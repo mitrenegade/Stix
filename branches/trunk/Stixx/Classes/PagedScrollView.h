@@ -13,9 +13,11 @@
 -(UIView*)viewForItemAtIndex:(int)index;
 -(void)initializeScrollWithPageSize:(CGSize)pageSize;
 -(int)itemCount;
+-(void)forceReloadAll;
 
 @optional
 -(void)updateScrollPagesAtPage:(int)page;
+-(void)didClickAtLocation:(CGPoint)location;
 
 @end
 
@@ -24,16 +26,21 @@
 	NSMutableArray *scrollViewPages;
 	NSObject<PagedScrollViewDelegate> * myDelegate;
     
+    int lastPageCount;
     bool isLazy;
+    int drag;
 }
 /**** from old BSPreviewScrollView ******/
 @property (nonatomic, assign) NSObject<PagedScrollViewDelegate> * myDelegate;
 @property (nonatomic, retain) NSMutableArray * scrollViewPages;
 @property (nonatomic, assign) bool isLazy;
+@property (nonatomic, assign) int lastPageCount;
+@property (nonatomic, assign) int drag;
 
 -(void)populateScrollPagesAtPage:(int)currentPage;
 -(void)loadPage:(int)page;
+-(void)reloadPage:(int)page;
 -(int)currentPage;
 -(void)clearNonvisiblePages; // called by didReceiveMemoryWarning
-
+-(void)clearAllPages;
 @end

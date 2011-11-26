@@ -7,11 +7,18 @@
 //BadgeView
 
 #import <UIKit/UIKit.h>
+#import "OutlineLabel.h"
+
+#define BADGE_TYPE_FIRE 0
+#define BADGE_TYPE_ICE 1
 
 @protocol BadgeViewDelegate
 
--(void)addTag:(UIImageView *)badge;
+-(void)didDropStix:(UIImageView *)badge ofType:(int)type;
+-(int)getStixCount:(int)stix_type;
 
+@optional
+-(void)didStartDrag;
 @end
 
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{
@@ -33,6 +40,13 @@
 	
 	NSObject<BadgeViewDelegate> *delegate;
 	UIView * underlay; // pointer to a sibling view of the badgeView owned by its superview's controller - for hittest
+    
+//    int countFire;
+//    int countIce;
+    NSMutableArray * labels;
+    OutlineLabel * labelFire;
+    OutlineLabel * labelIce;
+    
 }
 
 @property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
@@ -40,7 +54,14 @@
 //@property (nonatomic, retain) IBOutlet UIImageView * badgeFire;
 //@property (nonatomic, retain) IBOutlet UIImageView * badgeIce;
 //@property (nonatomic, retain) IBOutlet UIImageView * shelf;
+@property (nonatomic, retain) OutlineLabel * labelFire;
+@property (nonatomic, retain) OutlineLabel * labelIce;
 
 -(void)resetBadgeLocations;
 -(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;
+-(void)updateStixCounts;
+-(int)getOppositeBadgeType:(int)type;
+
+// for displaying badges
++(UIImageView *) getBadgeOfType:(int)type;
 @end

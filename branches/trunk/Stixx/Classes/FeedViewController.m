@@ -32,7 +32,7 @@
 @synthesize allTags;
 @synthesize scrollView;
 @synthesize lastPageViewed;
-
+@synthesize zoomViewController;
 -(id)init
 {
 	[super initWithNibName:@"FeedViewController" bundle:nil];
@@ -47,6 +47,11 @@
 	UIImage * i = [UIImage imageNamed:@"tab_feed.png"];
 	[tbi setImage:i];
     
+    return self;
+}
+
+-(void) viewDidLoad {
+    [super viewDidLoad];
     lastPageViewed = 0;
     
 	/****** init badge view ******/
@@ -54,13 +59,14 @@
     badgeView.delegate = self;
     [self initializeScrollWithPageSize:CGSizeMake(240, 320)];
     scrollView.isLazy = YES;
+    [delegate didCreateBadgeView:badgeView];
 
     // add badgeView and scrollView as subviews of feedview; set underlay
     [self.view addSubview:scrollView];
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [badgeView setUnderlay:scrollView];
     
-	return self;
+    zoomViewController = [[ZoomViewController alloc] init];
 }
 
 - (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
@@ -122,12 +128,28 @@
 	// Releases the view if it doesn't have a superview.
 	[super didReceiveMemoryWarning];
 	
-    [scrollView clearNonvisiblePages];
+    //[scrollView clearNonvisiblePages];
 }
 
 - (void)viewDidUnload {
 	// Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
 	// For example: self.myOutlet = nil;
+    [activityIndicatorCenter release];
+    [activityIndicatorLeft release];
+    [activityIndicatorRight release];
+    [nameLabel release];
+    
+    activityIndicatorCenter = nil;
+    activityIndicatorLeft = nil;
+    activityIndicatorRight = nil;
+    nameLabel = nil;
+
+    [badgeView release];
+    badgeView = nil;
+    [scrollView release];
+    scrollView = nil;
+
+    [super viewDidUnload];
 }
 
 
@@ -137,12 +159,73 @@
 	[allTags release];
     [username release];    
 	[scrollView release];
+    [activityIndicatorCenter release];
+    [activityIndicatorLeft release];
+    [activityIndicatorRight release];
+    [nameLabel release];
+    
+    activityIndicatorCenter = nil;
+    activityIndicatorLeft = nil;
+    activityIndicatorRight = nil;
+    nameLabel = nil;
+
+    [badgeView release];
+    badgeView = nil;
+    [scrollView release];
+    scrollView = nil;
+
     [super dealloc];
 }
 
 /******* badge view delegate ******/
--(void)addTag:(UIImageView *)badge {
+-(void)didDropStix:(UIImageView *)badge ofType:(int)type {
+    // increment stix count for given feed item
+    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];
     
+    NSString * badgeTypeStr;
+    if ([t badgeType] == BADGE_TYPE_FIRE)
+        badgeTypeStr = @"Fire";
+    else
+        badgeTypeStr = @"Ice";
+
+    if ([delegate getStixCount:type] < 1)
+    {
+        if ([delegate isLoggedIn] == NO)
+        {     
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"Ok I'll go log in now"];
+            [alert setTitle:@"Not logged in"];
+            [alert setMessage:[NSString stringWithFormat:@"You have no stix because you are not logged in!"]];
+            [alert show];
+            [alert release];
+        }
+        else
+        {
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"I take it back"];
+            [alert setTitle:@"Insufficient stix"];
+            [alert setMessage:[NSString stringWithFormat:@"You have run out of %@ stix!", badgeTypeStr]];
+            [alert show];
+            [alert release];
+        }
+        [badgeView resetBadgeLocations];
+        return;
+    }
+    
+    NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
+    [delegate didAddStixToTag:t withType:type];
+    [delegate decrementStixCount:type forUser:[delegate getUsername]];
+    //NSLog(@"After decrement: %d (delegate says %d)", ret, [delegate getStixCount:type]);
+    if ([t.username isEqualToString:[delegate getUsername]] == NO)
+        [delegate incrementStixCount:type forUser:t.username];
+    
+    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
+    [badgeView resetBadgeLocations];
+    [scrollView reloadPage:lastPageViewed];
+    
+}
+-(int)getStixCount:(int)stix_type {
+    return [self.delegate getStixCount:stix_type];
 }
 
 /*********** PagedScrollViewDelegate functions *******/
@@ -187,18 +270,21 @@
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)
     {
-        NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
+        //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
         [feedItem populateWithUserPhoto:photo];
         [photo release];
     }
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
+    // add badge and counts
+    [feedItem populateWithBadge:tag.badgeType withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
+    NSLog(@"Adding badge at location %d %d", tag.badge_x,tag. badge_y);
     [tag release];
     return feedItem.view;
 }
 
 -(void)updateScrollPagesAtPage:(int)page {
-    NSLog(@"UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
+    //NSLog(@"UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
     if ([self itemCount] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTags objectAtIndex:0];
@@ -243,6 +329,28 @@
         [psv loadPage:page];
         [psv loadPage:page+1];
     }
+}
+
+-(void)forceReloadAll {
+    [scrollView clearAllPages];
+}
+
+/************** FeedZoomView ***********/
+-(void)didClickAtLocation:(CGPoint)location {
+    NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
+    
+    Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
+    UIImage * image = tag.image;
+    NSString * label = tag.comment;
+   
+    [zoomViewController setDelegate:self];
+    [self.view insertSubview:zoomViewController.view aboveSubview:badgeView];
+    [zoomViewController forceImageAppear:image];
+    [zoomViewController setLabel:label];
+}
+
+-(void)didDismissZoom {
+    [zoomViewController.view removeFromSuperview];
 }
 
 @end

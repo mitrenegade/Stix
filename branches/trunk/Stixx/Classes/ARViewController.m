@@ -38,7 +38,7 @@
         self.rotateViewsBasedOnPerspective = NO;
         self.maximumRotationAngle = M_PI / 6.0;
         self.wantsFullScreenLayout = NO; //YES;
-        [self startListening];		
+        //[self startListening];		
         
         overlayView = [[UIView alloc] initWithFrame:CGRectZero];
         self.view = overlayView;
@@ -468,7 +468,7 @@ NSComparisonResult LocationSortClosestFirst(ARCoordinate *s1, ARCoordinate *s2, 
     
 	// save coordinates
 	CLLocationCoordinate2D currLatLong = [centerLocation coordinate];
-	NSLog(@"Current location: %f %f", currLatLong.latitude, currLatLong.longitude);
+	//NSLog(@"Current location: %f %f", currLatLong.latitude, currLatLong.longitude);
 	
 	// add new coordinate
 	CLLocation *tempLocation;
@@ -479,7 +479,7 @@ NSComparisonResult LocationSortClosestFirst(ARCoordinate *s1, ARCoordinate *s2, 
 	[tempLocation release];		
     [tempCoordinate setTitle:label];
     
-	NSLog(@"Set item %d: title %@", [self totalCoordinates] , [tempCoordinate title]) ;
+	//NSLog(@"Set item %d: title %@", [self totalCoordinates] , [tempCoordinate title]) ;
 	
 	[self addCoordinate:tempCoordinate];
 	[tempCoordinate autorelease];

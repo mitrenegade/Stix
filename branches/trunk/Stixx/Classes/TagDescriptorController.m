@@ -13,9 +13,11 @@
 
 @synthesize imageView;
 @synthesize commentField;
+@synthesize locationField;
 @synthesize buttonOK;
 @synthesize buttonCancel;
 @synthesize delegate;
+@synthesize badgeFrame, badgeType;
 
 -(id)init
 {
@@ -37,20 +39,18 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad]; 
-	//imageView = [[UIImageView alloc] init]; // this is done automatically
-#if 1
-	[imageView setImage:[[ImageCache sharedImageCache] imageForKey:@"newImage"]];
-#else
-	NSString * str = @"sample.jpg";
-	UIImage * tmpImage = [UIImage imageNamed:str];
-	if (tmpImage == nil){
-		NSLog(@"Could not load image!");
-	} else {
-		NSLog(@"Loaded %@", str);
-	}
-	[imageView setImage:tmpImage];
-#endif
+    UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
+	[imageView setImage:tmp];
+    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f", tmp.size.width, tmp.size.height); 
 	
+    UIImageView * badge = [BadgeView getBadgeOfType:badgeType];
+    //badgeFrame.origin.x = badgeFrame.origin.x + imageView.frame.origin.x;
+    //badgeFrame.origin.y = badgeFrame.origin.y + imageView.frame.origin.y;
+    [badge setFrame:badgeFrame];
+    //[self.view addSubview:badge];
+    [imageView addSubview:badge];
+    NSLog(@"TagDescriptor: imageView dims %f %f badge at %f %f", imageView.frame.size.width, imageView.frame.size.height, badgeFrame.origin.x, badgeFrame.origin.y);
+    //[badge release];
 	[commentField setDelegate:self];
 }
 
@@ -86,7 +86,7 @@
 
 -(IBAction)buttonOKPressed:(id)sender
 {
-	[self.delegate didAddDescriptor:[commentField text]];
+	[self.delegate didAddDescriptor:[commentField text] andLocation:[locationField text]];
 }
 -(IBAction)buttonCancelPressed:(id)sender
 {
@@ -96,7 +96,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
-	NSLog(@"Comment entered: %@", [textField text]); 
+	//NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
 @end

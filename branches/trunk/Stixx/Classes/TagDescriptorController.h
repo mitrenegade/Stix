@@ -8,25 +8,33 @@
 
 #import <UIKit/UIKit.h>
 #import "ImageCache.h"
+#import "BadgeView.h"
 
 @protocol TagDescriptorDelegate
-	-(void)didAddDescriptor:(NSString*)descriptor;
+-(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString*)location;
 @end
 
 @interface TagDescriptorController : UIViewController <UITextFieldDelegate>{
 	IBOutlet UIImageView * imageView;
 	IBOutlet UITextField * commentField;
+	IBOutlet UITextField * locationField;
 	IBOutlet UIButton * buttonOK;
 	IBOutlet UIButton * buttonCancel;
 	
+    CGRect badgeFrame;
+    int badgeType;
+    
 	NSObject<TagDescriptorDelegate> *delegate;
 }
 
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
 @property (nonatomic, retain) IBOutlet UITextField * commentField;
+@property (nonatomic, retain) IBOutlet UITextField * locationField;
 @property (nonatomic, retain) IBOutlet UIButton * buttonOK;
 @property (nonatomic, retain) IBOutlet UIButton * buttonCancel;
 @property (nonatomic, assign) NSObject<TagDescriptorDelegate> *delegate;
+@property (nonatomic, assign) CGRect badgeFrame;
+@property (nonatomic, assign) int badgeType;
 
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;

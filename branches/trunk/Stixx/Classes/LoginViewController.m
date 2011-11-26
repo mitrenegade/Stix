@@ -5,8 +5,6 @@
 //  Created by Administrator on 8/30/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
-// todo: login does not process kumulos info - sends all login and password info back o configviewcontroller
-
 
 #import "LoginViewController.h"
 
@@ -61,6 +59,15 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+-(NSMutableData * ) arrayToData:(NSMutableArray *) dict {
+    NSMutableData *data = [[NSMutableData alloc]init];
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
+    [archiver encodeObject:dict forKey:@"dictionary"];
+    [archiver finishEncoding];
+    [archiver release];
+    return [data autorelease];
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     // text field must also have delegate set as file's owner
 	[textField resignFirstResponder];
@@ -78,9 +85,9 @@
     [activityIndicator startAnimating];    
 
     //we want to log user in
-    NSString* username = [loginName text];//[(UITextField*)[[self view] viewWithTag:1] text];
-    NSString* password = [loginPassword text];//[(UITextField*)[[self view] viewWithTag:2] text];
-
+    NSString* username = [loginName text];
+    NSString* password = [loginPassword text];
+    
     Kumulos* k = [[Kumulos alloc]init];
     [k setDelegate:self];
     //[self showLoadingIndicator];
@@ -88,9 +95,7 @@
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{
 
-    NSString* username = [loginName text];//[(UITextField*)[[self view] viewWithTag:1] text];
-    //s[self hideLoadingIndicator];
-
+    NSString* username = [loginName text];
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"OK"];
     [alert setDelegate:nil];
@@ -98,7 +103,7 @@
     if ([theResults count]) {
         [alert setTitle:@"Success"];
         [alert setMessage:@"You are now logged in"];
-        [self.delegate loginSuccessfulWithName:username];
+        [self.delegate didSelectUsername:username withResults:theResults];
         [self dismissModalViewControllerAnimated:YES];
     }else {
         [alert setTitle:@"Whoops"];
@@ -118,6 +123,7 @@
 }
 
 - (IBAction) cancelButtonPressed:(id)sender {
+    [delegate didCancelLogin];
     [self dismissModalViewControllerAnimated:YES];    
 }
 
@@ -133,12 +139,10 @@
     [activityIndicator startAnimating];
 
     //Get values
-    NSString* username = [loginName text];//[(UITextField*)[[self view] viewWithTag:1] text];
-    NSString* password = [loginPassword text];//[(UITextField*)[[self view] viewWithTag:2] text];
+    NSString* username = [loginName text];
+    NSString* password = [loginPassword text];
     
-    //NSString* email     = [(UITextField*)[[self view] viewWithTag:3]text];
-
-    if (username == nil || password == nil) { // || email == nil) {
+    if (username == nil || password == nil) {
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"OK"];
         [alert setDelegate:nil];
@@ -150,19 +154,13 @@
     }
 
     //We want to register
-    //[self showLoadingIndicator];
     Kumulos* k = [[Kumulos alloc]init];
     [k setDelegate:self];
-    [k getUserWithUsername:username];
-    
-    // wait for getUserDidCompleteWithResults
+    [k getUserWithUsername:username]; // check if user already exists
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults {
-
-    //for (int i=0; i<[theResults count]; i++)
-    //    NSLog(@"User %d name %@\n", i, [theResults objectAtIndex:i]);
-    
+   
     if ([theResults count] > 0)
     {
         UIAlertView* alert = [[UIAlertView alloc]init];
@@ -175,30 +173,42 @@
         [kumulos release];
         return;
     }
-        
+    
+    // in LoginViewController, getUserDidComplete causes a new user to be created        
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
     UIImage * img = [UIImage imageNamed:@"emptyuser.png"];
     NSData * photo = UIImagePNGRepresentation(img);
-    
+
     [kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSNumber*)newRecordID{
 
+    // create stix counts - not used by loginViewController
+    NSString* username = [loginName text];
+    NSMutableArray * stix = [[self.delegate generateDefaultStix] retain];   
+    NSMutableData * data = [[self arrayToData:stix] retain];
+    [kumulos addStixToUserWithUsername:username andStix:data];
+    [data release];
+    [stix release];
+}
+
+-(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {
+    
     //[self hideLoadingIndicator];
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"OK"];
     [alert setDelegate:nil];
     [alert setTitle:@"Success"];
     [alert setMessage:@"New user added. You are now logged in."];
+    
     NSString* username = [loginName text];
-    [self.delegate loginSuccessfulWithName:username];
-    [self dismissModalViewControllerAnimated:YES];
+    [self.delegate didSelectUsername:username withResults:theResults];
+    //[self dismissModalViewControllerAnimated:YES]; // do not dismiss until delegate tells us it is done changing the username
     [alert show];
     [alert release];
     [kumulos release];
-    //[self dismissModalViewControllerAnimated:YES];
     
     [activityIndicator stopAnimating];
 }

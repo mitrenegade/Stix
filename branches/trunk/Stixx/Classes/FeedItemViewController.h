@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "UIImage+Resize.h"
+#import "BadgeView.h"
+#import "OutlineLabel.h"
 
 @interface FeedItemViewController : UIViewController {
     
@@ -34,5 +36,6 @@
 -(void)populateWithName:(NSString *)name andWithComment:(NSString*)comment andWithImage:(UIImage*)image;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
+-(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 
 @end

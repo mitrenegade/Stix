@@ -13,6 +13,7 @@
 @synthesize delegate;
 @synthesize underlay;
 //@synthesize badgeFire, badgeIce, shelf;
+@synthesize labelFire, labelIce;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -32,6 +33,10 @@
     [self addSubview:shelf];
     [self addSubview:badgeFire];
     [self addSubview:badgeIce];
+    
+    labelFire = nil;
+    labelIce = nil;
+    
 #endif
     badges = [[NSMutableArray alloc] init];//initWithObjects:badgeFire, badgeComment, nil];
     [badges addObject:badgeFire];
@@ -56,6 +61,17 @@
     [iceLarge release];
     //[fireShadow release];
     //[iceShadow release];
+    CGRect labelFrame = CGRectMake(94+15, 329+20, 42, 67);
+    labelFire = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    [labelFire drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+    labelFrame = CGRectMake(181+15, 329+20, 42, 67);
+    labelIce = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    [labelIce drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+    labels = [[NSMutableArray alloc] init];
+    [labels addObject:labelFire];
+    [labels addObject:labelIce];
+    //[self addSubview:labelFire];
+    //[self addSubview:labelIce];
     
     unsigned numEls = [badges count];
     while (numEls--)
@@ -98,6 +114,9 @@
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];//touch.view];
 	drag = 0;
+    
+    if ([self.delegate respondsToSelector:@selector(didStartDrag)]) 
+        [self.delegate performSelector:@selector(didStartDrag)];
 	
 	// find which icon is being dragged
 	unsigned numEls = [badges count];
@@ -109,13 +128,14 @@
 		int right = frame.origin.x + frame.size.width;
 		int top = frame.origin.y;
 		int bottom = frame.origin.y + frame.size.height;
-		NSLog(@"Badge %d: left right top bottom { %d %d %d %d} touch: %f %f", numEls, left, right, top, bottom, location.x, location.y);
+		//NSLog(@"Badge %d: left right top bottom { %d %d %d %d} touch: %f %f", numEls, left, right, top, bottom, location.x, location.y);
 		if (location.x > left && location.x < right && 
 				location.y > top && location.y < bottom)
 		{
 			badgeTouched = badge;
 			drag = 1;
 			badgeSelect = numEls;
+            [[labels objectAtIndex:badgeSelect] removeFromSuperview];
 			break;
 		}
 	}
@@ -154,11 +174,11 @@
 		 }
 		 ];
 		
-		NSLog(@"Dragging badge %d", badgeSelect);
+		//NSLog(@"Dragging badge %d", badgeSelect);
 		
 	}
 	//fire.center = location;
-	NSLog(@"Location: %f %f", location.x, location.y);
+	//NSLog(@"Location: %f %f", location.x, location.y);
     [super touchesBegan: touches withEvent: event];
 }
 
@@ -169,7 +189,7 @@
 		UITouch *touch = [[event allTouches] anyObject];
 		CGPoint location = [touch locationInView:self];//touch.view];
 
-		NSLog(@"Dragging to %f %f", location.x, location.y);
+		//NSLog(@"Dragging to %f %f", location.x, location.y);
 
 		// update frame of dragged badge, also scale
 		float scale = 1; // do not change scale while dragging
@@ -204,7 +224,7 @@
 			frame.size.width = width;
 			frame.size.height = height;
 			
-			NSLog(@"badge released");
+			//NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
 			
 			// animate a scaling transition
 			[UIView 
@@ -220,10 +240,10 @@
 			 ];
 			
 			// tells delegate to do necessary things such as take a photo
-			if ([self.delegate respondsToSelector:@selector(addTag:)]) {
-				[self.delegate performSelector:@selector(addTag:) withObject:badgeTouched];
-				
-			}	
+			//if ([self.delegate respondsToSelector:@selector(didDropStix:)]) {
+				//[self.delegate performSelector:@selector(didDropStix: withObject:badgeTouched withObject:badgeSelect)];
+            [self.delegate didDropStix:badgeTouched ofType:badgeSelect];
+			//}	
 		}
 	}
 }
@@ -268,10 +288,58 @@
 	while (numEls--)
 	{
 		UIImageView * badge = [badges objectAtIndex:numEls];
+        [badge removeFromSuperview];
+        if ([delegate getStixCount:numEls] < 1)
+            [badge setAlpha:.25];
+        else
+            [badge setAlpha:1];
 		badge.frame = [[badgeLocations objectAtIndex:numEls] CGRectValue];
+        [self addSubview:badge];
 	}
+    [self updateStixCounts];
     drag = 0;
 }
+
+-(void)updateStixCounts {
+    int countFire = [self.delegate getStixCount:BADGE_TYPE_FIRE];
+    if (countFire > -1)
+    {
+        [labelFire removeFromSuperview];
+        [labelFire setText:[NSString stringWithFormat:@"%d", countFire]];
+        [self addSubview:labelFire];
+    }
+    int countIce = [self.delegate getStixCount:BADGE_TYPE_ICE];
+    if (countIce > -1)
+    {
+        [labelIce removeFromSuperview];
+        [labelIce setText:[NSString stringWithFormat:@"%d", countIce]];
+        [self addSubview:labelIce];
+    }
+}
+
++(UIImageView *) getBadgeOfType:(int)type {
+    // returns a half size image view
+    if (type == BADGE_TYPE_FIRE)
+    {
+        UIImageView * badgeFire = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
+        badgeFire.frame = CGRectMake(0, 0, 42, 67);
+        return badgeFire;
+    }
+    else if (type == BADGE_TYPE_ICE)
+    {
+        UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
+        badgeIce.frame = CGRectMake(0, 0, 42, 67);
+        return badgeIce;
+    }
+    else return nil;
+}
+-(int)getOppositeBadgeType:(int)type {
+    if (type == BADGE_TYPE_FIRE)
+        return BADGE_TYPE_ICE;
+    else
+        return BADGE_TYPE_FIRE;
+}
+
 
 - (void)dealloc {
 	[super dealloc];

@@ -11,7 +11,11 @@
 
 @protocol LoginViewDelegate
 
-- (void)loginSuccessfulWithName:(NSString *)name;
+- (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
+- (NSMutableArray*)generateDefaultStix;
+
+@optional
+- (void)didCancelLogin;
 
 @end
 
@@ -40,4 +44,6 @@
 -(void)addUser;
 -(void)doLogin;
 
+// utilities - is this the right place?
+-(NSMutableData * ) arrayToData:(NSMutableArray *) dict;
 @end

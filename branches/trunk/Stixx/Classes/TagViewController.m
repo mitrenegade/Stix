@@ -10,6 +10,7 @@
 @synthesize cameraController;
 @synthesize arViewController;
 @synthesize rectView;
+@synthesize buttonInstructions;
 
 - (id)init {
 	
@@ -23,12 +24,19 @@
 		[tbi setTitle:@"Stix"];
 		
 		// add an image
-		UIImage * i = [UIImage imageNamed:@"tab_location.png"];
-		[tbi setImage:i];
-		
+		//UIImage * i = [UIImage imageNamed:@"tab_location.png"];
+		//[tbi setImage:i];
+    return self;
+}
+
+-(void)viewDidLoad {
+	[super viewDidLoad];
+
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
+    [badgeView setUnderlay:buttonInstructions];
+    [delegate didCreateBadgeView:badgeView];
     
     /****** init AR view ******/
     arViewController = [[ARViewController alloc] init];
@@ -60,7 +68,6 @@
 	//self.view = overlayView;
     [self.view addSubview:badgeView];
     
-	return self;
 }
 
 // called by main delegate to add tabBarView to camera overlay
@@ -71,10 +78,14 @@
 
 - (void)viewDidAppear:(BOOL)animated {
 #if !TARGET_IPHONE_SIMULATOR
-    /*
+/*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
-     */
-    [cameraController setROI:rectView.frame];
+ */    
+    CGRect viewRect = rectView.frame;
+    viewRect.origin.y = viewRect.origin.y + STATUS_BAR_SHIFT;
+    // hack: cameraController.ROI is used to crop the image, but for some reason croppedImage: doesn't work as we think. the width and height are actually values for max_x and max_y
+    viewRect.size.width = viewRect.size.width + viewRect.origin.x;
+    viewRect.size.height = viewRect.size.height + viewRect.origin.y;     [cameraController setROI:viewRect];
 	[self presentModalViewController:self.cameraController animated:animated];
 #endif
     [badgeView resetBadgeLocations];
@@ -96,15 +107,17 @@
 	
 }
 
--(void)viewDidLoad {
-	[super viewDidLoad];
-}
-
 - (void)viewDidUnload {
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
 	[overlayView release];
 	overlayView = nil;
+    [rectView release];
+    [buttonInstructions release];
+    rectView = nil;
+    buttonInstructions = nil;
+    
+    [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -125,12 +138,24 @@
 }
 
 // BadgeViewDelegate function
--(void)addTag:(UIImageView *)badge{
+-(void)didDropStix:(UIImageView *)badge ofType:(int)type{
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
 	[[self cameraController] takePicture];
     badgeFrame = badge.frame;
+    // save frame of badge relative to cropped image
+    badgeFrame.origin.x = badgeFrame.origin.x - cameraController.ROI.origin.x;
+    badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + STATUS_BAR_SHIFT;
+    badgeType = type; // save type for later;
+}
+
+-(int)getStixCount:(int)stix_type {
+    return [self.delegate getStixCount:stix_type];
+}
+
+-(void)didStartDrag {
+    [self.buttonInstructions setHidden:YES];
 }
 
 - (void)cameraDidTakePicture:(id)sender {
@@ -142,6 +167,8 @@
 	TagDescriptorController * descriptorController = [[TagDescriptorController alloc] init];
     
     [descriptorController setDelegate:self];
+    [descriptorController setBadgeFrame:badgeFrame];
+    [descriptorController setBadgeType:badgeType];
     [self.cameraController presentModalViewController:descriptorController animated:YES];
 
 }
@@ -151,57 +178,69 @@
 }
 
 /* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
--(void)didAddDescriptor:(NSString*)descriptor
+-(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString *)location
 {
+    [self.cameraController dismissModalViewControllerAnimated:YES];
     ARCoordinate * newCoord;
-	if (descriptor != nil)
+    NSString * desc;
+
+    NSLog(@"Entered: '%@' for description and '%@' for location", descriptor, location);
+	if ([descriptor length] > 0 && [location length] > 0)
 	{
-		NSLog(@"Entered: %@ for label text", descriptor);
-		
-        [self.cameraController dismissModalViewControllerAnimated:YES];
-		newCoord = [arViewController createCoordinateWithLabel:descriptor];
+        desc = [NSString stringWithFormat:@"%@ @ %@", descriptor, location];
 	}
-    else
+    else if ([descriptor length] == 0 && [location length] > 0)
+    {
+        desc = location;
+    }
+    else if ([descriptor length] > 0 && [location length] == 0)
+    {
+        desc = descriptor;
+    }
+    else 
     {
         NSDate *now = [NSDate date];
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-        [formatter setDateFormat:@"%A, %B %d, %Y"];
-        NSString *theString = [formatter stringFromDate:now];
-        [self.cameraController dismissModalViewControllerAnimated:YES];
-        newCoord = [arViewController createCoordinateWithLabel:theString];
+        [formatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
+        desc = [formatter stringFromDate:now];
     }
+    newCoord = [arViewController createCoordinateWithLabel:desc];
     
+    // check if user is logged in
+    if ([delegate isLoggedIn] == NO)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello Anonymous User!"
+                                                          message:@"You are not logged in. Please make sure you visit the profile page!"
+                                                         delegate:self
+                                                cancelButtonTitle:@"Ok"
+                                                otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }
     // create Tag
-    NSString * username = [[self.delegate getCurrentUsername] retain];
+    NSString * username = [[self.delegate getUsername] retain];
     Tag * tag = [[Tag alloc] init]; 
-    [tag addUsername:username andComment:descriptor];
+    [tag addUsername:username andComment:desc];
     UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
     int x = badgeFrame.origin.x;
     int y = badgeFrame.origin.y;
-	[tag addImage:image atLocationX:x andLocationY:y];
+    NSLog(@"Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
+    [tag addImage:image];
+    [tag addStixOfType:badgeType andCount:1 atLocationX:x andLocationY:y];
     [tag addARCoordinate:newCoord];
     [image release];
     [self.delegate addTag:tag];
     [tag release];
-    [username release];
     
-	[badgeView resetBadgeLocations];
-	
-	// dismiss descriptorController
+    [delegate decrementStixCount:badgeType forUser:username];
+    [badgeView resetBadgeLocations];
+    
+    [username release];
+    // dismiss descriptorController
     [self dismissModalViewControllerAnimated:YES];
-	//[self setView:overlayView];
+    //[self setView:overlayView];
 }
 
-- (Tag*)createTagWithName:(NSString*)name andComment:(NSString*)comment andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate
-{
-    // simply allocates and creates a tag from given items
-    Tag * tag = [[Tag alloc] init]; 
-    [tag addUsername:name andComment:comment];
-	[tag addImage:image atLocationX:badge_x andLocationY:badge_y];
-    [tag addARCoordinate:coordinate];
-    [tag autorelease];
-    return tag;
-}
 
 - (void)addCoordinateOfTag:(Tag*)tag {
     if (tag.coordinate)
@@ -217,6 +256,12 @@
 - (void)failedToAddCoordinate {
     
 }
+
+-(IBAction)closeInstructions:(id)sender;
+{
+    [buttonInstructions setHidden:YES];
+}
+
 
 #pragma mark -
 

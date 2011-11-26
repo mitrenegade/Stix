@@ -28,9 +28,10 @@
     NSString * username;
     NSString * comment;
     UIImage * image;
-    NSNumber * badge_x;
-    NSNumber * badge_y;
-    
+    int badge_x;
+    int badge_y;
+    int badgeType; // 0 = fire, 1 = ice
+    int badgeCount;
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
     
@@ -41,17 +42,25 @@
     NSDate * timestamp; // the timestamp as an NSDate
 }
 
++ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count;
 - (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
-- (void) addImage:(UIImage*)image atLocationX:(int)x andLocationY:(int)y;
+- (void) addImage:(UIImage*)image;
+-(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
++(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) NSString * comment;
 @property (nonatomic, retain) UIImage * image;
-@property (nonatomic, retain) NSNumber * badge_x;
-@property (nonatomic, retain) NSNumber * badge_y;
+//@property (nonatomic, retain) NSNumber * badge_x;
+//@property (nonatomic, retain) NSNumber * badge_y;
 @property (nonatomic, retain) ARCoordinate * coordinate;
 @property (nonatomic, retain) NSNumber * tagID;
 @property (nonatomic, retain) NSString * timestring;
 @property (nonatomic, retain) NSDate * timestamp;
+@property (nonatomic, assign) int badge_x;
+@property (nonatomic, assign) int badge_y;
+@property (nonatomic, assign) int badgeType;
+@property (nonatomic, assign) int badgeCount;
+
 @end

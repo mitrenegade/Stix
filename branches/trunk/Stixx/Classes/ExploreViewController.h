@@ -8,19 +8,37 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
+#import "PagedScrollView.h"
+#import "Kumulos.h"
+#import "Tag.h"
 
-@interface ExploreViewController : UIViewController <BadgeViewDelegate> 
+@protocol ExploreViewDelegate
+-(int)getStixCount:(int)stix_type;
+-(UIView*)didCreateBadgeView:(UIView*)newBadgeView;
+
+@end
+
+@interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate> 
 {
     BadgeView * badgeView; // for dragging and releasing badge
 
-    UIScrollView *scrollView;	
-	CGSize pageSize;
+    PagedScrollView *scrollView;	
+    NSObject<ExploreViewDelegate> * delegate;
+    
+    IBOutlet UIButton * refreshButton;
+    
+    NSMutableArray * allTagIDs;
+    NSMutableArray * allTags;
+    Kumulos * k;
 }
 
 @property (nonatomic, retain) BadgeView * badgeView;
-@property (nonatomic, retain) UIScrollView *scrollView;
-@property (nonatomic, assign) CGSize pageSize;
+@property (nonatomic, retain) PagedScrollView *scrollView;
+@property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
+@property (nonatomic, retain) IBOutlet UIButton * refreshButton;
+@property (nonatomic, retain) NSMutableArray * allTagIDs; 
+@property (nonatomic, retain) NSMutableArray * allTags; 
 
-- (void)initializeScroll;
-
+- (IBAction)refreshUpdates:(id)sender;
+-(void)getTagWithID:(int)id;
 @end

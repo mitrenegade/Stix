@@ -33,13 +33,18 @@
 	// add an image
 	UIImage * i = [UIImage imageNamed:@"tab_friends.png"];
 	[tbi setImage:i];
-	
+	return self;
+}
+
+-(void)viewDidLoad {
+    [super viewDidLoad];
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
-    
+    [delegate didCreateBadgeView:badgeView];
+  
     // add badgeView and scrollView as subviews of feedview; set underlay
     // important: in the beginning, buttonInstructions is the underlay for badgeView which means
     // any touch events get fowarded to buttonInstructions, as long as it is above the view 
@@ -48,7 +53,7 @@
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [badgeView setUnderlay:buttonInstructions];
     [badgeView setHidden:YES];
-	return self;
+//	return self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -61,14 +66,16 @@
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
 - (void)viewDidUnload
 {
+    [buttonInstructions release];
+    buttonInstructions = nil;
+    [activityIndicator release];
+    activityIndicator = nil;
+    [badgeView release];
+    badgeView = nil;
+    [scrollView release];
+    scrollView = nil;
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -86,9 +93,7 @@
 	[super viewWillAppear:animated];    
 
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
-    self.userPhotos = [self.delegate getUserPhotos]; 
-    [scrollView populateScrollPagesAtPage:0];
-    
+    [self forceReloadAll];    
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -116,10 +121,14 @@
     [badgeView setUnderlay:scrollView];
 }
 
-
 /******* badge view delegate ******/
--(void)addTag:(UIImageView *)badge {
-    
+-(void)didDropStix:(UIImageView *)badge ofType:(int)type {
+    [delegate decrementStixCount:type forUser:[delegate getUsername]];
+    // todo: increment stix count for this friend
+}
+
+-(int)getStixCount:(int)stix_type {
+    return [self.delegate getStixCount:stix_type];
 }
 
 /*********** PagedScrollViewDelegate functions *******/
@@ -163,7 +172,7 @@
             UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
             [friendView setBackgroundColor:[UIColor blackColor]];
             NSString * name = key;
-            friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 100);
+            friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 90);
             UILabel * namelabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20) + 85, 90, 20)];
             [namelabel setText:name];
             [namelabel setBackgroundColor:[UIColor blackColor]];
@@ -216,6 +225,16 @@
         [psv loadPage:page];
         [psv loadPage:page+1];
     }
+}
+
+-(void)forceReloadAll {
+    [scrollView clearAllPages];
+    self.userPhotos = [self.delegate getUserPhotos]; 
+    [scrollView populateScrollPagesAtPage:0];
+}
+
+-(void)didClickAtLocation:(CGPoint)location {
+    // do nothing
 }
 
 @end

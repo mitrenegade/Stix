@@ -3,10 +3,45 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "-[FeedViewController updateScrollPagesAtPage:]:FeedViewController.m">
+         contextName = "-[FeedViewController viewWillAppear:]:FeedViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "scrollView">
+            </PersistentString>
+            <PersistentString
+               value = "allTags">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[StixxAppDelegate addTagWithCheck:withID:]:StixxAppDelegate.m">
+         contextName = "-[PagedScrollView currentPage]:PagedScrollView.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "scrollViewPages">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[ProfileViewController generateDefaultStix]:ProfileViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController viewForItemAtIndex:]:FeedViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate kumulosAPI:apiOperation:getAllTagsWithIDLessThanDidCompleteWithResult:]:StixxAppDelegate.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "allTags">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController setMyScrollView:]:FeedViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "badgeController">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "-[BSPreviewScrollView dealloc]:BSPreviewScrollView.m">
@@ -23,28 +58,56 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[BadgeView hitTest:withEvent:]:BadgeView.m">
+         contextName = "-[PagedScrollView loadPage:]:PagedScrollView.m">
          <PersistentStrings>
             <PersistentString
-               value = "self.superview">
+               value = "scrollViewPages">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[FeedViewController setMyScrollView:]:FeedViewController.m">
+         contextName = "-[ConfigViewController kumulosAPI:apiOperation:getUserDidCompleteWithResult:]:ConfigViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate kumulosAPI:apiOperation:addTagDidCompleteWithResult:]:StixxAppDelegate.m">
          <PersistentStrings>
             <PersistentString
-               value = "badgeController">
+               value = "newestTag">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[StixxAppDelegate kumulosAPI:apiOperation:getAllTagsWithIDLessThanDidCompleteWithResult:]:StixxAppDelegate.m">
+         contextName = "-[ProfileViewController kumulosAPI:apiOperation:getUserDidCompleteWithResult:]:ProfileViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController viewDidLoad]:FeedViewController.m">
          <PersistentStrings>
             <PersistentString
-               value = "allTags">
+               value = "self.lastBadgeView">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController initializeScroll]:FeedViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "scrollView">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate getStixCount:]:StixxAppDelegate.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "allStix">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate addTagWithCheck:withID:]:StixxAppDelegate.m">
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController init]:FeedViewController.m">
@@ -64,24 +127,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
+         contextName = "-[FeedViewController updateScrollPagesAtPage:]:FeedViewController.m">
       </ContextState>
       <ContextState
-         contextName = "-[FeedViewController viewWillAppear:]:FeedViewController.m">
+         contextName = "-[BadgeView hitTest:withEvent:]:BadgeView.m">
          <PersistentStrings>
             <PersistentString
-               value = "scrollView">
-            </PersistentString>
-            <PersistentString
-               value = "allTags">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "-[FeedViewController initializeScroll]:FeedViewController.m">
-         <PersistentStrings>
-            <PersistentString
-               value = "scrollView">
+               value = "self.superview">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

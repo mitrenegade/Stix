@@ -33,15 +33,13 @@
 
 @interface BTLFullScreenCameraController : UIImagePickerController <UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
 	UIViewController *overlayController;
-	UILabel *statusLabel;
-	
+
 	UIImageView *addedOverlay; // an extra image sent in by an outside controller to be added to the composite
 	
     CGRect ROI; // area in which camera is actually within the aperture; must be set by controller
 }
 
 @property (nonatomic, retain) UIViewController *overlayController;
-@property (nonatomic, retain) UILabel *statusLabel;
 @property (nonatomic, retain) UIImageView *addedOverlay;
 @property (nonatomic, assign) CGRect ROI;
 
@@ -50,8 +48,6 @@
 - (void)dismissModalViewControllerAnimated:(BOOL)animated;
 - (void)takePicture;
 - (void)writeImageToDocuments:(UIImage*)image;
-- (void)initStatusMessage;
-- (void)showStatusMessage:(NSString*)message;
-- (void)hideStatusMessage;
 - (void)saveComposite:(UIImage*)baseImage;
+- (void)cropComposite:(UIImage*)baseImage;
 @end

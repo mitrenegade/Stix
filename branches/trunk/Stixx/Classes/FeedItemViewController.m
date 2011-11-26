@@ -55,6 +55,36 @@
     }
 }
 
+-(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+    UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+    float originX = x; //imageView.frame.origin.x + x;
+    float originY = y + 20; // STATUS_BAR_SHIFT HACK //imageView.frame.origin.y + y;
+    NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, imageView.frame.size.width, imageView.frame.size.height);
+    CGSize originalSize = imageData.size;
+	CGSize targetSize = imageView.frame.size;
+	
+	float imageScale =  targetSize.width / originalSize.width;
+    
+	CGRect scaledFrameOverlay = stix.frame;
+	scaledFrameOverlay.origin.x = originX * imageScale;
+	scaledFrameOverlay.origin.y = originY * imageScale;
+	scaledFrameOverlay.size.width = scaledFrameOverlay.size.width * imageScale;
+	scaledFrameOverlay.size.height = scaledFrameOverlay.size.height * imageScale;
+
+    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, scaledFrameOverlay.size.width, scaledFrameOverlay.size.height, imageView.frame.size.width, imageView.frame.size.height); 
+
+    [stix setFrame:scaledFrameOverlay];
+    CGRect stixFrame = CGRectMake(scaledFrameOverlay.origin.x+10, scaledFrameOverlay.origin.y+25, 20, 20);
+    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:stixFrame];
+    [stixCount drawTextInRect:CGRectMake(0,0, stixFrame.size.width, stixFrame.size.height)];
+    [stixCount setText:[NSString stringWithFormat:@"%d", count]];
+    [imageView addSubview:stix];
+    [imageView addSubview:stixCount];
+    
+    [stix release];
+    [stixCount release];
+}
+
 -(void)populateWithTimestamp:(NSDate *)timestamp {
     // format timestring
     // from 1 min - 1 hour, display # of minutes since tag
@@ -72,8 +102,10 @@
     NSString * unit;
     if (interval < 60)
     {
-        num = (int) interval;
-        unit = @"sec ago";
+        //num = (int) interval;
+        //unit = @"sec ago";
+        num = 0;
+        unit = @"< 1 min ago";
     }
     else if (interval < 3600)
     {
@@ -128,7 +160,7 @@
     [labelComment setText:commentString];
     [imageView setImage:imageData];
     
-    NSLog(@"Loading feed item with name %@ comment %@", labelName.text, labelComment.text);
+    //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelComment.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
 }
 
 - (void)viewDidUnload

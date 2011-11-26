@@ -13,34 +13,48 @@
 @synthesize myDelegate;
 @synthesize scrollViewPages;
 @synthesize isLazy;
+@synthesize lastPageCount;
+@synthesize drag;
 
 - (id)initWithFrame:(CGRect)frame 
 {
     self = [super initWithFrame:frame];
     if (self) {
         isLazy = NO;
+        scrollViewPages = [[NSMutableArray alloc] init];
+        lastPageCount = 0;
     }
-    
     return self;
 }
 
 -(void)populateScrollPagesAtPage:(int)currentPage {
     // todo: fill out/update a dictionary instead of recreating the whole scroll
     int pageCount = [self.myDelegate itemCount];
-    NSLog(@"Initializing %d pages in scroll", pageCount);
-    if (scrollViewPages){
-        [scrollViewPages release];
-    }
-    scrollViewPages = [[NSMutableArray alloc] initWithCapacity:pageCount];
-    
-    // Fill our pages collection with empty placeholders
-    for(int i = 0; i < pageCount; i++)
+    //NSLog(@"Initializing %d pages in scroll", pageCount);
+    if (pageCount != lastPageCount)
     {
-        [scrollViewPages addObject:[NSNull null]];
-    }
+        // clear old scrollViewPages
+        if (scrollViewPages){
+            for (int i=0; i<[scrollViewPages count]; i++){
+                UIView * d = (UIView*) [scrollViewPages objectAtIndex:i];
+                if ((NSNull*)d != [NSNull null])
+                    [d removeFromSuperview];
+            }
+            [scrollViewPages release];
+        }
+        scrollViewPages = [[NSMutableArray alloc] initWithCapacity:pageCount];
+
+        // Fill our pages collection with empty placeholders
+        for(int i = 0; i < pageCount; i++) // - lastPageCount; i++)
+        {
+            //[scrollViewPages addObject:[NSNull null]];
+            [scrollViewPages insertObject:[NSNull null] atIndex:i];
+        }
     
-    // Calculate the size of all combined views that we are scrolling through 
-    self.contentSize = CGSizeMake([self.myDelegate itemCount] * self.frame.size.width, self.frame.size.height);
+        // Calculate the size of all combined views that we are scrolling through 
+        self.contentSize = CGSizeMake([self.myDelegate itemCount] * self.frame.size.width, self.frame.size.height);
+        lastPageCount = pageCount;
+    }
     
     // Load the first two pages
     if (currentPage>0)
@@ -74,8 +88,11 @@
         UIView *view = [scrollViewPages objectAtIndex:page];
         
         // if the view is null we request the view from our delegate
-        if ((NSNull *)view == [NSNull null]) 
-        {
+        //if ((NSNull *)view != [NSNull null]) 
+        //{
+        //    [view removeFromSuperview];
+        //}
+        if ((NSNull *)view == [NSNull null]) {
             view = [[self.myDelegate viewForItemAtIndex:page] retain];
             [scrollViewPages replaceObjectAtIndex:page withObject:view];
             [view release];
@@ -88,6 +105,7 @@
             CGRect viewFrame = view.frame;
             viewFrame.origin.x = viewFrame.size.width * page;
             viewFrame.origin.y = 0;
+            //NSLog(@"Inserting frame %d at (%f %f)", page, viewFrame.origin.x, viewFrame.origin.y);
             
             view.frame = viewFrame;
             
@@ -96,6 +114,24 @@
     }
 }
 
+-(void)reloadPage:(int)page {
+    UIView *view = [scrollViewPages objectAtIndex:page];
+    [view removeFromSuperview];
+    
+    UIView * newview = [[self.myDelegate viewForItemAtIndex:page] retain];
+    [scrollViewPages replaceObjectAtIndex:page withObject:newview];
+    [newview release];
+    
+    // Position the view in our scrollview
+    view = [scrollViewPages objectAtIndex:page];
+    CGRect viewFrame = view.frame;
+    viewFrame.origin.x = viewFrame.size.width * page;
+    viewFrame.origin.y = 0;
+    
+    view.frame = viewFrame;    
+    [self addSubview:view];
+    
+}
 -(int)currentPage
 {
 	// Calculate which page is visible 
@@ -122,6 +158,27 @@
                 [scrollViewPages replaceObjectAtIndex:i withObject:[NSNull null]];
             }
         }
+    }
+}
+
+-(void)clearAllPages {
+    // forces reload of all views
+    lastPageCount = -1;
+}
+
+/******** process clicks *******/
+-(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	drag = 0;    
+}
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	drag = 1;
+}
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (drag != 1)
+	{
+        UITouch *touch = [[event allTouches] anyObject];	
+        CGPoint location = [touch locationInView:self];//touch.view];
+        [myDelegate didClickAtLocation:location];
     }
 }
 

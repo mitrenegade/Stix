@@ -34,7 +34,7 @@
 
 @implementation BTLFullScreenCameraController
 
-@synthesize statusLabel, overlayController;
+@synthesize overlayController;
 @synthesize addedOverlay;
 @synthesize ROI;
 - (id)init {
@@ -48,13 +48,7 @@
     self.wantsFullScreenLayout = NO;
     //self.cameraViewTransform = CGAffineTransformScale(self.cameraViewTransform, CAMERA_SCALAR, CAMERA_SCALAR);    		
 #endif
-		
-		if ([self.overlayController respondsToSelector:@selector(initStatusMessage)]) {
-			[self.overlayController performSelector:@selector(initStatusMessage)];
-		} else {
-			[self initStatusMessage];
-		}	
-      
+		      
       self.ROI = CGRectMake(0, 0, 320, 480); // default ROI
   }
   return self;
@@ -93,14 +87,13 @@
 	}
 	
 	self.delegate = self;
-	[self showStatusMessage:@"Taking photo..."];
 
 	[super takePicture];
 }
 
 - (UIImage*)addOverlayToBaseImage:(UIImage*)baseImage {
 	// add only the selected badge to the base image
-	UIImage *overlayImage = [addedOverlay image];
+//	UIImage *overlayImage = [addedOverlay image];
     CGSize addedOverlayContext = CGSizeMake(320, 480);
 	CGSize targetSize = CGSizeMake(ROI.size.width, ROI.size.height);	//250, 250
 	
@@ -124,40 +117,38 @@
 
 	UIGraphicsBeginImageContext(targetSize);	
 	[baseImage drawInRect:scaledFrameImage];	
-	[overlayImage drawInRect:scaledFrameOverlay];	
+	//[overlayImage drawInRect:scaledFrameOverlay];	
 	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();	
-    	
+    
     UIImage * cropped = [result croppedImage:ROI];
-    UIImage * rounded = [cropped roundedCornerImage:5 borderSize:0];
+//    NSLog(@"Cropping image to dims %f %f", cropped.size.width, cropped.size.height);
+    //UIImage * rounded = [cropped roundedCornerImage:5 borderSize:0];
 
-    // save both original image and edited image to photo album
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-    UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); // write to photo album
+    // save edited image to photo album
+    UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
 
-	[self showStatusMessage:@"addOverlayToBaseImage done"];
-	return rounded;	
+	return cropped;	
 }
 
 - (void)adjustLandscapePhoto:(UIImage*)image {
 	// TODO: maybe use this for something
-	NSLog(@"camera image: %f x %f", image.size.width, image.size.height);
+	//NSLog(@"camera image: %f x %f", image.size.width, image.size.height);
 
 	switch (image.imageOrientation) {
 		case UIImageOrientationLeft:
 		case UIImageOrientationRight:
 			// portrait
-			NSLog(@"portrait");
+			//NSLog(@"portrait");
 			break;
 		default:
 			// landscape
-			NSLog(@"landscape");
+			//NSLog(@"landscape");
 			break;
 	}
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-	[self showStatusMessage:@"Saving photo..."];
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
     UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
     UIImage * newPhoto; 
@@ -175,65 +166,41 @@
 	UIImage *baseImage = newPhoto;//[info objectForKey:UIImagePickerControllerOriginalImage];
 	if (baseImage == nil) return;
 	
-	[self saveComposite:baseImage];
+	//[self saveComposite:baseImage];
+    [self cropComposite:baseImage];
 }
 
 - (void)saveComposite:(UIImage*)baseImage {
 	// save composite
+    // no longer adds badge to base image, just crops it
 	UIImage *compositeImage = [self addOverlayToBaseImage:baseImage];
-    [self hideStatusMessage];
-
-	[self showStatusMessage:@"Done finish picking media; saved to image cache"];
 
 	// hack: use the image cache in the easy way - just cache one image each time
 	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
 		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
 	[[ImageCache sharedImageCache] setImage:compositeImage forKey:@"newImage"];
-	
-	[self hideStatusMessage];
-	
+		
 	if ([self.overlayController respondsToSelector:@selector(cameraDidTakePicture:)]) {
 		[self.overlayController performSelector:@selector(cameraDidTakePicture:) withObject:self];
 	}
 	
 }
-
+- (void)cropComposite:(UIImage*)baseImage {
+	// save composite
+	UIImage *compositeImage = [self addOverlayToBaseImage:baseImage];
+    
+	// hack: use the image cache in the easy way - just cache one image each time
+	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
+		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
+	[[ImageCache sharedImageCache] setImage:compositeImage forKey:@"newImage"];
+    
+	if ([self.overlayController respondsToSelector:@selector(cameraDidTakePicture:)]) {
+		[self.overlayController performSelector:@selector(cameraDidTakePicture:) withObject:self];
+	}
+	
+}
 - (void)image:(UIImage*)image didFinishSavingWithError:(NSError *)error contextInfo:(NSDictionary*)info {
-	[self showStatusMessage:@"Did finish saving with error!"];
-}
-
-- (void)initStatusMessage {
-    /*
-	self.statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, self.view.bounds.size.height)];
-	self.statusLabel.textAlignment = UITextAlignmentCenter;
-	self.statusLabel.adjustsFontSizeToFitWidth = YES;
-	self.statusLabel.backgroundColor = [UIColor clearColor];
-	self.statusLabel.textColor = [UIColor whiteColor];
-	self.statusLabel.shadowOffset = CGSizeMake(0, -1);  
-	self.statusLabel.shadowColor = [UIColor blackColor];  
-	self.statusLabel.hidden = YES;
-	[self.view addSubview:self.statusLabel];
-     */
-}
-
-
-- (void)hideStatusMessage {
-	if ([self.overlayController respondsToSelector:@selector(hideStatusMessage)]) {
-		[self.overlayController performSelector:@selector(hideStatusMessage)];
-	} else {
-		self.statusLabel.hidden = YES;
-	}
-}
-
-- (void)showStatusMessage:(NSString*)message {
-	if ([self.overlayController respondsToSelector:@selector(showStatusMessage:)]) {
-		[self.overlayController performSelector:@selector(showStatusMessage) withObject:message];
-	} else {
-		self.statusLabel.text = message;
-		self.statusLabel.hidden = NO;
-		[self.view bringSubviewToFront:self.statusLabel];
-		
-	}
+	NSLog(@"Did finish saving with error!");
 }
 
 - (void)writeImageToDocuments:(UIImage*)image {
@@ -250,7 +217,6 @@
 
 - (void)dealloc {
 	[overlayController release];
-	[statusLabel release];
   [super dealloc];
 	
 }

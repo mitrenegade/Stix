@@ -223,18 +223,16 @@
 	UIGraphicsEndImageContext();
      */
     UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
-    UIImage * rounded = [result roundedCornerImage:5 borderSize:2];
+    UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
 
     // save to album
     UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
     
-    NSData * img = UIImageJPEGRepresentation(rounded, .8);
+    //NSData * img = UIImageJPEGRepresentation(rounded, .8);
+    NSData * img = UIImagePNGRepresentation(rounded);
     NSLog(@"Adding photo of size %f %f to user %@", rounded.size.width, rounded.size.height, [delegate getUsername]);
     [photoButton setImage:rounded forState:UIControlStateNormal];
     [self.delegate didChangeUserphoto:rounded];
-
-    // force friendView to update photo
-    [self.delegate checkForUpdatePhotos];
 
     // add to kumulos
     [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
@@ -244,6 +242,9 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
 {
     NSLog(@"Added photo to username %@", [delegate getUsername]);
+
+    // force friendView to update photo after we know it is in kumulos
+    [self.delegate checkForUpdatePhotos];
 }
 
 /*** other actions ****/
@@ -322,6 +323,7 @@
         //[k getUserWithUsername:[delegate getUsername]];
         [nameLabel setText:[delegate getUsername]];
         [photoButton setImage:[delegate getUserPhoto] forState:UIControlStateNormal];
+        [photoButton setBackgroundColor:[UIColor blackColor]];
     }
     
     //[badgeFire setImage:[[UIImage imageNamed:@"fire.png"] resizedImage:CGSizeMake(21, 35) interpolationQuality:kCGInterpolationDefault]];

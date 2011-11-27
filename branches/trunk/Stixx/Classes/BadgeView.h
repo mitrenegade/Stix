@@ -11,6 +11,8 @@
 
 #define BADGE_TYPE_FIRE 0
 #define BADGE_TYPE_ICE 1
+#define OUTLINELABEL_X_OFFSET -5
+#define OUTLINELABEL_Y_OFFSET 10
 
 @protocol BadgeViewDelegate
 

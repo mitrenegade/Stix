@@ -266,6 +266,9 @@
     int item_height = 140;
     int ct;
     int foundid=-1;
+    if (start_index >= items_per_page) {
+        location.x -= [scrollView currentPage] * 300; // remove offset from scrollview 
+    }
     for (ct=0; ct<[allTags count]; ct++) {
         if (ct >= start_index && ct <= end_index) {
             x0 = 5 + x * (item_width + 10);

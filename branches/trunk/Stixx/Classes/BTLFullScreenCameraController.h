@@ -48,6 +48,5 @@
 - (void)dismissModalViewControllerAnimated:(BOOL)animated;
 - (void)takePicture;
 - (void)writeImageToDocuments:(UIImage*)image;
-- (void)saveComposite:(UIImage*)baseImage;
 - (void)cropComposite:(UIImage*)baseImage;
 @end

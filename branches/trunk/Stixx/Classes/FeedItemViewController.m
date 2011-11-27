@@ -14,6 +14,8 @@
 @synthesize labelName;
 @synthesize labelComment;
 @synthesize labelTime;
+@synthesize labelCommentBG;
+@synthesize labelLocationString;
 @synthesize imageView;
 @synthesize nameString, commentString, imageData;
 @synthesize userPhotoView;
@@ -41,12 +43,13 @@
     return self;
 }
 
--(void)populateWithName:(NSString *)name andWithComment:(NSString *)comment andWithImage:(UIImage*)image {
+-(void)populateWithName:(NSString *)name andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
     //NSLog(@"creating feedItemController with name %@ comment %@ image of size %f %f\n", name, comment, image.size.width, image.size.height);
     
     nameString = name;
     commentString = comment;
     imageData = image; //[image croppedImage:CGRectMake(5, 5, image.size.width-5, image.size.height-5)];
+    locationString = location;
 }
 
 -(void)populateWithUserPhoto:(UIImage*)photo {
@@ -56,27 +59,38 @@
 }
 
 -(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+    // README for some reason the placement of the stix needs to be scaled, but
+    // the width of the stix is already scaled or gets scaled correctly later.
+    // so for the stix to remain the correct size in relation to the image, only
+    // modify the center or origin of the stix, not the width.
     UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
-    float originX = x; //imageView.frame.origin.x + x;
-    float originY = y + 20; // STATUS_BAR_SHIFT HACK //imageView.frame.origin.y + y;
+    //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
+    float originX = x;
+    float originY = y;
     NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, imageView.frame.size.width, imageView.frame.size.height);
+    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
+    
+    // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = imageData.size;
 	CGSize targetSize = imageView.frame.size;
 	
 	float imageScale =  targetSize.width / originalSize.width;
     
-	CGRect scaledFrameOverlay = stix.frame;
-	scaledFrameOverlay.origin.x = originX * imageScale;
-	scaledFrameOverlay.origin.y = originY * imageScale;
-	scaledFrameOverlay.size.width = scaledFrameOverlay.size.width * imageScale;
-	scaledFrameOverlay.size.height = scaledFrameOverlay.size.height * imageScale;
-
-    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, scaledFrameOverlay.size.width, scaledFrameOverlay.size.height, imageView.frame.size.width, imageView.frame.size.height); 
-
-    [stix setFrame:scaledFrameOverlay];
-    CGRect stixFrame = CGRectMake(scaledFrameOverlay.origin.x+10, scaledFrameOverlay.origin.y+25, 20, 20);
-    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:stixFrame];
-    [stixCount drawTextInRect:CGRectMake(0,0, stixFrame.size.width, stixFrame.size.height)];
+	CGRect stixFrameScaled = stix.frame;
+	stixFrameScaled.origin.x *= imageScale;
+	stixFrameScaled.origin.y *= imageScale;
+	//stixFrameScaled.size.width *= imageScale;
+	//stixFrameScaled.size.height *= imageScale;
+    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
+    [stix setFrame:stixFrameScaled];
+    
+    CGRect labelFrame = stix.frame;
+    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    stixCount.center = CGPointMake(stixCount.center.x + OUTLINELABEL_X_OFFSET * imageScale, stixCount.center.y + OUTLINELABEL_Y_OFFSET * imageScale);
+    labelFrame = stixCount.frame; // changing center should change origin but not width
+    [stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]];
+    [stixCount setTextAttributesForBadgeType:type];
+    [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [stixCount setText:[NSString stringWithFormat:@"%d", count]];
     [imageView addSubview:stix];
     [imageView addSubview:stixCount];
@@ -157,9 +171,16 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [labelName setText:[NSString stringWithFormat:@"%@", nameString]];
+    UIColor * textColor = [UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1.0];
+    [labelComment setTextColor:textColor];
     [labelComment setText:commentString];
     [imageView setImage:imageData];
-    
+    [labelLocationString setText:locationString];
+    if ([locationString length] == 0) {
+        [labelComment setFrame:CGRectMake(labelComment.frame.origin.x, labelComment.frame.origin.y, labelComment.frame.size.width, 46)]; // combined heights
+        [labelCommentBG setFrame:CGRectMake(labelCommentBG.frame.origin.x, labelCommentBG.frame.origin.y, labelCommentBG.frame.size.width, 46)];
+        [labelLocationString setHidden:YES];
+    }
     //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelComment.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
 }
 

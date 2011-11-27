@@ -11,6 +11,7 @@
 #import "PagedScrollView.h"
 #import "Kumulos.h"
 #import "Tag.h"
+#import "ZoomViewController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(int)stix_type;
@@ -18,12 +19,15 @@
 
 @end
 
-@interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate> 
+@interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
 {
     BadgeView * badgeView; // for dragging and releasing badge
 
     PagedScrollView *scrollView;	
     NSObject<ExploreViewDelegate> * delegate;
+    ZoomViewController * zoomViewController;
+    CGRect zoomFrame;
+    UIImageView * zoomView;
     
     IBOutlet UIButton * refreshButton;
     

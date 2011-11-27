@@ -56,6 +56,8 @@
     [self.view addSubview:scrollView];
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     
+    zoomViewController = [[ZoomViewController alloc] init];
+
     [self forceReloadAll];
 
 //	return self;
@@ -237,6 +239,8 @@
     
 }
 
+/************** FeedZoomView ***********/
+
 -(void)didClickAtLocation:(CGPoint)location {
     // do nothing - forward click to button if necessary
     
@@ -246,7 +250,105 @@
         [self forceReloadAll];
     }
      */
-    [self forceReloadAll];
+//    [self forceReloadAll];
+
+    NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
+   
+    // dumb way to calculate which view we're looking at 
+    // but this mirrors the way we populate this page
+    int items_per_page = EXPLORE_COL * EXPLORE_ROW;
+    int start_index = [scrollView currentPage] * items_per_page;
+    int end_index = start_index + items_per_page - 1;
+    int x=0;
+    int y=0;
+    int x0, y0, x1, y1;
+    int item_width = 140;
+    int item_height = 140;
+    int ct;
+    int foundid=-1;
+    for (ct=0; ct<[allTags count]; ct++) {
+        if (ct >= start_index && ct <= end_index) {
+            x0 = 5 + x * (item_width + 10);
+            y0 = 50 + y * (item_height + 10);
+            x1 = x0 + item_width;
+            y1 = y0 + item_height;
+
+            if (location.x >= x0 && location.x <= x1 && location.y >= y0 && location.y <= y1) {
+                foundid = ct;
+                break;
+            }
+
+            x = x + 1;
+            if (x==EXPLORE_COL)
+            {
+                x = 0;
+                y = y + 1;
+            }
+            if (y == EXPLORE_ROW)
+                break;            
+        }
+    }
+
+    // no item was clicked
+    if (ct >= [allTags count] || foundid == -1)
+        return; 
+    
+    Tag * tag = [allTags objectAtIndex:ct];
+    UIImage * image = tag.image;
+    NSString * label = tag.comment;
+    NSString * locationString = tag.locationString;
+    UIImage * photo = tag.image;
+    
+    // animate
+    zoomView = [[UIImageView alloc] initWithImage:photo];
+    int xoffset = 10; // from scrollView width
+    int yoffset = 3; // from ??
+    zoomView.frame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
+    [self.view insertSubview:zoomView aboveSubview:scrollView];
+    zoomFrame = zoomView.frame;
+    CGRect frameBig = CGRectMake(10, 58, 300, 300); // hard coded from ZoomViewController.xib
+    // animate a scaling transition
+    [UIView 
+     animateWithDuration:.2
+     delay:0 
+     options:UIViewAnimationCurveEaseOut
+     animations:^{
+         zoomView.frame = frameBig;
+     }
+     completion:^(BOOL finished){
+         zoomView.hidden = YES;
+         [zoomViewController setDelegate:self];
+         [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
+         [zoomViewController forceImageAppear:image];
+         [zoomViewController setLabel:label];
+         [zoomViewController setLocation:locationString];
+         [badgeView setUnderlay:zoomViewController.view];
+     }
+     ];
+    
+}
+
+-(void)didDismissZoom {
+    [zoomViewController.view removeFromSuperview];
+#if 1
+    // animate
+    [zoomView setHidden:NO];
+
+    // animate a scaling transition
+    [UIView 
+     animateWithDuration:.2
+     delay:0 
+     options:UIViewAnimationCurveEaseOut
+     animations:^{
+         zoomView.frame = zoomFrame;
+     }
+     completion:^(BOOL finished){
+         zoomView.hidden = YES;
+         [zoomView release];
+         [badgeView setUnderlay:scrollView];
+     }
+     ];
+#endif
 }
 
 - (void)didReceiveMemoryWarning

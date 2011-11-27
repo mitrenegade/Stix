@@ -12,6 +12,8 @@
 
 @synthesize imageView;
 @synthesize labelComment;
+@synthesize labelCommentBG;
+@synthesize labelLocationString;
 @synthesize delegate;
 //@synthesize image;
 
@@ -33,6 +35,16 @@
 }
 -(void)setLabel:(NSString *)label {
     [labelComment setText:label];
+}
+-(void)setLocation:(NSString *)location {
+    [labelLocationString setText:location];
+    if ([location length] == 0) {
+        [labelLocationString setHidden:YES];
+        CGRect newFrame = [labelCommentBG frame];
+        newFrame.size.height = 51;
+        [labelCommentBG setFrame:newFrame];
+        [labelComment setFrame:newFrame];
+    }
 }
 
 -(IBAction)didPressBackButton:(id)sender {

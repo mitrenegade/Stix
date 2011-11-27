@@ -156,6 +156,8 @@
 -(void)didPressCenterButton {
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setSelectedIndex:2];
+    lastViewController = tagViewController;
+    [tagViewController viewWillAppear:TRUE];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

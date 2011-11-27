@@ -253,14 +253,15 @@
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theData];
 	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
-    //[k addTagWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:(NSData*)theData];
-    [k addStixWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
-    
+    // this is the old kumulos call that didn't include location
+    //[k addStixWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
+    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
     [encoder release];  
 }
 
 //- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addTagDidCompleteWithResult:(NSNumber*)newRecordID
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixDidCompleteWithResult:(NSNumber*)newRecordID
+//- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixDidCompleteWithResult:(NSNumber*)newRecordID
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID
 {
     [newestTag setTagID:newRecordID];
     [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp

@@ -27,6 +27,7 @@
     // elements saved by Kumulos
     NSString * username;
     NSString * comment;
+    NSString * locationString;
     UIImage * image;
     int badge_x;
     int badge_y;
@@ -42,8 +43,8 @@
     NSDate * timestamp; // the timestamp as an NSDate
 }
 
-+ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count;
-- (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment;
++ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count;
+- (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
 -(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
@@ -51,6 +52,7 @@
 
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) NSString * comment;
+@property (nonatomic, retain) NSString * locationString;
 @property (nonatomic, retain) UIImage * image;
 //@property (nonatomic, retain) NSNumber * badge_x;
 //@property (nonatomic, retain) NSNumber * badge_y;

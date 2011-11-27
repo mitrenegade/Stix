@@ -29,9 +29,6 @@
 #import "BTLFullScreenCameraController.h"
 #include <QuartzCore/QuartzCore.h>
 
-#define CAMERA_SCALAR 1.12412 // scalar = (480 / (2048 / 480))
-//#define CAMERA_SCALAR .8
-
 @implementation BTLFullScreenCameraController
 
 @synthesize overlayController;
@@ -46,7 +43,6 @@
     self.toolbarHidden = YES; // prevents bottom bar from being displayed
     self.allowsEditing = NO;
     self.wantsFullScreenLayout = NO;
-    //self.cameraViewTransform = CGAffineTransformScale(self.cameraViewTransform, CAMERA_SCALAR, CAMERA_SCALAR);    		
 #endif
 		      
       self.ROI = CGRectMake(0, 0, 320, 480); // default ROI
@@ -93,33 +89,23 @@
 
 - (UIImage*)addOverlayToBaseImage:(UIImage*)baseImage {
 	// add only the selected badge to the base image
-//	UIImage *overlayImage = [addedOverlay image];
-    CGSize addedOverlayContext = CGSizeMake(320, 480);
-	CGSize targetSize = CGSizeMake(ROI.size.width, ROI.size.height);	//250, 250
+    
+    // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
+    // that means the actual image is 320x428.42 on the iphone
+
+    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
+    CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
 	
-	float baseScale =  targetSize.width / baseImage.size.width;
-    float overlayScale =  targetSize.width / addedOverlayContext.width;
+    // scale to convert base image from 1936x2592 to 320x428 - iphone size
+	float baseScale =  screenContext.width / baseImage.size.width;
 
-	CGRect scaledFrameOverlay = addedOverlay.frame;
-	scaledFrameOverlay.origin.x = scaledFrameOverlay.origin.x * overlayScale;
-	scaledFrameOverlay.origin.y = scaledFrameOverlay.origin.y * overlayScale;
-	scaledFrameOverlay.size.width = scaledFrameOverlay.size.width * overlayScale;
-	scaledFrameOverlay.size.height = scaledFrameOverlay.size.height * overlayScale;
-	
-    // we want to scale as well as crop. The width of the full screen camera is 320x480,
-    // and the cropped region is stored in ROI.
-
-	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width, baseImage.size.height);
-	scaledFrameImage.origin.x = scaledFrameImage.origin.x * baseScale;
-	scaledFrameImage.origin.y = scaledFrameImage.origin.y * baseScale;
-	scaledFrameImage.size.width = scaledFrameImage.size.width * baseScale;
-	scaledFrameImage.size.height = scaledFrameImage.size.height * baseScale;
-
-	UIGraphicsBeginImageContext(targetSize);	
+	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
+    
+	UIGraphicsBeginImageContext(screenContext);	
 	[baseImage drawInRect:scaledFrameImage];	
-	//[overlayImage drawInRect:scaledFrameOverlay];	
 	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();	
+//    NSLog(@"Rescaled image to dims %f %f", result.size.width, result.size.height);
     
     UIImage * cropped = [result croppedImage:ROI];
 //    NSLog(@"Cropping image to dims %f %f", cropped.size.width, cropped.size.height);
@@ -166,25 +152,9 @@
 	UIImage *baseImage = newPhoto;//[info objectForKey:UIImagePickerControllerOriginalImage];
 	if (baseImage == nil) return;
 	
-	//[self saveComposite:baseImage];
     [self cropComposite:baseImage];
 }
 
-- (void)saveComposite:(UIImage*)baseImage {
-	// save composite
-    // no longer adds badge to base image, just crops it
-	UIImage *compositeImage = [self addOverlayToBaseImage:baseImage];
-
-	// hack: use the image cache in the easy way - just cache one image each time
-	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
-		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
-	[[ImageCache sharedImageCache] setImage:compositeImage forKey:@"newImage"];
-		
-	if ([self.overlayController respondsToSelector:@selector(cameraDidTakePicture:)]) {
-		[self.overlayController performSelector:@selector(cameraDidTakePicture:) withObject:self];
-	}
-	
-}
 - (void)cropComposite:(UIImage*)baseImage {
 	// save composite
 	UIImage *compositeImage = [self addOverlayToBaseImage:baseImage];

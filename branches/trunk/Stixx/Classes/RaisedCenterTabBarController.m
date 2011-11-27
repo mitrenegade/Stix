@@ -35,7 +35,9 @@
     else
     {
         CGPoint center = self.tabBar.center;
-        center.y = center.y - heightDifference/2.0-10;
+        center.y = center.y - 10;
+        // debug - to reveal regular tab button too
+        //center.y = center.y - 30;
         button.center = center;
     }
     [button addTarget:self

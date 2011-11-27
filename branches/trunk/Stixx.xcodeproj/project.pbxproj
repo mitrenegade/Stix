@@ -139,7 +139,7 @@
 		9E91C618148044A0003567ED /* RaisedCenterTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaisedCenterTabBarController.m; sourceTree = "<group>"; };
 		9E91C61E14817820003567ED /* textured_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = textured_background.png; sourceTree = "<group>"; };
 		9EAF617F145B58BE00CBAC8D /* emptyuser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emptyuser.png; sourceTree = "<group>"; };
-		9EB0316E142C002E0019F2BD /* Stixx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stixx.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9EB0316E142C002E0019F2BD /* Stix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EB03172142C002E0019F2BD /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9EB03174142C002E0019F2BD /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		9EB03176142C002E0019F2BD /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -303,7 +303,7 @@
 		9EB0316F142C002E0019F2BD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9EB0316E142C002E0019F2BD /* Stixx.app */,
+				9EB0316E142C002E0019F2BD /* Stix.app */,
 				9EB03197142C002E0019F2BD /* StixxTests.octest */,
 			);
 			name = Products;
@@ -498,7 +498,7 @@
 			);
 			name = Stixx;
 			productName = Stixx;
-			productReference = 9EB0316E142C002E0019F2BD /* Stixx.app */;
+			productReference = 9EB0316E142C002E0019F2BD /* Stix.app */;
 			productType = "com.apple.product-type.application";
 		};
 		9EB03196142C002E0019F2BD /* StixxTests */ = {
@@ -743,6 +743,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -765,6 +766,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -784,7 +786,7 @@
 					"\"$(SRCROOT)/Stixx\"",
 					"\"$(SRCROOT)/Stixx/Classes/stixxBindings\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Stix;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -800,7 +802,7 @@
 					"\"$(SRCROOT)/Stixx\"",
 					"\"$(SRCROOT)/Stixx/Classes/stixxBindings\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Stix;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

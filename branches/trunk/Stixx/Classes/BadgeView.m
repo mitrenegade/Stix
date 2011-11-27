@@ -27,9 +27,9 @@
     UIImageView * shelf = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]] autorelease];
     shelf.frame = CGRectMake(0, 381, 320, 30);
     UIImageView * badgeFire = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
-    badgeFire.frame = CGRectMake(94, 329, 42, 67);
+    badgeFire.center = CGPointMake(111, 362);
     UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
-    badgeIce.frame = CGRectMake(181, 329, 42, 67);
+    badgeIce.center = CGPointMake(202, 362);
     [self addSubview:shelf];
     [self addSubview:badgeFire];
     [self addSubview:badgeIce];
@@ -61,18 +61,7 @@
     [iceLarge release];
     //[fireShadow release];
     //[iceShadow release];
-    CGRect labelFrame = CGRectMake(94+15, 329+20, 42, 67);
-    labelFire = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    [labelFire drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    labelFrame = CGRectMake(181+15, 329+20, 42, 67);
-    labelIce = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    [labelIce drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    labels = [[NSMutableArray alloc] init];
-    [labels addObject:labelFire];
-    [labels addObject:labelIce];
-    //[self addSubview:labelFire];
-    //[self addSubview:labelIce];
-    
+   
     unsigned numEls = [badges count];
     while (numEls--)
     {
@@ -81,6 +70,24 @@
         //		 [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:numEls+1];
         [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:0];
     }
+
+    UIImageView * badge = [badges objectAtIndex:BADGE_TYPE_FIRE];
+    labelFire = [[OutlineLabel alloc] initWithFrame:badge.frame];
+    [labelFire setCenter:CGPointMake(badge.center.x-5, badge.center.y+10)];
+    [labelFire setTextColor:[UIColor colorWithRed:255 green:204 blue:102 alpha:1]];
+    [labelFire setOutlineColor:[UIColor colorWithRed:102 green:0 blue:0 alpha:1]];
+    [labelFire drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
+    
+    badge = [badges objectAtIndex:BADGE_TYPE_ICE];
+    labelIce = [[OutlineLabel alloc] initWithFrame:badge.frame];
+    [labelIce setCenter:CGPointMake(badge.center.x-5, badge.center.y+10)];
+    [labelIce setTextColor:[UIColor colorWithRed:153 green:255 blue:255 alpha:1]];
+    [labelIce setOutlineColor:[UIColor colorWithRed:0 green:51 blue:102 alpha:1]];
+    [labelIce drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
+    labels = [[NSMutableArray alloc] init];
+    [labels addObject:labelFire];
+    [labels addObject:labelIce];
+
  	return self;
 }
 

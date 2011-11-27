@@ -24,13 +24,13 @@
 		[tbi setTitle:@"Stix"];
 		
 		// add an image
-		//UIImage * i = [UIImage imageNamed:@"tab_location.png"];
-		//[tbi setImage:i];
-    return self;
-}
+//		UIImage * i = [UIImage imageNamed:@"tab_location.png"];
+//		[tbi setImage:i];
+//    return self;
+//}
 
--(void)viewDidLoad {
-	[super viewDidLoad];
+//-(void)viewDidLoad {
+//	[super viewDidLoad];
 
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
@@ -68,6 +68,7 @@
 	//self.view = overlayView;
     [self.view addSubview:badgeView];
     
+    return self;
 }
 
 // called by main delegate to add tabBarView to camera overlay

@@ -24,7 +24,7 @@
     UIWindow *window;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
-	TagViewController * tagViewController;
+	//UITabBarController * tabBarController; 	TagViewController * tagViewController;
 	FeedViewController *feedController;
 	FriendsViewController *friendController;
 	ProfileViewController *profileController;
@@ -65,6 +65,7 @@
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
+//@property (nonatomic, retain) IBOutlet UITabBarController *tabBarController;
 @property (nonatomic, retain) IBOutlet TagViewController *tagViewController;
 @property (nonatomic, retain) FeedViewController *feedController;
 @property (nonatomic, retain) ProfileViewController *profileController;

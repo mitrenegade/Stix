@@ -83,6 +83,14 @@
          contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
       </ContextState>
       <ContextState
+         contextName = "-[RaisedCenterTabBarController addCenterButtonWithImage:highlightImage:]:RaisedCenterTabBarController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "buttonImage.size">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "-[FeedViewController viewDidLoad]:FeedViewController.m">
          <PersistentStrings>
             <PersistentString

@@ -48,9 +48,12 @@
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
     
+#if 1
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
-    
+#else
+	tabBarController = [[UITabBarController alloc] init];
+#endif
     allTags = [[NSMutableArray alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableArray alloc] init];

@@ -20,8 +20,10 @@
         self.textColor = [UIColor whiteColor];
         [self setBackgroundColor:[UIColor clearColor]];
         [self setOutlineColor:[UIColor blackColor]];
-        [self setFont:[UIFont fontWithName:@"Arial" size:15]];
+        [self setFont:[UIFont fontWithName:@"Helvetica Bold" size:20]];
+        [self setTextAlignment:UITextAlignmentCenter];
         [self setFrame:frame];
+
     }
     
     return self;

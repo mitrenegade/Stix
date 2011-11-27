@@ -10,23 +10,24 @@
 
 @implementation Tag
 
-@synthesize username, comment, image, coordinate, tagID, timestring, timestamp;
+@synthesize username, comment, image, coordinate, tagID, timestring, timestamp, locationString;
 @synthesize badge_x, badge_y, badgeType, badgeCount;
 
 
-+ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count
++ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count
 {
     // simply allocates and creates a tag from given items
     Tag * tag = [[[Tag alloc] init] autorelease]; 
-    [tag addUsername:name andComment:comment];
+    [tag addUsername:name andComment:comment andLocationString:locationString];
 	[tag addImage:image];
     [tag addStixOfType:type andCount:count atLocationX:badge_x andLocationY:badge_y];
     [tag addARCoordinate:coordinate];
     return tag;
 }
-- (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment{
+- (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{
     [self setUsername:newUsername];
     [self setComment:newComment];
+    [self setLocationString:newLocation];
     //NSLog(@"Added username %@ and comment %@ to tag", newUsername, newComment);
 }
 
@@ -52,6 +53,7 @@
     
     NSString * name = [d valueForKey:@"username"];
     NSString * comment = [d valueForKey:@"comment"];
+    NSString * locationString = [d valueForKey:@"locationString"];
     UIImage * image = [[UIImage alloc] initWithData:[d valueForKey:@"image"]];
     int badge_x = [[d valueForKey:@"badge_x"] intValue];
     int badge_y = [[d valueForKey:@"badge_y"] intValue];
@@ -62,7 +64,7 @@
     ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
     [decoder finishDecoding];
     [decoder release];    
-    Tag * tag = [[Tag initWithName:name andComment:comment andImage:image andBadge_X:badge_x andBadge_Y:badge_y andCoordinate:coordinate andType:badgeType andCount:badgeCount] retain];
+    Tag * tag = [[Tag initWithName:name andComment:comment andLocationString:locationString andImage:image andBadge_X:badge_x andBadge_Y:badge_y andCoordinate:coordinate andType:badgeType andCount:badgeCount] retain];
     tag.tagID = [d valueForKey:@"allTagID"];
     tag.timestamp = [d valueForKey:@"timeCreated"];
     [image release];

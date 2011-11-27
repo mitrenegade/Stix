@@ -82,11 +82,11 @@
 /*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
  */    
-    CGRect viewRect = rectView.frame;
-    viewRect.origin.y = viewRect.origin.y + STATUS_BAR_SHIFT;
-    // hack: cameraController.ROI is used to crop the image, but for some reason croppedImage: doesn't work as we think. the width and height are actually values for max_x and max_y
-    viewRect.size.width = viewRect.size.width + viewRect.origin.x;
-    viewRect.size.height = viewRect.size.height + viewRect.origin.y;     [cameraController setROI:viewRect];
+    CGRect viewFrame = rectView.frame;
+    CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
+    // hack: because status bar is hidden, our "origin.y" is -20
+    viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
+    [cameraController setROI:viewFrame];
 	[self presentModalViewController:self.cameraController animated:animated];
 #endif
     [badgeView resetBadgeLocations];
@@ -140,14 +140,46 @@
 
 // BadgeViewDelegate function
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type{
+
+    if ([delegate getStixCount:type] < 1)
+    {
+        if ([delegate isLoggedIn] == NO)
+        {     
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"Ok I'll go log in now"];
+            [alert setTitle:@"Not logged in"];
+            [alert setMessage:[NSString stringWithFormat:@"You have no stix because you are not logged in!"]];
+            [alert show];
+            [alert release];
+        }
+        else
+        {
+            NSString * badgeTypeStr;
+            if (type == BADGE_TYPE_FIRE)
+                badgeTypeStr = @"Fire";
+            else
+                badgeTypeStr = @"Ice";
+
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"I take it back"];
+            [alert setTitle:@"Insufficient stix"];
+            [alert setMessage:[NSString stringWithFormat:@"You have run out of %@ stix! HINT: For this demo, go to the profile and click on 'Stix' for more.", badgeTypeStr]];
+            [alert show];
+            [alert release];
+        }
+        [badgeView resetBadgeLocations];
+        return;
+    }
+    
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
 	[[self cameraController] takePicture];
     badgeFrame = badge.frame;
     // save frame of badge relative to cropped image
+    CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
     badgeFrame.origin.x = badgeFrame.origin.x - cameraController.ROI.origin.x;
-    badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + STATUS_BAR_SHIFT;
+    badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + statusFrame.size.height;
     badgeType = type; // save type for later;
 }
 
@@ -184,18 +216,23 @@
     [self.cameraController dismissModalViewControllerAnimated:YES];
     ARCoordinate * newCoord;
     NSString * desc;
+    NSString * loc;
 
     NSLog(@"Entered: '%@' for description and '%@' for location", descriptor, location);
 	if ([descriptor length] > 0 && [location length] > 0)
 	{
-        desc = [NSString stringWithFormat:@"%@ @ %@", descriptor, location];
+        //desc = [NSString stringWithFormat:@"%@ @ %@", descriptor, location];
+        desc = descriptor;
+        loc = [NSString stringWithFormat:@"@ %@", location];
 	}
     else if ([descriptor length] == 0 && [location length] > 0)
     {
         desc = location;
+        loc = @"";
     }
     else if ([descriptor length] > 0 && [location length] == 0)
     {
+        loc = @""; 
         desc = descriptor;
     }
     else 
@@ -204,6 +241,7 @@
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         [formatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
         desc = [formatter stringFromDate:now];
+        loc = @"";
     }
     newCoord = [arViewController createCoordinateWithLabel:desc];
     
@@ -221,7 +259,7 @@
     // create Tag
     NSString * username = [[self.delegate getUsername] retain];
     Tag * tag = [[Tag alloc] init]; 
-    [tag addUsername:username andComment:desc];
+    [tag addUsername:username andComment:desc andLocationString:loc];
     UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
     int x = badgeFrame.origin.x;
     int y = badgeFrame.origin.y;

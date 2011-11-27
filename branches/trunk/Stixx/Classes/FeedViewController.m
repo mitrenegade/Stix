@@ -108,10 +108,10 @@
     //[self.delegate checkForUpdateTags];
 
     self.allTags = [self.delegate getTags];
-    [scrollView populateScrollPagesAtPage:lastPageViewed];
-    
     self.userPhotos = [self.delegate getUserPhotos]; 
     NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
+
+    [scrollView populateScrollPagesAtPage:lastPageViewed];
     //[self.nameLabel setText:username];
 }
 
@@ -338,21 +338,28 @@
 }
 
 /************** FeedZoomView ***********/
+#define DO_ZOOM_VIEW 0
 -(void)didClickAtLocation:(CGPoint)location {
+#if DO_ZOOM_VIEW
     NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
     
     Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
     UIImage * image = tag.image;
     NSString * label = tag.comment;
+    NSString * locationStr = tag.locationString;
    
     [zoomViewController setDelegate:self];
     [self.view insertSubview:zoomViewController.view aboveSubview:badgeView];
     [zoomViewController forceImageAppear:image];
     [zoomViewController setLabel:label];
+    [zoomViewController setLocation:locationStr];
+#endif
 }
 
 -(void)didDismissZoom {
+#if DO_ZOOM_VIEW
     [zoomViewController.view removeFromSuperview];
+#endif
 }
 
 @end

@@ -57,7 +57,7 @@
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
-    [self initializeScrollWithPageSize:CGSizeMake(240, 320)];
+    [self initializeScrollWithPageSize:CGSizeMake(280, 320)];
     scrollView.isLazy = YES;
     [delegate didCreateBadgeView:badgeView];
 
@@ -181,12 +181,6 @@
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {
     // increment stix count for given feed item
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];
-    
-    NSString * badgeTypeStr;
-    if ([t badgeType] == BADGE_TYPE_FIRE)
-        badgeTypeStr = @"Fire";
-    else
-        badgeTypeStr = @"Ice";
 
     if ([delegate getStixCount:type] < 1)
     {
@@ -201,6 +195,12 @@
         }
         else
         {
+            NSString * badgeTypeStr;
+            if (type == BADGE_TYPE_FIRE)
+                badgeTypeStr = @"Fire";
+            else
+                badgeTypeStr = @"Ice";
+
             UIAlertView* alert = [[UIAlertView alloc]init];
             [alert addButtonWithTitle:@"I take it back"];
             [alert setTitle:@"Insufficient stix"];
@@ -212,6 +212,12 @@
         return;
     }
     
+    NSString * badgeTypeStr;
+    if ([t badgeType] == BADGE_TYPE_FIRE)
+        badgeTypeStr = @"Fire";
+    else
+        badgeTypeStr = @"Ice";
+
     NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
     [delegate didAddStixToTag:t withType:type];
     [delegate decrementStixCount:type forUser:[delegate getUsername]];
@@ -249,24 +255,20 @@
 }
 
  -(UIView*)viewForItemAtIndex:(int)index
-{
-	// Note that the images are actually smaller than the image view frame, each image
-	// is 210x280. Images are centered and because they are smaller than the actual 
-	// view it creates a padding between each image. 
-	//CGRect imageViewFrame = CGRectMake(0.0f, 0.0f, 240, 320);
-	
+{	
     //NSLog(@"Index: %d reverse_index: %d", index, reverse_index);
     Tag * tag = [[allTags objectAtIndex:index] retain];
     
     NSString * name = tag.username;
     NSString * comment = tag.comment;
+    NSString * locationString = tag.locationString;
     UIImage * image = tag.image;
     
     NSLog(@"Creating feed item at index %d: name %@ comment %@ image dims %f %f\n", index, name, comment, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
-    [feedItem populateWithName:name andWithComment:comment andWithImage:image];
-    [feedItem.view setFrame:CGRectMake(0, 0, 240, 280)]; 
+    [feedItem populateWithName:name andWithComment:comment andWithLocationString:locationString andWithImage:image];
+    [feedItem.view setFrame:CGRectMake(0, 0, 280, 320)]; 
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)
     {

@@ -55,6 +55,7 @@
 -(void)populateWithUserPhoto:(UIImage*)photo {
     if (photo){
         [userPhotoView setImage:photo];
+        [userPhotoView setBackgroundColor:[UIColor blackColor]];
     }
 }
 
@@ -88,7 +89,7 @@
     OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
     stixCount.center = CGPointMake(stixCount.center.x + OUTLINELABEL_X_OFFSET * imageScale, stixCount.center.y + OUTLINELABEL_Y_OFFSET * imageScale);
     labelFrame = stixCount.frame; // changing center should change origin but not width
-    [stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]];
+    //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
     [stixCount setTextAttributesForBadgeType:type];
     [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [stixCount setText:[NSString stringWithFormat:@"%d", count]];
@@ -119,7 +120,7 @@
         //num = (int) interval;
         //unit = @"sec ago";
         num = 0;
-        unit = @"< 1 min ago";
+        unit = @"Just now";
     }
     else if (interval < 3600)
     {

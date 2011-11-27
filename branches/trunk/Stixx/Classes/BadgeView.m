@@ -240,6 +240,7 @@
             UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
             newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
             CGRect frame = newFrameView.frame;
+            [newFrameView release];
             
 			//NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
 			

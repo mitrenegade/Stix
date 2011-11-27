@@ -182,7 +182,7 @@
              */
             [exploreItemView addSubview:shadow];
             [exploreItemView addSubview:feedItem];
-            [photo release];
+            [shadow release];
             [feedItem release];
             //[commentlabel release];
             

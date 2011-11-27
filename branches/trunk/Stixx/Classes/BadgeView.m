@@ -30,6 +30,8 @@
     badgeFire.center = CGPointMake(111, 362);
     UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
     badgeIce.center = CGPointMake(202, 362);
+    //[badgeFire setBackgroundColor:[UIColor blackColor]]; // for debug
+    //[badgeIce setBackgroundColor:[UIColor blackColor]];
     [self addSubview:shelf];
     [self addSubview:badgeFire];
     [self addSubview:badgeIce];
@@ -73,16 +75,14 @@
 
     UIImageView * badge = [badges objectAtIndex:BADGE_TYPE_FIRE];
     labelFire = [[OutlineLabel alloc] initWithFrame:badge.frame];
-    [labelFire setCenter:CGPointMake(badge.center.x-5, badge.center.y+10)];
-    [labelFire setTextColor:[UIColor colorWithRed:255 green:204 blue:102 alpha:1]];
-    [labelFire setOutlineColor:[UIColor colorWithRed:102 green:0 blue:0 alpha:1]];
+    [labelFire setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+    [labelFire setTextAttributesForBadgeType:BADGE_TYPE_FIRE];
     [labelFire drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
     
     badge = [badges objectAtIndex:BADGE_TYPE_ICE];
     labelIce = [[OutlineLabel alloc] initWithFrame:badge.frame];
-    [labelIce setCenter:CGPointMake(badge.center.x-5, badge.center.y+10)];
-    [labelIce setTextColor:[UIColor colorWithRed:153 green:255 blue:255 alpha:1]];
-    [labelIce setOutlineColor:[UIColor colorWithRed:0 green:51 blue:102 alpha:1]];
+    [labelIce setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+    [labelIce setTextAttributesForBadgeType:BADGE_TYPE_ICE];
     [labelIce drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
     labels = [[NSMutableArray alloc] init];
     [labels addObject:labelFire];
@@ -152,21 +152,21 @@
         // pass event to nextResponder, which is first the controller, then the view's superview
 	}
 	else
-	{
-		badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
+	{		
+        badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
 		badgeTouchedLarge = [badgesLarge objectAtIndex:badgeSelect];
-		CGRect frameStart = badgeTouched.frame;
+		//CGRect frameStart = badgeTouched.frame;
+		float centerX = badgeTouched.center.x; //(frameStart.origin.x + frameStart.size.width/2);
+		float centerY = badgeTouched.center.y; //(frameStart.origin.y + frameStart.size.height/2);
+		
+		//frameEnd.origin.x = centerX - frameEnd.size.width / 2;
+		//frameEnd.origin.y = centerY - frameEnd.size.height / 2;
+        badgeTouchedLarge.center = CGPointMake(centerX, centerY);
 		CGRect frameEnd = badgeTouchedLarge.frame;
-		int centerX = (frameStart.origin.x + frameStart.size.width/2);
-		int centerY = (frameStart.origin.y + frameStart.size.height/2);
 		
-		frameEnd.origin.x = centerX - frameEnd.size.width / 2;
-		frameEnd.origin.y = centerY - frameEnd.size.height / 2;
-		
+        // point where finger clicked badge
 		offset_from_center_X = (location.x - centerX);
 		offset_from_center_Y = (location.y - centerY);
-		
-		badgeTouchedLarge.frame = frameEnd;
 		
 		// animate a scaling transition
 		[UIView 
@@ -199,9 +199,10 @@
 		//NSLog(@"Dragging to %f %f", location.x, location.y);
 
 		// update frame of dragged badge, also scale
-		float scale = 1; // do not change scale while dragging
+		//float scale = 1; // do not change scale while dragging
 		if (badgeTouched == nil)
 			return;
+        /*
 		CGRect frame = badgeTouched.frame;
 		int width = frame.size.width * scale;
 		int height = frame.size.height * scale;
@@ -212,6 +213,10 @@
 		frame.size.width = width;
 		frame.size.height = height;
 		badgeTouched.frame = frame;
+         */
+		float centerX = location.x - offset_from_center_X;
+		float centerY = location.y - offset_from_center_Y;
+        badgeTouched.center = CGPointMake(centerX, centerY);
 	}
 }
 
@@ -220,17 +225,22 @@
 	{
 		if (badgeTouched != nil)
 		{
-			CGRect originalFrame = [[badges objectAtIndex:badgeSelect] frame];
-			CGRect frame = badgeTouched.frame;
-			int width = originalFrame.size.width;
+			CGRect originalFrame = [[badgeLocations objectAtIndex:badgeSelect] CGRectValue];
+			/*
+             CGRect frame = badgeTouched.frame;
+			 int width = originalFrame.size.width;
 			int height = originalFrame.size.height;
-			int centerX = frame.origin.x + frame.size.width / 2;
+            int centerX = frame.origin.x + frame.size.width / 2;
 			int centerY = frame.origin.y + frame.size.height / 2;
 			frame.origin.x = centerX - width/2;
 			frame.origin.y = centerY - width/2;
 			frame.size.width = width;
 			frame.size.height = height;
-			
+			*/
+            UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
+            newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
+            CGRect frame = newFrameView.frame;
+            
 			//NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
 			
 			// animate a scaling transition

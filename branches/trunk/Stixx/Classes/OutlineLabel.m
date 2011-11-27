@@ -20,7 +20,7 @@
         self.textColor = [UIColor whiteColor];
         [self setBackgroundColor:[UIColor clearColor]];
         [self setOutlineColor:[UIColor blackColor]];
-        [self setFont:[UIFont fontWithName:@"Helvetica Bold" size:20]];
+        //[self setFont:[UIFont fontWithName:@"Helvetica Bold" size:35]]; does nothing
         [self setTextAlignment:UITextAlignmentCenter];
         [self setFrame:frame];
 
@@ -37,7 +37,7 @@
     CGContextRef c = UIGraphicsGetCurrentContext();
     if (c == nil)
         return;
-    CGContextSetLineWidth(c, 2);
+    CGContextSetLineWidth(c, 3);
     CGContextSetLineJoin(c, kCGLineJoinRound);
     
     CGContextSetTextDrawingMode(c, kCGTextStroke);
@@ -50,7 +50,17 @@
     [super drawTextInRect:rect];
     
     self.shadowOffset = shadowOffset;
-    
+}
+
+-(void)setTextAttributesForBadgeType:(int)type {
+    if (type == HOT_SCHEME) {
+        [self setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
+        [self setOutlineColor:[UIColor colorWithRed:102/255.0 green:0 blue:0 alpha:1]];
+    }
+    else if (type == COLD_SCHEME) {
+        [self setTextColor:[UIColor colorWithRed:153/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
+        [self setOutlineColor:[UIColor colorWithRed:0 green:51/255.0 blue:102/255.0 alpha:1]];        
+    }
 }
 
 

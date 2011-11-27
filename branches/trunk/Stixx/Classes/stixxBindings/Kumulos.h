@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Nov 25, 2011
+//  Created by Kumulos Bindings Compiler on Nov 27, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -14,6 +14,8 @@
 @protocol KumulosDelegate <kumulosProxyDelegate>
 @optional
 
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -73,6 +75,9 @@
 -(Kumulos*)init;
 -(Kumulos*)initWithAPIKey:(NSString*)APIKey andSecretKey:(NSString*)secretKey;
 
+   
+-(KSAPIOperation*) addNewStixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score;
+    
    
 -(KSAPIOperation*) addStixWithUsername:(NSString*)username andComment:(NSString*)comment andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score;
     

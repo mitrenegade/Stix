@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Nov 25, 2011
+//  Created by Kumulos Bindings Compiler on Nov 27, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -28,6 +28,35 @@
     return self;
  }
 
+
+-(KSAPIOperation*) addNewStixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:username forKey:@"username"];
+                    [theParams setValue:comment forKey:@"comment"];
+                    [theParams setValue:locationString forKey:@"locationString"];
+                    [theParams setValue:image forKey:@"image"];
+                    [theParams setValue:[NSNumber numberWithInt:badge_x] forKey:@"badge_x"];
+                    [theParams setValue:[NSNumber numberWithInt:badge_y] forKey:@"badge_y"];
+                    [theParams setValue:tagCoordinate forKey:@"tagCoordinate"];
+                    [theParams setValue:[NSNumber numberWithInt:type] forKey:@"type"];
+                    [theParams setValue:[NSNumber numberWithInt:score] forKey:@"score"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addNewStix" andParams:theParams];
+    [newOp setDelegate:self];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: addNewStixDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
 
 -(KSAPIOperation*) addStixWithUsername:(NSString*)username andComment:(NSString*)comment andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score{
 

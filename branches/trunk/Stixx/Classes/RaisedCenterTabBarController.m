@@ -46,12 +46,12 @@
 
     [self.view addSubview:button];
 }
-
+/*
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return NO;
 }
-
+*/
 -(IBAction)didPressCenterButton:(id)sender {
     [self.myDelegate didPressCenterButton];
 }

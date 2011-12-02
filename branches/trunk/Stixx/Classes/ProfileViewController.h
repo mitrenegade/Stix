@@ -37,7 +37,7 @@
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate>{
 
-    IBOutlet UIButton * loginScreenButton; // login if your profile, add as friend if other's profile
+    //IBOutlet UIButton * loginScreenButton; // login if your profile, add as friend if other's profile
     IBOutlet UIButton * logoutScreenButton;
     IBOutlet UIButton * stixCountButton; // custom button but no clicking
     IBOutlet UIButton * friendCountButton; // custom button but no clicking
@@ -58,7 +58,7 @@
     Kumulos * k;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton * loginScreenButton;
+//@property (nonatomic, retain) IBOutlet UIButton * loginScreenButton;
 @property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 @property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
 @property (nonatomic, retain) IBOutlet UIButton * friendCountButton;

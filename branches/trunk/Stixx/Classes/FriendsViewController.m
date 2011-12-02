@@ -109,13 +109,13 @@
 - (void)setIndicator:(BOOL)animate {
     if (animate)
     {
-        [activityIndicator setHidden:NO];
-        //[activityIndicator startAnimating];
+        //[activityIndicator setHidden:NO];
+        [activityIndicator startCompleteAnimation];
     }
     else
     {
-        [activityIndicator setHidden:YES];
-        //[activityIndicator stopAnimating];
+        //[activityIndicator setHidden:YES];
+        [activityIndicator stopCompleteAnimation];
     }
 }
 

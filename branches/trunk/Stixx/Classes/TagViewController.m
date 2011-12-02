@@ -75,7 +75,11 @@
 // called by main delegate to add tabBarView to camera overlay
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView
 {
-    [cameraController setCameraOverlayView:cameraOverlayView];
+    @try {
+        [cameraController setCameraOverlayView:cameraOverlayView];
+    }
+    @catch (NSException* exception) {
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {

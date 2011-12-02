@@ -74,10 +74,12 @@
 - (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
     if (animate)
     {
-        [activityIndicatorCenter setHidden:NO];
+        //[activityIndicatorCenter setHidden:NO];
+        [activityIndicatorCenter startCompleteAnimation];
     }
     else
-        [activityIndicatorCenter setHidden:YES];
+        [activityIndicatorCenter stopCompleteAnimation];
+        //[activityIndicatorCenter setHidden:YES];
 #if 0
     if (animate)
     {
@@ -309,6 +311,7 @@
         // should not come here!
         //NSLog(@"Error! allTags was never seeded!");
         [self.delegate checkForUpdateTags];
+        [self setIndicatorWithID:0 animated:YES];
     }
 }
 

@@ -36,6 +36,7 @@
     BadgeView * lastBadgeView;
 
     bool loggedIn;
+    bool isLoggingIn;
     NSString * username;
     UIImage * userphoto;
     int usertagtotal;

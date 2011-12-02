@@ -171,7 +171,7 @@
     {
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"Could not login"];
-        [alert setTitle:@"The user %@ doesn't seem to exist! Please try logging in again or adding a new account."];
+        [alert setTitle:@"The username you have selected doesn't seem to exist! Please try logging in again or adding a new account."];
         [alert show];
         [alert release];
         

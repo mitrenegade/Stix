@@ -103,13 +103,14 @@
     username = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
     userphoto = nil;
     loggedIn = NO;
+    isLoggingIn = NO;
     if (!username || [username length] == 0)
     {
         // force login
-        //[profileController firstTimeLogin];
         loginSplashController = [[LoginSplashController alloc] init];
         [loginSplashController setDelegate:self];
-        //[tabBarController presentModalViewController:loginSplashController animated:YES];
+        isLoggingIn = YES;
+        loggedIn = NO;
     }
     else
     {
@@ -131,9 +132,11 @@
     // Override point for customization after application launch
     [window makeKeyAndVisible];
     
-    if (loggedIn == NO)
+    if (isLoggingIn == YES && loggedIn == NO)
+    {
         [tabBarController presentModalViewController:loginSplashController animated:NO];
-    
+        isLoggingIn = NO;
+    }
 }
 
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
@@ -193,6 +196,7 @@
 	//[NSKeyedArchiver archiveRootObject:tempLocationArray toFile:path]; 
     
     // archive username
+    NSLog(@"Logging out and saving username %@", username);
     [NSKeyedArchiver archiveRootObject:username toFile:path];
 }
 
@@ -480,6 +484,7 @@
 
 - (void) didLoginFromSplashScreen {
     [self.tabBarController dismissModalViewControllerAnimated:YES];
+    loggedIn = YES; 
 }
 
 /**** ProfileViewController and login functions ****/
@@ -515,19 +520,20 @@
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total{
-    NSLog(@"Setting delegate name to %@", name);
     loggedIn = YES;
-    username = name;
+    username = [name retain];
     userphoto = [photo retain];
     usertagtotal = total;
     [allStix removeAllObjects];
     [allStix addObjectsFromArray:stix];
+    NSLog(@"Setting delegate name to %@ = %@ with stix: %d %d", name, username, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
         
     // also process
     [k processStixUpdatesWithUsername:name];
 
     [profileController updateStixCount];
-    [lastBadgeView resetBadgeLocations];
+    if (lastBadgeView)
+        [lastBadgeView resetBadgeLocations];
 }
 
 -(void)didLogout {
@@ -542,7 +548,8 @@
     [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_FIRE];
     [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_ICE];
     [profileController updateStixCount];
-    [lastBadgeView resetBadgeLocations];
+    if (lastBadgeView)
+        [lastBadgeView resetBadgeLocations];
     
     if (loginSplashController == nil) {
         loginSplashController = [[LoginSplashController alloc] init];
@@ -559,15 +566,25 @@
     for (NSMutableDictionary * d in theResults)
     {
         NSString * name = [d valueForKey:@"username"];
+        NSLog(@"Name: %@ delegate.username: %@\n", name, username);
         if ([name isEqualToString:username] == NO)
         {
             NSLog(@"Whoops! Stix Update for wrong user is being processed...fix it!");
             continue;
         }
+        if ([name isKindOfClass:[NSString class]] == NO)
+        {
+            NSLog(@"Whoops! Invalid name! Discarding update!");
+            continue;
+        }
+            
         int badgeType = [[d valueForKey:@"type"] intValue];
         int changeCt = [[d valueForKey:@"count"] intValue];
         
         changes[badgeType] += changeCt;
+
+        NSString * fromName = [d valueForKey:@"FromUsername"];
+        NSLog(@"%@ received %d stix of type %d from %@", name, changeCt, badgeType, fromName);
     } 
     int ct = [[allStix objectAtIndex:BADGE_TYPE_FIRE] intValue];
     [allStix replaceObjectAtIndex:BADGE_TYPE_FIRE withObject:[NSNumber numberWithInt:ct + changes[BADGE_TYPE_FIRE]]];
@@ -578,7 +595,8 @@
     
     [k addStixToUserWithUsername:username andStix:[profileController arrayToData:allStix]];
     
-    [lastBadgeView updateStixCounts];
+    if (lastBadgeView)
+        [lastBadgeView updateStixCounts];
     [profileController updateStixCount];
 }
 
@@ -628,8 +646,9 @@
             NSLog(@"Increment my %@ stix count for user %@ to %d", type==BADGE_TYPE_FIRE?@"Fire":@"Ice", name, ct);
         }
     }
-    if ([name isEqualToString:@"anonymous"] == NO)
-        [k addStixUpdateToQueueWithUsername:name andType:type andCount:1];
+    if (([name isEqualToString:@"anonymous"] == NO) && ([name length]>0))
+        [k addStixToQueueWithUsername:name andFromUsername:username andType:type andCount:1];
+    
     return ret;
 }
 
@@ -664,8 +683,8 @@
             NSLog(@"Decrement my %@ stix count for user %@ to %d", type==BADGE_TYPE_FIRE?@"Fire":@"Ice", name, ct);
         }
     }
-    if ([name isEqualToString:@"anonymous"] == NO)
-        [k addStixUpdateToQueueWithUsername:name andType:type andCount:-1];
+    if ([name isEqualToString:@"anonymous"] == NO || [name length]>0)
+        [k addStixToQueueWithUsername:name andFromUsername:username andType:type andCount:1];
     return ret;
 }
 

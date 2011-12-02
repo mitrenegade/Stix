@@ -95,8 +95,15 @@
             continue;        
         UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
         // badge count array
-        NSMutableArray * stix = [self dataToArray:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
-        NSLog(@"DidLoginWithUsername: %@ - currently has stix ", name);
+        NSMutableArray * stix;
+        if (loginController.bJoinOrLogin == 1) {
+            stix = [self dataToArray:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
+        }
+        else
+        {
+            stix = [self generateDefaultStix];
+        }
+        NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
         
         // total badge count
         int totalTags = [[d valueForKey:@"totalTags"] intValue];

@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Nov 29, 2011
+//  Created by Kumulos Bindings Compiler on Dec  2, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -40,6 +40,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfUserDidCompleteWithResult:(NSNumber*)aggregateResult;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToQueueDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixUpdateToQueueDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -112,6 +114,9 @@
     
    
 -(KSAPIOperation*) updateStixWithAllTagID:(NSUInteger)allTagID andScore:(NSInteger)score andType:(NSInteger)type;
+    
+   
+-(KSAPIOperation*) addStixToQueueWithUsername:(NSString*)username andFromUsername:(NSString*)fromUsername andType:(NSInteger)type andCount:(NSInteger)count;
     
    
 -(KSAPIOperation*) addStixUpdateToQueueWithUsername:(NSString*)username andType:(NSInteger)type andCount:(NSInteger)count;

@@ -243,7 +243,7 @@
 					<object class="IBUIButton" id="951775940">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 5}, {55, 37}}</string>
+						<string key="NSFrame">{{0, 5}, {55, 37}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
@@ -256,14 +256,16 @@
 							<double key="NSSize">6</double>
 							<int key="NSfFlags">16</int>
 						</object>
-						<int key="IBUIButtonType">1</int>
-						<string key="IBUINormalTitle">Settings/Logout</string>
 						<reference key="IBUIHighlightedTitleColor" ref="190866238"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="197289404"/>
+						<object class="NSCustomResource" key="IBUINormalImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">settings.png</string>
+						</object>
 					</object>
 				</object>
 				<string key="NSFrame">{{0, 20}, {320, 411}}</string>
@@ -674,6 +676,7 @@
 				<string>instruction_box.png</string>
 				<string>logo.png</string>
 				<string>nav_bar.png</string>
+				<string>settings.png</string>
 				<string>textured_background.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
@@ -683,6 +686,7 @@
 				<string>{305, 44}</string>
 				<string>{59, 38}</string>
 				<string>{320, 44}</string>
+				<string>{24, 17}</string>
 				<string>{320, 480}</string>
 			</object>
 		</object>

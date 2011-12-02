@@ -10,7 +10,7 @@
 
 @implementation ProfileViewController
 
-@synthesize loginScreenButton;
+//@synthesize loginScreenButton;
 @synthesize logoutScreenButton;
 @synthesize friendCountButton;
 @synthesize stixCountButton;
@@ -143,7 +143,7 @@
         [newPhoto release];
     }
     
-    [loginScreenButton setTitle:@"Switch account" forState:UIControlStateNormal];
+    //[loginScreenButton setTitle:@"Switch account" forState:UIControlStateNormal];
     [loginController dismissModalViewControllerAnimated:YES]; // do not dismiss until now, so profileView's viewWillAppear will not be summoned, causing login with old delegate.username
     //[self updateStixCount];
 }
@@ -399,8 +399,8 @@
 }
 
 - (void)viewDidUnload {    
-    [loginScreenButton release];
-    loginScreenButton = nil;
+    //[loginScreenButton release];
+    //loginScreenButton = nil;
     [stixCountButton release];
     stixCountButton = nil;
     [friendCountButton release];
@@ -419,8 +419,8 @@
 - (void)dealloc {
     [k release]; 
     [loginController release];
-    [loginScreenButton release];
-    loginScreenButton = nil;
+    //[loginScreenButton release];
+    //loginScreenButton = nil;
     [stixCountButton release];
     stixCountButton = nil;
     [friendCountButton release];

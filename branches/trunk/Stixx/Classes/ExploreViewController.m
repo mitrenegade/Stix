@@ -125,7 +125,8 @@
     }
  
     [scrollView populateScrollPagesAtPage:0];
-    [activityIndicator setHidden:YES];
+    //[activityIndicator setHidden:YES];
+    [activityIndicator stopCompleteAnimation];
 }
 /*********** PagedScrollViewDelegate functions *******/
 
@@ -286,7 +287,8 @@
         if (lastContentOffset > scrollView.contentOffset.x) { // left 
             if (page == 0)
             {
-                [self.activityIndicator setHidden:NO];            
+                //[self.activityIndicator setHidden:NO];   
+                [self.activityIndicator startCompleteAnimation];
                 [self forceReloadAll];
             }
         }
@@ -307,7 +309,8 @@
     [k getMostRecentlyUpdatedTagWithNumEls:[NSNumber numberWithInt:12]];
     [scrollView clearAllPages];
     //[activityIndicator startAnimating];
-    [activityIndicator setHidden:NO];
+    //[activityIndicator setHidden:NO];
+    [activityIndicator startCompleteAnimation];
 }
 
 /************** FeedZoomView ***********/

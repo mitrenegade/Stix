@@ -36,6 +36,7 @@
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
     [badgeView setUnderlay:buttonInstructions];
+    [badgeView setShowStixCounts:NO]; // do not show or change stix counts
     [delegate didCreateBadgeView:badgeView];
     
     /****** init AR view ******/
@@ -140,7 +141,7 @@
 
 // BadgeViewDelegate function
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type{
-
+#if 0
     if ([delegate getStixCount:type] < 1)
     {
         if ([delegate isLoggedIn] == NO)
@@ -170,7 +171,7 @@
         [badgeView resetBadgeLocations];
         return;
     }
-    
+#endif
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
@@ -246,6 +247,7 @@
     newCoord = [arViewController createCoordinateWithLabel:desc];
     
     // check if user is logged in
+#if 1
     if ([delegate isLoggedIn] == NO)
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello Anonymous User!"
@@ -256,11 +258,21 @@
         [alert show];
         [alert release];
     }
+#endif
     // create Tag
-    NSString * username = [[self.delegate getUsername] retain];
+    NSString * username = [self.delegate getUsername];
+    if ([delegate isLoggedIn] == NO)
+    {
+        username = @"anonymous";
+    }
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:username andComment:desc andLocationString:loc];
     UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
+    if ([delegate isLoggedIn] == NO)
+    {
+        [image release];
+        image = [[UIImage imageNamed:@"emptyuser.png"] retain];
+    }
     int x = badgeFrame.origin.x;
     int y = badgeFrame.origin.y;
     NSLog(@"Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
@@ -268,13 +280,14 @@
     [tag addStixOfType:badgeType andCount:1 atLocationX:x andLocationY:y];
     [tag addARCoordinate:newCoord];
     [image release];
-    [self.delegate addTag:tag];
+    [self.delegate tagViewDidAddTag:tag];
     [tag release];
     
-    [delegate decrementStixCount:badgeType forUser:username];
+    // to generate content, do not decrement
+    //[delegate decrementStixCount:badgeType forUser:username];
     [badgeView resetBadgeLocations];
     
-    [username release];
+    //[username release];
     // dismiss descriptorController
     [self dismissModalViewControllerAnimated:YES];
     //[self setView:overlayView];

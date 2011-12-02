@@ -14,7 +14,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9EB0316D142C002E0019F2BD"
-               BuildableName = "Stixx.app"
+               BuildableName = "Stix.app"
                BlueprintName = "Stixx"
                ReferencedContainer = "container:Stixx.xcodeproj">
             </BuildableReference>
@@ -49,7 +49,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9EB0316D142C002E0019F2BD"
-            BuildableName = "Stixx.app"
+            BuildableName = "Stix.app"
             BlueprintName = "Stixx"
             ReferencedContainer = "container:Stixx.xcodeproj">
          </BuildableReference>
@@ -66,7 +66,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9EB0316D142C002E0019F2BD"
-            BuildableName = "Stixx.app"
+            BuildableName = "Stix.app"
             BlueprintName = "Stixx"
             ReferencedContainer = "container:Stixx.xcodeproj">
          </BuildableReference>

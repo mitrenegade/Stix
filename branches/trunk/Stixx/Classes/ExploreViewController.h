@@ -12,6 +12,7 @@
 #import "Kumulos.h"
 #import "Tag.h"
 #import "ZoomViewController.h"
+#import "LoadingAnimationView.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(int)stix_type;
@@ -33,6 +34,11 @@
     
     NSMutableArray * allTagIDs;
     NSMutableArray * allTags;
+    
+    LoadingAnimationView * activityIndicator;
+    
+    int lastContentOffset;
+    
     Kumulos * k;
 }
 
@@ -42,6 +48,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * refreshButton;
 @property (nonatomic, retain) NSMutableArray * allTagIDs; 
 @property (nonatomic, retain) NSMutableArray * allTags; 
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 
 - (IBAction)refreshUpdates:(id)sender;
 -(void)getTagWithID:(int)id;

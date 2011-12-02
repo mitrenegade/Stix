@@ -60,10 +60,6 @@
 }
 
 -(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
-    // README for some reason the placement of the stix needs to be scaled, but
-    // the width of the stix is already scaled or gets scaled correctly later.
-    // so for the stix to remain the correct size in relation to the image, only
-    // modify the center or origin of the stix, not the width.
     UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float originX = x;
@@ -80,8 +76,8 @@
 	CGRect stixFrameScaled = stix.frame;
 	stixFrameScaled.origin.x *= imageScale;
 	stixFrameScaled.origin.y *= imageScale;
-	//stixFrameScaled.size.width *= imageScale;
-	//stixFrameScaled.size.height *= imageScale;
+	stixFrameScaled.size.width *= imageScale;
+	stixFrameScaled.size.height *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
     [stix setFrame:stixFrameScaled];
     

@@ -21,7 +21,7 @@
 @protocol TagViewDelegate
 
 - (NSString *)getUsername;
-- (void) addTag:(Tag*)newTag;
+- (void) tagViewDidAddTag:(Tag*)newTag;
 - (bool) isLoggedIn;
 
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate

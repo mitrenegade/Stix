@@ -12,10 +12,10 @@
 @protocol LoginViewDelegate
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
-- (NSMutableArray*)generateDefaultStix;
+- (void)didCancelLogin;
 
 @optional
-- (void)didCancelLogin;
+- (NSMutableArray*)generateDefaultStix;
 
 @end
 
@@ -28,6 +28,8 @@
     IBOutlet UIActivityIndicatorView * activityIndicator;
 
 	id<LoginViewDelegate, NSObject> delegate;
+    
+    bool bJoinOrLogin; // 0 for join, 1 for login
 }
 
 @property (nonatomic, retain) IBOutlet UITextField * loginName;
@@ -37,6 +39,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * cancelButton;
 @property (nonatomic, retain) id<LoginViewDelegate, NSObject> delegate;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
+@property (nonatomic, assign) bool bJoinOrLogin; 
 
 - (IBAction)loginButtonPressed:(id)sender; 
 - (IBAction)addUserButtonPressed:(id)sender;

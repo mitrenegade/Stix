@@ -11,6 +11,7 @@
 @implementation ProfileViewController
 
 @synthesize loginScreenButton;
+@synthesize logoutScreenButton;
 @synthesize friendCountButton;
 @synthesize stixCountButton;
 @synthesize delegate;
@@ -147,8 +148,6 @@
     //[self updateStixCount];
 }
 
-
-
 - (void)didCancelLogin {
     // did not want to login
     // if we are still anonymous, we should increment badges
@@ -168,6 +167,27 @@
             // should only have one
         }
     }
+    if ([theResults count] == 0)
+    {
+        UIAlertView* alert = [[UIAlertView alloc]init];
+        [alert addButtonWithTitle:@"Could not login"];
+        [alert setTitle:@"The user %@ doesn't seem to exist! Please try logging in again or adding a new account."];
+        [alert show];
+        [alert release];
+        
+        [delegate didLogout]; // force logout
+    }
+}
+
+-(IBAction) showLogoutScreen:(id)sender {
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Logout successful"];
+    [alert setMessage:[NSString stringWithFormat:@"You have been logged out from %@.", [delegate getUsername]]];
+    [alert show];
+    [alert release];
+    
+    [delegate didLogout];
 }
 
 /***** modifying user photo *******/
@@ -256,8 +276,8 @@
 
 -(NSMutableArray *)generateDefaultStix {
     NSMutableArray * stix = [[[NSMutableArray alloc] init] autorelease];
-    [stix insertObject:[NSNumber numberWithInt:DEFAULT_STIX_COUNT ] atIndex:BADGE_TYPE_FIRE];
-    [stix insertObject:[NSNumber numberWithInt:DEFAULT_STIX_COUNT ] atIndex:BADGE_TYPE_ICE];
+    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_FIRE];
+    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_ICE];
     return stix;
 }
 
@@ -310,7 +330,7 @@
 -(void)updateStixCount {
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
     int ct = [delegate getUserTagTotal];
-    [stixCountButton setTitle:[NSString stringWithFormat:@"%d Stix", ct] forState:UIControlStateNormal];
+    [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
 }
 
 -(void)viewWillAppear:(BOOL)animated{

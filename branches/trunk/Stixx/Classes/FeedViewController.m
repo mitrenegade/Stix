@@ -22,7 +22,6 @@
 
 @synthesize feedItemViewController;
 @synthesize badgeView;
-@synthesize username;
 @synthesize nameLabel;
 @synthesize delegate;
 @synthesize activityIndicatorCenter; // initially is active
@@ -66,10 +65,20 @@
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [badgeView setUnderlay:scrollView];
     
+    activityIndicatorCenter = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+    [self.view addSubview:activityIndicatorCenter];
+    
     zoomViewController = [[ZoomViewController alloc] init];
 }
 
 - (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
+    if (animate)
+    {
+        [activityIndicatorCenter setHidden:NO];
+    }
+    else
+        [activityIndicatorCenter setHidden:YES];
+#if 0
     if (animate)
     {
         // no need to reanimate center indicator
@@ -86,18 +95,14 @@
     }
     else // stop all indicators
     {
-        [activityIndicatorCenter setHidden:YES];
-        [activityIndicatorCenter stopAnimating];
+        //[activityIndicatorCenter setHidden:YES];
+        //[activityIndicatorCenter stopAnimating];
         [activityIndicatorLeft setHidden:YES];
         [activityIndicatorLeft stopAnimating];
         [activityIndicatorRight setHidden:YES];
         [activityIndicatorRight stopAnimating];
     }
-}
-
--(void)setUsernameLabel:(NSString *)name {
-    [self setUsername:name];
-    //[self.nameLabel setText:name];
+#endif
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -112,7 +117,6 @@
     NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
 
     [scrollView populateScrollPagesAtPage:lastPageViewed];
-    //[self.nameLabel setText:username];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -157,7 +161,6 @@
 {
 	[scrollView release];
 	[allTags release];
-    [username release];    
 	[scrollView release];
     [activityIndicatorCenter release];
     [activityIndicatorLeft release];
@@ -323,6 +326,17 @@
         PagedScrollView * psv = (PagedScrollView *)sv;
         int page = [psv currentPage];
         
+        // determine direction, for indicators
+        if (lastContentOffset < scrollView.contentOffset.x) { // right
+            if (page == [self itemCount] - 1)
+                [self setIndicatorWithID:0 animated:YES];
+        }
+        else if (lastContentOffset > scrollView.contentOffset.x) { // left 
+            if (page == 0)
+                [self setIndicatorWithID:0 animated:YES];
+        }
+        
+        lastContentOffset = scrollView.contentOffset.x;
         lastPageViewed = page;
 
         // Load the visible and neighbouring pages 

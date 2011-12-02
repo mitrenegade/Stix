@@ -13,6 +13,7 @@
 
 @synthesize loginName, loginButton, loginPassword, addUserButton, cancelButton, delegate;
 @synthesize activityIndicator;
+@synthesize bJoinOrLogin;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -57,6 +58,19 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    if (bJoinOrLogin == 0) // join
+    {
+        [loginButton setHidden:YES];
+        [addUserButton setHidden:NO];
+    }
+    else
+    {
+        [addUserButton setHidden:YES];
+        [loginButton setHidden:NO];
+    }
 }
 
 -(NSMutableData * ) arrayToData:(NSMutableArray *) dict {

@@ -19,8 +19,9 @@
 #import "ARCoordinate.h"
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
+#import "LoginSplashController.h"
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate> {
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate> {
     UIWindow *window;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
@@ -29,6 +30,7 @@
 	FriendsViewController *friendController;
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
+    LoginSplashController * loginSplashController;
     
     UIViewController * lastViewController;
     BadgeView * lastBadgeView;
@@ -71,6 +73,7 @@
 @property (nonatomic, retain) ProfileViewController *profileController;
 @property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
+@property (nonatomic, retain) LoginSplashController * loginSplashController;
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) UIImage * userphoto;
 @property (nonatomic, assign) int usertagtotal;

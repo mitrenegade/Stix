@@ -49,6 +49,8 @@
     OutlineLabel * labelFire;
     OutlineLabel * labelIce;
     
+    bool showStixCounts;
+    
 }
 
 @property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
@@ -58,6 +60,7 @@
 //@property (nonatomic, retain) IBOutlet UIImageView * shelf;
 @property (nonatomic, retain) OutlineLabel * labelFire;
 @property (nonatomic, retain) OutlineLabel * labelIce;
+@property (nonatomic, assign) bool showStixCounts;
 
 -(void)resetBadgeLocations;
 -(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;

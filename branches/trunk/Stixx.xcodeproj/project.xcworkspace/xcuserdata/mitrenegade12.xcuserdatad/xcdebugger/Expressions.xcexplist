@@ -80,15 +80,15 @@
          contextName = "-[ProfileViewController kumulosAPI:apiOperation:getUserDidCompleteWithResult:]:ProfileViewController.m">
       </ContextState>
       <ContextState
-         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
-      </ContextState>
-      <ContextState
          contextName = "-[RaisedCenterTabBarController addCenterButtonWithImage:highlightImage:]:RaisedCenterTabBarController.m">
          <PersistentStrings>
             <PersistentString
                value = "buttonImage.size">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController viewDidLoad]:FeedViewController.m">
@@ -136,6 +136,14 @@
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController updateScrollPagesAtPage:]:FeedViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate kumulosAPI:apiOperation:processStixUpdatesDidCompleteWithResult:]:StixxAppDelegate.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "username">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "-[BadgeView hitTest:withEvent:]:BadgeView.m">

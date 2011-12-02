@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
 #import "PagedScrollView.h"
+#import "LoadingAnimationView.h"
 
 @protocol FriendsViewDelegate
 
@@ -28,9 +29,11 @@
     NSMutableDictionary *userPhotos;
     IBOutlet UIButton * buttonInstructions;
     BadgeView * badgeView;
-    IBOutlet UIActivityIndicatorView * activityIndicator;
+    //IBOutlet UIActivityIndicatorView * activityIndicator;
 
     PagedScrollView *scrollView;	
+    LoadingAnimationView * activityIndicator;
+    int lastContentOffset;
 
     NSObject<FriendsViewDelegate> * delegate;
 }
@@ -38,9 +41,9 @@
 @property (nonatomic, assign) NSObject<FriendsViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) BadgeView * badgeView;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
+//@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
 @property (nonatomic, retain) PagedScrollView *scrollView;
-
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 -(IBAction)closeInstructions:(id)sender;
 -(void)setIndicator:(BOOL)animate;
 

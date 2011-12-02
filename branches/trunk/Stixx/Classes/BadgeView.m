@@ -14,6 +14,7 @@
 @synthesize underlay;
 //@synthesize badgeFire, badgeIce, shelf;
 @synthesize labelFire, labelIce;
+@synthesize  showStixCounts;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -26,10 +27,11 @@
 #else
     UIImageView * shelf = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]] autorelease];
     shelf.frame = CGRectMake(0, 381, 320, 30);
-    UIImageView * badgeFire = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
-    badgeFire.center = CGPointMake(111, 362);
-    UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
-    badgeIce.center = CGPointMake(202, 362);
+    UIImageView * badgeFire = [BadgeView getBadgeOfType:BADGE_TYPE_FIRE];//[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
+    badgeFire.center = CGPointMake(115, 365);
+    UIImageView * badgeIce = [BadgeView getBadgeOfType:BADGE_TYPE_ICE]; //[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
+    //NSLog(@"Fire: %f %f %f %f Ice: %f %f %f %f\n", badgeFire.frame.origin.x, badgeFire.frame.origin.y, badgeFire.frame.size.width, badgeFire.frame.size.height, badgeIce.frame.origin.x, badgeIce.frame.origin.y, badgeIce.frame.size.width, badgeIce.frame.size.height);
+    badgeIce.center = CGPointMake(205, 365);
     //[badgeFire setBackgroundColor:[UIColor blackColor]]; // for debug
     //[badgeIce setBackgroundColor:[UIColor blackColor]];
     [self addSubview:shelf];
@@ -38,6 +40,8 @@
     
     labelFire = nil;
     labelIce = nil;
+    
+    showStixCounts = YES;
     
 #endif
     badges = [[NSMutableArray alloc] init];//initWithObjects:badgeFire, badgeComment, nil];
@@ -307,7 +311,7 @@
 	{
 		UIImageView * badge = [badges objectAtIndex:numEls];
         [badge removeFromSuperview];
-        if ([delegate getStixCount:numEls] < 1)
+        if ([delegate getStixCount:numEls] < 1 && [self showStixCounts] == YES)
             [badge setAlpha:.25];
         else
             [badge setAlpha:1];
@@ -322,16 +326,20 @@
     int countFire = [self.delegate getStixCount:BADGE_TYPE_FIRE];
     if (countFire > -1)
     {
-        [labelFire removeFromSuperview];
+        if ([self showStixCounts])
+            [labelFire removeFromSuperview];
         [labelFire setText:[NSString stringWithFormat:@"%d", countFire]];
-        [self addSubview:labelFire];
+        if ([self showStixCounts])
+            [self addSubview:labelFire];
     }
     int countIce = [self.delegate getStixCount:BADGE_TYPE_ICE];
     if (countIce > -1)
     {
-        [labelIce removeFromSuperview];
+        if ([self showStixCounts])
+            [labelIce removeFromSuperview];
         [labelIce setText:[NSString stringWithFormat:@"%d", countIce]];
-        [self addSubview:labelIce];
+        if ([self showStixCounts])
+            [self addSubview:labelIce];
     }
 }
 
@@ -340,13 +348,13 @@
     if (type == BADGE_TYPE_FIRE)
     {
         UIImageView * badgeFire = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
-        badgeFire.frame = CGRectMake(0, 0, 42, 67);
+        //badgeFire.frame = CGRectMake(0, 0, 42, 67);
         return badgeFire;
     }
     else if (type == BADGE_TYPE_ICE)
     {
         UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
-        badgeIce.frame = CGRectMake(0, 0, 42, 67);
+        //badgeIce.frame = CGRectMake(0, 0, 42, 67);
         return badgeIce;
     }
     else return nil;

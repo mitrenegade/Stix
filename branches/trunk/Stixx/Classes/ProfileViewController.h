@@ -20,6 +20,7 @@
 
 - (void)checkForUpdatePhotos;
 - (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total;
+-(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
 - (UIImage *)getUserPhoto;
@@ -37,6 +38,7 @@
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate>{
 
     IBOutlet UIButton * loginScreenButton; // login if your profile, add as friend if other's profile
+    IBOutlet UIButton * logoutScreenButton;
     IBOutlet UIButton * stixCountButton; // custom button but no clicking
     IBOutlet UIButton * friendCountButton; // custom button but no clicking
     NSObject<ProfileViewDelegate> *delegate;
@@ -57,6 +59,7 @@
 }
 
 @property (nonatomic, retain) IBOutlet UIButton * loginScreenButton;
+@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 @property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
 @property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
@@ -85,6 +88,7 @@
 -(void)updateFriendCount;
 -(void)updateStixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
+-(IBAction)showLogoutScreen:(id)sender;
 
 // utils
 -(void)administratorModeResetAllStix;

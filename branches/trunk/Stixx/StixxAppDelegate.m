@@ -31,6 +31,7 @@
 @synthesize feedController;
 @synthesize profileController;
 @synthesize friendController;
+@synthesize loginSplashController;
 @synthesize username;
 @synthesize userphoto;
 @synthesize usertagtotal;
@@ -81,7 +82,6 @@
 	/***** create feed view *****/
 	feedController = [[FeedViewController alloc] init];
     [feedController setDelegate:self];
-    [feedController setUsernameLabel:username];
     //[feedController setIndicator:YES];
     feedController.allTags = allTags;
     
@@ -97,14 +97,19 @@
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
+    loginSplashController = nil;
     NSString *path = [self coordinateArrayPath];
 	NSLog(@"Trying to load from path %@", path);
     username = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    userphoto = nil;
     loggedIn = NO;
-    if (!username)
+    if (!username || [username length] == 0)
     {
         // force login
-        [profileController firstTimeLogin];
+        //[profileController firstTimeLogin];
+        loginSplashController = [[LoginSplashController alloc] init];
+        [loginSplashController setDelegate:self];
+        //[tabBarController presentModalViewController:loginSplashController animated:YES];
     }
     else
     {
@@ -125,6 +130,9 @@
 	
     // Override point for customization after application launch
     [window makeKeyAndVisible];
+    
+    if (loggedIn == NO)
+        [tabBarController presentModalViewController:loginSplashController animated:NO];
     
 }
 
@@ -235,7 +243,7 @@
     return added;
 }
 
--(void)addTag:(Tag *)newTag {
+-(void)tagViewDidAddTag:(Tag *)newTag {
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
     //[allTags addObject:newTag];
     newestTag = [newTag retain];
@@ -257,6 +265,7 @@
     //[k addStixWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
     [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
     [encoder release];  
+    
 }
 
 //- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addTagDidCompleteWithResult:(NSNumber*)newRecordID
@@ -272,6 +281,16 @@
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
     
+#if 0
+    // do not do this - we still cannot get rid of the damn camera view along the top.
+    // dismissModalViewControllerAnimated doesn't seem to work here...but it does work
+    // if we switch tab bars and didSelectViewController is called
+    [tagViewController dismissModalViewControllerAnimated:NO];
+    [tabBarController setSelectedIndex:0]; // go automatically to feedview
+    lastViewController = feedController;
+    [feedController viewWillAppear:TRUE];
+#endif
+
     // update usertagtotal
     usertagtotal += 1;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
@@ -351,7 +370,7 @@
     if (tagID == idOfNewestTagReceived || // we always want to make this request
         pageOfLastNewerTagsRequest != tagID){
         pageOfLastNewerTagsRequest = tagID;
-        [feedController setIndicatorWithID:0 animated:YES];
+        //[feedController setIndicatorWithID:0 animated:YES];
         [k getAllTagsWithIDGreaterThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
     }
     else{
@@ -362,7 +381,6 @@
 -(void)getOlderTagsThanID:(int)tagID {
     if (pageOfLastOlderTagsRequest != tagID) {
         pageOfLastOlderTagsRequest = tagID;
-        [feedController setIndicatorWithID:1 animated:YES];
         [k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
     }
     else{
@@ -444,8 +462,9 @@
     
     [friendController setIndicator:NO];
     if (lastViewController == friendController) // if currently viewing friends, force reload
+    {
         [lastViewController viewWillAppear:TRUE];
-    
+    }    
     if (lastViewController == profileController)
     {
         [profileController updateFriendCount];
@@ -455,6 +474,12 @@
 
 -(NSMutableDictionary * )getUserPhotos {
     return allUserPhotos;
+}
+
+/**** LoginSplashController delegate ****/
+
+- (void) didLoginFromSplashScreen {
+    [self.tabBarController dismissModalViewControllerAnimated:YES];
 }
 
 /**** ProfileViewController and login functions ****/
@@ -490,8 +515,6 @@
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total{
-    [feedController setUsernameLabel:name];
-    //[profileController setUsernameLabel:username]; // must be done in case viewWillAppear is called in profileController with old username
     NSLog(@"Setting delegate name to %@", name);
     loggedIn = YES;
     username = name;
@@ -505,6 +528,27 @@
 
     [profileController updateStixCount];
     [lastBadgeView resetBadgeLocations];
+}
+
+-(void)didLogout {
+    loggedIn = NO;
+    username = @"";
+    if (userphoto) {
+        [userphoto release];
+        userphoto = nil;
+    }
+    usertagtotal = 0;
+    [allStix removeAllObjects];
+    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_FIRE];
+    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_ICE];
+    [profileController updateStixCount];
+    [lastBadgeView resetBadgeLocations];
+    
+    if (loginSplashController == nil) {
+        loginSplashController = [[LoginSplashController alloc] init];
+        [loginSplashController setDelegate:self];
+    }
+    [tabBarController presentModalViewController:loginSplashController animated:NO];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation processStixUpdatesDidCompleteWithResult:(NSArray*)theResults {
@@ -670,6 +714,8 @@
 }
 
 -(UIImage *) getUserPhoto {
+    if ([self isLoggedIn] == NO)
+        return [UIImage imageNamed:@"emptyuser.png"];
     return userphoto;
 }
 

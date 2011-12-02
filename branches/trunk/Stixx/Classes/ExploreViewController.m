@@ -15,6 +15,7 @@
 @synthesize refreshButton;
 @synthesize allTagIDs;
 @synthesize allTags;
+@synthesize activityIndicator;
 
 #define EXPLORE_COL 2
 #define EXPLORE_ROW 2
@@ -37,6 +38,8 @@
     k = [[Kumulos alloc]init];
     [k setDelegate:self];    
 
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+
     return self;
     
 }
@@ -55,7 +58,7 @@
 
     [self.view addSubview:scrollView];
     [self.view insertSubview:badgeView aboveSubview:scrollView];
-    
+    [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
 
     [self forceReloadAll];
@@ -122,6 +125,7 @@
     }
  
     [scrollView populateScrollPagesAtPage:0];
+    [activityIndicator setHidden:YES];
 }
 /*********** PagedScrollViewDelegate functions *******/
 
@@ -142,6 +146,48 @@
     scrollView.myDelegate = self; // needs delegates for both scrolls
     scrollView.delegate = self;
 }
+
+-(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+    float item_width = 140;
+    float item_height = 140;
+
+    UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+    //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
+    float originX = x;
+    float originY = y;
+    NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
+    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
+    
+    // scale stix and label down to 270x270 which is the size of the feedViewItem
+    CGSize originalSize = CGSizeMake(300, 300);
+	CGSize targetSize = CGSizeMake(item_width, item_height);
+	
+	float imageScale =  targetSize.width / originalSize.width;
+    
+	CGRect stixFrameScaled = stix.frame;
+	stixFrameScaled.origin.x *= imageScale;
+	stixFrameScaled.origin.y *= imageScale;
+	stixFrameScaled.size.width *= imageScale;
+	stixFrameScaled.size.height *= imageScale;
+    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
+    [stix setFrame:stixFrameScaled];
+    
+    /* no label on small stix
+    CGRect labelFrame = stix.frame;
+    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(0, 0, stix.frame.size.width, stix.frame.size.height)];
+    stixCount.center = CGPointMake(stixCount.center.x + OUTLINELABEL_X_OFFSET * imageScale, stixCount.center.y + OUTLINELABEL_Y_OFFSET * imageScale);
+    labelFrame = stixCount.frame; // changing center should change origin but not width
+    //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
+    [stixCount setTextAttributesForBadgeType:type];
+    [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+    [stixCount setText:[NSString stringWithFormat:@"%d", count]];
+    
+    [stix addSubview:stixCount];
+    [stixCount release];
+     */
+    return [stix autorelease];
+}
+
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
@@ -172,6 +218,10 @@
             int h = shadow.frame.size.height;
             shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 10), w, h);
             feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 10), item_width, item_height);
+            
+            UIImageView * stix = [[self populateWithBadge:tag.badgeType withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
+            [feedItem addSubview:stix];
+            [stix release];
             /*
             UILabel * commentlabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 10+20) + item_width-5, item_width, 20)];
             [commentlabel setText:comment];
@@ -222,10 +272,30 @@
         PagedScrollView * psv = (PagedScrollView *)sv;
         int page = [psv currentPage];
         
+#if 0
         // Load the visible and neighbouring pages 
+#else
+        // determine direction, for indicators
+        //if (lastContentOffset < scrollView.contentOffset.x) { // right
+        //    if (page == [self itemCount] - 1)
+        //        [self.activityIndicator setHidden:NO];
+        //}
+        
+        // left scroll to reload
+        
+        if (lastContentOffset > scrollView.contentOffset.x) { // left 
+            if (page == 0)
+            {
+                [self.activityIndicator setHidden:NO];            
+                [self forceReloadAll];
+            }
+        }
+
         [psv loadPage:page-1];
         [psv loadPage:page];
         [psv loadPage:page+1];
+
+#endif
     }
 }
 
@@ -236,7 +306,8 @@
     [allTags removeAllObjects];
     [k getMostRecentlyUpdatedTagWithNumEls:[NSNumber numberWithInt:12]];
     [scrollView clearAllPages];
-    
+    //[activityIndicator startAnimating];
+    [activityIndicator setHidden:NO];
 }
 
 /************** FeedZoomView ***********/
@@ -325,6 +396,7 @@
          [zoomViewController forceImageAppear:image];
          [zoomViewController setLabel:label];
          [zoomViewController setLocation:locationString];
+         [zoomViewController setStixUsingTag:tag];
          [badgeView setUnderlay:zoomViewController.view];
      }
      ];
@@ -332,7 +404,6 @@
 }
 
 -(void)didDismissZoom {
-    [zoomViewController.view removeFromSuperview];
 #if 1
     // animate
     [zoomView setHidden:NO];
@@ -390,6 +461,8 @@
     badgeView = nil;
     [scrollView release];
     scrollView = nil;
+    [activityIndicator release];
+    activityIndicator = nil;
 
     [super viewDidUnload];
 }
@@ -397,6 +470,7 @@
     [k release];
     [badgeView release];
     [scrollView release];
+    [activityIndicator release];
     [super dealloc];
 }
 

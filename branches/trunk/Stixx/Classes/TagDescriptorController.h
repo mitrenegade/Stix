@@ -38,5 +38,5 @@
 
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;
-
+-(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 @end

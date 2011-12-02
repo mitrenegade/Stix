@@ -33,7 +33,10 @@
 	// add an image
 	UIImage * i = [UIImage imageNamed:@"tab_friends.png"];
 	[tbi setImage:i];
-	return self;
+
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+
+    return self;
 }
 
 -(void)viewDidLoad {
@@ -53,7 +56,9 @@
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [badgeView setUnderlay:buttonInstructions];
     [badgeView setHidden:YES];
-//	return self;
+
+    [self.view addSubview:activityIndicator];
+    //	return self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -105,12 +110,12 @@
     if (animate)
     {
         [activityIndicator setHidden:NO];
-        [activityIndicator startAnimating];
+        //[activityIndicator startAnimating];
     }
     else
     {
         [activityIndicator setHidden:YES];
-        [activityIndicator stopAnimating];
+        //[activityIndicator stopAnimating];
     }
 }
 

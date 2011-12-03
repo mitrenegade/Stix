@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "Kumulos.h"
+#import "UIImage+Resize.h"
+#import "UIImage+RoundedCorner.h"
 
 @protocol LoginViewDelegate
 
@@ -19,9 +21,10 @@
 
 @end
 
-@interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate> {
+@interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UIImagePickerControllerDelegate> {
     IBOutlet UITextField * loginName;
     IBOutlet UITextField * loginPassword;
+    IBOutlet UIButton * addPhoto;
     IBOutlet UIButton * loginButton;
     IBOutlet UIButton * addUserButton;
     IBOutlet UIButton * cancelButton;
@@ -34,6 +37,7 @@
 
 @property (nonatomic, retain) IBOutlet UITextField * loginName;
 @property (nonatomic, retain) IBOutlet UITextField * loginPassword;
+@property (nonatomic, retain) IBOutlet UIButton * addPhoto;
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
 @property (nonatomic, retain) IBOutlet UIButton * addUserButton;
 @property (nonatomic, retain) IBOutlet UIButton * cancelButton;
@@ -44,6 +48,7 @@
 - (IBAction)loginButtonPressed:(id)sender; 
 - (IBAction)addUserButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
+- (IBAction)addPhotoPressed:(id)sender;
 -(void)addUser;
 -(void)doLogin;
 

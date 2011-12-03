@@ -14,6 +14,7 @@
 @synthesize loginName, loginButton, loginPassword, addUserButton, cancelButton, delegate;
 @synthesize activityIndicator;
 @synthesize bJoinOrLogin;
+@synthesize addPhoto;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -88,6 +89,64 @@
 	return YES;
 }
 
+/**** adding photo - like takeProfilePicture in profile view ***/
+
+- (IBAction)addPhotoPressed:(id)sender {
+    UIImagePickerController * camera = [[UIImagePickerController alloc] init];
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.showsCameraControls = YES;
+    camera.navigationBarHidden = YES;
+    camera.toolbarHidden = YES;
+    camera.wantsFullScreenLayout = YES;
+    camera.allowsEditing = YES;
+    camera.delegate = self;
+    [self presentModalViewController:camera animated:YES];
+}
+- (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
+    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
+    [picker release];    
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
+    UIImage * newPhoto; 
+    //newPhoto = [UIImage imageNamed:@"friend1.png"];
+    if (editedPhoto)
+        newPhoto = editedPhoto;
+    else
+        newPhoto = originalPhoto; 
+    
+    NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
+    [self dismissModalViewControllerAnimated:TRUE];
+    
+    // scale down photo
+	CGSize targetSize = CGSizeMake(90, 90);		
+    /*
+     float baseScale =  targetSize.width / newPhoto.size.width;
+     CGRect scaledFrame = CGRectMake(0, 0, newPhoto.size.width * baseScale, newPhoto.size.height * baseScale);
+     UIGraphicsBeginImageContext(targetSize);
+     [newPhoto drawInRect:scaledFrame];	
+     UIImage * result = UIGraphicsGetImageFromCurrentImageContext();
+     UIGraphicsEndImageContext();
+     */
+    UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
+    UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
+    
+    // save to album
+    UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
+    
+    //NSData * img = UIImageJPEGRepresentation(rounded, .8);
+    NSData * img = UIImagePNGRepresentation(rounded);
+    [addPhoto setImage:rounded forState:UIControlStateNormal];
+    //[self.delegate didChangeUserphoto:rounded];
+    [img release];
+    
+    // add to kumulos
+    [picker release];
+}
+
+/****** loggin in or joining ****/
 - (IBAction)loginButtonPressed:(id)sender{
     [loginName resignFirstResponder];
     [loginPassword resignFirstResponder];

@@ -37,6 +37,7 @@
 @property (nonatomic, assign) int badgeType;
 
 -(IBAction)buttonOKPressed:(id)sender;
+-(IBAction)locationTextBoxEntered:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;
 -(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 @end

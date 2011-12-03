@@ -8,6 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface LocationViewController : UITableViewController
+@protocol LocationSelectedDelegate
+-(void)didChooseLocation:(NSString*)location;
+@end
+
+@interface LocationViewController : UITableViewController {
+    NSObject<LocationSelectedDelegate> *delegate;
+}
+
+@property (nonatomic, assign) NSObject<LocationSelectedDelegate> *delegate;
+-(void)getFoursquareVenues:(NSString*)text;
 
 @end

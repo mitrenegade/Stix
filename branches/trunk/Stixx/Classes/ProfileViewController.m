@@ -19,6 +19,7 @@
 @synthesize buttonInstructions;
 @synthesize photoButton;
 @synthesize loginController;
+@synthesize attemptedUsername;
 //@synthesize isLoggedIn;
 /*
 @synthesize badgeFire, badgeIce;
@@ -108,6 +109,7 @@
         [k setDelegate:self];    
     }
     [k getUserWithUsername:name];
+    attemptedUsername = [name retain];
 
     //[self didSelectUsername:name withResults:nil];
 }
@@ -170,13 +172,14 @@
     if ([theResults count] == 0)
     {
         UIAlertView* alert = [[UIAlertView alloc]init];
-        [alert addButtonWithTitle:@"Could not login"];
-        [alert setTitle:@"The username you have selected doesn't seem to exist! Please try logging in again or adding a new account."];
+        [alert addButtonWithTitle:@"Ok"];
+        [alert setTitle:[NSString stringWithFormat:@"The username %@ doesn't seem to exist! Please try logging in again or adding a new account.", attemptedUsername]];
         [alert show];
         [alert release];
         
         [delegate didLogout]; // force logout
     }
+    [attemptedUsername release];
 }
 
 -(IBAction) showLogoutScreen:(id)sender {

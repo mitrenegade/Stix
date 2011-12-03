@@ -7,9 +7,10 @@
 //
 
 #import "LocationViewController.h"
+#include "Foursquare2.h"
 
 @implementation LocationViewController
-
+@synthesize delegate;
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -77,14 +78,12 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-#warning Potentially incomplete method implementation.
     // Return the number of sections.
     return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
     // Return the number of rows in the section.
     return 0;
 }
@@ -101,6 +100,10 @@
     // Configure the cell...
     
     return cell;
+}
+
+-(void)getFoursquareVenues:(NSString*)text
+{
 }
 
 /*

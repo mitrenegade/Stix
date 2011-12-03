@@ -7,6 +7,7 @@
 //
 
 #import "TagDescriptorController.h"
+#import "LocationViewController.h"
 
 
 @implementation TagDescriptorController
@@ -133,6 +134,15 @@
 {
 	[self.delegate didAddDescriptor:[commentField text] andLocation:[locationField text]];
 }
+
+-(IBAction)locationTextBoxEntered:(id)sender
+{
+    LocationViewController* locationController =
+        [[LocationViewController alloc] init];
+    
+    [self presentModalViewController:locationController animated:YES];
+}
+
 -(IBAction)buttonCancelPressed:(id)sender
 {
 	//[self.delegate didAddDescriptor:nil];

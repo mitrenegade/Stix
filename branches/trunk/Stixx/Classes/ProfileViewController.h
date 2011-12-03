@@ -44,7 +44,7 @@
     NSObject<ProfileViewDelegate> *delegate;
     
     IBOutlet UILabel * nameLabel;
-    //NSString * username;
+    NSString * attemptedUsername; // just to keep what user tried to login as
     
     IBOutlet UIButton * photoButton;
     //bool isLoggedIn;
@@ -64,7 +64,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
-//@property (nonatomic, retain) NSString * username;
+@property (nonatomic, retain) NSString * attemptedUsername;
 @property (nonatomic, retain) IBOutlet UIButton * photoButton;
 //@property (nonatomic, assign) bool isLoggedIn;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;

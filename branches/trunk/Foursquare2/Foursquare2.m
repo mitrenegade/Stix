@@ -324,26 +324,17 @@
 
 +(void)searchVenuesNearByLatitude:(NSString*)lat
 						longitude:(NSString*)lon
-					   accuracyLL:(NSString*)accuracyLL
-						 altitude:(NSString*)altitude
-					  accuracyAlt:(NSString*)accuracyAlt
+					   radius:(NSString*)radius
 							query:(NSString*)query
 							limit:(NSString*)limit
-						   intent:(NSString*)intent
 						 callback:(Foursquare2Callback)callback
 {
 	NSMutableDictionary *dic = [NSMutableDictionary dictionary];
 	if (lat && lon) {
 		[dic setObject:[NSString stringWithFormat:@"%@,%@",lat,lon] forKey:@"ll"];
 	}
-	if (accuracyLL) {
-		[dic setObject:accuracyLL forKey:@"llAcc"];
-	}
-	if (altitude) {
-		[dic setObject:altitude forKey:@"alt"];
-	}
-	if (accuracyAlt) {
-		[dic setObject:accuracyAlt forKey:@"altAcc"];
+	if (radius) {
+		[dic setObject:radius forKey:@"radius"];
 	}
 	if (query) {
 		[dic setObject:query forKey:@"query"];
@@ -351,9 +342,7 @@
 	if (limit) {
 		[dic setObject:limit forKey:@"limit"];
 	}
-	if (intent) {
-		[dic setObject:intent forKey:@"intent"];
-	}
+		[dic setObject:@"browse" forKey:@"intent"];
 	[self get:@"venues/search" withParams:dic callback:callback];
 }
 

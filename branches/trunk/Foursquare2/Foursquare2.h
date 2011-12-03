@@ -137,12 +137,9 @@ typedef enum {
 
 +(void)searchVenuesNearByLatitude:(NSString*) lat
 						longitude:(NSString*)lon
-					   accuracyLL:(NSString*)accuracyLL
-						 altitude:(NSString*)altitude
-					  accuracyAlt:(NSString*)accuracyAlt
+					   radius:(NSString*)radius
 							query:(NSString*)query
 							limit:(NSString*)limit
-						   intent:(NSString*)intent
 						 callback:(Foursquare2Callback)callback;
 #pragma mark Aspects
 // !!!: please read comment

@@ -6,8 +6,9 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
 #import "LocationViewController.h"
-#include "Foursquare2.h"
+#import "FourSquareLocator.h"
 
 @implementation LocationViewController
 @synthesize delegate;
@@ -17,6 +18,8 @@
     if (self) {
         // Custom initialization
     }
+    fsl = [[FourSquareLocator alloc] init];
+    [fsl setDelegate:self];
     return self;
 }
 
@@ -24,7 +27,6 @@
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
     // Release any cached data, images, etc that aren't in use.
 }
 
@@ -33,7 +35,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+#if TARGET_IPHONE_SIMULATOR
+    [fsl query:@"pizza"];
+#endif
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
@@ -144,6 +148,11 @@
     return YES;
 }
 */
+
+-(void)receiveVenueNames:(NSArray *)venueNames
+{
+
+}
 
 #pragma mark - Table view delegate
 

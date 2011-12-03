@@ -207,8 +207,11 @@
     [descriptorController setDelegate:self];
     [descriptorController setBadgeFrame:badgeFrame];
     [descriptorController setBadgeType:badgeType];
+#if TARGET_IPHONE_SIMULATOR
+    [self presentModalViewController:descriptorController animated:YES];
+#else
     [self.cameraController presentModalViewController:descriptorController animated:YES];
-
+#endif
 }
 
 - (void)clearTags {

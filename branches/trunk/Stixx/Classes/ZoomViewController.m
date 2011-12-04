@@ -58,7 +58,7 @@
     
     CGRect labelFrame = stix.frame;
     stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    stixCount.center = CGPointMake(stixCount.center.x + OUTLINELABEL_X_OFFSET * imageScale, stixCount.center.y + OUTLINELABEL_Y_OFFSET * imageScale);
+    stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:tag.badgeType] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:tag.badgeType] * imageScale);
     labelFrame = stixCount.frame; // changing center should change origin but not width
     //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
     [stixCount setTextAttributesForBadgeType:tag.badgeType];

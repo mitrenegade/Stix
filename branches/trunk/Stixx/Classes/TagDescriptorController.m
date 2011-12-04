@@ -80,18 +80,7 @@
 	stixFrameScaled.size.height *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
-    
-    /*
-    CGRect labelFrame = stix.frame;
-    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    stixCount.center = CGPointMake(stixCount.center.x + OUTLINELABEL_X_OFFSET * imageScale, stixCount.center.y + OUTLINELABEL_Y_OFFSET * imageScale);
-    labelFrame = stixCount.frame; // changing center should change origin but not width
-    //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-    [stixCount setTextAttributesForBadgeType:type];
-    [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [stixCount setText:[NSString stringWithFormat:@"%d", count]];
-     */
- 
+     
     return [stix autorelease];
 }
 

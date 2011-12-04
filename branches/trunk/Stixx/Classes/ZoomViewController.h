@@ -34,7 +34,7 @@
 @property (nonatomic, retain) IBOutlet UILabel * labelComment;
 @property (nonatomic, retain) IBOutlet UILabel * labelCommentBG;
 @property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
-@property (nonatomic, retain) NSObject<ZoomViewDelegate> *delegate;
+@property (nonatomic, assign) NSObject<ZoomViewDelegate> *delegate;
 @property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) OutlineLabel * stixCount;
 //@property (nonatomic, retain) UIImage * image;

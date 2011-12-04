@@ -770,14 +770,11 @@
 				9E88A4A0148A940800E67864 /* LocationViewController.h */,
 				9E88A4A1148A940800E67864 /* LocationViewController.m */,
 				9E88A4A2148A940900E67864 /* LocationViewController.xib */,
-<<<<<<< HEAD
 				9EB5F683148AADED00F403D1 /* MyStixViewController.h */,
 				9EB5F684148AADED00F403D1 /* MyStixViewController.m */,
 				9EB5F685148AADED00F403D1 /* MyStixViewController.xib */,
-=======
 				44E3CA13148AC50E00554E82 /* FourSquareLocator.h */,
 				44E3CA14148AC50E00554E82 /* FourSquareLocator.m */,
->>>>>>> 0e032be405f7e98e4d07485c1744b85ddd1affaa
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -1113,11 +1110,8 @@
 				9E88A489148A8D9500E67864 /* NSStringAdditions.m in Sources */,
 				9E88A48A148A8D9500E67864 /* PhotoFormatter.m in Sources */,
 				9E88A4A3148A940900E67864 /* LocationViewController.m in Sources */,
-<<<<<<< HEAD
 				9EB5F686148AADED00F403D1 /* MyStixViewController.m in Sources */,
-=======
 				44E3CA15148AC50E00554E82 /* FourSquareLocator.m in Sources */,
->>>>>>> 0e032be405f7e98e4d07485c1744b85ddd1affaa
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

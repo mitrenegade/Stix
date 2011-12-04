@@ -13,6 +13,7 @@
 #import "UIImage+Resize.h"
 #import "LoginViewController.h"
 #import "BadgeView.h"
+#import "FriendsViewController.h"
 
 #define DEFAULT_STIX_COUNT 2
 
@@ -32,33 +33,28 @@
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
 -(int)incrementStixCount:(int)type forUser:(NSString *)name;
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
-
+-(void)didCreateBadgeView:(UIView *) newBadgeView;
 @end
 
-@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate>{
+@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate, FriendsViewDelegate>{
 
-    //IBOutlet UIButton * loginScreenButton; // login if your profile, add as friend if other's profile
     IBOutlet UIButton * logoutScreenButton;
     IBOutlet UIButton * stixCountButton; // custom button but no clicking
-    IBOutlet UIButton * friendCountButton; // custom button but no clicking
-    NSObject<ProfileViewDelegate> *delegate;
-    
-    IBOutlet UILabel * nameLabel;
-    NSString * attemptedUsername; // just to keep what user tried to login as
+    IBOutlet UIButton * friendCountButton; 
     
     IBOutlet UIButton * photoButton;
-    //bool isLoggedIn;
-    
+    IBOutlet UILabel * nameLabel;
+    NSString * attemptedUsername; // just to keep what user tried to login as
     IBOutlet UIButton * buttonInstructions;
     
     LoginViewController * loginController;
-    
-    //int countFire, countIce;
-    
+    FriendsViewController * friendController;
+
+    NSObject<ProfileViewDelegate> *delegate;
     Kumulos * k;
+    bool friendViewIsDisplayed;
 }
 
-//@property (nonatomic, retain) IBOutlet UIButton * loginScreenButton;
 @property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 @property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
 @property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
@@ -66,17 +62,9 @@
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
 @property (nonatomic, retain) NSString * attemptedUsername;
 @property (nonatomic, retain) IBOutlet UIButton * photoButton;
-//@property (nonatomic, assign) bool isLoggedIn;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-/*
-@property (nonatomic, retain) IBOutlet UIImageView * badgeFire;
-@property (nonatomic, retain) IBOutlet UIImageView * badgeIce;
-@property (nonatomic, retain) IBOutlet UILabel * labelFire;
-@property (nonatomic, retain) IBOutlet UILabel * labelIce;
- */
-//@property (nonatomic, assign) int countFire;
-//@property (nonatomic, assign) int countIce;
 @property (nonatomic, retain) LoginViewController * loginController;
+@property (nonatomic, retain) FriendsViewController * friendController;
 @property (nonatomic, retain) Kumulos * k;
 
 - (IBAction)showLoginScreen:(id)sender;
@@ -89,7 +77,7 @@
 -(void)updateStixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 -(IBAction)showLogoutScreen:(id)sender;
-
+-(IBAction)showFriendView:(id)sender;
 // utils
 -(void)administratorModeResetAllStix;
 -(NSMutableData * ) arrayToData:(NSMutableArray *) dict;

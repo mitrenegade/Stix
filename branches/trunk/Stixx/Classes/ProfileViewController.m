@@ -10,7 +10,6 @@
 
 @implementation ProfileViewController
 
-//@synthesize loginScreenButton;
 @synthesize logoutScreenButton;
 @synthesize friendCountButton;
 @synthesize stixCountButton;
@@ -19,13 +18,8 @@
 @synthesize buttonInstructions;
 @synthesize photoButton;
 @synthesize loginController;
+@synthesize friendController;
 @synthesize attemptedUsername;
-//@synthesize isLoggedIn;
-/*
-@synthesize badgeFire, badgeIce;
-@synthesize labelFire, labelIce;
-*/
-//@synthesize countFire, countIce;
 @synthesize k;
 
 -(id)init
@@ -60,7 +54,6 @@
     }
     loginController = [[LoginViewController alloc] init];
     loginController.delegate = self;
-
 	//return self;
 }
 
@@ -130,7 +123,7 @@
         }
         else
         {
-            newPhoto = [[UIImage imageNamed:@"emptyuser.png"] retain];
+            newPhoto = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
             [photoButton setImage:newPhoto forState:UIControlStateNormal];
             [photoButton setTitle:@"" forState:UIControlStateNormal]; 
         }
@@ -277,14 +270,6 @@
     [buttonInstructions setHidden:YES];
 }
 
--(NSMutableArray *)generateDefaultStix {
-    NSMutableArray * stix = [[[NSMutableArray alloc] init] autorelease];
-    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_FIRE];
-    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_ICE];
-    return stix;
-}
-
-
 -(void)administratorModeIncrementStix {
     // hack: increment own stix
     for (int i=0; i<5; i++) {
@@ -307,7 +292,7 @@
 
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
-        NSMutableArray * stix = [[self generateDefaultStix] retain];
+        NSMutableArray * stix = [[BadgeView generateDefaultStix] retain];
         NSMutableData * data = [[self arrayToData:stix] retain];
         [k addStixToUserWithUsername:name andStix:data];
         [data release];
@@ -334,6 +319,28 @@
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
     int ct = [delegate getUserTagTotal];
     [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
+}
+
+-(void)showFriendView:(id)sender {
+    //[self presentModalViewController:friendController animated:NO];
+    [self.view addSubview:friendController.view];
+    [friendController viewWillAppear:YES];
+    friendViewIsDisplayed = YES;
+}
+
+/**** friendsViewControllerDelegate ****/
+// badgeViewDelegate forwarded from friendsViewDelegate
+- (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
+-(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
+- (NSString*)getUsername {return [self.delegate getUsername];}
+
+-(int)getStixCount:(int)stix_type {return [delegate getStixCount:stix_type];}
+-(int)incrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate incrementStixCount:type forUser:name];}
+-(int)decrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate decrementStixCount:type forUser:name];}
+-(void)didCreateBadgeView:(UIView*)newBadgeView {[self.delegate didCreateBadgeView:newBadgeView];}
+
+-(void)didDismissFriendView {
+    friendViewIsDisplayed = NO;
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -386,6 +393,9 @@
     
     [self updateFriendCount];
     [self updateStixCount];
+    
+    if (friendViewIsDisplayed)
+        [friendController viewWillAppear:YES];
 }
 
 

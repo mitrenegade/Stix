@@ -16,11 +16,12 @@
 - (void)checkForUpdatePhotos;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString*)getUsername;
+-(void)didDismissFriendView;
 
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
 -(int)incrementStixCount:(int)type forUser:(NSString *)name;
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
--(UIView*)didCreateBadgeView:(UIView*)newBadgeView;
+-(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end
 
@@ -28,6 +29,7 @@
 {
     NSMutableDictionary *userPhotos;
     IBOutlet UIButton * buttonInstructions;
+    IBOutlet UIButton * buttonBack;
     BadgeView * badgeView;
     //IBOutlet UIActivityIndicatorView * activityIndicator;
 
@@ -40,12 +42,13 @@
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
 @property (nonatomic, assign) NSObject<FriendsViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
+@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
 @property (nonatomic, retain) BadgeView * badgeView;
 //@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 -(IBAction)closeInstructions:(id)sender;
 -(void)setIndicator:(BOOL)animate;
-
+-(IBAction)backButtonClicked:(id)sender;
 @end
 

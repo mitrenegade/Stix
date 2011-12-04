@@ -12,8 +12,6 @@
 
 @synthesize delegate;
 @synthesize underlay;
-//@synthesize badgeFire, badgeIce, shelf;
-//@synthesize labelFire, labelIce;
 @synthesize  showStixCounts;
 @synthesize badgeTypes;
 
@@ -43,13 +41,13 @@
     
     badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
-    //badgesLarge = [[NSMutableArray alloc] init];
+    badgesLarge = [[NSMutableArray alloc] init];
     labels = [[NSMutableArray alloc] init];
     for (int i=0; i<badgeTypes; i++)
     {
-        //UIImageView * badge = [BadgeView getLargeBadgeOfType:i];
-        //[badgesLarge addObject:badge];
-        //[badge release];
+        UIImageView * badgeLarge = [BadgeView getLargeBadgeOfType:i];
+        [badgesLarge addObject:badgeLarge];
+        [badgeLarge release];
         
         UIImageView * badge = [BadgeView getBadgeOfType:i];
         badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/badgeTypes*i + (320-2*BADGE_SHELF_PADDING)/badgeTypes/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
@@ -62,46 +60,6 @@
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         [labels addObject:label];
     }
-    //[badges addObject:badgeFire];
-    //[badges addObject:badgeIce];
-    
-    /*
-    UIImageView * fireLarge = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire_big.png"]];
-    UIImageView * iceLarge = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice_big.png"]];
-    
-    [badgesLarge addObject:fireLarge];
-    [badgesLarge addObject:iceLarge];
-    
-    [fireLarge release];
-    [iceLarge release];
-    
-    unsigned numEls = [badges count];
-    while (numEls--)
-    {
-        UIImageView * badge = [badges objectAtIndex:numEls];
-        //badge.frame = CGRectMake(BADGE_X_START + (BADGE_FRAME_WIDTH + BADGE_X_BORDER) * numEls, BADGE_Y_START, BADGE_FRAME_WIDTH, BADGE_FRAME_HEIGHT);
-        //		 [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:numEls+1];
-        [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:0];
-    }
-     */
-
-    /*
-    UIImageView * badge = [badges objectAtIndex:BADGE_TYPE_FIRE];
-    labelFire = [[OutlineLabel alloc] initWithFrame:badge.frame];
-    [labelFire setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
-    [labelFire setTextAttributesForBadgeType:BADGE_TYPE_FIRE];
-    [labelFire drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
-    
-    badge = [badges objectAtIndex:BADGE_TYPE_ICE];
-    labelIce = [[OutlineLabel alloc] initWithFrame:badge.frame];
-    [labelIce setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
-    [labelIce setTextAttributesForBadgeType:BADGE_TYPE_ICE];
-    [labelIce drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
-    labels = [[NSMutableArray alloc] init];
-    [labels addObject:labelFire];
-    [labels addObject:labelIce];
-     */
-
  	return self;
 }
 
@@ -379,7 +337,7 @@
 
 +(UIImageView *) getLargeBadgeOfType:(int)type {
     // returns a half size image view
-    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"heart_big.png", @"earth_big.png", nil];
+    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"heart_big.png", @"leaf_big.png", nil];
     if (type < [filenames count])
     {
         UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
@@ -392,7 +350,7 @@
 }
 +(UIImageView *) getEmptyBadgeOfType:(int)type {
     // returns a half size image view
-    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"empty_heart.png", @"empty_earth.png", nil];
+    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"empty_heart.png", @"empty_leaf.png", nil];
     if (type < [filenames count])
     {
         UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];

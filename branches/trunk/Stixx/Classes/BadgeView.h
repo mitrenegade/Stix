@@ -13,7 +13,7 @@ enum {
     BADGE_TYPE_FIRE = 0,
     BADGE_TYPE_ICE,
     BADGE_TYPE_HEART,
-    BADGE_TYPE_EARTH,
+    BADGE_TYPE_LEAF,
     BADGE_TYPE_MAX
 };
 
@@ -35,7 +35,7 @@ enum {
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{
 	NSMutableArray * badges;
 	NSMutableArray * badgeLocations; // original frame of each badge
-	//NSMutableArray * badgesLarge;
+	NSMutableArray * badgesLarge;
 	
 	UIImageView * badgeTouched;
 	UIImageView * badgeTouchedLarge;
@@ -63,6 +63,7 @@ enum {
 //@property (nonatomic, retain) OutlineLabel * labelIce;
 @property (nonatomic, assign) bool showStixCounts;
 @property (nonatomic, assign) int badgeTypes;
+@property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
 
 -(void)resetBadgeLocations;
 -(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;

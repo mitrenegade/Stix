@@ -61,6 +61,11 @@
         [self setTextColor:[UIColor colorWithRed:153/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
         [self setOutlineColor:[UIColor colorWithRed:0 green:51/255.0 blue:102/255.0 alpha:1]];        
     }
+    else {
+        // defaults for now
+        [self setTextColor:[UIColor colorWithRed:153/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
+        [self setOutlineColor:[UIColor colorWithRed:0 green:51/255.0 blue:102/255.0 alpha:1]];        
+    }
 }
 
 

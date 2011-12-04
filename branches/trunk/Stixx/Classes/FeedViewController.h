@@ -29,7 +29,7 @@
 -(int)incrementStixCount:(int)type forUser:(NSString *)name;
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
 -(void)didAddStixToTag:(Tag *)tag withType:(int)type;
--(UIView*)didCreateBadgeView:(UIView*)newBadgeView;
+-(void)didCreateBadgeView:(UIView*)newBadgeView;
 @end
 
 @interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate> // <UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, >

@@ -275,7 +275,7 @@
     if ([delegate isLoggedIn] == NO)
     {
         [image release];
-        image = [[UIImage imageNamed:@"emptyuser.png"] retain];
+        image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
     }
     int x = badgeFrame.origin.x;
     int y = badgeFrame.origin.y;

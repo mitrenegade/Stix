@@ -27,7 +27,7 @@
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
 -(int)incrementStixCount:(int)type forUser:(NSString *)name;
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
--(UIView*)didCreateBadgeView:(UIView*)newBadgeView;
+-(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @optional
 - (void) failedToAddCoordinateOfTag:(Tag*)tag;

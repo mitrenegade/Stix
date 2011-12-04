@@ -22,6 +22,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ARCoordinate.h"
+#import "BadgeView.h" // for BADGE_TYPE_MAX
 
 @interface Tag : NSObject {
     // elements saved by Kumulos
@@ -31,8 +32,9 @@
     UIImage * image;
     int badge_x;
     int badge_y;
-    int badgeType; // 0 = fire, 1 = ice
-    int badgeCount;
+    int badgeType; // now only represents the highest count badge
+    int badgeCount; // now only represents the highest count badge
+    NSMutableArray * stixCounts;
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
     
@@ -43,11 +45,12 @@
     NSDate * timestamp; // the timestamp as an NSDate
 }
 
-+ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count;
++ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts;
 - (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
 -(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+-(void)addStixCounts:(NSMutableArray *) stixCounts;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
@@ -64,5 +67,6 @@
 @property (nonatomic, assign) int badge_y;
 @property (nonatomic, assign) int badgeType;
 @property (nonatomic, assign) int badgeCount;
+@property (nonatomic, retain) NSMutableArray * stixCounts;
 
 @end

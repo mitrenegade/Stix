@@ -17,7 +17,7 @@
     NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
 }
 
-@property (nonatomic, retain) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
+@property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
 
 
 // Create a view controller and setup it's tab bar item with a title and image

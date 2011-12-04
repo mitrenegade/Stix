@@ -33,7 +33,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
 @property (nonatomic, retain) IBOutlet UIButton * joinButton;
 @property (nonatomic, retain) LoginViewController * loginController;
-@property (nonatomic, retain) NSObject<LoginSplashDelegate> *delegate;
+@property (nonatomic, assign) NSObject<LoginSplashDelegate> *delegate;
 
 -(IBAction)didClickJoinButton:(id)sender;
 -(IBAction)didClickLoginButton:(id)sender;

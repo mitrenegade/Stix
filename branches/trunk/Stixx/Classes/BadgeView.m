@@ -13,61 +13,68 @@
 @synthesize delegate;
 @synthesize underlay;
 //@synthesize badgeFire, badgeIce, shelf;
-@synthesize labelFire, labelIce;
+//@synthesize labelFire, labelIce;
 @synthesize  showStixCounts;
+@synthesize badgeTypes;
 
 - (id)initWithFrame:(CGRect)frame 
 {
     self = [super initWithFrame:frame];
   
-    // load self from NIB
-#if 0
-    [[NSBundle mainBundle] loadNibNamed:@"BadgeView" owner:self options:nil];
-    //[self addSubview:self];
-#else
     UIImageView * shelf = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]] autorelease];
     shelf.frame = CGRectMake(0, 381, 320, 30);
-    UIImageView * badgeFire = [BadgeView getBadgeOfType:BADGE_TYPE_FIRE];//[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
+    /*
+    UIImageView * badgeFire = [BadgeView getBadgeOfType:BADGE_TYPE_FIRE];
     badgeFire.center = CGPointMake(115, 365);
-    UIImageView * badgeIce = [BadgeView getBadgeOfType:BADGE_TYPE_ICE]; //[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
-    //NSLog(@"Fire: %f %f %f %f Ice: %f %f %f %f\n", badgeFire.frame.origin.x, badgeFire.frame.origin.y, badgeFire.frame.size.width, badgeFire.frame.size.height, badgeIce.frame.origin.x, badgeIce.frame.origin.y, badgeIce.frame.size.width, badgeIce.frame.size.height);
+    UIImageView * badgeIce = [BadgeView getBadgeOfType:BADGE_TYPE_ICE]; 
     badgeIce.center = CGPointMake(205, 365);
+     */
     //[badgeFire setBackgroundColor:[UIColor blackColor]]; // for debug
     //[badgeIce setBackgroundColor:[UIColor blackColor]];
     [self addSubview:shelf];
-    [self addSubview:badgeFire];
-    [self addSubview:badgeIce];
+    //[self addSubview:badgeFire];
+    //[self addSubview:badgeIce];
     
-    labelFire = nil;
-    labelIce = nil;
+    //labelFire = nil;
+    //labelIce = nil;
     
     showStixCounts = YES;
+    badgeTypes = 3; // default is fire and ice
     
-#endif
-    badges = [[NSMutableArray alloc] init];//initWithObjects:badgeFire, badgeComment, nil];
-    [badges addObject:badgeFire];
-    [badges addObject:badgeIce];
-    //[badges addObject:badgeComment];
-    
+    badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
-    badgesLarge = [[NSMutableArray alloc] init];
-    badgesShadow = [[NSMutableArray alloc] init];
+    //badgesLarge = [[NSMutableArray alloc] init];
+    labels = [[NSMutableArray alloc] init];
+    for (int i=0; i<badgeTypes; i++)
+    {
+        //UIImageView * badge = [BadgeView getLargeBadgeOfType:i];
+        //[badgesLarge addObject:badge];
+        //[badge release];
+        
+        UIImageView * badge = [BadgeView getBadgeOfType:i];
+        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/badgeTypes*i + (320-2*BADGE_SHELF_PADDING)/badgeTypes/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
+        [badges addObject:badge];
+        [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
+
+        OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
+        [label setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+        [label setTextAttributesForBadgeType:i];
+        [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
+        [labels addObject:label];
+    }
+    //[badges addObject:badgeFire];
+    //[badges addObject:badgeIce];
     
+    /*
     UIImageView * fireLarge = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire_big.png"]];
     UIImageView * iceLarge = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice_big.png"]];
-    //UIImageView * fireShadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire_shadow.png"]];
-    //UIImageView * iceShadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice_shadow.png"]];
     
     [badgesLarge addObject:fireLarge];
     [badgesLarge addObject:iceLarge];
-    //[badgesShadow addObject:fireShadow];
-    //[badgesShadow addObject:iceShadow];
     
     [fireLarge release];
     [iceLarge release];
-    //[fireShadow release];
-    //[iceShadow release];
-   
+    
     unsigned numEls = [badges count];
     while (numEls--)
     {
@@ -76,7 +83,9 @@
         //		 [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:numEls+1];
         [badgeLocations insertObject:[NSValue valueWithCGRect:badge.frame] atIndex:0];
     }
+     */
 
+    /*
     UIImageView * badge = [badges objectAtIndex:BADGE_TYPE_FIRE];
     labelFire = [[OutlineLabel alloc] initWithFrame:badge.frame];
     [labelFire setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
@@ -91,6 +100,7 @@
     labels = [[NSMutableArray alloc] init];
     [labels addObject:labelFire];
     [labels addObject:labelIce];
+     */
 
  	return self;
 }
@@ -158,7 +168,7 @@
 	else
 	{		
         badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
-		badgeTouchedLarge = [badgesLarge objectAtIndex:badgeSelect];
+		badgeTouchedLarge = [BadgeView getLargeBadgeOfType:badgeSelect]; // objectAtIndex:badgeSelect];
 		//CGRect frameStart = badgeTouched.frame;
 		float centerX = badgeTouched.center.x; //(frameStart.origin.x + frameStart.size.width/2);
 		float centerY = badgeTouched.center.y; //(frameStart.origin.y + frameStart.size.height/2);
@@ -311,18 +321,31 @@
 	{
 		UIImageView * badge = [badges objectAtIndex:numEls];
         [badge removeFromSuperview];
-        if ([delegate getStixCount:numEls] < 1 && [self showStixCounts] == YES)
-            [badge setAlpha:.25];
-        else
+        //if ([delegate getStixCount:numEls] < 1 && [self showStixCounts] == YES)
+        //    [badge setAlpha:.25];
+        //else
             [badge setAlpha:1];
 		badge.frame = [[badgeLocations objectAtIndex:numEls] CGRectValue];
         [self addSubview:badge];
 	}
-    [self updateStixCounts];
+    //[self updateStixCounts];
     drag = 0;
 }
 
 -(void)updateStixCounts {
+    for (int i=0; i<badgeTypes; i++) {
+        int ct = [self.delegate getStixCount:i];
+        if (ct > -1)
+        {
+            OutlineLabel * label = [labels objectAtIndex:i];
+            if ([self showStixCounts])
+                [label removeFromSuperview];
+            [label setText:[NSString stringWithFormat:@"%d", ct]];
+            if ([self showStixCounts])
+                [self addSubview:label];
+        }
+    }
+    /*
     int countFire = [self.delegate getStixCount:BADGE_TYPE_FIRE];
     if (countFire > -1)
     {
@@ -341,29 +364,58 @@
         if ([self showStixCounts])
             [self addSubview:labelIce];
     }
+     */
 }
 
 +(UIImageView *) getBadgeOfType:(int)type {
     // returns a half size image view
-    if (type == BADGE_TYPE_FIRE)
+    UIImageView * stix = [BadgeView getLargeBadgeOfType:type];
+    if (stix == nil)
+        return nil;
+    // create smaller size for actual badgeView
+    stix.frame = CGRectMake(0, 0, stix.frame.size.width * .75, stix.frame.size.height*.75); // resize badges to "small size"
+    return stix;
+}
+
++(UIImageView *) getLargeBadgeOfType:(int)type {
+    // returns a half size image view
+    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"heart_big.png", @"earth_big.png", nil];
+    if (type < [filenames count])
     {
-        UIImageView * badgeFire = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"fire.png"]] autorelease];
-        //badgeFire.frame = CGRectMake(0, 0, 42, 67);
-        return badgeFire;
+        UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
+        NSLog(@"Loading large badge from filename %@\n", [filenames objectAtIndex:type]);
+        [filenames release];
+        return stix;
     }
-    else if (type == BADGE_TYPE_ICE)
+    [filenames release];
+    return nil;
+}
++(UIImageView *) getEmptyBadgeOfType:(int)type {
+    // returns a half size image view
+    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"empty_heart.png", @"empty_earth.png", nil];
+    if (type < [filenames count])
     {
-        UIImageView * badgeIce = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ice.png"]] autorelease];
-        //badgeIce.frame = CGRectMake(0, 0, 42, 67);
-        return badgeIce;
+        UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
+        NSLog(@"Loading empty badge from filename %@\n", [filenames objectAtIndex:type]);
+        [filenames release];
+        return stix;
     }
-    else return nil;
+    [filenames release];
+    return nil;
 }
 -(int)getOppositeBadgeType:(int)type {
     if (type == BADGE_TYPE_FIRE)
         return BADGE_TYPE_ICE;
     else
         return BADGE_TYPE_FIRE;
+}
+
++(NSMutableArray *)generateDefaultStix {
+    NSMutableArray * stix = [[[NSMutableArray alloc] init] autorelease];
+    for (int i=0; i<BADGE_TYPE_MAX; i++) {
+        [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:i];
+    }
+    return stix;
 }
 
 

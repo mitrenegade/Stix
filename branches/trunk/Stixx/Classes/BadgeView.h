@@ -17,9 +17,6 @@ enum {
     BADGE_TYPE_MAX
 };
 
-#define OUTLINELABEL_X_OFFSET -5
-#define OUTLINELABEL_Y_OFFSET 10
-
 #define BADGE_SHELF_PADDING 20 // how many pixels per side on shelf
 #define BADGE_MYSTIX_PADDING 10 // how many pixels per side in mystix view
 
@@ -67,6 +64,8 @@ enum {
 -(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;
 -(void)updateStixCounts;
 -(int)getOppositeBadgeType:(int)type;
++(int)getOutlineOffsetX:(int) type;
++(int)getOutlineOffsetY:(int) type;
 
 // for displaying badges
 +(UIImageView *) getBadgeOfType:(int)type;

@@ -53,7 +53,7 @@
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
-        [label setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+        [label setCenter:CGPointMake(badge.center.x+[BadgeView getOutlineOffsetX:i], badge.center.y+[BadgeView getOutlineOffsetY:i])];
         [label setTextAttributesForBadgeType:i];
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         [labels addObject:label];
@@ -299,7 +299,7 @@
         badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
         
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
-        [label setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+        [label setCenter:CGPointMake(badge.center.x+[BadgeView getOutlineOffsetX:i], badge.center.y+[BadgeView getOutlineOffsetY:i])];
         [label setTextAttributesForBadgeType:i];
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         
@@ -396,7 +396,16 @@
     return stix;
 }
 
++(int)getOutlineOffsetX:(int)type {
 
+    const int xoffset[BADGE_TYPE_MAX] = {-5, -5, -2, -5};
+    return xoffset[type];
+}
++(int)getOutlineOffsetY:(int)type {
+    
+    const int yoffset[BADGE_TYPE_MAX] = {10, 10, 2, 10};
+    return yoffset[type];
+}
 - (void)dealloc {
 	[super dealloc];
 }

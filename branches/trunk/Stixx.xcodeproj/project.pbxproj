@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		444C3AA6148BF4C1005EB6DB /* Base64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */; };
+		444C3AA7148BF4C1005EB6DB /* Foursquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A97148BF4C1005EB6DB /* Foursquare.m */; };
+		444C3AA8148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A99148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m */; };
+		444C3AA9148BF4C1005EB6DB /* FoursquareWebLogin.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A9B148BF4C1005EB6DB /* FoursquareWebLogin.m */; };
+		444C3AAA148BF4C1005EB6DB /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A9D148BF4C1005EB6DB /* NSDataAdditions.m */; };
+		444C3AAB148BF4C1005EB6DB /* NSString+URLEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A9F148BF4C1005EB6DB /* NSString+URLEncoding.m */; };
+		444C3AAC148BF4C1005EB6DB /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3AA1148BF4C1005EB6DB /* NSURLAdditions.m */; };
+		444C3AAD148BF4C1005EB6DB /* OAuthHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3AA3148BF4C1005EB6DB /* OAuthHelper.m */; };
 		44E3CA15148AC50E00554E82 /* FourSquareLocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 44E3CA14148AC50E00554E82 /* FourSquareLocator.m */; };
 		9E3BE07A1463673200F7B763 /* MainWindow_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3BE0761463673200F7B763 /* MainWindow_iPhone.xib */; };
 		9E3BE07B1463673200F7B763 /* StixxAppDelegate_iPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */; };
@@ -164,20 +172,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E88A428148A8D8D00E67864 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E88A420148A8D8D00E67864 /* Foursquare2-iOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1D6058910D05DD3D006BFB54;
-			remoteInfo = "Foursquare2-iOS";
-		};
-		9E88A496148A8E1D00E67864 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E88A420148A8D8D00E67864 /* Foursquare2-iOS.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
-			remoteInfo = "Foursquare2-iOS";
-		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9EB03165142C002E0019F2BD /* Project object */;
@@ -188,6 +182,24 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64Transcoder.c; sourceTree = "<group>"; };
+		444C3A95148BF4C1005EB6DB /* Base64Transcoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64Transcoder.h; sourceTree = "<group>"; };
+		444C3A96148BF4C1005EB6DB /* Foursquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare.h; sourceTree = "<group>"; };
+		444C3A97148BF4C1005EB6DB /* Foursquare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Foursquare.m; sourceTree = "<group>"; };
+		444C3A98148BF4C1005EB6DB /* Foursquare_APIAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare_APIAppDelegate.h; sourceTree = "<group>"; };
+		444C3A99148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Foursquare_APIAppDelegate.m; sourceTree = "<group>"; };
+		444C3A9A148BF4C1005EB6DB /* FoursquareWebLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FoursquareWebLogin.h; sourceTree = "<group>"; };
+		444C3A9B148BF4C1005EB6DB /* FoursquareWebLogin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoursquareWebLogin.m; sourceTree = "<group>"; };
+		444C3A9C148BF4C1005EB6DB /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataAdditions.h; sourceTree = "<group>"; };
+		444C3A9D148BF4C1005EB6DB /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataAdditions.m; sourceTree = "<group>"; };
+		444C3A9E148BF4C1005EB6DB /* NSString+URLEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+URLEncoding.h"; sourceTree = "<group>"; };
+		444C3A9F148BF4C1005EB6DB /* NSString+URLEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+URLEncoding.m"; sourceTree = "<group>"; };
+		444C3AA0148BF4C1005EB6DB /* NSURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSURLAdditions.h; sourceTree = "<group>"; };
+		444C3AA1148BF4C1005EB6DB /* NSURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSURLAdditions.m; sourceTree = "<group>"; };
+		444C3AA2148BF4C1005EB6DB /* OAuthHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthHelper.h; sourceTree = "<group>"; };
+		444C3AA3148BF4C1005EB6DB /* OAuthHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAuthHelper.m; sourceTree = "<group>"; };
+		444C3AA4148BF4C1005EB6DB /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
+		444C3AA5148BF4C1005EB6DB /* Foursquare_API_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare_API_Prefix.pch; sourceTree = "<group>"; };
 		44E3CA13148AC50E00554E82 /* FourSquareLocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FourSquareLocator.h; sourceTree = "<group>"; };
 		44E3CA14148AC50E00554E82 /* FourSquareLocator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FourSquareLocator.m; sourceTree = "<group>"; };
 		9E3BE0771463673200F7B763 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow_iPhone.xib; sourceTree = "<group>"; };
@@ -215,7 +227,6 @@
 		9E7519EF1488AB71008F4E2A /* fire_load_side3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side3.png; path = Stixx/images/fire_load_side3.png; sourceTree = SOURCE_ROOT; };
 		9E7519F01488AB71008F4E2A /* fire_load_side4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side4.png; path = Stixx/images/fire_load_side4.png; sourceTree = SOURCE_ROOT; };
 		9E7519F11488AB71008F4E2A /* fire_load_side5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side5.png; path = Stixx/images/fire_load_side5.png; sourceTree = SOURCE_ROOT; };
-		9E88A420148A8D8D00E67864 /* Foursquare2-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Foursquare2-iOS.xcodeproj"; path = "Foursquare2-iOS/Foursquare2-iOS.xcodeproj"; sourceTree = "<group>"; };
 		9E88A42B148A8D9500E67864 /* Foursquare2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare2.h; sourceTree = "<group>"; };
 		9E88A42C148A8D9500E67864 /* Foursquare2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Foursquare2.m; sourceTree = "<group>"; };
 		9E88A42D148A8D9500E67864 /* HRRequest+PhotoExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HRRequest+PhotoExt.h"; sourceTree = "<group>"; };
@@ -443,6 +454,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		444C3A92148BF4C1005EB6DB /* Foursquare2-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				444C3A93148BF4C1005EB6DB /* Classes */,
+				444C3AA4148BF4C1005EB6DB /* Constants.h */,
+				444C3AA5148BF4C1005EB6DB /* Foursquare_API_Prefix.pch */,
+			);
+			path = "Foursquare2-iOS";
+			sourceTree = "<group>";
+		};
+		444C3A93148BF4C1005EB6DB /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */,
+				444C3A95148BF4C1005EB6DB /* Base64Transcoder.h */,
+				444C3A96148BF4C1005EB6DB /* Foursquare.h */,
+				444C3A97148BF4C1005EB6DB /* Foursquare.m */,
+				444C3A98148BF4C1005EB6DB /* Foursquare_APIAppDelegate.h */,
+				444C3A99148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m */,
+				444C3A9A148BF4C1005EB6DB /* FoursquareWebLogin.h */,
+				444C3A9B148BF4C1005EB6DB /* FoursquareWebLogin.m */,
+				444C3A9C148BF4C1005EB6DB /* NSDataAdditions.h */,
+				444C3A9D148BF4C1005EB6DB /* NSDataAdditions.m */,
+				444C3A9E148BF4C1005EB6DB /* NSString+URLEncoding.h */,
+				444C3A9F148BF4C1005EB6DB /* NSString+URLEncoding.m */,
+				444C3AA0148BF4C1005EB6DB /* NSURLAdditions.h */,
+				444C3AA1148BF4C1005EB6DB /* NSURLAdditions.m */,
+				444C3AA2148BF4C1005EB6DB /* OAuthHelper.h */,
+				444C3AA3148BF4C1005EB6DB /* OAuthHelper.m */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
 		9E3BE0751463673200F7B763 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -456,18 +500,10 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				444C3A92148BF4C1005EB6DB /* Foursquare2-iOS */,
 				9E88A42A148A8D9500E67864 /* Foursquare2 */,
-				9E88A420148A8D8D00E67864 /* Foursquare2-iOS.xcodeproj */,
 			);
 			name = External;
-			sourceTree = "<group>";
-		};
-		9E88A421148A8D8D00E67864 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9E88A429148A8D8D00E67864 /* Foursquare2-iOS.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		9E88A42A148A8D9500E67864 /* Foursquare2 */ = {
@@ -864,7 +900,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				9E88A497148A8E1D00E67864 /* PBXTargetDependency */,
 			);
 			name = Stixx;
 			productName = Stixx;
@@ -908,12 +943,6 @@
 			mainGroup = 9EB03163142C002E0019F2BD;
 			productRefGroup = 9EB0316F142C002E0019F2BD /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 9E88A421148A8D8D00E67864 /* Products */;
-					ProjectRef = 9E88A420148A8D8D00E67864 /* Foursquare2-iOS.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				9EB0316D142C002E0019F2BD /* Stixx */,
@@ -921,16 +950,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		9E88A429148A8D8D00E67864 /* Foursquare2-iOS.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "Foursquare2-iOS.app";
-			remoteRef = 9E88A428148A8D8D00E67864 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9EB0316C142C002E0019F2BD /* Resources */ = {
@@ -1112,6 +1131,14 @@
 				9E88A4A3148A940900E67864 /* LocationViewController.m in Sources */,
 				9EB5F686148AADED00F403D1 /* MyStixViewController.m in Sources */,
 				44E3CA15148AC50E00554E82 /* FourSquareLocator.m in Sources */,
+				444C3AA6148BF4C1005EB6DB /* Base64Transcoder.c in Sources */,
+				444C3AA7148BF4C1005EB6DB /* Foursquare.m in Sources */,
+				444C3AA8148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m in Sources */,
+				444C3AA9148BF4C1005EB6DB /* FoursquareWebLogin.m in Sources */,
+				444C3AAA148BF4C1005EB6DB /* NSDataAdditions.m in Sources */,
+				444C3AAB148BF4C1005EB6DB /* NSString+URLEncoding.m in Sources */,
+				444C3AAC148BF4C1005EB6DB /* NSURLAdditions.m in Sources */,
+				444C3AAD148BF4C1005EB6DB /* OAuthHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1126,11 +1153,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9E88A497148A8E1D00E67864 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Foursquare2-iOS";
-			targetProxy = 9E88A496148A8E1D00E67864 /* PBXContainerItemProxy */;
-		};
 		9EB0319E142C002E0019F2BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9EB0316D142C002E0019F2BD /* Stixx */;

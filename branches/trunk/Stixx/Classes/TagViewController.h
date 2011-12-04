@@ -25,6 +25,7 @@
 - (bool) isLoggedIn;
 
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
+-(int)getStixLevel;
 -(int)incrementStixCount:(int)type forUser:(NSString *)name;
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;

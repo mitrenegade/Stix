@@ -225,10 +225,11 @@
 
     NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
     [delegate didAddStixToTag:t withType:type];
-    [delegate decrementStixCount:type forUser:[delegate getUsername]];
     //NSLog(@"After decrement: %d (delegate says %d)", ret, [delegate getStixCount:type]);
-    if ([t.username isEqualToString:[delegate getUsername]] == NO)
+    if ([t.username isEqualToString:[delegate getUsername]] == NO) {
         [delegate incrementStixCount:type forUser:t.username];
+        //[delegate decrementStixCount:type forUser:[delegate getUsername]];        
+    }
     
     NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     [badgeView resetBadgeLocations];
@@ -237,6 +238,9 @@
 }
 -(int)getStixCount:(int)stix_type {
     return [self.delegate getStixCount:stix_type];
+}
+-(int)getStixLevel {
+    return [self.delegate getStixLevel];
 }
 
 /*********** PagedScrollViewDelegate functions *******/

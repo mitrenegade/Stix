@@ -42,9 +42,11 @@
     NSString * username;
     UIImage * userphoto;
     int usertagtotal;
+    int stixLevel;
 
     NSMutableArray * allStix;
     NSMutableArray * allTags;
+    NSMutableDictionary * allCommented; // for each element: key = allTagID; value = kind of stix added
     
     Tag * newestTag;
     NSDate * timeStampOfMostRecentTag;
@@ -67,6 +69,7 @@
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonMsg;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
+-(void)updateUserStixLevel;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -81,6 +84,7 @@
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) UIImage * userphoto;
 @property (nonatomic, assign) int usertagtotal;
+@property (nonatomic, assign) int stixLevel;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;

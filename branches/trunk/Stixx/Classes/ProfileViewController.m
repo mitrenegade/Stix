@@ -283,8 +283,8 @@
 }
 -(IBAction)adminStixButtonPressed:(id)sender
 {
-    //[self administratorModeResetAllStix];
-    [self administratorModeIncrementStix];
+    [self administratorModeResetAllStix];
+    //[self administratorModeIncrementStix];
 }
 
 // used only by administratorModeResetAllStix
@@ -335,6 +335,9 @@
 - (NSString*)getUsername {return [self.delegate getUsername];}
 
 -(int)getStixCount:(int)stix_type {return [delegate getStixCount:stix_type];}
+-(int)getStixLevel {
+    return [self.delegate getStixLevel];
+}
 -(int)incrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate incrementStixCount:type forUser:name];}
 -(int)decrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate decrementStixCount:type forUser:name];}
 -(void)didCreateBadgeView:(UIView*)newBadgeView {[self.delegate didCreateBadgeView:newBadgeView];}

@@ -16,6 +16,7 @@
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(int)stix_type;
+-(int)getStixLevel;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end

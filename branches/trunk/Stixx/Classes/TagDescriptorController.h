@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ImageCache.h"
 #import "BadgeView.h"
+#import "LocationViewController.h"
 
 @protocol TagDescriptorDelegate
 -(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString*)location;
@@ -21,6 +22,8 @@
 	IBOutlet UIButton * buttonOK;
 	IBOutlet UIButton * buttonCancel;
 	
+    LocationViewController * locationController;
+    
     CGRect badgeFrame;
     int badgeType;
     

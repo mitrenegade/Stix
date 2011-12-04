@@ -39,8 +39,12 @@
     [delegate didCreateBadgeView:badgeView];
     
     badges = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
+    labels = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
     for (int i=0; i<BADGE_TYPE_MAX; i++)
+    {
         [badges addObject:[NSNull null]];
+        [labels addObject:[NSNull null]];
+    }
     [self forceLoadMyStix];
 }
 
@@ -49,34 +53,49 @@
 }
 
 -(void)forceLoadMyStix {
+    NSArray * stixLabels = [[NSArray alloc] initWithObjects:@"Fire", @"Ice", @"Heart", @"Leaf", nil];
     int x=0;
     int y=0;
     int i;
-    for (i=0; i<badgeView.badgeTypes; i++) {
+    for (i=0; i<[delegate getStixLevel]; i++) {
         UIImageView * badgeLarge = [[BadgeView getLargeBadgeOfType:i] retain];
-        int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
-        int centery = 480/4 * y + 120;
+        //int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
+        int centerx = (320 - 2*BADGE_MYSTIX_PADDING)/2 * x + (320-2*BADGE_MYSTIX_PADDING)/4 + BADGE_MYSTIX_PADDING;
+        int centery = 480/4 * y + 100;
         badgeLarge.center = CGPointMake(centerx, centery);
+        
+        OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badgeLarge.frame];
+        [label setCenter:CGPointMake(centerx, centery+60)];
+        [label setTextAttributesForBadgeType:2];
+        [label drawTextInRect:CGRectMake(0,0, badgeLarge.frame.size.width*2, 80)];
+        [label setText:[stixLabels objectAtIndex:i]];
+         
         if ([badges objectAtIndex:i] == [NSNull null]) {
             [badges replaceObjectAtIndex:i withObject:badgeLarge];
+            [labels replaceObjectAtIndex:i withObject:label];
         }
         else {
             [[badges objectAtIndex:i] removeFromSuperview];
+            [[labels objectAtIndex:i] removeFromSuperview];
             [badges replaceObjectAtIndex:i withObject:badgeLarge];
+            [labels replaceObjectAtIndex:i withObject:label];
         }
         [self.view addSubview:badgeLarge];
+        [self.view addSubview:label];
         [badgeLarge release];
+        [label release];
         x++;
-        if (x==3) {
+        if (x==2) {
             x=0;
             y++;
         }
     }
-    NSLog(@"Badges: %d badge max: %d xy %d %d\n", badgeView.badgeTypes, BADGE_TYPE_MAX, x,y);
-    for (i=badgeView.badgeTypes;i<BADGE_TYPE_MAX; i++) {
+    NSLog(@"Badges: %d badge max: %d xy %d %d\n", [delegate getStixLevel], BADGE_TYPE_MAX, x,y);
+    for (i=[delegate getStixLevel];i<BADGE_TYPE_MAX; i++) {
         UIImageView * badgeLarge = [[BadgeView getEmptyBadgeOfType:i] retain];
-        int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
-        int centery = 480/4 * y + 120;
+        int centerx = (320 - 2*BADGE_MYSTIX_PADDING)/2 * x + (320-2*BADGE_MYSTIX_PADDING)/4 + BADGE_MYSTIX_PADDING;
+        //int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
+        int centery = 480/4 * y + 100;
         badgeLarge.center = CGPointMake(centerx, centery);
         if ([badges objectAtIndex:i] == nil) {
             [badges replaceObjectAtIndex:i withObject:badgeLarge];
@@ -84,12 +103,13 @@
         [self.view addSubview:badgeLarge];
         [badgeLarge release];
         x++;
-        if (x==3) {
+        if (x==2) {
             x=0;
             y++;
         }
 
     }
+    [stixLabels release];
 }
 
 - (void)didReceiveMemoryWarning
@@ -122,5 +142,8 @@
 /**** badgeViewDelegate - never used because no badgeView is shown ****/
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {};
 -(int)getStixCount:(int)stix_type {return 0;};
+-(int)getStixLevel {
+    return [self.delegate getStixLevel];
+}
 
 @end

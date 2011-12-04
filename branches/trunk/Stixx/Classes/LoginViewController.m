@@ -67,6 +67,7 @@
 -(void)viewWillAppear:(BOOL)animated {
     if (bJoinOrLogin == 0) // join
     {
+        [addUserButton setHidden:YES];
         [loginButton setHidden:YES];
         [addUserButton setHidden:NO];
     }
@@ -258,8 +259,13 @@
     // in LoginViewController, getUserDidComplete causes a new user to be created        
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
-    UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
-    NSData * photo = UIImagePNGRepresentation(newUserImageSet?newUserImage:img);
+    UIImage * img = [UIImage imageNamed:@"graphic_nopic2.png"];
+    
+    NSData * photo;
+    if (newUserImageSet == YES)
+        photo = UIImagePNGRepresentation(newUserImage);
+    else
+        photo = UIImagePNGRepresentation(img);
 
     [kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
 }

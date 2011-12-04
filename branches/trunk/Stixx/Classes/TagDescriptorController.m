@@ -42,24 +42,17 @@
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
 	[imageView setImage:tmp];
     NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f", tmp.size.width, tmp.size.height); 
-	
-#if 0
-    UIImageView * badge = [BadgeView getBadgeOfType:badgeType];
-    [badge setFrame:badgeFrame];
-    //[badge setBackgroundColor:[UIColor blackColor]]; // for debug
-    [imageView addSubview:badge];
-#else
-    UIImageView * stix = [[self populateWithBadge:badgeType withCount:1 atLocationX:badgeFrame.origin.x andLocationY:badgeFrame.origin.y] retain];
-    
+
+    UIImageView * stix = [[self populateWithBadge:badgeType withCount:1 atLocationX:badgeFrame.origin.x andLocationY:badgeFrame.origin.y] retain];    
     [imageView addSubview:stix];
     [stix release];
-#endif
     NSLog(@"TagDescriptor: imageView dims %f %f badge at %f %f", imageView.frame.size.width, imageView.frame.size.height, badgeFrame.origin.x, badgeFrame.origin.y);
     //[badge release];
 	[commentField setDelegate:self];
 
 #if TARGET_IPHONE_SIMULATOR
     [locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin];
+    locationController = [[LocationViewController alloc] init];
 #endif
 }
 
@@ -139,11 +132,8 @@
 }
 
 -(IBAction)locationTextBoxEntered:(id)sender
-{
-    LocationViewController* locationController =
-        [[LocationViewController alloc] init];
-    
-    [self presentModalViewController:locationController animated:YES];
+{   
+    //[self presentModalViewController:locationController animated:YES];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

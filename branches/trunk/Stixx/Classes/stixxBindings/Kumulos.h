@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Dec  2, 2011
+//  Created by Kumulos Bindings Compiler on Dec  4, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -53,6 +53,8 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSNumber*)newRecordID;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminResetAllStixLevelDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfUserForDecrementDidCompleteWithResult:(NSArray*)theResults;
@@ -62,6 +64,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByIDDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setStixLevelDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -134,6 +138,9 @@
 -(KSAPIOperation*) addUserWithUsername:(NSString*)username andPassword:(NSString*)password andPhoto:(NSData*)photo;
     
    
+-(KSAPIOperation*) adminResetAllStixLevelWithStixLevel:(NSInteger)stixLevel;
+    
+   
  -(KSAPIOperation*) getAllUsers;
    
 -(KSAPIOperation*) getStixOfUserForDecrementWithUsername:(NSString*)username;
@@ -146,6 +153,9 @@
     
    
 -(KSAPIOperation*) getUserByIDWithAllUserID:(NSUInteger)allUserID;
+    
+   
+-(KSAPIOperation*) setStixLevelWithUsername:(NSString*)username andStixLevel:(NSInteger)stixLevel;
     
    
 -(KSAPIOperation*) updateTotalTagsWithUsername:(NSString*)username andTotalTags:(NSInteger)totalTags;

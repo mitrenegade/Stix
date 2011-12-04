@@ -27,6 +27,7 @@ enum {
 
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type;
 -(int)getStixCount:(int)stix_type;
+-(int)getStixLevel;
 
 @optional
 -(void)didStartDrag;
@@ -52,9 +53,7 @@ enum {
     //OutlineLabel * labelIce;
     
     bool showStixCounts;
-    
-    // counts how many badges exist
-    int badgeTypes; 
+    int lastStixLevel;
 }
 
 @property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
@@ -62,7 +61,6 @@ enum {
 //@property (nonatomic, retain) OutlineLabel * labelFire;
 //@property (nonatomic, retain) OutlineLabel * labelIce;
 @property (nonatomic, assign) bool showStixCounts;
-@property (nonatomic, assign) int badgeTypes;
 @property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
 
 -(void)resetBadgeLocations;

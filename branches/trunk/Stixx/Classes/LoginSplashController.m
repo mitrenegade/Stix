@@ -90,18 +90,23 @@
         // badge count array
         NSMutableArray * stix;
         if (loginController.bJoinOrLogin == 1) {
-            stix = [self dataToArray:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
-        }
+            stix = [[self dataToArray:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
+            NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
+            // total badge count
+            int totalTags = [[d valueForKey:@"totalTags"] intValue];
+            [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
+            [stix release];         }
         else
         {
             stix = [[BadgeView generateDefaultStix] retain];
+            NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
+            // total badge count
+            int totalTags = [[d valueForKey:@"totalTags"] intValue];
+            [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
+            [stix release]; 
         }
-        NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
         
-        // total badge count
-        int totalTags = [[d valueForKey:@"totalTags"] intValue];
         
-        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
         [newPhoto release];
     }
     

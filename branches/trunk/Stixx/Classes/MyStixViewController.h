@@ -15,6 +15,7 @@
 
 // forward from BadgeViewDelegate
 -(int)getStixCount:(int)stix_type; // may be needed for one time use stix
+-(int)getStixLevel;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end
@@ -22,6 +23,7 @@
 @interface MyStixViewController : UIViewController <BadgeViewDelegate> {
     BadgeView * badgeView;
     NSMutableArray * badges;
+    NSMutableArray * labels;
 
     NSObject<MyStixViewDelegate> * delegate;
 }

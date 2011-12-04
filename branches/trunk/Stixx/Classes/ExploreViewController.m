@@ -457,6 +457,9 @@
 -(int)getStixCount:(int)stix_type {
     return [self.delegate getStixCount:stix_type];
 }
+-(int)getStixLevel {
+    return [self.delegate getStixLevel];
+}
 
 -(void)viewDidUnload {
     

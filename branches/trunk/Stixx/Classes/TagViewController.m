@@ -145,37 +145,6 @@
 
 // BadgeViewDelegate function
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type{
-#if 0
-    if ([delegate getStixCount:type] < 1)
-    {
-        if ([delegate isLoggedIn] == NO)
-        {     
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"Ok I'll go log in now"];
-            [alert setTitle:@"Not logged in"];
-            [alert setMessage:[NSString stringWithFormat:@"You have no stix because you are not logged in!"]];
-            [alert show];
-            [alert release];
-        }
-        else
-        {
-            NSString * badgeTypeStr;
-            if (type == BADGE_TYPE_FIRE)
-                badgeTypeStr = @"Fire";
-            else
-                badgeTypeStr = @"Ice";
-
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"I take it back"];
-            [alert setTitle:@"Insufficient stix"];
-            [alert setMessage:[NSString stringWithFormat:@"You have run out of %@ stix! HINT: For this demo, go to the profile and click on 'Stix' for more.", badgeTypeStr]];
-            [alert show];
-            [alert release];
-        }
-        [badgeView resetBadgeLocations];
-        return;
-    }
-#endif
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
@@ -190,6 +159,9 @@
 
 -(int)getStixCount:(int)stix_type {
     return [self.delegate getStixCount:stix_type];
+}
+-(int)getStixLevel {
+    return [self.delegate getStixLevel];
 }
 
 -(void)didStartDrag {

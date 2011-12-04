@@ -15,6 +15,17 @@
 {
 	[super init];
     gps = [[CLLocationManager alloc] init];
+
+    // start listening
+    gps.headingFilter = kCLHeadingFilterNone;
+    gps.desiredAccuracy = kCLLocationAccuracyBest;
+    //[gps startUpdatingHeading];
+    
+    // also start updating location
+    [gps setDistanceFilter:kCLDistanceFilterNone];
+    [gps setDesiredAccuracy:kCLLocationAccuracyBest];
+    [gps startUpdatingLocation];
+    
 	return self;
 }
 

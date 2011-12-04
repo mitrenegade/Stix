@@ -13,7 +13,7 @@
 @synthesize delegate;
 @synthesize underlay;
 @synthesize  showStixCounts;
-@synthesize badgeTypes;
+@synthesize badgesLarge;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -37,20 +37,18 @@
     //labelIce = nil;
     
     showStixCounts = YES;
-    badgeTypes = 3; // default is fire and ice
     
     badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
     badgesLarge = [[NSMutableArray alloc] init];
     labels = [[NSMutableArray alloc] init];
-    for (int i=0; i<badgeTypes; i++)
+    for (int i=0; i<BADGE_TYPE_MAX; i++)
     {
         UIImageView * badgeLarge = [BadgeView getLargeBadgeOfType:i];
         [badgesLarge addObject:badgeLarge];
-        [badgeLarge release];
         
         UIImageView * badge = [BadgeView getBadgeOfType:i];
-        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/badgeTypes*i + (320-2*BADGE_SHELF_PADDING)/badgeTypes/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
+        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
@@ -274,6 +272,7 @@
 
 -(void)resetBadgeLocations {
 	
+    /*
 	unsigned numEls = [badges count];
 	while (numEls--)
 	{
@@ -286,12 +285,33 @@
 		badge.frame = [[badgeLocations objectAtIndex:numEls] CGRectValue];
         [self addSubview:badge];
 	}
+ */
+    for (int i=0; i<BADGE_TYPE_MAX; i++)
+    {
+        UIImageView * badge = [badges objectAtIndex:i];
+        [badge removeFromSuperview];
+        OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
+        [label removeFromSuperview];
+    }
+    for (int i=0; i<[delegate getStixLevel]; i++)
+    {
+        UIImageView * badge = [badges objectAtIndex:i];
+        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
+        
+        OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
+        [label setCenter:CGPointMake(badge.center.x+OUTLINELABEL_X_OFFSET, badge.center.y+OUTLINELABEL_Y_OFFSET)];
+        [label setTextAttributesForBadgeType:i];
+        [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
+        
+        [self addSubview:badge];
+        [self addSubview:label];
+    }
     //[self updateStixCounts];
     drag = 0;
 }
 
 -(void)updateStixCounts {
-    for (int i=0; i<badgeTypes; i++) {
+    for (int i=0; i<[delegate getStixLevel]; i++) {
         int ct = [self.delegate getStixCount:i];
         if (ct > -1)
         {

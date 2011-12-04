@@ -20,8 +20,9 @@
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
 #import "LoginSplashController.h"
+#import "MyStixViewController.h"
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate> {
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate> {
     UIWindow *window;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
@@ -31,6 +32,7 @@
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
     LoginSplashController * loginSplashController;
+    MyStixViewController * myStixController;
     
     UIViewController * lastViewController;
     BadgeView * lastBadgeView;
@@ -75,6 +77,7 @@
 @property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) LoginSplashController * loginSplashController;
+@property (nonatomic, retain) MyStixViewController * myStixController;
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) UIImage * userphoto;
 @property (nonatomic, assign) int usertagtotal;

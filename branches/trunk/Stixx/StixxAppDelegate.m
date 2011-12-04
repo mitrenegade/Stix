@@ -32,6 +32,7 @@
 @synthesize profileController;
 @synthesize friendController;
 @synthesize loginSplashController;
+@synthesize myStixController;
 @synthesize username;
 @synthesize userphoto;
 @synthesize usertagtotal;
@@ -77,7 +78,6 @@
     pageOfLastNewerTagsRequest = -1;
     pageOfLastOlderTagsRequest = -1;
     [self checkForUpdateTags];
-    [self checkForUpdatePhotos];
     
 	/***** create feed view *****/
 	feedController = [[FeedViewController alloc] init];
@@ -93,10 +93,17 @@
 	friendController = [[FriendsViewController alloc] init];
     //	friendController.tagViewController = tagViewController;
     friendController.delegate = self;
+    [self checkForUpdatePhotos];
+    
+    /***** create mystix view *****/
+    myStixController = [[MyStixViewController alloc] init];
+    myStixController.delegate = self;
 	
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
+    [profileController setFriendController:friendController];
+    
     loginSplashController = nil;
     NSString *path = [self coordinateArrayPath];
 	NSLog(@"Trying to load from path %@", path);
@@ -118,8 +125,8 @@
         [profileController loginWithUsername:username];
     }   
 	/***** add view controllers to tab controller, and add tab to window *****/
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, friendController, profileController, nil];	
-	//NSArray * viewControllers = [NSArray arrayWithObjects: tagViewController, nil];	
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, myStixController, /*friendController, */profileController, nil];	
+    //NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, friendController, profileController, nil];	
 	[tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
     
@@ -446,7 +453,7 @@
 }
 
 /***** FriendViewDelegate ********/
-
+-(void)didDismissFriendView {}; // only used in profileView
 -(void) checkForUpdatePhotos {
     if (1) // todo: check for updated users by id
     {
@@ -465,12 +472,13 @@
     }
     
     [friendController setIndicator:NO];
-    if (lastViewController == friendController) // if currently viewing friends, force reload
-    {
-        [lastViewController viewWillAppear:TRUE];
-    }    
+    //if (lastViewController == profileController) // if currently viewing friends, force reload
+    //{
+    //    [lastViewController viewWillAppear:TRUE];
+    //}    
     if (lastViewController == profileController)
     {
+        [profileController.friendController viewWillAppear:YES];
         [profileController updateFriendCount];
     }
     //NSLog(@"loaded %d new friends from kumulos", [theResults count]);
@@ -595,8 +603,8 @@
     
     [k addStixToUserWithUsername:username andStix:[profileController arrayToData:allStix]];
     
-    if (lastBadgeView)
-        [lastBadgeView updateStixCounts];
+    //if (lastBadgeView)
+    //    [lastBadgeView updateStixCounts];
     [profileController updateStixCount];
 }
 
@@ -606,6 +614,7 @@
 
 -(int)getStixCount:(int)type {
     //if (loggedIn)
+    if ([allStix count] > type)
     {
         return [[allStix objectAtIndex:type] intValue];
     }
@@ -734,7 +743,7 @@
 
 -(UIImage *) getUserPhoto {
     if ([self isLoggedIn] == NO)
-        return [UIImage imageNamed:@"emptyuser.png"];
+        return [UIImage imageNamed:@"graphic_nouser.png"];
     return userphoto;
 }
 
@@ -746,11 +755,11 @@
     return loggedIn;
 }
 
--(UIView*)didCreateBadgeView:(UIView*)newBadgeView; {
+-(void)didCreateBadgeView:(UIView*)newBadgeView; {
     if (lastViewController != nil) {
         lastBadgeView = (BadgeView*) newBadgeView;
     }
-    return lastBadgeView;
+    //return lastBadgeView;
 }
 
 - (void)dealloc {

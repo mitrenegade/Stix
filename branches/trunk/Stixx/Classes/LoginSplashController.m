@@ -80,13 +80,6 @@
     return dict;
 }
 
--(NSMutableArray *)generateDefaultStix {
-    NSMutableArray * stix = [[[NSMutableArray alloc] init] autorelease];
-    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_FIRE];
-    [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:BADGE_TYPE_ICE];
-    return stix;
-}
-
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
     NSLog(@"Selected username: %@", name);
     for (NSMutableDictionary * d in theResults) {
@@ -101,7 +94,7 @@
         }
         else
         {
-            stix = [self generateDefaultStix];
+            stix = [[BadgeView generateDefaultStix] retain];
         }
         NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
         

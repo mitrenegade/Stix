@@ -10,6 +10,7 @@
 #import "Kumulos.h"
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
+#import "BadgeView.h" // for generateDefaultStix
 
 @protocol LoginViewDelegate
 
@@ -17,11 +18,11 @@
 - (void)didCancelLogin;
 
 @optional
-- (NSMutableArray*)generateDefaultStix;
+//- (NSMutableArray*)generateDefaultStix;
 
 @end
 
-@interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UIImagePickerControllerDelegate> {
+@interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
     IBOutlet UITextField * loginName;
     IBOutlet UITextField * loginPassword;
     IBOutlet UIButton * addPhoto;
@@ -30,6 +31,9 @@
     IBOutlet UIButton * cancelButton;
     IBOutlet UIActivityIndicatorView * activityIndicator;
 
+    UIImage * newUserImage;
+    bool newUserImageSet;
+    
 	id<LoginViewDelegate, NSObject> delegate;
     
     bool bJoinOrLogin; // 0 for join, 1 for login
@@ -41,9 +45,10 @@
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
 @property (nonatomic, retain) IBOutlet UIButton * addUserButton;
 @property (nonatomic, retain) IBOutlet UIButton * cancelButton;
-@property (nonatomic, retain) id<LoginViewDelegate, NSObject> delegate;
+@property (nonatomic, assign) id<LoginViewDelegate, NSObject> delegate;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
 @property (nonatomic, assign) bool bJoinOrLogin; 
+@property (nonatomic, retain) UIImage * newUserImage;
 
 - (IBAction)loginButtonPressed:(id)sender; 
 - (IBAction)addUserButtonPressed:(id)sender;

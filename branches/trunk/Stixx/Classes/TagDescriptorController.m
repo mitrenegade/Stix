@@ -23,7 +23,6 @@
 -(id)init
 {
 	[super initWithNibName:@"TagDescriptorController" bundle:nil];
-
 	return self;
 }
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -58,6 +57,10 @@
     NSLog(@"TagDescriptor: imageView dims %f %f badge at %f %f", imageView.frame.size.width, imageView.frame.size.height, badgeFrame.origin.x, badgeFrame.origin.y);
     //[badge release];
 	[commentField setDelegate:self];
+
+#if TARGET_IPHONE_SIMULATOR
+    [locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin];
+#endif
 }
 
 -(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {

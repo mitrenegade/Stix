@@ -84,7 +84,15 @@
 	
 	self.delegate = self;
 
-	[super takePicture];
+    @try {
+        [super takePicture];
+    }
+    @catch (NSException* exception) {
+#if TARGET_IPHONE_SIMULATOR
+		[self.overlayController performSelector:@selector(cameraDidTakePicture:) withObject:self];
+#endif        
+        NSLog(@"Take picture failed %@", [exception reason]);
+    }
 }
 
 - (UIImage*)addOverlayToBaseImage:(UIImage*)baseImage {

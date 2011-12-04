@@ -13,6 +13,7 @@
 @synthesize userPhotos;
 @synthesize delegate;
 @synthesize buttonInstructions;
+@synthesize buttonBack;
 @synthesize badgeView;
 @synthesize activityIndicator;
 @synthesize scrollView;
@@ -99,6 +100,7 @@
 
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
     [self forceReloadAll];    
+    [badgeView resetBadgeLocations];    
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -119,7 +121,13 @@
     }
 }
 
--(IBAction)closeInstructions:(id)sender;
+-(IBAction)backButtonClicked:(id)sender {
+    //[self dismissModalViewControllerAnimated:NO];
+    [self.view removeFromSuperview];
+    [self.delegate didDismissFriendView];
+}
+
+-(IBAction)closeInstructions:(id)sender
 {
     [buttonInstructions setHidden:YES];
     [badgeView setHidden:NO];

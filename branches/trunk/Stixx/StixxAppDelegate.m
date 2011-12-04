@@ -273,15 +273,23 @@ static const int levels[4] = {0,0,5,25};
     int type = newTag.badgeType;
     int count = newTag.badgeCount;
     
-    NSMutableData *theData;
+    NSMutableData *theCoordData;
     NSKeyedArchiver *encoder;
-    theData = [NSMutableData data];
-    encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theData];
+    theCoordData = [NSMutableData data];
+    encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
 	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
-    // this is the old kumulos call that didn't include location
+
+    NSMutableData *theStixData;
+    NSKeyedArchiver *encoder2;
+    theStixData = [NSMutableData data];
+    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
+	[encoder2 encodeObject:newTag.stixCounts forKey:@"stixCounts"];
+    [encoder2 finishEncoding];
+// this is the old kumulos call that didn't include location
     //[k addStixWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
-    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
+    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];
+    [k updatePixWithStixCountsWithAllTagID:[newTag.tagID intValue] andStixCounts:theStixData];
     [encoder release];  
     
 }
@@ -770,6 +778,20 @@ static const int levels[4] = {0,0,5,25};
     }    
 }
 
+// debug
+-(void)adminUpdateAllStixCountsToZero {
+    NSMutableArray * stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
+    for (int i=0; i<BADGE_TYPE_MAX; i++)
+        [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
+    NSMutableData *theStixData;
+    NSKeyedArchiver *encoder2;
+    theStixData = [NSMutableData data];
+    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
+	[encoder2 encodeObject:stixCounts forKey:@"stixCounts"];
+    [encoder2 finishEncoding];
+    [k adminUpdateAllUsersStixCountsWithStixCounts:theStixData];
+    [stixCounts release];
+}
 
 -(void)didAddStixToTag:(Tag *) tag withType:(int)type {
     // find the correct tag in allTags;
@@ -777,20 +799,69 @@ static const int levels[4] = {0,0,5,25};
         if (t.tagID == tag.tagID)
             NSLog(@"Found tag %d", [t.tagID intValue]);
     }
+    /*
     if (tag.badgeType == type)
         tag.badgeCount++;
     else {
         tag.badgeCount--;
         if (tag.badgeCount < 0) {
             tag.badgeCount = -tag.badgeCount;
-            tag.badgeType = [lastBadgeView getOppositeBadgeType:tag.badgeType];
+            tag.badgeType = type; //[lastBadgeView getOppositeBadgeType:tag.badgeType];
         }
     }
+     */
+    NSMutableArray * stixCounts = tag.stixCounts;
+    if (stixCounts == nil) {
+        stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
+        for (int i=0; i<BADGE_TYPE_MAX; i++)
+            [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
+        [stixCounts replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:tag.badgeCount+1]];
+    }
+    else if ([stixCounts count] < type) {
+        for (int i=[stixCounts count]; i<BADGE_TYPE_MAX; i++) {
+            [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
+        }
+        [stixCounts insertObject:[NSNumber numberWithInt:tag.badgeCount+1] atIndex:type];
+    }
+    else {
+        int ct = [[stixCounts objectAtIndex:type] intValue];
+        [stixCounts replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct+1]];
+    }
+    int maxtype = -1;
+    int max = -1;
+    for (int i=0; i<BADGE_TYPE_MAX; i++)
+    {
+        if ([[stixCounts objectAtIndex:i] intValue] == max)
+        {
+            if (i == tag.badgeType) {
+                maxtype = i;
+            }
+        }
+        else if ([[stixCounts objectAtIndex:i] intValue] > max)
+        {
+            max = [[stixCounts objectAtIndex:i] intValue];
+            maxtype = i;
+        }
+    }
+    tag.badgeType = maxtype;
+    tag.badgeCount = [[stixCounts objectAtIndex:maxtype] intValue];
 
     // todo: add kumulos:updateStixWithCount
     [k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
+
+    NSMutableData *theStixData;
+    NSKeyedArchiver *encoder2;
+    theStixData = [NSMutableData data];
+    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
+	[encoder2 encodeObject:stixCounts forKey:@"stixCounts"];
+    [encoder2 finishEncoding];
+    [k updatePixWithStixCountsWithAllTagID:[tag.tagID intValue] andStixCounts:theStixData];
     
     NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.badgeType == BADGE_TYPE_FIRE?@"Fire":@"Ice", [tag.tagID intValue], tag.badgeCount);
+}
+
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithStixCountsDidCompleteWithResult:(NSNumber*)affectedRows {
+    NSLog(@"Update Pix with Stix Counts: affected rows %d\n", [affectedRows intValue]);
 }
 
 -(NSString *) getUsername {

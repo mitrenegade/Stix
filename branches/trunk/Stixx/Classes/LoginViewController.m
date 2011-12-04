@@ -15,6 +15,7 @@
 @synthesize activityIndicator;
 @synthesize bJoinOrLogin;
 @synthesize addPhoto;
+@synthesize newUserImage;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -53,6 +54,8 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+//    if (newUserImage != nil)
+//        [newUserImage release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -71,7 +74,9 @@
     {
         [addUserButton setHidden:YES];
         [loginButton setHidden:NO];
+        [addPhoto setHidden:YES];
     }
+    newUserImageSet = false;
 }
 
 -(NSMutableData * ) arrayToData:(NSMutableArray *) dict {
@@ -139,10 +144,13 @@
     //NSData * img = UIImageJPEGRepresentation(rounded, .8);
     NSData * img = UIImagePNGRepresentation(rounded);
     [addPhoto setImage:rounded forState:UIControlStateNormal];
+    if (newUserImage == nil)
+    {
+        newUserImage = [rounded retain];
+        newUserImageSet = YES;
+    }
     //[self.delegate didChangeUserphoto:rounded];
     [img release];
-    
-    // add to kumulos
     [picker release];
 }
 
@@ -250,8 +258,8 @@
     // in LoginViewController, getUserDidComplete causes a new user to be created        
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
-    UIImage * img = [UIImage imageNamed:@"emptyuser.png"];
-    NSData * photo = UIImagePNGRepresentation(img);
+    UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
+    NSData * photo = UIImagePNGRepresentation(newUserImageSet?newUserImage:img);
 
     [kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
 }
@@ -260,7 +268,7 @@
 
     // create stix counts - not used by loginViewController
     NSString* username = [loginName text];
-    NSMutableArray * stix = [[self.delegate generateDefaultStix] retain];   
+    NSMutableArray * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[self arrayToData:stix] retain];
     [kumulos addStixToUserWithUsername:username andStix:data];
     [data release];

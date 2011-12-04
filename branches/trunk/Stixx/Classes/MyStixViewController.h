@@ -21,10 +21,13 @@
 
 @interface MyStixViewController : UIViewController <BadgeViewDelegate> {
     BadgeView * badgeView;
+    NSMutableArray * badges;
 
     NSObject<MyStixViewDelegate> * delegate;
 }
 
 @property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
+
+-(void)forceLoadMyStix;
 @end

@@ -37,10 +37,18 @@
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
     [delegate didCreateBadgeView:badgeView];
+    
+    badges = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
+    for (int i=0; i<BADGE_TYPE_MAX; i++)
+        [badges addObject:[NSNull null]];
+    [self forceLoadMyStix];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+}
+
+-(void)forceLoadMyStix {
     int x=0;
     int y=0;
     int i;
@@ -49,6 +57,13 @@
         int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
         int centery = 480/4 * y + 120;
         badgeLarge.center = CGPointMake(centerx, centery);
+        if ([badges objectAtIndex:i] == [NSNull null]) {
+            [badges replaceObjectAtIndex:i withObject:badgeLarge];
+        }
+        else {
+            [[badges objectAtIndex:i] removeFromSuperview];
+            [badges replaceObjectAtIndex:i withObject:badgeLarge];
+        }
         [self.view addSubview:badgeLarge];
         [badgeLarge release];
         x++;
@@ -57,11 +72,15 @@
             y++;
         }
     }
-    for (;i<BADGE_TYPE_MAX; i++) {
+    NSLog(@"Badges: %d badge max: %d xy %d %d\n", badgeView.badgeTypes, BADGE_TYPE_MAX, x,y);
+    for (i=badgeView.badgeTypes;i<BADGE_TYPE_MAX; i++) {
         UIImageView * badgeLarge = [[BadgeView getEmptyBadgeOfType:i] retain];
         int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
         int centery = 480/4 * y + 120;
         badgeLarge.center = CGPointMake(centerx, centery);
+        if ([badges objectAtIndex:i] == nil) {
+            [badges replaceObjectAtIndex:i withObject:badgeLarge];
+        }
         [self.view addSubview:badgeLarge];
         [badgeLarge release];
         x++;
@@ -88,6 +107,10 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    [badgeView release];
+    badgeView = nil;
+    [badges release];
+    badges = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

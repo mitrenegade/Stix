@@ -14,6 +14,9 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "-[StixxAppDelegate getUsername]:StixxAppDelegate.m">
+      </ContextState>
+      <ContextState
          contextName = "-[PagedScrollView currentPage]:PagedScrollView.m">
          <PersistentStrings>
             <PersistentString
@@ -66,6 +69,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "-[FeedViewController setIndicatorWithID:animated:]:FeedViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "activityIndicatorCenter">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "-[ConfigViewController kumulosAPI:apiOperation:getUserDidCompleteWithResult:]:ConfigViewController.m">
       </ContextState>
       <ContextState
@@ -105,6 +116,9 @@
                value = "scrollView">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[ProfileViewController viewWillAppear:]:ProfileViewController.m">
       </ContextState>
       <ContextState
          contextName = "-[StixxAppDelegate getStixCount:]:StixxAppDelegate.m">

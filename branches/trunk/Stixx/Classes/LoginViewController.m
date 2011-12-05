@@ -238,7 +238,7 @@
     NSString* password = [loginPassword text];
     NSString * email = [loginEmail text];
     
-    if (username == nil || password == nil || email == nil) {
+    if ([username length]==0 || [password length]==0 || [email length]==0) {
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"OK"];
         [alert setDelegate:nil];

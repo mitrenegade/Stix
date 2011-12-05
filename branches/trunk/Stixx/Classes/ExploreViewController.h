@@ -30,6 +30,7 @@
     ZoomViewController * zoomViewController;
     CGRect zoomFrame;
     UIImageView * zoomView;
+    bool isZooming; // prevent hits when zooming
     
     IBOutlet UIButton * refreshButton;
     

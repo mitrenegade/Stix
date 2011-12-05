@@ -78,7 +78,8 @@
 -(void)updateStixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 -(IBAction)showLogoutScreen:(id)sender;
--(IBAction)showFriendView:(id)sender;
+-(IBAction)friendCountButtonClicked:(id)sender;
+-(IBAction)stixCountButtonClicked:(id)sender;
 // utils
 -(void)administratorModeResetAllStix;
 -(NSMutableData * ) arrayToData:(NSMutableArray *) dict;

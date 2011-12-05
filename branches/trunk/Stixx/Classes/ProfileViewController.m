@@ -321,11 +321,20 @@
     [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
 }
 
--(void)showFriendView:(id)sender {
+-(void)friendCountButtonClicked:(id)sender {
     //[self presentModalViewController:friendController animated:NO];
     [self.view addSubview:friendController.view];
     [friendController viewWillAppear:YES];
     friendViewIsDisplayed = YES;
+}
+
+-(void)stixCountButtonClicked:(id)sender {
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version"];
+    [alert setMessage:@"My Pix Feed coming soon!"];
+    [alert show];
+    [alert release];
 }
 
 /**** friendsViewControllerDelegate ****/

@@ -63,8 +63,8 @@
     }
     else {
         // defaults for now
-        [self setTextColor:[UIColor blackColor]];
-        [self setOutlineColor:[UIColor whiteColor]];        
+        [self setTextColor:[UIColor colorWithRed:102/255.0 green:51/255.0 blue:0/255.0 alpha:1]];
+        [self setOutlineColor:[UIColor colorWithRed:200/255.0 green:200/255.0 blue:200/255.0 alpha:.8]];        
     }
 }
 

@@ -45,7 +45,7 @@
 @synthesize k;
 @synthesize lastBadgeView;
 
-static const int levels[4] = {0,0,5,25};
+static const int levels[4] = {0,0,5,10};
 
 // INIT code
 - (void)applicationDidFinishLaunching:(UIApplication *)application {  
@@ -202,7 +202,6 @@ static const int levels[4] = {0,0,5,25};
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {	// Get full path of possession archive 
-	NSString *path = [self coordinateArrayPath];
 	//NSLog(@"Saving coordinate array to path %@", path);
 	// Get the possession list 
 	//NSMutableArray *tempLocationArray = [tagViewController getCoordinates];
@@ -210,6 +209,7 @@ static const int levels[4] = {0,0,5,25};
 	//[NSKeyedArchiver archiveRootObject:tempLocationArray toFile:path]; 
     
     // archive username
+	NSString *path = [self coordinateArrayPath];
     NSLog(@"Logging out and saving username %@", username);
     [NSKeyedArchiver archiveRootObject:username toFile:path];
 }
@@ -279,18 +279,19 @@ static const int levels[4] = {0,0,5,25};
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
 	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
+    [encoder release];
+    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];
 
+#if 1 // create empty stixCounts for different stix types
     NSMutableData *theStixData;
     NSKeyedArchiver *encoder2;
     theStixData = [NSMutableData data];
     encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
 	[encoder2 encodeObject:newTag.stixCounts forKey:@"stixCounts"];
     [encoder2 finishEncoding];
-// this is the old kumulos call that didn't include location
-    //[k addStixWithUsername:newTag.username andComment:newTag.comment andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theData andType:type andScore:count];
-    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];
     [k updatePixWithStixCountsWithAllTagID:[newTag.tagID intValue] andStixCounts:theStixData];
-    [encoder release];  
+    [encoder2 release];  
+#endif
     
 }
 
@@ -345,11 +346,10 @@ static const int levels[4] = {0,0,5,25};
     if (newLevel != -1)
     {
         self.stixLevel = newLevel;
-        [self showAlertWithTitle:@"Level Up!" andMessage:[NSString stringWithFormat:@"Congratulations! You have added %d Stix! You now have %d total Stix types.", usertagtotal, newLevel] andButton:@"Yay!"];
         if (newLevel == 3)
-            [self showAlertWithTitle:@"New Stix Available!" andMessage:@"You now can use the Heart Stix. Visit the My Stix tab to see it!" andButton:@"OK"];
+            [self showAlertWithTitle:@"Level Up!" andMessage:[NSString stringWithFormat:@"You now can use the Heart Stix. You now have %d total Stix types. Visit the My Stix tab to see it!", newLevel] andButton:@"OK"];
         if (newLevel == 4)
-            [self showAlertWithTitle:@"New Stix Available!" andMessage:@"You now can use the Leaf Stix. Visit the My Stix tab to see it!" andButton:@"OK"];
+            [self showAlertWithTitle:@"Level Up!" andMessage:[NSString stringWithFormat:@"You now can use the Leaf Stix. You now have %d total Stix types. Visit the My Stix tab to see it!", newLevel] andButton:@"OK"];
         [k setStixLevelWithUsername:username andStixLevel:newLevel];
     }
     
@@ -586,6 +586,10 @@ static const int levels[4] = {0,0,5,25};
     username = [name retain];
     userphoto = [photo retain];
     usertagtotal = total;
+
+    NSString *path = [self coordinateArrayPath];
+    [NSKeyedArchiver archiveRootObject:username toFile:path];
+    
     int newLevel = -1;
     for (int i=0; i<4; i++) {
         if (usertagtotal >= levels[i])
@@ -604,8 +608,10 @@ static const int levels[4] = {0,0,5,25};
 
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
-    //if (lastBadgeView)
-    //    [lastBadgeView resetBadgeLocations];
+    if (lastBadgeView)
+        [lastBadgeView resetBadgeLocations];
+    
+    [myStixController forceLoadMyStix];
     
     [stix release];
 }
@@ -799,7 +805,8 @@ static const int levels[4] = {0,0,5,25};
         if (t.tagID == tag.tagID)
             NSLog(@"Found tag %d", [t.tagID intValue]);
     }
-    /*
+#if 1 
+    /*** increment/decrement fire and ice; do not change other stix counts ***/
     if (tag.badgeType == type)
         tag.badgeCount++;
     else {
@@ -809,7 +816,7 @@ static const int levels[4] = {0,0,5,25};
             tag.badgeType = type; //[lastBadgeView getOppositeBadgeType:tag.badgeType];
         }
     }
-     */
+#else
     NSMutableArray * stixCounts = tag.stixCounts;
     if (stixCounts == nil) {
         stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
@@ -845,18 +852,28 @@ static const int levels[4] = {0,0,5,25};
     }
     tag.badgeType = maxtype;
     tag.badgeCount = [[stixCounts objectAtIndex:maxtype] intValue];
-
-    // todo: add kumulos:updateStixWithCount
+#endif
+    
     [k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
 
+#if 0 // update stix counts for other tags
     NSMutableData *theStixData;
     NSKeyedArchiver *encoder2;
     theStixData = [NSMutableData data];
     encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
 	[encoder2 encodeObject:stixCounts forKey:@"stixCounts"];
     [encoder2 finishEncoding];
+    [encoder2 release];
     [k updatePixWithStixCountsWithAllTagID:[tag.tagID intValue] andStixCounts:theStixData];
+#endif
     
+    // update usertagtotal
+    usertagtotal += 1;
+    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
+    
+    // update user's stixLevel
+    [self updateUserStixLevel];
+
     NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.badgeType == BADGE_TYPE_FIRE?@"Fire":@"Ice", [tag.tagID intValue], tag.badgeCount);
 }
 

@@ -11,6 +11,7 @@
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
 #import "BadgeView.h" // for generateDefaultStix
+#import "LoadingAnimationView.h"
 
 @protocol LoginViewDelegate
 
@@ -25,11 +26,13 @@
 @interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
     IBOutlet UITextField * loginName;
     IBOutlet UITextField * loginPassword;
+    IBOutlet UITextField * loginEmail;
+    IBOutlet UIImageView * loginEmailBG;
     IBOutlet UIButton * addPhoto;
     IBOutlet UIButton * loginButton;
-    IBOutlet UIButton * addUserButton;
+    IBOutlet UIButton * joinButton;
     IBOutlet UIButton * cancelButton;
-    IBOutlet UIActivityIndicatorView * activityIndicator;
+    LoadingAnimationView * activityIndicator;
 
     UIImage * newUserImage;
     bool newUserImageSet;
@@ -41,17 +44,19 @@
 
 @property (nonatomic, retain) IBOutlet UITextField * loginName;
 @property (nonatomic, retain) IBOutlet UITextField * loginPassword;
+@property (nonatomic, retain) IBOutlet UITextField * loginEmail;
+@property (nonatomic, retain) IBOutlet UIImageView * loginEmailBG;
 @property (nonatomic, retain) IBOutlet UIButton * addPhoto;
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
-@property (nonatomic, retain) IBOutlet UIButton * addUserButton;
+@property (nonatomic, retain) IBOutlet UIButton * joinButton;
 @property (nonatomic, retain) IBOutlet UIButton * cancelButton;
 @property (nonatomic, assign) id<LoginViewDelegate, NSObject> delegate;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) bool bJoinOrLogin; 
 @property (nonatomic, retain) UIImage * newUserImage;
 
 - (IBAction)loginButtonPressed:(id)sender; 
-- (IBAction)addUserButtonPressed:(id)sender;
+- (IBAction)joinButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)addPhotoPressed:(id)sender;
 -(void)addUser;

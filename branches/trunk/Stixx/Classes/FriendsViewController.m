@@ -138,6 +138,13 @@
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {
     [delegate decrementStixCount:type forUser:[delegate getUsername]];
     // todo: increment stix count for this friend
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version"];
+    [alert setMessage:@"Sending Stix gifts coming soon!"];
+    [alert show];
+    [alert release];
+    [badgeView resetBadgeLocations];
 }
 
 -(int)getStixCount:(int)stix_type {
@@ -250,7 +257,12 @@
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
-    // do nothing
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version"];
+    [alert setMessage:@"Friend profiles coming soon!"];
+    [alert show];
+    [alert release];
 }
 
 @end

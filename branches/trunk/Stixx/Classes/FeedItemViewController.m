@@ -80,20 +80,22 @@
 	stixFrameScaled.size.height *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
     [stix setFrame:stixFrameScaled];
-    
-    CGRect labelFrame = stix.frame;
-    OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:type] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:type] * imageScale);
-    labelFrame = stixCount.frame; // changing center should change origin but not width
-    //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-    [stixCount setTextAttributesForBadgeType:type];
-    [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [stixCount setText:[NSString stringWithFormat:@"%d", count]];
     [imageView addSubview:stix];
-    [imageView addSubview:stixCount];
     
+    if (type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE) {
+        
+        CGRect labelFrame = stix.frame;
+        OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+        stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:type] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:type] * imageScale);
+        labelFrame = stixCount.frame; // changing center should change origin but not width
+        //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
+        [stixCount setTextAttributesForBadgeType:type];
+        [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+        [stixCount setText:[NSString stringWithFormat:@"%d", count]];
+        [imageView addSubview:stixCount];
+        [stixCount release];
+    }    
     [stix release];
-    [stixCount release];
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {

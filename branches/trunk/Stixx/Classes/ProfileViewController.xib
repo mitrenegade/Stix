@@ -219,7 +219,7 @@
 					<object class="IBUIButton" id="1011028699">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{133, 5}, {53, 33}}</string>
+						<string key="NSFrame">{{129, 0}, {62, 45}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="1057446160"/>
@@ -235,7 +235,7 @@
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="197289404"/>
-						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
+						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">logo.png</string>
 						</object>
@@ -384,12 +384,21 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">showFriendView:</string>
+						<string key="label">friendCountButtonClicked:</string>
 						<reference key="source" ref="760044876"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
-					<int key="connectionID">73</int>
+					<int key="connectionID">74</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">stixCountButtonClicked:</string>
+						<reference key="source" ref="448852438"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">75</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -408,13 +417,13 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="454272482"/>
 							<reference ref="4430580"/>
-							<reference ref="1011028699"/>
 							<reference ref="1057446160"/>
 							<reference ref="448852438"/>
 							<reference ref="760044876"/>
 							<reference ref="757478266"/>
 							<reference ref="680049379"/>
 							<reference ref="951775940"/>
+							<reference ref="1011028699"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -529,7 +538,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">73</int>
+			<int key="maxID">75</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -544,12 +553,14 @@
 							<string>adminStixButtonPressed:</string>
 							<string>changePhoto:</string>
 							<string>closeInstructions:</string>
-							<string>showFriendView:</string>
+							<string>friendCountButtonClicked:</string>
 							<string>showLoginScreen:</string>
 							<string>showLogoutScreen:</string>
+							<string>stixCountButtonClicked:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -565,9 +576,10 @@
 							<string>adminStixButtonPressed:</string>
 							<string>changePhoto:</string>
 							<string>closeInstructions:</string>
-							<string>showFriendView:</string>
+							<string>friendCountButtonClicked:</string>
 							<string>showLoginScreen:</string>
 							<string>showLogoutScreen:</string>
+							<string>stixCountButtonClicked:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -584,7 +596,7 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">showFriendView:</string>
+								<string key="name">friendCountButtonClicked:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -593,6 +605,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">showLogoutScreen:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">stixCountButtonClicked:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>

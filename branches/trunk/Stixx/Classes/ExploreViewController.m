@@ -52,6 +52,7 @@
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
+    [badgeView setShowRewardStix:NO];
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     [badgeView setUnderlay:scrollView];
     [delegate didCreateBadgeView:badgeView];
@@ -60,7 +61,8 @@
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
-
+    zoomView = [[UIImageView alloc] init];
+    isZooming = NO;
     [self forceReloadAll];
 
 //	return self;
@@ -297,22 +299,17 @@
     [scrollView clearAllPages];
     //[activityIndicator startAnimating];
     //[activityIndicator setHidden:NO];
+    isZooming = NO;
     [activityIndicator startCompleteAnimation];
 }
 
 /************** FeedZoomView ***********/
 
 -(void)didClickAtLocation:(CGPoint)location {
-    // do nothing - forward click to button if necessary
-    
-    /*
-    NSLog(@"Button location %f %f %f %f Click %f %f\n", refreshButton.frame.origin.x, refreshButton.frame.origin.y, refreshButton.frame.size.width, refreshButton.frame.size.height, location.x, location.y);
-    if (location.x >= refreshButton.frame.origin.x && location.x <= refreshButton.frame.origin.x + refreshButton.frame.size.width && location.y >= refreshButton.frame.origin.y && location.y <= refreshButton.frame.origin.y + refreshButton.frame.size.height) {
-        [self forceReloadAll];
-    }
-     */
-//    [self forceReloadAll];
 
+    if (isZooming == YES)
+        return;
+    
     NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
    
     // dumb way to calculate which view we're looking at 
@@ -364,7 +361,8 @@
     UIImage * photo = tag.image;
     
     // animate
-    zoomView = [[UIImageView alloc] initWithImage:photo];
+    isZooming = YES;
+    [zoomView setImage:photo];
     int xoffset = 10; // from scrollView width
     int yoffset = 3; // from ??
     zoomView.frame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
@@ -378,6 +376,7 @@
      options:UIViewAnimationCurveEaseOut
      animations:^{
          zoomView.frame = frameBig;
+         //[badgeView addSubview:zoomView];
      }
      completion:^(BOOL finished){
          zoomView.hidden = YES;
@@ -388,6 +387,7 @@
          [zoomViewController setLocation:locationString];
          [zoomViewController setStixUsingTag:tag];
          [badgeView setUnderlay:zoomViewController.view];
+         isZooming = NO;
      }
      ];
     
@@ -397,6 +397,7 @@
 #if 1
     // animate
     [zoomView setHidden:NO];
+    isZooming = YES;
 
     // animate a scaling transition
     [UIView 
@@ -408,8 +409,9 @@
      }
      completion:^(BOOL finished){
          zoomView.hidden = YES;
-         [zoomView release];
+         [zoomView removeFromSuperview];
          [badgeView setUnderlay:scrollView];
+         isZooming = NO;
      }
      ];
 #endif
@@ -438,7 +440,13 @@
 
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {
-    
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version"];
+    [alert setMessage:@"Adding Stix in the Explore view coming soon!"];
+    [alert show];
+    [alert release];
+    [badgeView resetBadgeLocations];
 }
 
 -(int)getStixCount:(int)stix_type {

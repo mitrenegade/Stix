@@ -12,6 +12,9 @@
 
 @synthesize badgeView;
 @synthesize delegate;
+@synthesize buttonRules;
+
+#define BADGE_MYSTIX_PADDING 45 // how many pixels per side in mystix view
 
 -(id)init
 {
@@ -40,28 +43,40 @@
     
     badges = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
     labels = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-    for (int i=0; i<BADGE_TYPE_MAX; i++)
-    {
-        [badges addObject:[NSNull null]];
-        [labels addObject:[NSNull null]];
-    }
-    [self forceLoadMyStix];
+    empties = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
+
+    [self generateAllStix];
+    
+    buttonRules = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 450)];
+    [buttonRules addTarget:self
+               action:@selector(didClickOnButtonRules:)
+     forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:buttonRules];
+    [buttonRules setHidden:YES];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+
+    [self forceLoadMyStix];
 }
 
--(void)forceLoadMyStix {
+-(void)generateAllStix {
     NSArray * stixLabels = [[NSArray alloc] initWithObjects:@"Fire", @"Ice", @"Heart", @"Leaf", nil];
     int x=0;
     int y=0;
     int i;
-    for (i=0; i<[delegate getStixLevel]; i++) {
+    for (i=0; i<BADGE_TYPE_MAX; i++) {
         UIImageView * badgeLarge = [[BadgeView getLargeBadgeOfType:i] retain];
+        badgeLarge.frame = CGRectMake(0, 0, badgeLarge.frame.size.width * .9, badgeLarge.frame.size.height * .9);
         //int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
+        
         int centerx = (320 - 2*BADGE_MYSTIX_PADDING)/2 * x + (320-2*BADGE_MYSTIX_PADDING)/4 + BADGE_MYSTIX_PADDING;
-        int centery = 480/4 * y + 100;
+        int centery;// = 480/3 * y + 150;
+        if (y == 0)
+            centery = 140;
+        else
+            centery = 330;
         badgeLarge.center = CGPointMake(centerx, centery);
         
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badgeLarge.frame];
@@ -70,46 +85,45 @@
         [label drawTextInRect:CGRectMake(0,0, badgeLarge.frame.size.width*2, 80)];
         [label setText:[stixLabels objectAtIndex:i]];
          
-        if ([badges objectAtIndex:i] == [NSNull null]) {
-            [badges replaceObjectAtIndex:i withObject:badgeLarge];
-            [labels replaceObjectAtIndex:i withObject:label];
-        }
-        else {
-            [[badges objectAtIndex:i] removeFromSuperview];
-            [[labels objectAtIndex:i] removeFromSuperview];
-            [badges replaceObjectAtIndex:i withObject:badgeLarge];
-            [labels replaceObjectAtIndex:i withObject:label];
-        }
+        UIImageView * empty = [[BadgeView getEmptyBadgeOfType:i] retain];
+        empty.center = CGPointMake(centerx, centery);
+
+        [badges insertObject:badgeLarge atIndex:i];
+        [labels insertObject:label atIndex:i];
+        [empties insertObject:empty atIndex:i];   
+
         [self.view addSubview:badgeLarge];
         [self.view addSubview:label];
-        [badgeLarge release];
+        [self.view addSubview:empty];
         [label release];
-        x++;
-        if (x==2) {
-            x=0;
-            y++;
-        }
-    }
-    NSLog(@"Badges: %d badge max: %d xy %d %d\n", [delegate getStixLevel], BADGE_TYPE_MAX, x,y);
-    for (i=[delegate getStixLevel];i<BADGE_TYPE_MAX; i++) {
-        UIImageView * badgeLarge = [[BadgeView getEmptyBadgeOfType:i] retain];
-        int centerx = (320 - 2*BADGE_MYSTIX_PADDING)/2 * x + (320-2*BADGE_MYSTIX_PADDING)/4 + BADGE_MYSTIX_PADDING;
-        //int centerx = (320-2*BADGE_MYSTIX_PADDING)/3 * x + (320-2*BADGE_MYSTIX_PADDING)/6 + BADGE_MYSTIX_PADDING;
-        int centery = 480/4 * y + 100;
-        badgeLarge.center = CGPointMake(centerx, centery);
-        if ([badges objectAtIndex:i] == nil) {
-            [badges replaceObjectAtIndex:i withObject:badgeLarge];
-        }
-        [self.view addSubview:badgeLarge];
-        [badgeLarge release];
-        x++;
-        if (x==2) {
-            x=0;
-            y++;
-        }
 
+        x++;
+        if (x==2) {
+            x=0;
+            y++;
+        }
+        
     }
     [stixLabels release];
+
+}
+
+-(void)forceLoadMyStix {
+    int level = [delegate getStixLevel];
+    for (int i=0; i<level; i++) {
+        [[badges objectAtIndex:i] setHidden:NO];
+        [[labels objectAtIndex:i] setHidden:NO];
+        [[empties objectAtIndex:i] setHidden:YES];
+    }
+    for (int i=level;i<BADGE_TYPE_MAX; i++) {
+        [[badges objectAtIndex:i] setHidden:YES];
+        [[labels objectAtIndex:i] setHidden:YES];
+        [[empties objectAtIndex:i] setHidden:NO];
+        
+        //[[badges objectAtIndex:i] removeFromSuperview];
+        //[[labels objectAtIndex:i] removeFromSuperview];
+        //[self.view addSubview:[empties objectAtIndex:i]];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -144,6 +158,86 @@
 -(int)getStixCount:(int)stix_type {return 0;};
 -(int)getStixLevel {
     return [self.delegate getStixLevel];
+}
+
+
+/**** ScrollView delegate *****/
+
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {        
+    
+    UITouch *touch = [[event allTouches] anyObject];	        
+    CGPoint location = [touch locationInView:self.view];
+    
+    // eventually this behavior will be done through scrollview
+    // right now it's just a click
+    //[myDelegate didClickAtLocation:location];
+    UIImageView * badgeSelected = nil;
+    UIImageView * emptySelected = nil;
+    int type = -1;
+    for (int i=0; i<[delegate getStixLevel]; i++)
+    {
+        UIImageView * badge = [badges objectAtIndex:i];
+        if (location.x >= badge.frame.origin.x && location.x <= badge.frame.origin.x + badge.frame.size.width && location.y >= badge.frame.origin.y && location.y <= badge.frame.origin.y + badge.frame.size.height) {
+            badgeSelected = badge;
+            type = i;
+        }
+    }
+    for (int i=[delegate getStixLevel]; i<BADGE_TYPE_MAX; i++)
+    {
+        UIImageView * badge = [empties objectAtIndex:i];
+        if (location.x >= badge.frame.origin.x && location.x <= badge.frame.origin.x + badge.frame.size.width && location.y >= badge.frame.origin.y && location.y <= badge.frame.origin.y + badge.frame.size.height) {
+            emptySelected = badge;
+            type = i;
+        }
+    }
+    
+    if (badgeSelected != nil && emptySelected == nil) {
+#if 0
+        // display approporiate badge info
+        NSMutableArray * filenames = [[NSMutableArray alloc] initWithObjects:@"Fire Stix: what's hot?", @"Ice Stix: what's not hot?", @"Heart Stix: what's passionate?", @"Leaf Stix: What's natural?", nil];
+        UIAlertView* alert = [[UIAlertView alloc]init];
+        [alert addButtonWithTitle:@"Ok"];
+        [alert setTitle:@"About the Stix"];
+        [alert setMessage:[filenames objectAtIndex:type]];
+        [alert show];
+        [alert release];
+#else
+        NSMutableArray * filenames = [[NSMutableArray alloc] initWithObjects:@"graphic_rules_fire.png", @"graphic_rules_ice.png", @"graphic_rules_heart.png", @"graphic_rules_leaf.png", nil];
+        UIImage * rules = [UIImage imageNamed:[filenames objectAtIndex:type]];
+        [buttonRules setHidden:NO];
+        [buttonRules setImage:rules forState:UIControlStateNormal];
+        [buttonRules setCenter:CGPointMake(160,230)];
+        //[rules release];
+        [filenames release];
+#endif
+    }
+    else if (badgeSelected == nil && emptySelected != nil) {
+        // display approporiate empty info
+#if 0
+        NSMutableArray * filenames = [[NSMutableArray alloc] initWithObjects:@"Fire Stix: what's hot?", @"Ice Stix: what's not hot?", @"Heart Stix: what's passionate?", @"Leaf Stix: What's natural?", nil];
+        UIAlertView* alert = [[UIAlertView alloc]init];
+        [alert addButtonWithTitle:@"Ok"];
+        [alert setTitle:@"About the Stix"];
+        [alert setMessage:[filenames objectAtIndex:type]];
+        [alert show];
+        [alert release];
+#else
+        NSMutableArray * filenames = [[NSMutableArray alloc] initWithObjects:@"graphic_rules_fire.png", @"graphic_rules_ice.png", @"graphic_rules_heart.png", @"graphic_rules_leaf.png", nil];
+        UIImage * rules = [UIImage imageNamed:[filenames objectAtIndex:type]];
+        [buttonRules setHidden:NO];
+        [buttonRules setImage:rules forState:UIControlStateNormal];
+        [buttonRules setCenter:CGPointMake(160,230)];
+        //[rules release];
+        [filenames release];
+#endif
+    }
+    else {
+        // not a touch for info, do nothing
+    }
+}
+
+-(IBAction)didClickOnButtonRules:(id)sender {
+    [buttonRules setHidden:YES];
 }
 
 @end

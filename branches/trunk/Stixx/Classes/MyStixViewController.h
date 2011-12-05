@@ -24,12 +24,17 @@
     BadgeView * badgeView;
     NSMutableArray * badges;
     NSMutableArray * labels;
+    NSMutableArray * empties;
+    
+    UIButton * buttonRules;
 
     NSObject<MyStixViewDelegate> * delegate;
 }
 
 @property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
-
+@property (nonatomic, retain) UIButton * buttonRules;
 -(void)forceLoadMyStix;
+-(void)generateAllStix;
+-(IBAction)didClickOnButtonRules:(id)sender;
 @end

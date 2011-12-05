@@ -80,7 +80,25 @@
 	stixFrameScaled.size.height *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
-     
+    
+    // change comment field prompt based on stix
+    switch (type) {
+        case BADGE_TYPE_FIRE:
+            [commentField setPlaceholder:@"What's Hot Here?"];
+            break;
+        case BADGE_TYPE_ICE:
+            [commentField setPlaceholder:@"What's Not Hot?"];
+            break;
+        case BADGE_TYPE_HEART:
+            [commentField setPlaceholder:@"What Do You Love?"];
+            break;
+        case BADGE_TYPE_LEAF:
+            [commentField setPlaceholder:@"What's Natural Here?"];
+            break;
+            
+        default:
+            break;
+    }
     return [stix autorelease];
 }
 

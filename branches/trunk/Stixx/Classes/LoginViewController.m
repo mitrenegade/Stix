@@ -8,14 +8,15 @@
 
 #import "LoginViewController.h"
 
-
 @implementation LoginViewController
 
-@synthesize loginName, loginButton, loginPassword, addUserButton, cancelButton, delegate;
+@synthesize loginName, loginButton, loginPassword, joinButton, cancelButton, delegate;
 @synthesize activityIndicator;
 @synthesize bJoinOrLogin;
 @synthesize addPhoto;
 @synthesize newUserImage;
+@synthesize loginEmail;
+@synthesize loginEmailBG;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -47,6 +48,8 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 240, 80, 80)];
+    [self.view addSubview:activityIndicator];
 }
 
 - (void)viewDidUnload
@@ -56,6 +59,7 @@
     // e.g. self.myOutlet = nil;
 //    if (newUserImage != nil)
 //        [newUserImage release];
+    [activityIndicator release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -65,16 +69,20 @@
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-    if (bJoinOrLogin == 0) // join
+    if (bJoinOrLogin == 0) // join as new user
     {
-        [addUserButton setHidden:YES];
+        [joinButton setHidden:NO];
         [loginButton setHidden:YES];
-        [addUserButton setHidden:NO];
+        [loginEmail setHidden:NO];
+        [loginEmailBG setHidden:NO];
+        [addPhoto setHidden:YES];
     }
-    else
+    else // login as existing user
     {
-        [addUserButton setHidden:YES];
+        [joinButton setHidden:YES];
         [loginButton setHidden:NO];
+        [loginEmail setHidden:YES];
+        [loginEmailBG setHidden:YES];
         [addPhoto setHidden:YES];
     }
     newUserImageSet = false;
@@ -159,16 +167,19 @@
 - (IBAction)loginButtonPressed:(id)sender{
     [loginName resignFirstResponder];
     [loginPassword resignFirstResponder];
+    [loginEmail resignFirstResponder];
     [self doLogin];
 }
 
+
+
 -(void)doLogin{
     
-    [activityIndicator startAnimating];    
+    [activityIndicator startCompleteAnimation];    
 
     //we want to log user in
-    NSString* username = [loginName text];
-    NSString* password = [loginPassword text];
+    NSString * username = [loginName text];
+    NSString * password = [loginPassword text];
     
     Kumulos* k = [[Kumulos alloc]init];
     [k setDelegate:self];
@@ -192,7 +203,7 @@
         [alert setMessage:@"Sorry we could not log you in."];
     }
     
-    [activityIndicator stopAnimating];
+    [activityIndicator stopCompleteAnimation];
 
     [alert show];
     [alert release];
@@ -206,25 +217,28 @@
 
 - (IBAction) cancelButtonPressed:(id)sender {
     [delegate didCancelLogin];
+    [activityIndicator stopCompleteAnimation];
     [self dismissModalViewControllerAnimated:YES];    
 }
 
-- (IBAction)addUserButtonPressed:(id)sender
+- (IBAction)joinButtonPressed:(id)sender
 {
     [loginName resignFirstResponder];
     [loginPassword resignFirstResponder];
+    [loginEmail resignFirstResponder];
     [self addUser];
 }
 
 -(void) addUser{
     
-    [activityIndicator startAnimating];
+    [activityIndicator startCompleteAnimation];
 
     //Get values
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
+    NSString * email = [loginEmail text];
     
-    if (username == nil || password == nil) {
+    if (username == nil || password == nil || email == nil) {
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"OK"];
         [alert setDelegate:nil];
@@ -253,19 +267,20 @@
         [alert show];
         [alert release];
         [kumulos release];
+        [activityIndicator stopCompleteAnimation];
         return;
     }
     
     // in LoginViewController, getUserDidComplete causes a new user to be created        
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
-    UIImage * img = [UIImage imageNamed:@"graphic_nopic2.png"];
+    UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
     
     NSData * photo;
     if (newUserImageSet == YES)
         photo = UIImagePNGRepresentation(newUserImage);
     else
-        photo = UIImagePNGRepresentation(img);
+        photo = UIImageJPEGRepresentation(img, .8);
 
     [kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
 }
@@ -274,6 +289,8 @@
 
     // create stix counts - not used by loginViewController
     NSString* username = [loginName text];
+    NSString * email = [loginEmail text];
+    [kumulos addEmailToUserWithUsername:username andEmail:email];
     NSMutableArray * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[self arrayToData:stix] retain];
     [kumulos addStixToUserWithUsername:username andStix:data];
@@ -297,7 +314,7 @@
     [alert release];
     [kumulos release];
     
-    [activityIndicator stopAnimating];
+    [activityIndicator stopCompleteAnimation];
 }
 
 @end

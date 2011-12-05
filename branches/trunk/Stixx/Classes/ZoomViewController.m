@@ -55,19 +55,20 @@
 	stixFrameScaled.size.height *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
-    
-    CGRect labelFrame = stix.frame;
-    stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:tag.badgeType] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:tag.badgeType] * imageScale);
-    labelFrame = stixCount.frame; // changing center should change origin but not width
-    //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-    [stixCount setTextAttributesForBadgeType:tag.badgeType];
-    [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [stixCount setText:[NSString stringWithFormat:@"%d", tag.badgeCount]];
     [imageView addSubview:stix];
-    [imageView addSubview:stixCount];
-
-    // do not release stix
+    
+    if (tag.badgeType == BADGE_TYPE_FIRE || tag.badgeType == BADGE_TYPE_ICE) {
+        CGRect labelFrame = stix.frame;
+        stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+        stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:tag.badgeType] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:tag.badgeType] * imageScale);
+        labelFrame = stixCount.frame; // changing center should change origin but not width
+        //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
+        [stixCount setTextAttributesForBadgeType:tag.badgeType];
+        [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+        [stixCount setText:[NSString stringWithFormat:@"%d", tag.badgeCount]];
+        [imageView addSubview:stixCount];
+    }
+    // do not release stix or stixCount
 }
 
 -(void)forceImageAppear:(UIImage*)img {

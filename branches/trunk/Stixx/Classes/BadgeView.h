@@ -18,7 +18,6 @@ enum {
 };
 
 #define BADGE_SHELF_PADDING 20 // how many pixels per side on shelf
-#define BADGE_MYSTIX_PADDING 10 // how many pixels per side in mystix view
 
 @protocol BadgeViewDelegate
 
@@ -50,6 +49,7 @@ enum {
     //OutlineLabel * labelIce;
     
     bool showStixCounts;
+    bool showRewardStix;
     int lastStixLevel;
 }
 
@@ -58,6 +58,7 @@ enum {
 //@property (nonatomic, retain) OutlineLabel * labelFire;
 //@property (nonatomic, retain) OutlineLabel * labelIce;
 @property (nonatomic, assign) bool showStixCounts;
+@property (nonatomic, assign) bool showRewardStix;
 @property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
 
 -(void)resetBadgeLocations;

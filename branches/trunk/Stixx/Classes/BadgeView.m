@@ -13,6 +13,7 @@
 @synthesize delegate;
 @synthesize underlay;
 @synthesize  showStixCounts;
+@synthesize  showRewardStix;
 @synthesize badgesLarge;
 
 - (id)initWithFrame:(CGRect)frame 
@@ -37,6 +38,7 @@
     //labelIce = nil;
     
     showStixCounts = YES;
+    showRewardStix = YES;
     
     badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
@@ -293,18 +295,37 @@
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
         [label removeFromSuperview];
     }
-    for (int i=0; i<[delegate getStixLevel]; i++)
+    int numStix = [delegate getStixLevel];
+    if (showRewardStix == NO)
+        numStix = 2;
+    for (int i=0; i<numStix; i++)
     {
         UIImageView * badge = [badges objectAtIndex:i];
-        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
+        // for views that only show the action stix, just position for two stix
+        int y = 365;
+        if (i == BADGE_TYPE_HEART)
+            y = 370;
         
+        if (numStix == 2) {
+            badge.center = CGPointMake((320-2*80)/numStix*i + (320-2*80)/numStix/2 + 80, y);
+        }
+        else if (numStix == 3) {
+            badge.center = CGPointMake((320-2*50)/numStix*i + (320-2*50)/numStix/2 + 50, y);
+        }    
+        else if (numStix == 4) {
+            badge.center = CGPointMake((320-2*30)/numStix*i + (320-2*30)/numStix/2 + 30, y);
+        }    
+        [self addSubview:badge];
+
+        /* no labels for stix on shelf */
+        /*
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
         [label setCenter:CGPointMake(badge.center.x+[BadgeView getOutlineOffsetX:i], badge.center.y+[BadgeView getOutlineOffsetY:i])];
         [label setTextAttributesForBadgeType:i];
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         
-        [self addSubview:badge];
         [self addSubview:label];
+         */
     }
     //[self updateStixCounts];
     drag = 0;
@@ -351,7 +372,7 @@
     if (stix == nil)
         return nil;
     // create smaller size for actual badgeView
-    stix.frame = CGRectMake(0, 0, stix.frame.size.width * .75, stix.frame.size.height*.75); // resize badges to "small size"
+    stix.frame = CGRectMake(0, 0, stix.frame.size.width * .65, stix.frame.size.height*.65); // resize badges to "small size"
     return stix;
 }
 

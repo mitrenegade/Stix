@@ -64,6 +64,7 @@
     [self.view addSubview:scrollView];
     [self.view insertSubview:badgeView aboveSubview:scrollView];
     [badgeView setUnderlay:scrollView];
+    [badgeView setShowRewardStix:NO];
     
     activityIndicatorCenter = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicatorCenter];
@@ -216,13 +217,29 @@
         [badgeView resetBadgeLocations];
         return;
     }
+   
+    if ([t badgeType] != BADGE_TYPE_FIRE && [t badgeType] != BADGE_TYPE_ICE) {        
+        NSString * badgeTypeStr;
+        if (type == BADGE_TYPE_FIRE)
+            badgeTypeStr = @"Fire";
+        else
+            badgeTypeStr = @"Ice";
+        UIAlertView* alert = [[UIAlertView alloc]init];
+        [alert addButtonWithTitle:@"Ok"];
+        [alert setTitle:@"Beta Version"];
+        [alert setMessage:[NSString stringWithFormat:@"Sorry, you cannot add stix to this Pix! Try adding your %@ to another picture.", badgeTypeStr]];
+        [alert show];
+        [alert release];
+        [badgeView resetBadgeLocations];
+        return;
+    }
+        
     
     NSString * badgeTypeStr;
     if ([t badgeType] == BADGE_TYPE_FIRE)
         badgeTypeStr = @"Fire";
     else
         badgeTypeStr = @"Ice";
-
     NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
     [delegate didAddStixToTag:t withType:type];
     //NSLog(@"After decrement: %d (delegate says %d)", ret, [delegate getStixCount:type]);

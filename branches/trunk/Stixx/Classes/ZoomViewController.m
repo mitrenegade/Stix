@@ -86,6 +86,13 @@
         [labelCommentBG setFrame:newFrame];
         [labelComment setFrame:newFrame];
     }
+    else {
+        [labelLocationString setHidden:NO];
+        CGRect newFrame = [labelCommentBG frame];
+        newFrame.size.height = 29;
+        [labelCommentBG setFrame:newFrame];        
+        [labelComment setFrame:newFrame];
+    }
 }
 
 -(IBAction)didPressBackButton:(id)sender {

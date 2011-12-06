@@ -451,11 +451,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "115"
-         endingLineNumber = "115"
+         startingLineNumber = "114"
+         endingLineNumber = "114"
          landmarkName = "-touchesBegan:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -465,11 +465,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "314"
-         endingLineNumber = "314"
+         startingLineNumber = "313"
+         endingLineNumber = "313"
          landmarkName = "-resetBadgeLocations"
          landmarkType = "5">
       </FileBreakpoint>
@@ -815,11 +815,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "281"
-         endingLineNumber = "281"
+         startingLineNumber = "280"
+         endingLineNumber = "280"
          landmarkName = "-resetBadgeLocations"
          landmarkType = "5">
       </FileBreakpoint>
@@ -829,11 +829,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344649505.338764"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "424"
-         endingLineNumber = "424"
+         startingLineNumber = "423"
+         endingLineNumber = "423"
          landmarkName = "+getOutlineOffsetX:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -871,11 +871,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "280"
-         endingLineNumber = "280"
+         startingLineNumber = "279"
+         endingLineNumber = "279"
          landmarkName = "-resetBadgeLocations"
          landmarkType = "5">
       </FileBreakpoint>
@@ -885,11 +885,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "245"
-         endingLineNumber = "245"
+         startingLineNumber = "244"
+         endingLineNumber = "244"
          landmarkName = "-hitTest:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1081,11 +1081,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "348"
-         endingLineNumber = "348"
+         startingLineNumber = "347"
+         endingLineNumber = "347"
          landmarkName = "-updateStixCounts"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1095,11 +1095,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "324"
-         endingLineNumber = "324"
+         startingLineNumber = "323"
+         endingLineNumber = "323"
          landmarkName = "-resetBadgeLocations"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1123,11 +1123,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "164"
-         endingLineNumber = "164"
+         startingLineNumber = "163"
+         endingLineNumber = "163"
          landmarkName = "-touchesMoved:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1655,11 +1655,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "112"
-         endingLineNumber = "112"
+         startingLineNumber = "111"
+         endingLineNumber = "111"
          landmarkName = "-touchesBegan:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2103,11 +2103,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "241"
-         endingLineNumber = "241"
+         startingLineNumber = "240"
+         endingLineNumber = "240"
          landmarkName = "-hitTest:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2117,11 +2117,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "138"
-         endingLineNumber = "138"
+         startingLineNumber = "137"
+         endingLineNumber = "137"
          landmarkName = "-touchesBegan:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2579,11 +2579,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "261"
-         endingLineNumber = "261"
+         startingLineNumber = "260"
+         endingLineNumber = "260"
          landmarkName = "-hitTest:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2593,11 +2593,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "193"
-         endingLineNumber = "193"
+         startingLineNumber = "192"
+         endingLineNumber = "192"
          landmarkName = "-touchesMoved:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2607,11 +2607,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "189"
-         endingLineNumber = "189"
+         startingLineNumber = "188"
+         endingLineNumber = "188"
          landmarkName = "-touchesMoved:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2621,11 +2621,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344645814.744621"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "173"
-         endingLineNumber = "173"
+         startingLineNumber = "172"
+         endingLineNumber = "172"
          landmarkName = "-touchesMoved:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3657,7 +3657,7 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/BadgeView.m"
-         timestampString = "344643872.062648"
+         timestampString = "344886623.791117"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "47"
@@ -3971,6 +3971,20 @@
          startingLineNumber = "217"
          endingLineNumber = "217"
          landmarkName = "-getFoursquareVenues:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/BadgeView.m"
+         timestampString = "344886429.581575"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "42"
+         endingLineNumber = "42"
+         landmarkName = "-initWithFrame:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

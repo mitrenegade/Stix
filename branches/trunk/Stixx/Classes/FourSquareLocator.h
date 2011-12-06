@@ -11,6 +11,7 @@
 
 @protocol VenueDelegate
 -(void)receiveVenueNames:(NSArray*)venueNames;
+-(void)didReceiveConnectionError;
 @end
 
 // Call query with text from text field and get venuedelegate

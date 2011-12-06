@@ -10,8 +10,15 @@
 #import "LocationViewController.h"
 #import "FourSquareLocator.h"
 
+#define HEADER_HEIGHT 75
+
+
 @implementation LocationViewController
 @synthesize delegate;
+@synthesize locationInput, locationSearch;
+@synthesize headerView;
+@synthesize activityIndicator;
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -19,6 +26,8 @@
         // Custom initialization
         fsl = [[FourSquareLocator alloc] init];
         [fsl setDelegate:self];
+        
+        activityIndicator = nil;
     }
     return self;
 }
@@ -35,14 +44,40 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-//#if TARGET_IPHONE_SIMULATOR
-    [fsl query:@"pizza"];
-//#endif
+
+    fsLocationStrings = [[NSMutableArray alloc] init];
+    [fsl query:@""];
+
     // Uncomment the following line to preserve selection between presentations.
     self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.navigationItem.rightBarButtonItem = self.editButtonItem;    
+    
+    locationInput = [[UITextField alloc] initWithFrame:CGRectMake(10,5,300,30)];
+    [locationInput setBorderStyle:UITextBorderStyleRoundedRect];
+    [locationInput setDelegate:self];
+    [locationInput setEnablesReturnKeyAutomatically:YES];
+    [locationInput setClearsOnBeginEditing:YES];
+    locationSearch = [[UITextField alloc] initWithFrame:CGRectMake(10,40,300,30)];
+    [locationSearch setBorderStyle:UITextBorderStyleRoundedRect];
+    [locationSearch setDelegate:self];
+    [locationSearch setEnablesReturnKeyAutomatically:YES];
+    [locationSearch setClearsOnBeginEditing:YES];
+    
+    headerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,300,HEADER_HEIGHT)];
+    //[headerView addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"textured_background.png"]] autorelease]];
+    [locationInput setText:@"Enter a location without GPS"];
+    [locationInput addTarget:self action:@selector(didSelectLocationStringFromHeader) 
+            forControlEvents:UIControlEventEditingDidEnd];
+    [headerView addSubview:locationInput];
+    [locationSearch setText:@"Enter a location term to search - UNDER CONSTRUCTION"];
+    [locationSearch addTarget:self action:@selector(didEnterSearch) forControlEvents:UIControlEventEditingDidEnd];
+    [headerView addSubview:locationSearch];
+    
+    if (activityIndicator == nil)
+        activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+    [self.view addSubview:activityIndicator];
 }
 
 - (void)viewDidUnload
@@ -50,11 +85,24 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    [locationInput release];
+    locationInput = nil;
+    [locationSearch release];
+    locationSearch = nil;
+    [headerView release];
+    headerView = nil;
+    [fsLocationStrings removeAllObjects];
+    [fsLocationStrings release];
+    fsLocationStrings = nil;
+    
+    [fsl release];
+    fsl = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [activityIndicator startCompleteAnimation];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -83,13 +131,13 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 0;
+    return [fsLocationStrings count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -102,12 +150,17 @@
     }
     
     // Configure the cell...
-    
+    NSString * fsLocationStr = [fsLocationStrings objectAtIndex:[indexPath row]];    
+#if 0
+     UIButton * button = [[UIButton alloc] init];
+    [button setTitle: fsLocationStr forState:UIControlStateNormal];
+    [button setFrame:CGRectMake(0, 0, cell.frame.size.width, cell.frame.size.height)];
+    [cell addSubview:button];
+#else
+    [cell setBackgroundView:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_bar.png"]] autorelease]];
+    [[cell textLabel] setText:fsLocationStr];
+#endif
     return cell;
-}
-
--(void)getFoursquareVenues:(NSString*)text
-{
 }
 
 /*
@@ -149,9 +202,39 @@
 }
 */
 
+-(void)didEnterSearch {
+    NSString * text = [locationSearch text];
+    [self getFoursquareVenues:text];
+}
+
+-(void)getFoursquareVenues:(NSString*)text
+{
+    // first clear locations
+    [fsLocationStrings removeAllObjects];
+    [self.tableView reloadData];
+    
+    // search for given query
+    [fsl query:text];
+    [activityIndicator startCompleteAnimation];
+    
+}
+
 -(void)receiveVenueNames:(NSArray *)venueNames
 {
+    [activityIndicator stopCompleteAnimation];
+    [fsLocationStrings addObjectsFromArray:venueNames];
+    [self.tableView reloadData];
+}
 
+-(void)didReceiveConnectionError {
+    // populate with a message that says "No internet connection" and allow entering text
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Location error!"];
+    [alert setMessage:@"Could not connect to location server!"];
+    [alert show];
+    [alert release];
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - Table view delegate
@@ -166,6 +249,37 @@
      [self.navigationController pushViewController:detailViewController animated:YES];
      [detailViewController release];
      */
+    
+    [self didSelectLocationStringFromTableRow:indexPath];
 }
 
+- (UIView *)tableView:(UITableView *)tv viewForHeaderInSection:(NSInteger) sec
+{ 
+    // header view will have the non-gps option
+    return headerView;
+}
+- (CGFloat)tableView:(UITableView *)tv heightForHeaderInSection:(NSInteger)sec
+{
+    return HEADER_HEIGHT;
+}
+
+-(void)didSelectLocationStringFromHeader {
+    NSLog(@"Location string selected: %@", [locationInput text]);
+    [self dismissModalViewControllerAnimated:YES];
+    [self.delegate didChooseLocation:[locationInput text]];
+}
+-(void)didSelectLocationStringFromTableRow:(NSIndexPath *)indexPath {
+    NSString * locationString = [fsLocationStrings objectAtIndex:[indexPath row]];
+    NSLog(@"Location string selected: %@", locationString);
+    
+    [self dismissModalViewControllerAnimated:YES];
+    [self.delegate didChooseLocation:locationString];
+}
+
+/*** UITextFieldDelegate ****/
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+	[textField resignFirstResponder];
+	//NSLog(@"Comment entered: %@", [textField text]); 
+	return YES;
+}
 @end

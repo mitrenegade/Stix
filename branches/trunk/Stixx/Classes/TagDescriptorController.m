@@ -50,10 +50,11 @@
     //[badge release];
 	[commentField setDelegate:self];
 
-#if TARGET_IPHONE_SIMULATOR
+//#if TARGET_IPHONE_SIMULATOR
     [locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin];
     locationController = [[LocationViewController alloc] init];
-#endif
+    [locationController setDelegate:self];
+//#endif
 }
 
 -(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
@@ -140,7 +141,12 @@
 
 -(IBAction)locationTextBoxEntered:(id)sender
 {   
-    //[self presentModalViewController:locationController animated:YES];
+    [self presentModalViewController:locationController animated:YES];
+}
+
+-(void)didChooseLocation:(NSString *)location {
+    NSLog(@"FourSquare locator returned %@\n", location);
+    [locationField setText:location];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

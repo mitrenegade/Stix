@@ -15,7 +15,7 @@
 -(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString*)location;
 @end
 
-@interface TagDescriptorController : UIViewController <UITextFieldDelegate>{
+@interface TagDescriptorController : UIViewController <UITextFieldDelegate, LocationViewControllerDelegate>{
 	IBOutlet UIImageView * imageView;
 	IBOutlet UITextField * commentField;
 	IBOutlet UITextField * locationField;

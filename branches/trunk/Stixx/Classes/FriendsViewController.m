@@ -58,6 +58,8 @@
     [badgeView setUnderlay:buttonInstructions];
     [badgeView setHidden:YES];
 
+    if (activityIndicator == nil)
+        activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicator];
     //	return self;
 }

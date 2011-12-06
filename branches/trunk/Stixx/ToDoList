@@ -1,20 +1,2 @@
-// bugs:
-- tagview badgeview not correct order
-- if tag is taken before all tags downloaded from server, the size of allTags is wrong? no scroll?
-- badges should not be movable until scrollviews appear
-- tap on stix view too many times and window crashes
-
-// todo:
-- badges saved in dictionary with allTagID as key
-- add shake to refresh tagView badges; add shake or drag to refresh feed/friends
-- add touch to magnify for feed
-- change login screen/password - login in beginning
-- add timeout to kumulos 
-- add callbacks
-
-**************
-
-fixed
-- scrollView gets deleted if we receive memory warning - this happens when we go to addstix view - removed IOKit
-- unable to find iokit under /Developer/Platforms/iPhoneOS.platform/DeviceSupport/4.3.3 etc
-Copy IOKit to frameworks/IOKitFramework instead of frameworks/IOKitFramework/Versions/A/
+make sure tagViewController can be recreated with loadView and viewDidLoad in case it is deleted by low memory warning
+make sure loginViewController is the same as above

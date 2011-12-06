@@ -45,7 +45,12 @@
     [Foursquare2 searchVenuesNearByLatitude:lat longitude:lon radius:@"1500" query:text limit:@"20" callback:^(BOOL success, id result) {
         NSMutableArray* venueNames = [[NSMutableArray alloc] init];
         NSDictionary* message = (NSDictionary*)result;
-        if (nil != message) {
+        if(success==NO) {
+            if (nil != self.delegate) {
+                [self.delegate didReceiveConnectionError];
+            }
+        }
+        else if (nil != message) {
             NSDictionary* response = (NSDictionary*)[message valueForKey:@"response"];
             if (nil != response) {
                 NSArray* groups = (NSArray*)[response valueForKey:@"groups"];

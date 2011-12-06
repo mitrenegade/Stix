@@ -48,9 +48,8 @@
     {
         UIImageView * badgeLarge = [BadgeView getLargeBadgeOfType:i];
         [badgesLarge addObject:badgeLarge];
-        
         UIImageView * badge = [BadgeView getBadgeOfType:i];
-        badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365); // recenter badge according to         
+        //badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365);         
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 

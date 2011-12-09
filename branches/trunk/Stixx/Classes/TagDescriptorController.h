@@ -9,20 +9,20 @@
 #import <UIKit/UIKit.h>
 #import "ImageCache.h"
 #import "BadgeView.h"
-#import "LocationViewController.h"
+#import "LocationHeaderViewController.h"
 
 @protocol TagDescriptorDelegate
 -(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString*)location;
 @end
 
-@interface TagDescriptorController : UIViewController <UITextFieldDelegate, LocationViewControllerDelegate>{
+@interface TagDescriptorController : UIViewController <UITextFieldDelegate, LocationHeaderViewControllerDelegate>{
 	IBOutlet UIImageView * imageView;
 	IBOutlet UITextField * commentField;
-	IBOutlet UITextField * locationField;
+	IBOutlet UIButton * locationField; // not editable
 	IBOutlet UIButton * buttonOK;
 	IBOutlet UIButton * buttonCancel;
 	
-    LocationViewController * locationController;
+    LocationHeaderViewController * locationController;
     
     CGRect badgeFrame;
     int badgeType;
@@ -32,7 +32,7 @@
 
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
 @property (nonatomic, retain) IBOutlet UITextField * commentField;
-@property (nonatomic, retain) IBOutlet UITextField * locationField;
+@property (nonatomic, retain) IBOutlet UIButton * locationField;
 @property (nonatomic, retain) IBOutlet UIButton * buttonOK;
 @property (nonatomic, retain) IBOutlet UIButton * buttonCancel;
 @property (nonatomic, assign) NSObject<TagDescriptorDelegate> *delegate;

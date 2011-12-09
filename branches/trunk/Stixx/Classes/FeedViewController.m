@@ -186,11 +186,11 @@
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {
     // increment stix count for given feed item
-    if ([allTags count] == 0)
+    if ([allTags count] == 0) {
         // nothing loaded yet
         [badgeView resetBadgeLocations];
         return;
-    
+    }
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];
 
     if ([delegate getStixCount:type] < 1)

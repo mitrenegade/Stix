@@ -8,31 +8,30 @@
 
 #import <UIKit/UIKit.h>
 #import "FourSquareLocator.h"
-#import "LoadingAnimationView.h"
 
 @protocol LocationViewControllerDelegate
 -(void)didChooseLocation:(NSString*)location;
+-(void)didReceiveConnectionError;
+-(void)didReceiveSearchResults;
 @end
 
-@interface LocationViewController : UITableViewController<VenueDelegate, UITextFieldDelegate> {
+@interface LocationViewController : UITableViewController<VenueDelegate, UITableViewDataSource, UITableViewDelegate> {
+
     NSObject<LocationViewControllerDelegate> *delegate;
     FourSquareLocator* fsl;
     NSMutableArray * fsLocationStrings;
-    UITextField * locationInput;
-    UITextField * locationSearch;
-    UIView * headerView;
+    NSMutableArray *searchResults;
+    bool searching;
+    bool letUserSelectRow;
+    bool needSearch; // used to cancel a search if cancel button is hit in delegate
 
-    LoadingAnimationView * activityIndicator;
 }
 
 @property (nonatomic, assign) NSObject<LocationViewControllerDelegate> *delegate;
-@property (nonatomic, retain) UITextField * locationInput;
-@property (nonatomic, retain) UITextField * locationSearch;
-@property (nonatomic, retain) UIView * headerView;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
--(void)didEnterSearch;
+@property (nonatomic, retain) NSMutableArray *searchResults;
+@property (nonatomic, assign) bool needSearch;
+
 -(void)getFoursquareVenues:(NSString*)text;
 -(void)receiveVenueNames:(NSArray *)venueNames;
--(void)didSelectLocationStringFromTableRow:(NSIndexPath *) indexPath;
--(void)didSelectLocationStringFromHeader;
+-(void)clearSearchResults;
 @end

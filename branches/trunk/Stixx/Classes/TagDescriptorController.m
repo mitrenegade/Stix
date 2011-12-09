@@ -7,8 +7,6 @@
 //
 
 #import "TagDescriptorController.h"
-#import "LocationViewController.h"
-
 
 @implementation TagDescriptorController
 
@@ -51,8 +49,8 @@
 	[commentField setDelegate:self];
 
 //#if TARGET_IPHONE_SIMULATOR
-    [locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin];
-    locationController = [[LocationViewController alloc] init];
+    //[locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin]; // added in xib
+    locationController = [[LocationHeaderViewController alloc] init];
     [locationController setDelegate:self];
 //#endif
 }
@@ -136,17 +134,7 @@
 
 -(IBAction)buttonOKPressed:(id)sender
 {
-	[self.delegate didAddDescriptor:[commentField text] andLocation:[locationField text]];
-}
-
--(IBAction)locationTextBoxEntered:(id)sender
-{   
-    [self presentModalViewController:locationController animated:YES];
-}
-
--(void)didChooseLocation:(NSString *)location {
-    NSLog(@"FourSquare locator returned %@\n", location);
-    [locationField setText:location];
+	[self.delegate didAddDescriptor:[commentField text] andLocation:[[locationField titleLabel] text]];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
@@ -155,9 +143,31 @@
     [self dismissModalViewControllerAnimated:YES];
 }
 
+-(IBAction)locationTextBoxEntered:(id)sender
+{   
+    [commentField resignFirstResponder];
+    [self presentModalViewController:locationController animated:YES];
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
 	//NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
+
+/*** LocationHeaderViewControllerDelegate ****/
+
+-(void)didChooseLocation:(NSString *)location {
+    NSLog(@"FourSquare locator returned %@\n", location);
+    [locationField setTitle:location forState:UIControlStateNormal];
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+-(void)didCancelLocation
+{
+    [self.locationField resignFirstResponder];
+	//[self.delegate didAddDescriptor:nil];
+}
+
 @end
+

@@ -12,8 +12,20 @@
 enum {
     BADGE_TYPE_FIRE = 0,
     BADGE_TYPE_ICE,
+    BADGE_TYPE_BOMB,
+    BADGE_TYPE_BULB,
+//    BADGE_TYPE_MAX,
+    BADGE_TYPE_DEAL,
+    BADGE_TYPE_EYES,
+    BADGE_TYPE_GLASSES,
     BADGE_TYPE_HEART,
     BADGE_TYPE_LEAF,
+    BADGE_TYPE_LIPS,
+    BADGE_TYPE_PARTYHAT,
+    BADGE_TYPE_SMILE,
+    BADGE_TYPE_STACHE,
+    BADGE_TYPE_STAR,
+    BADGE_TYPE_SUN,
     BADGE_TYPE_MAX
 };
 
@@ -67,6 +79,8 @@ enum {
 -(int)getOppositeBadgeType:(int)type;
 +(int)getOutlineOffsetX:(int) type;
 +(int)getOutlineOffsetY:(int) type;
++(NSArray *)stixFilenames;
++(NSArray *)stixDescriptors;
 
 // for displaying badges
 +(UIImageView *) getBadgeOfType:(int)type;

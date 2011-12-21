@@ -291,6 +291,7 @@
     Tag * tag = [[allTags objectAtIndex:index] retain];
     
     NSString * name = tag.username;
+    NSString * descriptor = tag.descriptor;
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
     UIImage * image = tag.image;
@@ -298,7 +299,7 @@
     NSLog(@"Creating feed item at index %d: name %@ comment %@ image dims %f %f\n", index, name, comment, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
-    [feedItem populateWithName:name andWithComment:comment andWithLocationString:locationString andWithImage:image];
+    [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString andWithImage:image];
     [feedItem.view setFrame:CGRectMake(0, 0, 280, 320)]; 
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)

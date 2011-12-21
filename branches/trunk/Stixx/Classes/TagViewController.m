@@ -31,14 +31,6 @@
 
 //-(void)viewDidLoad {
 //	[super viewDidLoad];
-
-	/****** init badge view ******/
-	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
-    badgeView.delegate = self;
-    [badgeView setUnderlay:buttonInstructions];
-    [badgeView setShowStixCounts:NO]; // do not show or change stix counts
-    [delegate didCreateBadgeView:badgeView];
-    
     /****** init AR view ******/
     arViewController = [[ARViewController alloc] init];
 	CLLocation *newCenter = [[CLLocation alloc] initWithLatitude:42.369182 longitude:-71.080427];
@@ -47,7 +39,7 @@
 	arViewController.rotateViewsBasedOnPerspective = NO;
 	arViewController.centerLocation = newCenter;
 	[newCenter release];
-
+    
 	/***** create camera controller *****/
 	NSLog(@"Initializing camera.");
 	cameraController = [[BTLFullScreenCameraController alloc] init];
@@ -63,6 +55,13 @@
 	
     //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
     //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
+	/****** init badge view ******/
+	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
+    badgeView.delegate = self;
+    [badgeView setUnderlay:buttonInstructions];
+    [badgeView setShowStixCounts:NO]; // do not show or change stix counts
+    [delegate didCreateBadgeView:badgeView];
+    
 	[badgeView addSubview:arViewController.view];
     //[apertureView addSubview:badgeController.view];
 	//[overlayView addSubview:apertureView];
@@ -119,9 +118,9 @@
 	[overlayView release];
 	overlayView = nil;
     [rectView release];
-    [buttonInstructions release];
     rectView = nil;
-    buttonInstructions = nil;
+    //[buttonInstructions release];
+    //buttonInstructions = nil;
     
     [super viewDidUnload];
 }
@@ -191,37 +190,31 @@
 }
 
 /* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
--(void)didAddDescriptor:(NSString*)descriptor andLocation:(NSString *)location
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixFrame:(CGRect)frame
 {
     [self.cameraController dismissModalViewControllerAnimated:YES];
     ARCoordinate * newCoord;
-    NSString * desc;
-    NSString * loc;
+    NSString * desc = descriptor;
+    NSString * com = comment;
+    NSString * loc = location;
 
-    NSLog(@"Entered: '%@' for description and '%@' for location", descriptor, location);
-	if ([descriptor length] > 0 && [location length] > 0)
+    NSLog(@"Entered: '%@' for description, '%@' for comment, and '%@' for location", descriptor, comment, location);
+	if ([descriptor length] > 0)
 	{
         //desc = [NSString stringWithFormat:@"%@ @ %@", descriptor, location];
         desc = descriptor;
-        loc = [NSString stringWithFormat:@"@ %@", location];
 	}
-    else if ([descriptor length] == 0 && [location length] > 0)
+    else if ([descriptor length] == 0 && [comment length] > 0)
     {
-        desc = location;
-        loc = @"";
+        desc = comment;
     }
-    else if ([descriptor length] > 0 && [location length] == 0)
-    {
-        loc = @""; 
-        desc = descriptor;
-    }
-    else 
+    else if ([descriptor length] == 0 && [comment length] == 0)
     {
         NSDate *now = [NSDate date];
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         [formatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
         desc = [formatter stringFromDate:now];
-        loc = @"";
+        com = @"";
     }
     newCoord = [arViewController createCoordinateWithLabel:desc];
     
@@ -245,15 +238,16 @@
         username = @"anonymous";
     }
     Tag * tag = [[Tag alloc] init]; 
-    [tag addUsername:username andComment:desc andLocationString:loc];
+    [tag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
+    [tag appendHistoryWithUsername:username andComment:com andStixType:badgeType];
     UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
     if ([delegate isLoggedIn] == NO)
     {
         [image release];
         image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
     }
-    int x = badgeFrame.origin.x;
-    int y = badgeFrame.origin.y;
+    int x = frame.origin.x;
+    int y = frame.origin.y;
     NSLog(@"Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
     [tag addImage:image];
     [tag addStixOfType:badgeType andCount:1 atLocationX:x andLocationY:y];

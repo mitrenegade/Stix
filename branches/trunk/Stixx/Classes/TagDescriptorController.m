@@ -12,11 +12,14 @@
 
 @synthesize imageView;
 @synthesize commentField;
-@synthesize locationField;
+@synthesize commentField2;
+@synthesize locationField, locationButton;
 @synthesize buttonOK;
 @synthesize buttonCancel;
 @synthesize delegate;
 @synthesize badgeFrame, badgeType;
+@synthesize stix;
+@synthesize buttonInstructions;
 
 -(id)init
 {
@@ -39,15 +42,17 @@
     [super viewDidLoad]; 
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
 	[imageView setImage:tmp];
-    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f", tmp.size.width, tmp.size.height); 
+    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f with badge at %f %f", tmp.size.width, tmp.size.height, badgeFrame.origin.x, badgeFrame.origin.y); 
 
-    UIImageView * stix = [[self populateWithBadge:badgeType withCount:1 atLocationX:badgeFrame.origin.x andLocationY:badgeFrame.origin.y] retain];    
+    stix = [[self populateWithBadge:badgeType withCount:1 atLocationX:badgeFrame.origin.x andLocationY:badgeFrame.origin.y] retain];    
     [imageView addSubview:stix];
-    [stix release];
+    //[stix release];
     NSLog(@"TagDescriptor: imageView dims %f %f badge at %f %f", imageView.frame.size.width, imageView.frame.size.height, badgeFrame.origin.x, badgeFrame.origin.y);
-    //[badge release];
-	[commentField setDelegate:self];
-
+    
+    drag = 0;
+    
+    [commentField2 setHidden:YES]; // hide for now
+    
 //#if TARGET_IPHONE_SIMULATOR
     //[locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin]; // added in xib
     locationController = [[LocationHeaderViewController alloc] init];
@@ -59,12 +64,12 @@
     float item_width = imageView.frame.size.width;
     float item_height = imageView.frame.size.height;
     
-    UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+    UIImageView * newstix = [[BadgeView getBadgeOfType:type] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float originX = x;
     float originY = y;
     NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
-    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
+    newstix.frame = CGRectMake(originX, originY, newstix.frame.size.width, newstix.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = CGSizeMake(300, 300);
@@ -72,13 +77,13 @@
 	
 	float imageScale =  targetSize.width / originalSize.width;
     
-	CGRect stixFrameScaled = stix.frame;
+	CGRect stixFrameScaled = newstix.frame;
 	stixFrameScaled.origin.x *= imageScale;
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
-    [stix setFrame:stixFrameScaled];
+    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", newstix.frame.size.width, newstix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
+    [newstix setFrame:stixFrameScaled];
     
     // change comment field prompt based on stix
     switch (type) {
@@ -98,7 +103,7 @@
         default:
             break;
     }
-    return [stix autorelease];
+    return [newstix autorelease];
 }
 
 
@@ -134,7 +139,7 @@
 
 -(IBAction)buttonOKPressed:(id)sender
 {
-	[self.delegate didAddDescriptor:[commentField text] andLocation:[[locationField titleLabel] text]];
+	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixFrame:[stix frame]];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
@@ -146,6 +151,8 @@
 -(IBAction)locationTextBoxEntered:(id)sender
 {   
     [commentField resignFirstResponder];
+    [commentField2 resignFirstResponder];
+    [locationField resignFirstResponder];
     [self presentModalViewController:locationController animated:YES];
 }
 
@@ -159,7 +166,7 @@
 
 -(void)didChooseLocation:(NSString *)location {
     NSLog(@"FourSquare locator returned %@\n", location);
-    [locationField setTitle:location forState:UIControlStateNormal];
+    [locationField setText:location];
     [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -167,6 +174,60 @@
 {
     [self.locationField resignFirstResponder];
 	//[self.delegate didAddDescriptor:nil];
+}
+
+/*** dragging and resizing badge ***/
+
+-(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	UITouch *touch = [[event allTouches] anyObject];	
+	CGPoint location = [touch locationInView:imageView];
+	drag = 0;
+    
+    [self closeInstructions:nil];
+    
+    CGRect frame = stix.frame;
+    int left = frame.origin.x;
+    int right = frame.origin.x + frame.size.width;
+    int top = frame.origin.y;
+    int bottom = frame.origin.y + frame.size.height;
+    if (location.x > left && location.x < right && 
+        location.y > top && location.y < bottom)
+    {
+        drag = 1;
+    }
+
+    // point where finger clicked badge
+    offset_x = (location.x - stix.center.x);
+    offset_y = (location.y - stix.center.y);
+}
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	//[self touchesBegan:touches withEvent:event];
+	if (drag == 1)
+	{
+		UITouch *touch = [[event allTouches] anyObject];
+		CGPoint location = [touch locationInView:imageView];
+		// update frame of dragged badge, also scale
+		//float scale = 1; // do not change scale while dragging
+		if (!drag)
+			return;
+
+		float centerX = location.x - offset_x;
+		float centerY = location.y - offset_y;
+        stix.center = CGPointMake(centerX, centerY);
+	}
+}
+
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (drag == 1)
+	{
+        drag = 0;
+	}
+}
+
+-(IBAction)closeInstructions:(id)sender
+{
+    [buttonInstructions setHidden:YES];
 }
 
 @end

@@ -43,11 +43,14 @@
     return self;
 }
 
--(void)populateWithName:(NSString *)name andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
+-(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
     //NSLog(@"creating feedItemController with name %@ comment %@ image of size %f %f\n", name, comment, image.size.width, image.size.height);
     
     nameString = name;
-    commentString = comment;
+    commentString = descriptor;//comment;
+    if (descriptor == nil || [descriptor length] == 0) {
+        commentString = comment;
+    }
     imageData = image; //[image croppedImage:CGRectMake(5, 5, image.size.width-5, image.size.height-5)];
     locationString = location;
 }

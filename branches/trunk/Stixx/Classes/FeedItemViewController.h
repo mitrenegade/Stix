@@ -38,7 +38,7 @@
 @property (nonatomic, retain) NSString * commentString;
 @property (nonatomic, retain) UIImage * imageData;
 
--(void)populateWithName:(NSString *)name andWithComment:(NSString*)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image;
+-(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
 -(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;

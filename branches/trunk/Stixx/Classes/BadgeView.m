@@ -8,6 +8,9 @@
 
 #import "BadgeView.h"
 
+static NSArray * stixFilenames;
+static NSArray * stixDescriptors;
+
 @implementation BadgeView
 
 @synthesize delegate;
@@ -365,6 +368,53 @@
      */
 }
 
++(NSArray *) stixFilenames {
+    if (!stixFilenames)
+    {
+        stixFilenames = [[NSArray alloc] initWithObjects: 
+                         @"120_fire.png",
+                         @"120_ice.png",
+                         @"120_bomb.png",
+                         @"120_bulb.png",
+                         @"120_deal.png",
+                         @"120_eyes.png",
+                         @"120_glasses.png",
+                         @"120_heart.png",
+                         @"120_leaf.png",
+                         @"120_lips.png",
+                         @"120_partyhat.png",
+                         @"120_smile.png",
+                         @"120_stache.png",
+                         @"120_star.png",
+                         @"120_sun.png",
+                         nil];
+    }
+    return stixFilenames;
+}
+
++(NSArray *) stixDescriptors {
+    if (!stixDescriptors) {
+        stixDescriptors = [[NSArray alloc] initWithObjects: 
+                           @"Fire Stix",
+                           @"Ice Stix",
+                           @"Bomb",
+                           @"Light Bulb",
+                           @"Good Deal",
+                           @"Googley Eyes",
+                           @"Funky Glasses",
+                           @"Heart",
+                           @"Leaf",
+                           @"Luscious Lips",
+                           @"Party Hat",
+                           @"Smile",
+                           @"The Stache",
+                           @"Gold Star",
+                           @"Sunny",
+                           nil];
+    }
+    return stixDescriptors;
+}
+
 +(UIImageView *) getBadgeOfType:(int)type {
     // returns a half size image view
     UIImageView * stix = [BadgeView getLargeBadgeOfType:type];
@@ -377,28 +427,24 @@
 
 +(UIImageView *) getLargeBadgeOfType:(int)type {
     // returns a half size image view
-    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"heart_big.png", @"leaf_big.png", nil];
+    NSArray * filenames = [BadgeView stixFilenames];
     if (type < [filenames count])
     {
         UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
         NSLog(@"Loading large badge from filename %@\n", [filenames objectAtIndex:type]);
-        [filenames release];
         return stix;
     }
-    [filenames release];
     return nil;
 }
 +(UIImageView *) getEmptyBadgeOfType:(int)type {
     // returns a half size image view
-    NSArray * filenames = [[NSArray alloc] initWithObjects: @"fire_big.png", @"ice_big.png", @"empty_heart.png", @"empty_leaf.png", nil];
+    NSArray * filenames = [BadgeView stixFilenames];
     if (type < [filenames count])
     {
         UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
         NSLog(@"Loading empty badge from filename %@\n", [filenames objectAtIndex:type]);
-        [filenames release];
         return stix;
     }
-    [filenames release];
     return nil;
 }
 -(int)getOppositeBadgeType:(int)type {
@@ -418,13 +464,13 @@
 
 +(int)getOutlineOffsetX:(int)type {
 
-    const int xoffset[BADGE_TYPE_MAX] = {-5, -5, -2, -5};
-    return xoffset[type];
+    //const int xoffset[BADGE_TYPE_MAX] = {-5, -5, -2, -5};
+    return -5; //xoffset[type];
 }
 +(int)getOutlineOffsetY:(int)type {
     
-    const int yoffset[BADGE_TYPE_MAX] = {10, 10, 2, 10};
-    return yoffset[type];
+    //const int yoffset[BADGE_TYPE_MAX] = {10, 10, 2, 10};
+    return 10; //yoffset[type];
 }
 - (void)dealloc {
 	[super dealloc];

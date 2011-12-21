@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 
 @protocol VenueDelegate
--(void)receiveVenueNames:(NSArray*)venueNames;
+-(void)receiveVenueNames:(NSArray*)venueNames andLatLong:(NSArray*)latlong;
 -(void)didReceiveConnectionError;
 @end
 
@@ -26,4 +26,5 @@
 
 - (id)init;
 - (void)query:(NSString*)text;
+- (double)distanceFromLatLong:(NSString*)latlongString;
 @end

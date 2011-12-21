@@ -29,6 +29,26 @@
 	return self;
 }
 
+-(double)distanceFromLatLong:(NSString *)latlongString {
+    // parse latlong
+    NSArray * tmp = [latlongString componentsSeparatedByString:@","];
+    NSString * latstr = [tmp objectAtIndex:0];
+    double lat = [latstr doubleValue];
+    NSString * lonstr = [tmp objectAtIndex:1];
+    double lon = [lonstr doubleValue];
+
+    CLLocation* location = [gps location];
+    if (nil == location) {
+        return 9999;
+    }
+    double currlat = [location coordinate].latitude;
+    double currlong = [location coordinate].longitude;
+    double dx = currlat - lat;
+    double dy = currlong - lon;
+    double dist = sqrt(dx*dx + dy*dy);
+    return dist;
+}
+
 -(void)query:(NSString*)text
 {
 #if TARGET_IPHONE_SIMULATOR
@@ -42,8 +62,9 @@
     NSString* lat = [[NSString alloc] initWithFormat:@"%f", [location coordinate].latitude];
     NSString* lon = [[NSString alloc] initWithFormat:@"%f", [location coordinate].longitude];
 #endif
-    [Foursquare2 searchVenuesNearByLatitude:lat longitude:lon radius:@"1500" query:text limit:@"20" callback:^(BOOL success, id result) {
+    [Foursquare2 searchVenuesNearByLatitude:lat longitude:lon radius:@"500" query:text limit:@"20" callback:^(BOOL success, id result) {
         NSMutableArray* venueNames = [[NSMutableArray alloc] init];
+        NSMutableArray * venueLL = [[NSMutableArray alloc] init];
         NSDictionary* message = (NSDictionary*)result;
         if(success==NO) {
             if (nil != self.delegate) {
@@ -63,9 +84,14 @@
                                 for (int i = 0; i < [items count]; ++i) {
                                     NSDictionary* item = (NSDictionary*)[items objectAtIndex:i];
                                     NSString* name = [item valueForKey:@"name"];
+                                    NSString* latlong = [item valueForKey:@"ll"];
                                     if (nil != name)
                                     {
                                         [venueNames addObject:name];
+                                        if (latlong)
+                                            [venueLL addObject:latlong];
+                                        else
+                                            [venueLL addObject:@"22,22"];
                                     }
                                 }
                             }
@@ -75,7 +101,7 @@
             }
         }
         if (nil != self.delegate) {
-            [self.delegate receiveVenueNames:venueNames];
+            [self.delegate receiveVenueNames:venueNames andLatLong:venueLL];
         }
     }];
 }

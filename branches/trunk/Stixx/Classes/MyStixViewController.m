@@ -13,6 +13,7 @@
 @synthesize badgeView;
 @synthesize delegate;
 @synthesize buttonRules;
+@synthesize tableController;
 
 #define BADGE_MYSTIX_PADDING 45 // how many pixels per side in mystix view
 
@@ -45,7 +46,7 @@
     labels = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
     empties = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
 
-    [self generateAllStix];
+    //[self generateAllStix];
     
     buttonRules = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 450)];
     [buttonRules addTarget:self
@@ -53,6 +54,12 @@
      forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:buttonRules];
     [buttonRules setHidden:YES];
+        
+    tableController = [[GiftStixTableController alloc] init];
+    [tableController.view setFrame:CGRectMake(0, 215, 320, 180)];
+    [tableController setDelegate:self];
+    [self.view addSubview:tableController.view];
+
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -62,7 +69,7 @@
 }
 
 -(void)generateAllStix {
-    NSArray * stixLabels = [[NSArray alloc] initWithObjects:@"Fire", @"Ice", @"Heart", @"Leaf", nil];
+    NSArray * stixLabels = [BadgeView stixDescriptors];
     int x=0;
     int y=0;
     int i;
@@ -104,12 +111,11 @@
         }
         
     }
-    [stixLabels release];
-
 }
 
 -(void)forceLoadMyStix {
-    int level = [delegate getStixLevel];
+#if 0
+    int level = BADGE_TYPE_ICE + 1; //[delegate getStixLevel];
     for (int i=0; i<level; i++) {
         [[badges objectAtIndex:i] setHidden:NO];
         [[labels objectAtIndex:i] setHidden:NO];
@@ -124,6 +130,7 @@
         //[[labels objectAtIndex:i] removeFromSuperview];
         //[self.view addSubview:[empties objectAtIndex:i]];
     }
+#endif
 }
 
 - (void)didReceiveMemoryWarning
@@ -155,7 +162,6 @@
 
 /**** badgeViewDelegate - never used because no badgeView is shown ****/
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {};
--(int)getStixCount:(int)stix_type {return 0;};
 -(int)getStixLevel {
     return [self.delegate getStixLevel];
 }
@@ -168,6 +174,8 @@
     UITouch *touch = [[event allTouches] anyObject];	        
     CGPoint location = [touch locationInView:self.view];
     
+    return;
+#if 0
     // eventually this behavior will be done through scrollview
     // right now it's just a click
     //[myDelegate didClickAtLocation:location];
@@ -234,10 +242,18 @@
     else {
         // not a touch for info, do nothing
     }
+#endif
 }
 
 -(IBAction)didClickOnButtonRules:(id)sender {
     [buttonRules setHidden:YES];
+}
+
+/*** GiftStixTableControllerDelegate ***/
+
+-(int)getStixCount:(int)type {
+    // also a badgeViewDelegate call
+    return [self.delegate getStixCount:type];
 }
 
 @end

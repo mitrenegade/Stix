@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
+#import "GiftStixTableController.h"
 
 @protocol MyStixViewDelegate
 
@@ -20,13 +21,15 @@
 
 @end
 
-@interface MyStixViewController : UIViewController <BadgeViewDelegate> {
+@interface MyStixViewController : UIViewController <BadgeViewDelegate, GiftStixTableControllerDelegate> {
     BadgeView * badgeView;
     NSMutableArray * badges;
     NSMutableArray * labels;
     NSMutableArray * empties;
     
     UIButton * buttonRules;
+    
+    GiftStixTableController * tableController;
 
     NSObject<MyStixViewDelegate> * delegate;
 }
@@ -34,6 +37,7 @@
 @property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
 @property (nonatomic, retain) UIButton * buttonRules;
+@property (nonatomic, retain) GiftStixTableController * tableController;
 -(void)forceLoadMyStix;
 -(void)generateAllStix;
 -(IBAction)didClickOnButtonRules:(id)sender;

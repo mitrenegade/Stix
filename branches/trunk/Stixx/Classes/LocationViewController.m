@@ -197,19 +197,38 @@
     [fsl query:text];
 }
 
--(void)receiveVenueNames:(NSArray *)venueNames
+-(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong
 {
     searching = NO;
     letUserSelectRow = YES;
     self.tableView.scrollEnabled = YES;
     
+    NSMutableArray * distArray = [[NSMutableArray alloc] init];
+    
     if (needSearch) {
         [fsLocationStrings removeAllObjects];
+#if 0
+        for (int i=0; i<[venueNames count]; i++) {
+            int insertIndexTarget = 0;
+            double distFromHere = [fsl distanceFromLatLong:[latlong objectAtIndex:i]];
+            for (int j=0; j<[distArray count]; j++) {
+                double oldDist = [[distArray objectAtIndex:j] doubleValue];
+                if (distFromHere < oldDist)
+                    insertIndexTarget = j;
+                NSLog(@"Comparing object %d with object %d: distance %f vs %f\n", i, j, distFromHere, oldDist);
+            }
+            [fsLocationStrings insertObject:[venueNames objectAtIndex:i] atIndex:insertIndexTarget];
+            [distArray insertObject:[NSNumber numberWithDouble:distFromHere] atIndex:insertIndexTarget];
+            NSLog(@"Inserted object at index %d", insertIndexTarget);
+        }
+#else
         [fsLocationStrings addObjectsFromArray:venueNames];
+#endif
         [self.tableView reloadData];
         
         [self.delegate didReceiveSearchResults];
     }
+    [distArray release];
 }
 
 -(void)didReceiveConnectionError {

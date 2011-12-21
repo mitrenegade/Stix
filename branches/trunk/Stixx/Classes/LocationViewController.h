@@ -32,6 +32,6 @@
 @property (nonatomic, assign) bool needSearch;
 
 -(void)getFoursquareVenues:(NSString*)text;
--(void)receiveVenueNames:(NSArray *)venueNames;
+-(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong;
 -(void)clearSearchResults;
 @end

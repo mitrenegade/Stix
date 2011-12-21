@@ -27,6 +27,7 @@
 @interface Tag : NSObject {
     // elements saved by Kumulos
     NSString * username;
+    NSString * descriptor;
     NSString * comment;
     NSString * locationString;
     UIImage * image;
@@ -43,17 +44,24 @@
     
     NSString* timestring; // the timestamp for the most recent tag, in string format (unused)
     NSDate * timestamp; // the timestamp as an NSDate
+    
+    // comments/history
+    NSMutableArray * historyUsername;
+    NSMutableArray * historyComments;
+    NSMutableArray * historyStixType;
 }
 
-+ (Tag*)initWithName:(NSString*)name andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts;
-- (void)addUsername:(NSString*)newUsername andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
++ (Tag*)initWithName:(NSString*)name andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)newLocationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts;
+- (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
 -(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(void)addStixCounts:(NSMutableArray *) stixCounts;
+-(void)appendHistoryWithUsername:(NSString*)newUsername andComment:(NSString*)newComment andStixType:(int)newStixType;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
+@property (nonatomic, retain) NSString * descriptor;
 @property (nonatomic, retain) NSString * comment;
 @property (nonatomic, retain) NSString * locationString;
 @property (nonatomic, retain) UIImage * image;
@@ -68,5 +76,8 @@
 @property (nonatomic, assign) int badgeType;
 @property (nonatomic, assign) int badgeCount;
 @property (nonatomic, retain) NSMutableArray * stixCounts;
+@property (nonatomic, retain) NSMutableArray * historyUsername;
+@property (nonatomic, retain) NSMutableArray * historyComment;
+@property (nonatomic, retain) NSMutableArray * historyStixType;
 
 @end

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
 #import "GiftStixTableController.h"
+#import "CarouselView.h"
 
 @protocol MyStixViewDelegate
 
@@ -30,11 +31,13 @@
     UIButton * buttonRules;
     
     GiftStixTableController * tableController;
+    CarouselView * carouselView;
 
     NSObject<MyStixViewDelegate> * delegate;
 }
 
 @property (nonatomic, retain) BadgeView * badgeView;
+@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
 @property (nonatomic, retain) UIButton * buttonRules;
 @property (nonatomic, retain) GiftStixTableController * tableController;

@@ -14,6 +14,7 @@
 @synthesize delegate;
 @synthesize buttonRules;
 @synthesize tableController;
+@synthesize carouselView;
 
 #define BADGE_MYSTIX_PADDING 45 // how many pixels per side in mystix view
 
@@ -41,6 +42,11 @@
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
     [delegate didCreateBadgeView:badgeView];
+    
+    /***** init carouselView *****/
+    carouselView = [[CarouselView alloc] initWithFrame:CGRectMake(0,90,320,80)];
+    [carouselView initWithStixLevel:[delegate getStixLevel]];
+    [self.view addSubview:carouselView];
     
     badges = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
     labels = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];

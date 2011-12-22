@@ -13,12 +13,14 @@
 
 @synthesize labelName;
 @synthesize labelComment;
+@synthesize labelDescriptor;
 @synthesize labelTime;
-@synthesize labelCommentBG;
+@synthesize labelDescriptorBG;
 @synthesize labelLocationString;
 @synthesize imageView;
 @synthesize nameString, commentString, imageData;
 @synthesize userPhotoView;
+@synthesize addCommentButton;
 
 /*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -44,12 +46,14 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
-    //NSLog(@"creating feedItemController with name %@ comment %@ image of size %f %f\n", name, comment, image.size.width, image.size.height);
+    NSLog(@"creating feedItemController with name %@ descriptor %@ comment %@ image of size %f %f\n", name, descriptor, comment, image.size.width, image.size.height);
     
     nameString = name;
-    commentString = descriptor;//comment;
+    descriptorString = descriptor;
+    commentString = comment;
     if (descriptor == nil || [descriptor length] == 0) {
-        commentString = comment;
+        descriptorString = comment;
+        commentString = nil;
     }
     imageData = image; //[image croppedImage:CGRectMake(5, 5, image.size.width-5, image.size.height-5)];
     locationString = location;
@@ -174,16 +178,17 @@
     // Do any additional setup after loading the view from its nib.
     [labelName setText:[NSString stringWithFormat:@"%@", nameString]];
     UIColor * textColor = [UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1.0];
-    [labelComment setTextColor:textColor];
+    [labelDescriptor setTextColor:textColor];
+    [labelDescriptor setText:descriptorString];
     [labelComment setText:commentString];
     [imageView setImage:imageData];
     [labelLocationString setText:locationString];
-    if ([locationString length] == 0) {
-        [labelComment setFrame:CGRectMake(labelComment.frame.origin.x, labelComment.frame.origin.y, labelComment.frame.size.width, 46)]; // combined heights
-        [labelCommentBG setFrame:CGRectMake(labelCommentBG.frame.origin.x, labelCommentBG.frame.origin.y, labelCommentBG.frame.size.width, 46)];
-        [labelLocationString setHidden:YES];
+    if ([commentString length] == 0) {
+        [labelDescriptor setFrame:CGRectMake(labelDescriptor.frame.origin.x, labelDescriptor.frame.origin.y, labelDescriptor.frame.size.width, 46)]; // combined heights
+        [labelDescriptorBG setFrame:CGRectMake(labelDescriptorBG.frame.origin.x, labelDescriptorBG.frame.origin.y, labelDescriptorBG.frame.size.width, 46)];
+        [labelComment setHidden:YES];
     }
-    //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelComment.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
+    //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelDescriptor.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
 }
 
 - (void)viewDidUnload

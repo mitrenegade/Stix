@@ -14,14 +14,17 @@
 @interface FeedItemViewController : UIViewController {
     
 	IBOutlet UILabel * labelName;
-    IBOutlet UILabel * labelCommentBG; // needed for opacity trick
-	IBOutlet UILabel * labelComment;
+    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
+	IBOutlet UILabel * labelDescriptor;
+    IBOutlet UILabel * labelComment;
 	IBOutlet UILabel * labelTime;
     IBOutlet UILabel * labelLocationString;
 	IBOutlet UIImageView * imageView;
     IBOutlet UIImageView * userPhotoView;
+    IBOutlet UIButton * addCommentButton;
     
     NSString * nameString;
+    NSString * descriptorString;
     NSString * commentString;
     NSString * locationString;
     UIImage * imageData;
@@ -29,7 +32,8 @@
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
-@property (retain, nonatomic) IBOutlet UILabel * labelCommentBG;
+@property (retain, nonatomic) IBOutlet UILabel * labelDescriptor;
+@property (retain, nonatomic) IBOutlet UILabel * labelDescriptorBG;
 @property (retain, nonatomic) IBOutlet UILabel * labelTime;
 @property (retain, nonatomic) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
@@ -37,6 +41,7 @@
 @property (nonatomic, retain) NSString * nameString;
 @property (nonatomic, retain) NSString * commentString;
 @property (nonatomic, retain) UIImage * imageData;
+@property (nonatomic, retain) IBOutlet UIButton * addCommentButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image;
 -(void)populateWithUserPhoto:(UIImage*)photo;

@@ -19,6 +19,8 @@
 @synthesize activityIndicator;
 @synthesize scrollView;
 @synthesize friendPages;
+@synthesize currentProfile;
+@synthesize userProfileController;
 
 #define FRIENDS_COL 3
 #define FRIENDS_ROW 2
@@ -280,29 +282,40 @@
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
-#if 0
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Beta Version"];
-    [alert setMessage:@"Friend profiles coming soon!"];
-    [alert show];
-    [alert release];
-#else
     NSEnumerator *e = [userPhotoFrames keyEnumerator];
     id key;
     while (key = [e nextObject]) {
         CGRect frame = [[userPhotoFrames objectForKey:key] CGRectValue];
         if (CGRectContainsPoint(frame, location)){
+#if 0
             UIAlertView* alert = [[UIAlertView alloc]init];
             [alert addButtonWithTitle:@"Ok"];
             [alert setTitle:@"Friend clicked"];
             [alert setMessage:[NSString stringWithFormat:@"You clicked on friend %@!", key]];
             [alert show];
             [alert release];
+#else
+            currentProfile = key;
+            userProfileController = [[UserProfileViewController alloc] init];
+            [userProfileController setDelegate:self];
+            [self.view addSubview:userProfileController.view];
+            
+            // must add to subview before changing name/photo
+            [userProfileController setUsername:currentProfile];
+            UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
+            [userProfileController setPhoto:[photo autorelease]];
+#endif
             break;
         }
     }
-#endif
 }
 
+/**** userprofile view delegate ****/
+- (int)getUserTagTotal {return 0;}
+
+-(void)didDismissUserProfileView {
+    [userProfileController.view removeFromSuperview];
+    [userProfileController release];
+    userProfileController = nil;
+}
 @end

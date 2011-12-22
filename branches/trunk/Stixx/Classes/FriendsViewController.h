@@ -10,6 +10,7 @@
 #import "BadgeView.h"
 #import "PagedScrollView.h"
 #import "LoadingAnimationView.h"
+#import "UserProfileViewController.h"
 
 @protocol FriendsViewDelegate
 
@@ -26,7 +27,7 @@
 
 @end
 
-@interface FriendsViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate>
+@interface FriendsViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, UserProfileViewDelegate>
 {
     NSMutableDictionary *userPhotos;
     NSMutableDictionary *userPhotoFrames;
@@ -41,6 +42,10 @@
     int lastContentOffset;
 
     NSObject<FriendsViewDelegate> * delegate;
+    
+    UserProfileViewController * userProfileController;
+
+    NSString * currentProfile; // name of profile currently viewed
 }
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
 @property (nonatomic, retain) NSMutableDictionary * userPhotoFrames;
@@ -52,6 +57,9 @@
 //@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic, retain) NSString * currentProfile;
+@property (nonatomic, retain) UserProfileViewController * userProfileController;
+
 -(IBAction)closeInstructions:(id)sender;
 -(void)setIndicator:(BOOL)animate;
 -(IBAction)backButtonClicked:(id)sender;

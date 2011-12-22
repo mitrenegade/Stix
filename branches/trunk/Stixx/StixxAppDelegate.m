@@ -722,17 +722,8 @@ static const int levels[4] = {0,0,5,10};
             ct = ct + 1;
             [allStix replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct]];
             ret = ct;
-#if 0         
-            // add to kumulos. todo: also error check
-            //NSMutableData * data = [[profileController arrayToData:allStix] retain];
-            //[k addStixToUserWithUsername:name andStix:data];
-            //[data release];
-#endif
-//            NSLog(@"Increment my %@ stix count for user %@ to %d", type==BADGE_TYPE_FIRE?@"Fire":@"Ice", name, ct);
         }
     }
-//    if (([name isEqualToString:@"anonymous"] == NO) && ([name length]>0))
-//        [k addStixToQueueWithUsername:name andFromUsername:username andType:type andCount:1];
     
     return ret;
 }
@@ -741,16 +732,6 @@ static const int levels[4] = {0,0,5,10};
     // decrement stix count of user
     int ret = -1;
     int ct = 0;
-    /*
-    if ([name isEqualToString:@"anonymous"])
-    {
-        int ct = [[allStix objectAtIndex:type] intValue];
-        ct = ct - 1;
-        [allStix replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct]];
-        ret = ct;
-    } 
-    else if ([name isEqualToString:username])
-    */
     if ([name isEqualToString:username])
     {
         if (type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE)
@@ -768,8 +749,6 @@ static const int levels[4] = {0,0,5,10};
 //            NSLog(@"Decrement my %@ stix count for user %@ to %d", type==BADGE_TYPE_FIRE?@"Fire":@"Ice", name, ct);
         }
     }
-//    if ([name isEqualToString:@"anonymous"] == NO || [name length]>0)
-//        [k addStixToQueueWithUsername:name andFromUsername:username andType:type andCount:1];
     return ret;
 }
 

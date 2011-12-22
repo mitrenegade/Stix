@@ -608,8 +608,8 @@ static const int levels[4] = {0,0,5,10};
 
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
-    if (lastBadgeView)
-        [lastBadgeView resetBadgeLocations];
+    //if (lastBadgeView)
+    //    [lastBadgeView resetBadgeLocations];
     
     [myStixController forceLoadMyStix];
     

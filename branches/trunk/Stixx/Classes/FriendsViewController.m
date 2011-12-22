@@ -11,12 +11,14 @@
 @implementation FriendsViewController
 
 @synthesize userPhotos;
+@synthesize userPhotoFrames;
 @synthesize delegate;
 @synthesize buttonInstructions;
 @synthesize buttonBack;
 @synthesize badgeView;
 @synthesize activityIndicator;
 @synthesize scrollView;
+@synthesize friendPages;
 
 #define FRIENDS_COL 3
 #define FRIENDS_ROW 2
@@ -61,7 +63,9 @@
     if (activityIndicator == nil)
         activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicator];
-    //	return self;
+
+    userPhotoFrames = [[NSMutableDictionary alloc] init];
+    friendPages = [[NSMutableArray alloc] init];
 }
 
 - (void)didReceiveMemoryWarning
@@ -84,6 +88,8 @@
     badgeView = nil;
     [scrollView release];
     scrollView = nil;
+    [userPhotoFrames release];
+    userPhotoFrames = nil;
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -178,53 +184,68 @@
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
-    // for now, display images of friends, six to a page
-    UIView * friendPageView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 300)];
-    //[friendPageView setBackgroundColor:[UIColor redColor]];
-    int x = 0;
-    int y = 0;
-    //for (id key in userPhotos) {
-    int items_per_page = FRIENDS_COL * FRIENDS_ROW;
-    int start_index = index * items_per_page;
-    int end_index = start_index + items_per_page - 1;
-    NSLog(@"Creating friend page %d with indices %d-%d", index, start_index, end_index);
-    NSEnumerator *e = [userPhotos keyEnumerator];
-    id key;
-    int ct = 0;
-    while (key = [e nextObject]) {
-        if (ct >= start_index && ct <= end_index) {
-            UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:key]];
-            UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
-            [friendView setBackgroundColor:[UIColor blackColor]];
-            NSString * name = key;
-            friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 90);
-            UILabel * namelabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20) + 85, 90, 20)];
-            [namelabel setText:name];
-            [namelabel setBackgroundColor:[UIColor blackColor]];
-            [namelabel setTextColor:[UIColor whiteColor]];
-            [namelabel setTextAlignment:UITextAlignmentCenter];
-            [friendPageView addSubview:friendView];
-            [friendPageView addSubview:namelabel];
-            [photo release];
-            [friendView release];
-            [namelabel release];
-            
-            NSLog(@"  Adding friend %d = %@ to position %d %d", ct, name, x, y);
-            
-            x = x + 1;
-            if (x==FRIENDS_COL)
-            {
-                x = 0;
-                y = y + 1;
+    // display images of friends, six to a page
+    if ([friendPages count] < index+1 || [friendPages objectAtIndex:index] == nil)
+    {
+        UIView * friendPageView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 300)];
+
+        int x = 0;
+        int y = 0;
+        //for (id key in userPhotos) {
+        int items_per_page = FRIENDS_COL * FRIENDS_ROW;
+        int start_index = index * items_per_page;
+        int end_index = start_index + items_per_page - 1;
+        NSLog(@"Creating friend page %d with indices %d-%d", index, start_index, end_index);
+        NSEnumerator *e = [userPhotos keyEnumerator];
+        id key;
+        int ct = 0;
+        while (key = [e nextObject]) {
+            if (ct >= start_index && ct <= end_index) {
+                UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:key]];
+                UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
+                [friendView setBackgroundColor:[UIColor blackColor]];
+                NSString * name = key;
+                friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 90);
+                UILabel * namelabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20) + 85, 90, 20)];
+                [namelabel setText:name];
+                [namelabel setBackgroundColor:[UIColor blackColor]];
+                [namelabel setTextColor:[UIColor whiteColor]];
+                [namelabel setTextAlignment:UITextAlignmentCenter];
+                [friendPageView addSubview:friendView];
+                [friendPageView addSubview:namelabel];
+                [photo release];
+                [friendView release];
+                [namelabel release];
+                
+                NSLog(@"  Adding friend %d = %@ to position %d %d", ct, name, x, y);
+
+                // remember the frame
+                CGRect scrollFrame = friendView.frame;
+                scrollFrame.origin.x += index * friendPageView.frame.size.width;
+                [userPhotoFrames setObject:[NSValue valueWithCGRect:scrollFrame] forKey:key];
+
+                x = x + 1;
+                if (x==FRIENDS_COL)
+                {
+                    x = 0;
+                    y = y + 1;
+                }
+                if (y == FRIENDS_ROW)
+                    break;            
             }
-            if (y == FRIENDS_ROW)
-                break;            
+            ct++;
+            if (ct > end_index)
+                break;
         }
-        ct++;
-        if (ct > end_index)
-            break;
+        //[friendPages replaceObjectAtIndex:index withObject:friendPageView];        
+        [friendPages addObject:friendPageView];
+        return [friendPageView autorelease];
     }
-    return [friendPageView autorelease];
+    else
+    {
+        UIView * friendPageView = [friendPages objectAtIndex:index];
+        return friendPageView;
+    }
 }
 
 -(int)itemCount
@@ -259,12 +280,29 @@
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
+#if 0
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
     [alert setTitle:@"Beta Version"];
     [alert setMessage:@"Friend profiles coming soon!"];
     [alert show];
     [alert release];
+#else
+    NSEnumerator *e = [userPhotoFrames keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        CGRect frame = [[userPhotoFrames objectForKey:key] CGRectValue];
+        if (CGRectContainsPoint(frame, location)){
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"Ok"];
+            [alert setTitle:@"Friend clicked"];
+            [alert setMessage:[NSString stringWithFormat:@"You clicked on friend %@!", key]];
+            [alert show];
+            [alert release];
+            break;
+        }
+    }
+#endif
 }
 
 @end

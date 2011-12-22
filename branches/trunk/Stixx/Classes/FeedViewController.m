@@ -32,6 +32,9 @@
 @synthesize scrollView;
 @synthesize lastPageViewed;
 @synthesize zoomViewController;
+
+#define FEED_ITEM_WIDTH 270
+#define FEED_ITEM_HEIGHT 320
 -(id)init
 {
 	[super initWithNibName:@"FeedViewController" bundle:nil];
@@ -56,7 +59,7 @@
 	/****** init badge view ******/
 	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
-    [self initializeScrollWithPageSize:CGSizeMake(280, 320)];
+    [self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     scrollView.isLazy = YES;
     [delegate didCreateBadgeView:badgeView];
 
@@ -300,7 +303,7 @@
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString andWithImage:image];
-    [feedItem.view setFrame:CGRectMake(0, 0, 280, 320)]; 
+    [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)
     {

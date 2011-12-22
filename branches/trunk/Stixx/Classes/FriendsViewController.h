@@ -29,6 +29,8 @@
 @interface FriendsViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate>
 {
     NSMutableDictionary *userPhotos;
+    NSMutableDictionary *userPhotoFrames;
+    NSMutableArray * friendPages;
     IBOutlet UIButton * buttonInstructions;
     IBOutlet UIButton * buttonBack;
     BadgeView * badgeView;
@@ -41,6 +43,8 @@
     NSObject<FriendsViewDelegate> * delegate;
 }
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
+@property (nonatomic, retain) NSMutableDictionary * userPhotoFrames;
+@property (nonatomic, retain) NSMutableArray * friendPages;
 @property (nonatomic, assign) NSObject<FriendsViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) IBOutlet UIButton * buttonBack;

@@ -134,6 +134,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
     }
     
     // Configure the cell...
@@ -141,7 +142,6 @@
 
     [cell.contentView setBackgroundColor:[UIColor clearColor]];
     [cell setFrame:CGRectMake(0, 0, 320, 120)];
-    [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
     [[cell textLabel] setText:fsLocationStr];
 
     return cell;

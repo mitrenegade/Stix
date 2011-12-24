@@ -16,7 +16,7 @@
 @synthesize locationString;
 @synthesize badge_x, badge_y, badgeType, badgeCount;
 @synthesize stixCounts;
-@synthesize historyComment, historyStixType, historyUsername;
+//@synthesize historyComment, historyStixType, historyUsername;
 
 
 + (Tag*)initWithName:(NSString*)name andDescriptor:newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts
@@ -80,6 +80,7 @@
     [stixCounts addObjectsFromArray:newStixCounts];
 }
 
+/*
 -(void)appendHistoryWithUsername:(NSString *)newUsername andComment:(NSString *)newComment andStixType:(int)newStixType {
     if (historyUsername == nil) {
         historyUsername = [[NSMutableArray alloc] init];
@@ -90,6 +91,7 @@
     [historyComment addObject:newComment];
     [historyStixType addObject:[NSNumber numberWithInt:newStixType]];
 }
+ */
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
     // loading a tag from kumulos

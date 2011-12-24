@@ -46,9 +46,9 @@
     NSDate * timestamp; // the timestamp as an NSDate
     
     // comments/history
-    NSMutableArray * historyUsername;
-    NSMutableArray * historyComments;
-    NSMutableArray * historyStixType;
+    //NSMutableArray * historyUsername;
+    //NSMutableArray * historyComments;
+    //NSMutableArray * historyStixType;
 }
 
 + (Tag*)initWithName:(NSString*)name andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)newLocationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts;
@@ -57,7 +57,7 @@
 - (void) addImage:(UIImage*)image;
 -(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(void)addStixCounts:(NSMutableArray *) stixCounts;
--(void)appendHistoryWithUsername:(NSString*)newUsername andComment:(NSString*)newComment andStixType:(int)newStixType;
+//-(void)appendHistoryWithUsername:(NSString*)newUsername andComment:(NSString*)newComment andStixType:(int)newStixType;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
@@ -76,8 +76,8 @@
 @property (nonatomic, assign) int badgeType;
 @property (nonatomic, assign) int badgeCount;
 @property (nonatomic, retain) NSMutableArray * stixCounts;
-@property (nonatomic, retain) NSMutableArray * historyUsername;
-@property (nonatomic, retain) NSMutableArray * historyComment;
-@property (nonatomic, retain) NSMutableArray * historyStixType;
+//@property (nonatomic, retain) NSMutableArray * historyUsername;
+//@property (nonatomic, retain) NSMutableArray * historyComment;
+//@property (nonatomic, retain) NSMutableArray * historyStixType;
 
 @end

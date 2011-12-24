@@ -118,7 +118,7 @@
 {
     static NSString *CellIdentifier = @"Cell";
     
-    GiftStixTableCell *cell = [(GiftStixTableCell*) tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    GiftStixTableCell *cell = (GiftStixTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[GiftStixTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
@@ -129,7 +129,7 @@
     //NSString * stixDesc = [stixDescriptors objectAtIndex:type];
     //NSString * cellLabel = [NSString stringWithFormat:@"%@: %d", stixDesc, count];
     //[[cell textLabel] setText:cellLabel];
-
+   
     int x = 0;
     int y = [indexPath row];
     for (int type = y*3 + 2; type < y*3+2+3; type++) {
@@ -139,7 +139,6 @@
 
         if (type >= BADGE_TYPE_MAX)
             continue;
-        [cell.contentView setBackgroundColor:[UIColor clearColor]];
         
         UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
                  

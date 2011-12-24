@@ -46,7 +46,7 @@
 
     NSMutableArray * allStix;
     NSMutableArray * allTags;
-    NSMutableDictionary * allCommented; // for each element: key = allTagID; value = kind of stix added
+    NSMutableDictionary * allCommentCounts;
     
     Tag * newestTag;
     NSDate * timeStampOfMostRecentTag;
@@ -70,6 +70,8 @@
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
 -(void)updateUserStixLevel;
+-(void)updateCommentCount:(int)tagID;
+
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -92,5 +94,6 @@
 @property (nonatomic, retain) NSMutableArray * allStix;
 @property (nonatomic, assign) BadgeView * lastBadgeView;
 @property (nonatomic, retain) Kumulos * k;
+@property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @end
 

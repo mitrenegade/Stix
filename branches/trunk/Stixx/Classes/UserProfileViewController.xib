@@ -67,7 +67,7 @@
 						<string key="NSFrameSize">{320, 44}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1011028699"/>
+						<reference key="NSNextKeyView" ref="818580751"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">4</int>
@@ -81,10 +81,10 @@
 					<object class="IBUILabel" id="757478266">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{121, 67}, {132, 33}}</string>
+						<string key="NSFrame">{{143, 72}, {132, 33}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="353746705"/>
+						<reference key="NSNextKeyView" ref="448852438"/>
 						<string key="NSReuseIdentifierKey">_NS:311</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -109,10 +109,10 @@
 					<object class="IBUIButton" id="1057446160">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{38, 61}, {75, 75}}</string>
+						<string key="NSFrame">{{34, 61}, {90, 90}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="757478266"/>
+						<reference key="NSNextKeyView" ref="353746705"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -143,7 +143,7 @@
 					<object class="IBUIButton" id="448852438">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{38, 149}, {115, 80}}</string>
+						<string key="NSFrame">{{34, 166}, {115, 80}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="760044876"/>
@@ -173,7 +173,7 @@
 					<object class="IBUIButton" id="760044876">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{161, 149}, {120, 80}}</string>
+						<string key="NSFrame">{{169, 166}, {120, 80}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
@@ -196,7 +196,7 @@
 						<string key="NSFrame">{{129, 0}, {62, 45}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="818580751"/>
+						<reference key="NSNextKeyView" ref="1057446160"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -220,7 +220,7 @@
 						<string key="NSFrame">{{5, 5}, {50, 35}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1057446160"/>
+						<reference key="NSNextKeyView" ref="1011028699"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -241,10 +241,10 @@
 					<object class="IBUIButton" id="353746705">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{121, 103}, {160, 31}}</string>
+						<string key="NSFrame">{{141, 108}, {148, 38}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="448852438"/>
+						<reference key="NSNextKeyView" ref="757478266"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<reference key="IBUIBackgroundColor" ref="190798906"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -252,14 +252,16 @@
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="332157051"/>
-						<int key="IBUIButtonType">1</int>
-						<string key="IBUINormalTitle">Add Friend</string>
 						<reference key="IBUIHighlightedTitleColor" ref="190866238"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzE0IDAuMzA5ODAzOTIxNiAwLjUyMTU2ODYyNzUAA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="197289404"/>
+						<object class="NSCustomResource" key="IBUINormalImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">btn_addfriend.png</string>
+						</object>
 					</object>
 				</object>
 				<string key="NSFrame">{{0, 20}, {320, 411}}</string>
@@ -374,14 +376,14 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="454272482"/>
-							<reference ref="1057446160"/>
-							<reference ref="448852438"/>
-							<reference ref="757478266"/>
 							<reference ref="1011028699"/>
-							<reference ref="353746705"/>
-							<reference ref="760044876"/>
 							<reference ref="818580751"/>
 							<reference ref="680049379"/>
+							<reference ref="757478266"/>
+							<reference ref="1057446160"/>
+							<reference ref="448852438"/>
+							<reference ref="760044876"/>
+							<reference ref="353746705"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -619,6 +621,7 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>btn_addfriend.png</string>
 				<string>dark_cell.png</string>
 				<string>graphic_nopic.png</string>
 				<string>logo.png</string>
@@ -628,6 +631,7 @@
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{170, 42}</string>
 				<string>{135, 82}</string>
 				<string>{90, 90}</string>
 				<string>{59, 38}</string>

@@ -21,7 +21,9 @@
 @synthesize nameString, commentString, imageData;
 @synthesize userPhotoView;
 @synthesize addCommentButton;
-
+@synthesize tagID;
+@synthesize delegate;
+@synthesize commentCount;
 /*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -157,9 +159,18 @@
         [labelTime setText:[NSString stringWithFormat:@"%@", unit]];
 } 
 
+-(void)populateWithCommentCount:(int)count {
+    self.commentCount = count;
+    [addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", self.commentCount] forState:UIControlStateNormal];
+}
+
 - (void)dealloc
 {
     [super dealloc];
+}
+
+-(IBAction)didPressAddCommentButton:(id)sender {
+    [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 
 - (void)didReceiveMemoryWarning

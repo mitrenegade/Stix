@@ -20,7 +20,7 @@
 
 @implementation FeedViewController
 
-@synthesize feedItemViewController;
+@synthesize feedItems;
 @synthesize badgeView;
 @synthesize nameLabel;
 @synthesize delegate;
@@ -32,9 +32,10 @@
 @synthesize scrollView;
 @synthesize lastPageViewed;
 @synthesize zoomViewController;
+@synthesize commentView;
 
-#define FEED_ITEM_WIDTH 270
-#define FEED_ITEM_HEIGHT 320
+#define FEED_ITEM_WIDTH 275
+#define FEED_ITEM_HEIGHT 300
 -(id)init
 {
 	[super initWithNibName:@"FeedViewController" bundle:nil];
@@ -72,7 +73,11 @@
     activityIndicatorCenter = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicatorCenter];
     
-    zoomViewController = [[ZoomViewController alloc] init];
+    //zoomViewController = [[ZoomViewController alloc] init];
+    
+    // array to retain each FeedItemViewController as it is created so its callback
+    // for the button can be used
+    feedItems = [[NSMutableDictionary alloc] init]; 
 }
 
 - (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
@@ -141,6 +146,10 @@
     //[scrollView clearNonvisiblePages];
 }
 
+//-(void)didClearPage:(int)page {
+//    [[feedItems objectAtIndex:page] release];
+//}
+
 - (void)viewDidUnload {
 	// Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
 	// For example: self.myOutlet = nil;
@@ -189,6 +198,7 @@
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(int)type {
     // increment stix count for given feed item
+    
     if ([allTags count] == 0) {
         // nothing loaded yet
         [badgeView resetBadgeLocations];
@@ -226,6 +236,7 @@
         return;
     }
    
+    /*
     if ([t badgeType] != BADGE_TYPE_FIRE && [t badgeType] != BADGE_TYPE_ICE) {        
         NSString * badgeTypeStr;
         if (type == BADGE_TYPE_FIRE)
@@ -241,22 +252,26 @@
         [badgeView resetBadgeLocations];
         return;
     }
-        
+    */
     
+    /*
     NSString * badgeTypeStr;
     if ([t badgeType] == BADGE_TYPE_FIRE)
         badgeTypeStr = @"Fire";
     else
         badgeTypeStr = @"Ice";
     NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
+     */
+    
     [delegate didAddStixToTag:t withType:type];
+
     //NSLog(@"After decrement: %d (delegate says %d)", ret, [delegate getStixCount:type]);
     //if ([t.username isEqualToString:[delegate getUsername]] == NO) {
     //    [delegate incrementStixCount:type forUser:t.username];
         //[delegate decrementStixCount:type forUser:[delegate getUsername]];        
     //}
     
-    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
+//    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     [badgeView resetBadgeLocations];
     [scrollView reloadPage:lastPageViewed];
     
@@ -291,6 +306,7 @@
  -(UIView*)viewForItemAtIndex:(int)index
 {	
     //NSLog(@"Index: %d reverse_index: %d", index, reverse_index);
+    
     Tag * tag = [[allTags objectAtIndex:index] retain];
     
     NSString * name = tag.username;
@@ -302,6 +318,7 @@
     NSLog(@"Creating feed item at index %d: name %@ comment %@ image dims %f %f\n", index, name, comment, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
+    [feedItem setDelegate:self];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString andWithImage:image];
     [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
@@ -315,8 +332,18 @@
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
     [feedItem populateWithBadge:tag.badgeType withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
+    feedItem.tagID = [tag.tagID intValue];
+    int count = [self.delegate getCommentCount:feedItem.tagID];
+    if (count == 1)
+        [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", count] forState:UIControlStateNormal];
+    else        
+        [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", count] forState:UIControlStateNormal];
     NSLog(@"Adding badge at location %d %d", tag.badge_x,tag. badge_y);
     [tag release];
+    
+    // this object must be retained so that the button actions can be used
+    [feedItems setObject:feedItem forKey:tag.tagID];
+    
     return feedItem.view;
 }
 
@@ -384,6 +411,17 @@
     [scrollView clearAllPages];
 }
 
+-(void)forceUpdateCommentCount:(int)tagID {
+    // this function is called after StixxAppDelegate has retrieved the comment
+    // count from kumulos and inserted it into the allCommentCounts array
+    
+    //for (int i=0; i<[feedItems count]; i++) {
+    FeedItemViewController * curr = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
+    [curr populateWithCommentCount:[self.delegate getCommentCount:tagID]];
+    
+    [scrollView reloadPage:lastPageViewed];
+}
+
 /************** FeedZoomView ***********/
 #define DO_ZOOM_VIEW 0
 -(void)didClickAtLocation:(CGPoint)location {
@@ -409,5 +447,29 @@
 #endif
 }
 
+/*** feedItemViewDelegate ****/
+-(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
+    commentView = [[CommentViewController alloc] init];
+    [commentView setTagID:tagID];
+    [commentView setNameString:nameString];
+    [commentView setDelegate:self];
+    [self presentModalViewController:commentView animated:YES];
+}
+
+/*** CommentViewDelegate ***/
+-(void)didCloseComments {
+    [self dismissModalViewControllerAnimated:YES];
+    [commentView release];
+    commentView = nil;
+}
+
+-(void)didAddNewComment:(NSString *)newComment {
+    NSString * name = [self.delegate getUsername];
+    int type = -1; //BADGE_TYPE_FIRE; // todo: fix this
+    int tagID = [commentView tagID];
+    if ([newComment length] > 0)
+        [self.delegate didAddHistoryItemWithTagId:tagID andUsername:name andComment:newComment andBadgeType:type];
+    [self didCloseComments];
+}
 @end
 

@@ -13,6 +13,7 @@
 #import "BadgeView.h"
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
+#import "CommentViewController.h"
 
 @protocol FeedViewDelegate
 
@@ -23,6 +24,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
+-(void)didAddHistoryItemWithTagId:(int)tagID andUsername:(NSString*)name andComment:(NSString*)comment andBadgeType:(int)type;
 
 - (bool) isLoggedIn;
 -(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
@@ -31,13 +33,15 @@
 -(int)decrementStixCount:(int)type forUser:(NSString *)name;
 -(void)didAddStixToTag:(Tag *)tag withType:(int)type;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
+-(int)getCommentCount:(int)tagID;
 @end
 
-@interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate> // <UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, >
-{
-	FeedItemViewController * feedItemViewController;
+@interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate> {
+    
+	NSMutableDictionary * feedItems;
     BadgeView * badgeView;
     ZoomViewController * zoomViewController;
+    CommentViewController * commentView;
     
     //IBOutlet UIActivityIndicatorView * activityIndicatorCenter;
     LoadingAnimationView * activityIndicatorCenter;
@@ -55,7 +59,7 @@
     int lastPageViewed;
     int lastContentOffset;
 }
-@property (nonatomic, retain) FeedItemViewController * feedItemViewController;
+@property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) BadgeView *badgeView;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) PagedScrollView *scrollView;
@@ -68,8 +72,10 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorRight;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) ZoomViewController * zoomViewController;
+@property (nonatomic, retain) CommentViewController * commentView;
 
 -(void)setIndicatorWithID:(int)which animated:(BOOL)animate;
+-(void)forceUpdateCommentCount:(int)tagID;
 
 @end
 

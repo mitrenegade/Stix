@@ -14,6 +14,7 @@
 	NSMutableArray * stixArray;
 	
     int carouselHeight;
+    int stixLevel;
 	//NSObject<CarouselViewDelegate> *delegate;
     
     UIScrollView * scrollView;
@@ -23,6 +24,7 @@
 @property (nonatomic, retain) NSMutableArray * stixArray; // access allowed
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
+@property (nonatomic, assign) int stixLevel;
 
 -(void)initWithStixLevel:(int)level;
 

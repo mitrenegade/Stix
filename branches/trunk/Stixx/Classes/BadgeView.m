@@ -24,21 +24,8 @@ static NSArray * stixDescriptors;
     self = [super initWithFrame:frame];
   
     UIImageView * shelf = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]] autorelease];
-    shelf.frame = CGRectMake(0, 381, 320, 30);
-    /*
-    UIImageView * badgeFire = [BadgeView getBadgeOfType:BADGE_TYPE_FIRE];
-    badgeFire.center = CGPointMake(115, 365);
-    UIImageView * badgeIce = [BadgeView getBadgeOfType:BADGE_TYPE_ICE]; 
-    badgeIce.center = CGPointMake(205, 365);
-     */
-    //[badgeFire setBackgroundColor:[UIColor blackColor]]; // for debug
-    //[badgeIce setBackgroundColor:[UIColor blackColor]];
+    shelf.frame = CGRectMake(0, 390, 320, 30);
     [self addSubview:shelf];
-    //[self addSubview:badgeFire];
-    //[self addSubview:badgeIce];
-    
-    //labelFire = nil;
-    //labelIce = nil;
     
     showStixCounts = YES;
     showRewardStix = YES;
@@ -52,7 +39,6 @@ static NSArray * stixDescriptors;
         UIImageView * badgeLarge = [BadgeView getLargeBadgeOfType:i];
         [badgesLarge addObject:badgeLarge];
         UIImageView * badge = [BadgeView getBadgeOfType:i];
-        //badge.center = CGPointMake((320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]*i + (320-2*BADGE_SHELF_PADDING)/[delegate getStixLevel]/2 + BADGE_SHELF_PADDING, 365);         
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
@@ -200,17 +186,6 @@ static NSArray * stixDescriptors;
 		if (badgeTouched != nil)
 		{
 			CGRect originalFrame = [[badgeLocations objectAtIndex:badgeSelect] CGRectValue];
-			/*
-             CGRect frame = badgeTouched.frame;
-			 int width = originalFrame.size.width;
-			int height = originalFrame.size.height;
-            int centerX = frame.origin.x + frame.size.width / 2;
-			int centerY = frame.origin.y + frame.size.height / 2;
-			frame.origin.x = centerX - width/2;
-			frame.origin.y = centerY - width/2;
-			frame.size.width = width;
-			frame.size.height = height;
-			*/
             UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
             newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
             CGRect frame = newFrameView.frame;
@@ -304,9 +279,7 @@ static NSArray * stixDescriptors;
     {
         UIImageView * badge = [badges objectAtIndex:i];
         // for views that only show the action stix, just position for two stix
-        int y = 365;
-        if (i == BADGE_TYPE_HEART)
-            y = 370;
+        int y = 375;
         
         if (numStix == 2) {
             badge.center = CGPointMake((320-2*80)/numStix*i + (320-2*80)/numStix/2 + 80, y);
@@ -374,13 +347,13 @@ static NSArray * stixDescriptors;
         stixFilenames = [[NSArray alloc] initWithObjects: 
                          @"120_fire.png",
                          @"120_ice.png",
+                         @"120_heart.png",
+                         @"120_leaf.png",
                          @"120_bomb.png",
                          @"120_bulb.png",
                          @"120_deal.png",
                          @"120_eyes.png",
                          @"120_glasses.png",
-                         @"120_heart.png",
-                         @"120_leaf.png",
                          @"120_lips.png",
                          @"120_partyhat.png",
                          @"120_smile.png",
@@ -397,13 +370,13 @@ static NSArray * stixDescriptors;
         stixDescriptors = [[NSArray alloc] initWithObjects: 
                            @"Fire Stix",
                            @"Ice Stix",
+                           @"Heart",
+                           @"Leaf",
                            @"Bomb",
                            @"Light Bulb",
                            @"Good Deal",
                            @"Googley Eyes",
                            @"Funky Glasses",
-                           @"Heart",
-                           @"Leaf",
                            @"Luscious Lips",
                            @"Party Hat",
                            @"Smile",

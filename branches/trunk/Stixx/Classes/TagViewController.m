@@ -239,7 +239,6 @@
     }
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
-    [tag appendHistoryWithUsername:username andComment:com andStixType:badgeType];
     UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
     if ([delegate isLoggedIn] == NO)
     {

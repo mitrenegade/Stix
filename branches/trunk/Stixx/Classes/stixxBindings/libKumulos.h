@@ -46,6 +46,7 @@
 	float connectionTimeout;
 	
 	BOOL debugMode;
+    BOOL useSSL;
     
     NSInteger APIServer;
 	NSInteger tag;
@@ -55,7 +56,18 @@
 	NSString* theError;
 	BOOL connFinished;
 	NSURLConnection *theConnection;
-
+    
+    double requestStartMicroTime;
+    
+    //operation information
+    float requestProcessingTime;
+    float requestReceivedTime;
+    double requestRoundTripTime;
+    NSNumber* responseCode;
+    NSString* responseMessage;
+    NSNumber* timestamp;
+    
+    
     
 }
 
@@ -66,9 +78,19 @@
 @property (nonatomic, retain) NSMethodSignature* errorCallbackMethodSignature;
 @property (nonatomic, retain) NSMethodSignature* delegateCallbackMethodSignature;
 
+@property (nonatomic) float requestProcessingTime;
+@property (nonatomic) float requestReceivedTime;
+@property (nonatomic) double requestRoundTripTime;
+@property (nonatomic) double requestStartMicroTime;
+@property (nonatomic, retain) NSNumber* responseCode;
+@property (nonatomic, retain) NSString* responseMessage;
+@property (nonatomic, retain) NSNumber* timestamp;
+
+
 @property (nonatomic, retain) NSString* APIKey;
 @property (nonatomic, retain) NSString* secretKey;
 @property (nonatomic) BOOL debugMode;
+@property (nonatomic) BOOL useSSL;
 @property (nonatomic) NSInteger tag;
 @property (nonatomic) NSInteger APIServer;
 
@@ -92,6 +114,7 @@
 @interface kumulosProxy : NSObject <KSAPIOperationDelegate> {
 	SEL callbackSelector;
 	BOOL isLoading;
+    BOOL useSSL;
 	id<kumulosProxyDelegate> delegate;
 	NSOperationQueue* opQueue;
 }
@@ -99,7 +122,9 @@
 @property (nonatomic) SEL callbackSelector;
 @property (nonatomic,assign) id<kumulosProxyDelegate> delegate;
 @property (nonatomic,retain) NSOperationQueue* opQueue;
+@property (nonatomic) BOOL useSSL;
 
+-(void)cancelAllOperations;
 -(NSString*) md5:(NSString*) inString;
 -(kumulosProxy*)init;
 

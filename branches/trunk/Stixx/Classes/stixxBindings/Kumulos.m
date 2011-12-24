@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Dec  5, 2011
+//  Created by Kumulos Bindings Compiler on Dec 24, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -15,6 +15,7 @@
     if ([super init]) {
         theAPIKey = @"4dtqjx1n83c3y7p8d8zy132h1nr6z4nn";
         theSecretKey = @"x5s767hm";
+        useSSL = NO;
     }
 
     return self;
@@ -28,6 +29,75 @@
     return self;
  }
 
+
+-(KSAPIOperation*) addHistoryToPixWithTagID:(NSInteger)tagID andUsername:(NSString*)username andComment:(NSString*)comment andBadgeType:(NSInteger)badgeType{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+                    [theParams setValue:username forKey:@"username"];
+                    [theParams setValue:comment forKey:@"comment"];
+                    [theParams setValue:[NSNumber numberWithInt:badgeType] forKey:@"badgeType"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addHistoryToPix" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: addHistoryToPixDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) getAllHistoryWithTagID:(NSInteger)tagID{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllHistory" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getAllHistoryDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) getHistoryCountWithTagID:(NSInteger)tagID{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getHistoryCount" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getHistoryCountDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
 
 -(KSAPIOperation*) addNewStixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score{
 
@@ -45,6 +115,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addNewStix" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -73,6 +144,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addStix" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -99,6 +171,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addTag" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -120,6 +193,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminUpdateAllUsersStixCounts" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -141,6 +215,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"deleteTag" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -161,6 +236,7 @@
                 
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllTags" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -183,6 +259,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllTagsWithIDGreaterThan" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -205,6 +282,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllTagsWithIDLessThan" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -227,6 +305,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllTagsWithIDRange" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -248,6 +327,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getLastTagID" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -269,6 +349,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getLastTagTimestamp" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -290,6 +371,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getMostRecentlyUpdatedTag" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -311,10 +393,34 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getStixOfUser" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getStixOfUserDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID andDescriptor:(NSString*)descriptor{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
+                    [theParams setValue:descriptor forKey:@"descriptor"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updatePixWithDescriptor" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: updatePixWithDescriptorDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];
@@ -333,6 +439,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updatePixWithStixCounts" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -356,6 +463,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updateStix" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -380,6 +488,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addStixToQueue" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -403,6 +512,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addStixUpdateToQueue" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -424,6 +534,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"processStixUpdates" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -446,6 +557,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addEmailToUser" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -468,6 +580,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addPhoto" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -490,6 +603,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addStixToUser" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -513,6 +627,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addUser" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -534,6 +649,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminResetAllStixLevel" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -554,6 +670,7 @@
                 
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getAllUsers" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -575,6 +692,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getStixOfUserForDecrement" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -596,6 +714,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getStixOfUserForIncrement" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -617,6 +736,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUser" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -638,6 +758,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserByID" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -660,6 +781,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"setStixLevel" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -682,6 +804,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updateTotalTags" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  
@@ -704,6 +827,7 @@
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"userLogin" andParams:theParams];
     [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
             
     //we pass the method signature for the kumulosProxy callback on this thread
  

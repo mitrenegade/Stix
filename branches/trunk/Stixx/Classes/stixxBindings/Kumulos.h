@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Dec  5, 2011
+//  Created by Kumulos Bindings Compiler on Dec 24, 2011
 //  Copyright Neroh All rights reserved.
 //
 
@@ -14,6 +14,12 @@
 @protocol KumulosDelegate <kumulosProxyDelegate>
 @optional
 
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHistoryToPixDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getHistoryCountDidCompleteWithResult:(NSNumber*)aggregateResult;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -40,6 +46,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getMostRecentlyUpdatedTagDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfUserDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithDescriptorDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithStixCountsDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -88,6 +96,15 @@
 -(Kumulos*)initWithAPIKey:(NSString*)APIKey andSecretKey:(NSString*)secretKey;
 
    
+-(KSAPIOperation*) addHistoryToPixWithTagID:(NSInteger)tagID andUsername:(NSString*)username andComment:(NSString*)comment andBadgeType:(NSInteger)badgeType;
+    
+   
+-(KSAPIOperation*) getAllHistoryWithTagID:(NSInteger)tagID;
+    
+   
+-(KSAPIOperation*) getHistoryCountWithTagID:(NSInteger)tagID;
+    
+   
 -(KSAPIOperation*) addNewStixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score;
     
    
@@ -124,6 +141,9 @@
     
    
 -(KSAPIOperation*) getStixOfUserWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID andDescriptor:(NSString*)descriptor;
     
    
 -(KSAPIOperation*) updatePixWithStixCountsWithAllTagID:(NSUInteger)allTagID andStixCounts:(NSData*)stixCounts;

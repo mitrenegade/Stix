@@ -44,6 +44,7 @@
 @synthesize allStix;
 @synthesize k;
 @synthesize lastBadgeView;
+@synthesize allCommentCounts;
 
 static const int levels[4] = {0,0,5,10};
 
@@ -68,6 +69,7 @@ static const int levels[4] = {0,0,5,10};
     stixLevel = 2; // default
     [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_FIRE];
     [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_ICE];
+    allCommentCounts = [[NSMutableDictionary alloc] init];
     
 	/***** create first view controller: the TagViewController *****/
   	tagViewController = [[TagViewController alloc] init];
@@ -238,6 +240,7 @@ static const int levels[4] = {0,0,5,10};
         {
             [tagViewController addCoordinateOfTag:tag];
             [allTags insertObject:tag atIndex:i];
+            [self getCommentCount:newID]; // store comment count for this tag
             //[tag release];
             added = YES;
             if (newID > idOfNewestTagReceived)
@@ -280,19 +283,7 @@ static const int levels[4] = {0,0,5,10};
 	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
     [encoder release];
-    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];
-
-#if 1 // create empty stixCounts for different stix types
-    NSMutableData *theStixData;
-    NSKeyedArchiver *encoder2;
-    theStixData = [NSMutableData data];
-    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
-	[encoder2 encodeObject:newTag.stixCounts forKey:@"stixCounts"];
-    [encoder2 finishEncoding];
-    [k updatePixWithStixCountsWithAllTagID:[newTag.tagID intValue] andStixCounts:theStixData];
-    [encoder2 release];  
-#endif
-    
+    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];    
 }
 
 //- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addTagDidCompleteWithResult:(NSNumber*)newRecordID
@@ -318,12 +309,30 @@ static const int levels[4] = {0,0,5,10};
     [feedController viewWillAppear:TRUE];
 #endif
 
+#if 1 // create empty stixCounts for different stix types
+    NSMutableData *theStixData;
+    NSKeyedArchiver *encoder2;
+    theStixData = [NSMutableData data];
+    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
+	[encoder2 encodeObject:newestTag.stixCounts forKey:@"stixCounts"];
+    [encoder2 finishEncoding];
+    [k updatePixWithStixCountsWithAllTagID:[newestTag.tagID intValue] andStixCounts:theStixData];
+    [k updatePixWithDescriptorWithAllTagID:[newestTag.tagID intValue] andDescriptor:newestTag.descriptor];
+    [encoder2 release];  
+#endif
+
     // update usertagtotal
     usertagtotal += 1;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
     
     // update user's stixLevel
     [self updateUserStixLevel];
+    
+    // add comment to history
+    //[k addHistoryToPixWithTagID:[newestTag.tagID intValue] andUsername:newestTag.username andComment:newestTag.comment andBadgeType:newestTag.badgeType];
+    // update comment count
+    //[self updateCommentCount:[tag.tagID intValue]];
+
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
@@ -500,9 +509,43 @@ static const int levels[4] = {0,0,5,10};
     [feedController setIndicatorWithID:1 animated:NO];
 }
 
-// feedView delegate functions
 - (NSMutableArray *) getTags {
     return allTags;
+}
+
+-(void)didAddHistoryItemWithTagId:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andBadgeType:(int)type {
+    [k addHistoryToPixWithTagID:tagID andUsername:name andComment:comment andBadgeType:type];
+    // update comment count
+    [self updateCommentCount:tagID];
+}
+
+-(int)getCommentCount:(int)tagID {
+    NSNumber * commentCount = [allCommentCounts objectForKey:[NSNumber numberWithInt:tagID]];
+    if (commentCount == nil)
+        [k getAllHistoryWithTagID:tagID];
+    else
+        return [commentCount intValue];
+    
+    return 0;
+}
+
+-(void)updateCommentCount:(int)tagID {
+    // get most recent comment count from kumulos
+    [k getAllHistoryWithTagID:tagID];
+}
+
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray *)theResults{
+    
+    if ([theResults count] == 0)
+        return;
+    
+    NSMutableDictionary * d = [theResults objectAtIndex:0];        
+    NSNumber * tagID = [d valueForKey:@"tagID"];
+    NSNumber * commentCount = [NSNumber numberWithInt:[theResults count]];
+    
+    [allCommentCounts setObject:commentCount forKey:tagID];
+
+    [feedController forceUpdateCommentCount:[tagID intValue]];
 }
 
 /***** FriendViewDelegate ********/
@@ -786,13 +829,17 @@ static const int levels[4] = {0,0,5,10};
     }
 #if 1 
     /*** increment/decrement fire and ice; do not change other stix counts ***/
-    if (tag.badgeType == type)
-        tag.badgeCount++;
-    else {
-        tag.badgeCount--;
-        if (tag.badgeCount < 0) {
-            tag.badgeCount = -tag.badgeCount;
-            tag.badgeType = type; //[lastBadgeView getOppositeBadgeType:tag.badgeType];
+    if ((type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE)  && 
+        (tag.badgeType == BADGE_TYPE_FIRE || tag.badgeType == BADGE_TYPE_ICE))
+    {
+        if (tag.badgeType == type)
+            tag.badgeCount++;
+        else {
+            tag.badgeCount--;
+            if (tag.badgeCount < 0) {
+                tag.badgeCount = -tag.badgeCount;
+                tag.badgeType = type; //[lastBadgeView getOppositeBadgeType:tag.badgeType];
+            }
         }
     }
 #else
@@ -852,6 +899,10 @@ static const int levels[4] = {0,0,5,10};
     
     // update user's stixLevel
     [self updateUserStixLevel];
+    
+    [k addHistoryToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andBadgeType:type];
+    // update comment count
+    [self updateCommentCount:[tag.tagID intValue]];
 
     NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.badgeType == BADGE_TYPE_FIRE?@"Fire":@"Ice", [tag.tagID intValue], tag.badgeCount);
 }

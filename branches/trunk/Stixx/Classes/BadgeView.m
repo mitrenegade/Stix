@@ -18,12 +18,13 @@ static NSArray * stixDescriptors;
 @synthesize  showStixCounts;
 @synthesize  showRewardStix;
 @synthesize badgesLarge;
+@synthesize shelf;
 
 - (id)initWithFrame:(CGRect)frame 
 {
     self = [super initWithFrame:frame];
   
-    UIImageView * shelf = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]] autorelease];
+    shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
     shelf.frame = CGRectMake(0, 390, 320, 30);
     [self addSubview:shelf];
     
@@ -48,6 +49,7 @@ static NSArray * stixDescriptors;
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         [labels addObject:label];
     }
+    
  	return self;
 }
 
@@ -178,6 +180,7 @@ static NSArray * stixDescriptors;
 		float centerY = location.y - offset_from_center_Y;
         badgeTouched.center = CGPointMake(centerX, centerY);
 	}
+    [super touchesMoved:touches withEvent:event];
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -447,6 +450,18 @@ static NSArray * stixDescriptors;
 }
 - (void)dealloc {
 	[super dealloc];
+    
+    [shelf release];
+    shelf = nil;
+    
+    [badges release];
+    badges = nil;
+    [badgesLarge release];
+    badgesLarge = nil;
+    [badgeLocations release];
+    badgeLocations = nil;
+    [labels release];
+    labels = nil;
 }
 
 @end

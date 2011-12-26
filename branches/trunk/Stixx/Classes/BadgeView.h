@@ -41,12 +41,14 @@ enum {
 @end
 
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{
+    
 	NSMutableArray * badges;
 	NSMutableArray * badgeLocations; // original frame of each badge
 	NSMutableArray * badgesLarge;
 	
 	UIImageView * badgeTouched;
 	UIImageView * badgeTouchedLarge;
+    UIImageView * shelf;
 	int drag;
 	int badgeSelect;
 	CGFloat offset_from_center_X; // offset of touch point from center of icno
@@ -62,6 +64,7 @@ enum {
     bool showStixCounts;
     bool showRewardStix;
     int lastStixLevel;
+
 }
 
 @property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
@@ -71,6 +74,7 @@ enum {
 @property (nonatomic, assign) bool showStixCounts;
 @property (nonatomic, assign) bool showRewardStix;
 @property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
+@property (nonatomic, retain) UIImageView * shelf;
 
 -(void)resetBadgeLocations;
 -(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;

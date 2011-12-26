@@ -9,9 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "OutlineLabel.h"
 #import "BadgeView.h"
+#import "UIVerticalGestureRecognizer.h"
 
-@interface CarouselView : UIView <UIScrollViewDelegate>{
-	NSMutableArray * stixArray;
+@interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate>{
 	
     int carouselHeight;
     int stixLevel;
@@ -21,11 +21,11 @@
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
-@property (nonatomic, retain) NSMutableArray * stixArray; // access allowed
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) int stixLevel;
 
 -(void)initWithStixLevel:(int)level;
-
+-(void)toggleShelf:(bool)isVisible;
+-(void)setCarouselFrame:(CGRect)frame;
 @end

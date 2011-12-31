@@ -229,7 +229,7 @@
     NSString* password = [loginPassword text];
     NSString * email = [loginEmail text];
     
-    if ([username length]==0 || [password length]==0 || [email length]==0) {
+    if ([username length]==0 || [password length]==0 || [email length]==0) {// || newUserImageSet == NO) {
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"OK"];
         [alert setDelegate:nil];
@@ -237,6 +237,7 @@
         [alert setMessage:@"You need to input all fields"];
         [alert show];
         [alert release];
+        [activityIndicator stopCompleteAnimation];
         return;
     }
 

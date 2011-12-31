@@ -9,6 +9,7 @@
 //@synthesize delegate;
 @synthesize scrollView;
 @synthesize carouselHeight;
+@synthesize showGiftStix;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -29,6 +30,7 @@
     for (int i=0; i<[BadgeView totalStixTypes]; i++) {
         [allCarouselStixViews addObject:[NSNull null]];
     }
+    showGiftStix = YES;
 
     return self;
 }
@@ -56,10 +58,15 @@
         [gestureRecognizer requireGestureRecognizerToFail:myVerticalRecognizer];
     } 
     [scrollView addGestureRecognizer:myVerticalRecognizer];
-    
+
+#if 0
+    [self reloadAllStixWithFrame:frame];
+#else
     UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
+    if ([self showGiftStix] == NO)
+        totalStix = 2;
     int ct = 0;
     for (int i=0; i<totalStix; i++)
     {
@@ -94,6 +101,7 @@
         }
     }
     [self addSubview:scrollView];
+#endif
 }
 
 -(void)reloadAllStix {
@@ -106,21 +114,31 @@
     
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
-    int ct=0;
+    if ([self showGiftStix] == NO)
+        totalStix = 2;
+    int ct=2;
     UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
-        if (count > 0 || count == -1) {
-            [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+        NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if ([stixStringID isEqualToString:@"FIRE"]) {
+            [basicStix setCenter:CGPointMake(stixSize*(0+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
             [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
-            ct++;
-        }
-        else
-        {
-            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
-            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
+        } else if ([stixStringID isEqualToString:@"ICE"]) {
+            [basicStix setCenter:CGPointMake(stixSize*(1+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
+        } else {
+            if (count > 0 || count == -1) {
+                [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+                [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
+                ct++;
+            }
+            else
+            {
+                CGRect stixFrame = CGRectMake(0, 0, 0, 0);
+                [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
+            }
         }
     }
     [basicStix release];
@@ -261,6 +279,9 @@ static int lastContentOffsetY = 0;
         CGPoint location = touch;
         drag = 0;
         
+        if ([self.delegate respondsToSelector:@selector(didStartDrag)]) 
+            [self.delegate performSelector:@selector(didStartDrag)];
+        
         // find which icon is being dragged
         for (int i=0; i<[BadgeView totalStixTypes]; i++)
         {
@@ -281,7 +302,10 @@ static int lastContentOffsetY = 0;
             // pass event to nextResponder, which is first the controller, then the view's superview
         }
         else
-        {		
+        {
+            // start the continuous vibe
+            [self performSelector:@selector(vibe:)];
+            
             // first, move off of scrollview and onto carousel base
             [badgeTouched removeFromSuperview];
             CGRect frameOutsideCarousel = badgeTouched.frame;
@@ -361,9 +385,18 @@ static int lastContentOffsetY = 0;
                  ];
                 
                 // tells delegate to do necessary things such as take a photo
+                drag = 0;
                 [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
             }
         }        
     }
+}
+
+-(void)vibe:(id)sender
+{
+    // for continuous vibe
+    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    //if (drag==1)
+    //    [self performSelector:@selector(vibe:) withObject:self afterDelay:.3f];
 }
 @end

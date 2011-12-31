@@ -10,6 +10,7 @@
 #import "OutlineLabel.h"
 #import "BadgeView.h"
 #import "UIVerticalGestureRecognizer.h"
+#import <AudioToolbox/AudioServices.h>
 
 #define SHELF_STIX_X 0
 #define SHELF_STIX_Y 340
@@ -25,15 +26,19 @@
     // arrays of the stix that appear in the carousel
     NSMutableArray * allCarouselStixFrames;
     NSMutableArray * allCarouselStixViews;
+    
+    bool showGiftStix;
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
+@property (nonatomic, assign) bool showGiftStix;
 
 -(void)toggleShelf:(bool)isVisible;
 -(void)initCarouselWithFrame:(CGRect)frame;
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;
 -(void)clearAllViews;
+-(void)vibe:(id)sender;
 @end

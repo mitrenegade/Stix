@@ -141,12 +141,12 @@
     int y = [indexPath row];
     for (int stixType = y*3; stixType < y*3+3; stixType++) {
         
+        [cell removeCellItemAtPosition:x];
+        
         if (stixType >= [allStixStringIDs count])
             continue;
         NSLog(@"Row %d position %d type %d\n", y, x, stixType);
         
-        [cell removeCellItemAtPosition:x];
-
         NSString * stixStringID = [allStixStringIDs objectAtIndex:stixType];
         UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
                  

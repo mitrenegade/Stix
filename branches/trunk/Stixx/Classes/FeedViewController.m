@@ -192,7 +192,25 @@
         return;
     }
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
-    CGPoint location = CGPointMake(badge.frame.origin.x, badge.frame.origin.y);
+    
+    // scale stix frame back
+    FeedItemViewController * feedItem = [feedItems objectForKey:t.tagID];
+	float imageScale =  300 / feedItem.imageView.frame.size.width;
+    
+	CGRect stixFrameScaled = badge.frame;
+	stixFrameScaled.origin.x *= imageScale;
+	stixFrameScaled.origin.y *= imageScale;
+	stixFrameScaled.size.width *= imageScale;
+	stixFrameScaled.size.height *= imageScale;
+    float centerx = badge.center.x * imageScale;
+    float centery = badge.center.y * imageScale;
+    CGRect scrollFrame = scrollView.frame;
+    CGRect imageViewFrame = feedItem.imageView.frame;
+    centerx -= scrollFrame.origin.x + imageViewFrame.origin.x;
+    centery -= scrollFrame.origin.y + imageViewFrame.origin.y;
+    NSLog(@"Offsetting center by %f %f\n", scrollFrame.origin.x + imageViewFrame.origin.x, scrollFrame.origin.y + imageViewFrame.origin.y);
+
+    CGPoint location = CGPointMake(centerx, centery); //badge.frame.origin.x, badge.frame.origin.y);
     [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
     
 //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
@@ -261,6 +279,7 @@
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
     [feedItem populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
+    [feedItem populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     if (count == 1)

@@ -118,6 +118,36 @@
 #endif
 }
 
+-(void)populateWithAuxStix:(NSMutableArray *)auxStix atLocations:(NSMutableArray *)auxLocations {
+    for (int i=0; i<[auxStix count]; i++) {
+        NSString * stixStringID = [auxStix objectAtIndex:i];
+        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
+        
+        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
+        float centerX = location.x;
+        float centerY = location.y;
+        
+        // scale stix and label down to 270x270 which is the size of the feedViewItem
+        CGSize originalSize = imageData.size;
+        CGSize targetSize = imageView.frame.size;
+        
+        float imageScale =  targetSize.width / originalSize.width;
+        
+        CGRect stixFrameScaled = stix.frame;
+        stixFrameScaled.origin.x *= imageScale;
+        stixFrameScaled.origin.y *= imageScale;
+        stixFrameScaled.size.width *= imageScale;
+        stixFrameScaled.size.height *= imageScale;
+        centerX *= imageScale;
+        centerY *= imageScale;
+        NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
+        [stix setFrame:stixFrameScaled];
+        [stix setCenter:CGPointMake(centerX, centerY)];
+        [imageView addSubview:stix];
+    }
+}
+
 -(void)populateWithTimestamp:(NSDate *)timestamp {
     // format timestring
     // from 1 min - 1 hour, display # of minutes since tag

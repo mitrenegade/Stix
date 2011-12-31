@@ -63,6 +63,7 @@
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
 -(void)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+-(void)populateWithAuxStix:(NSMutableArray*)auxStix atLocations:(NSMutableArray*)auxLocations;
 - (IBAction)didPressAddCommentButton:(id)sender;
 -(void)populateWithCommentCount:(int)count;
 @end

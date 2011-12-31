@@ -14,13 +14,14 @@
 #import "LoginViewController.h"
 #import "BadgeView.h"
 #import "FriendsViewController.h"
+#import "KumulosData.h"
 
 #define DEFAULT_STIX_COUNT 2
 
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total;
 -(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
@@ -30,10 +31,7 @@
 -(void)didCancelFirstTimeLogin;
 - (void)didChangeUserphoto:(UIImage*)photo;
 
--(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
--(int)getStixLevel;
--(int)incrementStixCount:(int)type forUser:(NSString *)name;
--(int)decrementStixCount:(int)type forUser:(NSString *)name;
+-(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
 @end
 
@@ -75,14 +73,12 @@
 -(void)firstTimeLogin;
 -(void)loginWithUsername:(NSString *)name;
 -(void)updateFriendCount;
--(void)updateStixCount;
+-(void)updatePixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 -(IBAction)showLogoutScreen:(id)sender;
 -(IBAction)friendCountButtonClicked:(id)sender;
 -(IBAction)stixCountButtonClicked:(id)sender;
 // utils
 -(void)administratorModeResetAllStix;
--(NSMutableData * ) arrayToData:(NSMutableArray *) dict;
--(NSMutableArray *) dataToArray:(NSMutableData *) data; 
 
 @end

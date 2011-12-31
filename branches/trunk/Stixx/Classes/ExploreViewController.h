@@ -13,18 +13,17 @@
 #import "Tag.h"
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
+#import "CarouselView.h"
 
 @protocol ExploreViewDelegate
--(int)getStixCount:(int)stix_type;
--(int)getStixLevel;
+-(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end
 
 @interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
 {
-    BadgeView * badgeView; // for dragging and releasing badge
-
+    CarouselView * carouselView; 
     PagedScrollView *scrollView;	
     NSObject<ExploreViewDelegate> * delegate;
     ZoomViewController * zoomViewController;
@@ -44,7 +43,7 @@
     Kumulos * k;
 }
 
-@property (nonatomic, retain) BadgeView * badgeView;
+@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * refreshButton;
@@ -54,4 +53,6 @@
 
 - (IBAction)refreshUpdates:(id)sender;
 -(void)getTagWithID:(int)id;
+-(void)createCarouselView;
+-(void)reloadCarouselView;
 @end

@@ -16,8 +16,7 @@
 - (NSString*)getUsername;
 
 // forward from BadgeViewDelegate
--(int)getStixCount:(int)stix_type; // may be needed for one time use stix
--(int)getStixLevel;
+-(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end
@@ -41,7 +40,6 @@
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
 @property (nonatomic, retain) UIButton * buttonRules;
 @property (nonatomic, retain) GiftStixTableController * tableController;
--(void)forceLoadMyStix;
--(void)generateAllStix;
 -(IBAction)didClickOnButtonRules:(id)sender;
+-(void)createCarouselView;
 @end

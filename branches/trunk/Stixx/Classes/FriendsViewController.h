@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BadgeView.h"
+#import "CarouselView.h"
 #import "PagedScrollView.h"
 #import "LoadingAnimationView.h"
 #import "UserProfileViewController.h"
@@ -19,10 +19,7 @@
 - (NSString*)getUsername;
 -(void)didDismissFriendView;
 
--(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
--(int)getStixLevel;
--(int)incrementStixCount:(int)type forUser:(NSString *)name;
--(int)decrementStixCount:(int)type forUser:(NSString *)name;
+-(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @end
@@ -34,9 +31,8 @@
     NSMutableArray * friendPages;
     IBOutlet UIButton * buttonInstructions;
     IBOutlet UIButton * buttonBack;
-    BadgeView * badgeView;
-    //IBOutlet UIActivityIndicatorView * activityIndicator;
-
+    CarouselView * carouselView;
+    
     PagedScrollView *scrollView;	
     LoadingAnimationView * activityIndicator;
     int lastContentOffset;
@@ -53,8 +49,7 @@
 @property (nonatomic, assign) NSObject<FriendsViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) IBOutlet UIButton * buttonBack;
-@property (nonatomic, retain) BadgeView * badgeView;
-//@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicator;
+@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, retain) NSString * currentProfile;

@@ -88,15 +88,6 @@
     newUserImageSet = false;
 }
 
--(NSMutableData * ) arrayToData:(NSMutableArray *) dict {
-    NSMutableData *data = [[NSMutableData alloc]init];
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
-    [archiver encodeObject:dict forKey:@"dictionary"];
-    [archiver finishEncoding];
-    [archiver release];
-    return [data autorelease];
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     // text field must also have delegate set as file's owner
 	[textField resignFirstResponder];
@@ -291,11 +282,11 @@
     NSString* username = [loginName text];
     NSString * email = [loginEmail text];
     [kumulos addEmailToUserWithUsername:username andEmail:email];
-    NSMutableArray * stix = [[BadgeView generateDefaultStix] retain];   
-    NSMutableData * data = [[self arrayToData:stix] retain];
+    NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
+    NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [kumulos addStixToUserWithUsername:username andStix:data];
-    [data release];
-    [stix release];
+//    [data release];
+//    [stix release];
 }
 
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {

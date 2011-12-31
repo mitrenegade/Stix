@@ -9,7 +9,7 @@
 #import "ExploreViewController.h"
 
 @implementation ExploreViewController
-@synthesize badgeView;
+@synthesize carouselView;
 @synthesize scrollView;
 @synthesize delegate;
 @synthesize refreshButton;
@@ -48,17 +48,14 @@
     
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableArray alloc] init];
-    
-	/****** init badge view ******/
-	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
-    badgeView.delegate = self;
-    [badgeView setShowRewardStix:NO];
+        
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
-    [badgeView setUnderlay:scrollView];
-    [delegate didCreateBadgeView:badgeView];
-
+    scrollView.isLazy = NO;
     [self.view addSubview:scrollView];
-    [self.view insertSubview:badgeView aboveSubview:scrollView];
+
+    /*** create badgeView ***/
+    [self createCarouselView];
+
     [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
     zoomView = [[UIImageView alloc] init];
@@ -66,6 +63,26 @@
     [self forceReloadAll];
 
 //	return self;
+}
+
+-(void)createCarouselView {
+    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
+        [carouselView clearAllViews];
+        [carouselView release];        
+    }
+    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+    carouselView.delegate = self;
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+
+    [self.view insertSubview:carouselView aboveSubview:scrollView];
+    [carouselView setUnderlay:scrollView];
+    [delegate didCreateBadgeView:carouselView];
+}
+
+-(void)reloadCarouselView {
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [[self carouselView] removeFromSuperview];
+    [self.view insertSubview:carouselView aboveSubview:scrollView];
 }
 
 -(IBAction)refreshUpdates:(id)sender {
@@ -150,11 +167,11 @@
     scrollView.delegate = self;
 }
 
--(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+-(UIImageView *)populateWithBadge:(NSString*)stixStringIDs withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
     float item_width = 140;
     float item_height = 140;
 
-    UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringIDs];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float originX = x;
     float originY = y;
@@ -175,7 +192,7 @@
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
     
-    return [stix autorelease];
+    return stix;
 }
 
 
@@ -209,22 +226,13 @@
             shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 10), w, h);
             feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 10), item_width, item_height);
             
-            UIImageView * stix = [[self populateWithBadge:tag.badgeType withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
+            UIImageView * stix = [[self populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
             [feedItem addSubview:stix];
             [stix release];
-            /*
-            UILabel * commentlabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 10+20) + item_width-5, item_width, 20)];
-            [commentlabel setText:comment];
-            [commentlabel setBackgroundColor:[UIColor blackColor]];
-            [commentlabel setTextColor:[UIColor whiteColor]];
-            [commentlabel setTextAlignment:UITextAlignmentCenter];
-             [friendPageView addSubview:commentlabel];
-             */
             [exploreItemView addSubview:shadow];
             [exploreItemView addSubview:feedItem];
             [shadow release];
             [feedItem release];
-            //[commentlabel release];
             
             NSLog(@"  Adding feed item %d = %@ to position %d %d", ct, comment, x, y);
             
@@ -386,7 +394,7 @@
          [zoomViewController setLabel:label];
          [zoomViewController setLocation:locationString];
          [zoomViewController setStixUsingTag:tag];
-         [badgeView setUnderlay:zoomViewController.view];
+         [carouselView setUnderlay:zoomViewController.view];
          isZooming = NO;
      }
      ];
@@ -410,7 +418,7 @@
      completion:^(BOOL finished){
          zoomView.hidden = YES;
          [zoomView removeFromSuperview];
-         [badgeView setUnderlay:scrollView];
+         [carouselView setUnderlay:scrollView];
          isZooming = NO;
      }
      ];
@@ -428,7 +436,7 @@
 #pragma mark - View lifecycle
 
 - (void)viewDidAppear:(BOOL)animated {
-    [badgeView resetBadgeLocations];    
+    [carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -439,27 +447,24 @@
 }
 
 /******* badge view delegate ******/
--(void)didDropStix:(UIImageView *)badge ofType:(int)type {
+-(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
     [alert setTitle:@"Beta Version"];
     [alert setMessage:@"Adding Stix in the Explore view coming soon!"];
     [alert show];
     [alert release];
-    [badgeView resetBadgeLocations];
+    [carouselView resetBadgeLocations];
 }
 
--(int)getStixCount:(int)stix_type {
-    return [self.delegate getStixCount:stix_type];
-}
--(int)getStixLevel {
-    return [self.delegate getStixLevel];
+-(int)getStixCount:(NSString*)stixStringID {
+    return [self.delegate getStixCount:stixStringID];
 }
 
 -(void)viewDidUnload {
     
-    [badgeView release];
-    badgeView = nil;
+    [carouselView release];
+    carouselView = nil;
     [scrollView release];
     scrollView = nil;
     [activityIndicator release];
@@ -469,7 +474,7 @@
 }
 -(void)dealloc {
     [k release];
-    [badgeView release];
+    [carouselView release];
     [scrollView release];
     [activityIndicator release];
     [super dealloc];

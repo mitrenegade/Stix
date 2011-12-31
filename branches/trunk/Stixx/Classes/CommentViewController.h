@@ -27,7 +27,7 @@
     
     NSMutableArray * names;
     NSMutableArray * comments;
-    NSMutableArray * stixTypes;
+    NSMutableArray * stixStringIDs;
     
     Kumulos * k;
     

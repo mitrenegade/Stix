@@ -11,7 +11,6 @@
 @implementation GiftStixTableController
 
 @synthesize delegate;
-@synthesize stixDescriptors, stixFilenames;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -42,15 +41,19 @@
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
-    allStix = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-    for (int type=BADGE_TYPE_ICE + 1; type<BADGE_TYPE_MAX; type++)
+    int total = [BadgeView totalStixTypes]-2;
+    allGiftStixCounts = [[NSMutableArray alloc] initWithCapacity:total];
+    allStixStringIDs = [[NSMutableArray alloc] initWithCapacity:total];
+    for (int stixType=0; stixType<[BadgeView totalStixTypes]; stixType++)
     {
-        int count = [self.delegate getStixCount:type];
-        [allStix addObject:[NSNumber numberWithInt:count]];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
+        if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+            continue;
+        int count = [self.delegate getStixCount:stixStringID];
+        [allGiftStixCounts addObject:[NSNumber numberWithInt:count]];
+        [allStixStringIDs addObject: stixStringID];
     }
-    stixDescriptors = [[NSMutableArray alloc] initWithArray:[BadgeView stixDescriptors]];
-    stixFilenames = [[NSMutableArray alloc] initWithArray:[BadgeView stixFilenames]];
-
+    
     [self.tableView setBackgroundColor:[UIColor clearColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
 
@@ -66,10 +69,14 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    for (int type=BADGE_TYPE_ICE + 1; type<BADGE_TYPE_MAX; type++)
+    // update stix counts each time
+    for (int stixType=0; stixType < [BadgeView totalStixTypes]; stixType++)
     {
-        int count = [self.delegate getStixCount:type];
-        [allStix replaceObjectAtIndex:type-2 withObject:[NSNumber numberWithInt:count]];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
+        if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+            continue;
+        int count = [self.delegate getStixCount:stixStringID];
+        [allGiftStixCounts replaceObjectAtIndex:stixType withObject:[NSNumber numberWithInt:count]];
     }
 }
 
@@ -105,7 +112,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    int triplets = ([allStix count]-2) / 3 + 1;
+    int triplets = ([allGiftStixCounts count] / 3) + 1; // number of groups of 3
     return triplets;
 }
 
@@ -132,18 +139,21 @@
    
     int x = 0;
     int y = [indexPath row];
-    for (int type = y*3 + 2; type < y*3+2+3; type++) {
-        NSLog(@"Row %d position %d type %d\n", y, x, type);
-
+    for (int stixType = y*3; stixType < y*3+3; stixType++) {
+        
+        if (stixType >= [allStixStringIDs count])
+            continue;
+        NSLog(@"Row %d position %d type %d\n", y, x, stixType);
+        
         [cell removeCellItemAtPosition:x];
 
-        if (type >= BADGE_TYPE_MAX)
-            continue;
-        
-        UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+        NSString * stixStringID = [allStixStringIDs objectAtIndex:stixType];
+        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
                  
+        int count = [[allGiftStixCounts objectAtIndex:stixType] intValue];
         [cell addCellItem:stix atPosition:x];
-        [stix release];
+        [cell addCellLabel:[NSString stringWithFormat:@"%d", count] atPosition:x];
+        
         x++;
     }    
     

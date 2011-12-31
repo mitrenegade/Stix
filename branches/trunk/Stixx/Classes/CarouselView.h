@@ -11,21 +11,29 @@
 #import "BadgeView.h"
 #import "UIVerticalGestureRecognizer.h"
 
+#define SHELF_STIX_X 0
+#define SHELF_STIX_Y 340
+#define SHELF_STIX_SIZE 70
+
 @interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate>{
 	
     int carouselHeight;
-    int stixLevel;
-	//NSObject<CarouselViewDelegate> *delegate;
+    //NSObject<CarouselViewDelegate> *delegate;
     
     UIScrollView * scrollView;
+    
+    // arrays of the stix that appear in the carousel
+    NSMutableArray * allCarouselStixFrames;
+    NSMutableArray * allCarouselStixViews;
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
-@property (nonatomic, assign) int stixLevel;
 
--(void)initWithStixLevel:(int)level;
 -(void)toggleShelf:(bool)isVisible;
--(void)setCarouselFrame:(CGRect)frame;
+-(void)initCarouselWithFrame:(CGRect)frame;
+-(void)reloadAllStix;
+-(void)reloadAllStixWithFrame:(CGRect)frame;
+-(void)clearAllViews;
 @end

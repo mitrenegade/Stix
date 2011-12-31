@@ -6,11 +6,12 @@
 @implementation TagViewController
 
 @synthesize delegate;
-@synthesize badgeView;
+@synthesize carouselView;
 @synthesize cameraController;
 @synthesize arViewController;
 @synthesize rectView;
 @synthesize buttonInstructions;
+@synthesize badgeView;
 
 - (id)init {
 	
@@ -55,20 +56,44 @@
 	
     //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
     //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
-	/****** init badge view ******/
-	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
+    return self;
+}
+
+-(void) viewDidLoad {
+    [super viewDidLoad];
+    
+    /****** init badge view ******/
+    [self createCarouselView];
+#if 0
+    badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
     badgeView.delegate = self;
     [badgeView setUnderlay:buttonInstructions];
     [badgeView setShowStixCounts:NO]; // do not show or change stix counts
     [delegate didCreateBadgeView:badgeView];
-    
 	[badgeView addSubview:arViewController.view];
-    //[apertureView addSubview:badgeController.view];
-	//[overlayView addSubview:apertureView];
-	//self.view = overlayView;
     [self.view addSubview:badgeView];
+#endif
+}
+
+-(void)createCarouselView {
+    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
+        [carouselView clearAllViews];
+        [carouselView release];
+    }
+    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+    carouselView.delegate = self;
+    [carouselView setUnderlay:buttonInstructions];
+    [carouselView initCarouselWithFrame:CGRectMake(0,320,320,90)];
     
-    return self;
+    [carouselView addSubview:arViewController.view];
+    [self.view addSubview:carouselView];
+    [delegate didCreateBadgeView:carouselView];
+}
+
+-(void)reloadCarouselView {
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(0,320,320,90)];
+    [[self carouselView] removeFromSuperview];
+    [self.view addSubview:carouselView];
 }
 
 // called by main delegate to add tabBarView to camera overlay
@@ -93,6 +118,8 @@
     [cameraController setROI:viewFrame];
 	[self presentModalViewController:self.cameraController animated:animated];
 #endif
+    [carouselView resetBadgeLocations];
+    
     [badgeView resetBadgeLocations];
 
 	[super viewDidAppear:animated];
@@ -143,7 +170,7 @@
 }
 
 // BadgeViewDelegate function
--(void)didDropStix:(UIImageView *)badge ofType:(int)type{
+-(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID{
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
@@ -153,14 +180,11 @@
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
     badgeFrame.origin.x = badgeFrame.origin.x - cameraController.ROI.origin.x;
     badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + statusFrame.size.height;
-    badgeType = type; // save type for later;
+    selectedStixStringID = stixStringID;
 }
 
--(int)getStixCount:(int)stix_type {
-    return [self.delegate getStixCount:stix_type];
-}
--(int)getStixLevel {
-    return [self.delegate getStixLevel];
+-(int)getStixCount:(NSString*)stixStringID {
+    return [self.delegate getStixCount:stixStringID];
 }
 
 -(void)didStartDrag {
@@ -177,7 +201,7 @@
     
     [descriptorController setDelegate:self];
     [descriptorController setBadgeFrame:badgeFrame];
-    [descriptorController setBadgeType:badgeType];
+    [descriptorController setStixStringID:selectedStixStringID];
 #if TARGET_IPHONE_SIMULATOR
     [self presentModalViewController:descriptorController animated:YES];
 #else
@@ -190,7 +214,7 @@
 }
 
 /* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixFrame:(CGRect)frame
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center
 {
     [self.cameraController dismissModalViewControllerAnimated:YES];
     ARCoordinate * newCoord;
@@ -245,19 +269,20 @@
         [image release];
         image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
     }
-    int x = frame.origin.x;
-    int y = frame.origin.y;
-    NSLog(@"Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
+    int x = center.x;
+    int y = center.y;
+    NSLog(@"TagViewController: Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
     [tag addImage:image];
-    [tag addStixOfType:badgeType andCount:1 atLocationX:x andLocationY:y];
+    [tag addMainStixOfType:selectedStixStringID andCount:1 atLocationX:x andLocationY:y];
     [tag addARCoordinate:newCoord];
+    // add empty aux
+    tag.auxStixStringIDs = [[NSMutableArray alloc] init];
+    tag.auxLocations = [[NSMutableArray alloc] init];
     [image release];
     [self.delegate tagViewDidAddTag:tag];
     [tag release];
     
-    // to generate content, do not decrement
-    //[delegate decrementStixCount:badgeType forUser:username];
-    [badgeView resetBadgeLocations];
+    [carouselView resetBadgeLocations];
     
     //[username release];
     // dismiss descriptorController

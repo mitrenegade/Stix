@@ -23,6 +23,7 @@
 #import <Foundation/Foundation.h>
 #import "ARCoordinate.h"
 #import "BadgeView.h" // for BADGE_TYPE_MAX
+#import "KumulosData.h"
 
 @interface Tag : NSObject {
     // elements saved by Kumulos
@@ -33,9 +34,14 @@
     UIImage * image;
     int badge_x;
     int badge_y;
-    int badgeType; // now only represents the highest count badge
-    int badgeCount; // now only represents the highest count badge
-    NSMutableArray * stixCounts;
+    //int badgeType;
+    int badgeCount;
+    NSString * stixStringID; // string representation of type
+
+    // auxiliary stix - stored in Kumulos as an array of dictionaries
+    NSMutableArray * auxStixStringIDs;
+    NSMutableArray * auxLocations;
+    
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
     
@@ -51,13 +57,10 @@
     //NSMutableArray * historyStixType;
 }
 
-+ (Tag*)initWithName:(NSString*)name andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)newLocationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts;
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
--(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
--(void)addStixCounts:(NSMutableArray *) stixCounts;
-//-(void)appendHistoryWithUsername:(NSString*)newUsername andComment:(NSString*)newComment andStixType:(int)newStixType;
+-(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
@@ -65,19 +68,16 @@
 @property (nonatomic, retain) NSString * comment;
 @property (nonatomic, retain) NSString * locationString;
 @property (nonatomic, retain) UIImage * image;
-//@property (nonatomic, retain) NSNumber * badge_x;
-//@property (nonatomic, retain) NSNumber * badge_y;
 @property (nonatomic, retain) ARCoordinate * coordinate;
 @property (nonatomic, retain) NSNumber * tagID;
 @property (nonatomic, retain) NSString * timestring;
 @property (nonatomic, retain) NSDate * timestamp;
-@property (nonatomic, assign) int badge_x;
-@property (nonatomic, assign) int badge_y;
-@property (nonatomic, assign) int badgeType;
+@property (nonatomic, assign) int badge_x; // center coordinate
+@property (nonatomic, assign) int badge_y; // center coordinate
 @property (nonatomic, assign) int badgeCount;
-@property (nonatomic, retain) NSMutableArray * stixCounts;
-//@property (nonatomic, retain) NSMutableArray * historyUsername;
-//@property (nonatomic, retain) NSMutableArray * historyComment;
-//@property (nonatomic, retain) NSMutableArray * historyStixType;
+@property (nonatomic, retain) NSString * stixStringID;
+
+@property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
+@property (nonatomic, retain) NSMutableArray * auxLocations;
 
 @end

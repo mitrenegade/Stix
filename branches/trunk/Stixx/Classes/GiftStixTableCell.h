@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
+#import "OutlineLabel.h"
 
 #define CELL_WIDTH 320
 #define CELL_HEIGHT 115
@@ -17,8 +18,11 @@
 {
     UIImageView * bg[3];
     UIImageView * icon[3];
+    //NSMutableArray * labels;
+    OutlineLabel * labels[3];
 }
 
 -(void)addCellItem:(UIImageView*) item atPosition:(int)pos;
+-(void)addCellLabel:(NSString*) item atPosition:(int)pos;
 -(void)removeCellItemAtPosition:(int)pos;
 @end

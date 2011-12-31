@@ -52,6 +52,7 @@
     if (dragCt == 3) {
         UITouch * touch = [[event allTouches] anyObject];
         CGPoint location = [touch locationInView:self.view];
+        currTouch = location;
         float dx = location.x - firstTouch.x;
         float dy = location.y - firstTouch.y;
         translation.x = dx;
@@ -72,6 +73,7 @@
 
         UITouch * touch = [[event allTouches] anyObject];
         CGPoint location = [touch locationInView:self.view];
+        currTouch = location;
         float dx = location.x - firstTouch.x;
         float dy = location.y - firstTouch.y;
         translation.x = dx;
@@ -102,5 +104,8 @@
 }
 -(CGPoint)firstTouch {
     return firstTouch;
+}
+-(CGPoint)currTouch {
+    return currTouch;
 }
 @end

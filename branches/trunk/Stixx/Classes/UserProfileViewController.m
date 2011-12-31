@@ -31,31 +31,13 @@
 	//return self;
 }
 #if 0
--(NSMutableData * ) arrayToData:(NSMutableArray *) dict {
-    // used to be dictionaryToData
-    NSMutableData *data = [[NSMutableData alloc]init];
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
-    [archiver encodeObject:dict forKey:@"dictionary"];
-    [archiver finishEncoding];
-    [archiver release];
-    return [data autorelease];
-}
--(NSMutableArray *) dataToArray:(NSMutableData *) data{ 
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    NSMutableArray * dict = [unarchiver decodeObjectForKey:@"dictionary"];
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    //[data release];
-    return dict;
-}
-
 -(void)updateFriendCount {
     NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
     int ct = [allUserPhotos count];
     [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
 }
 
--(void)updateStixCount {
+-(void)updatePixCount {
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
     int ct = [delegate getUserTagTotal];
     [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];

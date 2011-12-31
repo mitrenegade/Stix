@@ -9,7 +9,6 @@
 //@synthesize delegate;
 @synthesize scrollView;
 @synthesize carouselHeight;
-@synthesize stixLevel;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -22,16 +21,34 @@
     [self addSubview:bg];
     [bg release];
 #endif
+    
+    int total = [BadgeView totalStixTypes];
+    allCarouselStixFrames = [[NSMutableArray alloc] initWithCapacity:total];
+    allCarouselStixViews = [[NSMutableArray alloc] initWithCapacity:total];
+        
+    for (int i=0; i<[BadgeView totalStixTypes]; i++) {
+        [allCarouselStixViews addObject:[NSNull null]];
+    }
 
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 90, 320, 120)];
-    self.carouselHeight = 100;
-    scrollView.showsHorizontalScrollIndicator = YES;
+    return self;
+}
+
+#define NUM_STIX_FOR_BORDER 1 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
+-(void)initCarouselWithFrame:(CGRect)frame{
+    scrollView = [[UIScrollView alloc] initWithFrame:frame];
+    carouselHeight = scrollView.frame.size.height;
+    scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.scrollEnabled = YES;
     scrollView.directionalLockEnabled = YES; // only allow vertical or horizontal scroll
     [scrollView setDelegate:self];
     
-    // add gesture recognizer
+    // for debug
+    if (0) {
+        [scrollView setBackgroundColor:[UIColor blackColor]];
+        [self setBackgroundColor:[UIColor redColor]];
+    }
     
+    // add gesture recognizer
     UIVerticalGestureRecognizer * myVerticalRecognizer = [[UIVerticalGestureRecognizer alloc] initWithTarget:self action:@selector(verticalGestureHandler:)];
     [myVerticalRecognizer setDelegate:self];
     for (UIGestureRecognizer *gestureRecognizer in scrollView.gestureRecognizers)
@@ -39,30 +56,103 @@
         [gestureRecognizer requireGestureRecognizerToFail:myVerticalRecognizer];
     } 
     [scrollView addGestureRecognizer:myVerticalRecognizer];
-     
-    [self addSubview:scrollView];
     
-    return self;
-}
-
--(void)setCarouselFrame:(CGRect)frame {
-    scrollView.frame = frame;
-    carouselHeight = scrollView.frame.size.height;
-}
-
--(void)initWithStixLevel:(int)level {
-    if (level>BADGE_TYPE_MAX)
-        level = BADGE_TYPE_MAX;
+    UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
     int stixSize = carouselHeight;
-    stixLevel = level;
-    [scrollView setContentSize:CGSizeMake(carouselHeight*stixLevel, carouselHeight)];
-    for (int i=0; i<stixLevel; i++)
+    int totalStix = [BadgeView totalStixTypes];
+    int ct = 0;
+    for (int i=0; i<totalStix; i++)
     {
-        CGRect stixFrame = CGRectMake(stixSize*i, 0, stixSize, stixSize);
-        UIImageView * stix = [self.badgesLarge objectAtIndex:i];
-        [stix setFrame:stixFrame];
-        [scrollView addSubview:stix];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        int count = [self.delegate getStixCount:stixStringID];
+        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if (count > 0 || count == -1) {
+            [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize/2, stixSize/2)];
+            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:basicStix.frame]];
+            ct++;
+        }
+        else
+        {
+            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
+            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:stixFrame]];
+        }
     }
+    [basicStix release];
+    
+    CGSize size = CGSizeMake(carouselHeight*(ct+2*NUM_STIX_FOR_BORDER), carouselHeight);
+    [scrollView setContentSize:size];
+    for (int i=0; i<totalStix; i++) {
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        int count = [self.delegate getStixCount:stixStringID];
+        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if (count > 0 || count == -1) {
+            UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+            [stix setFrame:fr];
+            [scrollView addSubview:stix];
+            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+        }
+    }
+    [self addSubview:scrollView];
+}
+
+-(void)reloadAllStix {
+    [self reloadAllStixWithFrame:scrollView.frame];
+}
+-(void)reloadAllStixWithFrame:(CGRect)frame {
+
+    [scrollView removeFromSuperview];
+    scrollView.frame = frame;
+    
+    int stixSize = carouselHeight;
+    int totalStix = [BadgeView totalStixTypes];
+    int ct=0;
+    UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
+    for (int i=0; i<totalStix; i++) {
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        int count = [self.delegate getStixCount:stixStringID];
+        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if (count > 0 || count == -1) {
+            [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
+            ct++;
+        }
+        else
+        {
+            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
+            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
+        }
+    }
+    [basicStix release];
+    
+    CGSize size = CGSizeMake(carouselHeight*(ct+2*NUM_STIX_FOR_BORDER), carouselHeight);
+    [scrollView setContentSize:size];
+    for (int i=0; i<totalStix; i++) {
+        if ([NSNull null] != [allCarouselStixViews objectAtIndex:i])
+            [[allCarouselStixViews objectAtIndex:i] removeFromSuperview];
+        
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        int count = [self.delegate getStixCount:stixStringID];
+        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if (count > 0 || count == -1) {
+            UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+            [stix setFrame:fr];
+            [scrollView addSubview:stix];
+            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+        }
+    }
+    [self addSubview:scrollView];
+}
+
+-(void)clearAllViews {
+    for (int i=0; i<[allCarouselStixViews count]; i++)
+    {
+        if ([allCarouselStixViews objectAtIndex:i] != [NSNull null])
+            [[allCarouselStixViews objectAtIndex:i] removeFromSuperview];
+    }
+    [scrollView removeFromSuperview];
+    [self removeFromSuperview];
 }
 
 -(void)toggleShelf:(bool)isVisible {
@@ -72,10 +162,74 @@
 - (void)dealloc {
 	[super dealloc];
     
+    for (int i=0; i<[allCarouselStixViews count]; i++)
+    {
+        if ([allCarouselStixViews objectAtIndex:i] != [NSNull null])
+            [[allCarouselStixViews objectAtIndex:i] release];
+    }
     [scrollView release];
     scrollView = nil;
 }
 
+-(void)resetBadgeLocations{
+    // center frame and adjust for size
+#if 1
+    int totalStix = [BadgeView totalStixTypes];
+    for (int i=0; i<totalStix; i++)
+    {
+        if ([NSNull null] == [allCarouselStixViews objectAtIndex:i])
+            continue;
+        UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
+        [stix removeFromSuperview];
+
+        stix.frame = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+        [self.scrollView addSubview:stix];
+        
+        /* no labels for stix on shelf */
+        /*
+         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
+         [label setCenter:CGPointMake(badge.center.x+[BadgeView getOutlineOffsetX:i], badge.center.y+[BadgeView getOutlineOffsetY:i])];
+         [label setTextAttributesForBadgeType:i];
+         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
+         
+         [self addSubview:label];
+         */
+    }
+    drag = 0;
+#endif
+}
+
+
+
+#if 1
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    // badgeView should only respond to touch events if we are touching the badges. otherwise,
+    // foward the event to the underlay of badgeController, which is a sibling/same level view controller
+    // that is also a subview of badgeController's superview
+    //
+    // for example:
+    // badgeView
+    //   ^                  scrollView
+    //   |                      ^
+    //   |                      |
+    //    ---- feedView --------
+    // this specifically makes badgeView call hitTest on scrollView; scrollView must be set
+    // as an underlay of badgeController by feedView when the subviews are laid out
+    
+    UIView * result;
+    if (self.underlay)
+        result = [self.underlay hitTest:point withEvent:event];
+    else 
+        result = [super hitTest:point withEvent:event];
+    
+    if (CGRectContainsPoint(scrollView.frame, point))
+        return self.scrollView;
+    
+    // if the touch was not on one of the badges, either return the known underlay or just
+    // return self which means the hit is not passed downwards to anything else
+    return result;
+}
+#endif
 /*** scrollview delegate ***/
 static int lastContentOffsetX = 0;
 static int lastContentOffsetY = 0;
@@ -83,15 +237,12 @@ static int lastContentOffsetY = 0;
 #define UP -1
 
 -(void)scrollViewDidScroll:(UIScrollView *)sv {
-    int scrollDirection;
     if (lastContentOffsetX == sv.contentOffset.x) {
         if (lastContentOffsetY > sv.contentOffset.y) {
             NSLog(@"Scrolling down!");
-            scrollDirection = DOWN;
         }
         else if (lastContentOffsetY < sv.contentOffset.y) {
             NSLog(@"Scrolling up!");
-            scrollDirection = UP;
         }
     }
     lastContentOffsetX = sv.contentOffset.x;
@@ -111,15 +262,15 @@ static int lastContentOffsetY = 0;
         drag = 0;
         
         // find which icon is being dragged
-        unsigned numEls = [badges count];
-        while (numEls--)
+        for (int i=0; i<[BadgeView totalStixTypes]; i++)
         {
-            UIImageView * badge = [badges objectAtIndex:numEls];
-            CGRect frame = badge.frame;
+            UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
+            CGRect frame = stix.frame;
             if (CGRectContainsPoint(frame, touch)) {
-                badgeTouched = badge;
+                badgeTouched = stix;
                 drag = 1;
-                badgeSelect = numEls;
+                badgeSelect = i;
+                selectedStixStringID = [BadgeView getStixStringIDAtIndex:badgeSelect];
                 [[labels objectAtIndex:badgeSelect] removeFromSuperview];
                 break;
             }
@@ -131,21 +282,26 @@ static int lastContentOffsetY = 0;
         }
         else
         {		
-            badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
-            badgeTouchedLarge = [BadgeView getLargeBadgeOfType:badgeSelect]; // objectAtIndex:badgeSelect];
-            //CGRect frameStart = badgeTouched.frame;
-            float centerX = badgeTouched.center.x; //(frameStart.origin.x + frameStart.size.width/2);
-            float centerY = badgeTouched.center.y; //(frameStart.origin.y + frameStart.size.height/2);
-            
-            //frameEnd.origin.x = centerX - frameEnd.size.width / 2;
-            //frameEnd.origin.y = centerY - frameEnd.size.height / 2;
-            badgeTouchedLarge.center = CGPointMake(centerX, centerY);
-            CGRect frameEnd = badgeTouchedLarge.frame;
+            // first, move off of scrollview and onto carousel base
+            [badgeTouched removeFromSuperview];
+            CGRect frameOutsideCarousel = badgeTouched.frame;
+            frameOutsideCarousel.origin.x += scrollView.frame.origin.x - scrollView.contentOffset.x;
+            frameOutsideCarousel.origin.y += scrollView.frame.origin.y;
+            [badgeTouched setFrame:frameOutsideCarousel];
+            [self addSubview:badgeTouched];
+
+            badgeTouchedLarge = [BadgeView getLargeBadgeWithStixStringID:selectedStixStringID]; 
+            float centerX = badgeTouched.center.x; 
+            float centerY = badgeTouched.center.y; 
             
             // point where finger clicked badge
             offset_from_center_X = (location.x - centerX);
             offset_from_center_Y = (location.y - centerY);
             
+            badgeTouchedLarge.center = CGPointMake(centerX, centerY);
+            CGRect frameStart = badgeTouched.frame;
+            CGRect frameEnd = badgeTouchedLarge.frame;
+
             // animate a scaling transition
             [UIView 
              animateWithDuration:0.2
@@ -158,17 +314,56 @@ static int lastContentOffsetY = 0;
                  badgeTouched.hidden = NO;
              }
              ];
-            
-            //NSLog(@"Dragging badge %d", badgeSelect);
-            
+
         }
-        //fire.center = location;
-        //NSLog(@"Location: %f %f", location.x, location.y);
     }
     else if ([vgr state] == UIGestureRecognizerStateChanged) {
         CGPoint translation = vgr.translation; //[vgr translationInView:[inView superview]];
         NSLog(@"Gesture translation: %f %f\n", translation.x, translation.y);
+        if (drag == 1)
+        {
+            CGPoint location = vgr.currTouch; // location of touch in scrollview
+            
+            // update frame of dragged badge, also scale
+            if (badgeTouched == nil)
+                return;
+            float centerX = location.x - offset_from_center_X;// + scrollView.frame.origin.x;
+            float centerY = location.y - offset_from_center_Y;// + scrollView.frame.origin.y;
+            badgeTouched.center = CGPointMake(centerX, centerY);
 
+            NSLog(@"Dragging to %f %f: new center %f %f", location.x, location.y, centerX, centerY);
+        }
+    }
+    else if ([vgr state] == UIGestureRecognizerStateEnded) {
+        if (drag == 1)
+        {
+            if (badgeTouched != nil)
+            {
+                CGRect originalFrame = [[allCarouselStixFrames objectAtIndex:badgeSelect] CGRectValue];
+                UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
+                newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
+                CGRect frame = newFrameView.frame;
+                [newFrameView release];
+                
+                //NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
+                
+                // animate a scaling transition
+                [UIView 
+                 animateWithDuration:0.2
+                 delay:0 
+                 options:UIViewAnimationCurveEaseOut
+                 animations:^{
+                     badgeTouched.frame = frame;
+                 }
+                 completion:^(BOOL finished){
+                     badgeTouched.hidden = NO;
+                 }
+                 ];
+                
+                // tells delegate to do necessary things such as take a photo
+                [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
+            }
+        }        
     }
 }
 @end

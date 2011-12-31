@@ -17,9 +17,11 @@
 @synthesize buttonOK;
 @synthesize buttonCancel;
 @synthesize delegate;
-@synthesize badgeFrame, badgeType;
+@synthesize badgeFrame;
+@synthesize stixStringID;
 @synthesize stix;
 @synthesize buttonInstructions;
+@synthesize stixView;
 
 -(id)init
 {
@@ -41,16 +43,37 @@
 - (void)viewDidLoad {
     [super viewDidLoad]; 
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
+#if 1
 	[imageView setImage:tmp];
-    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f with badge at %f %f", tmp.size.width, tmp.size.height, badgeFrame.origin.x, badgeFrame.origin.y); 
+    float centerX = badgeFrame.origin.x + badgeFrame.size.width / 2;
+    float centerY = badgeFrame.origin.y + badgeFrame.size.height / 2;
 
-    stix = [[self populateWithBadge:badgeType withCount:1 atLocationX:badgeFrame.origin.x andLocationY:badgeFrame.origin.y] retain];    
-    [imageView addSubview:stix];
-    //[stix release];
-    NSLog(@"TagDescriptor: imageView dims %f %f badge at %f %f", imageView.frame.size.width, imageView.frame.size.height, badgeFrame.origin.x, badgeFrame.origin.y);
+    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f with badge at %f %f", tmp.size.width, tmp.size.height, centerX, centerY); 
     
+    stix = [[self populateWithBadge:stixStringID withCount:1 atLocationX:centerX andLocationY:centerY] retain];    
+    [imageView addSubview:stix];
+    [stix release];
+#else
+    CGRect frame = [imageView frame];
+    stixView = [[StixView alloc] initWithFrame:frame];
+    int x = badgeFrame.origin.x + badgeFrame.size.width / 2;
+    int y = badgeFrame.origin.y + badgeFrame.size.height / 2;
+    [stixView initializeWithImage:tmp andStix:stixStringID withCount:1 atLocationX:x andLocationY:y];
+    [self.view addSubview:stixView];
+#endif
+        
     drag = 0;
     
+    // change comment field prompt based on stix
+    if ([stixStringID isEqualToString:@"FIRE"]) {
+        [commentField setPlaceholder:@"What's Hot Here?"];
+    } else if ([stixStringID isEqualToString:@"ICE"]) {
+        [commentField setPlaceholder:@"What's Not Hot?"];
+    } else if ([stixStringID isEqualToString:@"HEART"]) {
+        [commentField setPlaceholder:@"What Do You Love?"];
+    } else {
+        [commentField setPlaceholder:@"What's Here?"];
+    }
     //[commentField2 setHidden:YES]; // hide for now
     
 //#if TARGET_IPHONE_SIMULATOR
@@ -60,19 +83,19 @@
 //#endif
 }
 
--(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+-(UIImageView *)populateWithBadge:(NSString*)stringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+
     float item_width = imageView.frame.size.width;
     float item_height = imageView.frame.size.height;
     
-    UIImageView * newstix = [[BadgeView getBadgeOfType:type] retain];
+    UIImageView * newstix = [BadgeView getBadgeWithStixStringID:stringID];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float originX = x;
-    float originY = y;
-    NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
-    newstix.frame = CGRectMake(originX, originY, newstix.frame.size.width, newstix.frame.size.height);
+    float centerX = x;
+    float centerY = y;
+    newstix.frame = CGRectMake(0, 0, newstix.frame.size.width, newstix.frame.size.height);
     
-    // scale stix and label down to 270x270 which is the size of the feedViewItem
-    CGSize originalSize = CGSizeMake(300, 300);
+    // scale stix and label down to 270x248 which is the size of the feedViewItem
+    CGSize originalSize = CGSizeMake(300, 275);
 	CGSize targetSize = CGSizeMake(item_width, item_height);
 	
 	float imageScale =  targetSize.width / originalSize.width;
@@ -82,31 +105,13 @@
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", newstix.frame.size.width, newstix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
+    centerX *= imageScale;
+    centerY *= imageScale;
+    NSLog(@"TagDescriptorController: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", newstix.frame.size.width, newstix.frame.size.height, centerX / imageScale, centerY / imageScale, originalSize.width, originalSize.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, item_width, item_height); 
     [newstix setFrame:stixFrameScaled];
-    
-    // change comment field prompt based on stix
-    switch (type) {
-        case BADGE_TYPE_FIRE:
-            [commentField setPlaceholder:@"What's Hot Here?"];
-            break;
-        case BADGE_TYPE_ICE:
-            [commentField setPlaceholder:@"What's Not Hot?"];
-            break;
-        case BADGE_TYPE_HEART:
-            [commentField setPlaceholder:@"What Do You Love?"];
-            break;
-        case BADGE_TYPE_LEAF:
-            [commentField setPlaceholder:@"What's Natural Here?"];
-            break;
-            
-        default:
-            break;
-    }
-    return [newstix autorelease];
+    [newstix setCenter:CGPointMake(centerX, centerY)];
+    return newstix;
 }
-
-
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -139,7 +144,20 @@
 
 -(IBAction)buttonOKPressed:(id)sender
 {
-	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixFrame:[stix frame]];
+    // scale stix frame back
+	float imageScale =  300 / imageView.frame.size.width;
+    
+	CGRect stixFrameScaled = stix.frame;
+	stixFrameScaled.origin.x *= imageScale;
+	stixFrameScaled.origin.y *= imageScale;
+	stixFrameScaled.size.width *= imageScale;
+	stixFrameScaled.size.height *= imageScale;
+    float centerx = stix.center.x * imageScale; // center coordinates in original 300x275 space
+    float centery = stix.center.y * imageScale;
+    //stix.frame = badgeFrame;
+    //[stix setCenter:CGPointMake(centerx, centery)];
+    NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
+	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery)];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

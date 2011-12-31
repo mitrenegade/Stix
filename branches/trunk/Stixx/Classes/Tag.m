@@ -14,31 +14,9 @@
 @synthesize comment;
 @synthesize descriptor;
 @synthesize locationString;
-@synthesize badge_x, badge_y, badgeType, badgeCount;
-@synthesize stixCounts;
-//@synthesize historyComment, historyStixType, historyUsername;
-
-
-+ (Tag*)initWithName:(NSString*)name andDescriptor:newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocationString andImage:(UIImage*)image andBadge_X:(int)badge_x andBadge_Y:(int)badge_y andCoordinate:(ARCoordinate*)coordinate andType:(int)type andCount:(int)count andStixCounts:(NSMutableArray *) stixCounts
-{
-    // simply allocates and creates a tag from given items
-    Tag * tag = [[[Tag alloc] init] autorelease]; 
-    [tag addUsername:name andDescriptor:newDescriptor andComment:newComment andLocationString:newLocationString];
-	[tag addImage:image];
-    [tag addStixOfType:type andCount:count atLocationX:badge_x andLocationY:badge_y];
-    [tag addARCoordinate:coordinate];
-    [tag addStixCounts:stixCounts];
-    return tag;
-}
-
-+(NSMutableArray *) dataToArray:(NSMutableData *) data{ 
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    NSMutableArray * dict = [unarchiver decodeObjectForKey:@"dictionary"];
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    //[data release];
-    return dict;
-}
+@synthesize badge_x, badge_y, badgeCount;
+@synthesize auxStixStringIDs, auxLocations;
+@synthesize stixStringID;
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString *)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{        
     if (newUsername == nil)
@@ -62,36 +40,21 @@
 }
 
 - (void) addImage:(UIImage*)newImage {
-    [self setImage:newImage];
+    [self setImage:[newImage retain]];
 }
 
--(void)addStixOfType:(int)type andCount:(int)count atLocationX:(int)x andLocationY:(int)y{
+-(void)addMainStixOfType:(NSString*)stringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y{
     badge_x = x;
     badge_y = y;
-    badgeType = type;
     badgeCount = count;
+    stixStringID = stringID;
     NSLog(@"Added badge at %d %d to tag", x, y);
 }
 
--(void)addStixCounts:(NSMutableArray *) newStixCounts {
-    if (stixCounts == nil)
-        stixCounts = [[NSMutableArray alloc] init];
-    [stixCounts removeAllObjects];
-    [stixCounts addObjectsFromArray:newStixCounts];
+-(void)addAuxiliaryStixOfType:(NSString*)stringID atLocation:(CGPoint)location {
+    [auxStixStringIDs addObject:stringID];
+    [auxLocations addObject:[NSValue valueWithCGPoint:location]];
 }
-
-/*
--(void)appendHistoryWithUsername:(NSString *)newUsername andComment:(NSString *)newComment andStixType:(int)newStixType {
-    if (historyUsername == nil) {
-        historyUsername = [[NSMutableArray alloc] init];
-        historyComment = [[NSMutableArray alloc] init];
-        historyStixType = [[NSMutableArray alloc] init];
-    }
-    [historyUsername addObject:newUsername];
-    [historyComment addObject:newComment];
-    [historyStixType addObject:[NSNumber numberWithInt:newStixType]];
-}
- */
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
     // loading a tag from kumulos
@@ -103,7 +66,20 @@
     UIImage * image = [[UIImage alloc] initWithData:[d valueForKey:@"image"]];
     int badge_x = [[d valueForKey:@"badge_x"] intValue];
     int badge_y = [[d valueForKey:@"badge_y"] intValue];
-    int badgeType = [[d valueForKey:@"type"] intValue];     int badgeCount = [[d valueForKey:@"score"] intValue];
+    int badgeType = [[d valueForKey:@"type"] intValue];     
+    int badgeCount = [[d valueForKey:@"score"] intValue];
+    NSString * stixStringID = [d valueForKey:@"stixStringID"];
+    if (stixStringID == nil || [stixStringID length] == 0) {
+        // backwards compatibility: old tags that have no stixStringID have a badgeType
+        stixStringID = [BadgeView getStixStringIDAtIndex:badgeType];
+        NSLog(@"*** Tag \"%@\"did not have stixStringID: setting badgeType %d to %@", descriptor, badgeType, stixStringID);
+    }
+    else
+    {
+        NSLog(@"*** Tag \"%@\"contained badgeType %d and stixStringID %@", descriptor, badgeType, stixStringID);
+        stixStringID = [stixStringID copy];
+    }
+    
     NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
     NSKeyedUnarchiver *decoder;
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData];
@@ -111,19 +87,31 @@
     [decoder finishDecoding];
     [decoder release];
     
-    theData = (NSMutableData*) [d valueForKey:@"stixCounts"];
-    NSMutableArray * stixCounts = [Tag dataToArray:theData];
-    if (stixCounts == nil) {
-        stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-        for (int i=0; i<BADGE_TYPE_MAX; i++)
-            [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
-        [stixCounts replaceObjectAtIndex:badgeType withObject:[NSNumber numberWithInt:badgeCount]];
-    }
-    Tag * tag = [[Tag initWithName:name andDescriptor:descriptor andComment:comment andLocationString:locationString andImage:image andBadge_X:badge_x andBadge_Y:badge_y andCoordinate:coordinate andType:badgeType andCount:badgeCount andStixCounts:stixCounts] retain];
+    NSMutableData *theData2 = (NSMutableData*)[d valueForKey:@"auxStix"];
+    decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
+    NSMutableArray * stixStringIDs = [decoder decodeObjectForKey:@"auxStixStringIDs"];
+    NSMutableArray * stixLocations = [decoder decodeObjectForKey:@"auxLocations"];
+    [decoder finishDecoding];
+    [decoder release];
+
+    Tag * tag = [[Tag alloc] init]; 
+    [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
+	[tag addImage:image];
+    [tag addMainStixOfType:stixStringID andCount:badgeCount atLocationX:badge_x andLocationY:badge_y];
+    [tag addARCoordinate:coordinate];
+    
+    // add empty aux
+    tag.auxStixStringIDs = stixStringIDs;
+    tag.auxLocations = stixLocations; 
+    if (stixStringIDs == nil)
+        tag.auxStixStringIDs = [[NSMutableArray alloc] init];
+    if (stixLocations == nil)
+        tag.auxLocations = [[NSMutableArray alloc] init];
     tag.tagID = [d valueForKey:@"allTagID"];
     tag.timestamp = [d valueForKey:@"timeCreated"];
-    [image release];
-    [tag autorelease];
+    //[tag.auxLocations addObjectsFromArray:stixLocations];
+    //[tag.auxStixStringIDs addObjectsFromArray:stixStringIDs];
+    //[image release];
     return tag;
 }
 

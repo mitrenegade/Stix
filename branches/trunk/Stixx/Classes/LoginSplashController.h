@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "LoginViewController.h"
 #import "BadgeView.h"
+#import "KumulosData.h"
 
 @protocol LoginSplashDelegate 
 
@@ -17,7 +18,7 @@
 - (void) didLoginFromSplashScreen;
 -(void)didLogout; // if cancel is pressed - goes back to splash screen
 
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total;
 
 @end
 

@@ -24,6 +24,6 @@
 @property (nonatomic, retain) NSString * comment;
 @property (nonatomic, retain) UIImageView * stix;
 
--(void)populateWithName:(NSString*)name andComment:(NSString*)comment andStixType:(int)stixType;
+-(void)populateWithName:(NSString*)name andComment:(NSString*)comment andStixType:(NSString *)stixStringID;
 
 @end

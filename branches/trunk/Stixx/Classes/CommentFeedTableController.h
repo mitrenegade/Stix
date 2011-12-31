@@ -13,7 +13,8 @@
 -(NSString *)getNameForIndex:(int)index;
 -(NSString *)getCommentForIndex:(int)index;
 //-(UIImageView *)getStixForIndex:(int)index;
--(int)getStixTypeForIndex:(int)index;
+//-(int)getStixTypeForIndex:(int)index;
+-(NSString *)getStixStringIDForIndex:(int)index;
 -(int)getCount;
 @end
 

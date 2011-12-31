@@ -21,7 +21,8 @@
 @implementation FeedViewController
 
 @synthesize feedItems;
-@synthesize badgeView;
+//@synthesize badgeView;
+@synthesize carouselView;
 @synthesize nameLabel;
 @synthesize delegate;
 @synthesize activityIndicatorCenter; // initially is active
@@ -34,8 +35,6 @@
 @synthesize zoomViewController;
 @synthesize commentView;
 
-#define FEED_ITEM_WIDTH 275
-#define FEED_ITEM_HEIGHT 300
 -(id)init
 {
 	[super initWithNibName:@"FeedViewController" bundle:nil];
@@ -57,18 +56,12 @@
     [super viewDidLoad];
     lastPageViewed = 0;
     
-	/****** init badge view ******/
-	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
-    badgeView.delegate = self;
     [self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     scrollView.isLazy = YES;
-    [delegate didCreateBadgeView:badgeView];
-
-    // add badgeView and scrollView as subviews of feedview; set underlay
     [self.view addSubview:scrollView];
-    [self.view insertSubview:badgeView aboveSubview:scrollView];
-    [badgeView setUnderlay:scrollView];
-    [badgeView setShowRewardStix:NO];
+    
+	/****** init badge view ******/
+    [self createCarouselView];
     
     activityIndicatorCenter = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicatorCenter];
@@ -80,6 +73,26 @@
     feedItems = [[NSMutableDictionary alloc] init]; 
 }
 
+-(void)createCarouselView {
+    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
+        [carouselView clearAllViews];
+        [carouselView release];
+    }
+    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+    carouselView.delegate = self;
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    
+    [self.view insertSubview:carouselView aboveSubview:scrollView];
+    [carouselView setUnderlay:scrollView];
+    [delegate didCreateBadgeView:carouselView];
+}
+
+-(void)reloadCarouselView {
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [[self carouselView] removeFromSuperview];
+    [self.view insertSubview:carouselView aboveSubview:scrollView];
+}
+
 - (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
     if (animate)
     {
@@ -89,31 +102,6 @@
     else
         [activityIndicatorCenter stopCompleteAnimation];
         //[activityIndicatorCenter setHidden:YES];
-#if 0
-    if (animate)
-    {
-        // no need to reanimate center indicator
-        if (which==0)
-        {
-            [activityIndicatorLeft setHidden:NO];
-            [activityIndicatorLeft startAnimating];
-        }
-        else
-        {
-            [activityIndicatorRight setHidden:NO];
-            [activityIndicatorRight startAnimating];
-        }
-    }
-    else // stop all indicators
-    {
-        //[activityIndicatorCenter setHidden:YES];
-        //[activityIndicatorCenter stopAnimating];
-        [activityIndicatorLeft setHidden:YES];
-        [activityIndicatorLeft stopAnimating];
-        [activityIndicatorRight setHidden:YES];
-        [activityIndicatorRight stopAnimating];
-    }
-#endif
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -131,8 +119,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [badgeView resetBadgeLocations];  
-    NSLog(@"Feed view's Badge controller frame: %f %f %f %f\n", badgeView.frame.origin.x, badgeView.frame.origin.y, badgeView.frame.size.width, badgeView.frame.size.height);
+    [carouselView resetBadgeLocations];  
 	[super viewDidAppear:animated];
 }
 
@@ -163,8 +150,8 @@
     activityIndicatorRight = nil;
     nameLabel = nil;
 
-    [badgeView release];
-    badgeView = nil;
+    [carouselView release];
+    carouselView = nil;
     [scrollView release];
     scrollView = nil;
 
@@ -187,8 +174,8 @@
     activityIndicatorRight = nil;
     nameLabel = nil;
 
-    [badgeView release];
-    badgeView = nil;
+    [carouselView release];
+    carouselView = nil;
     [scrollView release];
     scrollView = nil;
 
@@ -196,93 +183,26 @@
 }
 
 /******* badge view delegate ******/
--(void)didDropStix:(UIImageView *)badge ofType:(int)type {
+-(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
     // increment stix count for given feed item
     
     if ([allTags count] == 0) {
         // nothing loaded yet
-        [badgeView resetBadgeLocations];
+        [carouselView resetBadgeLocations];
         return;
     }
-    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];
-
-    if ([delegate getStixCount:type] < 1)
-    {
-        if ([delegate isLoggedIn] == NO)
-        {     
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"Ok I'll go log in now"];
-            [alert setTitle:@"Not logged in"];
-            [alert setMessage:[NSString stringWithFormat:@"You have no stix because you are not logged in!"]];
-            [alert show];
-            [alert release];
-        }
-        else
-        {
-            NSString * badgeTypeStr;
-            if (type == BADGE_TYPE_FIRE)
-                badgeTypeStr = @"Fire";
-            else
-                badgeTypeStr = @"Ice";
-
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"I take it back"];
-            [alert setTitle:@"Insufficient stix"];
-            [alert setMessage:[NSString stringWithFormat:@"You have run out of %@ stix!", badgeTypeStr]];
-            [alert show];
-            [alert release];
-        }
-        [badgeView resetBadgeLocations];
-        return;
-    }
-   
-    /*
-    if ([t badgeType] != BADGE_TYPE_FIRE && [t badgeType] != BADGE_TYPE_ICE) {        
-        NSString * badgeTypeStr;
-        if (type == BADGE_TYPE_FIRE)
-            badgeTypeStr = @"Fire";
-        else
-            badgeTypeStr = @"Ice";
-        UIAlertView* alert = [[UIAlertView alloc]init];
-        [alert addButtonWithTitle:@"Ok"];
-        [alert setTitle:@"Beta Version"];
-        [alert setMessage:[NSString stringWithFormat:@"Sorry, you cannot add stix to this Pix! Try adding your %@ to another picture.", badgeTypeStr]];
-        [alert show];
-        [alert release];
-        [badgeView resetBadgeLocations];
-        return;
-    }
-    */
-    
-    /*
-    NSString * badgeTypeStr;
-    if ([t badgeType] == BADGE_TYPE_FIRE)
-        badgeTypeStr = @"Fire";
-    else
-        badgeTypeStr = @"Ice";
-    NSLog(@"Current tag id %d by %@: %@ stix count was %d", [t.tagID intValue], t.username, badgeTypeStr, t.badgeCount);
-     */
-    
-    [delegate didAddStixToTag:t withType:type];
-
-    //NSLog(@"After decrement: %d (delegate says %d)", ret, [delegate getStixCount:type]);
-    //if ([t.username isEqualToString:[delegate getUsername]] == NO) {
-    //    [delegate incrementStixCount:type forUser:t.username];
-        //[delegate decrementStixCount:type forUser:[delegate getUsername]];        
-    //}
+    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    CGPoint location = CGPointMake(badge.frame.origin.x, badge.frame.origin.y);
+    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
     
 //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
-    [badgeView resetBadgeLocations];
+    [carouselView resetBadgeLocations];
     [scrollView reloadPage:lastPageViewed];
     
 }
--(int)getStixCount:(int)stix_type {
-    return [self.delegate getStixCount:stix_type];
+-(int)getStixCount:(NSString*)stixStringID {
+    return [self.delegate getStixCount:stixStringID];
 }
--(int)getStixLevel {
-    return [self.delegate getStixLevel];
-}
-
 /*********** PagedScrollViewDelegate functions *******/
 
 -(void)initializeScrollWithPageSize:(CGSize)pageSize
@@ -304,18 +224,27 @@
 }
 
  -(UIView*)viewForItemAtIndex:(int)index
-{	
-    //NSLog(@"Index: %d reverse_index: %d", index, reverse_index);
-    
-    Tag * tag = [[allTags objectAtIndex:index] retain];
+{	    
+    /*
+    for (int j=0; j<[allTags count]; j++) {
+        Tag * tt = [allTags objectAtIndex:j];
+        NSLog(@"Tag %d id %d descriptor %@\n", j, [tt.tagID intValue], tt.descriptor);
+        NSLog(@"  StringID %@", tt.stixStringID);
+    }
+     */
+
+    Tag * tag = [allTags objectAtIndex:index];
     
     NSString * name = tag.username;
     NSString * descriptor = tag.descriptor;
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
+    NSString * stixStringID = tag.stixStringID;
+    int tagID = [tag.tagID intValue];
     UIImage * image = tag.image;
+    NSLog(@"Index: %d tagID: %d", index, tagID);
     
-    NSLog(@"Creating feed item at index %d: name %@ comment %@ image dims %f %f\n", index, name, comment, image.size.width, image.size.height);
+    NSLog(@"Creating feed item %d at index %d: name %@ comment %@ image %@ dims %f %f\n", tagID, index, name, comment, stixStringID, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
     [feedItem setDelegate:self];
@@ -326,20 +255,19 @@
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
         [feedItem populateWithUserPhoto:photo];
-        [photo release];
+        //[photo release];
     }
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
-    [feedItem populateWithBadge:tag.badgeType withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
+    [feedItem populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     if (count == 1)
         [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", count] forState:UIControlStateNormal];
     else        
         [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", count] forState:UIControlStateNormal];
-    NSLog(@"Adding badge at location %d %d", tag.badge_x,tag. badge_y);
-    [tag release];
+    NSLog(@"FeedViewController: Adding badge at location %d %d in image of %f %f", tag.badge_x,tag. badge_y, image.size.width, image.size.height);
     
     // this object must be retained so that the button actions can be used
     [feedItems setObject:feedItem forKey:tag.tagID];

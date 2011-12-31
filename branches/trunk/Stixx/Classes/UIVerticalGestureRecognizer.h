@@ -13,6 +13,7 @@
 {
     CGPoint firstTouch;
     CGPoint translation;
+    CGPoint currTouch;
     bool isDrag;
     bool isDown;
     int dragCt;
@@ -20,4 +21,5 @@
 
 -(CGPoint)translation;
 -(CGPoint)firstTouch;
+-(CGPoint)currTouch;
 @end

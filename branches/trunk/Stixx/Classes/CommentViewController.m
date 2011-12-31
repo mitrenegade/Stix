@@ -53,7 +53,7 @@
     
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
-    stixTypes = [[NSMutableArray alloc] init];
+    stixStringIDs = [[NSMutableArray alloc] init];
     
     [nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
@@ -65,11 +65,20 @@
     for (NSMutableDictionary * d in theResults) {        
         NSString * name = [d valueForKey:@"username"];
         NSString * comment = [d valueForKey:@"comment"];
-        NSNumber * stixType = [d valueForKey:@"badgeType"];
+        NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        if ([stixStringID length] == 0)
+        {
+            // backwards compatibility
+            int type = [[d valueForKey:@"badgeType"] intValue];
+            if (type != -1)
+                stixStringID = [BadgeView getStixStringIDAtIndex:type];
+            else
+                stixStringID = @"COMMENT";
+        }
         
         [names addObject:name];
         [comments addObject:comment];
-        [stixTypes addObject:stixType];
+        [stixStringIDs addObject:stixStringID];
     }
     [commentsTable.tableView reloadData];
 }
@@ -97,8 +106,10 @@
     return [comments objectAtIndex:index];
 }
 
--(int)getStixTypeForIndex:(int)index {
-    int type = [[stixTypes objectAtIndex:index] intValue];
+-(NSString*)getStixStringIDForIndex:(int)index {
+    NSString* type = [stixStringIDs objectAtIndex:index];
+    if ([type length] == 0) 
+        type = @"COMMENT";
     return type;
 }
 

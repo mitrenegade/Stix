@@ -70,16 +70,6 @@
     [self presentModalViewController:loginController animated:YES];
 }
 
-// LoginViewDelegate - username is the name used to login, now need to get other info
--(NSMutableArray *) dataToArray:(NSMutableData *) data{ 
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    NSMutableArray * dict = [unarchiver decodeObjectForKey:@"dictionary"];
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    //[data release];
-    return dict;
-}
-
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
     NSLog(@"Selected username: %@", name);
     for (NSMutableDictionary * d in theResults) {
@@ -88,10 +78,9 @@
             continue;        
         UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
         // badge count array
-        NSMutableArray * stix;
+        NSMutableDictionary * stix;
         if (loginController.bJoinOrLogin == 1) {
-            stix = [[self dataToArray:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
-            NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
+            stix = [[KumulosData dataToDictionary:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
             // total badge count
             int totalTags = [[d valueForKey:@"totalTags"] intValue];
             [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
@@ -99,7 +88,7 @@
         else
         {
             stix = [[BadgeView generateDefaultStix] retain];
-            NSLog(@"DidLoginWithUsername: %@ - currently has stix %d %d", name, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
+            NSLog(@"DidLoginWithUsername: %@", name);
             // total badge count
             int totalTags = [[d valueForKey:@"totalTags"] intValue];
             [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];

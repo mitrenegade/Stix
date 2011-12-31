@@ -35,12 +35,12 @@
     float item_width = imageView.frame.size.width;
     float item_height = imageView.frame.size.height;
     
-     stix = [[BadgeView getBadgeOfType:tag.badgeType] retain];
+    stix = [BadgeView getBadgeWithStixStringID:tag.stixStringID];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float originX = tag.badge_x;
-    float originY = tag.badge_y;
+    float centerX = tag.badge_x;
+    float centerY = tag.badge_y;
     NSLog(@"Adding badge to %d %d in image of size %f %f", tag.badge_x, tag.badge_y, item_width, item_height);
-    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
+    stix.frame = CGRectMake(0, 0, stix.frame.size.width, stix.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = CGSizeMake(300, 300);
@@ -53,17 +53,19 @@
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
+    centerX *= imageScale;
+    centerY *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
+    [stix setCenter:CGPointMake(centerX, centerY)];
     [imageView addSubview:stix];
     
-    if (tag.badgeType == BADGE_TYPE_FIRE || tag.badgeType == BADGE_TYPE_ICE) {
+    if ([tag.stixStringID isEqualToString:@"FIRE"] || [tag.stixStringID isEqualToString:@"ICE"]) {
         CGRect labelFrame = stix.frame;
         stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-        stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:tag.badgeType] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:tag.badgeType] * imageScale);
         labelFrame = stixCount.frame; // changing center should change origin but not width
         //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-        [stixCount setTextAttributesForBadgeType:tag.badgeType];
+        [stixCount setTextAttributesForBadgeType:([tag.stixStringID isEqualToString:@"FIRE"]?0:1)];
         [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
         [stixCount setText:[NSString stringWithFormat:@"%d", tag.badgeCount]];
         [imageView addSubview:stixCount];

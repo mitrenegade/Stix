@@ -10,8 +10,9 @@
 #import "Kumulos.h"
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
-#import "BadgeView.h" // for generateDefaultStix
+#import "BadgeView.h"
 #import "LoadingAnimationView.h"
+#import "KumulosData.h"
 
 @protocol LoginViewDelegate
 
@@ -62,6 +63,4 @@
 -(void)addUser;
 -(void)doLogin;
 
-// utilities - is this the right place?
--(NSMutableData * ) arrayToData:(NSMutableArray *) dict;
 @end

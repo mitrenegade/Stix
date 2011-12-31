@@ -36,27 +36,58 @@
 @synthesize username;
 @synthesize userphoto;
 @synthesize usertagtotal;
-@synthesize stixLevel;
 @synthesize lastViewController;
 @synthesize allTags;
 @synthesize timeStampOfMostRecentTag;
 @synthesize allUserPhotos;
 @synthesize allStix;
 @synthesize k;
-@synthesize lastBadgeView;
+@synthesize lastCarouselView;
 @synthesize allCommentCounts;
+@synthesize loadingController;
 
-static const int levels[4] = {0,0,5,10};
+static const int levels[6] = {0,0,5,10,15,20};
+static int init=0;
 
 // INIT code
 - (void)applicationDidFinishLaunching:(UIApplication *)application {  
     
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
+
+    // Override point for customization after application launch
+    loadingController = [[LoadingViewController alloc] init];
+    [window addSubview:loadingController.view];
+    [loadingController setMessage:@"Connecting to Stix server..."];
     
-    /* add administration calls here */
-    //[k adminResetAllStixLevelWithStixLevel:2];
+    [window makeKeyAndVisible];
     
+    [k getAllStixTypes];
+    [k getAllStixViews];    
+}
+
+- (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
+    // initialize stix types for all badge views
+    [BadgeView InitializeStixTypes:theResults];
+    init++;
+    if (init == 2) {
+        [self continueInit];
+    }
+}
+
+
+- (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
+    [BadgeView InitializeStixViews:theResults];
+    init++;
+    if (init == 2) {
+        [self continueInit];
+    }
+}
+
+-(void) continueInit {
+
+    [self adminUpdateAllStixCountsToZero];
+
 #if 1
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
@@ -65,13 +96,16 @@ static const int levels[4] = {0,0,5,10};
 #endif
     allTags = [[NSMutableArray alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
-    allStix = [[NSMutableArray alloc] init];
-    stixLevel = 2; // default
-    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_FIRE];
-    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_ICE];
+    allStix = [[NSMutableDictionary alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
     
 	/***** create first view controller: the TagViewController *****/
+    [loadingController.view removeFromSuperview]; // doesnt work
+    [loadingController release];
+    loadingController = [[LoadingViewController alloc] init];
+    [window addSubview:loadingController.view];
+    [loadingController setMessage:@"Initializing camera..."];
+
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
 	[tagViewController setCameraOverlayView:[tabBarController view]]; // allows camera to have the tabBar navigation as well as the badge/aperture/3d overlay
@@ -87,18 +121,32 @@ static const int levels[4] = {0,0,5,10};
     pageOfLastNewerTagsRequest = -1;
     pageOfLastOlderTagsRequest = -1;
     [self checkForUpdateTags];
-    
+#if 1
 	/***** create feed view *****/
+    [loadingController.view removeFromSuperview];
+    [loadingController release];
+    loadingController = [[LoadingViewController alloc] init];
+    [window addSubview:loadingController.view];
+    [loadingController setMessage:@"Loading feed..."];
+
 	feedController = [[FeedViewController alloc] init];
     [feedController setDelegate:self];
     //[feedController setIndicator:YES];
     feedController.allTags = allTags;
+#endif
     
+#if 1
     /***** create explore view *****/
     exploreController = [[ExploreViewController alloc] init];
     exploreController.delegate = self;
 	
 	/***** create friends feed *****/
+    [loadingController.view removeFromSuperview];
+    [loadingController release];
+    loadingController = [[LoadingViewController alloc] init];
+    [window addSubview:loadingController.view];
+    [loadingController setMessage:@"Contacting friends.."];
+
 	friendController = [[FriendsViewController alloc] init];
     //	friendController.tagViewController = tagViewController;
     friendController.delegate = self;
@@ -107,11 +155,12 @@ static const int levels[4] = {0,0,5,10};
     /***** create mystix view *****/
     myStixController = [[MyStixViewController alloc] init];
     myStixController.delegate = self;
-	
+
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
     [profileController setFriendController:friendController];
+#endif
     
     loginSplashController = nil;
     NSString *path = [self coordinateArrayPath];
@@ -131,28 +180,34 @@ static const int levels[4] = {0,0,5,10};
     else
     {
         NSLog(@"Loggin in as %@", username);
+        [loadingController.view removeFromSuperview];
+        [loadingController release];
+        loadingController = [[LoadingViewController alloc] init];
+        [window addSubview:loadingController.view];
+        [loadingController setMessage:[NSString stringWithFormat:@"Logging in as %@...", username]];
         [profileController loginWithUsername:username];
     }   
 	/***** add view controllers to tab controller, and add tab to window *****/
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, myStixController, /*friendController, */profileController, nil];	
-    //NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, friendController, profileController, nil];	
-	[tabBarController setViewControllers:viewControllers];
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, myStixController, profileController, nil];
+    //NSArray * viewControllers = [NSArray arrayWithObjects: exploreController, feedController, tagViewController, myStixController, profileController, nil];
+    [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
     
     lastViewController = feedController;
-    lastBadgeView = feedController.badgeView;
+    lastCarouselView = feedController.carouselView;
+    [loadingController.view removeFromSuperview];
     [window addSubview:[tabBarController view]];
     
     [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:nil];
 	
-    // Override point for customization after application launch
-    [window makeKeyAndVisible];
-    
     if (isLoggingIn == YES && loggedIn == NO)
     {
         [tabBarController presentModalViewController:loginSplashController animated:NO];
         isLoggingIn = NO;
     }
+    
+    /* add administration calls here */
+    
 }
 
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
@@ -160,20 +215,20 @@ static const int levels[4] = {0,0,5,10};
     if (lastViewController == tagViewController)
     {
         [tagViewController dismissModalViewControllerAnimated:NO];
-        lastBadgeView = [tagViewController badgeView];
+        lastCarouselView = [tagViewController carouselView];
     }
     if (lastViewController == friendController) // if we leave friend controller, start an update for next time
     {
         [self checkForUpdatePhotos];
-        lastBadgeView = [friendController badgeView];
+        lastCarouselView = [friendController carouselView];
     }
     if (lastViewController == feedController)
     {
-        lastBadgeView = [feedController badgeView];
+        lastCarouselView = [feedController carouselView];
     }
     if (lastViewController == exploreController)
     {
-        lastBadgeView = [exploreController badgeView];
+        lastCarouselView = [exploreController carouselView];
     }
 	[viewController viewWillAppear:TRUE];
     lastViewController = viewController;
@@ -270,12 +325,9 @@ static const int levels[4] = {0,0,5,10};
     newestTag = [newTag retain];
     
     [k setDelegate:self];
-    NSData * img = UIImageJPEGRepresentation([newTag image], .8); //UIImagePNGRepresentation([newTag image]);
-    int x = newTag.badge_x;
-    int y = newTag.badge_y;
-    int type = newTag.badgeType;
-    int count = newTag.badgeCount;
+    NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); //UIImagePNGRepresentation([newTag image]);
     
+    // this must match Tag.m:getTagFromDictionary
     NSMutableData *theCoordData;
     NSKeyedArchiver *encoder;
     theCoordData = [NSMutableData data];
@@ -283,11 +335,36 @@ static const int levels[4] = {0,0,5,10};
 	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
     [encoder release];
-    [k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];    
+    
+    // this must match Tag.m:getTagFromDictionary
+    NSMutableData *theAuxStixData;
+    theAuxStixData = [NSMutableData data];
+    encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
+	[encoder encodeObject:newTag.auxLocations forKey:@"auxLocations"];
+	[encoder encodeObject:newTag.auxStixStringIDs forKey:@"auxStixStringIDs"];
+    [encoder finishEncoding];
+    [encoder release];
+
+    [k newPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andBadge_x:newTag.badge_x andBadge_y:newTag.badge_y andScore:newTag.badgeCount andStixStringID:newTag.stixStringID andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
+    //[k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];    
 }
 
-//- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addTagDidCompleteWithResult:(NSNumber*)newRecordID
-//- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixDidCompleteWithResult:(NSNumber*)newRecordID
+- (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation newPixDidCompleteWithResult:(NSNumber *)newRecordID {
+    [newestTag setTagID:newRecordID];
+    [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
+    //[allTags addObject:newestTag];
+    bool added = [self addTagWithCheck:newestTag withID:[newRecordID intValue]];
+    if (added)
+        NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
+    else
+        NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
+    
+    // update usertagtotal
+    usertagtotal += 1;
+    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
+}
+
+#if 0
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID
 {
     [newestTag setTagID:newRecordID];
@@ -324,59 +401,23 @@ static const int levels[4] = {0,0,5,10};
     // update usertagtotal
     usertagtotal += 1;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
-    
-    // update user's stixLevel
-    [self updateUserStixLevel];
-    
+        
     // add comment to history
     //[k addHistoryToPixWithTagID:[newestTag.tagID intValue] andUsername:newestTag.username andComment:newestTag.comment andBadgeType:newestTag.badgeType];
     // update comment count
     //[self updateCommentCount:[tag.tagID intValue]];
 
 }
+#endif
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
     NSLog(@"Updated user tag totals: affect rows %d\n", [affectedRows intValue]);
-    [profileController updateStixCount];
+    [profileController updatePixCount];
 }
 
 - (void)clearTags {
     [allTags removeAllObjects];
     [tagViewController clearTags];
-}
-
-- (void)updateUserStixLevel {
-    int newLevel = -1;
-    for (int i=0; i<4; i++) {
-        if (usertagtotal == levels[i])
-            newLevel = i+1;
-    }
-    
-    if (newLevel != -1)
-    {
-        self.stixLevel = newLevel;
-        if (newLevel == 3)
-            [self showAlertWithTitle:@"Level Up!" andMessage:[NSString stringWithFormat:@"You now can use the Heart Stix. You now have %d total Stix types. Visit the My Stix tab to see it!", newLevel] andButton:@"OK"];
-        if (newLevel == 4)
-            [self showAlertWithTitle:@"Level Up!" andMessage:[NSString stringWithFormat:@"You now can use the Leaf Stix. You now have %d total Stix types. Visit the My Stix tab to see it!", newLevel] andButton:@"OK"];
-        [k setStixLevelWithUsername:username andStixLevel:newLevel];
-    }
-    
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setStixLevelDidCompleteWithResult:(NSNumber*)affectedRows {
-    // update level
-
-    if (feedController.badgeView)
-        [feedController.badgeView resetBadgeLocations];
-    if (tagViewController.badgeView)
-        [tagViewController.badgeView resetBadgeLocations];
-    if (exploreController.badgeView)
-        [exploreController.badgeView resetBadgeLocations];
-    if (friendController.badgeView)
-        [friendController.badgeView resetBadgeLocations];
-    if (myStixController.badgeView)
-        [myStixController forceLoadMyStix];
 }
 
 /**** FeedViewDelegate ****/
@@ -414,7 +455,8 @@ static const int levels[4] = {0,0,5,10};
     bool didAddTag = NO;
     // assume result is ordered by allTagID
 	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain];
+        Tag * tag = [Tag getTagFromDictionary:d];
+        NSLog(@"Tag stringID: %@", tag.stixStringID);
         int new_id = [tag.tagID intValue];
         if (new_id > idOfNewestTagReceived)
         {
@@ -427,7 +469,6 @@ static const int levels[4] = {0,0,5,10};
             idOfOldestTagReceived = new_id;
         }
         didAddTag = [self addTagWithCheck:tag withID:new_id];
-        [tag release];
 	}
     [feedController setIndicatorWithID:0 animated:NO];
     [feedController setIndicatorWithID:1 animated:NO];
@@ -467,6 +508,7 @@ static const int levels[4] = {0,0,5,10};
     // tags with IDs greater than idOfCurrentTag should go to the head of the array allTags
 	for (NSMutableDictionary * d in theResults) {
         Tag * tag = [Tag getTagFromDictionary:d];
+        NSLog(@"Tag stringID: %@", tag.stixStringID);
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id > idOfNewestTagReceived)
@@ -492,6 +534,7 @@ static const int levels[4] = {0,0,5,10};
     int totalAdded = 0;
 	for (NSMutableDictionary * d in theResults) {
         Tag * tag = [Tag getTagFromDictionary:d];
+        NSLog(@"Tag stringID: %@", tag.stixStringID);
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id < idOfOldestTagReceived)
@@ -623,40 +666,46 @@ static const int levels[4] = {0,0,5,10};
         NSLog(@"Kumulos error in profileController: %@ - probably failed while trying to call userLogin", theError);
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableArray *)stix andTotalTags:(int)total{
-    [stix retain];
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total{
     loggedIn = YES;
     username = [name retain];
     userphoto = [photo retain];
     usertagtotal = total;
+    
+    NSLog(@"Username %@ with %d pix and image of %f %f", username, usertagtotal, userphoto.size.width, userphoto.size.height);
 
     NSString *path = [self coordinateArrayPath];
     [NSKeyedArchiver archiveRootObject:username toFile:path];
     
-    int newLevel = -1;
-    for (int i=0; i<4; i++) {
-        if (usertagtotal >= levels[i])
-            newLevel = i+1;
+    if (![stix isKindOfClass:[NSMutableDictionary class]]) {
+        [stix release];
+        stix = [BadgeView generateDefaultStix];
     }
-    stixLevel = newLevel;        
-
+    
     [allStix removeAllObjects];
-    [allStix addObjectsFromArray:stix];
-    NSLog(@"Setting delegate name to %@ = %@ with stix: %d %d", name, username, [[stix objectAtIndex:0] intValue], [[stix objectAtIndex:1] intValue]);
+    NSEnumerator *e = [stix keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        [allStix setObject:[stix objectForKey:key] forKey:key];
+        NSLog(@"Adding key %@ value %@", key, [stix objectForKey:key]);
+    }
+     
+    //[allStix addEntriesFromDictionary:stix];
+    NSLog(@"Setting delegate name to %@\n", username);
         
-    // also process
-    [k processStixUpdatesWithUsername:name];
-
-    [profileController updateStixCount];
+    [profileController updatePixCount];
 
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
     //if (lastBadgeView)
     //    [lastBadgeView resetBadgeLocations];
     
-    [myStixController forceLoadMyStix];
+    //[myStixController forceLoadMyStix];
     
-    [stix release];
+    [feedController reloadCarouselView];
+    [exploreController reloadCarouselView];
+    //[myStixController reloadCarouselView];
+    [tagViewController reloadCarouselView];
 }
 
 -(void)didLogout {
@@ -668,11 +717,9 @@ static const int levels[4] = {0,0,5,10};
     }
     usertagtotal = 0;
     [allStix removeAllObjects];
-    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_FIRE];
-    [allStix insertObject:[NSNumber numberWithInt:0] atIndex:BADGE_TYPE_ICE];
-    [profileController updateStixCount];
-    //if (lastBadgeView)
-    //    [lastBadgeView resetBadgeLocations];
+    [profileController updatePixCount];
+    if (lastCarouselView)
+        [lastCarouselView resetBadgeLocations];
     
     if (loginSplashController == nil) {
         loginSplashController = [[LoginSplashController alloc] init];
@@ -681,117 +728,16 @@ static const int levels[4] = {0,0,5,10};
     [tabBarController presentModalViewController:loginSplashController animated:NO];
 }
 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation processStixUpdatesDidCompleteWithResult:(NSArray*)theResults {
-    
-    int changes[2];
-    changes[BADGE_TYPE_FIRE] = 0;
-    changes[BADGE_TYPE_ICE] = 0;
-    for (NSMutableDictionary * d in theResults)
-    {
-        NSString * name = [d valueForKey:@"username"];
-        NSLog(@"Name: %@ delegate.username: %@\n", name, username);
-        if ([name isEqualToString:username] == NO)
-        {
-            NSLog(@"Whoops! Stix Update for wrong user is being processed...fix it!");
-            continue;
-        }
-        if ([name isKindOfClass:[NSString class]] == NO)
-        {
-            NSLog(@"Whoops! Invalid name! Discarding update!");
-            continue;
-        }
-            
-        int badgeType = [[d valueForKey:@"type"] intValue];
-        int changeCt = [[d valueForKey:@"count"] intValue];
-        
-        changes[badgeType] += changeCt;
-
-        NSString * fromName = [d valueForKey:@"FromUsername"];
-        NSLog(@"%@ received %d stix of type %d from %@", name, changeCt, badgeType, fromName);
-    } 
-    int ct = [[allStix objectAtIndex:BADGE_TYPE_FIRE] intValue];
-    [allStix replaceObjectAtIndex:BADGE_TYPE_FIRE withObject:[NSNumber numberWithInt:ct + changes[BADGE_TYPE_FIRE]]];
-    NSLog(@"Changed fire badges from %d to %d\n", ct, ct+changes[BADGE_TYPE_FIRE]);
-    ct = [[allStix objectAtIndex:BADGE_TYPE_ICE] intValue];
-    [allStix replaceObjectAtIndex:BADGE_TYPE_ICE withObject:[NSNumber numberWithInt:ct + changes[BADGE_TYPE_ICE]]];
-    NSLog(@"Changed ice badges from %d to %d\n", ct, ct+changes[BADGE_TYPE_ICE]);
-    
-    [k addStixToUserWithUsername:username andStix:[profileController arrayToData:allStix]];
-    
-    //if (lastBadgeView)
-    //    [lastBadgeView updateStixCounts];
-    [profileController updateStixCount];
-}
-
 -(void)didChangeUserphoto:(UIImage *)photo {
     [self setUserphoto:photo];
 }
 
--(int)getStixCount:(int)type {
+-(int)getStixCount:(NSString*)stixStringID {
     //if (loggedIn)
-    if ([allStix count] > type)
-    {
-        return [[allStix objectAtIndex:type] intValue];
-    }
-    return -1;
-}
-
--(int)getStixLevel {
-    return stixLevel;
-}
-
--(int)incrementStixCount:(int)type forUser:(NSString *)name{
-    // increment stix count of user
-    int ret = -1;
-    int ct = 0;
-    /*
-    if ([name isEqualToString:@"anonymous"])
-    {
-        int ct = [[allStix objectAtIndex:type] intValue];
-        // anonymous users cannot get increases in stix count
-        //ct = ct + 1;
-        //[allStix replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct]];
-        ret = ct;
-    } 
-    else if ([name isEqualToString:username])
-     */
-    if ([name isEqualToString:username])
-    {
-        // if the person being incremented is the current user, change allStix first,
-        // then submit a stixCountChange to kumulos
-        if (type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE)
-        {
-            ct = [[allStix objectAtIndex:type] intValue];
-            ct = ct + 1;
-            [allStix replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct]];
-            ret = ct;
-        }
-    }
-    
-    return ret;
-}
-
--(int)decrementStixCount:(int)type forUser:(NSString *)name{
-    // decrement stix count of user
-    int ret = -1;
-    int ct = 0;
-    if ([name isEqualToString:username])
-    {
-        if (type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE)
-        {
-            ct = [[allStix objectAtIndex:type] intValue];
-            ct = ct - 1;
-            [allStix replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct]];
-            ret = ct;
-#if 0  
-            // add to kumulos. todo: also error check
-            NSMutableData * data = [[profileController arrayToData:allStix] retain];
-            [k addStixToUserWithUsername:name andStix:data];
-            //[data release]; // do not release data here - must be added to stix
-#endif
-//            NSLog(@"Decrement my %@ stix count for user %@ to %d", type==BADGE_TYPE_FIRE?@"Fire":@"Ice", name, ct);
-        }
-    }
+    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+        return -1;
+    int ret = [[allStix objectForKey:stixStringID] intValue];
+    //NSLog(@"Stix count for %@: %d", stixStringID, ret);
     return ret;
 }
 
@@ -801,114 +747,60 @@ static const int levels[4] = {0,0,5,10};
     for (NSMutableDictionary * d in theResults)
     {
         NSString * name = [d valueForKey:@"username"];
-        NSMutableArray * stix = [profileController dataToArray:[d valueForKey:@"stix"]];
-        NSLog(@"Updated stix counts for user %@: %d fire and %d ice", name, [[stix objectAtIndex:BADGE_TYPE_FIRE] intValue],  [[stix objectAtIndex:BADGE_TYPE_ICE] intValue]);
+        NSLog(@"Updated stix counts for user %@", name);
     }    
 }
 
-// debug
--(void)adminUpdateAllStixCountsToZero {
-    NSMutableArray * stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-    for (int i=0; i<BADGE_TYPE_MAX; i++)
-        [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
-    NSMutableData *theStixData;
-    NSKeyedArchiver *encoder2;
-    theStixData = [NSMutableData data];
-    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
-	[encoder2 encodeObject:stixCounts forKey:@"stixCounts"];
-    [encoder2 finishEncoding];
-    [k adminUpdateAllUsersStixCountsWithStixCounts:theStixData];
-    [stixCounts release];
-}
-
--(void)didAddStixToTag:(Tag *) tag withType:(int)type {
+-(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location{
     // find the correct tag in allTags;
     for (Tag* t in allTags) {
         if (t.tagID == tag.tagID)
             NSLog(@"Found tag %d", [t.tagID intValue]);
     }
-#if 1 
-    /*** increment/decrement fire and ice; do not change other stix counts ***/
-    if ((type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE)  && 
-        (tag.badgeType == BADGE_TYPE_FIRE || tag.badgeType == BADGE_TYPE_ICE))
+
+    if ( ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) && 
+        ([tag.stixStringID isEqualToString:@"FIRE"] || [tag.stixStringID isEqualToString:@"ICE"]))
     {
-        if (tag.badgeType == type)
+        // increment/decrement fire and ice if it is the primary stix; do not change other stix counts
+        if (tag.stixStringID == stixStringID)
             tag.badgeCount++;
         else {
             tag.badgeCount--;
             if (tag.badgeCount < 0) {
                 tag.badgeCount = -tag.badgeCount;
-                tag.badgeType = type; //[lastBadgeView getOppositeBadgeType:tag.badgeType];
+                if ([tag.stixStringID isEqualToString:@"FIRE"])
+                    tag.stixStringID = @"ICE";
+                else
+                    tag.stixStringID = @"FIRE";
             }
         }
-    }
-#else
-    NSMutableArray * stixCounts = tag.stixCounts;
-    if (stixCounts == nil) {
-        stixCounts = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-        for (int i=0; i<BADGE_TYPE_MAX; i++)
-            [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
-        [stixCounts replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:tag.badgeCount+1]];
-    }
-    else if ([stixCounts count] < type) {
-        for (int i=[stixCounts count]; i<BADGE_TYPE_MAX; i++) {
-            [stixCounts insertObject:[NSNumber numberWithInt:0] atIndex:i];
-        }
-        [stixCounts insertObject:[NSNumber numberWithInt:tag.badgeCount+1] atIndex:type];
     }
     else {
-        int ct = [[stixCounts objectAtIndex:type] intValue];
-        [stixCounts replaceObjectAtIndex:type withObject:[NSNumber numberWithInt:ct+1]];
+        //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
+        // array for the tag
+        [tag.auxStixStringIDs addObject:stixStringID];
+        [tag.auxLocations addObject:[NSValue valueWithCGPoint:location]];
     }
-    int maxtype = -1;
-    int max = -1;
-    for (int i=0; i<BADGE_TYPE_MAX; i++)
-    {
-        if ([[stixCounts objectAtIndex:i] intValue] == max)
-        {
-            if (i == tag.badgeType) {
-                maxtype = i;
-            }
-        }
-        else if ([[stixCounts objectAtIndex:i] intValue] > max)
-        {
-            max = [[stixCounts objectAtIndex:i] intValue];
-            maxtype = i;
-        }
-    }
-    tag.badgeType = maxtype;
-    tag.badgeCount = [[stixCounts objectAtIndex:maxtype] intValue];
-#endif
     
-    [k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
-
-#if 0 // update stix counts for other tags
-    NSMutableData *theStixData;
-    NSKeyedArchiver *encoder2;
-    theStixData = [NSMutableData data];
-    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
-	[encoder2 encodeObject:stixCounts forKey:@"stixCounts"];
-    [encoder2 finishEncoding];
-    [encoder2 release];
-    [k updatePixWithStixCountsWithAllTagID:[tag.tagID intValue] andStixCounts:theStixData];
-#endif
+    //[k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
+    NSMutableData *theAuxStixData = [NSMutableData data];
+    NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
+	[encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
+	[encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
+    [encoder finishEncoding];
+    [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
     
     // update usertagtotal
     usertagtotal += 1;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
     
-    // update user's stixLevel
-    [self updateUserStixLevel];
+    //[k addHistoryToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andBadgeType:type];
+    [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
     
-    [k addHistoryToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andBadgeType:type];
     // update comment count
     [self updateCommentCount:[tag.tagID intValue]];
 
-    NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.badgeType == BADGE_TYPE_FIRE?@"Fire":@"Ice", [tag.tagID intValue], tag.badgeCount);
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithStixCountsDidCompleteWithResult:(NSNumber*)affectedRows {
-    NSLog(@"Update Pix with Stix Counts: affected rows %d\n", [affectedRows intValue]);
+    NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.stixStringID, [tag.tagID intValue], tag.badgeCount);
 }
 
 -(NSString *) getUsername {
@@ -935,12 +827,27 @@ static const int levels[4] = {0,0,5,10};
     return loggedIn;
 }
 
--(void)didCreateBadgeView:(UIView*)newBadgeView; {
+-(void)didCreateBadgeView:(UIView *)newBadgeView {
     if (lastViewController != nil) {
-        lastBadgeView = (BadgeView*) newBadgeView;
+        lastCarouselView = (CarouselView*) newBadgeView;
     }
-    //return lastBadgeView;
 }
+
+/*** processing stix counts ***/
+
+-(void)getUserInformation {
+}
+
+// debug
+-(void)adminUpdateAllStixCountsToZero {
+
+    NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
+    NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
+    //[k addStixToUserWithUsername:username andStix:data];
+    [k adminAddStixToAllUsersWithStix:data];
+
+}
+
 
 - (void)dealloc {
 	

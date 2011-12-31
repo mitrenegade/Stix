@@ -8,38 +8,44 @@
 
 #import "BadgeView.h"
 
-static NSArray * stixFilenames;
-static NSArray * stixDescriptors;
+static NSMutableDictionary * stixDescriptors = nil;
+static NSMutableArray * stixStringIDs = nil;
+static NSMutableDictionary * stixViews = nil;
+static int totalStixTypes = 0;
 
 @implementation BadgeView
 
 @synthesize delegate;
 @synthesize underlay;
-@synthesize  showStixCounts;
-@synthesize  showRewardStix;
+@synthesize showStixCounts;
 @synthesize badgesLarge;
 @synthesize shelf;
+@synthesize selectedStixStringID;
 
 - (id)initWithFrame:(CGRect)frame 
 {
     self = [super initWithFrame:frame];
+    
+    if (totalStixTypes == 0)
+        NSLog(@"***** ERROR! BadgeView Stix Types not yet initialized! *****");
   
     shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
     shelf.frame = CGRectMake(0, 390, 320, 30);
     [self addSubview:shelf];
     
     showStixCounts = YES;
-    showRewardStix = YES;
     
+    // Populate all stix structures - used by BadgeView, CarouselView
     badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
     badgesLarge = [[NSMutableArray alloc] init];
     labels = [[NSMutableArray alloc] init];
-    for (int i=0; i<BADGE_TYPE_MAX; i++)
+    for (int i=0; i<totalStixTypes; i++)
     {
-        UIImageView * badgeLarge = [BadgeView getLargeBadgeOfType:i];
+        NSString * stixStringID = [[stixStringIDs objectAtIndex:i] copy];
+        UIImageView * badgeLarge = [BadgeView getLargeBadgeWithStixStringID:stixStringID];
         [badgesLarge addObject:badgeLarge];
-        UIImageView * badge = [BadgeView getBadgeOfType:i];
+        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
@@ -61,24 +67,6 @@ static NSArray * stixDescriptors;
     //[self addSubview:self];
 }
 
--(UIImage * )composeImage:(UIImage *) baseImage withOverlay:(UIImage *) overlayImage;
-{
-
-	CGRect scaledFrame; 
-	CGFloat offsetX = baseImage.size.width / 10;
-	CGFloat offsetY = baseImage.size.height / 10;
-	scaledFrame.size.width = baseImage.size.width + offsetX * 2;
-	scaledFrame.size.height = baseImage.size.height + offsetY * 2;
-	CGSize targetSize = CGSizeMake(scaledFrame.size.width, scaledFrame.size.height);	
-	
-	UIGraphicsBeginImageContext(targetSize);	
-	[baseImage drawInRect:CGRectMake(0, 0, baseImage.size.width, baseImage.size.height)];	
-	[overlayImage drawInRect:CGRectMake(offsetX, offsetY, overlayImage.size.width, overlayImage.size.height)];	
-	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();																					
-	return result;
-}
-
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];//touch.view];
@@ -88,23 +76,18 @@ static NSArray * stixDescriptors;
         [self.delegate performSelector:@selector(didStartDrag)];
 	
 	// find which icon is being dragged
-	unsigned numEls = [badges count];
+	unsigned numEls = 2; // for badgeView, only use first two// [badges count];
 	while (numEls--)
 	{
 		UIImageView * badge = [badges objectAtIndex:numEls];
 		CGRect frame = badge.frame;
-		int left = frame.origin.x;
-		int right = frame.origin.x + frame.size.width;
-		int top = frame.origin.y;
-		int bottom = frame.origin.y + frame.size.height;
-		//NSLog(@"Badge %d: left right top bottom { %d %d %d %d} touch: %f %f", numEls, left, right, top, bottom, location.x, location.y);
-		if (location.x > left && location.x < right && 
-				location.y > top && location.y < bottom)
+        if (CGRectContainsPoint(frame, location))
 		{
 			badgeTouched = badge;
 			drag = 1;
-			badgeSelect = numEls;
-            [[labels objectAtIndex:badgeSelect] removeFromSuperview];
+			badgeSelect = numEls; // index into badgesLarge and badgeLocations arrays
+            selectedStixStringID = [stixStringIDs objectAtIndex:numEls];
+            [[labels objectAtIndex:numEls] removeFromSuperview];
 			break;
 		}
 	}
@@ -116,13 +99,10 @@ static NSArray * stixDescriptors;
 	else
 	{		
         badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
-		badgeTouchedLarge = [BadgeView getLargeBadgeOfType:badgeSelect]; // objectAtIndex:badgeSelect];
-		//CGRect frameStart = badgeTouched.frame;
-		float centerX = badgeTouched.center.x; //(frameStart.origin.x + frameStart.size.width/2);
-		float centerY = badgeTouched.center.y; //(frameStart.origin.y + frameStart.size.height/2);
-		
-		//frameEnd.origin.x = centerX - frameEnd.size.width / 2;
-		//frameEnd.origin.y = centerY - frameEnd.size.height / 2;
+		badgeTouchedLarge = [BadgeView getLargeBadgeWithStixStringID:selectedStixStringID]; 
+        float centerX = badgeTouched.center.x; 
+		float centerY = badgeTouched.center.y; 
+        
         badgeTouchedLarge.center = CGPointMake(centerX, centerY);
 		CGRect frameEnd = badgeTouchedLarge.frame;
 		
@@ -146,8 +126,6 @@ static NSArray * stixDescriptors;
 		//NSLog(@"Dragging badge %d", badgeSelect);
 		
 	}
-	//fire.center = location;
-	//NSLog(@"Location: %f %f", location.x, location.y);
     [super touchesBegan: touches withEvent: event];
 }
 
@@ -156,26 +134,13 @@ static NSArray * stixDescriptors;
 	if (drag == 1)
 	{
 		UITouch *touch = [[event allTouches] anyObject];
-		CGPoint location = [touch locationInView:self];//touch.view];
+		CGPoint location = [touch locationInView:self];
 
 		//NSLog(@"Dragging to %f %f", location.x, location.y);
 
 		// update frame of dragged badge, also scale
-		//float scale = 1; // do not change scale while dragging
 		if (badgeTouched == nil)
 			return;
-        /*
-		CGRect frame = badgeTouched.frame;
-		int width = frame.size.width * scale;
-		int height = frame.size.height * scale;
-		int centerX = location.x - offset_from_center_X;
-		int centerY = location.y - offset_from_center_Y;
-		frame.origin.x = centerX - width / 2;
-		frame.origin.y = centerY - height / 2;
-		frame.size.width = width;
-		frame.size.height = height;
-		badgeTouched.frame = frame;
-         */
 		float centerX = location.x - offset_from_center_X;
 		float centerY = location.y - offset_from_center_Y;
         badgeTouched.center = CGPointMake(centerX, centerY);
@@ -210,10 +175,7 @@ static NSArray * stixDescriptors;
 			 ];
 			
 			// tells delegate to do necessary things such as take a photo
-			//if ([self.delegate respondsToSelector:@selector(didDropStix:)]) {
-				//[self.delegate performSelector:@selector(didDropStix: withObject:badgeTouched withObject:badgeSelect)];
-            [self.delegate didDropStix:badgeTouched ofType:badgeSelect];
-			//}	
+            [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
 		}
 	}
 }
@@ -253,31 +215,12 @@ static NSArray * stixDescriptors;
 }
 
 -(void)resetBadgeLocations {
-	
-    /*
-	unsigned numEls = [badges count];
-	while (numEls--)
-	{
-		UIImageView * badge = [badges objectAtIndex:numEls];
-        [badge removeFromSuperview];
-        //if ([delegate getStixCount:numEls] < 1 && [self showStixCounts] == YES)
-        //    [badge setAlpha:.25];
-        //else
-            [badge setAlpha:1];
-		badge.frame = [[badgeLocations objectAtIndex:numEls] CGRectValue];
-        [self addSubview:badge];
-	}
- */
-    for (int i=0; i<BADGE_TYPE_MAX; i++)
+    for (int i=0; i<totalStixTypes; i++)
     {
         UIImageView * badge = [badges objectAtIndex:i];
         [badge removeFromSuperview];
-        OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
-        [label removeFromSuperview];
     }
-    int numStix = [delegate getStixLevel];
-    if (showRewardStix == NO)
-        numStix = 2;
+    int numStix = 2; // badgeView always only shows two stix
     for (int i=0; i<numStix; i++)
     {
         UIImageView * badge = [badges objectAtIndex:i];
@@ -305,95 +248,78 @@ static NSArray * stixDescriptors;
         [self addSubview:label];
          */
     }
-    //[self updateStixCounts];
     drag = 0;
 }
 
 -(void)updateStixCounts {
-    for (int i=0; i<[delegate getStixLevel]; i++) {
-        int ct = [self.delegate getStixCount:i];
+    // Not used
+    for (int i=0; i<2; i++) {
+        int ct = [self.delegate getStixCount:[stixStringIDs objectAtIndex:i]];
         if (ct > -1)
         {
             OutlineLabel * label = [labels objectAtIndex:i];
-            if ([self showStixCounts])
-                [label removeFromSuperview];
+            [label removeFromSuperview];
             [label setText:[NSString stringWithFormat:@"%d", ct]];
-            if ([self showStixCounts])
-                [self addSubview:label];
+            [self addSubview:label];
         }
     }
-    /*
-    int countFire = [self.delegate getStixCount:BADGE_TYPE_FIRE];
-    if (countFire > -1)
-    {
-        if ([self showStixCounts])
-            [labelFire removeFromSuperview];
-        [labelFire setText:[NSString stringWithFormat:@"%d", countFire]];
-        if ([self showStixCounts])
-            [self addSubview:labelFire];
-    }
-    int countIce = [self.delegate getStixCount:BADGE_TYPE_ICE];
-    if (countIce > -1)
-    {
-        if ([self showStixCounts])
-            [labelIce removeFromSuperview];
-        [labelIce setText:[NSString stringWithFormat:@"%d", countIce]];
-        if ([self showStixCounts])
-            [self addSubview:labelIce];
-    }
-     */
 }
 
-+(NSArray *) stixFilenames {
-    if (!stixFilenames)
++(NSString *) stixDescriptorForStixStringID:(NSString *)stixStringID {
+    return [stixDescriptors objectForKey:stixStringID];
+}
+
++(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos {
+    if (stixStringIDs)
     {
-        stixFilenames = [[NSArray alloc] initWithObjects: 
-                         @"120_fire.png",
-                         @"120_ice.png",
-                         @"120_heart.png",
-                         @"120_leaf.png",
-                         @"120_bomb.png",
-                         @"120_bulb.png",
-                         @"120_deal.png",
-                         @"120_eyes.png",
-                         @"120_glasses.png",
-                         @"120_lips.png",
-                         @"120_partyhat.png",
-                         @"120_smile.png",
-                         @"120_stache.png",
-                         @"120_star.png",
-                         @"120_sun.png",
-                         nil];
+        [stixStringIDs release];
+        stixStringIDs = nil;
     }
-    return stixFilenames;
+    stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
+    for (NSMutableDictionary * d in stixStringIDsFromKumulos) {
+        NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        [stixStringIDs addObject:stixStringID];
+    }
+    totalStixTypes = [stixStringIDs count];
 }
 
-+(NSArray *) stixDescriptors {
-    if (!stixDescriptors) {
-        stixDescriptors = [[NSArray alloc] initWithObjects: 
-                           @"Fire Stix",
-                           @"Ice Stix",
-                           @"Heart",
-                           @"Leaf",
-                           @"Bomb",
-                           @"Light Bulb",
-                           @"Good Deal",
-                           @"Googley Eyes",
-                           @"Funky Glasses",
-                           @"Luscious Lips",
-                           @"Party Hat",
-                           @"Smile",
-                           @"The Stache",
-                           @"Gold Star",
-                           @"Sunny",
-                           nil];
++(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos {
+    if (stixViews) {
+        [stixViews release];
+        stixViews = nil;
     }
-    return stixDescriptors;
+    if (stixDescriptors) {
+        [stixDescriptors release];
+        stixDescriptors = nil;
+    }
+    stixViews = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    for (NSMutableDictionary * d in stixViewsFromKumulos) {
+        NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+        NSData * dataPNG = [d valueForKey:@"dataPNG"];
+        UIImageView * stix = [[UIImageView alloc] initWithImage:[[UIImage alloc] initWithData:dataPNG]];
+        [stixViews setObject:stix forKey:stixStringID];
+        [stixDescriptors setObject:descriptor forKey:stixStringID];
+    }
+}
++(int)totalStixTypes {
+    return totalStixTypes;
 }
 
-+(UIImageView *) getBadgeOfType:(int)type {
++(NSString*) stringIDOfStix:(int)type {
+    if (!stixStringIDs) {
+        return nil;
+    }
+    return [stixStringIDs objectAtIndex:type];
+}
++(NSArray*) stixStringIDs {
+    return stixStringIDs;
+}
+
++(UIImageView *) getBadgeWithStixStringID:(NSString*)stixStringID {
     // returns a half size image view
-    UIImageView * stix = [BadgeView getLargeBadgeOfType:type];
+    UIImageView * stix = [BadgeView getLargeBadgeWithStixStringID:stixStringID];
     if (stix == nil)
         return nil;
     // create smaller size for actual badgeView
@@ -401,41 +327,24 @@ static NSArray * stixDescriptors;
     return stix;
 }
 
-+(UIImageView *) getLargeBadgeOfType:(int)type {
++(UIImageView *) getLargeBadgeWithStixStringID:(NSString*)stixStringID {
     // returns a half size image view
-    NSArray * filenames = [BadgeView stixFilenames];
-    if (type < [filenames count])
-    {
-        UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
-        NSLog(@"Loading large badge from filename %@\n", [filenames objectAtIndex:type]);
-        return stix;
-    }
-    return nil;
-}
-+(UIImageView *) getEmptyBadgeOfType:(int)type {
-    // returns a half size image view
-    NSArray * filenames = [BadgeView stixFilenames];
-    if (type < [filenames count])
-    {
-        UIImageView * stix = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[filenames objectAtIndex:type]]] autorelease];
-        NSLog(@"Loading empty badge from filename %@\n", [filenames objectAtIndex:type]);
-        return stix;
-    }
-    return nil;
-}
--(int)getOppositeBadgeType:(int)type {
-    if (type == BADGE_TYPE_FIRE)
-        return BADGE_TYPE_ICE;
-    else
-        return BADGE_TYPE_FIRE;
+    //NSLog(@"Loading large badge with string ID %@\n", stixStringID);
+    UIImageView * stix = [[UIImageView alloc] initWithImage:[[stixViews objectForKey:stixStringID] image]];
+    return stix;
 }
 
-+(NSMutableArray *)generateDefaultStix {
-    NSMutableArray * stix = [[[NSMutableArray alloc] init] autorelease];
-    for (int i=0; i<BADGE_TYPE_MAX; i++) {
-        [stix insertObject:[NSNumber numberWithInt:20 ] atIndex:i];
-    }
-    return stix;
++(NSString*)getStixStringIDAtIndex:(int)index {
+    return [[stixStringIDs objectAtIndex:index] copy];
+}
+
++(NSMutableDictionary *)generateDefaultStix {
+    NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
+    for (int i=0; i<2; i++)
+        [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
+    for (int i=2; i<[BadgeView totalStixTypes]; i++)
+        [stixCounts setObject:[NSNumber numberWithInt:5] forKey:[stixStringIDs objectAtIndex:i]];
+    return stixCounts;
 }
 
 +(int)getOutlineOffsetX:(int)type {

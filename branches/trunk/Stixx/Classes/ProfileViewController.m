@@ -57,25 +57,6 @@
 	//return self;
 }
 
-
--(NSMutableData * ) arrayToData:(NSMutableArray *) dict {
-    // used to be dictionaryToData
-    NSMutableData *data = [[NSMutableData alloc]init];
-    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
-    [archiver encodeObject:dict forKey:@"dictionary"];
-    [archiver finishEncoding];
-    [archiver release];
-    return [data autorelease];
-}
--(NSMutableArray *) dataToArray:(NSMutableData *) data{ 
-    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    NSMutableArray * dict = [unarchiver decodeObjectForKey:@"dictionary"];
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    //[data release];
-    return dict;
-}
-
 /***** logging in with a username ****/
 
 -(void)firstTimeLogin {
@@ -102,7 +83,7 @@
         [k setDelegate:self];    
     }
     [k getUserWithUsername:name];
-    attemptedUsername = [name retain];
+    attemptedUsername = [NSString stringWithFormat:@"%@", name];//[name retain];
 
     //[self didSelectUsername:name withResults:nil];
 }
@@ -128,10 +109,10 @@
             [photoButton setTitle:@"" forState:UIControlStateNormal]; 
         }
         // badge count array
-        NSMutableArray * stix = [self dataToArray:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
-        NSLog(@"DidLoginWithUsername: %@ - currently has stix ", name);
+        NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
+        NSLog(@"DidLoginWithUsername: %@", name);
         
-        // total badge count
+        // total Pix count
         int totalTags = [[d valueForKey:@"totalTags"] intValue];
         
         [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
@@ -140,7 +121,6 @@
     
     //[loginScreenButton setTitle:@"Switch account" forState:UIControlStateNormal];
     [loginController dismissModalViewControllerAnimated:YES]; // do not dismiss until now, so profileView's viewWillAppear will not be summoned, causing login with old delegate.username
-    //[self updateStixCount];
 }
 
 - (void)didCancelLogin {
@@ -172,7 +152,7 @@
         
         [delegate didLogout]; // force logout
     }
-    [attemptedUsername release];
+    //[attemptedUsername release];
 }
 
 -(IBAction) showLogoutScreen:(id)sender {
@@ -270,13 +250,6 @@
     [buttonInstructions setHidden:YES];
 }
 
--(void)administratorModeIncrementStix {
-    // hack: increment own stix
-    for (int i=0; i<5; i++) {
-        [delegate incrementStixCount:BADGE_TYPE_FIRE forUser:[delegate getUsername]];
-        [delegate incrementStixCount:BADGE_TYPE_ICE forUser:[delegate getUsername]];
-    }
-}
 -(void)administratorModeResetAllStix {
     // hack: resets/creates stix for all existing users
     [k getAllUsers];
@@ -292,8 +265,8 @@
 
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
-        NSMutableArray * stix = [[BadgeView generateDefaultStix] retain];
-        NSMutableData * data = [[self arrayToData:stix] retain];
+        NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];
+        NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
         [k addStixToUserWithUsername:name andStix:data];
         [data release];
         [stix release];
@@ -303,10 +276,7 @@
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * name = [d valueForKey:@"username"];
-    NSMutableData * data = [d valueForKey:@"stix"];
-    NSMutableArray * stix = [[self dataToArray:data] retain];
-    NSLog(@"Changed stix counts for %@ to %d and %d\n", name, [[stix objectAtIndex:BADGE_TYPE_FIRE] intValue], [[stix objectAtIndex:BADGE_TYPE_ICE] intValue]);
-    [stix release];
+    NSLog(@"Added new stix for %@ to Kumulos\n", name);
 }
 
 -(void)updateFriendCount {
@@ -315,7 +285,7 @@
     [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
 }
 
--(void)updateStixCount {
+-(void)updatePixCount {
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
     int ct = [delegate getUserTagTotal];
     [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
@@ -343,12 +313,7 @@
 -(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
 - (NSString*)getUsername {return [self.delegate getUsername];}
 
--(int)getStixCount:(int)stix_type {return [delegate getStixCount:stix_type];}
--(int)getStixLevel {
-    return [self.delegate getStixLevel];
-}
--(int)incrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate incrementStixCount:type forUser:name];}
--(int)decrementStixCount:(int)type forUser:(NSString *)name {return [self.delegate decrementStixCount:type forUser:name];}
+-(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
 -(void)didCreateBadgeView:(UIView*)newBadgeView {[self.delegate didCreateBadgeView:newBadgeView];}
 
 -(void)didDismissFriendView {
@@ -368,53 +333,13 @@
         [photoButton setBackgroundColor:[UIColor blackColor]];
     }
     
-    //[badgeFire setImage:[[UIImage imageNamed:@"fire.png"] resizedImage:CGSizeMake(21, 35) interpolationQuality:kCGInterpolationDefault]];
-    //[badgeIce setImage:[[UIImage imageNamed:@"ice.png"] resizedImage:CGSizeMake(21, 35) interpolationQuality:kCGInterpolationDefault]];
-    /*
-    UIImageView * badgeFire = [[BadgeView getBadgeOfType:BADGE_TYPE_FIRE] retain];
-    float originX = 190;
-    float originY = 150;
-    float width = badgeFire.frame.size.width / 2;
-    float height = badgeFire.frame.size.height / 2;
-    [badgeFire setFrame:CGRectMake(originX, originY, width, height)];
-    UIImageView * badgeIce = [[BadgeView getBadgeOfType:BADGE_TYPE_ICE] retain];
-    originX = 190;
-    originY = 190;
-    width = badgeIce.frame.size.width / 2;
-    height = badgeIce.frame.size.height / 2;
-    [badgeIce setFrame:CGRectMake(originX, originY, width, height)];
-    UILabel * labelFire = [[UILabel alloc] init];
-    UILabel * labelIce = [[UILabel alloc] init];
-    [labelFire setFrame:CGRectMake(220, 155, 15, 30)];
-    [labelIce setFrame:CGRectMake(220, 195, 15, 30)];
-    [labelFire setBackgroundColor:[UIColor clearColor]];
-    [labelIce setBackgroundColor:[UIColor clearColor]];
-    [labelFire setText:[NSString stringWithFormat:@"%d", countFire]];
-    [labelIce setText:[NSString stringWithFormat:@"%d", countIce]];
-    
-    [self.view addSubview:badgeFire];
-    [self.view addSubview:badgeIce];
-    [self.view addSubview:labelFire];
-    [self.view addSubview:labelIce];
-    
-    [badgeFire release];
-    [badgeIce release];
-    [labelFire release];
-    [labelIce release];
-     */
     
     [self updateFriendCount];
-    [self updateStixCount];
+    [self updatePixCount];
     
     if (friendViewIsDisplayed)
         [friendController viewWillAppear:YES];
 }
-
-
-- (void) kumulosAPI:(kumulosProxy*)kumulos apiOperation:(KSAPIOperation*)operation didFailWithError:(NSString*)theError {
-    NSLog(@"Kumulos failed: error: %@", theError);
-}
-
 
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.

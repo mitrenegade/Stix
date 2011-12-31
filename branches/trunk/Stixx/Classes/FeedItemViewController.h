@@ -10,6 +10,7 @@
 #import "UIImage+Resize.h"
 #import "BadgeView.h"
 #import "OutlineLabel.h"
+#import "StixView.h"
 
 @protocol FeedItemViewDelegate 
 
@@ -26,6 +27,7 @@
 	IBOutlet UILabel * labelTime;
     IBOutlet UILabel * labelLocationString;
 	IBOutlet UIImageView * imageView;
+    StixView * stixView;
     IBOutlet UIImageView * userPhotoView;
     IBOutlet UIButton * addCommentButton;
     
@@ -54,12 +56,13 @@
 @property (nonatomic, retain) IBOutlet UIButton * addCommentButton;
 @property (nonatomic, assign) int tagID;
 @property (nonatomic, assign) int commentCount;
-@property (nonatomic, assign) NSObject<FeedItemViewDelegate> * delegate;    
+@property (nonatomic, assign) NSObject<FeedItemViewDelegate> * delegate;   
+@property (nonatomic, retain) StixView * stixView;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
--(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+-(void)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 - (IBAction)didPressAddCommentButton:(id)sender;
 -(void)populateWithCommentCount:(int)count;
 @end

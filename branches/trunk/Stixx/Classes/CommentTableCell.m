@@ -29,23 +29,23 @@
     // Configure the view for the selected state
 }
 
--(void)populateWithName:(NSString *)newName andComment:(NSString *)newComment andStixType:(int)stixType {
+-(void)populateWithName:(NSString *)newName andComment:(NSString *)newComment andStixType:(NSString*)stixStringID {
     if (self.stix)
         [self.stix removeFromSuperview];
     
     self.name = newName;
     self.comment = newComment;
-    if (stixType != -1)
+    if (stixStringID != @"COMMENT")
     {
-        self.stix = [BadgeView getBadgeOfType:stixType];
+        self.stix = [BadgeView getBadgeWithStixStringID:stixStringID];
         [self.stix setFrame:CGRectMake(250,0,60,60)];
     }
     
     NSString * str;
     if ([comment length] == 0) // add generic descriptor
     {
-        NSArray * desc = [BadgeView stixDescriptors];
-        str = [NSString stringWithFormat:@"%@ added a %@", [self name], [desc objectAtIndex:stixType]];
+        NSString * desc = [BadgeView stixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"%@ added a %@", [self name], desc];
     }
     else
     {
@@ -54,7 +54,7 @@
     [[self textLabel] setText:str];
     [[self textLabel] setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     
-    if (stixType != -1)
+    if (stixStringID != @"COMMENT")
         [self addSubview:[self stix]];
 }
 @end

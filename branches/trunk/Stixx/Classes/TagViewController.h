@@ -15,6 +15,7 @@
 #import "ARViewController.h"
 #import "Tag.h"
 #import "ARCoordinate.h"
+#import "CarouselView.h"
 
 #define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
 
@@ -24,10 +25,7 @@
 - (void) tagViewDidAddTag:(Tag*)newTag;
 - (bool) isLoggedIn;
 
--(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
--(int)getStixLevel;
--(int)incrementStixCount:(int)type forUser:(NSString *)name;
--(int)decrementStixCount:(int)type forUser:(NSString *)name;
+-(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 @optional
@@ -39,14 +37,15 @@
 @interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, TagDescriptorDelegate, ARViewDelegate> {
 	
 	// layers of UIViewControllers
-	BadgeView * badgeView; // for dragging and releasing badge
+	CarouselView * carouselView; // for dragging and releasing badge
+    BadgeView * badgeView;
 	BTLFullScreenCameraController *cameraController; // for viewing through camera
 	ARViewController *arViewController; // for saving and displaying coordinates
     
 	NSObject<TagViewDelegate> *delegate;
 	UIView *overlayView;
     CGRect badgeFrame;
-    int badgeType;
+    NSString * selectedStixStringID;
     
     IBOutlet UIImageView * rectView; // exists purely to give us the coordinates of the aperture
     IBOutlet UIButton * buttonInstructions;
@@ -58,9 +57,12 @@
 - (void)addCoordinateOfTag:(Tag *) tag;
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView;
 -(IBAction)closeInstructions:(id)sender;
+-(void)createCarouselView;
+-(void)reloadCarouselView;
 
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-@property (nonatomic, retain) BadgeView *badgeView;
+@property (nonatomic, retain) CarouselView * carouselView;
+@property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, retain) BTLFullScreenCameraController *cameraController;
 @property (nonatomic, retain) ARViewController *arViewController;
 @property (nonatomic, assign) NSObject<TagViewDelegate> *delegate;

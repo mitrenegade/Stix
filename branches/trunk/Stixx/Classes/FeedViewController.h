@@ -10,10 +10,13 @@
 #import "TagViewController.h"
 #import "FeedItemViewController.h"
 #import "PagedScrollView.h"
-#import "BadgeView.h"
+#import "CarouselView.h"
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
+
+#define FEED_ITEM_WIDTH 275
+#define FEED_ITEM_HEIGHT 300
 
 @protocol FeedViewDelegate
 
@@ -27,11 +30,8 @@
 -(void)didAddHistoryItemWithTagId:(int)tagID andUsername:(NSString*)name andComment:(NSString*)comment andBadgeType:(int)type;
 
 - (bool) isLoggedIn;
--(int)getStixCount:(int)stix_type; // forward from BadgeViewDelegate
--(int)getStixLevel;
--(int)incrementStixCount:(int)type forUser:(NSString *)name;
--(int)decrementStixCount:(int)type forUser:(NSString *)name;
--(void)didAddStixToTag:(Tag *)tag withType:(int)type;
+-(int)getStixCount:(NSString*)stixStringID;
+-(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
 @end
@@ -39,7 +39,8 @@
 @interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate> {
     
 	NSMutableDictionary * feedItems;
-    BadgeView * badgeView;
+    //BadgeView * badgeView;
+    CarouselView * carouselView;
     ZoomViewController * zoomViewController;
     CommentViewController * commentView;
     
@@ -60,13 +61,13 @@
     int lastContentOffset;
 }
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
-@property (nonatomic, retain) BadgeView *badgeView;
+//@property (nonatomic, retain) BadgeView *badgeView;
+@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, assign) NSObject<FeedViewDelegate> * delegate;
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
-//@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorCenter;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicatorCenter;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorLeft;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorRight;
@@ -76,7 +77,8 @@
 
 -(void)setIndicatorWithID:(int)which animated:(BOOL)animate;
 -(void)forceUpdateCommentCount:(int)tagID;
-
+-(void)createCarouselView;
+-(void)reloadCarouselView;
 @end
 
 

@@ -15,7 +15,7 @@
 @synthesize delegate;
 @synthesize buttonInstructions;
 @synthesize buttonBack;
-@synthesize badgeView;
+@synthesize carouselView;
 @synthesize activityIndicator;
 @synthesize scrollView;
 @synthesize friendPages;
@@ -47,20 +47,22 @@
 -(void)viewDidLoad {
     [super viewDidLoad];
 	/****** init badge view ******/
-	badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
-    badgeView.delegate = self;
+	carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+    carouselView.delegate = self;
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X, SHELF_STIX_Y, 320, SHELF_STIX_SIZE)];
+    
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
-    [delegate didCreateBadgeView:badgeView];
+    [delegate didCreateBadgeView:carouselView];
   
     // add badgeView and scrollView as subviews of feedview; set underlay
     // important: in the beginning, buttonInstructions is the underlay for badgeView which means
     // any touch events get fowarded to buttonInstructions, as long as it is above the view 
     // for the scrollview
     [self.view insertSubview:scrollView belowSubview:buttonInstructions];
-    [self.view insertSubview:badgeView aboveSubview:scrollView];
-    [badgeView setUnderlay:buttonInstructions];
-    [badgeView setHidden:YES];
+    [self.view insertSubview:carouselView aboveSubview:scrollView];
+    [carouselView setUnderlay:buttonInstructions];
+    [carouselView setHidden:YES];
 
     if (activityIndicator == nil)
         activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
@@ -86,8 +88,8 @@
     buttonInstructions = nil;
     [activityIndicator release];
     activityIndicator = nil;
-    [badgeView release];
-    badgeView = nil;
+    [carouselView release];
+    carouselView = nil;
     [scrollView release];
     scrollView = nil;
     [userPhotoFrames release];
@@ -110,11 +112,11 @@
 
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
     [self forceReloadAll];    
-    [badgeView resetBadgeLocations];    
+    [carouselView resetBadgeLocations];    
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [badgeView resetBadgeLocations];    
+    [carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -140,13 +142,12 @@
 -(IBAction)closeInstructions:(id)sender
 {
     [buttonInstructions setHidden:YES];
-    [badgeView setHidden:NO];
-    [badgeView setUnderlay:scrollView];
+    [carouselView setHidden:NO];
+    [carouselView setUnderlay:scrollView];
 }
 
 /******* badge view delegate ******/
--(void)didDropStix:(UIImageView *)badge ofType:(int)type {
-    [delegate decrementStixCount:type forUser:[delegate getUsername]];
+-(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
     // todo: increment stix count for this friend
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
@@ -154,14 +155,11 @@
     [alert setMessage:@"Sending Stix gifts coming soon!"];
     [alert show];
     [alert release];
-    [badgeView resetBadgeLocations];
+    [carouselView resetBadgeLocations];
 }
 
--(int)getStixCount:(int)stix_type {
-    return [self.delegate getStixCount:stix_type];
-}
--(int)getStixLevel {
-    return [self.delegate getStixLevel];
+-(int)getStixCount:(NSString*)stixStringID {
+    return [self.delegate getStixCount:stixStringID];
 }
 
 /*********** PagedScrollViewDelegate functions *******/

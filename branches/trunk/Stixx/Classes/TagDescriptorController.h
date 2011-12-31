@@ -10,13 +10,15 @@
 #import "ImageCache.h"
 #import "BadgeView.h"
 #import "LocationHeaderViewController.h"
+#import "StixView.h"
 
 @protocol TagDescriptorDelegate
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixFrame:(CGRect) frame;
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center;
 @end
 
 @interface TagDescriptorController : UIViewController <UITextFieldDelegate, LocationHeaderViewControllerDelegate>{
 	IBOutlet UIImageView * imageView;
+    StixView * stixView;
 	IBOutlet UITextField * commentField;
 	IBOutlet UITextField * commentField2;
 	IBOutlet UITextField * locationField; 
@@ -30,7 +32,7 @@
     LocationHeaderViewController * locationController;
     
     CGRect badgeFrame;
-    int badgeType;
+    NSString * stixStringID;
     
     int drag;
     float offset_x;
@@ -48,14 +50,15 @@
 @property (nonatomic, retain) IBOutlet UIButton * buttonCancel;
 @property (nonatomic, assign) NSObject<TagDescriptorDelegate> *delegate;
 @property (nonatomic, assign) CGRect badgeFrame;
-@property (nonatomic, assign) int badgeType;
+@property (nonatomic, retain) NSString * stixStringID;
 @property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
+@property (nonatomic, retain) StixView * stixView;
 
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)locationTextBoxEntered:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;
--(UIImageView *)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+-(UIImageView *)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(IBAction)closeInstructions:(id)sender;
 
 @end

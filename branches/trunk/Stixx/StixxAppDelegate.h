@@ -21,6 +21,7 @@
 #import "RaisedCenterTabBarController.h"
 #import "LoginSplashController.h"
 #import "MyStixViewController.h"
+#import "LoadingViewController.h"
 
 @interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate> {
     UIWindow *window;
@@ -33,18 +34,18 @@
     ExploreViewController * exploreController;
     LoginSplashController * loginSplashController;
     MyStixViewController * myStixController;
+    LoadingViewController * loadingController;
     
     UIViewController * lastViewController;
-    BadgeView * lastBadgeView;
+    CarouselView * lastCarouselView;
 
     bool loggedIn;
     bool isLoggingIn;
     NSString * username;
     UIImage * userphoto;
     int usertagtotal;
-    int stixLevel;
-
-    NSMutableArray * allStix;
+    
+    NSMutableDictionary * allStix;
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
@@ -69,8 +70,9 @@
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonMsg;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
--(void)updateUserStixLevel;
 -(void)updateCommentCount:(int)tagID;
+-(void)continueInit;
+-(void)adminUpdateAllStixCountsToZero;
 
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
@@ -83,16 +85,16 @@
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) LoginSplashController * loginSplashController;
 @property (nonatomic, retain) MyStixViewController * myStixController;
+@property (nonatomic, retain) LoadingViewController * loadingController;
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) UIImage * userphoto;
 @property (nonatomic, assign) int usertagtotal;
-@property (nonatomic, assign) int stixLevel;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
-@property (nonatomic, retain) NSMutableArray * allStix;
-@property (nonatomic, assign) BadgeView * lastBadgeView;
+@property (nonatomic, retain) NSMutableDictionary * allStix;
+@property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @end

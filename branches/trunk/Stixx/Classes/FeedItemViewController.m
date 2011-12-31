@@ -24,6 +24,7 @@
 @synthesize tagID;
 @synthesize delegate;
 @synthesize commentCount;
+@synthesize stixView;
 /*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -48,7 +49,7 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
-    NSLog(@"creating feedItemController with name %@ descriptor %@ comment %@ image of size %f %f\n", name, descriptor, comment, image.size.width, image.size.height);
+    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ image of size %f %f\n", name, descriptor, comment, image.size.width, image.size.height);
     
     nameString = name;
     descriptorString = descriptor;
@@ -68,13 +69,18 @@
     }
 }
 
--(void)populateWithBadge:(int)type withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
-    UIImageView * stix = [[BadgeView getBadgeOfType:type] retain];
+-(void)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+#if 0
+    CGRect frame = [imageView frame];
+    stixView = [[StixView alloc] initWithFrame:frame];
+    [stixView initializeWithImage:imageData andStix:stixStringID withCount:count atLocationX:x andLocationY:y];
+    [self.view addSubview:stixView];
+#else
+    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float originX = x;
-    float originY = y;
-    NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, imageView.frame.size.width, imageView.frame.size.height);
-    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
+    float centerX = x;
+    float centerY = y;
+    stix.frame = CGRectMake(0, 0, stix.frame.size.width, stix.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = imageData.size;
@@ -87,24 +93,29 @@
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
+    centerX *= imageScale;
+    centerY *= imageScale;
+    NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
     [stix setFrame:stixFrameScaled];
+    [stix setCenter:CGPointMake(centerX, centerY)];
     [imageView addSubview:stix];
     
-    if (type == BADGE_TYPE_FIRE || type == BADGE_TYPE_ICE) {
+    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) {
         
         CGRect labelFrame = stix.frame;
         OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-        stixCount.center = CGPointMake(stixCount.center.x + [BadgeView getOutlineOffsetX:type] * imageScale, stixCount.center.y + [BadgeView getOutlineOffsetY:type] * imageScale);
         labelFrame = stixCount.frame; // changing center should change origin but not width
         //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-        [stixCount setTextAttributesForBadgeType:type];
+        if ([stixStringID isEqualToString:@"FIRE"])
+            [stixCount setTextAttributesForBadgeType:0];
+        if ([stixStringID isEqualToString:@"ICE"])
+            [stixCount setTextAttributesForBadgeType:1];
         [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
         [stixCount setText:[NSString stringWithFormat:@"%d", count]];
         [imageView addSubview:stixCount];
         [stixCount release];
-    }    
-    [stix release];
+    }
+#endif
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {

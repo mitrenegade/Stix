@@ -15,10 +15,13 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
+        //labels = [[NSMutableArray alloc] initWithCapacity:3];
         for (int i=0; i<3; i++)
         {
             icon[i] = nil;
             bg[i] = nil;
+            //[labels addObject:[NSNull null]];
+            labels[i] = nil;
         }
     }
     return self;
@@ -57,6 +60,32 @@
         [icon[pos] removeFromSuperview];
         [icon[pos] release];
         icon[pos] = nil;
+    }
+    /*
+    if ([labels objectAtIndex:pos] != [NSNull null]) {
+        [[labels objectAtIndex:pos] removeFromSuperview];
+        [labels replaceObjectAtIndex:pos withObject:[NSNull null]];
+    }
+     */
+    if (labels[pos]) {
+        [labels[pos] removeFromSuperview];
+        [labels[pos] release];
+        labels[pos] = nil;
+    }
+}
+
+-(void)addCellLabel:(NSString*)label atPosition:(int)pos {
+    if (pos < 0 || pos > 2)
+        return;
+    if (!labels[pos])
+    {      
+        CGRect frame = CGRectMake(pos*105+5,2,100,100);
+        labels[pos] = [[OutlineLabel alloc] initWithFrame:frame];
+        [labels[pos] setFrame:frame];
+        [labels[pos] setTextAttributesForBadgeType:3];
+        [labels[pos] drawTextInRect:frame];
+        [labels[pos] setText:label];
+        [self addSubview:labels[pos]];
     }
 }
 

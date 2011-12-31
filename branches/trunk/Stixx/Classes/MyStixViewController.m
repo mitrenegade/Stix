@@ -67,6 +67,7 @@
         [carouselView release];
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+    [carouselView setShowGiftStix:NO];
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(15,90,305,75)];
     //[self.delegate didCreateBadgeView:carouselView];

@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Dec 28, 2011
+//  Created by Kumulos Bindings Compiler on Dec 31, 2011
 //  Copyright Neroh All rights reserved.
 //
 

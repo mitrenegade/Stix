@@ -86,7 +86,7 @@ static int init=0;
 
 -(void) continueInit {
 
-    [self adminUpdateAllStixCountsToZero];
+    //[self adminUpdateAllStixCountsToZero];
 
 #if 1
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
@@ -655,15 +655,16 @@ static int init=0;
 }
 - (void) kumulosAPI:(kumulosProxy*)kumulos apiOperation:(KSAPIOperation*)operation didFailWithError:(NSString*)theError {
     //NSLog(@"Kumulos error: %@", theError);
-    
+#if 1
     if (lastViewController == feedController) { // currently on feed controller
         NSLog(@"Kumulos error in feedController: %@ - probably failed while trying to check for updated tags", theError);
-        [self showAlertWithTitle:@"Error in connection" andMessage:@"Could not access online database. Please reload this page." andButton:@"OK"];
+        [self showAlertWithTitle:@"Error in connection" andMessage:@"Stix encountered an error while connecting." andButton:@"OK"];
     }
     if (lastViewController == tagViewController)
         NSLog(@"Kumulos error in tagViewController: %@", theError);
     if (lastViewController == profileController)
         NSLog(@"Kumulos error in profileController: %@ - probably failed while trying to call userLogin", theError);
+#endif
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total{
@@ -762,7 +763,7 @@ static int init=0;
         ([tag.stixStringID isEqualToString:@"FIRE"] || [tag.stixStringID isEqualToString:@"ICE"]))
     {
         // increment/decrement fire and ice if it is the primary stix; do not change other stix counts
-        if (tag.stixStringID == stixStringID)
+        if ([tag.stixStringID isEqualToString:stixStringID])
             tag.badgeCount++;
         else {
             tag.badgeCount--;
@@ -778,10 +779,11 @@ static int init=0;
     else {
         //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
         // array for the tag
-        [tag.auxStixStringIDs addObject:stixStringID];
-        [tag.auxLocations addObject:[NSValue valueWithCGPoint:location]];
+        //[tag.auxStixStringIDs addObject:stixStringID];
+        //[tag.auxLocations addObject:[NSValue valueWithCGPoint:location]];
+        [tag addAuxiliaryStixOfType:stixStringID atLocation:location];
     }
-    
+
     //[k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
     NSMutableData *theAuxStixData = [NSMutableData data];
     NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];

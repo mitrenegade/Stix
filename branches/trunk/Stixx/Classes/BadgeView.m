@@ -11,6 +11,8 @@
 static NSMutableDictionary * stixDescriptors = nil;
 static NSMutableArray * stixStringIDs = nil;
 static NSMutableDictionary * stixViews = nil;
+static NSMutableDictionary * stixLikelihood = nil;
+static NSMutableArray * pool = nil;
 static int totalStixTypes = 0;
 
 @implementation BadgeView
@@ -292,15 +294,30 @@ static int totalStixTypes = 0;
         [stixDescriptors release];
         stixDescriptors = nil;
     }
+    if (stixLikelihood)
+    {
+        [stixLikelihood release];
+        stixLikelihood = nil;
+    }
+    if (pool)
+    {
+        [pool release];
+        pool = nil;
+    }
     stixViews = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
     stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
     for (NSMutableDictionary * d in stixViewsFromKumulos) {
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+        NSNumber * likelihood = [d valueForKey:@"likelihood"];
         NSData * dataPNG = [d valueForKey:@"dataPNG"];
         UIImageView * stix = [[UIImageView alloc] initWithImage:[[UIImage alloc] initWithData:dataPNG]];
         [stixViews setObject:stix forKey:stixStringID];
         [stixDescriptors setObject:descriptor forKey:stixStringID];
+        [stixLikelihood setObject:likelihood forKey:stixStringID];
+        //[img release];
+        //[stix release];
     }
 }
 +(int)totalStixTypes {
@@ -345,6 +362,25 @@ static int totalStixTypes = 0;
     for (int i=2; i<[BadgeView totalStixTypes]; i++)
         [stixCounts setObject:[NSNumber numberWithInt:5] forKey:[stixStringIDs objectAtIndex:i]];
     return stixCounts;
+}
+
++(NSString*)getRandomStixStringID {
+    if (pool == nil) {
+        // accumulate all likelihoods
+        pool = [[NSMutableArray alloc] init];
+        for (int i=0; i<[self totalStixTypes]; i++) {
+            NSString * stixStringID = [self getStixStringIDAtIndex:i];
+            int likelihood = [[stixLikelihood objectForKey:stixStringID] intValue];
+            for (int j=0; j<likelihood; j++) {
+                [pool addObject:stixStringID];
+            }
+        }
+    }
+    
+    int total = [pool count];
+    NSInteger num = arc4random() % total;
+    NSLog(@"Random stix string id: choosing from 0 to %d: result %d\n", total-1, num);
+    return [pool objectAtIndex:num];
 }
 
 +(int)getOutlineOffsetX:(int)type {

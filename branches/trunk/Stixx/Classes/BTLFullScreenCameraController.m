@@ -43,6 +43,7 @@
     self.toolbarHidden = YES; // prevents bottom bar from being displayed
     self.allowsEditing = NO;
     self.wantsFullScreenLayout = NO;
+    self.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
 #endif
 		      
       self.ROI = CGRectMake(0, 0, 320, 480); // default ROI
@@ -95,36 +96,6 @@
     }
 }
 
-- (UIImage*)addOverlayToBaseImage:(UIImage*)baseImage {
-	// add only the selected badge to the base image
-    
-    // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
-    // that means the actual image is 320x428.42 on the iphone
-
-    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
-    CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
-	
-    // scale to convert base image from 1936x2592 to 320x428 - iphone size
-	float baseScale =  screenContext.width / baseImage.size.width;
-
-	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
-    
-	UIGraphicsBeginImageContext(screenContext);	
-	[baseImage drawInRect:scaledFrameImage];	
-	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();	
-//    NSLog(@"Rescaled image to dims %f %f", result.size.width, result.size.height);
-    
-    UIImage * cropped = [result croppedImage:ROI];
-//    NSLog(@"Cropping image to dims %f %f", cropped.size.width, cropped.size.height);
-    //UIImage * rounded = [cropped roundedCornerImage:5 borderSize:0];
-
-    // save edited image to photo album
-    UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
-
-	return cropped;	
-}
-
 - (void)adjustLandscapePhoto:(UIImage*)image {
 	// TODO: maybe use this for something
 	//NSLog(@"camera image: %f x %f", image.size.width, image.size.height);
@@ -165,12 +136,30 @@
 
 - (void)cropComposite:(UIImage*)baseImage {
 	// save composite
-	UIImage *compositeImage = [self addOverlayToBaseImage:baseImage];
+    // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
+    // that means the actual image is 320x428.42 on the iphone
+    
+    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
+    CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
+	
+    // scale to convert base image from 1936x2592 to 320x428 - iphone size
+	float baseScale =  screenContext.width / baseImage.size.width;
+    
+	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
+    
+	UIGraphicsBeginImageContext(screenContext);	
+	[baseImage drawInRect:scaledFrameImage];	
+	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();	
+    
+    UIImage * cropped = [result croppedImage:ROI];
+    // save edited image to photo album
+    UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
     
 	// hack: use the image cache in the easy way - just cache one image each time
 	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
 		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
-	[[ImageCache sharedImageCache] setImage:compositeImage forKey:@"newImage"];
+	[[ImageCache sharedImageCache] setImage:cropped forKey:@"newImage"];
     
 	if ([self.overlayController respondsToSelector:@selector(cameraDidTakePicture:)]) {
 		[self.overlayController performSelector:@selector(cameraDidTakePicture:) withObject:self];

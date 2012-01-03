@@ -19,9 +19,6 @@
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
 - (void)didCancelLogin;
 
-@optional
-//- (NSMutableArray*)generateDefaultStix;
-
 @end
 
 @interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
@@ -54,7 +51,7 @@
 @property (nonatomic, assign) id<LoginViewDelegate, NSObject> delegate;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) bool bJoinOrLogin; 
-@property (nonatomic, retain) UIImage * newUserImage;
+@property (nonatomic, retain) UIImage * userImage;
 
 - (IBAction)loginButtonPressed:(id)sender; 
 - (IBAction)joinButtonPressed:(id)sender;

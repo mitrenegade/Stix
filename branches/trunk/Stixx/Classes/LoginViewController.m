@@ -14,7 +14,7 @@
 @synthesize activityIndicator;
 @synthesize bJoinOrLogin;
 @synthesize addPhoto;
-@synthesize newUserImage;
+@synthesize userImage;
 @synthesize loginEmail;
 @synthesize loginEmailBG;
 
@@ -144,9 +144,9 @@
     //NSData * img = UIImageJPEGRepresentation(rounded, .8);
     NSData * img = UIImagePNGRepresentation(rounded);
     [addPhoto setImage:rounded forState:UIControlStateNormal];
-    if (newUserImage == nil)
+    if (userImage == nil)
     {
-        newUserImage = [rounded retain];
+        userImage = [rounded retain];
         newUserImageSet = YES;
     }
     //[self.delegate didChangeUserphoto:rounded];
@@ -270,7 +270,7 @@
     
     NSData * photo;
     if (newUserImageSet == YES)
-        photo = UIImagePNGRepresentation(newUserImage);
+        photo = UIImagePNGRepresentation(userImage);
     else
         photo = UIImageJPEGRepresentation(img, .8);
 
@@ -286,12 +286,12 @@
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [kumulos addStixToUserWithUsername:username andStix:data];
-//    [data release];
-//    [stix release];
+    [data autorelease];
+    [stix autorelease];
 }
 
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {
-    
+
     //[self hideLoadingIndicator];
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"OK"];

@@ -35,7 +35,7 @@
 @property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) bool showGiftStix;
 
--(void)toggleShelf:(bool)isVisible;
+-(void)toggleShelf:(bool)isHidden;
 -(void)initCarouselWithFrame:(CGRect)frame;
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;

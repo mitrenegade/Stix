@@ -173,8 +173,8 @@
     [self removeFromSuperview];
 }
 
--(void)toggleShelf:(bool)isVisible {
-    [self.shelf setHidden:isVisible];
+-(void)toggleShelf:(bool)isHidden{
+    [self.shelf setHidden:isHidden];
 }
 
 - (void)dealloc {
@@ -285,6 +285,8 @@ static int lastContentOffsetY = 0;
         // find which icon is being dragged
         for (int i=0; i<[BadgeView totalStixTypes]; i++)
         {
+            if ([allCarouselStixViews objectAtIndex:i] == [NSNull null])
+                continue;
             UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
             CGRect frame = stix.frame;
             if (CGRectContainsPoint(frame, touch)) {

@@ -47,8 +47,7 @@ static int totalStixTypes = 0;
         NSString * stixStringID = [[stixStringIDs objectAtIndex:i] copy];
         UIImageView * badgeLarge = [BadgeView getLargeBadgeWithStixStringID:stixStringID];
         [badgesLarge addObject:badgeLarge];
-        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];
-        [badges addObject:badge];
+        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];        [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
@@ -56,6 +55,7 @@ static int totalStixTypes = 0;
         [label setTextAttributesForBadgeType:i];
         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
         [labels addObject:label];
+        [label release];
     }
     
  	return self;
@@ -312,12 +312,13 @@ static int totalStixTypes = 0;
         NSString * descriptor = [d valueForKey:@"stixDescriptor"];
         NSNumber * likelihood = [d valueForKey:@"likelihood"];
         NSData * dataPNG = [d valueForKey:@"dataPNG"];
-        UIImageView * stix = [[UIImageView alloc] initWithImage:[[UIImage alloc] initWithData:dataPNG]];
+        UIImage * img = [[UIImage alloc] initWithData:dataPNG];
+        UIImageView * stix = [[UIImageView alloc] initWithImage:img];
         [stixViews setObject:stix forKey:stixStringID];
         [stixDescriptors setObject:descriptor forKey:stixStringID];
         [stixLikelihood setObject:likelihood forKey:stixStringID];
-        //[img release];
-        //[stix release];
+        [img release];
+        [stix release];
     }
 }
 +(int)totalStixTypes {
@@ -348,11 +349,11 @@ static int totalStixTypes = 0;
     // returns a half size image view
     //NSLog(@"Loading large badge with string ID %@\n", stixStringID);
     UIImageView * stix = [[UIImageView alloc] initWithImage:[[stixViews objectForKey:stixStringID] image]];
-    return stix;
+    return stix; //[stix autorelease];
 }
 
 +(NSString*)getStixStringIDAtIndex:(int)index {
-    return [[stixStringIDs objectAtIndex:index] copy];
+    return [[stixStringIDs objectAtIndex:index] copy]; 
 }
 
 +(NSMutableDictionary *)generateDefaultStix {
@@ -360,8 +361,8 @@ static int totalStixTypes = 0;
     for (int i=0; i<2; i++)
         [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
     for (int i=2; i<[BadgeView totalStixTypes]; i++)
-        [stixCounts setObject:[NSNumber numberWithInt:5] forKey:[stixStringIDs objectAtIndex:i]];
-    return stixCounts;
+        [stixCounts setObject:[NSNumber numberWithInt:0] forKey:[stixStringIDs objectAtIndex:i]];
+    return stixCounts; //[stixCounts autorelease];
 }
 
 +(NSString*)getRandomStixStringID {

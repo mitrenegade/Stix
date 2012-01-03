@@ -151,7 +151,7 @@
 }
 
 -(id)initWithCoder:(NSCoder *)decoder {
-	[super init];
+	self = [super init];
 	
 	// TODO: incomplete
 	[self setRadialDistance:[decoder decodeDoubleForKey:@"radialDistance"]];

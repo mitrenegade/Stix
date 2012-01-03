@@ -109,4 +109,5 @@ enum {
 +(UIImageView *) getLargeBadgeWithStixStringID:(NSString*)stixStringID;
 +(NSMutableDictionary *) generateDefaultStix;
 +(NSString*) getStixStringIDAtIndex:(int)index;
++(NSString*) getRandomStixStringID;
 @end

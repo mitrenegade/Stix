@@ -12,11 +12,17 @@
 @synthesize rectView;
 @synthesize buttonInstructions;
 @synthesize badgeView;
+@synthesize overlayView;
+@synthesize camera;
+@synthesize descriptorIsOpen;
+@synthesize descriptorController;
+@synthesize needToShowCamera;
+@synthesize aperture;
 
 - (id)init {
 	
 		// does not do anything - nib does not contain extra buttons etc
-		[super initWithNibName:@"TagViewController" bundle:nil];
+		self = [super initWithNibName:@"TagViewController" bundle:nil];
 				
 		// create tab bar item to become a tab view
 		UITabBarItem *tbi = [self tabBarItem];
@@ -40,12 +46,25 @@
 	arViewController.rotateViewsBasedOnPerspective = NO;
 	arViewController.centerLocation = newCenter;
 	[newCenter release];
+    descriptorIsOpen = NO;
+    needToShowCamera = YES;
     
 	/***** create camera controller *****/
 	NSLog(@"Initializing camera.");
+#if 0
 	cameraController = [[BTLFullScreenCameraController alloc] init];
 	[cameraController setOverlayController:self];
-	
+#else
+    camera = [[UIImagePickerController alloc] init];
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.showsCameraControls = NO;
+    camera.navigationBarHidden = YES;
+    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
+    camera.allowsEditing = NO;
+    camera.wantsFullScreenLayout = NO;
+    camera.delegate = self;
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
+#endif
 	// hierarchy of tagView overlays:
 	// 1. self.view = overlayView = blank;
     // 1.5 overlayView.subView = apertureView - camera aperture (overlay.png)
@@ -57,6 +76,31 @@
     //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
     //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
     return self;
+}
+
+-(void)loadView {
+    // instead of calling [super loadView], which doesn’t account for a hidden status bar, create an unclipped view here
+    
+    CGSize screenSize = [UIScreen mainScreen].bounds.size;
+    
+    CGRect screenBounds = CGRectMake(0, 20, screenSize.width, screenSize.height);
+    
+    NoClipModalView *sView = [[NoClipModalView alloc] initWithFrame:screenBounds]; 
+    
+    self.view = sView; 
+    buttonInstructions = [[UIButton alloc] initWithFrame:CGRectMake(19,30, 283, 37)];
+    [buttonInstructions setBackgroundImage:[UIImage imageNamed:@"instruction_box.png"] forState:UIControlStateNormal];
+    [buttonInstructions setTitle:@"Drag Stix here to take a picture!" forState:UIControlStateNormal];
+    rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 90, 300, 275)];
+    //[rectView setBackgroundColor:[UIColor redColor]];
+    aperture = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
+    [aperture setAlpha:0.8];
+    [self.view addSubview:buttonInstructions];
+    [self.view addSubview:rectView];
+    [self.view addSubview:aperture];
+    
+    [sView release];
+    
 }
 
 -(void) viewDidLoad {
@@ -83,7 +127,7 @@
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
     [carouselView setUnderlay:buttonInstructions];
-    [carouselView initCarouselWithFrame:CGRectMake(0,320,320,90)];
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     
     [carouselView addSubview:arViewController.view];
     [self.view addSubview:carouselView];
@@ -91,7 +135,7 @@
 }
 
 -(void)reloadCarouselView {
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(0,320,320,90)];
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view addSubview:carouselView];
 }
@@ -99,8 +143,13 @@
 // called by main delegate to add tabBarView to camera overlay
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView
 {
+    [self setOverlayView:cameraOverlayView];
     @try {
+#if 0
         [cameraController setCameraOverlayView:cameraOverlayView];
+#else
+        [camera setCameraOverlayView:cameraOverlayView];
+#endif
     }
     @catch (NSException* exception) {
     }
@@ -111,16 +160,27 @@
 /*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
  */    
+//    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
+
     CGRect viewFrame = rectView.frame;
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
     // hack: because status bar is hidden, our "origin.y" is -20
     viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
+#if 0
     [cameraController setROI:viewFrame];
 	[self presentModalViewController:self.cameraController animated:animated];
+#else
+    if (descriptorIsOpen == NO) {
+        [self presentModalViewController:self.camera animated:NO];
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+        needToShowCamera = NO;
+    }
+#endif
 #endif
     [carouselView resetBadgeLocations];
-    
-    [badgeView resetBadgeLocations];
+    //[badgeView resetBadgeLocations];
 
 	[super viewDidAppear:animated];
 }
@@ -171,15 +231,24 @@
 
 // BadgeViewDelegate function
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID{
+#if 0
 	// first, set the camera controller to have the badge as an additional UIImageView
 	[[self cameraController] setAddedOverlay:badge];
 	// take a picture
 	[[self cameraController] takePicture];
+#else
+    [[self camera] takePicture];
+#endif
     badgeFrame = badge.frame;
     // save frame of badge relative to cropped image
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
+#if 0
     badgeFrame.origin.x = badgeFrame.origin.x - cameraController.ROI.origin.x;
     badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + statusFrame.size.height;
+#else
+    badgeFrame.origin.x = badgeFrame.origin.x - rectView.frame.origin.x;
+    badgeFrame.origin.y = badgeFrame.origin.y - rectView.frame.origin.y + statusFrame.size.height;    
+#endif
     selectedStixStringID = stixStringID;
 }
 
@@ -194,10 +263,15 @@
 - (void)cameraDidTakePicture:(id)sender {
 	// called by BTLFullScreenCameraController
 	// set a title
+#if 0
     [self.cameraController dismissModalViewControllerAnimated:NO]; // dismiss camera
-
+#else
+    descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
+    [self dismissModalViewControllerAnimated:NO];
+    needToShowCamera = NO; // still not need to show camera
+#endif
 	// prompt for label: use TagDescriptorController
-	TagDescriptorController * descriptorController = [[TagDescriptorController alloc] init];
+	descriptorController = [[TagDescriptorController alloc] init];
     
     [descriptorController setDelegate:self];
     [descriptorController setBadgeFrame:badgeFrame];
@@ -205,7 +279,13 @@
 #if TARGET_IPHONE_SIMULATOR
     [self presentModalViewController:descriptorController animated:YES];
 #else
-    [self.cameraController presentModalViewController:descriptorController animated:YES];
+#if 0
+    [self.camera presentModalViewController:descriptorController animated:YES];
+#else
+    //[self.view addSubview:descriptorController.view];
+    //[self.tabBarController presentModalViewController:descriptorController animated:NO];
+    [self presentModalViewController:descriptorController animated:YES];
+#endif
 #endif
 }
 
@@ -216,7 +296,9 @@
 /* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
 -(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center
 {
+#if 0
     [self.cameraController dismissModalViewControllerAnimated:YES];
+#endif
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
     NSString * com = comment;
@@ -286,8 +368,13 @@
     
     //[username release];
     // dismiss descriptorController
+    //[descriptorController.view removeFromSuperview];
+    //[descriptorController release];
+    //[self.tabBarController dismissModalViewControllerAnimated:YES];
     [self dismissModalViewControllerAnimated:YES];
-    //[self setView:overlayView];
+    needToShowCamera = YES;
+    descriptorIsOpen = NO;
+    [self viewDidAppear:NO];
 }
 
 
@@ -309,6 +396,70 @@
 -(IBAction)closeInstructions:(id)sender;
 {
     [buttonInstructions setHidden:YES];
+}
+
+/*** camera delegate ***/
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
+    UIImage * newPhoto; 
+    //newPhoto = [UIImage imageNamed:@"friend1.png"];
+    if (editedPhoto)
+    {
+        // shouldn't go here
+        newPhoto = editedPhoto;
+    }
+    else
+    {
+        newPhoto = originalPhoto;
+    }
+    
+	UIImage *baseImage = newPhoto;//[info objectForKey:UIImagePickerControllerOriginalImage];
+	if (baseImage == nil) return;
+	
+	// save composite
+    // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
+    // that means the actual image is 320x428.42 on the iphone
+    
+    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
+    CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
+	
+    // scale to convert base image from 1936x2592 to 320x428 - iphone size
+	float baseScale =  screenContext.width / baseImage.size.width;
+    
+	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
+    
+	UIGraphicsBeginImageContext(screenContext);	
+	[baseImage drawInRect:scaledFrameImage];	
+	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();	
+    
+    UIImage * cropped = [result croppedImage:[self.rectView frame]];
+    // save edited image to photo album
+    UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
+    
+	// hack: use the image cache in the easy way - just cache one image each time
+	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
+		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
+	[[ImageCache sharedImageCache] setImage:cropped forKey:@"newImage"];
+    
+	if ([self respondsToSelector:@selector(cameraDidTakePicture:)]) {
+		[self performSelector:@selector(cameraDidTakePicture:) withObject:self];
+	}
+	
+}
+- (void)image:(UIImage*)image didFinishSavingWithError:(NSError *)error contextInfo:(NSDictionary*)info {
+	NSLog(@"Did finish saving with error!");
+}
+
+- (void)writeImageToDocuments:(UIImage*)image {
+	NSData *png = UIImagePNGRepresentation(image);
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectory = [paths objectAtIndex:0];
+	
+	NSError *error = nil;
+	[png writeToFile:[documentsDirectory stringByAppendingPathComponent:@"image.png"] options:NSAtomicWrite error:&error];
 }
 
 

@@ -20,7 +20,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"UserProfileViewController" bundle:nil];
+	self = [super initWithNibName:@"UserProfileViewController" bundle:nil];
     return self;
 
 }

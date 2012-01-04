@@ -37,7 +37,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"FeedViewController" bundle:nil];
+	self = [super initWithNibName:@"FeedViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
 	UITabBarItem *tbi = [self tabBarItem];
@@ -202,12 +202,14 @@
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    float centerx = badge.center.x * imageScale;
-    float centery = badge.center.y * imageScale;
+    float centerx = badge.center.x;// * imageScale;
+    float centery = badge.center.y;// * imageScale;
     CGRect scrollFrame = scrollView.frame;
     CGRect imageViewFrame = feedItem.imageView.frame;
     centerx -= scrollFrame.origin.x + imageViewFrame.origin.x;
+    centerx *= imageScale;
     centery -= scrollFrame.origin.y + imageViewFrame.origin.y;
+    centery *= imageScale;
     NSLog(@"Offsetting center by %f %f\n", scrollFrame.origin.x + imageViewFrame.origin.x, scrollFrame.origin.y + imageViewFrame.origin.y);
 
     CGPoint location = CGPointMake(centerx, centery); //badge.frame.origin.x, badge.frame.origin.y);
@@ -273,7 +275,7 @@
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
         [feedItem populateWithUserPhoto:photo];
-        //[photo release];
+//        [photo autorelease];
     }
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];

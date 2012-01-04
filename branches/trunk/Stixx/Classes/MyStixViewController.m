@@ -20,7 +20,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"MyStixViewController" bundle:nil];
+	self = [super initWithNibName:@"MyStixViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
 	UITabBarItem *tbi = [self tabBarItem];
@@ -70,6 +70,7 @@
     [carouselView setShowGiftStix:NO];
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(15,90,305,75)];
+    [carouselView toggleShelf:YES];
     //[self.delegate didCreateBadgeView:carouselView];
     [self.view addSubview:carouselView];
 }

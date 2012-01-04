@@ -169,7 +169,7 @@
 
 -(UIImageView *)populateWithBadge:(NSString*)stixStringIDs withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
     float item_width = 140;
-    float item_height = 140;
+    float item_height = 128;
 
     UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringIDs];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
@@ -178,7 +178,7 @@
     NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
-    CGSize originalSize = CGSizeMake(300, 300);
+    CGSize originalSize = CGSizeMake(300, 275);
 	CGSize targetSize = CGSizeMake(item_width, item_height);
 	
 	float imageScale =  targetSize.width / originalSize.width;
@@ -206,7 +206,7 @@
     int x = 0;
     int y = 0;
     int item_width = 140;
-    int item_height = 140;
+    int item_height = 128;
     //for (id key in userPhotos) {
     int items_per_page = EXPLORE_COL * EXPLORE_ROW;
     int start_index = index * items_per_page;
@@ -225,8 +225,8 @@
             //NSString * name = tag.username;
             int w = shadow.frame.size.width;
             int h = shadow.frame.size.height;
-            shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 10), w, h);
-            feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 10), item_width, item_height);
+            shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 20), w, h);
+            feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);
             
             UIImageView * stix = [[self populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
             [feedItem addSubview:stix];

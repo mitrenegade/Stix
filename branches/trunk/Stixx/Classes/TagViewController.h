@@ -16,6 +16,7 @@
 #import "Tag.h"
 #import "ARCoordinate.h"
 #import "CarouselView.h"
+#import "NoClipModalView.h"
 
 #define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
 
@@ -34,21 +35,27 @@
 @end
 
 
-@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, TagDescriptorDelegate, ARViewDelegate> {
+@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, TagDescriptorDelegate, ARViewDelegate,UIImagePickerControllerDelegate, UINavigationControllerDelegate > {
 	
 	// layers of UIViewControllers
 	CarouselView * carouselView; // for dragging and releasing badge
     BadgeView * badgeView;
 	BTLFullScreenCameraController *cameraController; // for viewing through camera
+    UIImagePickerController * camera;
 	ARViewController *arViewController; // for saving and displaying coordinates
     
 	NSObject<TagViewDelegate> *delegate;
 	UIView *overlayView;
     CGRect badgeFrame;
     NSString * selectedStixStringID;
-    
+
+    IBOutlet UIImageView * aperture;
     IBOutlet UIImageView * rectView; // exists purely to give us the coordinates of the aperture
     IBOutlet UIButton * buttonInstructions;
+    
+    TagDescriptorController * descriptorController;
+    bool descriptorIsOpen;
+    bool needToShowCamera;
 }
 
 // sets a reference to a cameraController created outside in order to use modal view
@@ -67,4 +74,10 @@
 @property (nonatomic, retain) ARViewController *arViewController;
 @property (nonatomic, assign) NSObject<TagViewDelegate> *delegate;
 @property (nonatomic, retain) IBOutlet UIImageView * rectView;
+@property (nonatomic, retain) UIView * overlayView;
+@property (nonatomic, retain) UIImagePickerController * camera;
+@property (nonatomic, assign) bool descriptorIsOpen;
+@property (nonatomic, assign) bool needToShowCamera;
+@property (nonatomic, retain) TagDescriptorController * descriptorController;
+@property (nonatomic, retain) IBOutlet UIImageView * aperture;
 @end

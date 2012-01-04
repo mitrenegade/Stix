@@ -62,7 +62,7 @@
 #if 0
     [self reloadAllStixWithFrame:frame];
 #else
-    UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
+    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"FIRE"] retain];
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
     if ([self showGiftStix] == NO)
@@ -117,7 +117,7 @@
     if ([self showGiftStix] == NO)
         totalStix = 2;
     int ct=2;
-    UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:@"FIRE"];
+    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"FIRE"] retain];
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
@@ -173,18 +173,17 @@
     [self removeFromSuperview];
 }
 
--(void)toggleShelf:(bool)isHidden{
+-(void)toggleShelf:(bool)isHidden {
     [self.shelf setHidden:isHidden];
 }
 
 - (void)dealloc {
+
 	[super dealloc];
     
-    for (int i=0; i<[allCarouselStixViews count]; i++)
-    {
-        if ([allCarouselStixViews objectAtIndex:i] != [NSNull null])
-            [[allCarouselStixViews objectAtIndex:i] release];
-    }
+    [allCarouselStixFrames release];
+    [allCarouselStixViews release];
+
     [scrollView release];
     scrollView = nil;
 }
@@ -306,7 +305,7 @@ static int lastContentOffsetY = 0;
         else
         {
             // start the continuous vibe
-            [self performSelector:@selector(vibe:)];
+            //[self performSelector:@selector(vibe:)];
             
             // first, move off of scrollview and onto carousel base
             [badgeTouched removeFromSuperview];
@@ -325,7 +324,6 @@ static int lastContentOffsetY = 0;
             offset_from_center_Y = (location.y - centerY);
             
             badgeTouchedLarge.center = CGPointMake(centerX, centerY);
-            CGRect frameStart = badgeTouched.frame;
             CGRect frameEnd = badgeTouchedLarge.frame;
 
             // animate a scaling transition

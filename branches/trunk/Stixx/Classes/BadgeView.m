@@ -44,10 +44,11 @@ static int totalStixTypes = 0;
     labels = [[NSMutableArray alloc] init];
     for (int i=0; i<totalStixTypes; i++)
     {
-        NSString * stixStringID = [[stixStringIDs objectAtIndex:i] copy];
+        NSString * stixStringID = [stixStringIDs objectAtIndex:i];
         UIImageView * badgeLarge = [BadgeView getLargeBadgeWithStixStringID:stixStringID];
         [badgesLarge addObject:badgeLarge];
-        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];        [badges addObject:badge];
+        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];
+        [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
@@ -353,7 +354,7 @@ static int totalStixTypes = 0;
 }
 
 +(NSString*)getStixStringIDAtIndex:(int)index {
-    return [[stixStringIDs objectAtIndex:index] copy]; 
+    return [stixStringIDs objectAtIndex:index]; 
 }
 
 +(NSMutableDictionary *)generateDefaultStix {

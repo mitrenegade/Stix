@@ -22,7 +22,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"ExploreViewController" bundle:nil];
+	self = [super initWithNibName:@"ExploreViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
 	UITabBarItem *tbi = [self tabBarItem];
@@ -173,10 +173,9 @@
 
     UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringIDs];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float originX = x;
-    float originY = y;
+    float centerX = x;
+    float centerY = y;
     NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
-    stix.frame = CGRectMake(originX, originY, stix.frame.size.width, stix.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = CGSizeMake(300, 300);
@@ -189,8 +188,11 @@
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
+    centerX *= imageScale;
+    centerY *= imageScale;
     NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
     [stix setFrame:stixFrameScaled];
+    [stix setCenter:CGPointMake(centerX, centerY)];
     
     return stix;
 }

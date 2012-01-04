@@ -27,7 +27,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"FriendsViewController" bundle:nil];
+	self = [super initWithNibName:@"FriendsViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
 	UITabBarItem *tbi = [self tabBarItem];

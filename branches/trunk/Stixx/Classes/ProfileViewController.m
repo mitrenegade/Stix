@@ -24,7 +24,7 @@
 
 -(id)init
 {
-	[super initWithNibName:@"ProfileViewController" bundle:nil];
+	self = [super initWithNibName:@"ProfileViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
 	UITabBarItem *tbi = [self tabBarItem];
@@ -268,8 +268,8 @@
         NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];
         NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
         [k addStixToUserWithUsername:name andStix:data];
-        [data release];
-        [stix release];
+        [data autorelease];
+        [stix autorelease];
     }
  }
 

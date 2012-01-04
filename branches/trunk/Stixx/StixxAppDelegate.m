@@ -359,56 +359,8 @@ static int init=0;
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
     
-    // update usertagtotal
-    usertagtotal += 1;
-    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
+    [self updateUserTagTotal];
 }
-
-#if 0
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID
-{
-    [newestTag setTagID:newRecordID];
-    [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
-    //[allTags addObject:newestTag];
-    bool added = [self addTagWithCheck:newestTag withID:[newRecordID intValue]];
-    if (added)
-        NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
-    else
-        NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
-    
-#if 0
-    // do not do this - we still cannot get rid of the damn camera view along the top.
-    // dismissModalViewControllerAnimated doesn't seem to work here...but it does work
-    // if we switch tab bars and didSelectViewController is called
-    [tagViewController dismissModalViewControllerAnimated:NO];
-    [tabBarController setSelectedIndex:0]; // go automatically to feedview
-    lastViewController = feedController;
-    [feedController viewWillAppear:TRUE];
-#endif
-
-#if 1 // create empty stixCounts for different stix types
-    NSMutableData *theStixData;
-    NSKeyedArchiver *encoder2;
-    theStixData = [NSMutableData data];
-    encoder2 = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theStixData];
-	[encoder2 encodeObject:newestTag.stixCounts forKey:@"stixCounts"];
-    [encoder2 finishEncoding];
-    [k updatePixWithStixCountsWithAllTagID:[newestTag.tagID intValue] andStixCounts:theStixData];
-    [k updatePixWithDescriptorWithAllTagID:[newestTag.tagID intValue] andDescriptor:newestTag.descriptor];
-    [encoder2 release];  
-#endif
-
-    // update usertagtotal
-    usertagtotal += 1;
-    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
-        
-    // add comment to history
-    //[k addHistoryToPixWithTagID:[newestTag.tagID intValue] andUsername:newestTag.username andComment:newestTag.comment andBadgeType:newestTag.badgeType];
-    // update comment count
-    //[self updateCommentCount:[tag.tagID intValue]];
-
-}
-#endif
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
     NSLog(@"Updated user tag totals: affect rows %d\n", [affectedRows intValue]);
@@ -679,19 +631,12 @@ static int init=0;
     [NSKeyedArchiver archiveRootObject:username toFile:path];
     
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        [stix release];
         stix = [BadgeView generateDefaultStix];
     }
     
     [allStix removeAllObjects];
-    NSEnumerator *e = [stix keyEnumerator];
-    id key;
-    while (key = [e nextObject]) {
-        [allStix setObject:[stix objectForKey:key] forKey:key];
-        NSLog(@"Adding key %@ value %@", key, [stix objectForKey:key]);
-    }
-     
-    //[allStix addEntriesFromDictionary:stix];
+
+    [allStix addEntriesFromDictionary:stix];
     NSLog(@"Setting delegate name to %@\n", username);
         
     [profileController updatePixCount];
@@ -792,9 +737,7 @@ static int init=0;
     [encoder finishEncoding];
     [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
     
-    // update usertagtotal
-    usertagtotal += 1;
-    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
+    [self updateUserTagTotal];
     
     //[k addHistoryToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andBadgeType:type];
     [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
@@ -825,6 +768,31 @@ static int init=0;
     return usertagtotal;
 }
 
+-(void)updateUserTagTotal {
+    // update usertagtotal
+    usertagtotal += 1;
+    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
+
+    if ((usertagtotal % 5) == 0) {
+        bool newStixSuccess = NO;
+        while (!newStixSuccess) {
+            NSString * newStixStringID = [BadgeView getRandomStixStringID];
+            int count = [[allStix objectForKey:newStixStringID] intValue];
+            if (count == 0) {
+                [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", newStixStringID] andButton:@"OK"];
+                newStixSuccess = YES;
+                [allStix setObject:[NSNumber numberWithInt:1] forKey:newStixStringID];
+                NSMutableData * data = [KumulosData dictionaryToData:allStix];
+                [k addStixToUserWithUsername:username andStix:data];
+                
+                [feedController reloadCarouselView];
+                [exploreController reloadCarouselView];
+                [tagViewController reloadCarouselView];
+            }
+        }
+    }
+}
+
 -(bool)isLoggedIn {
     return loggedIn;
 }
@@ -847,9 +815,9 @@ static int init=0;
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     //[k addStixToUserWithUsername:username andStix:data];
     [k adminAddStixToAllUsersWithStix:data];
-
+    [data autorelease];
+    [stix autorelease];
 }
-
 
 - (void)dealloc {
 	

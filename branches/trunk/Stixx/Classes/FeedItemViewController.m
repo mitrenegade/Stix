@@ -39,7 +39,7 @@
 -(id)init
 {
 	// call superclass's initializer
-	[super initWithNibName:@"FeedItemViewController" bundle:nil];
+	self = [super initWithNibName:@"FeedItemViewController" bundle:nil];
     
     //nameString = [NSString alloc];
     //commentString = [NSString alloc];

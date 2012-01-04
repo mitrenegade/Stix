@@ -40,14 +40,14 @@
 }
 
 - (void) addImage:(UIImage*)newImage {
-    [self setImage:[newImage retain]];
+    [self setImage:[newImage copy]];
 }
 
 -(void)addMainStixOfType:(NSString*)stringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y{
     badge_x = x;
     badge_y = y;
     badgeCount = count;
-    stixStringID = stringID;
+    stixStringID = [stringID copy];
     NSLog(@"Added badge at %d %d to tag", x, y);
 }
 
@@ -71,13 +71,13 @@
     NSString * stixStringID = [d valueForKey:@"stixStringID"];
     if (stixStringID == nil || [stixStringID length] == 0) {
         // backwards compatibility: old tags that have no stixStringID have a badgeType
-        stixStringID = [BadgeView getStixStringIDAtIndex:badgeType];
+        stixStringID = [BadgeView getStixStringIDAtIndex:badgeType] ;
         NSLog(@"*** Tag \"%@\"did not have stixStringID: setting badgeType %d to %@", descriptor, badgeType, stixStringID);
     }
     else
     {
         NSLog(@"*** Tag \"%@\"contained badgeType %d and stixStringID %@", descriptor, badgeType, stixStringID);
-        stixStringID = [stixStringID copy];
+        stixStringID = [d valueForKey:@"stixStringID"];
     }
     
     NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];

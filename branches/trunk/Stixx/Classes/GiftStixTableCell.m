@@ -82,7 +82,8 @@
         CGRect frame = CGRectMake(pos*105+5,2,100,100);
         labels[pos] = [[OutlineLabel alloc] initWithFrame:frame];
         [labels[pos] setFrame:frame];
-        [labels[pos] setTextAttributesForBadgeType:3];
+        [labels[pos] setCenter:CGPointMake(pos*105+85,85)];
+        [labels[pos] setTextAttributesForBadgeType:0];
         [labels[pos] drawTextInRect:frame];
         [labels[pos] setText:label];
         [self addSubview:labels[pos]];

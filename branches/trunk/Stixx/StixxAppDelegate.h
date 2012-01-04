@@ -73,7 +73,7 @@
 -(void)updateCommentCount:(int)tagID;
 -(void)continueInit;
 -(void)adminUpdateAllStixCountsToZero;
-
+-(void)updateUserTagTotal;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;

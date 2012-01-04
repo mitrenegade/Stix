@@ -48,10 +48,14 @@
     {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
         if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+        {
             continue;
+        }
         int count = [self.delegate getStixCount:stixStringID];
         [allGiftStixCounts addObject:[NSNumber numberWithInt:count]];
-        [allStixStringIDs addObject: stixStringID];
+        [allStixStringIDs addObject:stixStringID];
+        
+        NSLog(@"GiftStix: allStixStringIDs %d = %@ count %d\n", stixType, stixStringID, count);
     }
     
     [self.tableView setBackgroundColor:[UIColor clearColor]];
@@ -73,8 +77,10 @@
     for (int stixType=0; stixType < [BadgeView totalStixTypes]; stixType++)
     {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
-        if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+        if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) 
+        {
             continue;
+        }
         int count = [self.delegate getStixCount:stixStringID];
         [allGiftStixCounts replaceObjectAtIndex:stixType withObject:[NSNumber numberWithInt:count]];
     }
@@ -129,6 +135,9 @@
     if (cell == nil) {
         cell = [[[GiftStixTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
+    for (int x=0; x<3; x++) {
+        [cell removeCellItemAtPosition:x];
+    }
     
     // Configure the cell...
     
@@ -140,20 +149,17 @@
     int x = 0;
     int y = [indexPath row];
     for (int stixType = y*3; stixType < y*3+3; stixType++) {
-        
-        [cell removeCellItemAtPosition:x];
-        
         if (stixType >= [allStixStringIDs count])
-            continue;
-        NSLog(@"Row %d position %d type %d\n", y, x, stixType);
-        
+            continue;        
         NSString * stixStringID = [allStixStringIDs objectAtIndex:stixType];
         UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
                  
         int count = [[allGiftStixCounts objectAtIndex:stixType] intValue];
         [cell addCellItem:stix atPosition:x];
-        [cell addCellLabel:[NSString stringWithFormat:@"%d", count] atPosition:x];
+        if (count != -1)
+            [cell addCellLabel:[NSString stringWithFormat:@"%d", count] atPosition:x];
         
+        NSLog(@"Row %d position %d type %d %@ count %d\n", y, x, stixType, stixStringID, count);
         x++;
     }    
     

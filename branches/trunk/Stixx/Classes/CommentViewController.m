@@ -69,11 +69,7 @@
         if ([stixStringID length] == 0)
         {
             // backwards compatibility
-            int type = [[d valueForKey:@"badgeType"] intValue];
-            if (type != -1)
-                stixStringID = [BadgeView getStixStringIDAtIndex:type];
-            else
-                stixStringID = @"COMMENT";
+            stixStringID = @"COMMENT";
         }
         
         [names addObject:name];

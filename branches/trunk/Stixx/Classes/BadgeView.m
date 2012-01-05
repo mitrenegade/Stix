@@ -388,12 +388,12 @@ static int totalStixTypes = 0;
 +(int)getOutlineOffsetX:(int)type {
 
     //const int xoffset[BADGE_TYPE_MAX] = {-5, -5, -2, -5};
-    return -5; //xoffset[type];
+    return -3; //xoffset[type];
 }
 +(int)getOutlineOffsetY:(int)type {
     
     //const int yoffset[BADGE_TYPE_MAX] = {10, 10, 2, 10};
-    return 10; //yoffset[type];
+    return 9; //yoffset[type];
 }
 - (void)dealloc {
 	[super dealloc];

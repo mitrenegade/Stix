@@ -25,6 +25,7 @@
 @synthesize delegate;
 @synthesize commentCount;
 @synthesize stixView;
+@synthesize locationIcon;
 /*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -49,7 +50,7 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location andWithImage:(UIImage*)image {
-    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ image of size %f %f\n", name, descriptor, comment, image.size.width, image.size.height);
+    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@ image of size %f %f\n", name, descriptor, comment, location, image.size.width, image.size.height);
     
     nameString = name;
     descriptorString = descriptor;
@@ -58,7 +59,7 @@
         descriptorString = comment;
         commentString = nil;
     }
-    imageData = image; //[image croppedImage:CGRectMake(5, 5, image.size.width-5, image.size.height-5)];
+    imageData = image;
     locationString = location;
 }
 
@@ -245,6 +246,8 @@
         [labelDescriptorBG setFrame:CGRectMake(labelDescriptorBG.frame.origin.x, labelDescriptorBG.frame.origin.y, labelDescriptorBG.frame.size.width, 46)];
         [labelComment setHidden:YES];
     }
+    if ([locationString length] == 0)
+        [locationIcon setHidden:YES];
     //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelDescriptor.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
 }
 

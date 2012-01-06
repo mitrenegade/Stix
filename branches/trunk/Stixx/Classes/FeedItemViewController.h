@@ -38,6 +38,7 @@
     NSString * commentString;
     NSString * locationString;
     UIImage * imageData;
+    UIImageView * locationIcon;
     int commentCount;
     int tagID;
    
@@ -50,6 +51,7 @@
 @property (retain, nonatomic) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
 @property (nonatomic, retain) IBOutlet UIImageView * userPhotoView;
+@property (nonatomic, retain) IBOutlet UIImageView * locationIcon;
 @property (nonatomic, retain) NSString * nameString;
 @property (nonatomic, retain) NSString * commentString;
 @property (nonatomic, retain) UIImage * imageData;

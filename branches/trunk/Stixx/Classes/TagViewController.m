@@ -18,6 +18,8 @@
 @synthesize descriptorController;
 @synthesize needToShowCamera;
 @synthesize aperture;
+@synthesize cameraDeviceButton;
+@synthesize flashModeButton;
 
 - (id)init {
 	
@@ -63,7 +65,8 @@
     camera.allowsEditing = NO;
     camera.wantsFullScreenLayout = NO;
     camera.delegate = self;
-    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;
+    
 #endif
 	// hierarchy of tagView overlays:
 	// 1. self.view = overlayView = blank;
@@ -88,10 +91,13 @@
     NoClipModalView *sView = [[NoClipModalView alloc] initWithFrame:screenBounds]; 
     
     self.view = sView; 
-    buttonInstructions = [[UIButton alloc] initWithFrame:CGRectMake(19,30, 283, 37)];
+    buttonInstructions = [[UIButton alloc] initWithFrame:CGRectMake(19,200, 283, 37)];
+    [buttonInstructions setFrame:CGRectMake(19,200, 283, 37)];
     [buttonInstructions setBackgroundImage:[UIImage imageNamed:@"instruction_box.png"] forState:UIControlStateNormal];
     [buttonInstructions setTitle:@"Drag Stix here to take a picture!" forState:UIControlStateNormal];
+    [buttonInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
     rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 90, 300, 275)];
+    [rectView setFrame:CGRectMake(10, 90, 300, 275)];
     //[rectView setBackgroundColor:[UIColor redColor]];
     aperture = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
     [aperture setAlpha:0.8];
@@ -99,6 +105,15 @@
     [self.view addSubview:rectView];
     [self.view addSubview:aperture];
     
+    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(19,45, 120, 37)];
+    [cameraDeviceButton setBackgroundColor:[UIColor grayColor]];
+    [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
+    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(180,45, 120, 37)];
+    [flashModeButton setBackgroundColor:[UIColor grayColor]];
+    [flashModeButton addTarget:self action:@selector(toggleFlashMode:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:cameraDeviceButton];
+    [self.view addSubview:flashModeButton];
     [sView release];
     
 }
@@ -126,7 +141,14 @@
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
-    [carouselView setUnderlay:buttonInstructions];
+    // to set the correct underlay:
+    // if no underlay is set, the hittest order is carouselView->badgeView->self.view
+    // but badgeView will incorrectly toggle a hit because it contains badgeFrames
+    // so we make carouselView return its underlay to skip badgeView. If the underlay is
+    // another subview in self.view's subview, it will then cause hittest to traverse
+    // all of self.view's subviews after carouselView natually, thus enabling all other buttons
+    // and touch interactions
+    [carouselView setUnderlay:flashModeButton];
     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     
     [carouselView addSubview:arViewController.view];
@@ -181,7 +203,8 @@
 #endif
     [carouselView resetBadgeLocations];
     //[badgeView resetBadgeLocations];
-
+    
+    [self updateCameraControlButtons];
 	[super viewDidAppear:animated];
 }
 
@@ -462,6 +485,48 @@
 	[png writeToFile:[documentsDirectory stringByAppendingPathComponent:@"image.png"] options:NSAtomicWrite error:&error];
 }
 
+-(void)updateCameraControlButtons {
+    switch (camera.cameraFlashMode) {
+        case UIImagePickerControllerCameraFlashModeAuto:
+            [flashModeButton setTitle:@"Auto Flash" forState:UIControlStateNormal];
+            break;
+        case UIImagePickerControllerCameraFlashModeOn:
+            [flashModeButton setTitle:@"Flash On" forState:UIControlStateNormal];
+            break;
+        case UIImagePickerControllerCameraFlashModeOff:
+            [flashModeButton setTitle:@"Flash Off" forState:UIControlStateNormal];
+            break;
+            
+        default:
+            break;
+    }
+    switch (camera.cameraDevice) {
+        case UIImagePickerControllerCameraDeviceFront:
+            [cameraDeviceButton setTitle:@"Switch to Rear" forState:UIControlStateNormal];
+            break;
+        case UIImagePickerControllerCameraDeviceRear:
+            [cameraDeviceButton setTitle:@"Switch to Front" forState:UIControlStateNormal];
+            break;
+            
+        default:
+            break;
+    }
+}
+
+-(IBAction)toggleFlashMode:(id)sender {
+    camera.cameraFlashMode++;
+    if (camera.cameraFlashMode == 2)
+        camera.cameraFlashMode = -1;
+    [self updateCameraControlButtons];
+}
+
+-(IBAction)toggleCameraDevice:(id)sender {
+    if (camera.cameraDevice == UIImagePickerControllerCameraDeviceFront)
+        camera.cameraDevice = UIImagePickerControllerCameraDeviceRear;
+    else
+        camera.cameraDevice = UIImagePickerControllerCameraDeviceFront;
+    [self updateCameraControlButtons];
+}
 
 #pragma mark -
 

@@ -53,6 +53,9 @@
     IBOutlet UIImageView * rectView; // exists purely to give us the coordinates of the aperture
     IBOutlet UIButton * buttonInstructions;
     
+    IBOutlet UIButton * flashModeButton;
+    IBOutlet UIButton * cameraDeviceButton;
+    
     TagDescriptorController * descriptorController;
     bool descriptorIsOpen;
     bool needToShowCamera;
@@ -66,6 +69,9 @@
 -(IBAction)closeInstructions:(id)sender;
 -(void)createCarouselView;
 -(void)reloadCarouselView;
+-(void)updateCameraControlButtons;
+-(IBAction)toggleFlashMode:(id)sender;
+-(IBAction)toggleCameraDevice:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) CarouselView * carouselView;
@@ -80,4 +86,6 @@
 @property (nonatomic, assign) bool needToShowCamera;
 @property (nonatomic, retain) TagDescriptorController * descriptorController;
 @property (nonatomic, retain) IBOutlet UIImageView * aperture;
+@property (nonatomic, retain) IBOutlet UIButton * flashModeButton;
+@property (nonatomic, retain) IBOutlet UIButton * cameraDeviceButton;
 @end

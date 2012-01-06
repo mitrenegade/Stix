@@ -12,7 +12,7 @@
 
 @protocol AuxStixViewControllerDelegate 
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location;
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location andComment:(NSString*)comment;
 
 @end
 

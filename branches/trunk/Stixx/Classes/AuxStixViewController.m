@@ -154,7 +154,7 @@
     //stix.frame = badgeFrame;
     //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"AuxStix: set aux stix of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-    [delegate didAddAuxStixWithStixStringID:stixStringID atLocation:CGPointMake(centerX, centerY)];
+    [delegate didAddAuxStixWithStixStringID:stixStringID atLocation:CGPointMake(centerX, centerY) andComment:[commentField text]];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

@@ -11,8 +11,9 @@
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
 #import "OutlineLabel.h"
+#import "Tag.h"
 
-@interface StixView : UIImageView
+@interface StixView : UIView
 {
     UIImageView * stix;
     OutlineLabel * stixCount;
@@ -21,11 +22,13 @@
     NSMutableArray * auxCanManipulate;
     int drag;
     float offset_x, offset_y;
+    bool interactionAllowed;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) OutlineLabel * stixCount;
+@property (nonatomic, assign) bool interactionAllowed;
 
+// could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
-
 @end

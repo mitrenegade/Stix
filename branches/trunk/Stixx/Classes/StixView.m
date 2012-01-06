@@ -12,12 +12,14 @@
 
 @synthesize stix;
 @synthesize stixCount;
+@synthesize interactionAllowed;
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
+        interactionAllowed = YES;
     }
     return self;
 }
@@ -32,6 +34,15 @@
 */
 
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+    
+    CGRect frame = self.frame;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
+    UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
+    [imageView setImage:imageData];
+    [self addSubview:imageView];
+    [imageView release];
+    
     stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
@@ -75,6 +86,11 @@
 
 
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    if (interactionAllowed == NO) {
+        [super touchesBegan:touches withEvent:event];
+        return;
+    }
+    
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];
 	drag = 0;
@@ -96,7 +112,11 @@
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	//[self touchesBegan:touches withEvent:event];
+    if (interactionAllowed == NO) {
+        [super touchesMoved:touches withEvent:event];
+        return;
+    }
+
 	if (drag == 1)
 	{
 		UITouch *touch = [[event allTouches] anyObject];
@@ -113,6 +133,11 @@
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    if (interactionAllowed == NO) {
+        [super touchesEnded:touches withEvent:event];
+        return;
+    }
+
 	if (drag == 1)
 	{
         drag = 0;

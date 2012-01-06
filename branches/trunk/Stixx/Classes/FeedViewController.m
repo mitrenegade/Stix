@@ -184,7 +184,12 @@
 
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
+    // stix dropped onto the image are the correct size relative to the feed image's imageView. That means they are
+    // already scaled down to fit correctly in a 250x230 sized pix. the center of the badge is still in full window coordinates
+    // so it must be corrected.
+    
     // increment stix count for given feed item
+    // badge's frame is currently in carouselView space which is the full screen
     
     if ([allTags count] == 0) {
         // nothing loaded yet
@@ -193,33 +198,53 @@
     }
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     
-    // scale stix frame back
+    // scale stix frame back to full 300x275 size
     FeedItemViewController * feedItem = [feedItems objectForKey:t.tagID];
-	float imageScale =  300 / feedItem.imageView.frame.size.width;
+	float imageScale = 300/feedItem.imageView.frame.size.width; // the user is using the badge size relative to the current view
+    
+    NSLog(@"FeedView: added stix of size %f %f at location %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
     
 	CGRect stixFrameScaled = badge.frame;
-	stixFrameScaled.origin.x *= imageScale;
-	stixFrameScaled.origin.y *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    float centerx = badge.center.x;// * imageScale;
-    float centery = badge.center.y;// * imageScale;
     CGRect scrollFrame = scrollView.frame;
     CGRect imageViewFrame = feedItem.imageView.frame;
-    centerx -= scrollFrame.origin.x + imageViewFrame.origin.x;
-    centerx *= imageScale;
-    centery -= scrollFrame.origin.y + imageViewFrame.origin.y;
-    centery *= imageScale;
-    NSLog(@"Offsetting center by %f %f\n", scrollFrame.origin.x + imageViewFrame.origin.x, scrollFrame.origin.y + imageViewFrame.origin.y);
+    float centerx = badge.center.x - (scrollFrame.origin.x + imageViewFrame.origin.x);
+    float centery = badge.center.y - (scrollFrame.origin.y + imageViewFrame.origin.y);
+	stixFrameScaled.size.width *= imageScale;
+	stixFrameScaled.size.height *= imageScale;
+    [badge setFrame:stixFrameScaled];
+    CGPoint location = CGPointMake(centerx * imageScale, centery * imageScale); 
+    [badge setCenter:location];
+    NSLog(@"Offsetting center by %f %f to %f %f, then scaling to %f %f\n", scrollFrame.origin.x + imageViewFrame.origin.x, scrollFrame.origin.y + imageViewFrame.origin.y, centerx, centery, location.x, location.y);
 
-    CGPoint location = CGPointMake(centerx, centery); //badge.frame.origin.x, badge.frame.origin.y);
-    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
+    // at this point, location and badgeFrame are all relative to feedItem.frame, at full size (300px). NOT QUITE ACCURATE PLACEMENT
+#if 0
     
-//    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
+    // display auxStix view
+    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
+    //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     [carouselView resetBadgeLocations];
     [scrollView reloadPage:lastPageViewed];
+#else
+    NSLog(@"FeedView: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
+    AuxStixViewController * auxView = [[AuxStixViewController alloc] init];
+    [self presentModalViewController:auxView animated:NO]; // must load first
+    auxView.delegate = self;
+    [auxView initStixView:t];
+    [auxView addAuxStix:badge ofType:stixStringID atLocation:location];
+#endif
     
 }
+
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location{
+    [self dismissModalViewControllerAnimated:YES];
+    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
+
+    //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
+    [carouselView resetBadgeLocations];
+    [scrollView reloadPage:lastPageViewed];
+}
+
 -(int)getStixCount:(NSString*)stixStringID {
     return [self.delegate getStixCount:stixStringID];
 }
@@ -270,6 +295,7 @@
     [feedItem setDelegate:self];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString andWithImage:image];
     [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+    [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)
     {
@@ -284,10 +310,7 @@
     [feedItem populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
-    if (count == 1)
-        [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", count] forState:UIControlStateNormal];
-    else        
-        [feedItem.addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", count] forState:UIControlStateNormal];
+    [feedItem populateWithCommentCount:count];
     NSLog(@"FeedViewController: Adding badge at location %d %d in image of %f %f", tag.badge_x,tag. badge_y, image.size.width, image.size.height);
     
     // this object must be retained so that the button actions can be used
@@ -414,10 +437,9 @@
 
 -(void)didAddNewComment:(NSString *)newComment {
     NSString * name = [self.delegate getUsername];
-    int type = -1; //BADGE_TYPE_FIRE; // todo: fix this
     int tagID = [commentView tagID];
     if ([newComment length] > 0)
-        [self.delegate didAddHistoryItemWithTagId:tagID andUsername:name andComment:newComment andBadgeType:type];
+        [self.delegate didAddNewCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
 }
 @end

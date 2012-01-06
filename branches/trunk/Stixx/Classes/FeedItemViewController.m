@@ -80,7 +80,6 @@
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
     float centerY = y;
-    stix.frame = CGRectMake(0, 0, stix.frame.size.width, stix.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = imageData.size;
@@ -104,6 +103,7 @@
         
         CGRect labelFrame = stix.frame;
         OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+        [stixCount setCenter:CGPointMake(stixCount.center.x+[BadgeView getOutlineOffsetX:0], stixCount.center.y+[BadgeView getOutlineOffsetY:0])];
         labelFrame = stixCount.frame; // changing center should change origin but not width
         //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
         if ([stixStringID isEqualToString:@"FIRE"])
@@ -202,7 +202,12 @@
 
 -(void)populateWithCommentCount:(int)count {
     self.commentCount = count;
-    [addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", self.commentCount] forState:UIControlStateNormal];
+    if (count == 0)
+        [addCommentButton setTitle:[NSString stringWithFormat:@"Add comment", commentCount] forState:UIControlStateNormal];
+    else if (count == 1)
+        [addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", commentCount] forState:UIControlStateNormal];
+    else        
+        [addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", commentCount] forState:UIControlStateNormal];
 }
 
 - (void)dealloc

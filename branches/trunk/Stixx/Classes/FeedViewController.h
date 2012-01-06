@@ -14,6 +14,7 @@
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
+#import "AuxStixViewController.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -27,7 +28,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
--(void)didAddHistoryItemWithTagId:(int)tagID andUsername:(NSString*)name andComment:(NSString*)comment andBadgeType:(int)type;
+-(void)didAddNewCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 
 - (bool) isLoggedIn;
 -(int)getStixCount:(NSString*)stixStringID;
@@ -36,7 +37,7 @@
 -(int)getCommentCount:(int)tagID;
 @end
 
-@interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate> {
+@interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate, AuxStixViewControllerDelegate> {
     
 	NSMutableDictionary * feedItems;
     //BadgeView * badgeView;

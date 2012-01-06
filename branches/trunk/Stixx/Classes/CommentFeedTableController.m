@@ -110,7 +110,6 @@
     if (index < [self.delegate getCount]) {
         NSString * name = [self.delegate getNameForIndex:index];
         NSString * comment = [self.delegate getCommentForIndex:index];
-        //int type = [self.delegate getStixTypeForIndex:index];
         NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
         
         [cell populateWithName:name andComment:comment andStixType:stixStringID];

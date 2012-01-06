@@ -79,6 +79,7 @@
     [super viewWillAppear:animated];
 
     [carouselView resetBadgeLocations];
+    [tableController reloadStixCounts];
 }
 
 - (void)didReceiveMemoryWarning

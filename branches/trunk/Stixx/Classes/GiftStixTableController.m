@@ -47,15 +47,15 @@
     for (int stixType=0; stixType<[BadgeView totalStixTypes]; stixType++)
     {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
+        int count = 0; //[self.delegate getStixCount:stixStringID];
         if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
         {
-            continue;
+            count = -1;
         }
-        int count = [self.delegate getStixCount:stixStringID];
         [allGiftStixCounts addObject:[NSNumber numberWithInt:count]];
         [allStixStringIDs addObject:stixStringID];
         
-        NSLog(@"GiftStix: allStixStringIDs %d = %@ count %d\n", stixType, stixStringID, count);
+        //NSLog(@"GiftStix: allStixStringIDs %d = %@ count %d\n", stixType, stixStringID, count);
     }
     
     [self.tableView setBackgroundColor:[UIColor clearColor]];
@@ -74,6 +74,9 @@
 {
     [super viewWillAppear:animated];
     // update stix counts each time
+}
+
+-(void)reloadStixCounts {
     for (int stixType=0; stixType < [BadgeView totalStixTypes]; stixType++)
     {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:stixType];
@@ -83,6 +86,7 @@
         }
         int count = [self.delegate getStixCount:stixStringID];
         [allGiftStixCounts replaceObjectAtIndex:stixType withObject:[NSNumber numberWithInt:count]];
+        //NSLog(@"GiftStix: allStixStringIDs %d = %@ count %d\n", stixType, stixStringID, count);
     }
 }
 
@@ -151,7 +155,12 @@
     for (int stixType = y*3; stixType < y*3+3; stixType++) {
         if (stixType >= [allStixStringIDs count])
             continue;        
+        
         NSString * stixStringID = [allStixStringIDs objectAtIndex:stixType];
+
+        //if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+        //    continue;
+        
         UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
                  
         int count = [[allGiftStixCounts objectAtIndex:stixType] intValue];

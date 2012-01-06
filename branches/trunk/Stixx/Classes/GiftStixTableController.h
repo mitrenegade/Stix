@@ -24,4 +24,6 @@
 }
 
 @property (nonatomic, assign) NSObject<GiftStixTableControllerDelegate> *delegate;
+
+-(void)reloadStixCounts;
 @end

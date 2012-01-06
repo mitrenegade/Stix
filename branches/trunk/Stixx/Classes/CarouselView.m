@@ -10,6 +10,7 @@
 @synthesize scrollView;
 @synthesize carouselHeight;
 @synthesize showGiftStix;
+@synthesize sizeOfStixContext;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -31,7 +32,7 @@
         [allCarouselStixViews addObject:[NSNull null]];
     }
     showGiftStix = YES;
-
+    sizeOfStixContext = 300; // default
     return self;
 }
 
@@ -121,7 +122,7 @@
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-        NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        NSLog(@"CarouselView reloading stix %d: stixStringID: %@ count: %d", i, stixStringID, count);
         if ([stixStringID isEqualToString:@"FIRE"]) {
             [basicStix setCenter:CGPointMake(stixSize*(0+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
             [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
@@ -315,16 +316,18 @@ static int lastContentOffsetY = 0;
             [badgeTouched setFrame:frameOutsideCarousel];
             [self addSubview:badgeTouched];
 
-            badgeTouchedLarge = [BadgeView getLargeBadgeWithStixStringID:selectedStixStringID]; 
+            badgeLifted = [BadgeView getBadgeWithStixStringID:selectedStixStringID]; 
+            float scale = sizeOfStixContext / 300; // if stix context is different from the camera view in TagViewController
+            badgeLifted.frame = CGRectMake(0, 0, badgeLifted.frame.size.width*scale, badgeLifted.frame.size.height * scale);
             float centerX = badgeTouched.center.x; 
             float centerY = badgeTouched.center.y; 
+            badgeLifted.center = CGPointMake(centerX, centerY);
             
             // point where finger clicked badge
             offset_from_center_X = (location.x - centerX);
             offset_from_center_Y = (location.y - centerY);
             
-            badgeTouchedLarge.center = CGPointMake(centerX, centerY);
-            CGRect frameEnd = badgeTouchedLarge.frame;
+            CGRect frameEnd = badgeLifted.frame;
 
             // animate a scaling transition
             [UIView 
@@ -372,6 +375,7 @@ static int lastContentOffsetY = 0;
                 //NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
                 
                 // animate a scaling transition
+#if 0
                 [UIView 
                  animateWithDuration:0.2
                  delay:0 
@@ -383,6 +387,7 @@ static int lastContentOffsetY = 0;
                      badgeTouched.hidden = NO;
                  }
                  ];
+#endif
                 
                 // tells delegate to do necessary things such as take a photo
                 drag = 0;

@@ -56,8 +56,8 @@ enum {
 	NSMutableArray * badgeLocations; // original frame of each badge
 	NSMutableArray * badgesLarge;
 	
-	UIImageView * badgeTouched;
-	UIImageView * badgeTouchedLarge;
+	UIImageView * badgeTouched; // the stix on the carousel (at whatever size the carousel is)
+	UIImageView * badgeLifted; // what a stix looks like in the correct context
     UIImageView * shelf;
     
 	int drag;

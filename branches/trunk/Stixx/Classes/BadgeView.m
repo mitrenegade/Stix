@@ -102,12 +102,12 @@ static int totalStixTypes = 0;
 	else
 	{		
         badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
-		badgeTouchedLarge = [BadgeView getLargeBadgeWithStixStringID:selectedStixStringID]; 
+		badgeLifted = [BadgeView getBadgeWithStixStringID:selectedStixStringID];  // the stix size to be added to a 300x275 camera view
         float centerX = badgeTouched.center.x; 
 		float centerY = badgeTouched.center.y; 
         
-        badgeTouchedLarge.center = CGPointMake(centerX, centerY);
-		CGRect frameEnd = badgeTouchedLarge.frame;
+        badgeLifted.center = CGPointMake(centerX, centerY);
+		CGRect frameEnd = badgeLifted.frame;
 		
         // point where finger clicked badge
 		offset_from_center_X = (location.x - centerX);

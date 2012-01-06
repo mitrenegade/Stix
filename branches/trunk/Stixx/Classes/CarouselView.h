@@ -28,12 +28,15 @@
     NSMutableArray * allCarouselStixViews;
     
     bool showGiftStix;
+    
+    float sizeOfStixContext; // optional ivar that determines stix scaling - normal stix ratio is a stix frame from [BadgeView getBadgeOfStixStringID] inside a 300x275 camera view. sizeOfStixContext replaces the 300 with a width in pixels
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) bool showGiftStix;
+@property (nonatomic, assign) float sizeOfStixContext;
 
 -(void)toggleShelf:(bool)isHidden;
 -(void)initCarouselWithFrame:(CGRect)frame;

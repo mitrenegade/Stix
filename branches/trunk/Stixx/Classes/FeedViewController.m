@@ -235,10 +235,12 @@
     
 }
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location{
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location andComment:(NSString *)comment {
     [self dismissModalViewControllerAnimated:YES];
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
+    if ([comment length] > 0)
+        [self didAddNewComment:comment withTagID:[t.tagID intValue]];
 
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     [carouselView resetBadgeLocations];
@@ -435,9 +437,9 @@
     commentView = nil;
 }
 
--(void)didAddNewComment:(NSString *)newComment {
+-(void)didAddNewComment:(NSString *)newComment withTagID:(int)tagID{
     NSString * name = [self.delegate getUsername];
-    int tagID = [commentView tagID];
+    //int tagID = [commentView tagID];
     if ([newComment length] > 0)
         [self.delegate didAddNewCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];

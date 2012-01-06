@@ -60,7 +60,7 @@
     if (currentPage>0)
         [self loadPage:currentPage-1];
     [self loadPage:currentPage];
-    if (currentPage<pageCount)
+    if (currentPage<pageCount || pageCount == 1)
         [self loadPage:currentPage+1];
 }
 

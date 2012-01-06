@@ -14,7 +14,7 @@
 @protocol CommentViewDelegate <NSObject>
 
 -(void)didCloseComments;
--(void)didAddNewComment:(NSString*)newComment;
+-(void)didAddNewComment:(NSString*)newComment withTagID:(int)tagID;
 
 @end
 

@@ -117,7 +117,7 @@
     NSString * newComment = [commentField text];
     [commentField resignFirstResponder];
     if ([newComment length] > 0)
-        [self.delegate didAddNewComment:newComment];
+        [self.delegate didAddNewComment:newComment withTagID:self.tagID];
 }
 
 -(IBAction)backButtonPressed:(id)sender {

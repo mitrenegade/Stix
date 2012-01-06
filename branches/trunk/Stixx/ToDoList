@@ -1,2 +1,30 @@
-make sure tagViewController can be recreated with loadView and viewDidLoad in case it is deleted by low memory warning
-make sure loginViewController is the same as above
+features to add:
+aux stix location/sizing/comment window -> sizing requires kumulos change (badgeFrame)
+use stixView for exploreViewController
+add aux stix to stixView
+add frame to all stix in tags
+update friend profiles to reflect true add friend
+
+bugs:
+gift stix leaving empty space in mystix view
+
+major revisions:
+location/poi view
+add more exploreview options - friend's pix, nearby, etc
+real friend lists and privacy - add friend
+
+
+done
+use stixView for tagDescriptorController
+location icon in tag view - comes from ARCoordinateView
+hitting back in tagview results in white pic - wrong view loaded?
+add camera controls/flash/exposure time to tagView
+gift stix one time use
+0 comments = add comment
+dropped stix wrong location (?)
+location icon gone if no location
+already downloaded pix do not show updated auxStix
+
+Questions for beta testers:
+when app closed, is it better to restart it or to keep in background?
+camera flash? do you use it more in dark or well lit situations? would flash be annoying?

@@ -99,7 +99,12 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
+         contextName = "-[LocationViewController headerView]:LocationViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "searchBar">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController viewDidLoad]:FeedViewController.m">
@@ -110,18 +115,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "-[LocationViewController headerView]:LocationViewController.m">
-         <PersistentStrings>
-            <PersistentString
-               value = "searchBar">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController initializeScroll]:FeedViewController.m">
          <PersistentStrings>
             <PersistentString
                value = "scrollView">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "+[BadgeView stixDescriptorForStixStringID:]:BadgeView.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "stixDescriptors">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

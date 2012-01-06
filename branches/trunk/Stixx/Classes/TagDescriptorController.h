@@ -14,6 +14,7 @@
 
 @protocol TagDescriptorDelegate
 -(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center;
+-(void)didCancelAddDescriptor;
 @end
 
 @interface TagDescriptorController : UIViewController <UITextFieldDelegate, LocationHeaderViewControllerDelegate>{
@@ -58,7 +59,7 @@
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)locationTextBoxEntered:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;
--(UIImageView *)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+//-(UIImageView *)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(IBAction)closeInstructions:(id)sender;
 
 @end

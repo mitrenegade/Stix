@@ -71,12 +71,13 @@
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY];
+    [stixView populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
     [self.view addSubview:stixView];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
 
 }
 
--(void)addAuxStix:(UIImageView *)newStix ofType:(NSString *)newStixStringID atLocation:(CGPoint)location {
+-(void)addNewAuxStix:(UIImageView *)newStix ofType:(NSString *)newStixStringID atLocation:(CGPoint)location {
     badgeFrame = newStix.frame;
     // save frame of badge relative to cropped image
     // stix frame coming in relative to a full size 300x275 view at origin 0,0

@@ -18,11 +18,11 @@
     UIImageView * stix;
     OutlineLabel * stixCount;
     bool canManipulate;
-    NSMutableArray * auxStix;
     NSMutableArray * auxCanManipulate;
     int drag;
     float offset_x, offset_y;
     bool interactionAllowed;
+    float imageScale;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -31,4 +31,5 @@
 
 // could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+-(void)populateWithAuxStix:(NSMutableArray *)auxStix atLocations:(NSMutableArray *)auxLocations;
 @end

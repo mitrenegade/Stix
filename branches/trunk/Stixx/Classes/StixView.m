@@ -53,7 +53,7 @@
     CGSize originalSize = imageData.size;
 	CGSize targetSize = self.frame.size;
 	
-	float imageScale =  targetSize.width / originalSize.width;
+    imageScale =  targetSize.width / originalSize.width;
     
 	CGRect stixFrameScaled = stix.frame;
 	stixFrameScaled.origin.x *= imageScale;
@@ -80,10 +80,34 @@
         [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
         [stixCount setText:[NSString stringWithFormat:@"%d", count]];
         [self addSubview:stixCount];
-        [stixCount release];
+//        [stixCount release];
     }
 }
 
+-(void)populateWithAuxStix:(NSMutableArray *)auxStix atLocations:(NSMutableArray *)auxLocations {
+    for (int i=0; i<[auxStix count]; i++) {
+        NSString * stixStringID = [auxStix objectAtIndex:i];
+        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
+        
+        UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
+        float centerX = location.x;
+        float centerY = location.y;
+        
+        // scale stix and label down to 270x270 which is the size of the feedViewItem
+        CGRect stixFrameScaled = auxStix.frame;
+        stixFrameScaled.origin.x *= imageScale;
+        stixFrameScaled.origin.y *= imageScale;
+        stixFrameScaled.size.width *= imageScale;
+        stixFrameScaled.size.height *= imageScale;
+        centerX *= imageScale;
+        centerY *= imageScale;
+        //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
+        [auxStix setFrame:stixFrameScaled];
+        [auxStix setCenter:CGPointMake(centerX, centerY)];
+        [self addSubview:auxStix];
+    }
+}
 
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if (interactionAllowed == NO) {
@@ -129,6 +153,8 @@
 		float centerX = location.x - offset_x;
 		float centerY = location.y - offset_y;
         stix.center = CGPointMake(centerX, centerY);
+        if (stixCount != nil)
+            stixCount.center = CGPointMake(centerX - [BadgeView getOutlineOffsetX:0], centerY - [BadgeView getOutlineOffsetX:0]);
 	}
 }
 

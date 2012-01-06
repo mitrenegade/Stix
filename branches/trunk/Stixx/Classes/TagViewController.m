@@ -32,12 +32,6 @@
 		// give it a label
 		[tbi setTitle:@"Stix"];
 		
-		// add an image
-//		UIImage * i = [UIImage imageNamed:@"tab_location.png"];
-//		[tbi setImage:i];
-//    return self;
-//}
-
 //-(void)viewDidLoad {
 //	[super viewDidLoad];
     /****** init AR view ******/
@@ -105,12 +99,12 @@
     [self.view addSubview:rectView];
     [self.view addSubview:aperture];
     
-    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(19,45, 120, 37)];
-    [cameraDeviceButton setBackgroundColor:[UIColor grayColor]];
-    [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
-    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(180,45, 120, 37)];
+    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(20,45, 120, 37)];
     [flashModeButton setBackgroundColor:[UIColor grayColor]];
     [flashModeButton addTarget:self action:@selector(toggleFlashMode:) forControlEvents:UIControlEventTouchUpInside];
+    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(180,45, 120, 37)];
+    [cameraDeviceButton setBackgroundColor:[UIColor grayColor]];
+    [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:cameraDeviceButton];
     [self.view addSubview:flashModeButton];
@@ -316,6 +310,14 @@
     [arViewController removeAllCoordinates];
 }
 
+-(void)didCancelAddDescriptor {
+    [carouselView resetBadgeLocations];
+    
+    [self dismissModalViewControllerAnimated:YES];
+    needToShowCamera = YES;
+    descriptorIsOpen = NO;
+    [self viewDidAppear:NO];    
+}
 /* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
 -(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center
 {

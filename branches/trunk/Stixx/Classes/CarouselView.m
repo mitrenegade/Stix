@@ -366,6 +366,7 @@ static int lastContentOffsetY = 0;
         {
             if (badgeTouched != nil)
             {
+                /*
                 CGRect originalFrame = [[allCarouselStixFrames objectAtIndex:badgeSelect] CGRectValue];
                 UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
                 newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
@@ -373,7 +374,7 @@ static int lastContentOffsetY = 0;
                 [newFrameView release];
                 
                 //NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
-                
+                */
                 // animate a scaling transition
 #if 0
                 [UIView 

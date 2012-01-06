@@ -230,7 +230,7 @@
     [self presentModalViewController:auxView animated:NO]; // must load first
     auxView.delegate = self;
     [auxView initStixView:t];
-    [auxView addAuxStix:badge ofType:stixStringID atLocation:location];
+    [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
 #endif
     
 }
@@ -295,7 +295,7 @@
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
     [feedItem setDelegate:self];
-    [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString andWithImage:image];
+    [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
     [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
     [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
@@ -308,8 +308,13 @@
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
+#if 0
     [feedItem populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
+    feedItem.imageData = tag.image;
     [feedItem populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
+#else
+    [feedItem initStixView:tag];
+#endif
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];

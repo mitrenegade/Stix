@@ -43,7 +43,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad]; 
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
-#if 1
+#if 0
 	[imageView setImage:tmp];
     float centerX = badgeFrame.origin.x + badgeFrame.size.width / 2;
     float centerY = badgeFrame.origin.y + badgeFrame.size.height / 2;
@@ -53,13 +53,14 @@
     stix = [[self populateWithBadge:stixStringID withCount:1 atLocationX:centerX andLocationY:centerY] retain];    
     [imageView addSubview:stix];
     [stix release];
-#else
+#else                
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     int x = badgeFrame.origin.x + badgeFrame.size.width / 2;
     int y = badgeFrame.origin.y + badgeFrame.size.height / 2;
     [stixView initializeWithImage:tmp andStix:stixStringID withCount:1 atLocationX:x andLocationY:y];
     [self.view addSubview:stixView];
+    
 #endif
         
     drag = 0;
@@ -82,7 +83,7 @@
     [locationController setDelegate:self];
 //#endif
 }
-
+#if 0
 -(UIImageView *)populateWithBadge:(NSString*)stringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
 
     float item_width = imageView.frame.size.width;
@@ -92,7 +93,6 @@
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
     float centerY = y;
-    newstix.frame = CGRectMake(0, 0, newstix.frame.size.width, newstix.frame.size.height);
     
     // scale stix and label down to 270x248 which is the size of the feedViewItem
     CGSize originalSize = CGSizeMake(300, 275);
@@ -112,7 +112,7 @@
     [newstix setCenter:CGPointMake(centerX, centerY)];
     return newstix;
 }
-
+#endif
 /*
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -162,8 +162,8 @@
 
 -(IBAction)buttonCancelPressed:(id)sender
 {
-	//[self.delegate didAddDescriptor:nil];
-    [self dismissModalViewControllerAnimated:YES];
+	[self.delegate didCancelAddDescriptor];
+    //[self dismissModalViewControllerAnimated:YES];
 }
 
 -(IBAction)locationTextBoxEntered:(id)sender

@@ -53,5 +53,5 @@
 -(IBAction)closeInstructions:(id)sender;
 
 -(void)initStixView:(Tag *) tag;
--(void)addAuxStix:(UIImageView *)newStix ofType:(NSString*)newStixStringID atLocation:(CGPoint)location;
+-(void)addNewAuxStix:(UIImageView *)newStix ofType:(NSString*)newStixStringID atLocation:(CGPoint)location;
 @end

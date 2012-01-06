@@ -130,7 +130,7 @@
 	pointView.frame = CGRectMake((int)(BOX_WIDTH / 2.0 - pointView.image.size.width / 2.0), (int)(BOX_HEIGHT / 2.0 - pointView.image.size.height / 2.0), pointView.image.size.width, pointView.image.size.height);
     
 	[tempView addSubview:titleLabel];
-	[tempView addSubview:pointView];
+	//[tempView addSubview:pointView];
 	
 	[titleLabel release];
 	[pointView release];

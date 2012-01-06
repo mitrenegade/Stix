@@ -45,6 +45,7 @@
 @synthesize lastCarouselView;
 @synthesize allCommentCounts;
 @synthesize loadingController;
+@synthesize allCarouselViews;
 
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
@@ -98,6 +99,7 @@ static int init=0;
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
+    allCarouselViews = [[NSMutableArray alloc] init];
     
 	/***** create first view controller: the TagViewController *****/
     [loadingController.view removeFromSuperview]; // doesnt work
@@ -508,8 +510,8 @@ static int init=0;
     return allTags;
 }
 
--(void)didAddHistoryItemWithTagId:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andBadgeType:(int)type {
-    [k addHistoryToPixWithTagID:tagID andUsername:name andComment:comment andBadgeType:type];
+-(void)didAddNewCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+    [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
     // update comment count
     [self updateCommentCount:tagID];
 }
@@ -534,12 +536,27 @@ static int init=0;
     if ([theResults count] == 0)
         return;
     
-    NSMutableDictionary * d = [theResults objectAtIndex:0];        
-    NSNumber * tagID = [d valueForKey:@"tagID"];
-    NSNumber * commentCount = [NSNumber numberWithInt:[theResults count]];
-    
+    NSNumber * tagID;
+#if 0
+    NSNumber * commentCount = [NSNumber numberWithInt:[theResults count]];    
     [allCommentCounts setObject:commentCount forKey:tagID];
-
+#else
+    int commentCount = 0;
+    for (int i=0; i<[theResults count]; i++) {
+        NSMutableDictionary * d = [theResults objectAtIndex:i];        
+        tagID = [d valueForKey:@"tagID"];
+        NSString * commentStixStringID = [d valueForKey:@"stixStringID"];
+        if ([commentStixStringID length] == 0) {
+            // stix type is 0, so this must be a comment
+            NSString * comment = [d valueForKey:@"comment"];
+            if ([comment length] > 0) {
+                commentCount ++;
+            }
+        }
+        NSLog(@"Comment %d stix string ID: %@ count %d", i, commentStixStringID, commentCount);
+    }
+    [allCommentCounts setObject:[NSNumber numberWithInt:commentCount] forKey:tagID];
+#endif
     [feedController forceUpdateCommentCount:[tagID intValue]];
 }
 
@@ -683,7 +700,7 @@ static int init=0;
     if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
         return -1;
     int ret = [[allStix objectForKey:stixStringID] intValue];
-    //NSLog(@"Stix count for %@: %d", stixStringID, ret);
+    NSLog(@"Stix count for %@: %d", stixStringID, ret);
     return ret;
 }
 
@@ -729,7 +746,6 @@ static int init=0;
         [tag addAuxiliaryStixOfType:stixStringID atLocation:location];
     }
 
-    //[k updateStixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andType:tag.badgeType];
     NSMutableData *theAuxStixData = [NSMutableData data];
     NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
 	[encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
@@ -738,12 +754,10 @@ static int init=0;
     [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
     
     [self updateUserTagTotal];
+        
+    [self didAddNewCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
     
-    //[k addHistoryToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andBadgeType:type];
-    [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
-    
-    // update comment count
-    [self updateCommentCount:[tag.tagID intValue]];
+    [self decrementStixCount:stixStringID];
 
     NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.stixStringID, [tag.tagID intValue], tag.badgeCount);
 }
@@ -779,9 +793,9 @@ static int init=0;
             NSString * newStixStringID = [BadgeView getRandomStixStringID];
             int count = [[allStix objectForKey:newStixStringID] intValue];
             if (count == 0) {
-                [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", newStixStringID] andButton:@"OK"];
+                [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
                 newStixSuccess = YES;
-                [allStix setObject:[NSNumber numberWithInt:1] forKey:newStixStringID];
+                [allStix setObject:[NSNumber numberWithInt:3] forKey:newStixStringID];
                 NSMutableData * data = [KumulosData dictionaryToData:allStix];
                 [k addStixToUserWithUsername:username andStix:data];
                 
@@ -798,9 +812,10 @@ static int init=0;
 }
 
 -(void)didCreateBadgeView:(UIView *)newBadgeView {
-    if (lastViewController != nil) {
-        lastCarouselView = (CarouselView*) newBadgeView;
-    }
+//    if (lastViewController != nil) {
+//        lastCarouselView = (CarouselView*) newBadgeView;
+//    }
+    [allCarouselViews addObject:newBadgeView];
 }
 
 /*** processing stix counts ***/
@@ -817,6 +832,22 @@ static int init=0;
     [k adminAddStixToAllUsersWithStix:data];
     [data autorelease];
     [stix autorelease];
+}
+
+-(void)decrementStixCount:(NSString *)stixStringID {
+    int count = [[allStix objectForKey:stixStringID] intValue];
+    if (count > 0) {
+        count--;
+        [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID]; 
+        
+        for (int i=0; i<[allCarouselViews count]; i++) {
+            [[allCarouselViews objectAtIndex:i] reloadAllStix];
+        }
+    }
+    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
+    [k addStixToUserWithUsername:username andStix:data];
+    [data release];
+    
 }
 
 - (void)dealloc {

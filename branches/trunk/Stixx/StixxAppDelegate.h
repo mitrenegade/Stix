@@ -49,6 +49,8 @@
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
+    NSMutableArray * allCarouselViews;
+    
     Tag * newestTag;
     NSDate * timeStampOfMostRecentTag;
     int idOfNewestTagOnServer;
@@ -75,6 +77,8 @@
 -(void)adminUpdateAllStixCountsToZero;
 -(void)updateUserTagTotal;
 
+-(void)decrementStixCount:(NSString*)stixStringID;
+
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
 //@property (nonatomic, retain) IBOutlet UITabBarController *tabBarController;
@@ -97,5 +101,6 @@
 @property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
+@property (nonatomic, retain) NSMutableArray * allCarouselViews;
 @end
 

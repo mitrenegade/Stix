@@ -546,8 +546,8 @@ static int init=0;
         NSMutableDictionary * d = [theResults objectAtIndex:i];        
         tagID = [d valueForKey:@"tagID"];
         NSString * commentStixStringID = [d valueForKey:@"stixStringID"];
-        if ([commentStixStringID length] == 0) {
-            // stix type is 0, so this must be a comment
+        if ([commentStixStringID length] == 0 || [commentStixStringID isEqualToString:@"COMMENT"]) {
+            // stix type is -1 or "COMMENT", so this must be a comment
             NSString * comment = [d valueForKey:@"comment"];
             if ([comment length] > 0) {
                 commentCount ++;

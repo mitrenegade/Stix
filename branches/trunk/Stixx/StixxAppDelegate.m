@@ -359,7 +359,10 @@ static int init=0;
     //[allTags addObject:newestTag];
     bool added = [self addTagWithCheck:newestTag withID:[newRecordID intValue]];
     if (added)
+    {
         NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
+        [feedController.scrollView populateScrollPagesAtPage:0]; // force update first page
+    }
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
     
@@ -538,15 +541,11 @@ static int init=0;
     if ([theResults count] == 0)
         return;
     
-    NSNumber * tagID;
-#if 0
-    NSNumber * commentCount = [NSNumber numberWithInt:[theResults count]];    
-    [allCommentCounts setObject:commentCount forKey:tagID];
-#else
+    NSMutableDictionary * d = [theResults objectAtIndex:0];        
+    NSNumber * tagID = [d valueForKey:@"tagID"]; 
     int commentCount = 0;
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];        
-        tagID = [d valueForKey:@"tagID"];
         NSString * commentStixStringID = [d valueForKey:@"stixStringID"];
         if ([commentStixStringID length] == 0 || [commentStixStringID isEqualToString:@"COMMENT"]) {
             // stix type is -1 or "COMMENT", so this must be a comment
@@ -558,7 +557,6 @@ static int init=0;
         NSLog(@"Comment %d stix string ID: %@ count %d", i, commentStixStringID, commentCount);
     }
     [allCommentCounts setObject:[NSNumber numberWithInt:commentCount] forKey:tagID];
-#endif
     [feedController forceUpdateCommentCount:[tagID intValue]];
 }
 

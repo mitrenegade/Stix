@@ -47,10 +47,7 @@
     
 	/***** create camera controller *****/
 	NSLog(@"Initializing camera.");
-#if 0
-	cameraController = [[BTLFullScreenCameraController alloc] init];
-	[cameraController setOverlayController:self];
-#else
+#if !TARGET_IPHONE_SIMULATOR
     camera = [[UIImagePickerController alloc] init];
     camera.sourceType = UIImagePickerControllerSourceTypeCamera;
     camera.showsCameraControls = NO;
@@ -59,8 +56,7 @@
     camera.allowsEditing = NO;
     camera.wantsFullScreenLayout = NO;
     camera.delegate = self;
-    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;
-    
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
 #endif
 	// hierarchy of tagView overlays:
 	// 1. self.view = overlayView = blank;
@@ -85,27 +81,31 @@
     NoClipModalView *sView = [[NoClipModalView alloc] initWithFrame:screenBounds]; 
     
     self.view = sView; 
+    /*
     buttonInstructions = [[UIButton alloc] initWithFrame:CGRectMake(19,200, 283, 37)];
     [buttonInstructions setFrame:CGRectMake(19,200, 283, 37)];
     [buttonInstructions setBackgroundImage:[UIImage imageNamed:@"instruction_box.png"] forState:UIControlStateNormal];
     [buttonInstructions setTitle:@"Drag Stix here to take a picture!" forState:UIControlStateNormal];
     [buttonInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 90, 300, 275)];
-    [rectView setFrame:CGRectMake(10, 90, 300, 275)];
+     */
+    int shift = 20;
+    rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 74+shift, 300, 275)];
     //[rectView setBackgroundColor:[UIColor redColor]];
     aperture = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
-    [aperture setAlpha:0.8];
+    [aperture setFrame:CGRectMake(0, shift, 320, 480)];
     [self.view addSubview:buttonInstructions];
     [self.view addSubview:rectView];
     [self.view addSubview:aperture];
     
-    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(20,45, 120, 37)];
+    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(90, 3+shift, 60, 60)];
     [flashModeButton setBackgroundColor:[UIColor grayColor]];
     [flashModeButton addTarget:self action:@selector(toggleFlashMode:) forControlEvents:UIControlEventTouchUpInside];
-    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(180,45, 120, 37)];
+    [flashModeButton setBackgroundColor:[UIColor clearColor]];
+    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(170,3+shift, 60, 60)];
     [cameraDeviceButton setBackgroundColor:[UIColor grayColor]];
     [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
-    
+    [cameraDeviceButton setImage:[UIImage imageNamed:@"switch_camera.png"] forState:UIControlStateNormal];
+    [cameraDeviceButton setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:cameraDeviceButton];
     [self.view addSubview:flashModeButton];
     [sView release];
@@ -172,7 +172,6 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-#if !TARGET_IPHONE_SIMULATOR
 /*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
  */    
@@ -183,17 +182,13 @@
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
     // hack: because status bar is hidden, our "origin.y" is -20
     viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
-#if 0
-    [cameraController setROI:viewFrame];
-	[self presentModalViewController:self.cameraController animated:animated];
-#else
+#if !TARGET_IPHONE_SIMULATOR
     if (descriptorIsOpen == NO) {
         [self presentModalViewController:self.camera animated:NO];
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
         [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
         needToShowCamera = NO;
     }
-#endif
 #endif
     [carouselView resetBadgeLocations];
     //[badgeView resetBadgeLocations];
@@ -280,29 +275,21 @@
 - (void)cameraDidTakePicture:(id)sender {
 	// called by BTLFullScreenCameraController
 	// set a title
-#if 0
-    [self.cameraController dismissModalViewControllerAnimated:NO]; // dismiss camera
-#else
     descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
+#if !TARGET_IPHONE_SIMULATOR
     [self dismissModalViewControllerAnimated:NO];
-    needToShowCamera = NO; // still not need to show camera
 #endif
+    needToShowCamera = NO; // still not need to show camera
 	// prompt for label: use TagDescriptorController
 	descriptorController = [[TagDescriptorController alloc] init];
     
     [descriptorController setDelegate:self];
     [descriptorController setBadgeFrame:badgeFrame];
     [descriptorController setStixStringID:selectedStixStringID];
-#if TARGET_IPHONE_SIMULATOR
-    [self presentModalViewController:descriptorController animated:YES];
-#else
-#if 0
-    [self.camera presentModalViewController:descriptorController animated:YES];
-#else
+#if !TARGET_IPHONE_SIMULATOR
     //[self.view addSubview:descriptorController.view];
     //[self.tabBarController presentModalViewController:descriptorController animated:NO];
     [self presentModalViewController:descriptorController animated:YES];
-#endif
 #endif
 }
 
@@ -318,12 +305,9 @@
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];    
 }
-/* TagDescriptorDelegate functions - newer implementation of tagging and commenting */
+
 -(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center
 {
-#if 0
-    [self.cameraController dismissModalViewControllerAnimated:YES];
-#endif
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
     NSString * com = comment;
@@ -350,7 +334,6 @@
     newCoord = [arViewController createCoordinateWithLabel:desc];
     
     // check if user is logged in
-#if 1
     if ([delegate isLoggedIn] == NO)
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello Anonymous User!"
@@ -361,7 +344,6 @@
         [alert show];
         [alert release];
     }
-#endif
     // create Tag
     NSString * username = [self.delegate getUsername];
     if ([delegate isLoggedIn] == NO)
@@ -490,29 +472,35 @@
 -(void)updateCameraControlButtons {
     switch (camera.cameraFlashMode) {
         case UIImagePickerControllerCameraFlashModeAuto:
-            [flashModeButton setTitle:@"Auto Flash" forState:UIControlStateNormal];
+            //[flashModeButton setTitle:@"Auto Flash" forState:UIControlStateNormal];
+            [flashModeButton setImage:[UIImage imageNamed:@"flash_auto.png"] forState:UIControlStateNormal];
             break;
         case UIImagePickerControllerCameraFlashModeOn:
-            [flashModeButton setTitle:@"Flash On" forState:UIControlStateNormal];
+            //[flashModeButton setTitle:@"Flash On" forState:UIControlStateNormal];
+            [flashModeButton setImage:[UIImage imageNamed:@"flash.png"] forState:UIControlStateNormal];
             break;
         case UIImagePickerControllerCameraFlashModeOff:
-            [flashModeButton setTitle:@"Flash Off" forState:UIControlStateNormal];
+            //[flashModeButton setTitle:@"Flash Off" forState:UIControlStateNormal];
+            [flashModeButton setImage:[UIImage imageNamed:@"flash_off.png"] forState:UIControlStateNormal];
             break;
             
         default:
             break;
     }
+    /*
     switch (camera.cameraDevice) {
         case UIImagePickerControllerCameraDeviceFront:
-            [cameraDeviceButton setTitle:@"Switch to Rear" forState:UIControlStateNormal];
+            //[cameraDeviceButton setTitle:@"Switch to Rear" forState:UIControlStateNormal];
+            [cameraDeviceButton setImage:[UIImage imageNamed:@"flash_auto.png"] forState:UIControlStateNormal];
             break;
         case UIImagePickerControllerCameraDeviceRear:
-            [cameraDeviceButton setTitle:@"Switch to Front" forState:UIControlStateNormal];
+            //[cameraDeviceButton setTitle:@"Switch to Front" forState:UIControlStateNormal];
             break;
             
         default:
             break;
     }
+     */
 }
 
 -(IBAction)toggleFlashMode:(id)sender {

@@ -65,11 +65,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "424"
-         endingLineNumber = "424"
+         startingLineNumber = "433"
+         endingLineNumber = "433"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -105,11 +105,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "427"
-         endingLineNumber = "427"
+         startingLineNumber = "436"
+         endingLineNumber = "436"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -229,11 +229,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "440"
-         endingLineNumber = "440"
+         startingLineNumber = "449"
+         endingLineNumber = "449"
          landmarkName = "-getNewerTagsThanID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -313,11 +313,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "341"
-         endingLineNumber = "341"
+         startingLineNumber = "325"
+         endingLineNumber = "325"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -369,11 +369,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "462"
-         endingLineNumber = "462"
+         startingLineNumber = "471"
+         endingLineNumber = "471"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDGreaterThanDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -731,11 +731,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "303"
-         endingLineNumber = "303"
+         startingLineNumber = "307"
+         endingLineNumber = "307"
          landmarkName = "-addTagWithCheck:withID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -759,11 +759,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "289"
-         endingLineNumber = "289"
+         startingLineNumber = "293"
+         endingLineNumber = "293"
          landmarkName = "-addTagWithCheck:withID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -787,11 +787,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "402"
-         endingLineNumber = "402"
+         startingLineNumber = "384"
+         endingLineNumber = "384"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -829,11 +829,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "324"
-         endingLineNumber = "324"
+         startingLineNumber = "314"
+         endingLineNumber = "314"
          landmarkName = "-viewForItemAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -843,11 +843,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "335"
-         endingLineNumber = "335"
+         startingLineNumber = "325"
+         endingLineNumber = "325"
          landmarkName = "-updateScrollPagesAtPage:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -857,11 +857,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "403"
-         endingLineNumber = "403"
+         startingLineNumber = "385"
+         endingLineNumber = "385"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -871,11 +871,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "332"
-         endingLineNumber = "332"
+         startingLineNumber = "322"
+         endingLineNumber = "322"
          landmarkName = "-updateScrollPagesAtPage:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1025,11 +1025,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "241"
-         endingLineNumber = "241"
+         startingLineNumber = "236"
+         endingLineNumber = "236"
          landmarkName = "-didReceiveMemoryWarning"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1039,11 +1039,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "234"
-         endingLineNumber = "234"
+         startingLineNumber = "229"
+         endingLineNumber = "229"
          landmarkName = "-shouldAutorotateToInterfaceOrientation:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1053,11 +1053,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "215"
-         endingLineNumber = "215"
+         startingLineNumber = "210"
+         endingLineNumber = "210"
          landmarkName = "-viewWillDisappear:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1067,11 +1067,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347528127.090141"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "296"
-         endingLineNumber = "296"
+         startingLineNumber = "286"
+         endingLineNumber = "286"
          landmarkName = "-viewForItemAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1081,11 +1081,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "579"
-         endingLineNumber = "579"
+         startingLineNumber = "583"
+         endingLineNumber = "583"
          landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1095,11 +1095,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "587"
-         endingLineNumber = "587"
+         startingLineNumber = "591"
+         endingLineNumber = "591"
          landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1219,11 +1219,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "224"
-         endingLineNumber = "224"
+         startingLineNumber = "219"
+         endingLineNumber = "219"
          landmarkName = "-viewDidUnload"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1471,11 +1471,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "604"
-         endingLineNumber = "604"
+         startingLineNumber = "608"
+         endingLineNumber = "608"
          landmarkName = "-didLoginFromSplashScreen"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1499,11 +1499,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "600"
-         endingLineNumber = "600"
+         startingLineNumber = "604"
+         endingLineNumber = "604"
          landmarkName = "@implementation StixxAppDelegate"
          landmarkType = "3">
       </FileBreakpoint>
@@ -1527,11 +1527,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "350"
-         endingLineNumber = "350"
+         startingLineNumber = "356"
+         endingLineNumber = "356"
          landmarkName = "-tagViewDidAddTag:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1541,11 +1541,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "328"
-         endingLineNumber = "328"
+         startingLineNumber = "332"
+         endingLineNumber = "332"
          landmarkName = "-tagViewDidAddTag:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1555,11 +1555,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "267"
-         endingLineNumber = "267"
+         startingLineNumber = "271"
+         endingLineNumber = "271"
          landmarkName = "-applicationDidEnterBackground:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1651,11 +1651,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "468"
-         endingLineNumber = "468">
+         startingLineNumber = "458"
+         endingLineNumber = "458">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1831,11 +1831,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "211"
-         endingLineNumber = "211"
+         startingLineNumber = "215"
+         endingLineNumber = "215"
          landmarkName = "-continueInit"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1845,11 +1845,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "213"
-         endingLineNumber = "213"
+         startingLineNumber = "217"
+         endingLineNumber = "217"
          landmarkName = "-continueInit"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1887,11 +1887,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "486"
-         endingLineNumber = "486"
+         startingLineNumber = "468"
+         endingLineNumber = "468"
          landmarkName = "-writeImageToDocuments:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2382,7 +2382,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "397"
          endingLineNumber = "397"
-         landmarkName = "-updatePixWithDescriptorWithAllTagID:andDescriptor:"
+         landmarkName = "-updatePixWithAllTagID:andScore:andStixStringID:andAuxStix:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2391,11 +2391,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "634"
-         endingLineNumber = "634"
+         startingLineNumber = "638"
+         endingLineNumber = "638"
          landmarkName = "-kumulosAPI:apiOperation:didFailWithError:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2405,11 +2405,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "656"
-         endingLineNumber = "656"
+         startingLineNumber = "660"
+         endingLineNumber = "660"
          landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2419,11 +2419,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "601"
-         endingLineNumber = "601"
+         startingLineNumber = "605"
+         endingLineNumber = "605"
          landmarkName = "-didLoginFromSplashScreen"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2433,11 +2433,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "677"
-         endingLineNumber = "677"
+         startingLineNumber = "681"
+         endingLineNumber = "681"
          landmarkName = "-didLogout"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2461,11 +2461,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "593"
-         endingLineNumber = "593"
+         startingLineNumber = "597"
+         endingLineNumber = "597"
          landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2531,11 +2531,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "418"
-         endingLineNumber = "418"
+         startingLineNumber = "408"
+         endingLineNumber = "408"
          landmarkName = "-didClickAtLocation:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2545,11 +2545,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "414"
-         endingLineNumber = "414"
+         startingLineNumber = "404"
+         endingLineNumber = "404"
          landmarkName = "-didClickAtLocation:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2559,11 +2559,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "597"
-         endingLineNumber = "597"
+         startingLineNumber = "601"
+         endingLineNumber = "601"
          landmarkName = "-getUserPhotos"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2685,11 +2685,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "505"
-         endingLineNumber = "505"
+         startingLineNumber = "514"
+         endingLineNumber = "514"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDLessThanDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2713,11 +2713,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "591"
-         endingLineNumber = "591"
+         startingLineNumber = "595"
+         endingLineNumber = "595"
          landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2741,11 +2741,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "592"
-         endingLineNumber = "592"
+         startingLineNumber = "596"
+         endingLineNumber = "596"
          landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3384,26 +3384,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "1"
-         filePath = "Stixx/Classes/TagDescriptorController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "224"
-         endingLineNumber = "224"
-         landmarkName = "-touchesMoved:withEvent:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "384"
-         endingLineNumber = "384"
+         startingLineNumber = "366"
+         endingLineNumber = "366"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3413,11 +3399,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "237"
-         endingLineNumber = "237"
+         startingLineNumber = "232"
+         endingLineNumber = "232"
          landmarkName = "-didReceiveMemoryWarning"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3427,11 +3413,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "344"
-         endingLineNumber = "344"
+         startingLineNumber = "328"
+         endingLineNumber = "328"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3663,11 +3649,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "473"
-         endingLineNumber = "473">
+         startingLineNumber = "463"
+         endingLineNumber = "463">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3703,11 +3689,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "366"
-         endingLineNumber = "366"
+         startingLineNumber = "356"
+         endingLineNumber = "356"
          landmarkName = "-scrollViewDidScroll:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3731,11 +3717,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "499"
-         endingLineNumber = "499">
+         startingLineNumber = "489"
+         endingLineNumber = "489">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3757,11 +3743,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "504"
-         endingLineNumber = "504">
+         startingLineNumber = "494"
+         endingLineNumber = "494">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3769,11 +3755,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "507"
-         endingLineNumber = "507">
+         startingLineNumber = "497"
+         endingLineNumber = "497">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3837,11 +3823,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "463"
-         endingLineNumber = "463">
+         startingLineNumber = "453"
+         endingLineNumber = "453">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3849,11 +3835,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "567"
-         endingLineNumber = "567"
+         startingLineNumber = "571"
+         endingLineNumber = "571"
          landmarkName = "-checkForUpdatePhotos"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3863,11 +3849,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "564"
-         endingLineNumber = "564"
+         startingLineNumber = "568"
+         endingLineNumber = "568"
          landmarkName = "-didDismissFriendView"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3877,11 +3863,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "292"
-         endingLineNumber = "292"
+         startingLineNumber = "296"
+         endingLineNumber = "296"
          landmarkName = "-addTagWithCheck:withID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3891,11 +3877,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "466"
-         endingLineNumber = "466">
+         startingLineNumber = "456"
+         endingLineNumber = "456">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3903,11 +3889,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "566"
-         endingLineNumber = "566"
+         startingLineNumber = "570"
+         endingLineNumber = "570"
          landmarkName = "-checkForUpdatePhotos"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3917,11 +3903,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "522"
-         endingLineNumber = "522"
+         startingLineNumber = "531"
+         endingLineNumber = "531"
          landmarkName = "-getCommentCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3931,11 +3917,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347527418.843066"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "895"
-         endingLineNumber = "895">
+         startingLineNumber = "904"
+         endingLineNumber = "904">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3943,11 +3929,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347527418.843066"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "900"
-         endingLineNumber = "900">
+         startingLineNumber = "909"
+         endingLineNumber = "909">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -4065,11 +4051,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/Tag.m"
-         timestampString = "347248379.612713"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "103"
-         endingLineNumber = "103"
+         startingLineNumber = "107"
+         endingLineNumber = "107"
          landmarkName = "+getTagFromDictionary:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4247,11 +4233,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "707"
-         endingLineNumber = "707"
+         startingLineNumber = "711"
+         endingLineNumber = "711"
          landmarkName = "-kumulosAPI:apiOperation:addStixToUserDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4275,11 +4261,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "438"
-         endingLineNumber = "438"
+         startingLineNumber = "447"
+         endingLineNumber = "447"
          landmarkName = "-getNewerTagsThanID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4289,11 +4275,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "409"
-         endingLineNumber = "409"
+         startingLineNumber = "418"
+         endingLineNumber = "418"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4303,11 +4289,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "430"
-         endingLineNumber = "430"
+         startingLineNumber = "439"
+         endingLineNumber = "439"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4331,11 +4317,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "405"
-         endingLineNumber = "405"
+         startingLineNumber = "414"
+         endingLineNumber = "414"
          landmarkName = "-kumulosAPI:apiOperation:getLastTagIDDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4415,11 +4401,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "431"
-         endingLineNumber = "431"
+         startingLineNumber = "440"
+         endingLineNumber = "440"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4429,11 +4415,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/Tag.m"
-         timestampString = "347245445.814365"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "76"
-         endingLineNumber = "76"
+         startingLineNumber = "78"
+         endingLineNumber = "78"
          landmarkName = "+getTagFromDictionary:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4443,11 +4429,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/Tag.m"
-         timestampString = "346886489.749408"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "62"
-         endingLineNumber = "62"
+         startingLineNumber = "64"
+         endingLineNumber = "64"
          landmarkName = "+getTagFromDictionary:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4457,11 +4443,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "465"
-         endingLineNumber = "465"
+         startingLineNumber = "474"
+         endingLineNumber = "474"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDGreaterThanDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4471,11 +4457,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "413"
-         endingLineNumber = "413"
+         startingLineNumber = "422"
+         endingLineNumber = "422"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDRangeDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4485,11 +4471,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "492"
-         endingLineNumber = "492"
+         startingLineNumber = "501"
+         endingLineNumber = "501"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDLessThanDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4499,11 +4485,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "497"
-         endingLineNumber = "497"
+         startingLineNumber = "506"
+         endingLineNumber = "506"
          landmarkName = "-kumulosAPI:apiOperation:getAllTagsWithIDLessThanDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4513,11 +4499,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "315"
-         endingLineNumber = "315"
+         startingLineNumber = "319"
+         endingLineNumber = "319"
          landmarkName = "-addTagWithCheck:withID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4527,11 +4513,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347528127.090141"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "283"
-         endingLineNumber = "283"
+         startingLineNumber = "273"
+         endingLineNumber = "273"
          landmarkName = "-viewForItemAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4723,11 +4709,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "647"
-         endingLineNumber = "647"
+         startingLineNumber = "651"
+         endingLineNumber = "651"
          landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4737,11 +4723,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "659"
-         endingLineNumber = "659"
+         startingLineNumber = "663"
+         endingLineNumber = "663"
          landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4751,11 +4737,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "702"
-         endingLineNumber = "702"
+         startingLineNumber = "706"
+         endingLineNumber = "706"
          landmarkName = "-getStixCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4849,11 +4835,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "282"
-         endingLineNumber = "282"
+         startingLineNumber = "286"
+         endingLineNumber = "286"
          landmarkName = "-addTagWithCheck:withID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4863,11 +4849,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "329"
-         endingLineNumber = "329"
+         startingLineNumber = "333"
+         endingLineNumber = "333"
          landmarkName = "-tagViewDidAddTag:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4877,11 +4863,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/Tag.m"
-         timestampString = "347248379.612713"
+         timestampString = "347578745.823617"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "110"
-         endingLineNumber = "110"
+         startingLineNumber = "117"
+         endingLineNumber = "117"
          landmarkName = "+getTagFromDictionary:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4891,11 +4877,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "342"
-         endingLineNumber = "342"
+         startingLineNumber = "346"
+         endingLineNumber = "346"
          landmarkName = "-tagViewDidAddTag:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4905,12 +4891,12 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "744"
-         endingLineNumber = "744"
-         landmarkName = "-didAddStixToPix:withStixStringID:atLocation:"
+         startingLineNumber = "748"
+         endingLineNumber = "748"
+         landmarkName = "-didAddStixToPix:withStixStringID:withLocation:withScale:withRotation:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -4947,11 +4933,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "265"
-         endingLineNumber = "265"
+         startingLineNumber = "260"
+         endingLineNumber = "260"
          landmarkName = "-didDropStix:ofType:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -4961,11 +4947,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "267"
-         endingLineNumber = "267"
+         startingLineNumber = "262"
+         endingLineNumber = "262"
          landmarkName = "-didDropStix:ofType:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5059,11 +5045,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "650"
-         endingLineNumber = "650"
+         startingLineNumber = "654"
+         endingLineNumber = "654"
          landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5073,11 +5059,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "800"
-         endingLineNumber = "800"
+         startingLineNumber = "811"
+         endingLineNumber = "811"
          landmarkName = "-updateUserTagTotal"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5087,7 +5073,7 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "118"
@@ -5101,11 +5087,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "220"
-         endingLineNumber = "220"
+         startingLineNumber = "215"
+         endingLineNumber = "215"
          landmarkName = "-viewDidUnload"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5115,11 +5101,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "244"
-         endingLineNumber = "244"
+         startingLineNumber = "239"
+         endingLineNumber = "239"
          landmarkName = "-dealloc"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5129,11 +5115,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "332"
-         endingLineNumber = "332"
+         startingLineNumber = "316"
+         endingLineNumber = "316"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5171,11 +5157,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "333"
-         endingLineNumber = "333"
+         startingLineNumber = "317"
+         endingLineNumber = "317"
          landmarkName = "-didAddDescriptor:andComment:andLocation:andStixCenter:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5185,7 +5171,7 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "161"
@@ -5199,39 +5185,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "51"
-         endingLineNumber = "51"
-         landmarkName = "-init"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "52"
-         endingLineNumber = "52"
-         landmarkName = "-init"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "284"
-         endingLineNumber = "284"
+         startingLineNumber = "277"
+         endingLineNumber = "277"
          landmarkName = "-cameraDidTakePicture:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5241,39 +5199,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "282"
-         endingLineNumber = "282"
-         landmarkName = "-cameraDidTakePicture:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "186"
-         endingLineNumber = "186"
-         landmarkName = "-viewDidAppear:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "87"
-         endingLineNumber = "87"
+         startingLineNumber = "83"
+         endingLineNumber = "83"
          landmarkName = "-loadView"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5311,11 +5241,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347528127.090141"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "259"
-         endingLineNumber = "259"
+         startingLineNumber = "249"
+         endingLineNumber = "249"
          landmarkName = "-initializeScrollWithPageSize:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5367,11 +5297,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "206"
-         endingLineNumber = "206"
+         startingLineNumber = "201"
+         endingLineNumber = "201"
          landmarkName = "-viewWillAppear:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5381,21 +5311,7 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "190"
-         endingLineNumber = "190"
-         landmarkName = "-viewDidAppear:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "119"
@@ -5409,11 +5325,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "198"
-         endingLineNumber = "198"
+         startingLineNumber = "193"
+         endingLineNumber = "193"
          landmarkName = "-viewDidAppear:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5423,11 +5339,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "660"
-         endingLineNumber = "660"
+         startingLineNumber = "664"
+         endingLineNumber = "664"
          landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5451,11 +5367,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "400"
-         endingLineNumber = "400"
+         startingLineNumber = "390"
+         endingLineNumber = "390"
          landmarkName = "-forceUpdateCommentCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5465,25 +5381,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "544"
-         endingLineNumber = "544"
-         landmarkName = "-kumulosAPI:apiOperation:getAllHistoryDidCompleteWithResult:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432129.341139"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "558"
-         endingLineNumber = "558"
+         startingLineNumber = "563"
+         endingLineNumber = "563"
          landmarkName = "-kumulosAPI:apiOperation:getAllHistoryDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5521,11 +5423,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347432115.094855"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "844"
-         endingLineNumber = "844"
+         startingLineNumber = "853"
+         endingLineNumber = "853"
          landmarkName = "-decrementStixCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5646,36 +5548,8 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "1"
-         filePath = "Stixx/Classes/TagDescriptorController.m"
-         timestampString = "347574899.546205"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "204"
-         endingLineNumber = "204"
-         landmarkName = "-touchesBegan:withEvent:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
          filePath = "Stixx/Classes/StixView.m"
-         timestampString = "347576770.684654"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "118"
-         endingLineNumber = "118"
-         landmarkName = "-touchesBegan:withEvent:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/Classes/StixView.m"
-         timestampString = "347576770.684654"
+         timestampString = "347733205.932617"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "127"
@@ -5688,27 +5562,13 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "1"
-         filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347528127.090141"
+         filePath = "Stixx/Classes/StixView.m"
+         timestampString = "347733205.932617"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "242"
-         endingLineNumber = "242"
-         landmarkName = "-didAddAuxStixWithStixStringID:atLocation:andComment:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347527342.508683"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "760"
-         endingLineNumber = "760"
-         landmarkName = "-didAddStixToPix:withStixStringID:atLocation:"
+         startingLineNumber = "136"
+         endingLineNumber = "136"
+         landmarkName = "-touchesBegan:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -5717,12 +5577,12 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347558693.507638"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "243"
-         endingLineNumber = "243"
-         landmarkName = "-didAddAuxStixWithStixStringID:atLocation:andComment:"
+         startingLineNumber = "232"
+         endingLineNumber = "232"
+         landmarkName = "-didAddAuxStixWithStixStringID:withLocation:withScale:withRotation:withComment:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -5731,11 +5591,39 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347559114.879492"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "516"
-         endingLineNumber = "516"
+         startingLineNumber = "766"
+         endingLineNumber = "766"
+         landmarkName = "-didAddStixToPix:withStixStringID:withLocation:withScale:withRotation:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/FeedViewController.m"
+         timestampString = "347578301.956745"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "233"
+         endingLineNumber = "233"
+         landmarkName = "-didAddAuxStixWithStixStringID:withLocation:withScale:withRotation:withComment:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/StixxAppDelegate.m"
+         timestampString = "347738050.132317"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "525"
+         endingLineNumber = "525"
          landmarkName = "-didAddNewCommentWithTagID:andUsername:andComment:andStixStringID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5745,11 +5633,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347559351.16898"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "536"
-         endingLineNumber = "536"
+         startingLineNumber = "545"
+         endingLineNumber = "545"
          landmarkName = "-kumulosAPI:apiOperation:getAllHistoryDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5759,11 +5647,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "347559498.164649"
+         timestampString = "347738050.132317"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "521"
-         endingLineNumber = "521"
+         startingLineNumber = "530"
+         endingLineNumber = "530"
          landmarkName = "-getCommentCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5773,11 +5661,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/FeedViewController.m"
-         timestampString = "347575938.311231"
+         timestampString = "347578301.956745"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "399"
-         endingLineNumber = "399"
+         startingLineNumber = "389"
+         endingLineNumber = "389"
          landmarkName = "-forceUpdateCommentCount:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5801,11 +5689,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "526"
-         endingLineNumber = "526"
+         startingLineNumber = "514"
+         endingLineNumber = "514"
          landmarkName = "-toggleCameraDevice:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5815,11 +5703,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "519"
-         endingLineNumber = "519"
+         startingLineNumber = "507"
+         endingLineNumber = "507"
          landmarkName = "-toggleFlashMode:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5829,11 +5717,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "423"
-         endingLineNumber = "423"
+         startingLineNumber = "405"
+         endingLineNumber = "405"
          landmarkName = "-closeInstructions:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5843,11 +5731,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/TagViewController.m"
-         timestampString = "347574899.546205"
+         timestampString = "347732593.537871"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "251"
-         endingLineNumber = "251"
+         startingLineNumber = "246"
+         endingLineNumber = "246"
          landmarkName = "-didDropStix:ofType:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -5927,12 +5815,82 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/Classes/StixView.m"
-         timestampString = "347576972.205797"
+         timestampString = "347578513.403794"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "88"
-         endingLineNumber = "88"
-         landmarkName = "-populateWithAuxStix:atLocations:"
+         startingLineNumber = "91"
+         endingLineNumber = "91"
+         landmarkName = "-populateWithAuxStix:withLocations:withScales:withRotations:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/Tag.m"
+         timestampString = "347578745.823617"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "126"
+         endingLineNumber = "126"
+         landmarkName = "+getTagFromDictionary:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/StixView.m"
+         timestampString = "347578794.297681"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "92"
+         endingLineNumber = "92"
+         landmarkName = "-populateWithAuxStix:withLocations:withScales:withRotations:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/StixView.m"
+         timestampString = "347733205.932617"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "149"
+         endingLineNumber = "149"
+         landmarkName = "-touchesMoved:withEvent:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/StixView.m"
+         timestampString = "347733205.932617"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "128"
+         endingLineNumber = "128"
+         landmarkName = "-touchesBegan:withEvent:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Stixx/Classes/StixView.m"
+         timestampString = "347733284.500642"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "124"
+         endingLineNumber = "124"
+         landmarkName = "-touchesBegan:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

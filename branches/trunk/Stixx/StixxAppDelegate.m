@@ -200,12 +200,16 @@ static int init=0;
     [loadingController.view removeFromSuperview];
     [window addSubview:[tabBarController view]];
     
-    [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:nil];
+    [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
 	
     if (isLoggingIn == YES && loggedIn == NO)
     {
         [tabBarController presentModalViewController:loginSplashController animated:NO];
         isLoggingIn = NO;
+    }
+    else
+    {
+        [self didPressCenterButton]; // force jump to camera view
     }
     
     /* add administration calls here */

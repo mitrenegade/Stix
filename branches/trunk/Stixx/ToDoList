@@ -1,9 +1,8 @@
 features to add:
 aux stix location/sizing/comment window -> sizing requires kumulos change (badgeFrame)
 use stixView for exploreViewController
-add aux stix to stixView
 add frame to all stix in tags
-update friend profiles to reflect true add friend
+update friend profiles to reflect true pix counts
 
 bugs:
 gift stix leaving empty space in mystix view
@@ -12,9 +11,10 @@ major revisions:
 location/poi view
 add more exploreview options - friend's pix, nearby, etc
 real friend lists and privacy - add friend
-
+peel giftstix to add to collection
 
 done
+add aux stix to stixView
 use stixView for tagDescriptorController
 location icon in tag view - comes from ARCoordinateView
 hitting back in tagview results in white pic - wrong view loaded?

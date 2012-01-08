@@ -44,13 +44,11 @@
 		9E54BAC714874D0D006F24B6 /* btn_login_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC314874D0C006F24B6 /* btn_login_small.png */; };
 		9E54BAC814874D0D006F24B6 /* graphic_addpic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC414874D0C006F24B6 /* graphic_addpic.png */; };
 		9E54BAC914874D0D006F24B6 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC514874D0C006F24B6 /* settings.png */; };
-		9E57F6CE14A3F61200D717C2 /* libKumulos_iOS_v0.7.3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E57F6CD14A3F61200D717C2 /* libKumulos_iOS_v0.7.3.a */; };
 		9E5ACD9014A94BB400B2E8DD /* KumulosData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */; };
 		9E64049B14566F7A0051EB4D /* dropshadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E64049A14566F7A0051EB4D /* dropshadow.png */; };
 		9E64049D14566F840051EB4D /* instruction_box.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E64049C14566F840051EB4D /* instruction_box.png */; };
 		9E64049F14566F8B0051EB4D /* tab_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E64049E14566F8B0051EB4D /* tab_addstix.png */; };
 		9E6404A51456DC680051EB4D /* dropshadow_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E6404A41456DC680051EB4D /* dropshadow_small.png */; };
-		9E6404AD1456E40F0051EB4D /* tab_addstix_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E6404AC1456E40F0051EB4D /* tab_addstix_small.png */; };
 		9E7519F21488AB71008F4E2A /* fire_load_side1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519ED1488AB71008F4E2A /* fire_load_side1.png */; };
 		9E7519F31488AB71008F4E2A /* fire_load_side2.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519EE1488AB71008F4E2A /* fire_load_side2.png */; };
 		9E7519F41488AB71008F4E2A /* fire_load_side3.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519EF1488AB71008F4E2A /* fire_load_side3.png */; };
@@ -203,6 +201,12 @@
 		9ED09B38148FA88E003113C0 /* LocationHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED09B36148FA88E003113C0 /* LocationHeaderViewController.m */; };
 		9ED09B39148FA88E003113C0 /* LocationHeaderViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9ED09B37148FA88E003113C0 /* LocationHeaderViewController.xib */; };
 		9EE119A814A85E3F004DCA6B /* UIVerticalGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EE119A714A85E3E004DCA6B /* UIVerticalGestureRecognizer.m */; };
+		9EE6334314B7C7CA0000AAFC /* flash_auto.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334014B7C7CA0000AAFC /* flash_auto.png */; };
+		9EE6334414B7C7CA0000AAFC /* flash_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334114B7C7CA0000AAFC /* flash_off.png */; };
+		9EE6334514B7C7CA0000AAFC /* flash.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334214B7C7CA0000AAFC /* flash.png */; };
+		9EE6334714B7C7D40000AAFC /* switch_camera.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334614B7C7D40000AAFC /* switch_camera.png */; };
+		9EE6334914B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE6334814B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a */; };
+		9EE6334B14BA101D0000AAFC /* tab_addstix_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334A14BA101D0000AAFC /* tab_addstix_on.png */; };
 		9EF173BE146A10580073F83B /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF173BD146A10570073F83B /* Default.png */; };
 		9EF173C0146A10700073F83B /* icon_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF173BF146A10700073F83B /* icon_57.png */; };
 		9EF173C3146D01F60073F83B /* OutlineLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF173C2146D01F30073F83B /* OutlineLabel.m */; };
@@ -292,14 +296,12 @@
 		9E54BAC314874D0C006F24B6 /* btn_login_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_login_small.png; sourceTree = "<group>"; };
 		9E54BAC414874D0C006F24B6 /* graphic_addpic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_addpic.png; sourceTree = "<group>"; };
 		9E54BAC514874D0C006F24B6 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
-		9E57F6CD14A3F61200D717C2 /* libKumulos_iOS_v0.7.3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libKumulos_iOS_v0.7.3.a; sourceTree = "<group>"; };
 		9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosData.h; sourceTree = "<group>"; };
 		9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosData.m; sourceTree = "<group>"; };
 		9E64049A14566F7A0051EB4D /* dropshadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dropshadow.png; sourceTree = "<group>"; };
 		9E64049C14566F840051EB4D /* instruction_box.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = instruction_box.png; sourceTree = "<group>"; };
 		9E64049E14566F8B0051EB4D /* tab_addstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_addstix.png; sourceTree = "<group>"; };
 		9E6404A41456DC680051EB4D /* dropshadow_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dropshadow_small.png; sourceTree = "<group>"; };
-		9E6404AC1456E40F0051EB4D /* tab_addstix_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_addstix_small.png; sourceTree = "<group>"; };
 		9E7519ED1488AB71008F4E2A /* fire_load_side1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side1.png; path = Stixx/images/fire_load_side1.png; sourceTree = SOURCE_ROOT; };
 		9E7519EE1488AB71008F4E2A /* fire_load_side2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side2.png; path = Stixx/images/fire_load_side2.png; sourceTree = SOURCE_ROOT; };
 		9E7519EF1488AB71008F4E2A /* fire_load_side3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side3.png; path = Stixx/images/fire_load_side3.png; sourceTree = SOURCE_ROOT; };
@@ -519,6 +521,12 @@
 		9ED09B37148FA88E003113C0 /* LocationHeaderViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LocationHeaderViewController.xib; sourceTree = "<group>"; };
 		9EE119A614A85E3E004DCA6B /* UIVerticalGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIVerticalGestureRecognizer.h; sourceTree = "<group>"; };
 		9EE119A714A85E3E004DCA6B /* UIVerticalGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIVerticalGestureRecognizer.m; sourceTree = "<group>"; };
+		9EE6334014B7C7CA0000AAFC /* flash_auto.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = flash_auto.png; sourceTree = "<group>"; };
+		9EE6334114B7C7CA0000AAFC /* flash_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = flash_off.png; sourceTree = "<group>"; };
+		9EE6334214B7C7CA0000AAFC /* flash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = flash.png; sourceTree = "<group>"; };
+		9EE6334614B7C7D40000AAFC /* switch_camera.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = switch_camera.png; sourceTree = "<group>"; };
+		9EE6334814B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libKumulos_iOS_.0.7.4.a; sourceTree = "<group>"; };
+		9EE6334A14BA101D0000AAFC /* tab_addstix_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_addstix_on.png; sourceTree = "<group>"; };
 		9EF173BD146A10570073F83B /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		9EF173BF146A10700073F83B /* icon_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_57.png; sourceTree = "<group>"; };
 		9EF173C1146D01F00073F83B /* OutlineLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutlineLabel.h; sourceTree = "<group>"; };
@@ -552,7 +560,7 @@
 				9EB03175142C002E0019F2BD /* Foundation.framework in Frameworks */,
 				9EB03177142C002E0019F2BD /* CoreGraphics.framework in Frameworks */,
 				9E88A499148A8EB400E67864 /* libxml2.2.7.3.dylib in Frameworks */,
-				9E57F6CE14A3F61200D717C2 /* libKumulos_iOS_v0.7.3.a in Frameworks */,
+				9EE6334914B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -757,7 +765,7 @@
 		9EA17D3A143BFF8700CD710C /* stixxBindings */ = {
 			isa = PBXGroup;
 			children = (
-				9E57F6CD14A3F61200D717C2 /* libKumulos_iOS_v0.7.3.a */,
+				9EE6334814B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a */,
 				9E91C60F147F8782003567ED /* Kumulos.h */,
 				9E91C610147F8782003567ED /* Kumulos.m */,
 				9E91C612147F8782003567ED /* libKumulos.h */,
@@ -970,6 +978,10 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9EE6334614B7C7D40000AAFC /* switch_camera.png */,
+				9EE6334014B7C7CA0000AAFC /* flash_auto.png */,
+				9EE6334114B7C7CA0000AAFC /* flash_off.png */,
+				9EE6334214B7C7CA0000AAFC /* flash.png */,
 				9E4A619D14AD1FC3000DCEF0 /* bkg_actionstix.png */,
 				9E4A619B14AD1FB6000DCEF0 /* txt_giftstix.png */,
 				9E1EB79614A4818200FC6E1A /* btn_addfriend.png */,
@@ -1057,7 +1069,7 @@
 				9EB03214142C01340019F2BD /* stixx_feed.jpg */,
 				9EB03215142C01340019F2BD /* stixx_friends.jpg */,
 				9E64049E14566F8B0051EB4D /* tab_addstix.png */,
-				9E6404AC1456E40F0051EB4D /* tab_addstix_small.png */,
+				9EE6334A14BA101D0000AAFC /* tab_addstix_on.png */,
 				9EB03216142C01340019F2BD /* tab_feed.png */,
 				9EB03217142C01340019F2BD /* tab_find.png */,
 				9EB03218142C01340019F2BD /* tab_friends.png */,
@@ -1175,7 +1187,6 @@
 				9E64049D14566F840051EB4D /* instruction_box.png in Resources */,
 				9E64049F14566F8B0051EB4D /* tab_addstix.png in Resources */,
 				9E6404A51456DC680051EB4D /* dropshadow_small.png in Resources */,
-				9E6404AD1456E40F0051EB4D /* tab_addstix_small.png in Resources */,
 				9ECD52341457BF33005CFDBB /* ExploreViewController.xib in Resources */,
 				9ECD52361457D1E1005CFDBB /* tab_location.png in Resources */,
 				9ECD5241145A3651005CFDBB /* ToDoList in Resources */,
@@ -1254,6 +1265,11 @@
 				9E4A619E14AD1FC3000DCEF0 /* bkg_actionstix.png in Resources */,
 				9E8A29CE14AF94FA00CDCE76 /* LoadingViewController.xib in Resources */,
 				9E06552114B5699400A638AA /* AuxStixViewController.xib in Resources */,
+				9EE6334314B7C7CA0000AAFC /* flash_auto.png in Resources */,
+				9EE6334414B7C7CA0000AAFC /* flash_off.png in Resources */,
+				9EE6334514B7C7CA0000AAFC /* flash.png in Resources */,
+				9EE6334714B7C7D40000AAFC /* switch_camera.png in Resources */,
+				9EE6334B14BA101D0000AAFC /* tab_addstix_on.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1446,7 +1462,7 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1468,7 +1484,7 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
@@ -1482,10 +1498,7 @@
 		9EB031AC142C002F0019F2BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stixx/Stixx-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1504,7 +1517,7 @@
 				);
 				PRODUCT_NAME = Stix;
 				SEPARATE_STRIP = YES;
-				VALID_ARCHS = armv6;
+				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1512,10 +1525,7 @@
 		9EB031AD142C002F0019F2BD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					armv6,
-					"$(ARCHS_STANDARD_32_BIT)",
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stixx/Stixx-Prefix.pch";
@@ -1534,7 +1544,7 @@
 					"\"$(SRCROOT)/Stixx/Classes/stixxBindings\"",
 				);
 				PRODUCT_NAME = Stix;
-				VALID_ARCHS = armv6;
+				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

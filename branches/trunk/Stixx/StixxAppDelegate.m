@@ -344,6 +344,8 @@ static int init=0;
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
 	[encoder encodeObject:newTag.auxLocations forKey:@"auxLocations"];
 	[encoder encodeObject:newTag.auxStixStringIDs forKey:@"auxStixStringIDs"];
+    [encoder encodeObject:newTag.auxScales forKey:@"auxScales"];
+    [encoder encodeObject:newTag.auxRotations forKey:@"auxRotations"];
     [encoder finishEncoding];
     [encoder release];
 
@@ -714,7 +716,7 @@ static int init=0;
     }    
 }
 
--(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location{
+-(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
     // find the correct tag in allTags;
     for (Tag* t in allTags) {
         if (t.tagID == tag.tagID)
@@ -743,13 +745,15 @@ static int init=0;
         // array for the tag
         //[tag.auxStixStringIDs addObject:stixStringID];
         //[tag.auxLocations addObject:[NSValue valueWithCGPoint:location]];
-        [tag addAuxiliaryStixOfType:stixStringID atLocation:location];
+        [tag addAuxiliaryStixOfType:stixStringID withLocation:location withScale:scale withRotation:rotation];
     }
 
     NSMutableData *theAuxStixData = [NSMutableData data];
     NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
 	[encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
 	[encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
+    [encoder encodeObject:tag.auxScales forKey:@"auxScales"];
+    [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
     [encoder finishEncoding];
     [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
     
@@ -788,22 +792,25 @@ static int init=0;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
 
     if ((usertagtotal % 5) == 0) {
-        bool newStixSuccess = NO;
-        while (!newStixSuccess) {
-            NSString * newStixStringID = [BadgeView getRandomStixStringID];
-            int count = [[allStix objectForKey:newStixStringID] intValue];
-            if (count == 0) {
-                [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
-                newStixSuccess = YES;
-                [allStix setObject:[NSNumber numberWithInt:3] forKey:newStixStringID];
-                NSMutableData * data = [KumulosData dictionaryToData:allStix];
-                [k addStixToUserWithUsername:username andStix:data];
-                
-                [feedController reloadCarouselView];
-                [exploreController reloadCarouselView];
-                [tagViewController reloadCarouselView];
-            }
+//        bool newStixSuccess = NO;
+//        while (!newStixSuccess) {
+        NSString * newStixStringID = [BadgeView getRandomStixStringID];
+        int count = [[allStix objectForKey:newStixStringID] intValue];
+        if (count == 0) {
+            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
         }
+        else
+        {
+            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
+        }
+        //newStixSuccess = YES;
+        [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
+        NSMutableData * data = [KumulosData dictionaryToData:allStix];
+        [k addStixToUserWithUsername:username andStix:data];
+            
+        [feedController reloadCarouselView];
+        [exploreController reloadCarouselView];
+        [tagViewController reloadCarouselView];
     }
 }
 

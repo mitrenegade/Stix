@@ -145,8 +145,8 @@
 -(IBAction)buttonOKPressed:(id)sender
 {
     // scale stix frame back
-	float imageScale =  300 / imageView.frame.size.width;
-    
+	float imageScale =  300 / stixView.frame.size.width;
+    stix = stixView.stix;
 	CGRect stixFrameScaled = stix.frame;
 	stixFrameScaled.origin.x *= imageScale;
 	stixFrameScaled.origin.y *= imageScale;
@@ -192,55 +192,6 @@
 {
     [self.locationField resignFirstResponder];
 	//[self.delegate didAddDescriptor:nil];
-}
-
-/*** dragging and resizing badge ***/
-
--(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *touch = [[event allTouches] anyObject];	
-	CGPoint location = [touch locationInView:imageView];
-	drag = 0;
-    
-    [self closeInstructions:nil];
-    
-    CGRect frame = stix.frame;
-    int left = frame.origin.x;
-    int right = frame.origin.x + frame.size.width;
-    int top = frame.origin.y;
-    int bottom = frame.origin.y + frame.size.height;
-    if (location.x > left && location.x < right && 
-        location.y > top && location.y < bottom)
-    {
-        drag = 1;
-    }
-
-    // point where finger clicked badge
-    offset_x = (location.x - stix.center.x);
-    offset_y = (location.y - stix.center.y);
-}
-
--(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	//[self touchesBegan:touches withEvent:event];
-	if (drag == 1)
-	{
-		UITouch *touch = [[event allTouches] anyObject];
-		CGPoint location = [touch locationInView:imageView];
-		// update frame of dragged badge, also scale
-		//float scale = 1; // do not change scale while dragging
-		if (!drag)
-			return;
-
-		float centerX = location.x - offset_x;
-		float centerY = location.y - offset_y;
-        stix.center = CGPointMake(centerX, centerY);
-	}
-}
-
--(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (drag == 1)
-	{
-        drag = 0;
-	}
 }
 
 -(IBAction)closeInstructions:(id)sender

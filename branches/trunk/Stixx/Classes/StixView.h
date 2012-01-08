@@ -31,5 +31,5 @@
 
 // could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
--(void)populateWithAuxStix:(NSMutableArray *)auxStix atLocations:(NSMutableArray *)auxLocations;
+-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations;
 @end

@@ -84,11 +84,21 @@
     }
 }
 
--(void)populateWithAuxStix:(NSMutableArray *)auxStix atLocations:(NSMutableArray *)auxLocations {
+-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations {
     for (int i=0; i<[auxStix count]; i++) {
         NSString * stixStringID = [auxStix objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
-        
+        float scale, rotation;
+        // hack: backwards compatibility 
+        if ([auxScales count] == [auxStix count]) {
+            scale = [[auxScales objectAtIndex:i] floatValue];
+            rotation = [[auxRotations objectAtIndex:i] floatValue];
+        }
+        else
+        {
+            scale = 1;
+            rotation = 0;
+        }
         UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
         //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
         float centerX = location.x;
@@ -96,16 +106,15 @@
         
         // scale stix and label down to 270x270 which is the size of the feedViewItem
         CGRect stixFrameScaled = auxStix.frame;
-        stixFrameScaled.origin.x *= imageScale;
-        stixFrameScaled.origin.y *= imageScale;
-        stixFrameScaled.size.width *= imageScale;
-        stixFrameScaled.size.height *= imageScale;
+        stixFrameScaled.size.width *= imageScale * scale;
+        stixFrameScaled.size.height *= imageScale * scale;
         centerX *= imageScale;
         centerY *= imageScale;
         //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
         [auxStix setFrame:stixFrameScaled];
         [auxStix setCenter:CGPointMake(centerX, centerY)];
         [self addSubview:auxStix];
+        NSLog(@"StixView: adding auxStix %@ at center %f %f\n", stixStringID, centerX, centerY);
     }
 }
 

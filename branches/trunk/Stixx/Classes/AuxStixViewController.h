@@ -12,7 +12,7 @@
 
 @protocol AuxStixViewControllerDelegate 
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location andComment:(NSString*)comment;
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString*)comment;
 
 @end
 
@@ -33,6 +33,8 @@
     int drag;
     float offset_x;
     float offset_y;
+    float auxScale;
+    float auxRotation;
     
 	NSObject<AuxStixViewControllerDelegate> *delegate;
 }

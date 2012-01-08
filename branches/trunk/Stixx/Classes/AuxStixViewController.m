@@ -71,7 +71,7 @@
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY];
-    [stixView populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
+    [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
     [self.view addSubview:stixView];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
 
@@ -152,10 +152,13 @@
     centerY *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    //stix.frame = badgeFrame;
-    //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"AuxStix: set aux stix of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-    [delegate didAddAuxStixWithStixStringID:stixStringID atLocation:CGPointMake(centerX, centerY) andComment:[commentField text]];
+    
+    // hack: debug to test display
+    auxScale = 1;
+    auxRotation = 0; //3.1415/4;
+    
+    [delegate didAddAuxStixWithStixStringID:stixStringID withLocation:CGPointMake(centerX, centerY) withScale:auxScale withRotation:auxRotation withComment:[commentField text]];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

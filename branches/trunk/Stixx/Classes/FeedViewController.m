@@ -217,28 +217,18 @@
     NSLog(@"Offsetting center by %f %f to %f %f, then scaling to %f %f\n", scrollFrame.origin.x + imageViewFrame.origin.x, scrollFrame.origin.y + imageViewFrame.origin.y, centerx, centery, location.x, location.y);
 
     // at this point, location and badgeFrame are all relative to feedItem.frame, at full size (300px). NOT QUITE ACCURATE PLACEMENT
-#if 0
-    
-    // display auxStix view
-    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
-    //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
-    [carouselView resetBadgeLocations];
-    [scrollView reloadPage:lastPageViewed];
-#else
     NSLog(@"FeedView: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
     AuxStixViewController * auxView = [[AuxStixViewController alloc] init];
     [self presentModalViewController:auxView animated:NO]; // must load first
     auxView.delegate = self;
     [auxView initStixView:t];
-    [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
-#endif
-    
+    [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
 }
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID atLocation:(CGPoint)location andComment:(NSString *)comment {
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString *)comment {
     [self dismissModalViewControllerAnimated:YES];
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
-    [delegate didAddStixToPix:t withStixStringID:stixStringID atLocation:location];
+    [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withScale:scale withRotation:rotation];
     if ([comment length] > 0)
         [self didAddNewComment:comment withTagID:[t.tagID intValue]];
 

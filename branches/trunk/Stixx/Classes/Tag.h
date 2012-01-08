@@ -41,6 +41,8 @@
     // auxiliary stix - stored in Kumulos as an array of dictionaries
     NSMutableArray * auxStixStringIDs;
     NSMutableArray * auxLocations;
+    NSMutableArray * auxScales;
+    NSMutableArray * auxRotations;
     
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
@@ -61,7 +63,7 @@
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
 -(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
--(void)addAuxiliaryStixOfType:(NSString*)stringID atLocation:(CGPoint)location;
+-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
@@ -80,5 +82,7 @@
 
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, retain) NSMutableArray * auxLocations;
+@property (nonatomic, retain) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
+@property (nonatomic, retain) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation)
 
 @end

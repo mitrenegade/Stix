@@ -15,7 +15,7 @@
 @synthesize descriptor;
 @synthesize locationString;
 @synthesize badge_x, badge_y, badgeCount;
-@synthesize auxStixStringIDs, auxLocations;
+@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations;
 @synthesize stixStringID;
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString *)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{        
@@ -51,9 +51,11 @@
     NSLog(@"Added badge at %d %d to tag", x, y);
 }
 
--(void)addAuxiliaryStixOfType:(NSString*)stringID atLocation:(CGPoint)location {
+-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
     [auxStixStringIDs addObject:stringID];
     [auxLocations addObject:[NSValue valueWithCGPoint:location]];
+    [auxScales addObject:[NSNumber numberWithFloat:scale]];
+    [auxRotations addObject:[NSNumber numberWithFloat:rotation]];
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
@@ -91,6 +93,8 @@
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
     NSMutableArray * stixStringIDs = [decoder decodeObjectForKey:@"auxStixStringIDs"];
     NSMutableArray * stixLocations = [decoder decodeObjectForKey:@"auxLocations"];
+    NSMutableArray * stixScales = [decoder decodeObjectForKey:@"auxScales"];
+    NSMutableArray * stixRotations = [decoder decodeObjectForKey:@"auxRotations"];
     [decoder finishDecoding];
     [decoder release];
 
@@ -103,15 +107,24 @@
     // add empty aux
     tag.auxStixStringIDs = stixStringIDs;
     tag.auxLocations = stixLocations; 
+    tag.auxScales = stixScales;
+    tag.auxRotations = stixRotations;
     if (stixStringIDs == nil)
         tag.auxStixStringIDs = [[NSMutableArray alloc] init];
     if (stixLocations == nil)
         tag.auxLocations = [[NSMutableArray alloc] init];
+    if (stixScales == nil) {
+        tag.auxScales = [[NSMutableArray alloc] init];        
+        for (int i=0; i<[tag.auxStixStringIDs count]; i++)
+            [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
+    }
+    if (stixRotations == nil) {
+        tag.auxRotations = [[NSMutableArray alloc] init];
+        for (int i=0; i<[tag.auxStixStringIDs count]; i++)
+            [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    }
     tag.tagID = [d valueForKey:@"allTagID"];
     tag.timestamp = [d valueForKey:@"timeCreated"];
-    //[tag.auxLocations addObjectsFromArray:stixLocations];
-    //[tag.auxStixStringIDs addObjectsFromArray:stixStringIDs];
-    //[image release];
     return tag;
 }
 

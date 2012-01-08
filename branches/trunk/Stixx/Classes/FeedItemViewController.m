@@ -82,7 +82,7 @@
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY];
-    [stixView populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
+    [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
     [self.view insertSubview:stixView belowSubview:imageView];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
     

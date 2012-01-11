@@ -15,6 +15,10 @@
 @interface RaisedCenterTabBarController : UITabBarController
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
+    
+    UIButton * button;
+    UIImage * bgNormal;
+    UIImage * bgSelected;
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -27,5 +31,7 @@
 -(void) addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage;
 
 -(IBAction)didPressCenterButton:(id)sender;
+-(void)setButtonStateSelected;
+-(void)setButtonStateNormal;
 
 @end

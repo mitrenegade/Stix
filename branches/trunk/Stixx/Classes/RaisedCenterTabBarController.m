@@ -23,9 +23,11 @@
 // Create a custom UIButton and add it to the center of our tab bar
 -(void) addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage
 {
-    UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
     button.frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
+    bgNormal = [buttonImage retain];
+    bgSelected = [highlightImage retain];
     [button setBackgroundImage:buttonImage forState:UIControlStateNormal];
     [button setBackgroundImage:highlightImage forState:UIControlStateHighlighted];
     
@@ -35,7 +37,7 @@
     else
     {
         CGPoint center = self.tabBar.center;
-        center.y = center.y - 8;
+        center.y = center.y - 6;
         // debug - to reveal regular tab button too
         //center.y = center.y - 30;
         button.center = center;
@@ -54,6 +56,14 @@
 */
 -(IBAction)didPressCenterButton:(id)sender {
     [self.myDelegate didPressCenterButton];
+}
+
+// these functions are called by the app delegate - when the tabbar state changes
+-(void)setButtonStateSelected {
+    [button setBackgroundImage:bgSelected forState:UIControlStateNormal];
+}
+-(void)setButtonStateNormal {
+    [button setBackgroundImage:bgNormal forState:UIControlStateNormal];
 }
 
 @end

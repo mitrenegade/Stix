@@ -16,7 +16,7 @@
 
 @end
 
-@interface AuxStixViewController : UIViewController <UITextFieldDelegate> {
+@interface AuxStixViewController : UIViewController <UITextFieldDelegate, UIGestureRecognizerDelegate> {
     
 	IBOutlet UIImageView * imageView;
     IBOutlet StixView * stixView;
@@ -35,6 +35,8 @@
     float offset_y;
     float auxScale;
     float auxRotation;
+    CGRect frameBeforeScale;
+    float stixScale;
     
 	NSObject<AuxStixViewControllerDelegate> *delegate;
 }

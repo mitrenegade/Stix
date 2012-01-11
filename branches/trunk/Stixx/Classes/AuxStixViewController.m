@@ -44,6 +44,11 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    
+    // add gesture recognizer
+    UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
+    [myGestureRecognizer setDelegate:self];
+    [self.view addGestureRecognizer:myGestureRecognizer];
 }
 
 - (void)viewDidUnload
@@ -61,19 +66,25 @@
 
 -(void)initStixView:(Tag*)tag {
     UIImage * imageData = tag.image;
+    
+    // for the tag's primary stix
     NSString * myStixStringID = tag.stixStringID;
     int count = tag.badgeCount;
     float centerX = tag.badge_x;
     float centerY = tag.badge_y;
+    float scale = tag.stixScale;
+    if (scale == 0)  // BOBBY TODO: draw from auxScales list
+        scale = 1; // backwards compatibility
+    float rotation = tag.stixRotation;
     
     NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", imageData.size.width, imageData.size.height, centerX, centerY);
 
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
-    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY];
+    [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
+    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
     [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
     [self.view addSubview:stixView];
-    [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
 
 }
 
@@ -89,6 +100,8 @@
     location.y += stixView.frame.origin.y;
     badgeFrame.size.width *= imageScale;
     badgeFrame.size.height *= imageScale;
+    auxScale = 1;
+    auxRotation = 0;
     
     // location is already the point inside stixFrame
     stixStringID = newStixStringID;
@@ -126,10 +139,15 @@
 		//float scale = 1; // do not change scale while dragging
 		if (!drag)
 			return;
-        
-		float centerX = location.x - offset_x;
+       
+        float centerX = location.x - offset_x;
 		float centerY = location.y - offset_y;
-        stix.center = CGPointMake(centerX, centerY);
+        
+        // filter out rogue touches, usually when people are using a pinch
+        if (abs(centerX - stix.center.x) > 50 || abs(centerY - stix.center.y) > 50) 
+            return;
+        
+		stix.center = CGPointMake(centerX, centerY);
 	}
 }
 
@@ -155,7 +173,6 @@
     NSLog(@"AuxStix: set aux stix of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
     
     // hack: debug to test display
-    auxScale = 1;
     auxRotation = 0; //3.1415/4;
     
     [delegate didAddAuxStixWithStixStringID:stixStringID withLocation:CGPointMake(centerX, centerY) withScale:auxScale withRotation:auxRotation withComment:[commentField text]];
@@ -176,6 +193,37 @@
 -(IBAction)closeInstructions:(id)sender;
 {
     [buttonInstructions setHidden:YES];
+}
+
+-(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {
+    if ([gesture state] == UIGestureRecognizerStateBegan) {
+        NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [gesture scale], [gesture velocity]);
+        frameBeforeScale = stix.frame;
+        CGPoint center = stix.center;
+        NSLog(@"Original center: %f %f", center.x, center.y);
+    }
+    else if ([gesture state] == UIGestureRecognizerStateChanged) {
+        //if (isDragging) return;
+        float newscale = [gesture scale];
+        NSLog(@"AuxView: Pinch changing! scale %f velocity %f auxScale %f totalScale %f", [gesture scale], [gesture velocity], auxScale, auxScale * newscale);
+        if ((auxScale * newscale) > 3)
+            return;
+        CGPoint center = stix.center;
+        //NSLog(@"Old center: %f %f", center.x, center.y);
+        CGRect stixFrameScaled = frameBeforeScale;
+        stixFrameScaled.size.width *= newscale;
+        stixFrameScaled.size.height *= newscale;
+        stix.frame = stixFrameScaled;
+        stix.center = center;
+        //NSLog(@"New center: %f %f", center.x, center.y);
+    }    
+    else if ([gesture state] == UIGestureRecognizerStateEnded) {
+        //if (isDragging) return;
+        auxScale = auxScale * [gesture scale];
+        if (auxScale > 3)
+            auxScale = 3;
+        NSLog(@"Frame scale changed by %f: overall scale %f", [gesture scale], auxScale);
+    }
 }
 
 @end

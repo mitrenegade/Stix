@@ -55,7 +55,7 @@
     [buttonRules setHidden:YES];
         
     tableController = [[GiftStixTableController alloc] init];
-    [tableController.view setFrame:CGRectMake(0, 215, 320, 180)];
+    [tableController.view setFrame:CGRectMake(0, 215, 320, 200)];
     [tableController setDelegate:self];
     [self.view addSubview:tableController.view];
 

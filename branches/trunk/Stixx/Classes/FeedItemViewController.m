@@ -76,69 +76,24 @@
     int count = tag.badgeCount;
     float centerX = tag.badge_x;
     float centerY = tag.badge_y;
+    float scale = tag.stixScale;
+    float rotation = tag.stixRotation;
+    
+    // hack: backwards compatibility
+    if (scale == 0)
+        scale = 1;
     
     NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", imageData.size.width, imageData.size.height, centerX, centerY);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
-    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY];
+    [stixView setInteractionAllowed:NO];
+    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
     [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
     [self.view insertSubview:stixView belowSubview:imageView];
-    [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
+    //[stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
     
 }
-
-/*
--(void)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
-#if 0
-    CGRect frame = [imageView frame];
-    stixView = [[StixView alloc] initWithFrame:frame];
-    [stixView initializeWithImage:imageData andStix:stixStringID withCount:count atLocationX:x andLocationY:y];
-    [self.view addSubview:stixView];
-#else
-    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
-    //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float centerX = x;
-    float centerY = y;
-    
-    // scale stix and label down to 270x270 which is the size of the feedViewItem
-    CGSize originalSize = imageData.size;
-	CGSize targetSize = imageView.frame.size;
-	
-	float imageScale =  targetSize.width / originalSize.width;
-    
-	CGRect stixFrameScaled = stix.frame;
-	stixFrameScaled.origin.x *= imageScale;
-	stixFrameScaled.origin.y *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    centerX *= imageScale;
-    centerY *= imageScale;
-    NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
-    [stix setFrame:stixFrameScaled];
-    [stix setCenter:CGPointMake(centerX, centerY)];
-    [imageView addSubview:stix];
-    
-    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) {
-        
-        CGRect labelFrame = stix.frame;
-        OutlineLabel * stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-        [stixCount setCenter:CGPointMake(stixCount.center.x+[BadgeView getOutlineOffsetX:0], stixCount.center.y+[BadgeView getOutlineOffsetY:0])];
-        labelFrame = stixCount.frame; // changing center should change origin but not width
-        //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-        if ([stixStringID isEqualToString:@"FIRE"])
-            [stixCount setTextAttributesForBadgeType:0];
-        if ([stixStringID isEqualToString:@"ICE"])
-            [stixCount setTextAttributesForBadgeType:1];
-        [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-        [stixCount setText:[NSString stringWithFormat:@"%d", count]];
-        [imageView addSubview:stixCount];
-        [stixCount release];
-    }
-#endif
-}
-*/
-
 -(void)populateWithTimestamp:(NSDate *)timestamp {
     // format timestring
     // from 1 min - 1 hour, display # of minutes since tag

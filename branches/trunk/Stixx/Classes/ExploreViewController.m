@@ -220,22 +220,33 @@
             UIImage * photo = tag.image;
             NSString * comment = tag.comment;
             UIImageView * shadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dropshadow_140.png"]];
-            UIImageView * feedItem = [[UIImageView alloc] initWithImage:photo];
-            [feedItem setBackgroundColor:[UIColor blackColor]];
-            //NSString * name = tag.username;
             int w = shadow.frame.size.width;
             int h = shadow.frame.size.height;
             shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 20), w, h);
-            feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);
-            
+#if 0
+            UIImageView * feedItem = [[UIImageView alloc] initWithImage:photo];
+            [feedItem setBackgroundColor:[UIColor blackColor]];
+            //NSString * name = tag.username;
+            feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);            
             UIImageView * stix = [[self populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
             [feedItem addSubview:stix];
             [stix release];
-            [exploreItemView addSubview:shadow];
-            [exploreItemView addSubview:feedItem];
             [shadow release];
             [feedItem release];
-            
+#else              
+            CGRect frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);
+            StixView * stixView = [[StixView alloc] initWithFrame:frame];
+            [stixView setInteractionAllowed:NO];
+            int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
+            int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
+            [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
+            [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
+            [exploreItemView addSubview:shadow];
+            [exploreItemView addSubview:stixView];
+            [shadow release];
+            [stixView release];
+#endif
+
             NSLog(@"  Adding feed item %d = %@ to position %d %d", ct, comment, x, y);
             
             x = x + 1;

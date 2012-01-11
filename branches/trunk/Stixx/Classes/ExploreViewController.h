@@ -14,6 +14,7 @@
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
 #import "CarouselView.h"
+#import "StixView.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;

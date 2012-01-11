@@ -63,6 +63,14 @@
     int pageOfLastNewerTagsRequest;
     int pageOfLastOlderTagsRequest;
     
+    // hack: save some memory from didAddStixToPix - fix is to add the correct callback
+    bool isUpdatingAuxStix;
+    int updatingAuxTagID;
+    NSString * updatingAuxStixStringID;
+    CGPoint updatingAuxLocation;
+    float updatingAuxScale;
+    float updatingAuxRotation;
+    
     NSMutableDictionary * allUserPhotos;
     int idOfMostRecentUser;
     
@@ -72,6 +80,7 @@
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonMsg;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
+-(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 -(void)updateCommentCount:(int)tagID;
 -(void)continueInit;
 -(void)adminUpdateAllStixCountsToZero;

@@ -13,6 +13,8 @@
 @synthesize stix;
 @synthesize stixCount;
 @synthesize interactionAllowed;
+@synthesize stixScale;
+@synthesize stixRotation;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -33,7 +35,7 @@
 }
 */
 
--(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
+-(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation {
     
     CGRect frame = self.frame;
     frame.origin.x = 0;
@@ -42,6 +44,9 @@
     [imageView setImage:imageData];
     [self addSubview:imageView];
     [imageView release];
+    
+    stixScale = scale;
+    stixRotation = rotation;
     
     stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
@@ -56,10 +61,8 @@
     imageScale =  targetSize.width / originalSize.width;
     
 	CGRect stixFrameScaled = stix.frame;
-	stixFrameScaled.origin.x *= imageScale;
-	stixFrameScaled.origin.y *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
+	stixFrameScaled.size.width *= imageScale * stixScale;
+	stixFrameScaled.size.height *= imageScale * stixScale;
     centerX *= imageScale;
     centerY *= imageScale;
     //NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
@@ -82,22 +85,30 @@
         [self addSubview:stixCount];
 //        [stixCount release];
     }
+    
+    // add gesture recognizer
+    UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
+    [myGestureRecognizer setDelegate:self];
+    
+    if (interactionAllowed) {
+        [self addGestureRecognizer:myGestureRecognizer];
+    }
 }
 
 -(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations {
     for (int i=0; i<[auxStix count]; i++) {
         NSString * stixStringID = [auxStix objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
-        float scale, rotation;
+        float auxScale, auxRotation;
         // hack: backwards compatibility 
         if ([auxScales count] == [auxStix count]) {
-            scale = [[auxScales objectAtIndex:i] floatValue];
-            rotation = [[auxRotations objectAtIndex:i] floatValue];
+            auxScale = [[auxScales objectAtIndex:i] floatValue];
+            auxRotation = [[auxRotations objectAtIndex:i] floatValue];
         }
         else
         {
-            scale = 1;
-            rotation = 0;
+            auxScale = 1;
+            auxRotation = 0;
         }
         UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
         //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
@@ -106,8 +117,8 @@
         
         // scale stix and label down to 270x270 which is the size of the feedViewItem
         CGRect stixFrameScaled = auxStix.frame;
-        stixFrameScaled.size.width *= imageScale * scale;
-        stixFrameScaled.size.height *= imageScale * scale;
+        stixFrameScaled.size.width *= imageScale * auxScale;
+        stixFrameScaled.size.height *= imageScale * auxScale;
         centerX *= imageScale;
         centerY *= imageScale;
         //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
@@ -123,25 +134,24 @@
         [super touchesBegan:touches withEvent:event];
         return;
     }
+    if (isDragging) // will come here if a second finger touches
+        return;
     
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];
-	drag = 0;
+	isDragging = 0;
     
     CGRect frame = stix.frame;
-    int left = frame.origin.x;
-    int right = frame.origin.x + frame.size.width;
-    int top = frame.origin.y;
-    int bottom = frame.origin.y + frame.size.height;
-    if (location.x > left && location.x < right && 
-        location.y > top && location.y < bottom)
+    if (CGRectContainsPoint(frame, location))
     {
-        drag = 1;
+        isDragging = 1;
     }
     
     // point where finger clicked badge
     offset_x = (location.x - stix.center.x);
     offset_y = (location.y - stix.center.y);
+    
+    NSLog(@"Touches began: center %f %f touch offset %f %f", stix.center.x, stix.center.y, location.x, location.y);
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -150,20 +160,24 @@
         return;
     }
 
-	if (drag == 1)
+	if (isDragging == 1)
 	{
 		UITouch *touch = [[event allTouches] anyObject];
 		CGPoint location = [touch locationInView:self];
 		// update frame of dragged badge, also scale
 		//float scale = 1; // do not change scale while dragging
-		if (!drag)
-			return;
         
 		float centerX = location.x - offset_x;
 		float centerY = location.y - offset_y;
+        
+        // filter out rogue touches, usually when people are using a pinch
+        if (abs(centerX - stix.center.x) > 50 || abs(centerY - stix.center.y) > 50) 
+            return;
+        
         stix.center = CGPointMake(centerX, centerY);
         if (stixCount != nil)
             stixCount.center = CGPointMake(centerX - [BadgeView getOutlineOffsetX:0], centerY - [BadgeView getOutlineOffsetX:0]);
+        NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
 	}
 }
 
@@ -172,11 +186,44 @@
         [super touchesEnded:touches withEvent:event];
         return;
     }
+    
+    NSLog(@"Touches ended: new center %f %f", stix.center.x, stix.center.y);
 
-	if (drag == 1)
+	if (isDragging == 1)
 	{
-        drag = 0;
+        isDragging = 0;
 	}
 }
 
+-(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {
+    if ([gesture state] == UIGestureRecognizerStateBegan) {
+        isPinching = YES;
+        NSLog(@"StixView: Pinch motion started! scale %f velocity %f", [gesture scale], [gesture velocity]);
+        frameBeforeScale = stix.frame;
+        CGPoint center = stix.center;
+        NSLog(@"Original center: %f %f", center.x, center.y);
+    }
+    else if ([gesture state] == UIGestureRecognizerStateChanged) {
+        //if (isDragging) return;
+        NSLog(@"StixView: Pinch changing! scale %f velocity %f", [gesture scale], [gesture velocity]);
+        float newscale = [gesture scale];
+        if ((stixScale * newscale) > 3)
+            return;
+        CGPoint center = stix.center;
+        NSLog(@"Old center: %f %f", center.x, center.y);
+        CGRect stixFrameScaled = frameBeforeScale;
+        stixFrameScaled.size.width *= newscale;
+        stixFrameScaled.size.height *= newscale;
+        stix.frame = stixFrameScaled;
+        stix.center = center;
+        NSLog(@"New center: %f %f", center.x, center.y);
+    }    
+    else if ([gesture state] == UIGestureRecognizerStateEnded) {
+        //if (isDragging) return;
+        stixScale = stixScale * [gesture scale];
+        if (stixScale > 3)
+            stixScale = 3;
+        NSLog(@"Frame scale changed by %f: overall scale %f", [gesture scale], stixScale);
+    }
+}
 @end

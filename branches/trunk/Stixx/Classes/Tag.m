@@ -17,6 +17,7 @@
 @synthesize badge_x, badge_y, badgeCount;
 @synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations;
 @synthesize stixStringID;
+@synthesize stixScale, stixRotation;
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString *)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{        
     if (newUsername == nil)
@@ -70,6 +71,8 @@
     int badge_y = [[d valueForKey:@"badge_y"] intValue];
     int badgeType = [[d valueForKey:@"type"] intValue];     
     int badgeCount = [[d valueForKey:@"score"] intValue];
+    float stixScale = [[d valueForKey:@"stixScale"] floatValue];
+    float stixRotation = [[d valueForKey:@"stixRotation"] floatValue];
     NSString * stixStringID = [d valueForKey:@"stixStringID"];
     if (stixStringID == nil || [stixStringID length] == 0) {
         // backwards compatibility: old tags that have no stixStringID have a badgeType
@@ -123,6 +126,8 @@
         for (int i=0; i<[tag.auxStixStringIDs count]; i++)
             [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
     }
+    tag.stixScale = stixScale;
+    tag.stixRotation = stixRotation;
     tag.tagID = [d valueForKey:@"allTagID"];
     tag.timestamp = [d valueForKey:@"timeCreated"];
     return tag;

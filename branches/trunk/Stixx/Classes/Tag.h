@@ -37,7 +37,9 @@
     //int badgeType;
     int badgeCount;
     NSString * stixStringID; // string representation of type
-
+    float stixScale;
+    float stixRotation;
+    
     // auxiliary stix - stored in Kumulos as an array of dictionaries
     NSMutableArray * auxStixStringIDs;
     NSMutableArray * auxLocations;
@@ -79,6 +81,8 @@
 @property (nonatomic, assign) int badge_y; // center coordinate
 @property (nonatomic, assign) int badgeCount;
 @property (nonatomic, retain) NSString * stixStringID;
+@property (nonatomic, assign) float stixScale;
+@property (nonatomic, assign) float stixRotation;
 
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, retain) NSMutableArray * auxLocations;

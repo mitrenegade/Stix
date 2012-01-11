@@ -58,7 +58,7 @@
     stixView = [[StixView alloc] initWithFrame:frame];
     int x = badgeFrame.origin.x + badgeFrame.size.width / 2;
     int y = badgeFrame.origin.y + badgeFrame.size.height / 2;
-    [stixView initializeWithImage:tmp andStix:stixStringID withCount:1 atLocationX:x andLocationY:y];
+    [stixView initializeWithImage:tmp andStix:stixStringID withCount:1 atLocationX:x andLocationY:y andScale:1 andRotation:0];
     [self.view addSubview:stixView];
     
 #endif
@@ -154,10 +154,12 @@
 	stixFrameScaled.size.height *= imageScale;
     float centerx = stix.center.x * imageScale; // center coordinates in original 300x275 space
     float centery = stix.center.y * imageScale;
+    float stixScale = [stixView stixScale];
+    float stixRotation = [stixView stixRotation];
     //stix.frame = badgeFrame;
     //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery)];
+	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery) andScale:stixScale andRotation:stixRotation];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

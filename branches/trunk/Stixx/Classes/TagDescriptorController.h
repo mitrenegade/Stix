@@ -13,7 +13,7 @@
 #import "StixView.h"
 
 @protocol TagDescriptorDelegate
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center;
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center andScale:(float)stixScale andRotation:(float)stixRotation;
 -(void)didCancelAddDescriptor;
 @end
 

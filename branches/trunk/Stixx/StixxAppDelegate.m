@@ -360,6 +360,7 @@ static int init=0;
 	[encoder encodeObject:newTag.auxStixStringIDs forKey:@"auxStixStringIDs"];
     [encoder encodeObject:newTag.auxScales forKey:@"auxScales"];
     [encoder encodeObject:newTag.auxRotations forKey:@"auxRotations"];
+    [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
     [encoder finishEncoding];
     [encoder release];
 
@@ -473,8 +474,6 @@ static int init=0;
         else {
             //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
             // array for the tag
-            //[tag.auxStixStringIDs addObject:stixStringID];
-            //[tag.auxLocations addObject:[NSValue valueWithCGPoint:location]];
             CGPoint location = updatingAuxLocation;
             float scale = updatingAuxScale;
             float rotation = updatingAuxRotation;
@@ -488,9 +487,13 @@ static int init=0;
         [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
         [encoder encodeObject:tag.auxScales forKey:@"auxScales"];
         [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
+        [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
         [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
         [self updateUserTagTotal];
+        
+        // replace old tag in allTags
+        [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
         
         [self didAddNewCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
         
@@ -523,7 +526,8 @@ static int init=0;
         [feedController setIndicatorWithID:0 animated:NO];
         [feedController setIndicatorWithID:1 animated:NO];
         if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
-            [lastViewController viewWillAppear:TRUE];
+            [feedController reloadCurrentPage];
+//            [lastViewController viewWillAppear:TRUE];
         //NSLog(@"loaded %d tags from kumulos", [theResults count]);
   
     }    

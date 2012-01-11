@@ -178,10 +178,10 @@
 //    [[UIApplication sharedApplication] setStatusBarHidden:NO];
 //    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
 
-    CGRect viewFrame = rectView.frame;
-    CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
+    //CGRect viewFrame = rectView.frame;
+    //CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
     // hack: because status bar is hidden, our "origin.y" is -20
-    viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
+    //viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
 #if !TARGET_IPHONE_SIMULATOR
     if (descriptorIsOpen == NO) {
         [self presentModalViewController:self.camera animated:NO];
@@ -199,7 +199,6 @@
 
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
-
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -306,7 +305,7 @@
     [self viewDidAppear:NO];    
 }
 
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center andScale:(float)stixScale andRotation:(float)stixRotation
 {
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
@@ -365,8 +364,12 @@
     [tag addMainStixOfType:selectedStixStringID andCount:1 atLocationX:x andLocationY:y];
     [tag addARCoordinate:newCoord];
     // add empty aux
+    tag.stixScale = stixScale;
+    tag.stixRotation = stixRotation;
     tag.auxStixStringIDs = [[NSMutableArray alloc] init];
     tag.auxLocations = [[NSMutableArray alloc] init];
+    tag.auxScales = [[NSMutableArray alloc] init];
+    tag.auxRotations = [[NSMutableArray alloc] init];
     [image release];
     [self.delegate tagViewDidAddTag:tag];
     [tag release];

@@ -341,6 +341,11 @@
     }
 }
 
+-(void)reloadCurrentPage {
+    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
+    [scrollView reloadPage:lastPageViewed];
+}
+
 -(int)itemCount
 {
 	// Return the number of pages we intend to display

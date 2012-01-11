@@ -80,6 +80,7 @@
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)createCarouselView;
 -(void)reloadCarouselView;
+-(void)reloadCurrentPage;
 @end
 
 

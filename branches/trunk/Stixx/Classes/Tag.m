@@ -15,7 +15,7 @@
 @synthesize descriptor;
 @synthesize locationString;
 @synthesize badge_x, badge_y, badgeCount;
-@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations;
+@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable;
 @synthesize stixStringID;
 @synthesize stixScale, stixRotation;
 
@@ -57,6 +57,7 @@
     [auxLocations addObject:[NSValue valueWithCGPoint:location]];
     [auxScales addObject:[NSNumber numberWithFloat:scale]];
     [auxRotations addObject:[NSNumber numberWithFloat:rotation]];
+    [auxPeelable addObject:[NSNumber numberWithBool:YES]];
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
@@ -98,6 +99,7 @@
     NSMutableArray * stixLocations = [decoder decodeObjectForKey:@"auxLocations"];
     NSMutableArray * stixScales = [decoder decodeObjectForKey:@"auxScales"];
     NSMutableArray * stixRotations = [decoder decodeObjectForKey:@"auxRotations"];
+    NSMutableArray * stixPeelable = [decoder decodeObjectForKey:@"auxPeelable"];
     [decoder finishDecoding];
     [decoder release];
 
@@ -112,6 +114,7 @@
     tag.auxLocations = stixLocations; 
     tag.auxScales = stixScales;
     tag.auxRotations = stixRotations;
+    tag.auxPeelable = stixPeelable;
     if (stixStringIDs == nil)
         tag.auxStixStringIDs = [[NSMutableArray alloc] init];
     if (stixLocations == nil)
@@ -125,6 +128,12 @@
         tag.auxRotations = [[NSMutableArray alloc] init];
         for (int i=0; i<[tag.auxStixStringIDs count]; i++)
             [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    }
+    if (stixPeelable == nil) {
+        tag.auxPeelable = [[NSMutableArray alloc] init];
+        for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+            [tag.auxPeelable addObject:[NSNumber numberWithBool:YES]];
+        }
     }
     tag.stixScale = stixScale;
     tag.stixRotation = stixRotation;

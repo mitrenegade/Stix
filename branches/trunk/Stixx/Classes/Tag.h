@@ -45,6 +45,7 @@
     NSMutableArray * auxLocations;
     NSMutableArray * auxScales;
     NSMutableArray * auxRotations;
+    NSMutableArray * auxPeelable;
     
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
@@ -88,5 +89,6 @@
 @property (nonatomic, retain) NSMutableArray * auxLocations;
 @property (nonatomic, retain) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
 @property (nonatomic, retain) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation)
+@property (nonatomic, retain) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner
 
 @end

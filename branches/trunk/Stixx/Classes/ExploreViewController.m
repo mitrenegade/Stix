@@ -240,7 +240,7 @@
             int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
             int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
             [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
-            [stixView populateWithAuxStix:tag.auxStixStringIDs withLocations:tag.auxLocations withScales:tag.auxScales withRotations:tag.auxRotations];
+            [stixView populateWithAuxStixFromTag:tag];
             [exploreItemView addSubview:shadow];
             [exploreItemView addSubview:stixView];
             [shadow release];

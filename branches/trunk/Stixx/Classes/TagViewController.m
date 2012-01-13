@@ -370,6 +370,7 @@
     tag.auxLocations = [[NSMutableArray alloc] init];
     tag.auxScales = [[NSMutableArray alloc] init];
     tag.auxRotations = [[NSMutableArray alloc] init];
+    tag.auxPeelable = [[NSMutableArray alloc] init];
     [image release];
     [self.delegate tagViewDidAddTag:tag];
     [tag release];

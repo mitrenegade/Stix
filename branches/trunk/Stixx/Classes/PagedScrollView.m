@@ -115,6 +115,8 @@
 }
 
 -(void)reloadPage:(int)page {
+    if (page >= [scrollViewPages count])
+        return;
     UIView *view = [scrollViewPages objectAtIndex:page];
     [view removeFromSuperview];
     

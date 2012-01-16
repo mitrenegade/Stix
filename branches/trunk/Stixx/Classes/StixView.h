@@ -33,6 +33,11 @@
 
     bool interactionAllowed;
     float imageScale;
+    
+    bool isPeelable;
+    
+    NSMutableArray * auxStixViews;
+    NSMutableArray * auxStixStringIDs;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -40,8 +45,12 @@
 @property (nonatomic, assign) bool interactionAllowed;
 @property (nonatomic, assign) float stixScale;
 @property (nonatomic, assign) float stixRotation;
+@property (nonatomic, retain) NSMutableArray * auxStixViews;
+@property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
+@property (nonatomic, assign) bool isPeelable;
 
 // could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;
--(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations;
+//-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations;
+-(void)populateWithAuxStixFromTag:(Tag*)tag;
 @end

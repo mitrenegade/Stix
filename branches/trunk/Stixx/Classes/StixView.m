@@ -7,6 +7,7 @@
 //
 
 #import "StixView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation StixView
 
@@ -15,6 +16,8 @@
 @synthesize interactionAllowed;
 @synthesize stixScale;
 @synthesize stixRotation;
+@synthesize auxStixViews, auxStixStringIDs;
+@synthesize isPeelable;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -86,22 +89,36 @@
 //        [stixCount release];
     }
     
-    // add gesture recognizer
+    // add pinch gesture recognizer
     UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
     [myGestureRecognizer setDelegate:self];
     
+    UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
+    [myTapRecognizer setNumberOfTapsRequired:2];
+    [myTapRecognizer setNumberOfTouchesRequired:1];
+    [myTapRecognizer setDelegate:self];
+
+    if (isPeelable)
+        [self addGestureRecognizer:myTapRecognizer];
     if (interactionAllowed) {
         [self addGestureRecognizer:myGestureRecognizer];
     }
 }
 
--(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations {
-    for (int i=0; i<[auxStix count]; i++) {
-        NSString * stixStringID = [auxStix objectAtIndex:i];
+//-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations {
+-(void)populateWithAuxStixFromTag:(Tag *)tag {
+    auxStixStringIDs = tag.auxStixStringIDs;
+    NSMutableArray * auxLocations = tag.auxLocations;
+    NSMutableArray * auxScales = tag.auxScales;
+    NSMutableArray * auxRotations = tag.auxRotations;
+    NSMutableArray * auxPeelable = tag.auxPeelable;
+    auxStixViews = [[NSMutableArray alloc] init];
+    for (int i=0; i<[auxStixStringIDs count]; i++) {
+        NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
         float auxScale, auxRotation;
         // hack: backwards compatibility 
-        if ([auxScales count] == [auxStix count]) {
+        if ([auxScales count] == [auxStixStringIDs count]) {
             auxScale = [[auxScales objectAtIndex:i] floatValue];
             auxRotation = [[auxRotations objectAtIndex:i] floatValue];
         }
@@ -124,8 +141,34 @@
         //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
         [auxStix setFrame:stixFrameScaled];
         [auxStix setCenter:CGPointMake(centerX, centerY)];
+        
+        if (isPeelable) {
+            if ([[auxPeelable objectAtIndex:i] boolValue] == YES) {
+                // turn this stix into an animated one
+#if 0
+                [auxStix setAnimationDuration:.5];
+                [auxStix setAnimationRepeatCount:0];
+                UIImage * img1 = [[auxStix image] copy];
+                UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
+                [auxStix setAnimationImages:[NSMutableArray arrayWithObjects:img1,img2, nil]];
+                [auxStix startAnimating];
+#else
+                CABasicAnimation *crossFade = [CABasicAnimation animationWithKeyPath:@"contents"];
+                UIImage * img1 = [[auxStix image] copy];
+                UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
+                crossFade.duration = 1.0;
+                crossFade.fromValue = (id)(img1.CGImage);
+                crossFade.toValue = (id)(img2.CGImage);
+                crossFade.repeatCount = 0;
+                [auxStix.layer addAnimation:crossFade forKey:@"animateContents"];
+                
+#endif
+            }
+        }
         [self addSubview:auxStix];
         NSLog(@"StixView: adding auxStix %@ at center %f %f\n", stixStringID, centerX, centerY);
+        
+        [auxStixViews addObject:auxStix];
     }
 }
 
@@ -193,6 +236,17 @@
 	{
         isDragging = 0;
 	}
+}
+
+-(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
+    CGPoint location = [gesture locationInView:self];
+    for (int i=0; i<[self.auxStixViews count]; i++) {
+        CGRect frame = [[auxStixViews objectAtIndex:i] frame];
+        NSLog(@"Stix %d at %f %f %f %f", i, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        if (CGRectContainsPoint(frame, location)) {
+            NSLog(@"Tapped on stix %d of type %@ at %f %f", i, [auxStixStringIDs objectAtIndex:i], location.x, location.y);
+        }
+    }
 }
 
 -(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {

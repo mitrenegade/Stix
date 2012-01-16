@@ -61,10 +61,9 @@
 @property (nonatomic, assign) NSObject<FeedItemViewDelegate> * delegate;   
 @property (nonatomic, retain) StixView * stixView;
 
--(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location; // andWithImage:(UIImage*)image;
+-(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
-//-(void)populateWithAuxStix:(NSMutableArray*)auxStix atLocations:(NSMutableArray*)auxLocations;
 - (IBAction)didPressAddCommentButton:(id)sender;
 -(void)populateWithCommentCount:(int)count;
 

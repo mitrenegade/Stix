@@ -11,12 +11,12 @@
 
 @interface LoadingViewController : UIViewController
 {
-    IBOutlet UIButton * loadingMessage;
+    IBOutlet UITextField * loadingMessage;
     LoadingAnimationView * activityIndicator;
     UIView * mySuperView;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton * loadingMessage;
+@property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) UIView * mySuperView;
 -(void)setMessage:(NSString*)message;

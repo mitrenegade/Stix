@@ -43,7 +43,7 @@
 }
 
 -(void)setMessage:(NSString*) message {
-    [loadingMessage setTitle:message forState:UIControlStateNormal];
+    [loadingMessage setText:message];
 }
 
 - (void)viewDidUnload

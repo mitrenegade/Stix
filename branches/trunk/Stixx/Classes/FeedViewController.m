@@ -298,13 +298,7 @@
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
-#if 0
-    [feedItem populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y];
-    feedItem.imageData = tag.image;
-    [feedItem populateWithAuxStix:tag.auxStixStringIDs atLocations:tag.auxLocations];
-#else
     [feedItem initStixView:tag];
-#endif
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];

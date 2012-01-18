@@ -44,7 +44,7 @@
     NSString * str;
     if ([comment length] == 0) // add generic descriptor
     {
-        NSString * desc = [BadgeView stixDescriptorForStixStringID:stixStringID];
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
         str = [NSString stringWithFormat:@"%@ added a %@", [self name], desc];
     }
     else

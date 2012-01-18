@@ -374,7 +374,7 @@
 #define DO_ZOOM_VIEW 0
 -(void)didClickAtLocation:(CGPoint)location {
 #if DO_ZOOM_VIEW
-    NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
+    NSLog(@"FeedViewController: Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
     
     Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
     UIImage * image = tag.image;
@@ -417,6 +417,11 @@
     if ([newComment length] > 0)
         [self.delegate didAddNewCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
+}
+
+/*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/
+-(NSString*)getUsername {
+    return [self.delegate getUsername];
 }
 @end
 

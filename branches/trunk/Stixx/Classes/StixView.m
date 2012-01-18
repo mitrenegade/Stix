@@ -18,6 +18,7 @@
 @synthesize stixRotation;
 @synthesize auxStixViews, auxStixStringIDs;
 @synthesize isPeelable;
+@synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -94,7 +95,7 @@
     [myGestureRecognizer setDelegate:self];
     
     UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
-    [myTapRecognizer setNumberOfTapsRequired:2];
+    [myTapRecognizer setNumberOfTapsRequired:1];
     [myTapRecognizer setNumberOfTouchesRequired:1];
     [myTapRecognizer setDelegate:self];
 
@@ -109,17 +110,17 @@
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
     auxStixStringIDs = tag.auxStixStringIDs;
     NSMutableArray * auxLocations = tag.auxLocations;
-    NSMutableArray * auxScales = tag.auxScales;
     NSMutableArray * auxRotations = tag.auxRotations;
-    NSMutableArray * auxPeelable = tag.auxPeelable;
+    auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
+    auxScales = [[NSMutableArray alloc] init];
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
         float auxScale, auxRotation;
         // hack: backwards compatibility 
-        if ([auxScales count] == [auxStixStringIDs count]) {
-            auxScale = [[auxScales objectAtIndex:i] floatValue];
+        if ([tag.auxScales count] == [auxStixStringIDs count]) {
+            auxScale = [[tag.auxScales objectAtIndex:i] floatValue];
             auxRotation = [[auxRotations objectAtIndex:i] floatValue];
         }
         else
@@ -143,32 +144,28 @@
         [auxStix setCenter:CGPointMake(centerX, centerY)];
         
         if (isPeelable) {
-            if ([[auxPeelable objectAtIndex:i] boolValue] == YES) {
+            if (1) { //[[tag.auxPeelable objectAtIndex:i] boolValue] == YES && [tag.username isEqualToString:[self.delegate getUsername]]) {
+                [auxPeelableByUser addObject:[NSNumber numberWithBool:YES]];
                 // turn this stix into an animated one
-#if 0
-                [auxStix setAnimationDuration:.5];
-                [auxStix setAnimationRepeatCount:0];
-                UIImage * img1 = [[auxStix image] copy];
-                UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
-                [auxStix setAnimationImages:[NSMutableArray arrayWithObjects:img1,img2, nil]];
-                [auxStix startAnimating];
-#else
                 CABasicAnimation *crossFade = [CABasicAnimation animationWithKeyPath:@"contents"];
                 UIImage * img1 = [[auxStix image] copy];
                 UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
-                crossFade.duration = 1.0;
+                crossFade.duration = 3.0;
                 crossFade.fromValue = (id)(img1.CGImage);
                 crossFade.toValue = (id)(img2.CGImage);
-                crossFade.repeatCount = 0;
+                crossFade.autoreverses = YES;
+                crossFade.repeatCount = HUGE_VALF;
                 [auxStix.layer addAnimation:crossFade forKey:@"animateContents"];
-                
-#endif
+            } 
+            else {
+                [auxPeelableByUser addObject:[NSNumber numberWithBool:NO]];
             }
         }
         [self addSubview:auxStix];
         NSLog(@"StixView: adding auxStix %@ at center %f %f\n", stixStringID, centerX, centerY);
         
         [auxStixViews addObject:auxStix];
+        [auxScales addObject:[NSNumber numberWithFloat:auxScale]];
     }
 }
 
@@ -238,15 +235,63 @@
 	}
 }
 
+-(bool)isPeelable:(int)index {
+    bool canBePeeled = [[auxPeelableByUser objectAtIndex:index] boolValue];
+    return canBePeeled;
+}
+
+-(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix {
+    unsigned char pixel[1] = {0};
+    CGContextRef context = CGBitmapContextCreate(pixel, 
+                                                 1, 1, 8, 1, NULL,
+                                                 kCGImageAlphaOnly);
+    UIGraphicsPushContext(context);
+    UIImage * im = selectedStix.image;
+    [im drawAtPoint:CGPointMake(-point.x, -point.y)];
+    UIGraphicsPopContext();
+    CGContextRelease(context);
+    CGFloat alpha = pixel[0]/255.0;
+    BOOL transparent = alpha < 0.9; //0.01;
+    NSLog(@"Foreground test: x y %f %f, alpha %f", point.x, point.y, alpha);
+    return !transparent;
+}
+
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
     CGPoint location = [gesture locationInView:self];
+    int lastStixView = -1;
     for (int i=0; i<[self.auxStixViews count]; i++) {
         CGRect frame = [[auxStixViews objectAtIndex:i] frame];
-        NSLog(@"Stix %d at %f %f %f %f", i, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
-        if (CGRectContainsPoint(frame, location)) {
-            NSLog(@"Tapped on stix %d of type %@ at %f %f", i, [auxStixStringIDs objectAtIndex:i], location.x, location.y);
+        //NSLog(@"Stix %d at %f %f %f %f", i, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        if (CGRectContainsPoint(frame, location) && [self isPeelable:i]) {
+            // also check to see if point has color data or is part of the clear background
+            CGPoint locationInFrame = location;
+            locationInFrame.x -= frame.origin.x;
+            locationInFrame.y -= frame.origin.y;
+            // UIImage is always 120x120, so we have to scale the touch from within the current frame to a 120x120 frame
+            float scale = 120 / frame.size.width;
+            locationInFrame.x *= scale;
+            locationInFrame.y *= scale;
+            NSLog(@"Tapped in frame of stix %d of type %@ at %f %f scale %f", i, [auxStixStringIDs objectAtIndex:i], location.x, location.y, scale);
+            if ([self isForeground:locationInFrame inStix:[auxStixViews objectAtIndex:i]]) {
+                lastStixView = i;
+            }
         }
     }
+    if (lastStixView == -1)
+        return;
+    
+    // display action sheet
+    NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
+    NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+    NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", @"Reposition", nil];
+    [actionSheet showInView:self];
+    [actionSheet release];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {
+    // button index: 0 = "Peel", 1 = "Stick", 2 = "Cancel"
+    NSLog(@"Button index: %d", buttonIndex);
 }
 
 -(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {

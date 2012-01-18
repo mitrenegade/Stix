@@ -15,9 +15,10 @@
 
 @protocol StixViewDelegate 
 //-(void)didFinishScalingMotionWithScale:(float)scale;
+-(NSString*) getUsername;
 @end
 
-@interface StixView : UIView <UIGestureRecognizerDelegate>
+@interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
 {
     UIImageView * stix;
     OutlineLabel * stixCount;
@@ -38,6 +39,10 @@
     
     NSMutableArray * auxStixViews;
     NSMutableArray * auxStixStringIDs;
+    NSMutableArray * auxScales; // needed for touch test
+    NSMutableArray * auxPeelableByUser;
+    
+    NSObject<StixViewDelegate> * delegate;    
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -48,6 +53,7 @@
 @property (nonatomic, retain) NSMutableArray * auxStixViews;
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, assign) bool isPeelable;
+@property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;    
 
 // could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;

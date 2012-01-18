@@ -12,7 +12,7 @@
 
 @synthesize imageView;
 @synthesize labelComment;
-@synthesize labelCommentBG;
+//@synthesize labelCommentBG;
 @synthesize labelLocationString;
 @synthesize delegate;
 @synthesize stix;
@@ -31,7 +31,35 @@
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
 }
+
+-(void)initStixView:(Tag*)tag {
+    NSString * myStixStringID = tag.stixStringID;
+    int count = tag.badgeCount;
+    float centerX = tag.badge_x;
+    float centerY = tag.badge_y;
+    float scale = tag.stixScale;
+    float rotation = tag.stixRotation;
+    
+    // hack: backwards compatibility
+    if (scale == 0)
+        scale = 1;
+    
+    NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", tag.image.size.width, tag.image.size.height, centerX, centerY);
+    
+    CGRect frame = [imageView frame];
+    stixView = [[StixView alloc] initWithFrame:frame];
+    [stixView setInteractionAllowed:NO];
+    [stixView setIsPeelable:NO];
+    [stixView initializeWithImage:tag.image andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
+    [stixView populateWithAuxStixFromTag:tag];
+    [self.view insertSubview:stixView belowSubview:imageView];    
+}
+
 -(void)setStixUsingTag:(Tag *) tag {
+    
+#if 1
+    [self initStixView:tag];
+#else
     float item_width = imageView.frame.size.width;
     float item_height = imageView.frame.size.height;
     
@@ -71,6 +99,7 @@
         [imageView addSubview:stixCount];
     }
     // do not release stix or stixCount
+#endif
 }
 
 -(void)forceImageAppear:(UIImage*)img {
@@ -79,23 +108,25 @@
 -(void)setLabel:(NSString *)label {
     [labelComment setText:label];
 }
+/*
 -(void)setLocation:(NSString *)location {
     [labelLocationString setText:location];
     if ([location length] == 0) {
-        [labelLocationString setHidden:YES];
-        CGRect newFrame = [labelCommentBG frame];
-        newFrame.size.height = 51;
-        [labelCommentBG setFrame:newFrame];
-        [labelComment setFrame:newFrame];
+        //[labelLocationString setHidden:YES];
+        //CGRect newFrame = [labelCommentBG frame];
+        //newFrame.size.height = 51;
+        //[labelCommentBG setFrame:newFrame];
+        //[labelComment setFrame:newFrame];
     }
     else {
         [labelLocationString setHidden:NO];
-        CGRect newFrame = [labelCommentBG frame];
-        newFrame.size.height = 29;
-        [labelCommentBG setFrame:newFrame];        
-        [labelComment setFrame:newFrame];
+        //CGRect newFrame = [labelCommentBG frame];
+        //newFrame.size.height = 29;
+        //[labelCommentBG setFrame:newFrame];        
+        //[labelComment setFrame:newFrame];
     }
 }
+*/
 
 -(IBAction)didPressBackButton:(id)sender {
     [self.stix removeFromSuperview];
@@ -128,7 +159,7 @@
     
     [imageView release];
     [labelComment release];
-    [labelCommentBG release];
+    //[labelCommentBG release];
     [labelLocationString release];
     [stix release];
     [stixCount release];

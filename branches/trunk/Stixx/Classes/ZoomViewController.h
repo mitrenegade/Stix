@@ -10,6 +10,7 @@
 #import "BadgeView.h"
 #import "Tag.h"
 #import "OutlineLabel.h"
+#import "StixView.h"
 
 @protocol ZoomViewDelegate
 
@@ -20,19 +21,20 @@
 @interface ZoomViewController : UIViewController
 
 {
-    IBOutlet UIButton * imageView;
+    //IBOutlet UIButton * imageView;
     //IBOutlet UIButton * backButton;
     IBOutlet UILabel * labelComment;
-    IBOutlet UILabel * labelCommentBG;
+    //IBOutlet UILabel * labelCommentBG;
     IBOutlet UILabel * labelLocationString;
-    UIImageView * stix;
-    OutlineLabel * stixCount;
+    //UIImageView * stix;
+    //OutlineLabel * stixCount;
 	NSObject<ZoomViewDelegate> *delegate;
+    StixView * stixView;
 }
 @property (nonatomic, retain) IBOutlet UIButton * imageView;
 //@property (nonatomic, retain) IBOutlet UIButton * backButton;
 @property (nonatomic, retain) IBOutlet UILabel * labelComment;
-@property (nonatomic, retain) IBOutlet UILabel * labelCommentBG;
+//@property (nonatomic, retain) IBOutlet UILabel * labelCommentBG;
 @property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, assign) NSObject<ZoomViewDelegate> *delegate;
 @property (nonatomic, retain) UIImageView * stix;
@@ -43,4 +45,5 @@
 -(void)setLabel:(NSString*)label;
 -(void)setLocation:(NSString *)location;
 -(void)setStixUsingTag:(Tag *)tag;
+-(void)initStixView:(Tag *)tag;
 @end

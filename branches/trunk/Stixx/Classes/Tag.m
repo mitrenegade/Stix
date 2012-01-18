@@ -52,12 +52,12 @@
     NSLog(@"Added badge at %d %d to tag", x, y);
 }
 
--(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
+-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable{
     [auxStixStringIDs addObject:stringID];
     [auxLocations addObject:[NSValue valueWithCGPoint:location]];
     [auxScales addObject:[NSNumber numberWithFloat:scale]];
     [auxRotations addObject:[NSNumber numberWithFloat:rotation]];
-    [auxPeelable addObject:[NSNumber numberWithBool:YES]];
+    [auxPeelable addObject:[NSNumber numberWithBool:peelable]];
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {

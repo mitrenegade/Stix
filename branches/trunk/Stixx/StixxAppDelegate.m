@@ -457,7 +457,10 @@ static int init=0;
             CGPoint location = updatingAuxLocation;
             float scale = updatingAuxScale;
             float rotation = updatingAuxRotation;
-            [tag addAuxiliaryStixOfType:stixStringID withLocation:location withScale:scale withRotation:rotation];
+            float peelable = YES;
+            if ([tag.username isEqualToString:username])
+                peelable = NO;
+            [tag addAuxiliaryStixOfType:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
             [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
         }
         
@@ -838,11 +841,11 @@ static int init=0;
         NSString * newStixStringID = [BadgeView getRandomStixStringID];
         int count = [[allStix objectForKey:newStixStringID] intValue];
         if (count == 0) {
-            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
+            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
         }
         else
         {
-            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView stixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
+            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK"];
         }
         //newStixSuccess = YES;
         [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];

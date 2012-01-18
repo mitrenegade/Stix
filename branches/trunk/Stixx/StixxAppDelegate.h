@@ -34,7 +34,7 @@
     ExploreViewController * exploreController;
     LoginSplashController * loginSplashController;
     MyStixViewController * myStixController;
-    LoadingViewController * loadingController;
+//    LoadingViewController * loadingController;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
@@ -74,6 +74,8 @@
     NSMutableDictionary * allUserPhotos;
     int idOfMostRecentUser;
     
+    IBOutlet UITextField * loadingMessage;
+    
     Kumulos* k;
 }
 
@@ -98,7 +100,6 @@
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) LoginSplashController * loginSplashController;
 @property (nonatomic, retain) MyStixViewController * myStixController;
-@property (nonatomic, retain) LoadingViewController * loadingController;
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) UIImage * userphoto;
 @property (nonatomic, assign) int usertagtotal;
@@ -111,5 +112,6 @@
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @property (nonatomic, retain) NSMutableArray * allCarouselViews;
+@property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
 @end
 

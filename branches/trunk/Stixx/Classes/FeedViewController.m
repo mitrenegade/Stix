@@ -25,9 +25,7 @@
 @synthesize carouselView;
 @synthesize nameLabel;
 @synthesize delegate;
-@synthesize activityIndicatorCenter; // initially is active
-@synthesize activityIndicatorLeft;
-@synthesize activityIndicatorRight;
+@synthesize activityIndicator; // initially is active
 @synthesize userPhotos;
 @synthesize allTags;
 @synthesize scrollView;
@@ -63,8 +61,8 @@
 	/****** init badge view ******/
     [self createCarouselView];
     
-    activityIndicatorCenter = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
-    [self.view addSubview:activityIndicatorCenter];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
+    [self.view addSubview:activityIndicator];
     
     //zoomViewController = [[ZoomViewController alloc] init];
     
@@ -91,17 +89,6 @@
     [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:scrollView];
-}
-
-- (void)setIndicatorWithID:(int)which animated:(BOOL)animate {
-    if (animate)
-    {
-        //[activityIndicatorCenter setHidden:NO];
-        [activityIndicatorCenter startCompleteAnimation];
-    }
-    else
-        [activityIndicatorCenter stopCompleteAnimation];
-        //[activityIndicatorCenter setHidden:YES];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -140,14 +127,11 @@
 - (void)viewDidUnload {
 	// Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
 	// For example: self.myOutlet = nil;
-    [activityIndicatorCenter release];
-    [activityIndicatorLeft release];
-    [activityIndicatorRight release];
+    [activityIndicator release];
     [nameLabel release];
     
-    activityIndicatorCenter = nil;
-    activityIndicatorLeft = nil;
-    activityIndicatorRight = nil;
+    activityIndicator = nil;
+
     nameLabel = nil;
 
     [carouselView release];
@@ -164,14 +148,10 @@
 	[scrollView release];
 	[allTags release];
 	[scrollView release];
-    [activityIndicatorCenter release];
-    [activityIndicatorLeft release];
-    [activityIndicatorRight release];
+    [activityIndicator release];
     [nameLabel release];
     
-    activityIndicatorCenter = nil;
-    activityIndicatorLeft = nil;
-    activityIndicatorRight = nil;
+    activityIndicator = nil;
     nameLabel = nil;
 
     [carouselView release];
@@ -331,7 +311,7 @@
         // should not come here!
         //NSLog(@"Error! allTags was never seeded!");
         [self.delegate checkForUpdateTags];
-        [self setIndicatorWithID:0 animated:YES];
+        [self.activityIndicator startCompleteAnimation];
     }
 }
 
@@ -357,11 +337,11 @@
         // determine direction, for indicators
         if (lastContentOffset < scrollView.contentOffset.x) { // right
             if (page == [self itemCount] - 1)
-                [self setIndicatorWithID:0 animated:YES];
+                [self.activityIndicator startCompleteAnimation];
         }
         else if (lastContentOffset > scrollView.contentOffset.x) { // left 
             if (page == 0)
-                [self setIndicatorWithID:0 animated:YES];
+                [self.activityIndicator startCompleteAnimation];
         }
         
         lastContentOffset = scrollView.contentOffset.x;

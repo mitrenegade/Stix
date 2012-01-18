@@ -45,10 +45,7 @@
     ZoomViewController * zoomViewController;
     CommentViewController * commentView;
     
-    //IBOutlet UIActivityIndicatorView * activityIndicatorCenter;
-    LoadingAnimationView * activityIndicatorCenter;
-    IBOutlet UIActivityIndicatorView * activityIndicatorLeft;
-    IBOutlet UIActivityIndicatorView * activityIndicatorRight;
+    LoadingAnimationView * activityIndicator;
     
     IBOutlet UILabel * nameLabel;
     
@@ -69,14 +66,11 @@
 @property (nonatomic, assign) NSObject<FeedViewDelegate> * delegate;
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicatorCenter;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorLeft;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView * activityIndicatorRight;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) ZoomViewController * zoomViewController;
 @property (nonatomic, retain) CommentViewController * commentView;
 
--(void)setIndicatorWithID:(int)which animated:(BOOL)animate;
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)createCarouselView;
 -(void)reloadCarouselView;

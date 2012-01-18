@@ -39,6 +39,8 @@
     
     LoadingAnimationView * activityIndicator;
     
+    StixView * stixView; // the view that is clicked for zoom
+    
     int lastContentOffset;
     
     Kumulos * k;

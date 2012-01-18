@@ -58,7 +58,7 @@
 
     [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
-    zoomView = [[UIImageView alloc] init];
+    //zoomView = [[UIImageView alloc] init];
     isZooming = NO;
     [self forceReloadAll];
 
@@ -166,7 +166,7 @@
     scrollView.myDelegate = self; // needs delegates for both scrolls
     scrollView.delegate = self;
 }
-
+/*
 -(UIImageView *)populateWithBadge:(NSString*)stixStringIDs withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
     float item_width = 140;
     float item_height = 128;
@@ -196,7 +196,7 @@
     
     return stix;
 }
-
+*/
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
@@ -235,8 +235,9 @@
             [feedItem release];
 #else              
             CGRect frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);
-            StixView * stixView = [[StixView alloc] initWithFrame:frame];
+            stixView = [[StixView alloc] initWithFrame:frame];
             [stixView setInteractionAllowed:NO];
+            [stixView setIsPeelable:NO];
             int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
             int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
             [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
@@ -376,66 +377,123 @@
         return; 
     
     Tag * tag = [allTags objectAtIndex:ct];
-    UIImage * image = tag.image;
-    NSString * label = tag.comment;
+    NSString * label = tag.descriptor;
     NSString * locationString = tag.locationString;
+    NSLog(@"Using tag of comment %@ and location %@", label, locationString);
+    /*
+#if 1
+    UIImage * image = tag.image;
     UIImage * photo = tag.image;
     
     // animate
     isZooming = YES;
-    [zoomView setImage:photo];
+    [zoomViewController setStixUsingTag:tag];
+//    [zoomView setImage:photo];
     int xoffset = 10; // from scrollView width
     int yoffset = 3; // from ??
     zoomView.frame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
     [self.view insertSubview:zoomView aboveSubview:scrollView];
     zoomFrame = zoomView.frame;
+#else
+    int xoffset = 10; // from scrollView width
+    int yoffset = 3; // from ??
+    zoomFrame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
+    stixView = [[StixView alloc] initWithFrame:zoomFrame];
+    [stixView setInteractionAllowed:NO];
+    [stixView setIsPeelable:NO];
+    int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
+    int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
+    [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
+    [stixView populateWithAuxStixFromTag:tag];
+    [self.view insertSubview:stixView aboveSubview:scrollView];
+#endif
     CGRect frameBig = CGRectMake(10, 58, 300, 300); // hard coded from ZoomViewController.xib
     // animate a scaling transition
+    NSLog(@"Stix frame before: %f %f %f %f", stixView.frame.origin.x, stixView.frame.origin.y, stixView.frame.size.width, stixView.frame.size.height);
     [UIView 
-     animateWithDuration:.2
+     animateWithDuration:5
      delay:0 
      options:UIViewAnimationCurveEaseOut
      animations:^{
+#if 1
          zoomView.frame = frameBig;
-         //[badgeView addSubview:zoomView];
+#else
+         stixView.frame = frameBig;
+#endif
      }
      completion:^(BOOL finished){
-         zoomView.hidden = YES;
+#if 1
+        zoomView.hidden = YES;
          [zoomViewController setDelegate:self];
          [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
-         [zoomViewController forceImageAppear:image];
+         //[zoomViewController forceImageAppear:image];
          [zoomViewController setLabel:label];
-         [zoomViewController setLocation:locationString];
+         //[zoomViewController setLocation:locationString];
          [zoomViewController setStixUsingTag:tag];
          [carouselView setUnderlay:zoomViewController.view];
          isZooming = NO;
+#else
+         [stixView setHidden:YES];
+         [zoomViewController setDelegate:self];
+         [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
+         [zoomViewController setLabel:label];
+         //[zoomViewController setLocation:locationString];
+         [zoomViewController setStixUsingTag:tag];
+         [carouselView setUnderlay:zoomViewController.view];
+         isZooming = NO;
+         NSLog(@"Stix frame after: %f %f %f %f", stixView.frame.origin.x, stixView.frame.origin.y, stixView.frame.size.width, stixView.frame.size.height);
+#endif
      }
      ];
+     */
+    [zoomViewController setDelegate:self];
+    [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
+    [zoomViewController setLabel:label];
+    [zoomViewController setStixUsingTag:tag];
+    [carouselView setUnderlay:zoomViewController.view];
+    isZooming = NO;
     
 }
 
 -(void)didDismissZoom {
-#if 1
     // animate
+    /*
+#if 1
     [zoomView setHidden:NO];
+#else
+    [stixView setHidden:NO];
+#endif
     isZooming = YES;
 
     // animate a scaling transition
     [UIView 
-     animateWithDuration:.2
+     animateWithDuration:5
      delay:0 
      options:UIViewAnimationCurveEaseOut
      animations:^{
+#if 1
          zoomView.frame = zoomFrame;
+#else
+         stixView.frame = zoomFrame;
+#endif
      }
      completion:^(BOOL finished){
-         zoomView.hidden = YES;
+#if 1
+         [zoomView setHidden:YES];
          [zoomView removeFromSuperview];
+#else
+         stixView.hidden = YES;
+         [stixView removeFromSuperview];
+         [stixView release];
+#endif
          [carouselView setUnderlay:scrollView];
          isZooming = NO;
      }
      ];
-#endif
+     */
+    isZooming = NO;
+    [carouselView setUnderlay:scrollView];
+    [zoomViewController.view removeFromSuperview];
 }
 
 - (void)didReceiveMemoryWarning

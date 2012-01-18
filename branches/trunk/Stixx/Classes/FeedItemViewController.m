@@ -89,6 +89,7 @@
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO];
     [stixView setIsPeelable:YES];
+    [stixView setDelegate:self];
     [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view insertSubview:stixView belowSubview:imageView];
@@ -210,4 +211,8 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+/* StixViewDelegate */
+-(NSString*)getUsername {
+    return [self.delegate getUsername];
+}
 @end

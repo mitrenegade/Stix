@@ -15,10 +15,10 @@
 @protocol FeedItemViewDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
-
+-(NSString*)getUsername; // forward from StixView
 @end
 
-@interface FeedItemViewController : UIViewController {
+@interface FeedItemViewController : UIViewController <StixViewDelegate>{
     
 	IBOutlet UILabel * labelName;
     IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick

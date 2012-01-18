@@ -268,7 +268,7 @@ static int totalStixTypes = 0;
     }
 }
 
-+(NSString *) stixDescriptorForStixStringID:(NSString *)stixStringID {
++(NSString *) getStixDescriptorForStixStringID:(NSString *)stixStringID {
     return [stixDescriptors objectForKey:stixStringID];
 }
 

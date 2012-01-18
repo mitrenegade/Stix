@@ -102,7 +102,7 @@ enum {
 +(NSArray *)stixStringIDs;
 
 // returns a human readable string for each Stix
-+(NSString *)stixDescriptorForStixStringID:(NSString*)stixStringID;
++(NSString *)getStixDescriptorForStixStringID:(NSString*)stixStringID;
 
 // for displaying badges
 +(UIImageView *) getBadgeWithStixStringID:(NSString*)stixStringID;

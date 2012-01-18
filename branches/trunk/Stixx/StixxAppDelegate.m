@@ -44,8 +44,8 @@
 @synthesize k;
 @synthesize lastCarouselView;
 @synthesize allCommentCounts;
-@synthesize loadingController;
 @synthesize allCarouselViews;
+@synthesize loadingMessage;
 
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
@@ -57,9 +57,7 @@ static int init=0;
     [k setDelegate:self];
 
     // Override point for customization after application launch
-    loadingController = [[LoadingViewController alloc] init];
-    [window addSubview:loadingController.view];
-    [loadingController setMessage:@"Connecting to Stix server..."];
+    [loadingMessage setText:@"Connecting to Stix Server..."];
     
     [window makeKeyAndVisible];
     
@@ -102,11 +100,7 @@ static int init=0;
     allCarouselViews = [[NSMutableArray alloc] init];
     
 	/***** create first view controller: the TagViewController *****/
-    [loadingController.view removeFromSuperview]; // doesnt work
-    [loadingController release];
-    loadingController = [[LoadingViewController alloc] init];
-    [window addSubview:loadingController.view];
-    [loadingController setMessage:@"Initializing camera..."];
+    //[loadingMessage setText:@"Initializing camera..."];
 
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
@@ -125,11 +119,7 @@ static int init=0;
     [self checkForUpdateTags];
 #if 1
 	/***** create feed view *****/
-    [loadingController.view removeFromSuperview];
-    [loadingController release];
-    loadingController = [[LoadingViewController alloc] init];
-    [window addSubview:loadingController.view];
-    [loadingController setMessage:@"Loading feed..."];
+    //[loadingMessage setText:@"Loading feed..."];
 
 	feedController = [[FeedViewController alloc] init];
     [feedController setDelegate:self];
@@ -143,12 +133,7 @@ static int init=0;
     exploreController.delegate = self;
 	
 	/***** create friends feed *****/
-    [loadingController.view removeFromSuperview];
-    [loadingController release];
-    loadingController = [[LoadingViewController alloc] init];
-    [window addSubview:loadingController.view];
-    [loadingController setMessage:@"Contacting friends.."];
-
+    //[loadingMessage setText:@"Networking with friends..."];
 	friendController = [[FriendsViewController alloc] init];
     //	friendController.tagViewController = tagViewController;
     friendController.delegate = self;
@@ -182,11 +167,7 @@ static int init=0;
     else
     {
         NSLog(@"Loggin in as %@", username);
-        [loadingController.view removeFromSuperview];
-        [loadingController release];
-        loadingController = [[LoadingViewController alloc] init];
-        [window addSubview:loadingController.view];
-        [loadingController setMessage:[NSString stringWithFormat:@"Logging in as %@...", username]];
+        //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
         [profileController loginWithUsername:username];
     }   
 	/***** add view controllers to tab controller, and add tab to window *****/
@@ -197,7 +178,6 @@ static int init=0;
     
     lastViewController = feedController;
     lastCarouselView = feedController.carouselView;
-    [loadingController.view removeFromSuperview];
     [window addSubview:[tabBarController view]];
     
     [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
@@ -523,8 +503,7 @@ static int init=0;
             }
             didAddTag = [self addTagWithCheck:tag withID:new_id];
         }
-        [feedController setIndicatorWithID:0 animated:NO];
-        [feedController setIndicatorWithID:1 animated:NO];
+        [feedController.activityIndicator stopCompleteAnimation];
         if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
             [feedController reloadCurrentPage];
 //            [lastViewController viewWillAppear:TRUE];
@@ -539,7 +518,6 @@ static int init=0;
     if (tagID == idOfNewestTagReceived || // we always want to make this request
         pageOfLastNewerTagsRequest != tagID){
         pageOfLastNewerTagsRequest = tagID;
-        //[feedController setIndicatorWithID:0 animated:YES];
         [k getAllTagsWithIDGreaterThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
     }
     else{
@@ -581,7 +559,7 @@ static int init=0;
         [feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed + totalAdded - 1]; 
         //NSLog(@"Added %d tags with id greater than current id at page %d", totalAdded, feedController.lastPageViewed);
     }
-    [feedController setIndicatorWithID:0 animated:NO];
+    [feedController.activityIndicator stopCompleteAnimation];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDLessThanDidCompleteWithResult:(NSArray *)theResults {
@@ -604,7 +582,7 @@ static int init=0;
         [feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed]; // hack: forced reload of end
         //NSLog(@"Added %d tags with id less than current id at page %d", totalAdded, feedController.lastPageViewed);
     }
-    [feedController setIndicatorWithID:1 animated:NO];
+    [feedController.activityIndicator stopCompleteAnimation];
 }
 
 - (NSMutableArray *) getTags {
@@ -720,11 +698,12 @@ static int init=0;
     [alert show];
     [alert release];
 }
-- (void) kumulosAPI:(kumulosProxy*)kumulos apiOperation:(KSAPIOperation*)operation didFailWithError:(NSString*)theError {
-    //NSLog(@"Kumulos error: %@", theError);
-#if 1
+
+-(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
+    NSLog(@"Kumulos error: %@", theError);
+#if 0
     if (lastViewController == feedController) { // currently on feed controller
-        NSLog(@"Kumulos error in feedController: %@ - probably failed while trying to check for updated tags", theError);
+        NSLog(@"Kumulos error in feedController %x: %@ - probably failed while trying to check for updated tags", feedController, theError);
         [self showAlertWithTitle:@"Error in connection" andMessage:@"Stix encountered an error while connecting." andButton:@"OK"];
     }
     if (lastViewController == tagViewController)

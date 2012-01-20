@@ -15,7 +15,10 @@
 @protocol FeedItemViewDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
--(NSString*)getUsername; // forward from StixView
+
+// forward from StixView
+-(NSString*)getUsername;
+-(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 @end
 
 @interface FeedItemViewController : UIViewController <StixViewDelegate>{

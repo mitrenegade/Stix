@@ -52,12 +52,49 @@
     NSLog(@"Added badge at %d %d to tag", x, y);
 }
 
+-(void)addAnyStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable {
+    // called by StixAppDelegate multiple places - makes a decision whether
+    // to increment count or add an aux stix
+    if ( ([newStixStringID isEqualToString:@"FIRE"] || [newStixStringID isEqualToString:@"ICE"]) && 
+        ([self.stixStringID isEqualToString:@"FIRE"] || [self.stixStringID isEqualToString:@"ICE"]))
+    {
+        // increment/decrement fire and ice if it is the primary stix; do not change other stix counts
+        if ([self.stixStringID isEqualToString:newStixStringID])
+            self.badgeCount++;
+        else {
+            self.badgeCount--;
+            if (self.badgeCount < 0) {
+                self.badgeCount = -self.badgeCount;
+                if ([self.stixStringID isEqualToString:@"FIRE"])
+                    self.stixStringID = @"ICE";
+                else
+                    self.stixStringID = @"FIRE";
+            }
+        }
+    }
+    else {
+        //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
+        // array for the tag
+        [self addAuxiliaryStixOfType:newStixStringID withLocation:newLocation withScale:newScale withRotation:newRotation withPeelable:newPeelable];
+    }
+}
+
 -(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable{
     [auxStixStringIDs addObject:stringID];
     [auxLocations addObject:[NSValue valueWithCGPoint:location]];
     [auxScales addObject:[NSNumber numberWithFloat:scale]];
     [auxRotations addObject:[NSNumber numberWithFloat:rotation]];
     [auxPeelable addObject:[NSNumber numberWithBool:peelable]];
+}
+
+-(NSString*)removeAuxiliaryStixAtIndex:(int)index {
+    NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
+    [auxStixStringIDs removeObjectAtIndex:index];
+    [auxLocations removeObjectAtIndex:index];
+    [auxScales removeObjectAtIndex:index];
+    [auxRotations removeObjectAtIndex:index];
+    [auxPeelable removeObjectAtIndex:index];
+    return auxStringID;
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {

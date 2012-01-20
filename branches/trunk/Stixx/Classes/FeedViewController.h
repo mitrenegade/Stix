@@ -35,6 +35,8 @@
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
+
+-(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index;
 @end
 
 @interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate, AuxStixViewControllerDelegate> {

@@ -215,4 +215,14 @@
 -(NSString*)getUsername {
     return [self.delegate getUsername];
 }
+
+-(void)didAttachStix:(int)index {
+    // 1 = attach
+    [self.delegate didPerformPeelableAction:1 forAuxStix:(int)index];
+}
+
+-(void)didPeelStix:(int)index {
+    // 0 = peel
+    [self.delegate didPerformPeelableAction:0 forAuxStix:(int)index];
+}
 @end

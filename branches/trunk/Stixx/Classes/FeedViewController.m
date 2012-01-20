@@ -317,6 +317,7 @@
 
 -(void)reloadCurrentPage {
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
+    self.allTags = [self.delegate getTags];
     [scrollView reloadPage:lastPageViewed];
 }
 
@@ -373,9 +374,9 @@
 /************** FeedZoomView ***********/
 #define DO_ZOOM_VIEW 0
 -(void)didClickAtLocation:(CGPoint)location {
-#if DO_ZOOM_VIEW
     NSLog(@"FeedViewController: Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
     
+#if DO_ZOOM_VIEW
     Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
     UIImage * image = tag.image;
     NSString * label = tag.comment;
@@ -387,6 +388,13 @@
     [zoomViewController setLabel:label];
     [zoomViewController setLocation:locationStr];
 #endif
+    
+    Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
+    CGPoint locationInFeedItem = location;
+    locationInFeedItem.x -= lastContentOffset;
+    
+    FeedItemViewController * feedItem = [feedItems objectForKey:tag.tagID];
+    [[feedItem stixView] didTouchAtLocation:locationInFeedItem];
 }
 
 -(void)didDismissZoom {
@@ -422,6 +430,25 @@
 /*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/
 -(NSString*)getUsername {
     return [self.delegate getUsername];
+}
+
+-(void)didPerformPeelableAction:(int)action forAuxStix:(int)index {
+    // change local tag structure for immediate display
+    Tag * tag = [allTags objectAtIndex:lastPageViewed];
+    if (action == 0) {
+        // peel stix
+        [tag removeAuxiliaryStixAtIndex:index];
+        // feedItem should already have removed it
+    }
+    else if (action == 1) {
+        // attach stix
+        [[tag auxPeelable] replaceObjectAtIndex:index withObject:[NSNumber numberWithBool:NO]];
+        [allTags replaceObjectAtIndex:lastPageViewed withObject:tag];
+    }
+    [self reloadCurrentPage];
+    
+    // tell app delegate to reload tag before altering internal info
+    [self.delegate didPerformPeelableAction:action forTagWithIndex:lastPageViewed forAuxStix:index];
 }
 @end
 

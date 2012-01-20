@@ -65,8 +65,10 @@
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
+-(void)addAnyStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable;
 -(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
+-(NSString*)removeAuxiliaryStixAtIndex:(int)index;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;

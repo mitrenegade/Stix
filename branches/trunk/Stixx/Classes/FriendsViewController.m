@@ -39,7 +39,8 @@
 	UIImage * i = [UIImage imageNamed:@"tab_friends.png"];
 	[tbi setImage:i];
 
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+//    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
 
     return self;
 }

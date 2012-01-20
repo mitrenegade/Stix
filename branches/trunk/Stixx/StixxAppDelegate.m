@@ -416,7 +416,6 @@ static int init=0;
         // find the correct tag in allTags;
         if ([theResults count] == 0)
             return;
-#if 1
         Tag * tag = nil;
         for (NSMutableDictionary * d in theResults) {
             Tag * t = [Tag getTagFromDictionary:d];
@@ -427,42 +426,99 @@ static int init=0;
         }
         if (tag == nil)
             return;
-#else
+        NSString * stixStringID = updatingAuxStixStringID;
+
+        // only uses these if not fire/ice 
+        CGPoint location = updatingAuxLocation;
+        float scale = updatingAuxScale;
+        float rotation = updatingAuxRotation;
+        float peelable = YES;
+        if ([tag.username isEqualToString:username])
+            peelable = NO;
+        
+        // find local tag and sync with kumulos tag
+        Tag * localTag = nil;
+        for (int i=0; i<[allTags count]; i++) {
+            localTag = [allTags objectAtIndex:i];
+            if ([localTag.tagID intValue] == updatingAuxTagID)
+                break;
+        }
+        if (localTag == nil) 
+            return;
+        // FIXME: in case of bad internet connections, updated stix from one user might
+        // not make it to kumulos before another user changes it. we have to make
+        // updating aux stix a parallel action so that multiple users can operate on 
+        // one pix without deleting the other users' progress.
+        // this can be done by creating an auxStix table where addition of a stix
+        // simply adds to that database instead of adding to a data structure that gets
+        // loaded to the pix in allTags
+        //[tag syncWithTag:localTag];  // copy all new tags from localTag into kumulos tag
+                                    // this prevents lost updates due to a slow internet connection with fast local addition of new stix because localTag will always have the most updated local additions and tag will have the most updated internet additions
+        /*
+        NSMutableArray * oldAuxStix = tag.auxStixStringIDs;
+        NSMutableArray * newAuxStix = [[allTags objectAtIndex:0] auxStixStringIDs];
+        NSLog(@"old tags have %d aux stix; current tags have %d aux stix", [oldAuxStix count], [newAuxStix count]); 
+        */
+        [tag addAnyStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+        /*
+        oldAuxStix = tag.auxStixStringIDs;
+        NSLog(@"old tags now have %d aux stix; last stix is %@", [oldAuxStix count], [oldAuxStix objectAtIndex:[oldAuxStix count]-1]);
+        */
+        NSMutableData *theAuxStixData = [NSMutableData data];
+        NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
+        [encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
+        [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
+        [encoder encodeObject:tag.auxScales forKey:@"auxScales"];
+        [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
+        [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
+        [encoder finishEncoding];
+        
+        // update kumulos version of tag with most recent tags
+        [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
+        
+        // replace old tag in allTags
+        [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
+                
+        NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
+        isUpdatingAuxStix = 0;
+        [feedController reloadCurrentPage];
+    }
+    
+    if (isUpdatingPeelableStix) {
+        // we get here after calling getAllTagsWithIDRange from didPerformPeelableAction
+        // so that we can modify the new peelable stix status to the correct tag structure
+        
+        // find the correct tag in allTags;
         if ([theResults count] == 0)
             return;
-        NSMutableDictionary * d = [theResults objectAtIndex:0];
-        Tag * tag = [Tag getTagFromDictionary:d];
-#endif
-        NSString * stixStringID = updatingAuxStixStringID;
-        if ( ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) && 
-            ([tag.stixStringID isEqualToString:@"FIRE"] || [tag.stixStringID isEqualToString:@"ICE"]))
-        {
-            // increment/decrement fire and ice if it is the primary stix; do not change other stix counts
-            if ([tag.stixStringID isEqualToString:stixStringID])
-                tag.badgeCount++;
-            else {
-                tag.badgeCount--;
-                if (tag.badgeCount < 0) {
-                    tag.badgeCount = -tag.badgeCount;
-                    if ([tag.stixStringID isEqualToString:@"FIRE"])
-                        tag.stixStringID = @"ICE";
-                    else
-                        tag.stixStringID = @"FIRE";
-                }
+        Tag * tag = nil;
+        for (NSMutableDictionary * d in theResults) {
+            Tag * t = [Tag getTagFromDictionary:d];
+            NSLog(@"Checking tag of id %d for id %d", [t.tagID intValue], updatingPeelableTagIndex);
+            if ([t.tagID intValue]== updatingPeelableTagID) {
+                NSLog(@"Found tag %d", [t.tagID intValue]);
+                tag = t;
             }
         }
-        else {
-            //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
-            // array for the tag
-            CGPoint location = updatingAuxLocation;
-            float scale = updatingAuxScale;
-            float rotation = updatingAuxRotation;
-            float peelable = YES;
-            if ([tag.username isEqualToString:username])
-                peelable = NO;
-            [tag addAuxiliaryStixOfType:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
-            [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
+        if (tag == nil)
+            return;
+        
+        // from FeedViewController: changes structure of most recently dowloaded tag
+        if (updatingPeelableAction == 0) { // peel stix
+            NSString * peeledAuxStixStringID = [[tag auxStixStringIDs] objectAtIndex:updatingPeelableAuxStixIndex];
+            [tag removeAuxiliaryStixAtIndex:updatingPeelableAuxStixIndex];
+            [self incrementStixCount:peeledAuxStixStringID];            
+            NSLog(@"Adding %@ stix to tag with id %d: new count %d.", peeledAuxStixStringID, [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
+
+            // add to comment log - if comment == @"PEEL" then it is a peel action
+            [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
         }
+        else if (updatingPeelableAction == 1) { // attach stix
+            [[tag auxPeelable] replaceObjectAtIndex:updatingPeelableAuxStixIndex withObject:[NSNumber numberWithBool:NO]];
+        }
+        [allTags replaceObjectAtIndex:updatingPeelableTagIndex withObject:tag];
+        feedController.allTags = allTags;
+        [feedController reloadCurrentPage];
         
         NSMutableData *theAuxStixData = [NSMutableData data];
         NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
@@ -473,20 +529,12 @@ static int init=0;
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
         [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
-        [self updateUserTagTotal];
-        
-        // replace old tag in allTags
-        [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
-        
-        [self didAddNewCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
-        
-        [self decrementStixCount:stixStringID];
-        
-        NSLog(@"Adding %@ stix to tag with id %d: new count %d.", tag.stixStringID, [tag.tagID intValue], tag.badgeCount);
-        isUpdatingAuxStix = 0;
+        isUpdatingPeelableStix = 0;
         [feedController reloadCurrentPage];
     }
-    else {
+    
+    //else
+    {
         // this is called from simply wanting to populate our allTags structure
         bool didAddTag = NO;
         // assume result is ordered by allTagID
@@ -507,9 +555,10 @@ static int init=0;
             didAddTag = [self addTagWithCheck:tag withID:new_id];
         }
         [feedController.activityIndicator stopCompleteAnimation];
-        if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
+        //if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
+        [feedController viewWillAppear:TRUE];
+        if (didAddTag)
             [feedController reloadCurrentPage];
-//            [lastViewController viewWillAppear:TRUE];
         //NSLog(@"loaded %d tags from kumulos", [theResults count]);
   
     }    
@@ -796,6 +845,30 @@ static int init=0;
 
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
 
+    // first update existing tag and display to user for immediate viewing
+    // only uses these if not fire/ice 
+    float peelable = YES;
+    if ([tag.username isEqualToString:username])
+        peelable = NO;
+    [tag addAnyStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+
+    NSNumber * tagID = tag.tagID;
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([t.tagID intValue] == [tagID intValue])
+        {
+            [allTags replaceObjectAtIndex:i withObject:tag];
+            break;
+        }
+        //[feedController reloadCurrentPage];
+    }
+    
+    // immediately add comment, update total, decrement stix count
+    [self didAddNewCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
+    [self updateUserTagTotal];        
+    [self decrementStixCount:stixStringID];
+
+    // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
     updatingAuxStixStringID = stixStringID;
     updatingAuxLocation = location;
@@ -803,6 +876,16 @@ static int init=0;
     updatingAuxRotation = rotation;
 
     isUpdatingAuxStix = YES;
+    [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
+}
+
+-(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index {
+    Tag * tag = [allTags objectAtIndex:tagIndex];
+    isUpdatingPeelableStix = YES;
+    updatingPeelableAction = action;
+    updatingPeelableTagID = [tag.tagID intValue];
+    updatingPeelableAuxStixIndex = index;
+
     [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
 }
 
@@ -896,9 +979,29 @@ static int init=0;
         }
     }
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
+    
+    // todo: when giftstx are used, we must check to sync with kumulos
     [k addStixToUserWithUsername:username andStix:data];
     [data release];
     
+}
+
+-(void)incrementStixCount:(NSString *)stixStringID {
+    int count = [[allStix objectForKey:stixStringID] intValue];
+    if (1) {
+        count++;
+        [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID]; 
+        
+        for (int i=0; i<[allCarouselViews count]; i++) {
+            [[allCarouselViews objectAtIndex:i] reloadAllStix];
+        }
+    }
+    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
+    [k addStixToUserWithUsername:username andStix:data];
+    [data release];
+
+    if (count == 1)
+        [self showAlertWithTitle:@"Peeled a Stix!" andMessage:[NSString stringWithFormat:@"You have peeled off a %@ stix and added it to your collection!", [BadgeView getStixDescriptorForStixStringID:stixStringID]] andButton:@"OK"];
 }
 
 - (void)dealloc {

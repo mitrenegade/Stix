@@ -71,6 +71,13 @@
     float updatingAuxScale;
     float updatingAuxRotation;
     
+    // hack: for peelable stix actions
+    bool isUpdatingPeelableStix;
+    int updatingPeelableTagIndex;
+    int updatingPeelableTagID;
+    int updatingPeelableAuxStixIndex;
+    int updatingPeelableAction;
+    
     NSMutableDictionary * allUserPhotos;
     int idOfMostRecentUser;
     
@@ -89,6 +96,7 @@
 -(void)updateUserTagTotal;
 
 -(void)decrementStixCount:(NSString*)stixStringID;
+-(void)incrementStixCount:(NSString*)stixStringID;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;

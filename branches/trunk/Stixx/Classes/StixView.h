@@ -15,7 +15,11 @@
 
 @protocol StixViewDelegate 
 //-(void)didFinishScalingMotionWithScale:(float)scale;
+@optional
 -(NSString*) getUsername;
+-(void)didAttachStix:(int)index;
+-(void)didPeelStix:(int)index;
+
 @end
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
@@ -42,6 +46,8 @@
     NSMutableArray * auxScales; // needed for touch test
     NSMutableArray * auxPeelableByUser;
     
+    int stixPeelSelected;
+    
     NSObject<StixViewDelegate> * delegate;    
 }
 
@@ -53,10 +59,14 @@
 @property (nonatomic, retain) NSMutableArray * auxStixViews;
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, assign) bool isPeelable;
-@property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;    
+@property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
 
 // could use this
 -(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;
 //-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations;
 -(void)populateWithAuxStixFromTag:(Tag*)tag;
+-(bool)isStixPeelable:(int)index;
+-(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
+
+-(void)didTouchAtLocation:(CGPoint)location;
 @end

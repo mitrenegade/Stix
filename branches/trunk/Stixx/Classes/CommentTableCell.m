@@ -35,7 +35,7 @@
     
     self.name = newName;
     self.comment = newComment;
-    if (stixStringID != @"COMMENT")
+    if (![stixStringID isEqualToString:@"COMMENT"] && ![comment isEqualToString:@"PEEL"])
     {
         self.stix = [BadgeView getBadgeWithStixStringID:stixStringID];
         [self.stix setFrame:CGRectMake(250,0,60,60)];
@@ -46,6 +46,10 @@
     {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
         str = [NSString stringWithFormat:@"%@ added a %@", [self name], desc];
+    }
+    else if ([comment isEqualToString:@"PEEL"]) {
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"%@ peeled off a %@ to add to their collection", [self name], desc];
     }
     else
     {

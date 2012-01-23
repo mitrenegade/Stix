@@ -357,22 +357,12 @@
         [image release];
         image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
     }
-    int x = center.x;
-    int y = center.y;
-    NSLog(@"TagViewController: Badge frame added at %d %d and image size at %f %f", x, y, image.size.width, image.size.height);
+    NSLog(@"TagViewController: Badge frame added at %d %d and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
     [tag addImage:image];
-    [tag addMainStixOfType:selectedStixStringID andCount:1 atLocationX:x andLocationY:y];
     [tag addARCoordinate:newCoord];
-    // add empty aux
-    tag.stixScale = stixScale;
-    tag.stixRotation = stixRotation;
-    tag.auxStixStringIDs = [[NSMutableArray alloc] init];
-    tag.auxLocations = [[NSMutableArray alloc] init];
-    tag.auxScales = [[NSMutableArray alloc] init];
-    tag.auxRotations = [[NSMutableArray alloc] init];
-    tag.auxPeelable = [[NSMutableArray alloc] init];
+    [tag addStix:selectedStixStringID withLocation:center withScale:stixScale withRotation:stixRotation withPeelable:NO];
     [image release];
-    [self.delegate tagViewDidAddTag:tag];
+    [self.delegate didCreateNewPix:tag];
     [tag release];
     
     [carouselView resetBadgeLocations];

@@ -23,7 +23,8 @@
 @protocol TagViewDelegate
 
 - (NSString *)getUsername;
-- (void) tagViewDidAddTag:(Tag*)newTag;
+//- (void) tagViewDidAddTag:(Tag*)newTag;
+-(void)didCreateNewPix:(Tag*)newTag;
 - (bool) isLoggedIn;
 
 -(int)getStixCount:(NSString*)stixStringID;

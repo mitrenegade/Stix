@@ -135,7 +135,6 @@ static int init=0;
 	/***** create friends feed *****/
     //[loadingMessage setText:@"Networking with friends..."];
 	friendController = [[FriendsViewController alloc] init];
-    //	friendController.tagViewController = tagViewController;
     friendController.delegate = self;
     [self checkForUpdatePhotos];
     
@@ -315,9 +314,12 @@ static int init=0;
     return added;
 }
 
--(void)tagViewDidAddTag:(Tag *)newTag {
+-(void)didCreateNewPix:(Tag *)newTag {
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
     //[allTags addObject:newTag];
+    
+    // this function migrates toward not using the basic stix
+    
     newestTag = [newTag retain];
     
     [k setDelegate:self];
@@ -343,12 +345,11 @@ static int init=0;
     [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
     [encoder finishEncoding];
     [encoder release];
-
-    [k newPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andBadge_x:newTag.badge_x andBadge_y:newTag.badge_y andScore:newTag.badgeCount andStixStringID:newTag.stixStringID andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
-    //[k addNewStixWithUsername:username andComment:newTag.comment andLocationString:newTag.locationString andImage:img andBadge_x:x andBadge_y:y andTagCoordinate:theCoordData andType:type andScore:count];    
+    
+    [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];    
 }
 
-- (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation newPixDidCompleteWithResult:(NSNumber *)newRecordID {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixDidCompleteWithResult:(NSNumber *)newRecordID {
     [newestTag setTagID:newRecordID];
     [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
     //[allTags addObject:newestTag];
@@ -361,8 +362,7 @@ static int init=0;
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
 
-    // hack: backwards compatibility. for now, add a new kumulos function to add scale and rotation
-    [k addScaleAndRotationToPixWithAllTagID:[newRecordID intValue] andStixScale:newestTag.stixScale andStixRotation:newestTag.stixRotation];
+    // do not add scale and rotation - all saved in aux stix
     
     [self updateUserTagTotal];
 }
@@ -409,9 +409,39 @@ static int init=0;
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
 {
+    // first, update from kumulos in case other people have added stix
+    // to the same pix we are modifying
+    {
+        // this is called from simply wanting to populate our allTags structure
+        bool didAddTag = NO;
+        // assume result is ordered by allTagID
+        for (NSMutableDictionary * d in theResults) {
+            Tag * tag = [Tag getTagFromDictionary:d];
+            int new_id = [tag.tagID intValue];
+            if (new_id > idOfNewestTagReceived)
+            {
+                NSLog(@"Changing id of Newest Tag Received from %d to %d", idOfNewestTagReceived, new_id);
+                idOfNewestTagReceived = new_id;
+            }
+            if (new_id < idOfOldestTagReceived)
+            {
+                NSLog(@"Changing id of Oldest Tag Received from %d to %d", idOfOldestTagReceived, new_id);
+                idOfOldestTagReceived = new_id;
+            }
+            didAddTag = [self addTagWithCheck:tag withID:new_id];
+        }
+        [feedController.activityIndicator stopCompleteAnimation];
+        if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
+            [feedController viewWillAppear:TRUE];
+        if (didAddTag)
+            [feedController reloadCurrentPage];
+        //NSLog(@"loaded %d tags from kumulos", [theResults count]);
+        
+    }    
+    
+    // we get here from didAddStixToPix
+    // so that we can add the new aux stix to the correct auxStix structure
     if (isUpdatingAuxStix) {
-        // we get here after calling getAllTagsWithIDRange from didAddStixToPix
-        // so that we can add the new aux stix to the correct auxStix structure
         
         // find the correct tag in allTags;
         if ([theResults count] == 0)
@@ -452,14 +482,12 @@ static int init=0;
         // this can be done by creating an auxStix table where addition of a stix
         // simply adds to that database instead of adding to a data structure that gets
         // loaded to the pix in allTags
-        //[tag syncWithTag:localTag];  // copy all new tags from localTag into kumulos tag
-                                    // this prevents lost updates due to a slow internet connection with fast local addition of new stix because localTag will always have the most updated local additions and tag will have the most updated internet additions
         /*
         NSMutableArray * oldAuxStix = tag.auxStixStringIDs;
         NSMutableArray * newAuxStix = [[allTags objectAtIndex:0] auxStixStringIDs];
         NSLog(@"old tags have %d aux stix; current tags have %d aux stix", [oldAuxStix count], [newAuxStix count]); 
         */
-        [tag addAnyStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+        [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
         /*
         oldAuxStix = tag.auxStixStringIDs;
         NSLog(@"old tags now have %d aux stix; last stix is %@", [oldAuxStix count], [oldAuxStix objectAtIndex:[oldAuxStix count]-1]);
@@ -474,19 +502,20 @@ static int init=0;
         [encoder finishEncoding];
         
         // update kumulos version of tag with most recent tags
-        [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
+        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
+        //[k updatePixWithAllTagID:[tag.tagID intValue] andScore:badgeCount andStixStringID:stringID andAuxStix:theAuxStixData];
         
         // replace old tag in allTags
         [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
                 
-        NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
+        //NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
         isUpdatingAuxStix = 0;
         [feedController reloadCurrentPage];
     }
     
+    // we get here from didPerformPeelableAction
+    // so that we can modify the new peelable stix status to the correct tag structure
     if (isUpdatingPeelableStix) {
-        // we get here after calling getAllTagsWithIDRange from didPerformPeelableAction
-        // so that we can modify the new peelable stix status to the correct tag structure
         
         // find the correct tag in allTags;
         if ([theResults count] == 0)
@@ -506,7 +535,7 @@ static int init=0;
         // from FeedViewController: changes structure of most recently dowloaded tag
         if (updatingPeelableAction == 0) { // peel stix
             NSString * peeledAuxStixStringID = [[tag auxStixStringIDs] objectAtIndex:updatingPeelableAuxStixIndex];
-            [tag removeAuxiliaryStixAtIndex:updatingPeelableAuxStixIndex];
+            [tag removeStixAtIndex:updatingPeelableAuxStixIndex];
             [self incrementStixCount:peeledAuxStixStringID];            
             NSLog(@"Adding %@ stix to tag with id %d: new count %d.", peeledAuxStixStringID, [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
 
@@ -528,40 +557,10 @@ static int init=0;
         [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
-        [k updatePixWithAllTagID:[tag.tagID intValue] andScore:tag.badgeCount andStixStringID:tag.stixStringID andAuxStix:theAuxStixData];
+        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         isUpdatingPeelableStix = 0;
         [feedController reloadCurrentPage];
     }
-    
-    //else
-    {
-        // this is called from simply wanting to populate our allTags structure
-        bool didAddTag = NO;
-        // assume result is ordered by allTagID
-        for (NSMutableDictionary * d in theResults) {
-            Tag * tag = [Tag getTagFromDictionary:d];
-            NSLog(@"Tag stringID: %@", tag.stixStringID);
-            int new_id = [tag.tagID intValue];
-            if (new_id > idOfNewestTagReceived)
-            {
-                NSLog(@"Changing id of Newest Tag Received from %d to %d", idOfNewestTagReceived, new_id);
-                idOfNewestTagReceived = new_id;
-            }
-            if (new_id < idOfOldestTagReceived)
-            {
-                NSLog(@"Changing id of Oldest Tag Received from %d to %d", idOfOldestTagReceived, new_id);
-                idOfOldestTagReceived = new_id;
-            }
-            didAddTag = [self addTagWithCheck:tag withID:new_id];
-        }
-        [feedController.activityIndicator stopCompleteAnimation];
-        //if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
-        [feedController viewWillAppear:TRUE];
-        if (didAddTag)
-            [feedController reloadCurrentPage];
-        //NSLog(@"loaded %d tags from kumulos", [theResults count]);
-  
-    }    
 }
 
 -(void)getNewerTagsThanID:(int)tagID {
@@ -593,7 +592,6 @@ static int init=0;
     // tags with IDs greater than idOfCurrentTag should go to the head of the array allTags
 	for (NSMutableDictionary * d in theResults) {
         Tag * tag = [Tag getTagFromDictionary:d];
-        NSLog(@"Tag stringID: %@", tag.stixStringID);
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id > idOfNewestTagReceived)
@@ -619,7 +617,6 @@ static int init=0;
     int totalAdded = 0;
 	for (NSMutableDictionary * d in theResults) {
         Tag * tag = [Tag getTagFromDictionary:d];
-        NSLog(@"Tag stringID: %@", tag.stixStringID);
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id < idOfOldestTagReceived)
@@ -801,23 +798,25 @@ static int init=0;
 }
 
 -(void)didLogout {
-    loggedIn = NO;
-    username = @"";
-    if (userphoto) {
-        [userphoto release];
-        userphoto = nil;
+    if (loggedIn == YES) {
+        loggedIn = NO;
+        username = @"";
+        if (userphoto) {
+            [userphoto release];
+            userphoto = nil;
+        }
+        usertagtotal = 0;
+        [allStix removeAllObjects];
+        [profileController updatePixCount];
+        if (lastCarouselView)
+            [lastCarouselView resetBadgeLocations];
+        
+        if (loginSplashController == nil) {
+            loginSplashController = [[LoginSplashController alloc] init];
+            [loginSplashController setDelegate:self];
+        }
+        [tabBarController presentModalViewController:loginSplashController animated:NO];
     }
-    usertagtotal = 0;
-    [allStix removeAllObjects];
-    [profileController updatePixCount];
-    if (lastCarouselView)
-        [lastCarouselView resetBadgeLocations];
-    
-    if (loginSplashController == nil) {
-        loginSplashController = [[LoginSplashController alloc] init];
-        [loginSplashController setDelegate:self];
-    }
-    [tabBarController presentModalViewController:loginSplashController animated:NO];
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
@@ -850,7 +849,7 @@ static int init=0;
     float peelable = YES;
     if ([tag.username isEqualToString:username])
         peelable = NO;
-    [tag addAnyStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+    [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
 
     NSNumber * tagID = tag.tagID;
     for (int i=0; i<[allTags count]; i++) {
@@ -889,6 +888,7 @@ static int init=0;
     [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
 }
 
+// not used
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updatePixDidCompleteWithResult:(NSNumber *)affectedRows {
     [feedController reloadCurrentPage];
 }
@@ -962,7 +962,6 @@ static int init=0;
 
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
-    //[k addStixToUserWithUsername:username andStix:data];
     [k adminAddStixToAllUsersWithStix:data];
     [data autorelease];
     [stix autorelease];

@@ -58,7 +58,7 @@
     [[self textLabel] setText:str];
     [[self textLabel] setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     
-    if (stixStringID != @"COMMENT")
+    if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"])
         [self addSubview:[self stix]];
 }
 @end

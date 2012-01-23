@@ -68,21 +68,12 @@
     UIImage * imageData = tag.image;
     
     // for the tag's primary stix
-    NSString * myStixStringID = tag.stixStringID;
-    int count = tag.badgeCount;
-    float centerX = tag.badge_x;
-    float centerY = tag.badge_y;
-    float scale = tag.stixScale;
-    if (scale == 0)  // BOBBY TODO: draw from auxScales list
-        scale = 1; // backwards compatibility
-    float rotation = tag.stixRotation;
-    
-    NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", imageData.size.width, imageData.size.height, centerX, centerY);
+    NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
 
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
-    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
+    [stixView initializeWithImage:imageData];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view addSubview:stixView];
 

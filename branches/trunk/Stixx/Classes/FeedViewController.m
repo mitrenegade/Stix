@@ -176,7 +176,10 @@
         [carouselView resetBadgeLocations];
         return;
     }
+    allTags = [self.delegate getTags];
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    
+    NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
     
     // scale stix frame back to full 300x275 size
     FeedItemViewController * feedItem = [feedItems objectForKey:t.tagID];
@@ -256,12 +259,11 @@
     NSString * descriptor = tag.descriptor;
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
-    NSString * stixStringID = tag.stixStringID;
     int tagID = [tag.tagID intValue];
     UIImage * image = tag.image;
     NSLog(@"Index: %d tagID: %d", index, tagID);
     
-    NSLog(@"Creating feed item %d at index %d: name %@ comment %@ image %@ dims %f %f\n", tagID, index, name, comment, stixStringID, image.size.width, image.size.height);
+    NSLog(@"Creating feed item %d at index %d: name %@ comment %@ dims %f %f\n", tagID, index, name, comment, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
     [feedItem setDelegate:self];
@@ -282,7 +284,6 @@
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];
-    NSLog(@"FeedViewController: Adding badge at location %d %d in image of %f %f", tag.badge_x,tag. badge_y, image.size.width, image.size.height);
     
     // this object must be retained so that the button actions can be used
     [feedItems setObject:feedItem forKey:tag.tagID];

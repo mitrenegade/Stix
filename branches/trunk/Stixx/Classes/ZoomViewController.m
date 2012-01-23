@@ -12,12 +12,9 @@
 
 @synthesize imageView;
 @synthesize labelComment;
-//@synthesize labelCommentBG;
 @synthesize labelLocationString;
 @synthesize delegate;
-@synthesize stix;
-@synthesize stixCount;
-//@synthesize image;
+@synthesize stixView;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -33,24 +30,13 @@
 }
 
 -(void)initStixView:(Tag*)tag {
-    NSString * myStixStringID = tag.stixStringID;
-    int count = tag.badgeCount;
-    float centerX = tag.badge_x;
-    float centerY = tag.badge_y;
-    float scale = tag.stixScale;
-    float rotation = tag.stixRotation;
-    
-    // hack: backwards compatibility
-    if (scale == 0)
-        scale = 1;
-    
-    NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", tag.image.size.width, tag.image.size.height, centerX, centerY);
+    NSLog(@"AuxStix: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO];
     [stixView setIsPeelable:NO];
-    [stixView initializeWithImage:tag.image andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
+    [stixView initializeWithImage:tag.image];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view insertSubview:stixView belowSubview:imageView];    
 }
@@ -108,31 +94,10 @@
 -(void)setLabel:(NSString *)label {
     [labelComment setText:label];
 }
-/*
--(void)setLocation:(NSString *)location {
-    [labelLocationString setText:location];
-    if ([location length] == 0) {
-        //[labelLocationString setHidden:YES];
-        //CGRect newFrame = [labelCommentBG frame];
-        //newFrame.size.height = 51;
-        //[labelCommentBG setFrame:newFrame];
-        //[labelComment setFrame:newFrame];
-    }
-    else {
-        [labelLocationString setHidden:NO];
-        //CGRect newFrame = [labelCommentBG frame];
-        //newFrame.size.height = 29;
-        //[labelCommentBG setFrame:newFrame];        
-        //[labelComment setFrame:newFrame];
-    }
-}
-*/
 
--(IBAction)didPressBackButton:(id)sender {
-    [self.stix removeFromSuperview];
-    [stix release];
-    [self.stixCount removeFromSuperview];
-    [stixCount release];
+-(IBAction)didPressBackButton:(id)sender {    
+    for (int i=0; i<[[stixView auxStixViews] count]; i++)
+        [[[stixView auxStixViews] objectAtIndex:i] removeFromSuperview];
     [self.view removeFromSuperview];
     [delegate didDismissZoom];
 }
@@ -159,11 +124,8 @@
     
     [imageView release];
     [labelComment release];
-    //[labelCommentBG release];
     [labelLocationString release];
-    [stix release];
-    [stixCount release];
-    
+    [stixView release];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }

@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jan  8, 2012
+//  Created by Kumulos Bindings Compiler on Jan 23, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -26,6 +26,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addScaleAndRotationToPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminDeleteTestDataDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation deleteTagDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -54,6 +56,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithStixCountsDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixOfPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addEmailToUserDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -114,6 +118,9 @@
 -(KSAPIOperation*) adminDeleteTestDataWithDescriptor:(NSString*)descriptor;
     
    
+-(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andAuxStix:(NSData*)auxStix;
+    
+   
 -(KSAPIOperation*) deleteTagWithAllTagID:(NSUInteger)allTagID;
     
    
@@ -153,6 +160,9 @@
     
    
 -(KSAPIOperation*) updateStixWithAllTagID:(NSUInteger)allTagID andScore:(NSInteger)score andType:(NSInteger)type;
+    
+   
+-(KSAPIOperation*) updateStixOfPixWithAllTagID:(NSUInteger)allTagID andAuxStix:(NSData*)auxStix;
     
    
 -(KSAPIOperation*) addEmailToUserWithUsername:(NSString*)username andEmail:(NSString*)email;

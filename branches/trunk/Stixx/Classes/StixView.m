@@ -30,17 +30,9 @@
     return self;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
-
--(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation {
-    
+// populates with the image data for the pix
+-(void)initializeWithImage:(UIImage*)imageData {
+    originalImageSize = imageData.size;
     CGRect frame = self.frame;
     frame.origin.x = 0;
     frame.origin.y = 0;
@@ -48,6 +40,14 @@
     [imageView setImage:imageData];
     [self addSubview:imageView];
     [imageView release];
+}
+
+// originally initializeWithImage: withStix:
+// this function creates a temporary stix object that can be manipulated
+-(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation {
+    CGRect frame = self.frame;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
     
     stixScale = scale;
     stixRotation = rotation;
@@ -59,7 +59,7 @@
     NSLog(@"StixView creating %@ stix to %d %d in image of size %f %f", stixStringID, x, y, self.frame.size.width, self.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
-    CGSize originalSize = imageData.size;
+    CGSize originalSize = originalImageSize;
 	CGSize targetSize = self.frame.size;
 	
     imageScale =  targetSize.width / originalSize.width;
@@ -137,6 +137,10 @@
         float centerY = location.y;
         
         // scale stix and label down to 270x270 which is the size of the feedViewItem
+        CGSize originalSize = originalImageSize;
+        CGSize targetSize = self.frame.size;
+        imageScale =  targetSize.width / originalSize.width;
+
         CGRect stixFrameScaled = auxStix.frame;
         stixFrameScaled.size.width *= imageScale * auxScale;
         stixFrameScaled.size.height *= imageScale * auxScale;

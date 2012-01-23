@@ -24,6 +24,7 @@
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
 {
+    // stix to be manipulated: new stix or new aux stix
     UIImageView * stix;
     OutlineLabel * stixCount;
     bool canManipulate;
@@ -31,6 +32,8 @@
     bool isDragging;
     bool isPinching;
     float offset_x, offset_y;
+    
+    CGSize originalImageSize;
 
     float stixScale;
     CGRect frameBeforeScale;
@@ -62,9 +65,9 @@
 @property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
 
 // could use this
--(void)initializeWithImage:(UIImage*)imageData andStix:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;
-//-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations;
+-(void)initializeWithImage:(UIImage*)imageData;
 -(void)populateWithAuxStixFromTag:(Tag*)tag;
+-(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;
 -(bool)isStixPeelable:(int)index;
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
 

@@ -72,25 +72,15 @@
 
 -(void)initStixView:(Tag*)tag {
     imageData = tag.image;
-    NSString * myStixStringID = tag.stixStringID;
-    int count = tag.badgeCount;
-    float centerX = tag.badge_x;
-    float centerY = tag.badge_y;
-    float scale = tag.stixScale;
-    float rotation = tag.stixRotation;
     
-    // hack: backwards compatibility
-    if (scale == 0)
-        scale = 1;
-    
-    NSLog(@"AuxStix: Creating stix view of size %f %f, with badge at %f %f", imageData.size.width, imageData.size.height, centerX, centerY);
+    NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO];
     [stixView setIsPeelable:YES];
     [stixView setDelegate:self];
-    [stixView initializeWithImage:imageData andStix:myStixStringID withCount:count atLocationX:centerX andLocationY:centerY andScale:scale andRotation:rotation];
+    [stixView initializeWithImage:imageData];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view insertSubview:stixView belowSubview:imageView];
     //[stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView

@@ -32,15 +32,18 @@
     NSString * comment;
     NSString * locationString;
     UIImage * image;
+    
+    // old primary stix info - not used
+    /*
     int badge_x;
     int badge_y;
-    //int badgeType;
     int badgeCount;
     NSString * stixStringID; // string representation of type
     float stixScale;
     float stixRotation;
+    */
     
-    // auxiliary stix - stored in Kumulos as an array of dictionaries
+    // auxiliary stix - stored in Kumulos as a separate table //an array of dictionaries
     NSMutableArray * auxStixStringIDs;
     NSMutableArray * auxLocations;
     NSMutableArray * auxScales;
@@ -55,20 +58,15 @@
     
     NSString* timestring; // the timestamp for the most recent tag, in string format (unused)
     NSDate * timestamp; // the timestamp as an NSDate
-    
-    // comments/history
-    //NSMutableArray * historyUsername;
-    //NSMutableArray * historyComments;
-    //NSMutableArray * historyStixType;
 }
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
--(void)addAnyStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable;
--(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
--(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
--(NSString*)removeAuxiliaryStixAtIndex:(int)index;
+-(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable;
+//-(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
+//-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
+-(NSString*)removeStixAtIndex:(int)index;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 
 @property (nonatomic, retain) NSString * username;
@@ -80,12 +78,14 @@
 @property (nonatomic, retain) NSNumber * tagID;
 @property (nonatomic, retain) NSString * timestring;
 @property (nonatomic, retain) NSDate * timestamp;
+/*
 @property (nonatomic, assign) int badge_x; // center coordinate
 @property (nonatomic, assign) int badge_y; // center coordinate
 @property (nonatomic, assign) int badgeCount;
 @property (nonatomic, retain) NSString * stixStringID;
 @property (nonatomic, assign) float stixScale;
 @property (nonatomic, assign) float stixRotation;
+*/
 
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, retain) NSMutableArray * auxLocations;

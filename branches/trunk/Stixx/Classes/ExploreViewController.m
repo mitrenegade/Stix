@@ -239,9 +239,8 @@
             stixView = [[StixView alloc] initWithFrame:frame];
             [stixView setInteractionAllowed:NO];
             [stixView setIsPeelable:NO];
-            int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
-            int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
-            [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
+            
+            [stixView initializeWithImage:tag.image];
             [stixView populateWithAuxStixFromTag:tag];
             [exploreItemView addSubview:shadow];
             [exploreItemView addSubview:stixView];

@@ -19,7 +19,7 @@
 @synthesize delegate;
 @synthesize badgeFrame;
 @synthesize stixStringID;
-@synthesize stix;
+//@synthesize stix;
 @synthesize buttonInstructions;
 @synthesize stixView;
 
@@ -43,26 +43,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad]; 
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
-#if 0
-	[imageView setImage:tmp];
-    float centerX = badgeFrame.origin.x + badgeFrame.size.width / 2;
-    float centerY = badgeFrame.origin.y + badgeFrame.size.height / 2;
-
-    NSLog(@"TagDescriptor: Setting imageView to image of dims %f %f with badge at %f %f", tmp.size.width, tmp.size.height, centerX, centerY); 
-    
-    stix = [[self populateWithBadge:stixStringID withCount:1 atLocationX:centerX andLocationY:centerY] retain];    
-    [imageView addSubview:stix];
-    [stix release];
-#else                
+           
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     int x = badgeFrame.origin.x + badgeFrame.size.width / 2;
     int y = badgeFrame.origin.y + badgeFrame.size.height / 2;
-    [stixView initializeWithImage:tmp andStix:stixStringID withCount:1 atLocationX:x andLocationY:y andScale:1 andRotation:0];
+    [stixView initializeWithImage:tmp];
+    [stixView populateWithStixForManipulation:stixStringID withCount:1 atLocationX:x andLocationY:y andScale:1 andRotation:0];
     [self.view addSubview:stixView];
     
-#endif
-        
     drag = 0;
     
     // change comment field prompt based on stix
@@ -83,44 +72,6 @@
     [locationController setDelegate:self];
 //#endif
 }
-#if 0
--(UIImageView *)populateWithBadge:(NSString*)stringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
-
-    float item_width = imageView.frame.size.width;
-    float item_height = imageView.frame.size.height;
-    
-    UIImageView * newstix = [BadgeView getBadgeWithStixStringID:stringID];
-    //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float centerX = x;
-    float centerY = y;
-    
-    // scale stix and label down to 270x248 which is the size of the feedViewItem
-    CGSize originalSize = CGSizeMake(300, 275);
-	CGSize targetSize = CGSizeMake(item_width, item_height);
-	
-	float imageScale =  targetSize.width / originalSize.width;
-    
-	CGRect stixFrameScaled = newstix.frame;
-	stixFrameScaled.origin.x *= imageScale;
-	stixFrameScaled.origin.y *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    centerX *= imageScale;
-    centerY *= imageScale;
-    NSLog(@"TagDescriptorController: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", newstix.frame.size.width, newstix.frame.size.height, centerX / imageScale, centerY / imageScale, originalSize.width, originalSize.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, item_width, item_height); 
-    [newstix setFrame:stixFrameScaled];
-    [newstix setCenter:CGPointMake(centerX, centerY)];
-    return newstix;
-}
-#endif
-/*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations.
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-*/
-
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
@@ -146,14 +97,13 @@
 {
     // scale stix frame back
 	float imageScale =  300 / stixView.frame.size.width;
-    stix = stixView.stix;
-	CGRect stixFrameScaled = stix.frame;
+    CGRect stixFrameScaled = stixView.stix.frame;
 	stixFrameScaled.origin.x *= imageScale;
 	stixFrameScaled.origin.y *= imageScale;
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
-    float centerx = stix.center.x * imageScale; // center coordinates in original 300x275 space
-    float centery = stix.center.y * imageScale;
+    float centerx = stixView.stix.center.x * imageScale; // center coordinates in original 300x275 space
+    float centery = stixView.stix.center.y * imageScale;
     float stixScale = [stixView stixScale];
     float stixRotation = [stixView stixRotation];
     //stix.frame = badgeFrame;

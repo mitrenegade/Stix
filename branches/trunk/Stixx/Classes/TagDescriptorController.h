@@ -28,7 +28,7 @@
 	IBOutlet UIButton * buttonCancel;
     IBOutlet UIButton * buttonInstructions;
     
-    UIImageView * stix;
+    //UIImageView * stix;
 	
     LocationHeaderViewController * locationController;
     
@@ -52,7 +52,7 @@
 @property (nonatomic, assign) NSObject<TagDescriptorDelegate> *delegate;
 @property (nonatomic, assign) CGRect badgeFrame;
 @property (nonatomic, retain) NSString * stixStringID;
-@property (nonatomic, retain) UIImageView * stix;
+//@property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) StixView * stixView;
 

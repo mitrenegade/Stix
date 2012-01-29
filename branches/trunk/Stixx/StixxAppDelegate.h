@@ -22,8 +22,16 @@
 #import "LoginSplashController.h"
 #import "MyStixViewController.h"
 #import "LoadingViewController.h"
+#import "FeedbackViewController.h"
+#import <Parse/Parse.h>
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate> {
+enum notification_bookmarks {
+    NB_NEWSTIX = 0,
+    NB_NEWCOMMENT,
+    NB_NEWGIFT 
+};
+
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate> {
     UIWindow *window;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
@@ -83,6 +91,10 @@
     
     IBOutlet UITextField * loadingMessage;
     
+    int notificationBookmarkType;
+    int notificationTagID;
+    NSString * notificationGiftStixStringID;
+    
     Kumulos* k;
 }
 
@@ -97,6 +109,15 @@
 
 -(void)decrementStixCount:(NSString*)stixStringID;
 -(void)incrementStixCount:(NSString*)stixStringID;
+-(Tag*) getTagWithID:(int)tagID;
+
+-(void) Parse_subscribeToChannel:(NSString*) channel;
+//-(void) Parse_sendNotification:(NSString*) message toChannel:(NSString*) channel;
+//-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel;
+//-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel withTag:(Tag*)tag;
+-(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(Tag*)tag orGiftStix:(NSString*)giftStixStringID;
+-(void)handleNotificationBookmarks;
+
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;

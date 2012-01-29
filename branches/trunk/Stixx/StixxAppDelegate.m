@@ -51,6 +51,7 @@ static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
 
 // INIT code
+/* deprecated
 - (void)applicationDidFinishLaunching:(UIApplication *)application {  
     
     k = [[Kumulos alloc]init];
@@ -62,7 +63,42 @@ static int init=0;
     [window makeKeyAndVisible];
     
     [k getAllStixTypes];
-    [k getAllStixViews];    
+    [k getAllStixViews];
+}
+ */
+-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    k = [[Kumulos alloc]init];
+    [k setDelegate:self];
+    
+    // Override point for customization after application launch
+    [loadingMessage setText:@"Connecting to Stix Server..."];
+    
+    [window makeKeyAndVisible];
+    
+    [k getAllStixTypes];
+    [k getAllStixViews];
+    
+    /*
+    PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
+    [testObject setObject:@"bar" forKey:@"foo"];
+    [testObject save];
+    */
+    
+    [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|
+     UIRemoteNotificationTypeAlert|
+     UIRemoteNotificationTypeSound];    
+    
+    return YES;
+}
+
+- (void)application:(UIApplication *)application
+didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
+{
+    // Tell Parse about the device token.
+    [PFPush storeDeviceToken:newDeviceToken];
+    // Subscribe to the global broadcast channel.
+    [PFPush subscribeToChannelInBackground:@""];
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
@@ -73,7 +109,6 @@ static int init=0;
         [self continueInit];
     }
 }
-
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
     [BadgeView InitializeStixViews:theResults];
@@ -262,6 +297,16 @@ static int init=0;
     [NSKeyedArchiver archiveRootObject:username toFile:path];
 }
 
+- (void)application:(UIApplication *)application 
+didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    if ([error code] == 3010) {
+        NSLog(@"Push notifications don't work in the simulator!");
+    } else {
+        NSLog(@"didFailToRegisterForRemoteNotificationsWithError: %@", error);
+    }
+}
+
 /**** loading and adding of stix from kumulos ****/
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID{
     return [self addTagWithCheck:tag withID:newID overwrite:NO];
@@ -317,9 +362,10 @@ static int init=0;
 -(void)didCreateNewPix:(Tag *)newTag {
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
     //[allTags addObject:newTag];
+
+    [tabBarController setSelectedIndex:0];
     
     // this function migrates toward not using the basic stix
-    
     newestTag = [newTag retain];
     
     [k setDelegate:self];
@@ -363,7 +409,6 @@ static int init=0;
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
 
     // do not add scale and rotation - all saved in aux stix
-    
     [self updateUserTagTotal];
 }
 
@@ -638,12 +683,21 @@ static int init=0;
     return allTags;
 }
 
--(void)didAddNewCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
     [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
-    // update comment count
-    [self updateCommentCount:tagID];
-    // reward user
-    [self updateUserTagTotal];
+
+    if (![comment isEqualToString:@""]) {
+        // actual comment
+
+        // notify
+        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", username, comment];
+        Tag * tag = [self getTagWithID:tagID];
+        [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag orGiftStix:nil];
+        // update comment count
+        [self updateCommentCount:tagID];
+        // reward user
+        [self updateUserTagTotal];
+    }
 }
 
 -(int)getCommentCount:(int)tagID {
@@ -685,7 +739,7 @@ static int init=0;
     [feedController forceUpdateCommentCount:[tagID intValue]];
 }
 
-/***** FriendViewDelegate ********/
+/***** FriendsViewDelegate ********/
 -(void)didDismissFriendView {}; // only used in profileView
 -(void) checkForUpdatePhotos {
     if (1) // todo: check for updated users by id
@@ -694,6 +748,10 @@ static int init=0;
         
         [k getAllUsers];
     }
+}
+-(void)didSendGiftStix:(NSString *)stixStringID toUsername:(NSString *)friendName {
+    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
+    [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
@@ -795,6 +853,8 @@ static int init=0;
     [exploreController reloadCarouselView];
     //[myStixController reloadCarouselView];
     [tagViewController reloadCarouselView];
+    
+    [self Parse_subscribeToChannel:username];
 }
 
 -(void)didLogout {
@@ -863,9 +923,13 @@ static int init=0;
     }
     
     // immediately add comment, update total, decrement stix count
-    [self didAddNewCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID];
+    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
     [self updateUserTagTotal];        
     [self decrementStixCount:stixStringID];
+    
+    // immediately notify
+    NSString * message = [NSString stringWithFormat:@"%@ added a %@ to your Pix \"%@\"!", username, [BadgeView getStixDescriptorForStixStringID:stixStringID], tag.descriptor];
+    [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag orGiftStix:nil];
 
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
@@ -952,6 +1016,38 @@ static int init=0;
     [allCarouselViews addObject:newBadgeView];
 }
 
+-(void)didClickFeedbackButton:(NSString *)fromView {
+    NSLog(@"Feedback button clicked from %@", fromView);
+    FeedbackViewController * feedbackController = [[FeedbackViewController alloc] init];
+    [feedbackController setDelegate:self];
+//    if (lastViewController != tagViewController)
+        [lastViewController presentModalViewController:feedbackController animated:NO];
+//    else
+//        [tagViewController setCameraOverlayView:feedbackController.view];
+}
+
+-(void)didCancelFeedback {
+//    if (lastViewController != tagViewController)
+        [lastViewController dismissModalViewControllerAnimated:NO];
+//    else
+//    	[tagViewController setCameraOverlayView:[tabBarController view]]; 
+}
+
+- (void) sendEmailTo:(NSString *)to withSubject:(NSString *) subject withBody:(NSString *)body {
+	NSString *mailString = [NSString stringWithFormat:@"mailto:?to=%@&subject=%@&body=%@",
+							[to stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
+							[subject stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
+							[body  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+	
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:mailString]];
+}
+
+-(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
+    NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
+    NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, username];
+	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:message];
+}
+
 /*** processing stix counts ***/
 
 -(void)getUserInformation {
@@ -1002,6 +1098,138 @@ static int init=0;
     if (count == 1)
         [self showAlertWithTitle:@"Peeled a Stix!" andMessage:[NSString stringWithFormat:@"You have peeled off a %@ stix and added it to your collection!", [BadgeView getStixDescriptorForStixStringID:stixStringID]] andButton:@"OK"];
 }
+
+-(Tag*) getTagWithID:(int)tagID {
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([[t tagID] intValue] == tagID)
+            return [allTags objectAtIndex:i];
+    }
+    return nil;
+}
+
+/***** Parse Notifications ****/
+-(void) Parse_subscribeToChannel:(NSString*) channel {
+    // Subscribe to the global broadcast channel.
+    [PFPush subscribeToChannelInBackground:channel];
+}
+
+#if 0
+-(void) Parse_sendNotification:(NSString*) message toChannel:(NSString*) channel{
+    [PFPush sendPushMessageToChannelInBackground:channel withMessage:message];    
+}
+
+-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel {
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    [data setObject:message forKey:@"alert"];
+    [data setObject:[NSNumber numberWithInt:1] forKey:@"badge"];
+    [PFPush sendPushDataToChannelInBackground:channel withData:data];
+}
+
+-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel withTag:(Tag*)tag {
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    [data setObject:message forKey:@"alert"];
+    [data setObject:[NSNumber numberWithInt:1] forKey:@"badge"];
+    [data setObject:[NSNumber numberWithInt:NB_NEWSTIX] forKey:@"notificationBookmarkType"];
+    [data setObject:tag.tagID forKey:@"tagID"];
+    [PFPush sendPushDataToChannelInBackground:channel withData:data];
+}
+#endif
+
+-(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(Tag*)tag orGiftStix:(NSString*)giftStixStringID {
+    
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    [data setObject:message forKey:@"alert"];
+    //[data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
+    [data setObject:[NSNumber numberWithInt:type] forKey:@"notificationBookmarkType"];
+    [data setObject:message forKey:@"message"];
+    if (tag != nil)
+        [data setObject:tag.tagID forKey:@"tagID"];
+    if (giftStixStringID != nil)
+        [data setObject:giftStixStringID forKey:@"giftStixStringID"];
+    [PFPush sendPushDataToChannelInBackground:channel withData:data];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+        
+    switch (notificationBookmarkType) {
+        case NB_NEWSTIX: 
+        {
+            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
+            notificationGiftStixStringID = nil;
+        }
+            break;
+            
+        case NB_NEWCOMMENT:
+        {
+            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
+            notificationGiftStixStringID = nil;
+            [self updateCommentCount:notificationTagID]; // in case comment count was not updated
+        }
+            break;
+            
+        case NB_NEWGIFT:
+        {
+            notificationTagID = -1;
+            notificationGiftStixStringID = [[userInfo objectForKey:@"giftStixStringID"] copy];
+        }
+            
+        default:
+            break;
+    }
+
+    NSString * message = [userInfo objectForKey:@"message"]; // get alert message
+    
+    if ( application.applicationState == UIApplicationStateActive ) {
+        // app was already in the foreground
+        notificationBookmarkType = [[userInfo objectForKey:@"notificationBookmarkType"] intValue];
+        // create something that will parse and jump to the correct tag
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Stix Alert"
+                                                        message:message
+                                                       delegate:self
+                                              cancelButtonTitle:@"Close"
+                                              otherButtonTitles:@"View", nil];    
+        [alert show];
+        [alert release];
+    }
+    else {
+        // app was just brought from background to foreground due to clicking
+        // because the user clicked, we treat the behavior same as "View" 
+        [self handleNotificationBookmarks];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+    NSLog(@"Button index: %d", buttonIndex);    
+    // 0 = close
+    // 1 = view
+    if (buttonIndex == 1) {
+        [self handleNotificationBookmarks];
+    }
+}
+
+-(void)handleNotificationBookmarks {
+    if (notificationTagID == -1) {
+        // gift stix
+        [tabBarController setSelectedIndex:3]; // go to mystixview
+        NSString * message = [NSString stringWithFormat:@"You have received a %@!", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Stix"
+                                                        message:message
+                                                       delegate:self
+                                              cancelButtonTitle:@"Close"
+                                              otherButtonTitles:nil];    
+        [alert show];
+        [alert release];
+    }
+    else {
+        [feedController jumpToPageWithTagID:notificationTagID];
+        if (notificationBookmarkType == NB_NEWCOMMENT) {
+            [feedController openCommentForPageWithTagID:[NSNumber numberWithInt:notificationTagID]];
+        }
+    }
+}
+
+
 
 - (void)dealloc {
 	

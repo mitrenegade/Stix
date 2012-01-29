@@ -64,7 +64,7 @@
     } else {
         [commentField setPlaceholder:@"What's Here?"];
     }
-    //[commentField2 setHidden:YES]; // hide for now
+    [commentField2 setHidden:YES]; // hide for now
     
 //#if TARGET_IPHONE_SIMULATOR
     //[locationField addTarget:self action:@selector(locationTextBoxEntered:) forControlEvents:UIControlEventEditingDidBegin]; // added in xib

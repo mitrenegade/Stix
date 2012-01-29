@@ -22,6 +22,8 @@
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
+-(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;
+
 @end
 
 @interface FriendsViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, UserProfileViewDelegate>

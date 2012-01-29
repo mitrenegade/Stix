@@ -149,13 +149,29 @@
 
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
-    // todo: increment stix count for this friend
+#if 0
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
     [alert setTitle:@"Beta Version"];
     [alert setMessage:@"Sending Stix gifts coming soon!"];
     [alert show];
     [alert release];
+#else
+    CGPoint location = badge.center;
+    location.x += scrollView.contentOffset.x;
+    NSString * friendName = nil;
+    NSEnumerator *e = [userPhotoFrames keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        CGRect frame = [[userPhotoFrames objectForKey:key] CGRectValue];
+        if (CGRectContainsPoint(frame, location)){
+            friendName = key;
+            break;
+        }
+    }
+    if (friendName != nil)
+        [self.delegate didSendGiftStix:stixStringID toUsername:friendName];
+#endif
     [carouselView resetBadgeLocations];
 }
 
@@ -281,6 +297,7 @@
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
+    NSString * friendName = nil;
     NSEnumerator *e = [userPhotoFrames keyEnumerator];
     id key;
     while (key = [e nextObject]) {
@@ -304,9 +321,12 @@
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
             [userProfileController setPhoto:[photo autorelease]];
 #endif
+            friendName = key;
             break;
         }
     }
+    if (friendName != nil)
+        [self.delegate didSendGiftStix:@"FIRE" toUsername:friendName];
 }
 
 /**** userprofile view delegate ****/

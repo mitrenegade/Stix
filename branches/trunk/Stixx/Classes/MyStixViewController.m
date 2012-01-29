@@ -10,11 +10,12 @@
 
 @implementation MyStixViewController
 
-@synthesize badgeView;
+//@synthesize badgeView;
 @synthesize delegate;
 @synthesize buttonRules;
 @synthesize tableController;
 @synthesize carouselView;
+@synthesize buttonFeedback;
 
 #define BADGE_MYSTIX_PADDING 45 // how many pixels per side in mystix view
 
@@ -39,13 +40,7 @@
     [super viewDidLoad];
     
     /***** init carouselView *****/
-    [self createCarouselView];    
-    
-    badges = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-    labels = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-    empties = [[NSMutableArray alloc] initWithCapacity:BADGE_TYPE_MAX];
-
-    //[self generateAllStix];
+    [self createCarouselView];
     
     buttonRules = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 450)];
     [buttonRules addTarget:self
@@ -57,7 +52,8 @@
     tableController = [[GiftStixTableController alloc] init];
     [tableController.view setFrame:CGRectMake(0, 215, 320, 200)];
     [tableController setDelegate:self];
-    [self.view addSubview:tableController.view];
+    //[self.view addSubview:tableController.view];
+    [self.view insertSubview:tableController.view belowSubview:[self buttonFeedback]];
 
 }
 
@@ -71,9 +67,15 @@
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(15,90,305,75)];
     [carouselView toggleShelf:YES];
-    //[self.delegate didCreateBadgeView:carouselView];
-    [self.view addSubview:carouselView];
+//    [self.view addSubview:carouselView];
+    [self.view insertSubview:carouselView belowSubview:[self buttonFeedback]];
+
 }
+
+-(IBAction)feedbackButtonClicked:(id)sender {
+    [self.delegate didClickFeedbackButton:@"MyStix view"];
+}
+
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -97,10 +99,6 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    [badgeView release];
-    badgeView = nil;
-    [badges release];
-    badges = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -129,7 +127,6 @@
 /*** GiftStixTableControllerDelegate ***/
 
 -(int)getStixCount:(NSString *)stixStringID {
-    // also a badgeViewDelegate call
     return [self.delegate getStixCount:stixStringID];
 }
 

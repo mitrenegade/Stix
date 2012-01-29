@@ -18,15 +18,14 @@
 // forward from BadgeViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
+-(void)didClickFeedbackButton:(NSString*)fromView;
 
 @end
 
 @interface MyStixViewController : UIViewController <BadgeViewDelegate, GiftStixTableControllerDelegate> {
-    BadgeView * badgeView;
-    NSMutableArray * badges;
-    NSMutableArray * labels;
-    NSMutableArray * empties;
+    //BadgeView * badgeView;
     
+    IBOutlet UIButton * buttonFeedback;
     UIButton * buttonRules;
     
     GiftStixTableController * tableController;
@@ -35,11 +34,14 @@
     NSObject<MyStixViewDelegate> * delegate;
 }
 
-@property (nonatomic, retain) BadgeView * badgeView;
+//@property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, assign) NSObject<MyStixViewDelegate> * delegate;
 @property (nonatomic, retain) UIButton * buttonRules;
 @property (nonatomic, retain) GiftStixTableController * tableController;
+@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 -(IBAction)didClickOnButtonRules:(id)sender;
 -(void)createCarouselView;
+-(IBAction)feedbackButtonClicked:(id)sender;
+
 @end

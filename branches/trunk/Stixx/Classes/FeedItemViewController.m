@@ -208,11 +208,13 @@
 
 -(void)didAttachStix:(int)index {
     // 1 = attach
-    [self.delegate didPerformPeelableAction:1 forAuxStix:(int)index];
+    [self.delegate didPerformPeelableAction:1 forAuxStix:index];
 }
 
 -(void)didPeelStix:(int)index {
     // 0 = peel
-    [self.delegate didPerformPeelableAction:0 forAuxStix:(int)index];
+    // show peel animation
+    [stixView doPeelAnimationForStix:index];
+    //[self.delegate didPerformPeelableAction:0 forAuxStix:index];
 }
 @end

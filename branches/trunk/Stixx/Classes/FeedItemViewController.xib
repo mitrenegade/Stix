@@ -109,13 +109,14 @@
 					<object class="IBUIButton" id="1008031884">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{147, 266}, {122, 20}}</string>
+						<string key="NSFrame">{{140, 266}, {122, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<reference key="IBUIBackgroundColor" ref="764240490"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<float key="IBUIAlpha">0.60000002384185791</float>
+						<int key="IBUIContentMode">4</int>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
@@ -433,7 +434,6 @@
 						<reference key="object" ref="191373211"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="1008031884"/>
 							<reference ref="945350788"/>
 							<reference ref="838662837"/>
 							<reference ref="823903930"/>
@@ -444,6 +444,7 @@
 							<reference ref="1045321790"/>
 							<reference ref="225439182"/>
 							<reference ref="143498748"/>
+							<reference ref="1008031884"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>

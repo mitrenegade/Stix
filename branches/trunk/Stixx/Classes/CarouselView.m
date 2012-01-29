@@ -235,8 +235,12 @@
     // as an underlay of badgeController by feedView when the subviews are laid out
     
     UIView * result;
-    if (self.underlay)
-        result = [self.underlay hitTest:point withEvent:event];
+    if (self.underlay) {
+        CGPoint newPoint = point;
+        newPoint.x -= self.underlay.frame.origin.x;
+        newPoint.y -= self.underlay.frame.origin.y;
+        result = [self.underlay hitTest:newPoint withEvent:event];
+    }
     else 
         result = [super hitTest:point withEvent:event];
     

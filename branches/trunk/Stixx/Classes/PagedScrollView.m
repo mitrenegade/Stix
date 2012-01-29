@@ -143,6 +143,14 @@
 	return page;
 }
 
+-(void)jumpToPage:(int)page {
+    // calculate offset of selected page
+    CGFloat pageWidth = self.frame.size.width;
+    float offset = page * pageWidth; // + (pageWidth/2);
+    CGPoint contentOffset = CGPointMake(offset, 0);
+    [self setContentOffset:contentOffset animated:YES];
+}
+
 -(void)clearNonvisiblePages {
         
     // Calculate the current page in scroll view

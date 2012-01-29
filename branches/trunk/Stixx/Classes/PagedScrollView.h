@@ -43,4 +43,5 @@
 -(int)currentPage;
 -(void)clearNonvisiblePages; // called by didReceiveMemoryWarning
 -(void)clearAllPages;
+-(void)jumpToPage:(int)page;
 @end

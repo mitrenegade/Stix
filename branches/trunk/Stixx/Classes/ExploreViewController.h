@@ -19,7 +19,7 @@
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
-
+-(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
 @interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
@@ -32,7 +32,7 @@
     UIImageView * zoomView;
     bool isZooming; // prevent hits when zooming
     
-    IBOutlet UIButton * refreshButton;
+    IBOutlet UIButton * buttonFeedback;
     
     NSMutableArray * allTagIDs;
     NSMutableArray * allTags;
@@ -49,7 +49,7 @@
 @property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
-@property (nonatomic, retain) IBOutlet UIButton * refreshButton;
+@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) NSMutableArray * allTagIDs; 
 @property (nonatomic, retain) NSMutableArray * allTags; 
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
@@ -58,4 +58,6 @@
 -(void)getTagWithID:(int)id;
 -(void)createCarouselView;
 -(void)reloadCarouselView;
+-(IBAction)feedbackButtonClicked:(id)sender;
+
 @end

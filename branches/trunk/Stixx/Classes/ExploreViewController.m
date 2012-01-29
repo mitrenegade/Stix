@@ -12,7 +12,7 @@
 @synthesize carouselView;
 @synthesize scrollView;
 @synthesize delegate;
-@synthesize refreshButton;
+@synthesize buttonFeedback;
 @synthesize allTagIDs;
 @synthesize allTags;
 @synthesize activityIndicator;
@@ -52,7 +52,8 @@
         
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
-    [self.view addSubview:scrollView];
+    //[self.view addSubview:scrollView];
+    [self.view insertSubview:scrollView belowSubview:[self buttonFeedback]];
 
     /*** create badgeView ***/
     [self createCarouselView];
@@ -218,7 +219,6 @@
         if (ct >= start_index && ct <= end_index) {
             Tag * tag = [allTags objectAtIndex:i];
             
-            UIImage * photo = tag.image;
             NSString * comment = tag.comment;
             UIImageView * shadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dropshadow_140.png"]];
             int w = shadow.frame.size.width;
@@ -495,6 +495,11 @@
     [carouselView setUnderlay:scrollView];
     [zoomViewController.view removeFromSuperview];
 }
+
+-(IBAction)feedbackButtonClicked:(id)sender {
+    [self.delegate didClickFeedbackButton:@"Explore view"];
+}
+
 
 - (void)didReceiveMemoryWarning
 {

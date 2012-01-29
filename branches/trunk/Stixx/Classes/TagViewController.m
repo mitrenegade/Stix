@@ -20,6 +20,7 @@
 @synthesize aperture;
 @synthesize cameraDeviceButton;
 @synthesize flashModeButton;
+@synthesize buttonFeedback;
 
 - (id)init {
 	
@@ -81,13 +82,6 @@
     NoClipModalView *sView = [[NoClipModalView alloc] initWithFrame:screenBounds]; 
     
     self.view = sView; 
-    /*
-    buttonInstructions = [[UIButton alloc] initWithFrame:CGRectMake(19,200, 283, 37)];
-    [buttonInstructions setFrame:CGRectMake(19,200, 283, 37)];
-    [buttonInstructions setBackgroundImage:[UIImage imageNamed:@"instruction_box.png"] forState:UIControlStateNormal];
-    [buttonInstructions setTitle:@"Drag Stix here to take a picture!" forState:UIControlStateNormal];
-    [buttonInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-     */
     int shift = 20;
     rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 74+shift, 300, 275)];
     //[rectView setBackgroundColor:[UIColor redColor]];
@@ -98,16 +92,22 @@
     [self.view addSubview:aperture];
     
     flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(90, 3+shift, 60, 60)];
-    [flashModeButton setBackgroundColor:[UIColor grayColor]];
     [flashModeButton addTarget:self action:@selector(toggleFlashMode:) forControlEvents:UIControlEventTouchUpInside];
     [flashModeButton setBackgroundColor:[UIColor clearColor]];
+
     cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(170,3+shift, 60, 60)];
-    [cameraDeviceButton setBackgroundColor:[UIColor grayColor]];
     [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
     [cameraDeviceButton setImage:[UIImage imageNamed:@"switch_camera.png"] forState:UIControlStateNormal];
     [cameraDeviceButton setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:cameraDeviceButton];
     [self.view addSubview:flashModeButton];
+/*
+    buttonFeedback = [[UIButton alloc] init];
+    [buttonFeedback setFrame:CGRectMake(240,13+shift, 80, 40)];
+    [buttonFeedback setImage:[UIImage imageNamed:@"nav_feedback.png"] forState:UIControlStateNormal];
+    [buttonFeedback addTarget:self action:@selector(feedbackButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:buttonFeedback];
+*/    
     [sView release];
     
 }
@@ -357,7 +357,7 @@
         [image release];
         image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
     }
-    NSLog(@"TagViewController: Badge frame added at %d %d and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
+    NSLog(@"TagViewController: Badge frame added at %f %f and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
     [tag addImage:image];
     [tag addARCoordinate:newCoord];
     [tag addStix:selectedStixStringID withLocation:center withScale:stixScale withRotation:stixRotation withPeelable:NO];
@@ -510,6 +510,10 @@
     else
         camera.cameraDevice = UIImagePickerControllerCameraDeviceFront;
     [self updateCameraControlButtons];
+}
+
+-(IBAction)feedbackButtonClicked:(id)sender {
+    [self.delegate didClickFeedbackButton:@"Tag view"];
 }
 
 #pragma mark -

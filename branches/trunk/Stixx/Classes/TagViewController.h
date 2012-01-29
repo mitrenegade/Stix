@@ -29,9 +29,7 @@
 
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
-
-@optional
-- (void) failedToAddCoordinateOfTag:(Tag*)tag;
+-(void)didClickFeedbackButton:(NSString*)fromView;
 
 @end
 
@@ -56,24 +54,12 @@
     
     IBOutlet UIButton * flashModeButton;
     IBOutlet UIButton * cameraDeviceButton;
+    IBOutlet UIButton * buttonFeedback;
     
     TagDescriptorController * descriptorController;
     bool descriptorIsOpen;
     bool needToShowCamera;
 }
-
-// sets a reference to a cameraController created outside in order to use modal view
-- (void)cameraDidTakePicture:(id)sender;
-- (void)clearTags;
-- (void)addCoordinateOfTag:(Tag *) tag;
-- (void)setCameraOverlayView:(UIView *)cameraOverlayView;
--(IBAction)closeInstructions:(id)sender;
--(void)createCarouselView;
--(void)reloadCarouselView;
--(void)updateCameraControlButtons;
--(IBAction)toggleFlashMode:(id)sender;
--(IBAction)toggleCameraDevice:(id)sender;
-
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) BadgeView * badgeView;
@@ -89,4 +75,19 @@
 @property (nonatomic, retain) IBOutlet UIImageView * aperture;
 @property (nonatomic, retain) IBOutlet UIButton * flashModeButton;
 @property (nonatomic, retain) IBOutlet UIButton * cameraDeviceButton;
+@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+
+// sets a reference to a cameraController created outside in order to use modal view
+- (void)cameraDidTakePicture:(id)sender;
+- (void)clearTags;
+- (void)addCoordinateOfTag:(Tag *) tag;
+- (void)setCameraOverlayView:(UIView *)cameraOverlayView;
+-(IBAction)closeInstructions:(id)sender;
+-(void)createCarouselView;
+-(void)reloadCarouselView;
+-(void)updateCameraControlButtons;
+-(IBAction)toggleFlashMode:(id)sender;
+-(IBAction)toggleCameraDevice:(id)sender;
+-(IBAction)feedbackButtonClicked:(id)sender;
+
 @end

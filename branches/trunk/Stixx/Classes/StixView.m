@@ -74,6 +74,7 @@
     [stix setCenter:CGPointMake(centerX, centerY)];
     [self addSubview:stix];
     
+    /*
     if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) {
         
         CGRect labelFrame = stix.frame;
@@ -89,6 +90,7 @@
         [self addSubview:stixCount];
 //        [stixCount release];
     }
+     */
     
     // add pinch gesture recognizer
     UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
@@ -177,6 +179,38 @@
         [auxScales addObject:[NSNumber numberWithFloat:auxScale]];
         [auxPeelableByUser addObject:[NSNumber numberWithBool:isPeelableByUser]];
     }
+}
+
+-(void)doPeelAnimationForStix:(int)index {
+    UIImageView * auxStix = [auxStixViews objectAtIndex:index];
+#if 1
+    [auxStix.layer removeAllAnimations];
+    CGRect frameLift = auxStix.frame;
+    CGPoint center = auxStix.center;
+    frameLift.size.width *= 2;
+    frameLift.size.height *= 2;
+    frameLift.origin.x = center.x - frameLift.size.width / 2;
+    frameLift.origin.y = center.y - frameLift.size.height / 2;
+    [UIView transitionWithView:auxStix 
+                      duration:1
+                       options:UIViewAnimationTransitionNone 
+                    animations: ^ { auxStix.frame = frameLift; } 
+                    completion:nil
+     ];
+    CGRect frameDisappear = CGRectMake(160, 480, 5, 5);
+    [UIView transitionWithView:auxStix 
+                      duration:1
+                       options:UIViewAnimationTransitionNone 
+                    animations: ^ { auxStix.frame = frameDisappear; } 
+                    completion:^(BOOL finished) { [auxStix removeFromSuperview]; }
+     ];   
+#else
+    [UIView beginAnimations:@"PartialPageCurlEffect" context:nil];
+    [UIView setAnimationDuration:1];
+    [UIView setAnimationCurve:UIViewAnimationCurveLinear];
+    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:auxStix cache:YES];    
+    [UIView commitAnimations];
+#endif
 }
 
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

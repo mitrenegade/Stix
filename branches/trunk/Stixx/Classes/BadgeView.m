@@ -70,6 +70,7 @@ static int totalStixTypes = 0;
     //[self addSubview:self];
 }
 
+/*
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];//touch.view];
@@ -216,6 +217,7 @@ static int totalStixTypes = 0;
     // return self which means the hit is not passed downwards to anything else
     return result;
 }
+*/
 
 -(void)resetBadgeLocations {
     for (int i=0; i<totalStixTypes; i++)

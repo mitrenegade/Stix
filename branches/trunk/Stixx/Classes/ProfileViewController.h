@@ -33,6 +33,10 @@
 
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
+
+-(void)didClickFeedbackButton:(NSString*)fromView;
+-(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;
+
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate, FriendsViewDelegate>{
@@ -66,7 +70,8 @@
 @property (nonatomic, retain) FriendsViewController * friendController;
 @property (nonatomic, retain) Kumulos * k;
 
-- (IBAction)showLoginScreen:(id)sender;
+-(IBAction)didClickLogoutButton:(id)sender;
+-(IBAction)showLoginScreen:(id)sender;
 -(IBAction)changePhoto:(id)sender;
 -(void)takeProfilePicture;
 -(IBAction)closeInstructions:(id)sender;
@@ -80,5 +85,7 @@
 -(IBAction)stixCountButtonClicked:(id)sender;
 // utils
 -(void)administratorModeResetAllStix;
+
+-(IBAction)feedbackButtonClicked:(id)sender;
 
 @end

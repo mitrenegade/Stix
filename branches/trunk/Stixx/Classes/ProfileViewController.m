@@ -155,6 +155,30 @@
     //[attemptedUsername release];
 }
 
+-(IBAction) didClickLogoutButton:(id)sender {
+#if 0
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:[NSString stringWithFormat:@"Do you want to log out of account %@?", [delegate getUsername]] delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Log me out!", nil];
+    [actionSheet showInView:self.view];
+    [actionSheet release];
+#else
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logout"
+                                                    message:@"Do you want to log out?"
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"Log me out!", nil];    
+    [alert show];
+    [alert release];
+#endif
+}
+
+- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+    NSLog(@"Button index: %d", buttonIndex);    
+    // 0 = cancel
+    // 1 = logout
+    if (buttonIndex == 1)
+        [self showLogoutScreen:nil];
+}
+
 -(IBAction) showLogoutScreen:(id)sender {
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
@@ -307,6 +331,10 @@
     [alert release];
 }
 
+-(IBAction)feedbackButtonClicked:(id)sender {
+    [self.delegate didClickFeedbackButton:@"Profile view"];
+}
+
 /**** friendsViewControllerDelegate ****/
 // badgeViewDelegate forwarded from friendsViewDelegate
 - (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
@@ -318,6 +346,10 @@
 
 -(void)didDismissFriendView {
     friendViewIsDisplayed = NO;
+}
+
+-(void)didSendGiftStix:(NSString *)stixStringID toUsername:(NSString *)friendName {
+    [self.delegate didSendGiftStix:stixStringID toUsername:friendName];
 }
 
 -(void)viewWillAppear:(BOOL)animated{

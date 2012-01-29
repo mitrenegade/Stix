@@ -28,7 +28,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
--(void)didAddNewCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 
 - (bool) isLoggedIn;
 -(int)getStixCount:(NSString*)stixStringID;
@@ -37,6 +37,7 @@
 -(int)getCommentCount:(int)tagID;
 
 -(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index;
+-(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
 @interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate, AuxStixViewControllerDelegate> {
@@ -50,6 +51,7 @@
     LoadingAnimationView * activityIndicator;
     
     IBOutlet UILabel * nameLabel;
+    IBOutlet UIButton * buttonFeedback;
     
     NSObject<FeedViewDelegate> * delegate;
     
@@ -68,6 +70,7 @@
 @property (nonatomic, assign) NSObject<FeedViewDelegate> * delegate;
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
+@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) ZoomViewController * zoomViewController;
@@ -77,6 +80,10 @@
 -(void)createCarouselView;
 -(void)reloadCarouselView;
 -(void)reloadCurrentPage;
+-(IBAction)feedbackButtonClicked:(id)sender;
+-(IBAction)didClickJumpButton:(id)sender;
+-(void)jumpToPageWithTagID:(int)tagID;
+-(void)openCommentForPageWithTagID:(NSNumber*)tagID;
 @end
 
 

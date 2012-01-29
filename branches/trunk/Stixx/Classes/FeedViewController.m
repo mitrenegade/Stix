@@ -32,6 +32,7 @@
 @synthesize lastPageViewed;
 @synthesize zoomViewController;
 @synthesize commentView;
+@synthesize buttonFeedback;
 
 -(id)init
 {
@@ -56,7 +57,8 @@
     
     [self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     scrollView.isLazy = YES;
-    [self.view addSubview:scrollView];
+//    [self.view addSubview:scrollView];
+    [self.view insertSubview:scrollView belowSubview:[self buttonFeedback]];
     
 	/****** init badge view ******/
     [self createCarouselView];
@@ -291,6 +293,30 @@
     return feedItem.view;
 }
 
+-(void)jumpToPageWithTagID:(int)tagID {
+#if 0
+    if ([feedItems objectForKey:tagID] == nil) {
+        NSLog(@"Feed item does not exist!");
+        // todo: load pages there
+    }
+    else {
+#else
+    if (1) {  
+#endif
+        // find position of tag in allTags
+        for (int i=0; i<[allTags count]; i++) {
+            Tag * t = [allTags objectAtIndex:i];
+            if ([t.tagID intValue] == tagID) {
+                [scrollView jumpToPage:i];
+            }
+        }
+    }
+}
+
+-(IBAction)didClickJumpButton:(id)sender {
+    [scrollView jumpToPage:0];
+}
+
 -(void)updateScrollPagesAtPage:(int)page {
     //NSLog(@"UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
     if ([self itemCount] > 0) {
@@ -375,6 +401,7 @@
 /************** FeedZoomView ***********/
 #define DO_ZOOM_VIEW 0
 -(void)didClickAtLocation:(CGPoint)location {
+    location.x -= scrollView.contentOffset.x;
     NSLog(@"FeedViewController: Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
     
 #if DO_ZOOM_VIEW
@@ -392,10 +419,13 @@
     
     Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
     CGPoint locationInFeedItem = location;
-    locationInFeedItem.x -= lastContentOffset;
+    //locationInFeedItem.x -= lastContentOffset; // converts to feedItem frame
     
     FeedItemViewController * feedItem = [feedItems objectForKey:tag.tagID];
-    [[feedItem stixView] didTouchAtLocation:locationInFeedItem];
+    CGPoint locationInStixView = locationInFeedItem;
+    locationInStixView.x -= feedItem.stixView.frame.origin.x;
+    locationInStixView.y -= feedItem.stixView.frame.origin.y;
+    [[feedItem stixView] didTouchAtLocation:locationInStixView];
 }
 
 -(void)didDismissZoom {
@@ -412,6 +442,13 @@
     [commentView setDelegate:self];
     [self presentModalViewController:commentView animated:YES];
 }
+    
+// hack: forced display of comment page
+    -(void)openCommentForPageWithTagID:(NSNumber*)tagID {
+        FeedItemViewController * feedItem = [feedItems objectForKey:tagID];
+        if (feedItem != nil)
+            [feedItem didPressAddCommentButton:self];
+    }
 
 /*** CommentViewDelegate ***/
 -(void)didCloseComments {
@@ -424,8 +461,12 @@
     NSString * name = [self.delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0)
-        [self.delegate didAddNewCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
+}
+
+-(IBAction)feedbackButtonClicked:(id)sender {
+    [self.delegate didClickFeedbackButton:@"Feed view"];
 }
 
 /*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/
@@ -438,7 +479,7 @@
     Tag * tag = [allTags objectAtIndex:lastPageViewed];
     if (action == 0) {
         // peel stix
-        [tag removeAuxiliaryStixAtIndex:index];
+        [tag removeStixAtIndex:index];
         // feedItem should already have removed it
     }
     else if (action == 1) {

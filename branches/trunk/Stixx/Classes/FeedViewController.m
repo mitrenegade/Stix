@@ -261,11 +261,9 @@
     NSString * descriptor = tag.descriptor;
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
-    int tagID = [tag.tagID intValue];
-    UIImage * image = tag.image;
-    NSLog(@"Index: %d tagID: %d", index, tagID);
-    
-    NSLog(@"Creating feed item %d at index %d: name %@ comment %@ dims %f %f\n", tagID, index, name, comment, image.size.width, image.size.height);
+    //int tagID = [tag.tagID intValue];
+    //UIImage * image = tag.image;
+    //NSLog(@"Creating feed item %d at index %d: name %@ comment %@ dims %f %f\n", tagID, index, name, comment, image.size.width, image.size.height);
     
     FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
     [feedItem setDelegate:self];
@@ -480,17 +478,17 @@
     if (action == 0) {
         // peel stix
         [tag removeStixAtIndex:index];
-        // feedItem should already have removed it
     }
     else if (action == 1) {
         // attach stix
         [[tag auxPeelable] replaceObjectAtIndex:index withObject:[NSNumber numberWithBool:NO]];
         [allTags replaceObjectAtIndex:lastPageViewed withObject:tag];
     }
-    [self reloadCurrentPage];
+    //[self reloadCurrentPage];
     
     // tell app delegate to reload tag before altering internal info
     [self.delegate didPerformPeelableAction:action forTagWithIndex:lastPageViewed forAuxStix:index];
 }
+    
 @end
 

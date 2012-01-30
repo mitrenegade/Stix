@@ -173,7 +173,7 @@
             }
         }
         [self addSubview:auxStix];
-        NSLog(@"StixView: adding %@ auxStix %@ at center %f %f\n", isPeelableByUser?@"peelable":@"attached", stixStringID, centerX, centerY);
+        //NSLog(@"StixView: adding %@ auxStix %@ at center %f %f\n", isPeelableByUser?@"peelable":@"attached", stixStringID, centerX, centerY);
         
         [auxStixViews addObject:auxStix];
         [auxScales addObject:[NSNumber numberWithFloat:auxScale]];
@@ -183,7 +183,6 @@
 
 -(void)doPeelAnimationForStix:(int)index {
     UIImageView * auxStix = [auxStixViews objectAtIndex:index];
-#if 1
     [auxStix.layer removeAllAnimations];
     CGRect frameLift = auxStix.frame;
     CGPoint center = auxStix.center;
@@ -192,25 +191,21 @@
     frameLift.origin.x = center.x - frameLift.size.width / 2;
     frameLift.origin.y = center.y - frameLift.size.height / 2;
     [UIView transitionWithView:auxStix 
-                      duration:1
+                      duration:.5
                        options:UIViewAnimationTransitionNone 
                     animations: ^ { auxStix.frame = frameLift; } 
-                    completion:nil
+                    completion: nil
      ];
-    CGRect frameDisappear = CGRectMake(160, 480, 5, 5);
+    CGRect frameDisappear = CGRectMake(160, 300, 5, 5);
     [UIView transitionWithView:auxStix 
-                      duration:1
+                      duration:.5
                        options:UIViewAnimationTransitionNone 
                     animations: ^ { auxStix.frame = frameDisappear; } 
-                    completion:^(BOOL finished) { [auxStix removeFromSuperview]; }
-     ];   
-#else
-    [UIView beginAnimations:@"PartialPageCurlEffect" context:nil];
-    [UIView setAnimationDuration:1];
-    [UIView setAnimationCurve:UIViewAnimationCurveLinear];
-    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:auxStix cache:YES];    
-    [UIView commitAnimations];
-#endif
+                    completion:^(BOOL finished) { 
+                        [auxStix removeFromSuperview]; 
+                        [self.delegate peelAnimationDidCompleteForStix:index]; 
+                    }
+     ]; 
 }
 
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -341,6 +336,7 @@
 // hack: sent through delegate functions
 -(void)didTouchAtLocation:(CGPoint)location {
     if ([self isPeelable]) {
+
         NSLog(@"Tap detected in stix view at %f %f", location.x, location.y);
         int lastStixView = -1;
         for (int i=0; i<[self.auxStixViews count]; i++) {
@@ -369,22 +365,26 @@
         NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
         NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
         stixPeelSelected = lastStixView;
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", @"Move", nil];
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
         [actionSheet showInView:self];
         [actionSheet release];
-    }
+    } 
 }
 
--(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    // button index: 0 = "Peel", 1 = "Stick", 2 = "Cancel"
+//-(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {
+//}
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    // button index: 0 = "Peel", 1 = "Stick", 2 = "Move", 3 = "Cancel"
     NSLog(@"Button index: %d stixPeelSelected: %d", buttonIndex, stixPeelSelected);
     switch (buttonIndex) {
         case 0: // Peel
+            // performing a peel action causes this StixView and its delegate FeedItemView to eventually be deleted/removed. Until that happens and the user interface is correctly populated, do not allow interaction anymore.
+            self.isPeelable = NO;
+            // remove from delegate's tag structure
             [self.delegate didPeelStix:stixPeelSelected];
             break;
         case 1: // Stick
-            //[auxPeelableByUser replaceObjectAtIndex:stixPeelSelected withObject:[NSNumber numberWithBool:NO]];
-            //[[[auxStixViews objectAtIndex:stixPeelSelected] layer] removeAnimationForKey:@"crossFade"];
+            self.isPeelable = NO;
             [self.delegate didAttachStix:stixPeelSelected]; // will cause new StixView to be created
             break;
         case 2: // Cancel

@@ -19,6 +19,7 @@
 -(NSString*) getUsername;
 -(void)didAttachStix:(int)index;
 -(void)didPeelStix:(int)index;
+-(void)peelAnimationDidCompleteForStix:(int)index;
 
 @end
 

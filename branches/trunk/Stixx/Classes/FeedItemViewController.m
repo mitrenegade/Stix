@@ -73,7 +73,7 @@
 -(void)initStixView:(Tag*)tag {
     imageData = tag.image;
     
-    NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
+    //NSLog(@"FeedItemView: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
@@ -215,6 +215,10 @@
     // 0 = peel
     // show peel animation
     [stixView doPeelAnimationForStix:index];
-    //[self.delegate didPerformPeelableAction:0 forAuxStix:index];
 }
+
+-(void)peelAnimationDidCompleteForStix:(int)index {
+    [self.delegate didPerformPeelableAction:0 forAuxStix:index];
+}
+
 @end

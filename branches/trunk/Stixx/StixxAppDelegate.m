@@ -568,9 +568,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         Tag * tag = nil;
         for (NSMutableDictionary * d in theResults) {
             Tag * t = [Tag getTagFromDictionary:d];
-            NSLog(@"Checking tag of id %d for id %d", [t.tagID intValue], updatingPeelableTagIndex);
             if ([t.tagID intValue]== updatingPeelableTagID) {
-                NSLog(@"Found tag %d", [t.tagID intValue]);
                 tag = t;
             }
         }
@@ -579,10 +577,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         // from FeedViewController: changes structure of most recently dowloaded tag
         if (updatingPeelableAction == 0) { // peel stix
-            NSString * peeledAuxStixStringID = [[tag auxStixStringIDs] objectAtIndex:updatingPeelableAuxStixIndex];
-            [tag removeStixAtIndex:updatingPeelableAuxStixIndex];
+            NSString * peeledAuxStixStringID = [tag removeStixAtIndex:updatingPeelableAuxStixIndex];
             [self incrementStixCount:peeledAuxStixStringID];            
-            NSLog(@"Adding %@ stix to tag with id %d: new count %d.", peeledAuxStixStringID, [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
+            //NSLog(@"Adding %@ stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
 
             // add to comment log - if comment == @"PEEL" then it is a peel action
             [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
@@ -590,6 +587,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         else if (updatingPeelableAction == 1) { // attach stix
             [[tag auxPeelable] replaceObjectAtIndex:updatingPeelableAuxStixIndex withObject:[NSNumber numberWithBool:NO]];
         }
+        
+        // find index in current tags
+        updatingPeelableTagIndex = -1;
+        for (int i=0; i<[allTags count]; i++) {
+            Tag * t = [allTags objectAtIndex:i];
+            if ([t.tagID intValue] == updatingPeelableTagID) {
+                updatingPeelableTagIndex = i;
+                break;
+            }
+        }        
         [allTags replaceObjectAtIndex:updatingPeelableTagIndex withObject:tag];
         feedController.allTags = allTags;
         [feedController reloadCurrentPage];
@@ -603,9 +610,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
-        isUpdatingPeelableStix = 0;
-        [feedController reloadCurrentPage];
     }
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateStixOfPixDidCompleteWithResult:(NSNumber *)affectedRows {
+    NSLog(@"Update finally completed");
+    isUpdatingPeelableStix = NO;
 }
 
 -(void)getNewerTagsThanID:(int)tagID {
@@ -888,7 +898,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
         return -1;
     int ret = [[allStix objectForKey:stixStringID] intValue];
-    NSLog(@"Stix count for %@: %d", stixStringID, ret);
+    //NSLog(@"Stix count for %@: %d", stixStringID, ret);
     return ret;
 }
 
@@ -960,10 +970,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(NSString *) getUsername {
     if (loggedIn == YES)
     {
-        NSLog(@"[delegate getUsername] returning %@", username);
+        //NSLog(@"[delegate getUsername] returning %@", username);
         return username;
     }
-    NSLog(@"[delegate getUsername] returning anonymous");
+    //NSLog(@"[delegate getUsername] returning anonymous");
     return @"anonymous";
 }
 
@@ -1083,7 +1093,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)incrementStixCount:(NSString *)stixStringID {
     int count = [[allStix objectForKey:stixStringID] intValue];
-    if (1) {
+    if (![stixStringID isEqualToString:@"FIRE"] && ![stixStringID isEqualToString:@"ICE"]) {
         count++;
         [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID]; 
         

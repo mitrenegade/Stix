@@ -280,8 +280,9 @@
 }
 -(IBAction)adminStixButtonPressed:(id)sender
 {
-    [self administratorModeResetAllStix];
+    //[self administratorModeResetAllStix];
     //[self administratorModeIncrementStix];
+    [self.delegate didPressAdminEasterEgg];
 }
 
 // used only by administratorModeResetAllStix

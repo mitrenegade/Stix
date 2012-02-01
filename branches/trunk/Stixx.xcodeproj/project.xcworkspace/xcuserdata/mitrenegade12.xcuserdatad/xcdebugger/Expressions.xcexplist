@@ -6,10 +6,10 @@
          contextName = "-[FeedViewController viewWillAppear:]:FeedViewController.m">
          <PersistentStrings>
             <PersistentString
-               value = "scrollView">
+               value = "allTags">
             </PersistentString>
             <PersistentString
-               value = "allTags">
+               value = "scrollView">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -50,13 +50,13 @@
          contextName = "-[BSPreviewScrollView dealloc]:BSPreviewScrollView.m">
          <PersistentStrings>
             <PersistentString
-               value = "scrollViewPages">
-            </PersistentString>
-            <PersistentString
                value = "badgeView">
             </PersistentString>
             <PersistentString
                value = "badgeController">
+            </PersistentString>
+            <PersistentString
+               value = "scrollViewPages">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -107,15 +107,20 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "+[BadgeView stixDescriptorForStixStringID:]:BadgeView.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "stixDescriptors">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "-[FeedViewController viewDidLoad]:FeedViewController.m">
          <PersistentStrings>
             <PersistentString
                value = "self.lastBadgeView">
             </PersistentString>
          </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
       </ContextState>
       <ContextState
          contextName = "-[FeedViewController initializeScroll]:FeedViewController.m">
@@ -126,10 +131,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "+[BadgeView stixDescriptorForStixStringID:]:BadgeView.m">
+         contextName = "-[FeedViewController viewForItemAtIndex:index:]:FeedViewController.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate handleNotificationBookmarks]:StixxAppDelegate.m">
          <PersistentStrings>
             <PersistentString
-               value = "stixDescriptors">
+               value = "notificationGiftStixStringID">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -159,9 +167,6 @@
             <PersistentString
                value = "scrollView">
             </PersistentString>
-            <PersistentString
-               value = "self.view">
-            </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
@@ -180,6 +185,14 @@
          <PersistentStrings>
             <PersistentString
                value = "self.superview">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[StixxAppDelegate application:didReceiveRemoteNotification:]:StixxAppDelegate.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "notificationGiftStixStringID">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

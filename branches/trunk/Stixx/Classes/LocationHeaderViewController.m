@@ -118,12 +118,8 @@
 
 -(void)didReceiveConnectionError {
     // populate with a message that says "No internet connection" and allow entering text
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Location error!"];
-    [alert setMessage:@"Could not connect to location server!"];
-    [alert show];
-    [alert release];
+    
+    [self.delegate didReceiveConnectionError];
     [self dismissModalViewControllerAnimated:YES];
 }
 

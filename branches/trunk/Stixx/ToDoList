@@ -1,19 +1,72 @@
+next release:
+
 features to add:
-aux stix location/sizing/comment window -> sizing requires kumulos change (badgeFrame)
-use stixView for exploreViewController
-add frame to all stix in tags
-update friend profiles to reflect true pix counts
+scrollable comments or multiple line comments
+migrate gift stix to kumulos
+comment stix links to add comment
+like/dislike button to replace fire/ice
+auxstixview should not have its own touch/gestures
+hide stix mode for viewing original pictures without stix - in zoom view?
+fast scroll for feed
 
 bugs:
+partially uploaded stix looks bad on feed - add upload complete/success flag
+shutter graphic not opening bug
+no stix drag outside of stixview
+stix manipulation should not allow off image location
+// concurrency
+check for updated stix in range less than most current
+// FIXME: in case of bad internet connections, updated stix from one user might
+        // not make it to kumulos before another user changes it. we have to make
+        // updating aux stix a parallel action so that multiple users can operate on 
+        // one pix without deleting the other users' progress.
+        // this can be done by creating an auxStix table where addition of a stix
+        // simply adds to that database instead of adding to a data structure that gets
+        // loaded to the pix in allTags
 gift stix leaving empty space in mystix view
+stix manipulation while small stix?
+
+notification bugs
+general notifications still pop up on screen when phone is idle
+when you jump to a tag from a notification sometimes the tags between it and the most recent are not loaded
+
+outsource projects:
+FriendView: add date joined
+update friend profiles to reflect true pix counts
 
 major revisions:
+better mystix view - categories
 location/poi view
 add more exploreview options - friend's pix, nearby, etc
 real friend lists and privacy - add friend
-peel giftstix to add to collection
+features only available based on location
+
+tester suggestions:
+add text to speech bubble
+load pictures from library
+combine stix
 
 done
+alert view opening closes old alert views - force old ones to close/only have one alert
+tap on carousel view = popup picture
+fire and ice are instead just a count/upvote/downvote; all stix are aux stix including fire and ice
+peel fire stix - do not increment fire count. maybe do not allow fire/ice stix to be peeled
+DONE more accurate finger position when peeling
+OK FOR NOW - different animation for peelable stix
+DONE animate peeling/curling motion of removing stix
+DONE Logout: confirmation
+DONE feedback button somewhere
+DONE add comment button activates when clicked elsewhere
+DONE after adding stix jump to feedivew
+aux stix location/sizing/comment window -> sizing requires kumulos change (badgeFrame)
+stixView should always manipulate one stix and always display all aux stix
+when auxstix added, need to check kumulos for updated auxstix for this tag first
+didAddStixToPix: add to old tag and reload immediately then replace tag in alltags with new stix from kumulos
+peel giftstix to add to collection
+use stixview for zoomview
+explore doesn't use stixview
+use stixView for exploreViewController
+*
 add aux stix to stixView
 use stixView for tagDescriptorController
 location icon in tag view - comes from ARCoordinateView
@@ -24,7 +77,3 @@ gift stix one time use
 dropped stix wrong location (?)
 location icon gone if no location
 already downloaded pix do not show updated auxStix
-
-Questions for beta testers:
-when app closed, is it better to restart it or to keep in background?
-camera flash? do you use it more in dark or well lit situations? would flash be annoying?

@@ -11,6 +11,8 @@
 @synthesize carouselHeight;
 @synthesize showGiftStix;
 @synthesize sizeOfStixContext;
+@synthesize allowTap;
+@synthesize tapDefaultOffset;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -59,6 +61,13 @@
         [gestureRecognizer requireGestureRecognizerToFail:myVerticalRecognizer];
     } 
     [scrollView addGestureRecognizer:myVerticalRecognizer];
+
+    UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
+    [myTapRecognizer setNumberOfTapsRequired:1];
+    [myTapRecognizer setNumberOfTouchesRequired:1];
+    [myTapRecognizer setDelegate:self];
+    [scrollView addGestureRecognizer:myTapRecognizer];
+    self.allowTap = NO;
 
 #if 0
     [self reloadAllStixWithFrame:frame];
@@ -398,9 +407,42 @@ static int lastContentOffsetY = 0;
                 drag = 0;
                 [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
             }
-        }        
+        }   
     }
 }
+
+-(void)doubleTapGestureHandler:(UITapGestureRecognizer*) sender {
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        // so tap is not continuously sent
+        if (allowTap) {
+            //NSLog(@"Double tap recognized!");
+            CGPoint location = [sender locationInView:self.scrollView];
+            for (int i=0; i<[allCarouselStixFrames count]; i++) {
+                CGRect stixFrame = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+                if (CGRectContainsPoint(stixFrame, location)) {
+                    NSString * stixStringID = [[BadgeView stixStringIDs] objectAtIndex:i];
+                    NSLog(@"Stix of type %@ touched", stixStringID);
+                    UIImageView * stixTouched = [allCarouselStixViews objectAtIndex:i];                    
+
+                    // remove from scrollView and onto carouselView
+                    [stixTouched removeFromSuperview];
+                    CGRect frameOutsideCarousel = stixTouched.frame;
+                    frameOutsideCarousel.origin.x = 0 - tapDefaultOffset.x;
+                    frameOutsideCarousel.origin.y = 0 - tapDefaultOffset.y;
+                    frameOutsideCarousel.origin.x -= frameOutsideCarousel.size.width/2;
+                    frameOutsideCarousel.origin.y -= frameOutsideCarousel.size.height/2 + 20;
+//                    frameOutsideCarousel.origin.x += scrollView.frame.origin.x - scrollView.contentOffset.x;
+//                    frameOutsideCarousel.origin.y += scrollView.frame.origin.y;
+                    // center to 
+                    [stixTouched setFrame:frameOutsideCarousel];
+                    [self addSubview:stixTouched];
+                    [self.delegate didDropStix:stixTouched ofType:stixStringID];
+                }
+            }
+        }
+    }
+}
+
 
 -(void)vibe:(id)sender
 {

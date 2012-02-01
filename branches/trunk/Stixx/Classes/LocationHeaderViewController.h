@@ -13,6 +13,7 @@
 @protocol LocationHeaderViewControllerDelegate 
 -(void)didChooseLocation:(NSString*)location;
 -(void)didCancelLocation;
+-(void)didReceiveConnectionError;
 @end
 
 @interface LocationHeaderViewController : UIViewController <UITextFieldDelegate,   

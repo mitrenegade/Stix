@@ -144,6 +144,9 @@
     // and touch interactions
     [carouselView setUnderlay:flashModeButton];
     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+     
+    [carouselView setAllowTap:YES];
+    [carouselView setTapDefaultOffset:CGPointMake(carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
     
     [carouselView addSubview:arViewController.view];
     [self.view addSubview:carouselView];

@@ -68,7 +68,7 @@
     UIImage * imageData = tag.image;
     
     // for the tag's primary stix
-    NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
+    //NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
 
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];

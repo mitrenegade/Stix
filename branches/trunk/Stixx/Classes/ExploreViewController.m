@@ -213,7 +213,7 @@
     int items_per_page = EXPLORE_COL * EXPLORE_ROW;
     int start_index = index * items_per_page;
     int end_index = start_index + items_per_page - 1;
-    NSLog(@"Creating friend page %d with indices %d-%d", index, start_index, end_index);
+    //NSLog(@"Creating explore page %d with indices %d-%d", index, start_index, end_index);
     int ct = 0;
     for (int i=0; i<[allTags count]; i++) {
         if (ct >= start_index && ct <= end_index) {
@@ -248,7 +248,7 @@
             [stixView release];
 #endif
 
-            NSLog(@"  Adding feed item %d = %@ to position %d %d", ct, comment, x, y);
+            //NSLog(@"  Adding feed item %d = %@ to position %d %d", ct, comment, x, y);
             
             x = x + 1;
             if (x==EXPLORE_COL)

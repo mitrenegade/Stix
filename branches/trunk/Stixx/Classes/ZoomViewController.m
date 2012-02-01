@@ -30,7 +30,7 @@
 }
 
 -(void)initStixView:(Tag*)tag {
-    NSLog(@"AuxStix: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
+    //NSLog(@"ZoomView: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];

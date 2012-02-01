@@ -37,6 +37,8 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;
 
+-(void)didPressAdminEasterEgg;
+
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, LoginViewDelegate, FriendsViewDelegate>{

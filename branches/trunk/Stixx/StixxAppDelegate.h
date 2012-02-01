@@ -28,7 +28,8 @@
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
     NB_NEWCOMMENT,
-    NB_NEWGIFT 
+    NB_NEWGIFT,
+    NB_PEELACTION
 };
 
 @interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate> {
@@ -93,18 +94,24 @@ enum notification_bookmarks {
     
     int notificationBookmarkType;
     int notificationTagID;
+    NSString * notificationTargetChannel;
+    bool updatingNotifiedTagDoJump;
+    bool isUpdatingNotifiedTag;
     NSString * notificationGiftStixStringID;
+    
+    NSMutableArray * alertQueue;
     
     Kumulos* k;
 }
 
-- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonMsg;
+- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 -(void)updateCommentCount:(int)tagID;
 -(void)continueInit;
 -(void)adminUpdateAllStixCountsToZero;
+-(void)adminIncrementAllStixCounts;
 -(void)updateUserTagTotal;
 
 -(void)decrementStixCount:(NSString*)stixStringID;
@@ -116,8 +123,8 @@ enum notification_bookmarks {
 //-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel;
 //-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel withTag:(Tag*)tag;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(Tag*)tag orGiftStix:(NSString*)giftStixStringID;
--(void)handleNotificationBookmarks;
-
+-(void)handleNotificationBookmarks:(bool)doJump;
+-(void)showAllAlerts;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -142,5 +149,6 @@ enum notification_bookmarks {
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @property (nonatomic, retain) NSMutableArray * allCarouselViews;
 @property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
+@property (nonatomic, retain) NSMutableArray * alertQueue;
 @end
 

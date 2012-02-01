@@ -151,5 +151,14 @@
     [buttonInstructions setHidden:YES];
 }
 
+-(void)didReceiveConnectionError {
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Location error!"];
+    [alert setMessage:@"Could not connect to location server!"];
+    [alert show];
+    [alert release];
+}
+
 @end
 

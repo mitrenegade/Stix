@@ -63,7 +63,7 @@
 						<string key="NSFrameSize">{320, 44}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="258797361"/>
+						<reference key="NSNextKeyView" ref="336635492"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">4</int>
@@ -156,10 +156,10 @@
 						</object>
 						<reference key="IBUIFont" ref="550460099"/>
 					</object>
-					<object class="IBUIButton" id="258797361">
+					<object class="IBUIButton" id="336635492">
 						<reference key="NSNextResponder" ref="774585933"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{10, 11}, {25, 25}}</string>
+						<string key="NSFrame">{{8, 10}, {29, 29}}</string>
 						<reference key="NSSuperview" ref="774585933"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="836370128"/>
@@ -238,7 +238,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">didClickJumpButton:</string>
-						<reference key="source" ref="258797361"/>
+						<reference key="source" ref="336635492"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
@@ -277,7 +277,7 @@
 							<reference ref="390111997"/>
 							<reference ref="55920697"/>
 							<reference ref="387027882"/>
-							<reference ref="258797361"/>
+							<reference ref="336635492"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -308,7 +308,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">63</int>
-						<reference key="object" ref="258797361"/>
+						<reference key="object" ref="336635492"/>
 						<reference key="parent" ref="774585933"/>
 					</object>
 				</object>

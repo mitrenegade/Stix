@@ -149,14 +149,6 @@
 
 /******* badge view delegate ******/
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
-#if 0
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Beta Version"];
-    [alert setMessage:@"Sending Stix gifts coming soon!"];
-    [alert show];
-    [alert release];
-#else
     CGPoint location = badge.center;
     location.x += scrollView.contentOffset.x;
     NSString * friendName = nil;
@@ -171,7 +163,6 @@
     }
     if (friendName != nil)
         [self.delegate didSendGiftStix:stixStringID toUsername:friendName];
-#endif
     [carouselView resetBadgeLocations];
 }
 
@@ -212,7 +203,7 @@
         int items_per_page = FRIENDS_COL * FRIENDS_ROW;
         int start_index = index * items_per_page;
         int end_index = start_index + items_per_page - 1;
-        NSLog(@"Creating friend page %d with indices %d-%d", index, start_index, end_index);
+        //NSLog(@"Creating friend page %d with indices %d-%d", index, start_index, end_index);
         NSEnumerator *e = [userPhotos keyEnumerator];
         id key;
         int ct = 0;
@@ -303,14 +294,6 @@
     while (key = [e nextObject]) {
         CGRect frame = [[userPhotoFrames objectForKey:key] CGRectValue];
         if (CGRectContainsPoint(frame, location)){
-#if 0
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"Ok"];
-            [alert setTitle:@"Friend clicked"];
-            [alert setMessage:[NSString stringWithFormat:@"You clicked on friend %@!", key]];
-            [alert show];
-            [alert release];
-#else
             currentProfile = key;
             userProfileController = [[UserProfileViewController alloc] init];
             [userProfileController setDelegate:self];
@@ -320,13 +303,10 @@
             [userProfileController setUsername:currentProfile];
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
             [userProfileController setPhoto:[photo autorelease]];
-#endif
             friendName = key;
             break;
         }
     }
-    if (friendName != nil)
-        [self.delegate didSendGiftStix:@"FIRE" toUsername:friendName];
 }
 
 /**** userprofile view delegate ****/

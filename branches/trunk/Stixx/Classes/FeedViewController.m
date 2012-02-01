@@ -48,6 +48,8 @@
 	UIImage * i = [UIImage imageNamed:@"tab_feed.png"];
 	[tbi setImage:i];
     
+    lastPageViewed = -1;
+    
     return self;
 }
 

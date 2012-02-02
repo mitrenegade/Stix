@@ -29,7 +29,8 @@ enum notification_bookmarks {
     NB_NEWSTIX = 0,
     NB_NEWCOMMENT,
     NB_NEWGIFT,
-    NB_PEELACTION
+    NB_PEELACTION,
+    NB_UPDATECAROUSEL
 };
 
 @interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate> {
@@ -125,6 +126,7 @@ enum notification_bookmarks {
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(Tag*)tag orGiftStix:(NSString*)giftStixStringID;
 -(void)handleNotificationBookmarks:(bool)doJump;
 -(void)showAllAlerts;
+-(void)reloadAllCarousels;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;

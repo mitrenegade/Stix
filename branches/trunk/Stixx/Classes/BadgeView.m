@@ -365,6 +365,15 @@ static int totalStixTypes = 0;
         [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
     for (int i=2; i<[BadgeView totalStixTypes]; i++)
         [stixCounts setObject:[NSNumber numberWithInt:0] forKey:[stixStringIDs objectAtIndex:i]];
+    return stixCounts;
+}
+
++(NSMutableDictionary *)generateOneOfEachStix {
+    NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
+    for (int i=0; i<2; i++)
+        [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
+    for (int i=2; i<[BadgeView totalStixTypes]; i++)
+        [stixCounts setObject:[NSNumber numberWithInt:1] forKey:[stixStringIDs objectAtIndex:i]];
     return stixCounts; //[stixCounts autorelease];
 }
 

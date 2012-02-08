@@ -231,7 +231,7 @@
 					<object class="IBUIImageView" id="455730454">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">256</int>
-						<string key="NSFrame">{{32, 172}, {275, 249}}</string>
+						<string key="NSFrame">{{32, 164}, {275, 249}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="476049930"/>
@@ -248,7 +248,7 @@
 					<object class="IBUIImageView" id="806914441">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{25, 165}, {270, 248}}</string>
+						<string key="NSFrame">{{25, 157}, {270, 248}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="455730454"/>
@@ -262,7 +262,6 @@
 						<string key="NSFrame">{{39, 421}, {249, 31}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -309,7 +308,6 @@
 						<string key="IBUIPlaceholder">What's Hot Here?</string>
 						<reference key="IBUITextColor" ref="121794680"/>
 						<int key="IBUITextAlignment">1</int>
-						<bool key="IBUIClearsOnBeginEditing">YES</bool>
 						<bool key="IBUIAdjustsFontSizeToFit">YES</bool>
 						<float key="IBUIMinimumFontSize">17</float>
 						<object class="IBUITextInputTraits" key="IBUITextInputTraits">
@@ -506,13 +504,13 @@
 							<reference ref="370861169"/>
 							<reference ref="276734648"/>
 							<reference ref="723471837"/>
-							<reference ref="806914441"/>
-							<reference ref="455730454"/>
 							<reference ref="476049930"/>
 							<reference ref="711575094"/>
 							<reference ref="176301164"/>
 							<reference ref="78313721"/>
 							<reference ref="171676387"/>
+							<reference ref="806914441"/>
+							<reference ref="455730454"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>

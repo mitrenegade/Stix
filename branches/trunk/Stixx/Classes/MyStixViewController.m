@@ -66,7 +66,7 @@
     [carouselView setShowGiftStix:NO];
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(15,90,305,75)];
-    [carouselView toggleShelf:YES];
+    [carouselView toggleHideShelf:YES];
 //    [self.view addSubview:carouselView];
     [self.view insertSubview:carouselView belowSubview:[self buttonFeedback]];
 

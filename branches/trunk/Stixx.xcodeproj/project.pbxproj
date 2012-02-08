@@ -34,8 +34,6 @@
 		9E189FBF14E0341B0082098C /* notification-portrait@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E189FA814E0341B0082098C /* notification-portrait@2x.png */; };
 		9E189FC014E0341B0082098C /* spinner-bg.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E189FA914E0341B0082098C /* spinner-bg.png */; };
 		9E189FC114E0341B0082098C /* spinner-bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E189FAA14E0341B0082098C /* spinner-bg@2x.png */; };
-		9E189FC214E0341B0082098C /* libKiip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E189FAC14E0341B0082098C /* libKiip.a */; };
-		9E189FC314E0341B0082098C /* libKiip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E189FAE14E0341B0082098C /* libKiip.a */; };
 		9E189FC414E0341B0082098C /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 9E189FAF14E0341B0082098C /* LICENSE */; };
 		9E189FC514E0341B0082098C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9E189FB014E0341B0082098C /* README.md */; };
 		9E189FC614E0341B0082098C /* libKiip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E189FB214E0341B0082098C /* libKiip.a */; };
@@ -51,18 +49,20 @@
 		9E252B0F14E1BFD60070ECB4 /* btn_morebux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */; };
 		9E252B1014E1BFD60070ECB4 /* bux_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0C14E1BFD60070ECB4 /* bux_bar.png */; };
 		9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1114E1C08F0070ECB4 /* btn_addstix.png */; };
-		9E252B3714E2F4BD0070ECB4 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1E14E2F4BD0070ECB4 /* LICENSE.txt */; };
-		9E252B3814E2F4BD0070ECB4 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1F14E2F4BD0070ECB4 /* README.txt */; };
-		9E252B3914E2F4BD0070ECB4 /* CDataScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2214E2F4BD0070ECB4 /* CDataScanner.m */; };
-		9E252B3A14E2F4BD0070ECB4 /* CDataScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2514E2F4BD0070ECB4 /* CDataScanner_Extensions.m */; };
-		9E252B3B14E2F4BD0070ECB4 /* NSCharacterSet_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2714E2F4BD0070ECB4 /* NSCharacterSet_Extensions.m */; };
-		9E252B3C14E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2914E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.m */; };
-		9E252B3D14E2F4BD0070ECB4 /* NSScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2B14E2F4BD0070ECB4 /* NSScanner_Extensions.m */; };
-		9E252B3E14E2F4BD0070ECB4 /* CJSONDataSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B2E14E2F4BD0070ECB4 /* CJSONDataSerializer.m */; };
-		9E252B3F14E2F4BD0070ECB4 /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B3014E2F4BD0070ECB4 /* CJSONDeserializer.m */; };
-		9E252B4014E2F4BD0070ECB4 /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B3214E2F4BD0070ECB4 /* CJSONScanner.m */; };
-		9E252B4114E2F4BD0070ECB4 /* CJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B3414E2F4BD0070ECB4 /* CJSONSerializer.m */; };
-		9E252B4214E2F4BD0070ECB4 /* CSerializedJSONData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252B3614E2F4BD0070ECB4 /* CSerializedJSONData.m */; };
+		9E252C0614E2F5DA0070ECB4 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9E252BED14E2F5DA0070ECB4 /* LICENSE.txt */; };
+		9E252C0714E2F5DA0070ECB4 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9E252BEE14E2F5DA0070ECB4 /* README.txt */; };
+		9E252C0814E2F5DA0070ECB4 /* CDataScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BF114E2F5DA0070ECB4 /* CDataScanner.m */; };
+		9E252C0914E2F5DA0070ECB4 /* CDataScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BF414E2F5DA0070ECB4 /* CDataScanner_Extensions.m */; };
+		9E252C0A14E2F5DA0070ECB4 /* NSCharacterSet_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BF614E2F5DA0070ECB4 /* NSCharacterSet_Extensions.m */; };
+		9E252C0B14E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BF814E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.m */; };
+		9E252C0C14E2F5DA0070ECB4 /* NSScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BFA14E2F5DA0070ECB4 /* NSScanner_Extensions.m */; };
+		9E252C0D14E2F5DA0070ECB4 /* CJSONDataSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BFD14E2F5DA0070ECB4 /* CJSONDataSerializer.m */; };
+		9E252C0E14E2F5DA0070ECB4 /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252BFF14E2F5DA0070ECB4 /* CJSONDeserializer.m */; };
+		9E252C0F14E2F5DA0070ECB4 /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252C0114E2F5DA0070ECB4 /* CJSONScanner.m */; };
+		9E252C1014E2F5DA0070ECB4 /* CJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252C0314E2F5DA0070ECB4 /* CJSONSerializer.m */; };
+		9E252C1114E2F5DA0070ECB4 /* CSerializedJSONData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */; };
+		9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */; };
+		9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */; };
 		9E2830E814A158E7000707B8 /* GiftStixTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830E714A158E7000707B8 /* GiftStixTableCell.m */; };
 		9E2830EB14A2BAF8000707B8 /* CarouselView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830EA14A2BAF6000707B8 /* CarouselView.m */; };
 		9E2830EF14A2D998000707B8 /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830ED14A2D993000707B8 /* UserProfileViewController.m */; };
@@ -250,8 +250,6 @@
 		9EC7361B14CE08D300AE5A6C /* FeedbackViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */; };
 		9EC7361E14CE0D4E00AE5A6C /* checkbox_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361C14CE0D4E00AE5A6C /* checkbox_selected.png */; };
 		9EC7361F14CE0D4E00AE5A6C /* checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361D14CE0D4E00AE5A6C /* checkbox.png */; };
-		9ECB658A14DDCDC40067F3F3 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9ECB658914DDCDC40067F3F3 /* TapkuLibrary.bundle */; };
-		9ECB658D14DDCE010067F3F3 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ECB658614DDCD910067F3F3 /* libTapkuLibrary.a */; };
 		9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */; };
 		9ECB659214DDD1470067F3F3 /* CoverflowViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */; };
 		9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ECB659314DDD5770067F3F3 /* MapKit.framework */; };
@@ -297,33 +295,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		9E252C1D14E2F6E00070ECB4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = TapkuLibrary;
+		};
+		9E252C1F14E2F6E00070ECB4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3B45DDF1134C736600D24C1A;
+			remoteInfo = LogicTests;
+		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9EB03165142C002E0019F2BD /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9EB0316D142C002E0019F2BD;
 			remoteInfo = Stixx;
-		};
-		9ECB658514DDCD910067F3F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC07E0554694100DB518D;
-			remoteInfo = TapkuLibrary;
-		};
-		9ECB658714DDCD910067F3F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3B45DDF1134C736600D24C1A;
-			remoteInfo = LogicTests;
-		};
-		9ECB658B14DDCDF00067F3F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC07D0554694100DB518D;
-			remoteInfo = TapkuLibrary;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -392,28 +383,30 @@
 		9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_morebux.png; sourceTree = "<group>"; };
 		9E252B0C14E1BFD60070ECB4 /* bux_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_bar.png; sourceTree = "<group>"; };
 		9E252B1114E1C08F0070ECB4 /* btn_addstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_addstix.png; sourceTree = "<group>"; };
-		9E252B1E14E2F4BD0070ECB4 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-		9E252B1F14E2F4BD0070ECB4 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
-		9E252B2114E2F4BD0070ECB4 /* CDataScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner.h; sourceTree = "<group>"; };
-		9E252B2214E2F4BD0070ECB4 /* CDataScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDataScanner.m; sourceTree = "<group>"; };
-		9E252B2414E2F4BD0070ECB4 /* CDataScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner_Extensions.h; sourceTree = "<group>"; };
-		9E252B2514E2F4BD0070ECB4 /* CDataScanner_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDataScanner_Extensions.m; sourceTree = "<group>"; };
-		9E252B2614E2F4BD0070ECB4 /* NSCharacterSet_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSCharacterSet_Extensions.h; sourceTree = "<group>"; };
-		9E252B2714E2F4BD0070ECB4 /* NSCharacterSet_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSCharacterSet_Extensions.m; sourceTree = "<group>"; };
-		9E252B2814E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDictionary_JSONExtensions.h; sourceTree = "<group>"; };
-		9E252B2914E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_JSONExtensions.m; sourceTree = "<group>"; };
-		9E252B2A14E2F4BD0070ECB4 /* NSScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSScanner_Extensions.h; sourceTree = "<group>"; };
-		9E252B2B14E2F4BD0070ECB4 /* NSScanner_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSScanner_Extensions.m; sourceTree = "<group>"; };
-		9E252B2D14E2F4BD0070ECB4 /* CJSONDataSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONDataSerializer.h; sourceTree = "<group>"; };
-		9E252B2E14E2F4BD0070ECB4 /* CJSONDataSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONDataSerializer.m; sourceTree = "<group>"; };
-		9E252B2F14E2F4BD0070ECB4 /* CJSONDeserializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONDeserializer.h; sourceTree = "<group>"; };
-		9E252B3014E2F4BD0070ECB4 /* CJSONDeserializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONDeserializer.m; sourceTree = "<group>"; };
-		9E252B3114E2F4BD0070ECB4 /* CJSONScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONScanner.h; sourceTree = "<group>"; };
-		9E252B3214E2F4BD0070ECB4 /* CJSONScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONScanner.m; sourceTree = "<group>"; };
-		9E252B3314E2F4BD0070ECB4 /* CJSONSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONSerializer.h; sourceTree = "<group>"; };
-		9E252B3414E2F4BD0070ECB4 /* CJSONSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONSerializer.m; sourceTree = "<group>"; };
-		9E252B3514E2F4BD0070ECB4 /* CSerializedJSONData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSerializedJSONData.h; sourceTree = "<group>"; };
-		9E252B3614E2F4BD0070ECB4 /* CSerializedJSONData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CSerializedJSONData.m; sourceTree = "<group>"; };
+		9E252BED14E2F5DA0070ECB4 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		9E252BEE14E2F5DA0070ECB4 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		9E252BF014E2F5DA0070ECB4 /* CDataScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner.h; sourceTree = "<group>"; };
+		9E252BF114E2F5DA0070ECB4 /* CDataScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDataScanner.m; sourceTree = "<group>"; };
+		9E252BF314E2F5DA0070ECB4 /* CDataScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner_Extensions.h; sourceTree = "<group>"; };
+		9E252BF414E2F5DA0070ECB4 /* CDataScanner_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDataScanner_Extensions.m; sourceTree = "<group>"; };
+		9E252BF514E2F5DA0070ECB4 /* NSCharacterSet_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSCharacterSet_Extensions.h; sourceTree = "<group>"; };
+		9E252BF614E2F5DA0070ECB4 /* NSCharacterSet_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSCharacterSet_Extensions.m; sourceTree = "<group>"; };
+		9E252BF714E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDictionary_JSONExtensions.h; sourceTree = "<group>"; };
+		9E252BF814E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDictionary_JSONExtensions.m; sourceTree = "<group>"; };
+		9E252BF914E2F5DA0070ECB4 /* NSScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSScanner_Extensions.h; sourceTree = "<group>"; };
+		9E252BFA14E2F5DA0070ECB4 /* NSScanner_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSScanner_Extensions.m; sourceTree = "<group>"; };
+		9E252BFC14E2F5DA0070ECB4 /* CJSONDataSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONDataSerializer.h; sourceTree = "<group>"; };
+		9E252BFD14E2F5DA0070ECB4 /* CJSONDataSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONDataSerializer.m; sourceTree = "<group>"; };
+		9E252BFE14E2F5DA0070ECB4 /* CJSONDeserializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONDeserializer.h; sourceTree = "<group>"; };
+		9E252BFF14E2F5DA0070ECB4 /* CJSONDeserializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONDeserializer.m; sourceTree = "<group>"; };
+		9E252C0014E2F5DA0070ECB4 /* CJSONScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONScanner.h; sourceTree = "<group>"; };
+		9E252C0114E2F5DA0070ECB4 /* CJSONScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONScanner.m; sourceTree = "<group>"; };
+		9E252C0214E2F5DA0070ECB4 /* CJSONSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CJSONSerializer.h; sourceTree = "<group>"; };
+		9E252C0314E2F5DA0070ECB4 /* CJSONSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CJSONSerializer.m; sourceTree = "<group>"; };
+		9E252C0414E2F5DA0070ECB4 /* CSerializedJSONData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSerializedJSONData.h; sourceTree = "<group>"; };
+		9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CSerializedJSONData.m; sourceTree = "<group>"; };
+		9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
+		9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = ../tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
 		9E2830E314A1314E000707B8 /* load_bkg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_bkg.png; sourceTree = "<group>"; };
 		9E2830E614A158E6000707B8 /* GiftStixTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiftStixTableCell.h; sourceTree = "<group>"; };
 		9E2830E714A158E7000707B8 /* GiftStixTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GiftStixTableCell.m; sourceTree = "<group>"; };
@@ -675,8 +668,6 @@
 		9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FeedbackViewController.xib; sourceTree = "<group>"; };
 		9EC7361C14CE0D4E00AE5A6C /* checkbox_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_selected.png; sourceTree = "<group>"; };
 		9EC7361D14CE0D4E00AE5A6C /* checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox.png; sourceTree = "<group>"; };
-		9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = Stixx/tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
-		9ECB658914DDCDC40067F3F3 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
 		9ECB658E14DDD1460067F3F3 /* CoverflowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverflowViewController.h; sourceTree = "<group>"; };
 		9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverflowViewController.m; sourceTree = "<group>"; };
 		9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CoverflowViewController.xib; sourceTree = "<group>"; };
@@ -735,7 +726,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9ECB658D14DDCE010067F3F3 /* libTapkuLibrary.a in Frameworks */,
+				9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */,
 				9EE8D95D14D1C5FE001F36D1 /* Security.framework in Frameworks */,
 				9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */,
 				9EE8D95914D1C5DA001F36D1 /* MobileCoreServices.framework in Frameworks */,
@@ -752,8 +743,6 @@
 				9EE8D95414D1BED7001F36D1 /* Parse.framework in Frameworks */,
 				9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */,
 				9E1233D714DDDDF900D46DBD /* QuartzCore.framework in Frameworks */,
-				9E189FC214E0341B0082098C /* libKiip.a in Frameworks */,
-				9E189FC314E0341B0082098C /* libKiip.a in Frameworks */,
 				9E189FC614E0341B0082098C /* libKiip.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -965,57 +954,66 @@
 			path = universal;
 			sourceTree = "<group>";
 		};
-		9E252B1D14E2F4BD0070ECB4 /* TouchJSON */ = {
+		9E252BEC14E2F5DA0070ECB4 /* TouchJSON */ = {
 			isa = PBXGroup;
 			children = (
-				9E252B1E14E2F4BD0070ECB4 /* LICENSE.txt */,
-				9E252B1F14E2F4BD0070ECB4 /* README.txt */,
-				9E252B2014E2F4BD0070ECB4 /* Source */,
+				9E252BED14E2F5DA0070ECB4 /* LICENSE.txt */,
+				9E252BEE14E2F5DA0070ECB4 /* README.txt */,
+				9E252BEF14E2F5DA0070ECB4 /* Source */,
 			);
 			path = TouchJSON;
 			sourceTree = "<group>";
 		};
-		9E252B2014E2F4BD0070ECB4 /* Source */ = {
+		9E252BEF14E2F5DA0070ECB4 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				9E252B2114E2F4BD0070ECB4 /* CDataScanner.h */,
-				9E252B2214E2F4BD0070ECB4 /* CDataScanner.m */,
-				9E252B2314E2F4BD0070ECB4 /* Extensions */,
-				9E252B2C14E2F4BD0070ECB4 /* JSON */,
+				9E252BF014E2F5DA0070ECB4 /* CDataScanner.h */,
+				9E252BF114E2F5DA0070ECB4 /* CDataScanner.m */,
+				9E252BF214E2F5DA0070ECB4 /* Extensions */,
+				9E252BFB14E2F5DA0070ECB4 /* JSON */,
 			);
 			path = Source;
 			sourceTree = "<group>";
 		};
-		9E252B2314E2F4BD0070ECB4 /* Extensions */ = {
+		9E252BF214E2F5DA0070ECB4 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				9E252B2414E2F4BD0070ECB4 /* CDataScanner_Extensions.h */,
-				9E252B2514E2F4BD0070ECB4 /* CDataScanner_Extensions.m */,
-				9E252B2614E2F4BD0070ECB4 /* NSCharacterSet_Extensions.h */,
-				9E252B2714E2F4BD0070ECB4 /* NSCharacterSet_Extensions.m */,
-				9E252B2814E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.h */,
-				9E252B2914E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.m */,
-				9E252B2A14E2F4BD0070ECB4 /* NSScanner_Extensions.h */,
-				9E252B2B14E2F4BD0070ECB4 /* NSScanner_Extensions.m */,
+				9E252BF314E2F5DA0070ECB4 /* CDataScanner_Extensions.h */,
+				9E252BF414E2F5DA0070ECB4 /* CDataScanner_Extensions.m */,
+				9E252BF514E2F5DA0070ECB4 /* NSCharacterSet_Extensions.h */,
+				9E252BF614E2F5DA0070ECB4 /* NSCharacterSet_Extensions.m */,
+				9E252BF714E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.h */,
+				9E252BF814E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.m */,
+				9E252BF914E2F5DA0070ECB4 /* NSScanner_Extensions.h */,
+				9E252BFA14E2F5DA0070ECB4 /* NSScanner_Extensions.m */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		9E252B2C14E2F4BD0070ECB4 /* JSON */ = {
+		9E252BFB14E2F5DA0070ECB4 /* JSON */ = {
 			isa = PBXGroup;
 			children = (
-				9E252B2D14E2F4BD0070ECB4 /* CJSONDataSerializer.h */,
-				9E252B2E14E2F4BD0070ECB4 /* CJSONDataSerializer.m */,
-				9E252B2F14E2F4BD0070ECB4 /* CJSONDeserializer.h */,
-				9E252B3014E2F4BD0070ECB4 /* CJSONDeserializer.m */,
-				9E252B3114E2F4BD0070ECB4 /* CJSONScanner.h */,
-				9E252B3214E2F4BD0070ECB4 /* CJSONScanner.m */,
-				9E252B3314E2F4BD0070ECB4 /* CJSONSerializer.h */,
-				9E252B3414E2F4BD0070ECB4 /* CJSONSerializer.m */,
-				9E252B3514E2F4BD0070ECB4 /* CSerializedJSONData.h */,
-				9E252B3614E2F4BD0070ECB4 /* CSerializedJSONData.m */,
+				9E252BFC14E2F5DA0070ECB4 /* CJSONDataSerializer.h */,
+				9E252BFD14E2F5DA0070ECB4 /* CJSONDataSerializer.m */,
+				9E252BFE14E2F5DA0070ECB4 /* CJSONDeserializer.h */,
+				9E252BFF14E2F5DA0070ECB4 /* CJSONDeserializer.m */,
+				9E252C0014E2F5DA0070ECB4 /* CJSONScanner.h */,
+				9E252C0114E2F5DA0070ECB4 /* CJSONScanner.m */,
+				9E252C0214E2F5DA0070ECB4 /* CJSONSerializer.h */,
+				9E252C0314E2F5DA0070ECB4 /* CJSONSerializer.m */,
+				9E252C0414E2F5DA0070ECB4 /* CSerializedJSONData.h */,
+				9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */,
 			);
 			path = JSON;
+			sourceTree = "<group>";
+		};
+		9E252C1614E2F6E00070ECB4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */,
+				9E252C2014E2F6E00070ECB4 /* LogicTests.octest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		9E3BE0751463673200F7B763 /* iPhone */ = {
@@ -1031,6 +1029,7 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				9E252BEC14E2F5DA0070ECB4 /* TouchJSON */,
 				9E189F8914E0341B0082098C /* Kiip-v1.0.13 */,
 				444C3A92148BF4C1005EB6DB /* Foursquare2-iOS */,
 				9E88A42A148A8D9500E67864 /* Foursquare2 */,
@@ -1207,7 +1206,7 @@
 		9EB03171142C002E0019F2BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9E252B1D14E2F4BD0070ECB4 /* TouchJSON */,
+				9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */,
 				9EB03243142C01640019F2BD /* QuartzCore.framework */,
 				9EB03241142C015A0019F2BD /* CoreLocation.framework */,
 				9EE8D95C14D1C5FE001F36D1 /* Security.framework */,
@@ -1218,7 +1217,6 @@
 				9E8A29CF14AFA80D00CDCE76 /* AudioToolbox.framework */,
 				9E1233D614DDDDF900D46DBD /* QuartzCore.framework */,
 				9ECB659314DDD5770067F3F3 /* MapKit.framework */,
-				9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */,
 				9EE8D95314D1BED7001F36D1 /* Parse.framework */,
 				9E88A498148A8EB300E67864 /* libxml2.2.7.3.dylib */,
 				9EB03172142C002E0019F2BD /* UIKit.framework */,
@@ -1249,7 +1247,7 @@
 		9EB03179142C002E0019F2BD /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				9ECB658914DDCDC40067F3F3 /* TapkuLibrary.bundle */,
+				9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */,
 				9EB0317A142C002E0019F2BD /* Stixx-Info.plist */,
 				9EB0317B142C002E0019F2BD /* InfoPlist.strings */,
 				9EB0317E142C002E0019F2BD /* main.m */,
@@ -1531,15 +1529,6 @@
 			path = images;
 			sourceTree = "<group>";
 		};
-		9ECB657E14DDCD910067F3F3 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9ECB658614DDCD910067F3F3 /* libTapkuLibrary.a */,
-				9ECB658814DDCD910067F3F3 /* LogicTests.octest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1554,7 +1543,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				9ECB658C14DDCDF00067F3F3 /* PBXTargetDependency */,
 			);
 			name = Stixx;
 			productName = Stixx;
@@ -1600,8 +1588,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 9ECB657E14DDCD910067F3F3 /* Products */;
-					ProjectRef = 9ECB657D14DDCD910067F3F3 /* TapkuLibrary.xcodeproj */;
+					ProductGroup = 9E252C1614E2F6E00070ECB4 /* Products */;
+					ProjectRef = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1613,18 +1601,18 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		9ECB658614DDCD910067F3F3 /* libTapkuLibrary.a */ = {
+		9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libTapkuLibrary.a;
-			remoteRef = 9ECB658514DDCD910067F3F3 /* PBXContainerItemProxy */;
+			remoteRef = 9E252C1D14E2F6E00070ECB4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9ECB658814DDCD910067F3F3 /* LogicTests.octest */ = {
+		9E252C2014E2F6E00070ECB4 /* LogicTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = LogicTests.octest;
-			remoteRef = 9ECB658714DDCD910067F3F3 /* PBXContainerItemProxy */;
+			remoteRef = 9E252C1F14E2F6E00070ECB4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1769,7 +1757,6 @@
 				9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */,
 				9E4F598614DDC524006469DF /* StoreViewController.xib in Resources */,
 				9EBE40AE14DDC74B003103B8 /* StoreCategoriesController.xib in Resources */,
-				9ECB658A14DDCDC40067F3F3 /* TapkuLibrary.bundle in Resources */,
 				9ECB659214DDD1470067F3F3 /* CoverflowViewController.xib in Resources */,
 				9E189FB314E0341B0082098C /* Kiip.html in Resources */,
 				9E189FB414E0341B0082098C /* index.html in Resources */,
@@ -1798,8 +1785,9 @@
 				9E252B0F14E1BFD60070ECB4 /* btn_morebux.png in Resources */,
 				9E252B1014E1BFD60070ECB4 /* bux_bar.png in Resources */,
 				9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */,
-				9E252B3714E2F4BD0070ECB4 /* LICENSE.txt in Resources */,
-				9E252B3814E2F4BD0070ECB4 /* README.txt in Resources */,
+				9E252C0614E2F5DA0070ECB4 /* LICENSE.txt in Resources */,
+				9E252C0714E2F5DA0070ECB4 /* README.txt in Resources */,
+				9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1919,16 +1907,16 @@
 				9E4F598514DDC524006469DF /* StoreViewController.m in Sources */,
 				9EBE40AD14DDC74B003103B8 /* StoreCategoriesController.m in Sources */,
 				9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */,
-				9E252B3914E2F4BD0070ECB4 /* CDataScanner.m in Sources */,
-				9E252B3A14E2F4BD0070ECB4 /* CDataScanner_Extensions.m in Sources */,
-				9E252B3B14E2F4BD0070ECB4 /* NSCharacterSet_Extensions.m in Sources */,
-				9E252B3C14E2F4BD0070ECB4 /* NSDictionary_JSONExtensions.m in Sources */,
-				9E252B3D14E2F4BD0070ECB4 /* NSScanner_Extensions.m in Sources */,
-				9E252B3E14E2F4BD0070ECB4 /* CJSONDataSerializer.m in Sources */,
-				9E252B3F14E2F4BD0070ECB4 /* CJSONDeserializer.m in Sources */,
-				9E252B4014E2F4BD0070ECB4 /* CJSONScanner.m in Sources */,
-				9E252B4114E2F4BD0070ECB4 /* CJSONSerializer.m in Sources */,
-				9E252B4214E2F4BD0070ECB4 /* CSerializedJSONData.m in Sources */,
+				9E252C0814E2F5DA0070ECB4 /* CDataScanner.m in Sources */,
+				9E252C0914E2F5DA0070ECB4 /* CDataScanner_Extensions.m in Sources */,
+				9E252C0A14E2F5DA0070ECB4 /* NSCharacterSet_Extensions.m in Sources */,
+				9E252C0B14E2F5DA0070ECB4 /* NSDictionary_JSONExtensions.m in Sources */,
+				9E252C0C14E2F5DA0070ECB4 /* NSScanner_Extensions.m in Sources */,
+				9E252C0D14E2F5DA0070ECB4 /* CJSONDataSerializer.m in Sources */,
+				9E252C0E14E2F5DA0070ECB4 /* CJSONDeserializer.m in Sources */,
+				9E252C0F14E2F5DA0070ECB4 /* CJSONScanner.m in Sources */,
+				9E252C1014E2F5DA0070ECB4 /* CJSONSerializer.m in Sources */,
+				9E252C1114E2F5DA0070ECB4 /* CSerializedJSONData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1947,11 +1935,6 @@
 			isa = PBXTargetDependency;
 			target = 9EB0316D142C002E0019F2BD /* Stixx */;
 			targetProxy = 9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */;
-		};
-		9ECB658C14DDCDF00067F3F3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = TapkuLibrary;
-			targetProxy = 9ECB658B14DDCDF00067F3F3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2057,7 +2040,7 @@
 				GCC_PREFIX_HEADER = "Stixx/Stixx-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/Stixx/tapkulibrary/src",
+					"$(SRCROOT)/tapkulibrary/src",
 					"\"$(SRCROOT)/Foursquare2\"",
 					"\"$(SRCROOT)/Foursquare2/HTTPRiot\"/**",
 					"\"$(SRCROOT)/Foursquare2-iOS\"",
@@ -2079,7 +2062,7 @@
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
 				SEPARATE_STRIP = YES;
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/Stixx/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};
@@ -2099,7 +2082,7 @@
 				GCC_PREFIX_HEADER = "Stixx/Stixx-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/Stixx/tapkulibrary/src",
+					"$(SRCROOT)/tapkulibrary/src",
 					"\"$(SRCROOT)/Foursquare2\"",
 					"\"$(SRCROOT)/Foursquare2/HTTPRiot\"/**",
 					"\"$(SRCROOT)/Foursquare2-iOS\"",
@@ -2120,7 +2103,7 @@
 				);
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "";
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/Stixx/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};

@@ -8,9 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
-//#import "StoreCategoriesCell.h"
 #import "OutlineLabel.h"
-#import "StixStoreTableCell.h"
 
 @protocol StoreCategoriesControllerDelegate
 -(void)didSelectRow:(int)row;

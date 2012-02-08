@@ -1,29 +1,24 @@
 next release:
+grouped notifications
+facebook share
+rescale/rotate box
+carousel on tagDescriptorView
 
 features to add:
 scrollable comments or multiple line comments
 migrate gift stix to kumulos
 comment stix links to add comment
 like/dislike button to replace fire/ice
-auxstixview should not have its own touch/gestures
 hide stix mode for viewing original pictures without stix - in zoom view?
 fast scroll for feed
 
 bugs:
+clicking on connection message causes keyboard
 partially uploaded stix looks bad on feed - add upload complete/success flag
-shutter graphic not opening bug
 no stix drag outside of stixview
 stix manipulation should not allow off image location
 // concurrency
 check for updated stix in range less than most current
-// FIXME: in case of bad internet connections, updated stix from one user might
-        // not make it to kumulos before another user changes it. we have to make
-        // updating aux stix a parallel action so that multiple users can operate on 
-        // one pix without deleting the other users' progress.
-        // this can be done by creating an auxStix table where addition of a stix
-        // simply adds to that database instead of adding to a data structure that gets
-        // loaded to the pix in allTags
-gift stix leaving empty space in mystix view
 stix manipulation while small stix?
 
 notification bugs

@@ -38,6 +38,9 @@
 
 -(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index;
 -(void)didClickFeedbackButton:(NSString*)fromView;
+-(void)didDismissSecondaryView;
+
+-(void)didPressAdminEasterEgg:(NSString*)view;
 @end
 
 @interface FeedViewController : UIViewController<PagedScrollViewDelegate, BadgeViewDelegate, ZoomViewDelegate, FeedItemViewDelegate, CommentViewDelegate, AuxStixViewControllerDelegate> {
@@ -47,6 +50,8 @@
     CarouselView * carouselView;
     ZoomViewController * zoomViewController;
     CommentViewController * commentView;
+    
+    UIImagePickerController * camera;
     
     LoadingAnimationView * activityIndicator;
     
@@ -75,6 +80,7 @@
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) ZoomViewController * zoomViewController;
 @property (nonatomic, retain) CommentViewController * commentView;
+@property (nonatomic, retain) UIImagePickerController * camera;
 
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)createCarouselView;
@@ -84,6 +90,7 @@
 -(IBAction)didClickJumpButton:(id)sender;
 -(void)jumpToPageWithTagID:(int)tagID;
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID;
+-(IBAction)adminStixButtonPressed:(id)sender;
 @end
 
 

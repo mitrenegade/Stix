@@ -33,6 +33,7 @@
 @synthesize zoomViewController;
 @synthesize commentView;
 @synthesize buttonFeedback;
+@synthesize camera;
 
 -(id)init
 {
@@ -110,6 +111,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [carouselView resetBadgeLocations];  
 	[super viewDidAppear:animated];
 }
@@ -206,14 +208,22 @@
     // at this point, location and badgeFrame are all relative to feedItem.frame, at full size (300px). NOT QUITE ACCURATE PLACEMENT
     NSLog(@"FeedView: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
     AuxStixViewController * auxView = [[AuxStixViewController alloc] init];
-    [self presentModalViewController:auxView animated:NO]; // must load first
+
+    // hack a way to display view over camera; formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [auxView.view setFrame:frameShifted];
+    [self.camera setCameraOverlayView:auxView.view];
+    
     auxView.delegate = self;
     [auxView initStixView:t];
     [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
 }
 
 -(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString *)comment {
-    [self dismissModalViewControllerAnimated:YES];
+
+    // hack a way to remove view over camera; formerly dismissModalViewController
+    [self.delegate didDismissSecondaryView];
+    
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withScale:scale withRotation:rotation];
     if ([comment length] > 0)
@@ -222,6 +232,11 @@
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     [carouselView resetBadgeLocations];
     [scrollView reloadPage:lastPageViewed];
+}
+
+-(void)didCancelAuxStix {
+    // hack a way to remove view over camera; formerly dismissModalViewController
+    [self.delegate didDismissSecondaryView];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -299,10 +314,11 @@
         NSLog(@"Feed item does not exist!");
         // todo: load pages there
     }
-    else {
+    else 
 #else
-    if (1) {  
+    if (1)
 #endif
+    {
         // find position of tag in allTags
         for (int i=0; i<[allTags count]; i++) {
             Tag * t = [allTags objectAtIndex:i];
@@ -440,19 +456,24 @@
     [commentView setTagID:tagID];
     [commentView setNameString:nameString];
     [commentView setDelegate:self];
-    [self presentModalViewController:commentView animated:YES];
+
+    // hack a way to display view over camera; formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [commentView.view setFrame:frameShifted];
+    [self.camera setCameraOverlayView:commentView.view];
 }
     
 // hack: forced display of comment page
-    -(void)openCommentForPageWithTagID:(NSNumber*)tagID {
-        FeedItemViewController * feedItem = [feedItems objectForKey:tagID];
-        if (feedItem != nil)
-            [feedItem didPressAddCommentButton:self];
-    }
+-(void)openCommentForPageWithTagID:(NSNumber*)tagID {
+    FeedItemViewController * feedItem = [feedItems objectForKey:tagID];
+    if (feedItem != nil)
+        [feedItem didPressAddCommentButton:self];
+}
 
 /*** CommentViewDelegate ***/
 -(void)didCloseComments {
-    [self dismissModalViewControllerAnimated:YES];
+    // hack a way to remove view over camera; formerly dismissModalViewController
+    [self.delegate didDismissSecondaryView]; // same as aux view
     [commentView release];
     commentView = nil;
 }
@@ -490,6 +511,10 @@
     
     // tell app delegate to reload tag before altering internal info
     [self.delegate didPerformPeelableAction:action forTagWithIndex:lastPageViewed forAuxStix:index];
+}
+
+-(IBAction)adminStixButtonPressed:(id)sender {
+    [self.delegate didPressAdminEasterEgg:@"FeedView"];
 }
     
 @end

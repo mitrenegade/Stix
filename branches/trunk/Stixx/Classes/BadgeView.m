@@ -13,6 +13,7 @@ static NSMutableArray * stixStringIDs = nil;
 static NSMutableDictionary * stixViews = nil;
 static NSMutableDictionary * stixLikelihood = nil;
 static NSMutableArray * pool = nil;
+static NSMutableDictionary * stixCategories = nil;
 static int totalStixTypes = 0;
 
 @implementation BadgeView
@@ -274,18 +275,58 @@ static int totalStixTypes = 0;
     return [stixDescriptors objectForKey:stixStringID];
 }
 
++(void)InitializeGenericStixTypes {
+    stixStringIDs = [[NSMutableArray alloc] init];
+    stixViews = [[NSMutableDictionary alloc] init];
+    stixDescriptors = [[NSMutableDictionary alloc] init];
+    stixLikelihood = [[NSMutableDictionary alloc] init];
+    NSString * stixStringID = @"FIRE";
+    NSString * descriptor = @"Temporary Fire Stix";
+    UIImage * img = [UIImage imageNamed:@"120_fire.png"];
+    UIImageView * stix = [[UIImageView alloc] initWithImage:img];
+    [stixStringIDs addObject:stixStringID];
+    [stixViews setObject:stix forKey:stixStringID];
+    [stixDescriptors setObject:descriptor forKey:stixStringID];
+    [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
+    [stix release];
+    stixStringID = @"ICE";
+    descriptor = @"Temporary Ice Stix";
+    img = [UIImage imageNamed:@"120_ice.png"];
+    stix = [[UIImageView alloc] initWithImage:img];
+    [stixStringIDs addObject:stixStringID];
+    [stixViews setObject:stix forKey:stixStringID];
+    [stixDescriptors setObject:descriptor forKey:stixStringID];
+    [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
+    [stix release];
+    totalStixTypes = [stixStringIDs count];
+}
+
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos {
     if (stixStringIDs)
     {
         [stixStringIDs release];
         stixStringIDs = nil;
     }
+    if (stixCategories)
+    {
+        [stixCategories release];
+        stixCategories = nil;
+    }
     stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
+    stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
     for (NSMutableDictionary * d in stixStringIDsFromKumulos) {
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         [stixStringIDs addObject:stixStringID];
+        
+        NSString * categoryName = [d valueForKey:@"categoryName"];
+        NSMutableArray * category = [stixCategories objectForKey:categoryName];
+        if (!category) {
+            category = [[NSMutableArray alloc] init];
+        }
+        [category addObject:stixStringID];
+        [stixCategories setObject:category forKey:categoryName];
     }
-    totalStixTypes = [stixStringIDs count];
+    totalStixTypes = MIN([stixStringIDs count], [stixViews count]);
 }
 
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos {
@@ -323,6 +364,7 @@ static int totalStixTypes = 0;
         [img release];
         [stix release];
     }
+    totalStixTypes = MIN([stixStringIDs count], [stixViews count]);
 }
 +(int)totalStixTypes {
     return totalStixTypes;
@@ -363,8 +405,15 @@ static int totalStixTypes = 0;
     NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
     for (int i=0; i<2; i++)
         [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
-    for (int i=2; i<[BadgeView totalStixTypes]; i++)
-        [stixCounts setObject:[NSNumber numberWithInt:0] forKey:[stixStringIDs objectAtIndex:i]];
+    for (int i=2; i<[BadgeView totalStixTypes]; i++) {
+        NSString * stixID = [stixStringIDs objectAtIndex:i];
+        int num = 0;
+        if ([stixID isEqualToString:@"FOOTBALL"] || [stixID isEqualToString:@"BEERSTEIN"] || [stixID isEqualToString:@"FOOTBALLJERSEY_RED"] || [stixID isEqualToString:@"FOOTBALLJERSEY_BLUE"] || [stixID isEqualToString:@"BURGER"])
+        {            
+            num = 3;
+        }
+        [stixCounts setObject:[NSNumber numberWithInt:num] forKey:[stixStringIDs objectAtIndex:i]];
+    }
     return stixCounts;
 }
 
@@ -405,6 +454,14 @@ static int totalStixTypes = 0;
     
     //const int yoffset[BADGE_TYPE_MAX] = {10, 10, 2, 10};
     return 9; //yoffset[type];
+}
+
++(NSMutableArray *) getStixForCategory:(NSString*)categoryName {
+    if (stixCategories) {
+        NSMutableArray * stixForCategory = [stixCategories objectForKey:categoryName];
+        return stixForCategory;
+    }
+    return nil;
 }
 - (void)dealloc {
 	[super dealloc];

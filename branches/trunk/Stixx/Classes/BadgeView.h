@@ -43,10 +43,11 @@ enum {
 
 @protocol BadgeViewDelegate
 
--(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
 -(int)getStixCount:(NSString*)stixStringID;
 
 @optional
+
+-(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
 -(void)didStartDrag;
 @end
 
@@ -93,6 +94,7 @@ enum {
 // existence by their StringIDs (FIRE, ICE, GLASSES, STAR_GOLD, etc).
 // populates the static variable stixStringIDs from an array from the delegate
 // which calls kumulos beforehand to retrieve these values.
++(void)InitializeGenericStixTypes;
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos;
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
@@ -111,4 +113,5 @@ enum {
 +(NSMutableDictionary *) generateOneOfEachStix;
 +(NSString*) getStixStringIDAtIndex:(int)index;
 +(NSString*) getRandomStixStringID;
++(NSMutableArray *) getStixForCategory:(NSString*)categoryName;
 @end

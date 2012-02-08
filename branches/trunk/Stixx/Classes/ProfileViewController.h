@@ -37,7 +37,10 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;
 
--(void)didPressAdminEasterEgg;
+-(void)didPressAdminEasterEgg:(NSString*)view;
+-(void)didClickChangePhoto;
+
+-(void)didClickInviteButton;
 
 @end
 
@@ -89,5 +92,6 @@
 -(void)administratorModeResetAllStix;
 
 -(IBAction)feedbackButtonClicked:(id)sender;
+-(IBAction)inviteButtonClicked:(id)sender;
 
 @end

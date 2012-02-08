@@ -144,11 +144,13 @@
     }
     if ([theResults count] == 0)
     {
+        /*
         UIAlertView* alert = [[UIAlertView alloc]init];
         [alert addButtonWithTitle:@"Ok"];
         [alert setTitle:[NSString stringWithFormat:@"The username %@ doesn't seem to exist! Please try logging in again or adding a new account.", attemptedUsername]];
         [alert show];
         [alert release];
+        */
         
         [delegate didLogout]; // force logout
     }
@@ -199,24 +201,34 @@
     }
     else
     {
-        [self takeProfilePicture];
+        [self.delegate didClickChangePhoto];
+        //[self takeProfilePicture];
     }
 }
 
 -(void)takeProfilePicture {
+#if !TARGET_IPHONE_SIMULATOR
     UIImagePickerController * camera = [[UIImagePickerController alloc] init];
+#if 0
     camera.sourceType = UIImagePickerControllerSourceTypeCamera;
     camera.showsCameraControls = YES;
     camera.navigationBarHidden = YES;
     camera.toolbarHidden = YES;
     camera.wantsFullScreenLayout = YES;
+#else
+    camera.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+#endif
     camera.allowsEditing = YES;
     camera.delegate = self;
     [self presentModalViewController:camera animated:YES];
+#endif
 }
+
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
-    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
-    [picker release];    
+//    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
+//    [picker release];    
+    [self dismissModalViewControllerAnimated:YES];
+    [picker release];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
@@ -234,14 +246,6 @@
 
     // scale down photo
 	CGSize targetSize = CGSizeMake(90, 90);		
-    /*
-	float baseScale =  targetSize.width / newPhoto.size.width;
-	CGRect scaledFrame = CGRectMake(0, 0, newPhoto.size.width * baseScale, newPhoto.size.height * baseScale);
-	UIGraphicsBeginImageContext(targetSize);
-	[newPhoto drawInRect:scaledFrame];	
-	UIImage * result = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-     */
     UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
     UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
 
@@ -282,7 +286,7 @@
 {
     //[self administratorModeResetAllStix];
     //[self administratorModeIncrementStix];
-    [self.delegate didPressAdminEasterEgg];
+    [self.delegate didPressAdminEasterEgg:@"ProfileView"];
 }
 
 // used only by administratorModeResetAllStix
@@ -334,6 +338,10 @@
 
 -(IBAction)feedbackButtonClicked:(id)sender {
     [self.delegate didClickFeedbackButton:@"Profile view"];
+}
+
+-(IBAction)inviteButtonClicked:(id)sender {
+    [self.delegate didClickInviteButton];
 }
 
 /**** friendsViewControllerDelegate ****/

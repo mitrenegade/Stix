@@ -95,6 +95,7 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    [fsl query:@""]; // requery
 }
 
 - (void)viewWillDisappear:(BOOL)animated

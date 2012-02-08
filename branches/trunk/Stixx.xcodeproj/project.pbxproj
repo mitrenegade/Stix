@@ -64,6 +64,7 @@
 		9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */; };
 		9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */; };
 		9E252C3014E2FB800070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C2F14E2FB800070ECB4 /* Parse.framework */; };
+		9E252C3F14E3010F0070ECB4 /* btn_invite.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C3E14E3010F0070ECB4 /* btn_invite.png */; };
 		9E2830E814A158E7000707B8 /* GiftStixTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830E714A158E7000707B8 /* GiftStixTableCell.m */; };
 		9E2830EB14A2BAF8000707B8 /* CarouselView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830EA14A2BAF6000707B8 /* CarouselView.m */; };
 		9E2830EF14A2D998000707B8 /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830ED14A2D993000707B8 /* UserProfileViewController.m */; };
@@ -85,7 +86,6 @@
 		9E54BAC814874D0D006F24B6 /* graphic_addpic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC414874D0C006F24B6 /* graphic_addpic.png */; };
 		9E54BAC914874D0D006F24B6 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC514874D0C006F24B6 /* settings.png */; };
 		9E5ACD9014A94BB400B2E8DD /* KumulosData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */; };
-		9E63625C14DC55090008E806 /* btn_invite.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63625B14DC55090008E806 /* btn_invite.png */; };
 		9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626414DC61D80008E806 /* feedback_cartoon.png */; };
 		9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626614DC61ED0008E806 /* radio_button_off.png */; };
 		9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626714DC61EE0008E806 /* radio_button_on.png */; };
@@ -408,6 +408,7 @@
 		9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
 		9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = ../tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
 		9E252C2F14E2FB800070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
+		9E252C3E14E3010F0070ECB4 /* btn_invite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_invite.png; sourceTree = "<group>"; };
 		9E2830E314A1314E000707B8 /* load_bkg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_bkg.png; sourceTree = "<group>"; };
 		9E2830E614A158E6000707B8 /* GiftStixTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiftStixTableCell.h; sourceTree = "<group>"; };
 		9E2830E714A158E7000707B8 /* GiftStixTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GiftStixTableCell.m; sourceTree = "<group>"; };
@@ -439,7 +440,6 @@
 		9E54BAC514874D0C006F24B6 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
 		9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosData.h; sourceTree = "<group>"; };
 		9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosData.m; sourceTree = "<group>"; };
-		9E63625B14DC55090008E806 /* btn_invite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = btn_invite.png; path = "../../../../../../../Dropbox/Project Superman/Resource Files/images/Profile View/btn_invite.png"; sourceTree = "<group>"; };
 		9E63626414DC61D80008E806 /* feedback_cartoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = feedback_cartoon.png; sourceTree = "<group>"; };
 		9E63626614DC61ED0008E806 /* radio_button_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_off.png; sourceTree = "<group>"; };
 		9E63626714DC61EE0008E806 /* radio_button_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_on.png; sourceTree = "<group>"; };
@@ -1408,6 +1408,7 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9E252C3E14E3010F0070ECB4 /* btn_invite.png */,
 				9E252B1114E1C08F0070ECB4 /* btn_addstix.png */,
 				9E252B0914E1BFD60070ECB4 /* btn_25bux.png */,
 				9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */,
@@ -1421,7 +1422,6 @@
 				9E63626614DC61ED0008E806 /* radio_button_off.png */,
 				9E63626714DC61EE0008E806 /* radio_button_on.png */,
 				9E63626414DC61D80008E806 /* feedback_cartoon.png */,
-				9E63625B14DC55090008E806 /* btn_invite.png */,
 				9E793B9314DB0EEE005883FC /* zoom_in.png */,
 				9E793B9414DB0EEE005883FC /* zoom_out.png */,
 				9EC7361C14CE0D4E00AE5A6C /* checkbox_selected.png */,
@@ -1751,7 +1751,6 @@
 				9EC7361F14CE0D4E00AE5A6C /* checkbox.png in Resources */,
 				9E793B9514DB0EEE005883FC /* zoom_in.png in Resources */,
 				9E793B9614DB0EEE005883FC /* zoom_out.png in Resources */,
-				9E63625C14DC55090008E806 /* btn_invite.png in Resources */,
 				9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */,
 				9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */,
 				9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */,
@@ -1788,6 +1787,7 @@
 				9E252C0614E2F5DA0070ECB4 /* LICENSE.txt in Resources */,
 				9E252C0714E2F5DA0070ECB4 /* README.txt in Resources */,
 				9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */,
+				9E252C3F14E3010F0070ECB4 /* btn_invite.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,16 +39,16 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     buttonFeedback = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonFeedback setImage:[UIImage imageNamed:@"checkbox.png"] forState:UIControlStateNormal];
-    [buttonFeedback setImage:[UIImage imageNamed:@"checkbox_selected.png"] forState:UIControlStateSelected];
-    [buttonFeedback setFrame:CGRectMake(40, 70, 20, 20)];
+    [buttonFeedback setImage:[UIImage imageNamed:@"radio_button_off.png"] forState:UIControlStateNormal];
+    [buttonFeedback setImage:[UIImage imageNamed:@"radio_button_on.png"] forState:UIControlStateSelected];
+    [buttonFeedback setFrame:CGRectMake(50, 70, 26, 26)];
     [buttonFeedback addTarget:self action:@selector(didClickFeedbackButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:buttonFeedback];
 
     buttonBug = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonBug setImage:[UIImage imageNamed:@"checkbox.png"] forState:UIControlStateNormal];
-    [buttonBug setImage:[UIImage imageNamed:@"checkbox_selected.png"] forState:UIControlStateSelected];
-    [buttonBug setFrame:CGRectMake(40, 108, 20, 20)];
+    [buttonBug setImage:[UIImage imageNamed:@"radio_button_off.png"] forState:UIControlStateNormal];
+    [buttonBug setImage:[UIImage imageNamed:@"radio_button_on.png"] forState:UIControlStateSelected];
+    [buttonBug setFrame:CGRectMake(180, 70, 26, 26)];
     [buttonBug addTarget:self action:@selector(didClickBugButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:buttonBug];
 }
@@ -69,6 +69,8 @@
 -(void)viewDidAppear:(BOOL)animated {
     [self.buttonFeedback setSelected:YES];
     typeString = @"Feedback";
+    [messageView.layer setCornerRadius:10];
+    [messageView.layer setMasksToBounds:YES];
     [self.buttonBug setSelected:NO];
 }
 

@@ -18,6 +18,7 @@
 #import "StixxAppDelegate.h"
 #import <MapKit/MapKit.h>
 #import "FileHelpers.h"
+#import "Kiip.h"
 
 #define START_ID 100
 #define TAG_LOAD_WINDOW 3 // load this many tags before or after current tag
@@ -47,6 +48,8 @@
 @synthesize allCarouselViews;
 @synthesize loadingMessage;
 @synthesize alertQueue;
+@synthesize camera;
+@synthesize storeViewController;
 
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
@@ -69,6 +72,8 @@ static int init=0;
  */
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    /*** Kumulos service ***/
+    
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
     
@@ -77,9 +82,9 @@ static int init=0;
     
     [window makeKeyAndVisible];
     
-    [k getAllStixTypes];
-    [k getAllStixViews];
+    [self initializeBadges];
     
+    /*** Parse service ***/
     /*
     PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
     [testObject setObject:@"bar" forKey:@"foo"];
@@ -89,7 +94,16 @@ static int init=0;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|
      UIRemoteNotificationTypeAlert|
      UIRemoteNotificationTypeSound];    
-        
+    
+    /*** Kiip service ***/
+#if USING_KIIP
+    // Start and initialize when application starts
+    KPManager* manager = [[KPManager alloc] initWithKey:@"4a46c4944e118f390cdd0dd8dd75e2c9" secret:@"ed6b5b8b4060c2d81d8d3b30544b1f3d"];
+    // Set the shared instance after initialization
+    // to allow easier access of the object throughout the project.
+    [KPManager setSharedManager:manager];
+    [manager release];
+#endif
     return YES;
 }
 
@@ -102,21 +116,35 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [PFPush subscribeToChannelInBackground:@""];
 }
 
+-(void)initializeBadges {
+    //[BadgeView InitializeGenericStixTypes];
+    [k getAllStixTypes];
+    [k getAllStixViews];
+}
+
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
     // initialize stix types for all badge views
     [BadgeView InitializeStixTypes:theResults];
+    NSLog(@"All Stix types initialized from kumulos!");
     init++;
     if (init == 2) {
         [self continueInit];
+        //[self reloadAllCarousels];
     }
+    if (init > 2)
+        [self reloadAllCarousels];
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
     [BadgeView InitializeStixViews:theResults];
+    NSLog(@"All Stix data initialized from kumulos!");
     init++;
     if (init == 2) {
         [self continueInit];
+        //[self reloadAllCarousels];
     }
+    if (init > 2)
+        [self reloadAllCarousels];
 }
 
 -(void) continueInit {
@@ -134,11 +162,33 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     allCarouselViews = [[NSMutableArray alloc] init];
     
 	/***** create first view controller: the TagViewController *****/
-    //[loadingMessage setText:@"Initializing camera..."];
+    [loadingMessage setText:@"Initializing camera..."];
 
+    camera = [[UIImagePickerController alloc] init];
+#if !TARGET_IPHONE_SIMULATOR
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.showsCameraControls = NO;
+    camera.navigationBarHidden = YES;
+    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
+    camera.allowsEditing = NO;
+    camera.wantsFullScreenLayout = NO;
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
+#endif    
+    // create an empty main controller in order to turn on camera
+    mainController = [[UIViewController alloc] init];
+    [window addSubview:mainController.view];
+    
+#if !TARGET_IPHONE_SIMULATOR
+    [mainController presentModalViewController:camera animated:YES];
+#endif
+    
+    // tagView subview is never added to the window but only used as an overlay for camera
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
-	[tagViewController setCameraOverlayView:[tabBarController view]]; // allows camera to have the tabBar navigation as well as the badge/aperture/3d overlay
+    //[window addSubview:tagViewController.view];
+    camera.delegate = tagViewController;
+    tagViewController.camera = camera;
+    [camera setCameraOverlayView:tagViewController.view];
     
     //timeStampOfMostRecentTag = [[NSDate alloc] init];
     idOfNewestTagOnServer = -1;
@@ -159,6 +209,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [feedController setDelegate:self];
     //[feedController setIndicator:YES];
     feedController.allTags = allTags;
+    feedController.camera = camera; // hack: in order to present modal controllers that respond to touch
 #endif
     
 #if 1
@@ -173,8 +224,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [self checkForUpdatePhotos];
     
     /***** create mystix view *****/
-    myStixController = [[MyStixViewController alloc] init];
-    myStixController.delegate = self;
+    //myStixController = [[MyStixViewController alloc] init];
+    //myStixController.delegate = self;
+    
+    /***** create stixstore view ***/
+    //coverflowController = [[CoverflowViewController alloc] init];
+    storeViewController = [[StoreViewController alloc] init];
+    storeViewController.delegate = self;
 
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
@@ -191,6 +247,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     isLoggingIn = NO;
     if (!username || [username length] == 0)
     {
+        NSLog(@"Could not log in: forcing new login screen!");
         // force login
         loginSplashController = [[LoginSplashController alloc] init];
         [loginSplashController setDelegate:self];
@@ -204,25 +261,35 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [profileController loginWithUsername:username];
     }   
     /***** add view controllers to tab controller, and add tab to window *****/
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, tagViewController, myStixController, profileController, nil];
+    UIViewController * emptyview = [[UIViewController alloc] init];
+    UITabBarItem *tbi = [emptyview tabBarItem];
+    [tbi setTitle:@"Stix"];
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, emptyview, storeViewController, profileController, nil];
     //NSArray * viewControllers = [NSArray arrayWithObjects: exploreController, feedController, tagViewController, myStixController, profileController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
     
     lastViewController = feedController;
     lastCarouselView = feedController.carouselView;
-    [window addSubview:[tabBarController view]];
+    //[window addSubview:[tagViewController view]];
+    //[tagViewController.view addSubview:tabBarController.view];
+    //[window addSubview:[tabBarController view]];
     
     [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
 	
     if (isLoggingIn == YES && loggedIn == NO)
     {
-        [tabBarController presentModalViewController:loginSplashController animated:NO];
+        [camera setCameraOverlayView:loginSplashController.view];
         isLoggingIn = NO;
     }
     else
     {
-        [self didPressCenterButton]; // force jump to camera view
+        //[self didDismissSecondaryView];
+        //[tabBarController setSelectedIndex:0];
+        //[self.camera setCameraOverlayView:tabBarController.view];
+        //[self didPressCenterButton]; // force jump to camera view
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [camera setCameraOverlayView:tabBarController.view];
     }
     
     /* add administration calls here */
@@ -263,12 +330,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setSelectedIndex:2];
     [tabBarController setButtonStateSelected]; // highlight button
-    lastViewController = tagViewController;
-    [tagViewController viewWillAppear:TRUE];
+    [self.camera setCameraOverlayView:tagViewController.view];
 }
 
--(void)didDismissTagView {
-    [self.tabBarController dismissModalViewControllerAnimated:NO];
+-(void)didDismissSecondaryView {
     [tabBarController setButtonStateNormal]; // highlight button
     if (lastViewController == feedController) {
         [self.tabBarController setSelectedIndex:0];
@@ -282,36 +347,45 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (lastViewController == profileController) {
         [self.tabBarController setSelectedIndex:4];
     }
+    [self.camera setCameraOverlayView:tabBarController.view];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {	// Get full path of possession archive 
-	NSString *path = [self coordinateArrayPath];
-    
-	//NSLog(@"Saving coordinate array to path %@", path);
-	// Get the possession list 
-	//NSMutableArray *tempLocationArray = [tagViewController getCoordinates];
-	// Archive possession list to file
-	//[NSKeyedArchiver archiveRootObject:tempLocationArray toFile:path]; 
-    
-    // archive username
-    [NSKeyedArchiver archiveRootObject:username toFile:path];
+    if (init == 2) {
+        NSString *path = [self coordinateArrayPath];
+        NSLog(@"Logging out and saving username %@", username);
+        [NSKeyedArchiver archiveRootObject:username toFile:path];
+    }
+
+#if USING_KIIP
+    // End the Kiip session when the app terminates
+    [[KPManager sharedManager] endSession];
+#endif
 }
 
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {	// Get full path of possession archive 
-	//NSLog(@"Saving coordinate array to path %@", path);
-	// Get the possession list 
-	//NSMutableArray *tempLocationArray = [tagViewController getCoordinates];
-	// Archive possession list to file
-	//[NSKeyedArchiver archiveRootObject:tempLocationArray toFile:path]; 
     
     // archive username
-	NSString *path = [self coordinateArrayPath];
-    NSLog(@"Logging out and saving username %@", username);
-    [NSKeyedArchiver archiveRootObject:username toFile:path];
+    if (init == 2) {
+        NSString *path = [self coordinateArrayPath];
+        NSLog(@"Logging out and saving username %@", username);
+        [NSKeyedArchiver archiveRootObject:username toFile:path];
+    }
+    
+#if USING_KIIP
+    // End the Kiip session when the user leaves the app
+    [[KPManager sharedManager] endSession];
+#endif
+}
 
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+#if USING_KIIP
+    // Start a Kiip session when the user enters the app
+    [[KPManager sharedManager] startSession];
+#endif
 }
 
 - (void)application:(UIApplication *)application 
@@ -322,6 +396,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     } else {
         NSLog(@"didFailToRegisterForRemoteNotificationsWithError: %@", error);
     }
+}
+
+-(void)applicationDidEnterForeground:(UIApplication *)application {
+    // force some updates to badgeview types
+    [self initializeBadges];
+}
+
+- (void)dealloc {
+	
+	//NEW COMMENT!
+    [k release];
+    [window release];
+    [super dealloc];
 }
 
 /**** loading and adding of stix from kumulos ****/
@@ -380,6 +467,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
     //[allTags addObject:newTag];
 
+    [self didDismissSecondaryView];
     [tabBarController setSelectedIndex:0];
     
     // this function migrates toward not using the basic stix
@@ -504,6 +592,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // we get here from handleNotificationBookmarks
     if (isUpdatingNotifiedTag) {
         if (updatingNotifiedTagDoJump) {
+            [[UIApplication sharedApplication] setStatusBarHidden:NO];
+            [self.camera setCameraOverlayView:tabBarController.view];
             [tabBarController setSelectedIndex:0];
             [feedController jumpToPageWithTagID:notificationTagID];
         }
@@ -582,6 +672,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
         isUpdatingAuxStix = 0;
         [feedController reloadCurrentPage];
+        
     }
     
     // we get here from didPerformPeelableAction
@@ -825,11 +916,109 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 /**** LoginSplashController delegate ****/
 
 - (void) didLoginFromSplashScreen {
-    [self.tabBarController dismissModalViewControllerAnimated:YES];
+    [loginSplashController.view removeFromSuperview];
+    [loginSplashController release];
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [mainController dismissModalViewControllerAnimated:NO];
+    //mainController = [[UIViewController alloc] init];
+    //[window addSubview:mainController.view];
+    [mainController presentModalViewController:camera animated:YES];
+//    [mainController release];
+    [self.camera setCameraOverlayView:tagViewController.view];
+    bool isLoaded = [self.camera isViewLoaded];
+    NSLog(@"Is loaded? %d", isLoaded);
+    
+    //[self.tabBarController didPressCenterButton:self];
+    [self.tabBarController setSelectedIndex:0];
     loggedIn = YES; 
+
+    // save login info
+    NSString *path = [self coordinateArrayPath];
+    NSLog(@"Logging out and saving username %@", username);
+    [NSKeyedArchiver archiveRootObject:username toFile:path];
 }
 
 /**** ProfileViewController and login functions ****/
+
+-(void)didClickChangePhoto {
+    // we want to open another camera source
+    // we have to do it over the existing camera because touch controls don't work if
+    // we add a modal view to profileViewController
+    UIImagePickerController * picker = [[UIImagePickerController alloc] init];
+#if 0
+    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    picker.showsCameraControls = YES;
+    picker.navigationBarHidden = YES;
+    picker.toolbarHidden = YES;
+    picker.wantsFullScreenLayout = YES;
+#else
+    picker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    //picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+#endif
+    picker.allowsEditing = YES;
+    picker.delegate = self;
+    
+    // because a modal camera already exists, we must present a modal view over that camera
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [camera presentModalViewController:picker animated:YES];
+}
+
+- (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
+    //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
+    //    [picker release];    
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [camera dismissModalViewControllerAnimated:TRUE];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+    [tabBarController setSelectedIndex:0];
+    [profileController viewWillAppear:YES];
+    [picker release];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
+    UIImage * newPhoto; 
+    //newPhoto = [UIImage imageNamed:@"friend1.png"];
+    if (editedPhoto)
+        newPhoto = editedPhoto;
+    else
+        newPhoto = originalPhoto; 
+    
+    NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [camera dismissModalViewControllerAnimated:TRUE];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+    [tabBarController setSelectedIndex:0];
+    [profileController viewWillAppear:YES];
+    
+    // scale down photo
+	CGSize targetSize = CGSizeMake(90, 90);		
+    UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
+    UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
+    
+    // save to album
+    UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
+    
+    //NSData * img = UIImageJPEGRepresentation(rounded, .8);
+    NSData * img = UIImagePNGRepresentation(rounded);
+    [profileController.photoButton setImage:rounded forState:UIControlStateNormal];
+    [self didChangeUserphoto:rounded];
+    
+    // add to kumulos
+    [k addPhotoWithUsername:username andPhoto:img];
+    [picker release];
+}
+
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
+{
+    NSLog(@"Added photo to username %@",  username);
+    
+    // force friendView to update photo after we know it is in kumulos
+    [self checkForUpdatePhotos];
+}
 
 - (NSString *)coordinateArrayPath
 {	
@@ -838,6 +1027,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didCancelFirstTimeLogin {
     NSLog(@"FirstTimeLogin returned with cancel button");
+    //[self.camera setCameraOverlayView:loginSplashController.view];
 }
 
 -(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
@@ -905,11 +1095,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (lastCarouselView)
             [lastCarouselView resetBadgeLocations];
         
-        if (loginSplashController == nil) {
+//        if (loginSplashController == nil) {
             loginSplashController = [[LoginSplashController alloc] init];
             [loginSplashController setDelegate:self];
-        }
-        [tabBarController presentModalViewController:loginSplashController animated:NO];
+//        }
+        [self.camera setCameraOverlayView:loginSplashController.view];
+    }
+    else {
+        // probably came from a failed login attempt with a nonexistent user
+        loginSplashController = [[LoginSplashController alloc] init];
+        [loginSplashController setDelegate:self];
+        [self.camera setCameraOverlayView:loginSplashController.view];        
     }
 }
 
@@ -937,7 +1133,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
-
+    
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
     float peelable = YES;
@@ -1007,35 +1203,41 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return usertagtotal;
 }
 
+-(void)rewardStix {
+    NSString * newStixStringID = [BadgeView getRandomStixStringID];
+    int count = [[allStix objectForKey:newStixStringID] intValue];
+    if (count == 0) {
+#if USING_KIIP
+        [[KPManager sharedManager] unlockAchievement:@"1"];
+#else
+        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new Stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
+#endif
+    }
+    else
+    {
+#if USING_KIIP
+        [[KPManager sharedManager] unlockAchievement:@"1"];
+#else
+        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
+#endif
+    }
+    [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
+    NSMutableData * data = [KumulosData dictionaryToData:allStix];
+    [k addStixToUserWithUsername:username andStix:data];
+}
+
 -(void)updateUserTagTotal {
     // update usertagtotal
     usertagtotal += 1;
     [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
 
     if ((usertagtotal % 5) == 0) {
-//        bool newStixSuccess = NO;
-//        while (!newStixSuccess) {
-        NSString * newStixStringID = [BadgeView getRandomStixStringID];
-        int count = [[allStix objectForKey:newStixStringID] intValue];
-        if (count == 0) {
-            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new Stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
-        }
-        else
-        {
-            [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
-        }
-        //newStixSuccess = YES;
-        [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
-        NSMutableData * data = [KumulosData dictionaryToData:allStix];
-        [k addStixToUserWithUsername:username andStix:data];
-#if 0
-        [feedController reloadCarouselView];
-        [exploreController reloadCarouselView];
-        [tagViewController reloadCarouselView];
-#else
+        [self rewardStix];
         [self reloadAllCarousels];
-#endif
     }
+#if USING_KIIP
+    [[KPManager sharedManager] updateScore:usertagtotal onLeaderboard:@"topDailyStixter"];
+#endif
 }
 
 -(bool)isLoggedIn {
@@ -1053,22 +1255,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Feedback button clicked from %@", fromView);
     FeedbackViewController * feedbackController = [[FeedbackViewController alloc] init];
     [feedbackController setDelegate:self];
-//    if (lastViewController != tagViewController)
-        [lastViewController presentModalViewController:feedbackController animated:NO];
-//    else
-//        [tagViewController setCameraOverlayView:feedbackController.view];
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [feedbackController.view setFrame:frameShifted];
+    [self.camera setCameraOverlayView:feedbackController.view];
 }
 
 -(void)didCancelFeedback {
-//    if (lastViewController != tagViewController)
-        [lastViewController dismissModalViewControllerAnimated:NO];
-//    else
-//    	[tagViewController setCameraOverlayView:[tabBarController view]]; 
+    // formerly dismissModalViewController
+    [self didDismissSecondaryView];
 }
 
-- (void) sendEmailTo:(NSString *)to withSubject:(NSString *) subject withBody:(NSString *)body {
-	NSString *mailString = [NSString stringWithFormat:@"mailto:?to=%@&subject=%@&body=%@",
+- (void) sendEmailTo:(NSString *)to withCC:(NSString*)cc withSubject:(NSString *) subject withBody:(NSString *)body {
+	NSString *mailString = [NSString stringWithFormat:@"mailto:?to=%@&bcc=%@&subject=%@&body=%@",
 							[to stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
+                            [cc stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
 							[subject stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
 							[body  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
 	
@@ -1078,7 +1279,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
     NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, username];
-	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:message];
+	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:message];
+    [self didDismissSecondaryView];
+}
+
+-(void)didClickInviteButton {
+    NSLog(@"Invite button submitted by %@", [self getUsername]);
+    NSString * subject = [NSString stringWithFormat:@"Become a Stixster!"];
+    NSString * body = [NSString stringWithFormat:@"I'm playing Stix on my iPhone and I think you'd enjoy it too! Just click <a href=\"http://bit.ly/sjvbNE\">here</a> to get started!"];
+    [self sendEmailTo:@"" withCC:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:body];
+    [self rewardStix];
 }
 
 /*** processing stix counts ***/
@@ -1147,10 +1357,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
 }
 
--(void)didPressAdminEasterEgg {
-    [self adminIncrementAllStixCounts];
-    //[self adminUpdateAllStixCountsToOne];
-    [self reloadAllCarousels];
+-(void)didPressAdminEasterEgg:(NSString *)view {
+    if ([view isEqualToString:@"ProfileView"]) {
+        [self adminIncrementAllStixCounts];
+        //[self adminUpdateAllStixCountsToOne];
+        [self reloadAllCarousels];        
+    }
+    else if ([view isEqualToString:@"FeedView"]) {
+#if USING_KIIP
+        [[KPManager sharedManager] unlockAchievement:@"1"];
+#endif
+    }
 }
 
 -(void)decrementStixCount:(NSString *)stixStringID {
@@ -1384,12 +1601,18 @@ static bool isShowingAlerts = NO;
     }
 }
 
-- (void)dealloc {
-	
-	//NEW COMMENT!
-    [k release];
-    [window release];
-    [super dealloc];
+/**** StoreView delegate ****/
+-(void)didClickGetStix:(NSString *)stixStringID {
+    NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+    [self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil];
+    [self incrementStixCount:stixStringID];
+}
+
+/**********************************
+ Kiip library 
+ *********************************/
+- (void) willPresentNotification:(NSString*)rid {
+    // do nothing
 }
 
 @end

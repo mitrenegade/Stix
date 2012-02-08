@@ -24,6 +24,8 @@
 #import "LoadingViewController.h"
 #import "FeedbackViewController.h"
 #import <Parse/Parse.h>
+#import "CoverflowViewController.h"
+#import "StoreViewController.h"
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -33,8 +35,12 @@ enum notification_bookmarks {
     NB_UPDATECAROUSEL
 };
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate> {
+#define USING_KIIP 1
+
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate> {
     UIWindow *window;
+    
+    UIViewController * mainController;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
 	//UITabBarController * tabBarController; 	TagViewController * tagViewController;
@@ -45,6 +51,7 @@ enum notification_bookmarks {
     LoginSplashController * loginSplashController;
     MyStixViewController * myStixController;
 //    LoadingViewController * loadingController;
+    StoreViewController * storeViewController;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
@@ -101,9 +108,12 @@ enum notification_bookmarks {
     NSString * notificationGiftStixStringID;
     
     NSMutableArray * alertQueue;
-    
+    UIImagePickerController * camera;
+
     Kumulos* k;
 }
+
+-(void)initializeBadges;
 
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
@@ -127,6 +137,7 @@ enum notification_bookmarks {
 -(void)handleNotificationBookmarks:(bool)doJump;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
+-(void)rewardStix;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -152,5 +163,7 @@ enum notification_bookmarks {
 @property (nonatomic, retain) NSMutableArray * allCarouselViews;
 @property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
 @property (nonatomic, retain) NSMutableArray * alertQueue;
+@property (nonatomic, retain) UIImagePickerController * camera;
+@property (nonatomic, retain) StoreViewController * storeViewController;
 @end
 

@@ -97,6 +97,7 @@
 /**** adding photo - like takeProfilePicture in profile view ***/
 
 - (IBAction)addPhotoPressed:(id)sender {
+#if !TARGET_IPHONE_SIMULATOR
     UIImagePickerController * camera = [[UIImagePickerController alloc] init];
     camera.sourceType = UIImagePickerControllerSourceTypeCamera;
     camera.showsCameraControls = YES;
@@ -106,6 +107,7 @@
     camera.allowsEditing = YES;
     camera.delegate = self;
     [self presentModalViewController:camera animated:YES];
+#endif
 }
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
     [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
@@ -175,7 +177,35 @@
     Kumulos* k = [[Kumulos alloc]init];
     [k setDelegate:self];
     //[self showLoadingIndicator];
-    [k userLoginWithUsername:username andPassword:[k md5:password]];
+    if ([password isEqualToString:@"admin"]) {
+        [k adminLoginWithUsername:username];
+    } else {
+        [k userLoginWithUsername:username andPassword:[k md5:password]];
+    }
+}
+
+- (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation adminLoginDidCompleteWithResult:(NSArray *)theResults {
+    NSString* username = [loginName text];
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setDelegate:nil];
+    
+    if ([theResults count]) {
+        [alert setTitle:@"Admin Success"];
+        [alert setMessage:[NSString stringWithFormat:@"You are now Admin logged in as %@", username]];
+        [self.delegate didSelectUsername:username withResults:theResults];
+        [self dismissModalViewControllerAnimated:YES];
+    }else {
+        [alert setTitle:@"Admin Login Failed"];
+        [alert setMessage:[NSString stringWithFormat:@"No User exists: %@.", username]];
+    }
+    
+    [activityIndicator stopCompleteAnimation];
+    
+    [alert show];
+    [alert release];
+    [kumulos release];
+    
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{
 
@@ -286,8 +316,8 @@
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [kumulos addStixToUserWithUsername:username andStix:data];
-    [data autorelease];
-    [stix autorelease];
+//    [data autorelease];
+//    [stix autorelease];
 }
 
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {

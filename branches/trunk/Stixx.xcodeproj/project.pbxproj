@@ -63,8 +63,8 @@
 		9E252C1114E2F5DA0070ECB4 /* CSerializedJSONData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */; };
 		9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */; };
 		9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */; };
-		9E252C3014E2FB800070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C2F14E2FB800070ECB4 /* Parse.framework */; };
 		9E252C3F14E3010F0070ECB4 /* btn_invite.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C3E14E3010F0070ECB4 /* btn_invite.png */; };
+		9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C4014E301EE0070ECB4 /* Parse.framework */; };
 		9E2830E814A158E7000707B8 /* GiftStixTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830E714A158E7000707B8 /* GiftStixTableCell.m */; };
 		9E2830EB14A2BAF8000707B8 /* CarouselView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830EA14A2BAF6000707B8 /* CarouselView.m */; };
 		9E2830EF14A2D998000707B8 /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830ED14A2D993000707B8 /* UserProfileViewController.m */; };
@@ -407,8 +407,8 @@
 		9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CSerializedJSONData.m; sourceTree = "<group>"; };
 		9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
 		9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = ../tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
-		9E252C2F14E2FB800070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
 		9E252C3E14E3010F0070ECB4 /* btn_invite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_invite.png; sourceTree = "<group>"; };
+		9E252C4014E301EE0070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
 		9E2830E314A1314E000707B8 /* load_bkg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_bkg.png; sourceTree = "<group>"; };
 		9E2830E614A158E6000707B8 /* GiftStixTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiftStixTableCell.h; sourceTree = "<group>"; };
 		9E2830E714A158E7000707B8 /* GiftStixTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GiftStixTableCell.m; sourceTree = "<group>"; };
@@ -743,7 +743,7 @@
 				9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */,
 				9E1233D714DDDDF900D46DBD /* QuartzCore.framework in Frameworks */,
 				9E189FC614E0341B0082098C /* libKiip.a in Frameworks */,
-				9E252C3014E2FB800070ECB4 /* Parse.framework in Frameworks */,
+				9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1206,7 +1206,7 @@
 		9EB03171142C002E0019F2BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9E252C2F14E2FB800070ECB4 /* Parse.framework */,
+				9E252C4014E301EE0070ECB4 /* Parse.framework */,
 				9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */,
 				9EB03243142C01640019F2BD /* QuartzCore.framework */,
 				9EB03241142C015A0019F2BD /* CoreLocation.framework */,

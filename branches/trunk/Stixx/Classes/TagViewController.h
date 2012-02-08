@@ -30,7 +30,7 @@
 -(int)getStixCount:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(void)didClickFeedbackButton:(NSString*)fromView;
-
+-(void)didDismissSecondaryView;
 @end
 
 
@@ -44,7 +44,7 @@
 	ARViewController *arViewController; // for saving and displaying coordinates
     
 	NSObject<TagViewDelegate> *delegate;
-	UIView *overlayView;
+//	UIView *overlayView;
     CGRect badgeFrame;
     NSString * selectedStixStringID;
 
@@ -54,7 +54,11 @@
     
     IBOutlet UIButton * flashModeButton;
     IBOutlet UIButton * cameraDeviceButton;
-    IBOutlet UIButton * buttonFeedback;
+//    IBOutlet UIButton * buttonFeedback;
+    
+    IBOutlet UIButton * buttonClose;
+    IBOutlet UIButton * buttonZoomIn;
+    IBOutlet UIButton * buttonZoomOut;
     
     TagDescriptorController * descriptorController;
     bool descriptorIsOpen;
@@ -67,7 +71,7 @@
 @property (nonatomic, retain) ARViewController *arViewController;
 @property (nonatomic, assign) NSObject<TagViewDelegate> *delegate;
 @property (nonatomic, retain) IBOutlet UIImageView * rectView;
-@property (nonatomic, retain) UIView * overlayView;
+//@property (nonatomic, retain) UIView * overlayView;
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, assign) bool descriptorIsOpen;
 @property (nonatomic, assign) bool needToShowCamera;
@@ -75,7 +79,10 @@
 @property (nonatomic, retain) IBOutlet UIImageView * aperture;
 @property (nonatomic, retain) IBOutlet UIButton * flashModeButton;
 @property (nonatomic, retain) IBOutlet UIButton * cameraDeviceButton;
-@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+@property (nonatomic, retain) IBOutlet UIButton * buttonClose;
+@property (nonatomic, retain) IBOutlet UIButton * buttonZoomIn;
+@property (nonatomic, retain) IBOutlet UIButton * buttonZoomOut;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;
@@ -89,5 +96,7 @@
 -(IBAction)toggleFlashMode:(id)sender;
 -(IBAction)toggleCameraDevice:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
-
+-(IBAction)didClickCloseButton:(id)sender;
+-(IBAction)didClickZoomIn:(id)sender;
+-(IBAction)didClickZoomOut:(id)sender;
 @end

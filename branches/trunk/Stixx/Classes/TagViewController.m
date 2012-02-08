@@ -12,7 +12,7 @@
 @synthesize rectView;
 @synthesize buttonInstructions;
 @synthesize badgeView;
-@synthesize overlayView;
+//@synthesize overlayView;
 @synthesize camera;
 @synthesize descriptorIsOpen;
 @synthesize descriptorController;
@@ -20,7 +20,9 @@
 @synthesize aperture;
 @synthesize cameraDeviceButton;
 @synthesize flashModeButton;
-@synthesize buttonFeedback;
+@synthesize buttonClose;
+@synthesize buttonZoomIn;
+@synthesize buttonZoomOut;
 
 - (id)init {
 	
@@ -73,6 +75,9 @@
 }
 
 -(void)loadView {
+#if 1
+    [super loadView];
+#else
     // instead of calling [super loadView], which doesn’t account for a hidden status bar, create an unclipped view here
     
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
@@ -109,12 +114,12 @@
     [self.view addSubview:buttonFeedback];
 */    
     [sView release];
-    
+#endif
 }
 
 -(void) viewDidLoad {
     [super viewDidLoad];
-    
+
     /****** init badge view ******/
     [self createCarouselView];
 #if 0
@@ -142,39 +147,54 @@
     // another subview in self.view's subview, it will then cause hittest to traverse
     // all of self.view's subviews after carouselView natually, thus enabling all other buttons
     // and touch interactions
-    [carouselView setUnderlay:flashModeButton];
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-     
+//    [carouselView setUnderlay:flashModeButton];
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y+60,320,SHELF_STIX_SIZE)];
+    //[carouselView toggleHideShelf:YES];
     [carouselView setAllowTap:YES];
     [carouselView setTapDefaultOffset:CGPointMake(carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
     
     [carouselView addSubview:arViewController.view];
-    [self.view addSubview:carouselView];
+//    [self.view insertSubview:carouselView belowSubview:buttonClose];
+    [self.view insertSubview:carouselView belowSubview:camera.view];
+//    [self.view addSubview:carouselView];
+//    [self.view insertSubview:carouselView atIndex:[[self.view subviews] count]];
+//    [self.view insertSubview:carouselView atIndex:0];
     [delegate didCreateBadgeView:carouselView];
 }
 
 -(void)reloadCarouselView {
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-    [[self carouselView] removeFromSuperview];
+    // hack: if carouselView is not scrolling, it is being eclipsed by the tabbar
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y+60,320,SHELF_STIX_SIZE)];
+    // HACK: make sure carouselView doesn't prevent other buttons from being touched
+    // this is different because of the weird camera layer that doesn't exist in others (feedView, exploreView)
+    [[self carouselView] removeFromSuperview];    
+    [self.buttonClose removeFromSuperview];
+    [self.flashModeButton removeFromSuperview];
+    [self.cameraDeviceButton removeFromSuperview];
+    [self.buttonZoomIn removeFromSuperview];
+    [self.buttonZoomOut removeFromSuperview];
     [self.view addSubview:carouselView];
+    [self.view addSubview:buttonClose];
+    [self.view addSubview:flashModeButton];
+    [self.view addSubview:cameraDeviceButton];
+    [self.view addSubview:buttonZoomIn];
+    [self.view addSubview:buttonZoomOut];
 }
 
 // called by main delegate to add tabBarView to camera overlay
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView
 {
-    [self setOverlayView:cameraOverlayView];
+//    [self setOverlayView:cameraOverlayView];
     @try {
-#if 0
-        [cameraController setCameraOverlayView:cameraOverlayView];
-#else
         [camera setCameraOverlayView:cameraOverlayView];
-#endif
     }
     @catch (NSException* exception) {
     }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    [buttonZoomIn setHidden:YES];
+    [buttonZoomOut setHidden:YES];
 /*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
  */    
@@ -187,7 +207,6 @@
     //viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
 #if !TARGET_IPHONE_SIMULATOR
     if (descriptorIsOpen == NO) {
-        [self presentModalViewController:self.camera animated:NO];
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
         [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
         needToShowCamera = NO;
@@ -207,17 +226,13 @@
 - (void)viewWillDisappear:(BOOL)animated
 {	
 	[super viewWillDisappear:animated];
-//#if !TARGET_IPHONE_SIMULATOR
-//	[self.cameraController dismissModalViewControllerAnimated:YES];
-//#endif
-	
 }
 
 - (void)viewDidUnload {
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
-	[overlayView release];
-	overlayView = nil;
+	//[overlayView release];
+	//overlayView = nil;
     [rectView release];
     rectView = nil;
     //[buttonInstructions release];
@@ -245,14 +260,7 @@
 
 // BadgeViewDelegate function
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID{
-#if 0
-	// first, set the camera controller to have the badge as an additional UIImageView
-	[[self cameraController] setAddedOverlay:badge];
-	// take a picture
-	[[self cameraController] takePicture];
-#else
     [[self camera] takePicture];
-#endif
     badgeFrame = badge.frame;
     // save frame of badge relative to cropped image
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
@@ -278,9 +286,6 @@
 	// called by BTLFullScreenCameraController
 	// set a title
     descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
-#if !TARGET_IPHONE_SIMULATOR
-    [self dismissModalViewControllerAnimated:NO];
-#endif
     needToShowCamera = NO; // still not need to show camera
 	// prompt for label: use TagDescriptorController
 	descriptorController = [[TagDescriptorController alloc] init];
@@ -289,9 +294,10 @@
     [descriptorController setBadgeFrame:badgeFrame];
     [descriptorController setStixStringID:selectedStixStringID];
 #if !TARGET_IPHONE_SIMULATOR
-    //[self.view addSubview:descriptorController.view];
-    //[self.tabBarController presentModalViewController:descriptorController animated:NO];
-    [self presentModalViewController:descriptorController animated:YES];
+    // hack a way to display view over camera; formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [descriptorController.view setFrame:frameShifted];
+    [self.camera setCameraOverlayView:descriptorController.view];
 #endif
 }
 
@@ -302,7 +308,9 @@
 -(void)didCancelAddDescriptor {
     [carouselView resetBadgeLocations];
     
-    [self dismissModalViewControllerAnimated:YES];
+    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
+    //[self.camera dismissModalViewControllerAnimated:YES];
+    [self.camera setCameraOverlayView:self.view];
     needToShowCamera = YES;
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];    
@@ -370,12 +378,9 @@
     
     [carouselView resetBadgeLocations];
     
-    //[username release];
-    // dismiss descriptorController
-    //[descriptorController.view removeFromSuperview];
-    //[descriptorController release];
-    //[self.tabBarController dismissModalViewControllerAnimated:YES];
-    [self dismissModalViewControllerAnimated:YES];
+    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
+    //[self.camera dismissModalViewControllerAnimated:YES];
+    //[self.camera setCameraOverlayView:self.view];
     needToShowCamera = YES;
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];
@@ -517,6 +522,17 @@
 
 -(IBAction)feedbackButtonClicked:(id)sender {
     [self.delegate didClickFeedbackButton:@"Tag view"];
+}
+
+-(IBAction)didClickCloseButton:(id)sender {
+    [self.delegate didDismissSecondaryView];
+}
+
+-(IBAction)didClickZoomIn:(id)sender {
+}
+
+-(IBAction)didClickZoomOut:(id)sender {
+    
 }
 
 #pragma mark -

@@ -46,6 +46,8 @@
     scrollView.scrollEnabled = YES;
     scrollView.directionalLockEnabled = YES; // only allow vertical or horizontal scroll
     [scrollView setDelegate:self];
+
+    shelf.frame = CGRectMake(scrollView.frame.origin.x, scrollView.frame.origin.y+50, 320, 30);
     
     // for debug
     if (0) {
@@ -122,9 +124,20 @@
     [scrollView removeFromSuperview];
     scrollView.frame = frame;
     
+    if ([allCarouselStixViews count] != [BadgeView totalStixTypes]) {
+        [allCarouselStixViews release];
+        [allCarouselStixFrames release];
+        allCarouselStixViews = [[NSMutableArray alloc] initWithCapacity:[BadgeView totalStixTypes]];
+        allCarouselStixFrames = [[NSMutableArray alloc] initWithCapacity:[BadgeView totalStixTypes]];
+        for (int i=0; i<[BadgeView totalStixTypes]; i++) {
+            [allCarouselStixViews addObject:[NSNull null]];
+            [allCarouselStixFrames addObject:[NSNull null]];
+        }
+    }
+    
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
-    if ([self showGiftStix] == NO)
+    if ([self showGiftStix] == NO || [BadgeView totalStixTypes] == 2)
         totalStix = 2;
     int ct=2;
     UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"FIRE"] retain];
@@ -183,7 +196,7 @@
     [self removeFromSuperview];
 }
 
--(void)toggleShelf:(bool)isHidden {
+-(void)toggleHideShelf:(bool)isHidden {
     [self.shelf setHidden:isHidden];
 }
 

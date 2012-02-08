@@ -43,7 +43,7 @@
 @property (nonatomic, assign) bool allowTap;
 @property (nonatomic, assign) CGPoint tapDefaultOffset;
 
--(void)toggleShelf:(bool)isHidden;
+-(void)toggleHideShelf:(bool)isHidden;
 -(void)initCarouselWithFrame:(CGRect)frame;
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;

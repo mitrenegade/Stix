@@ -63,6 +63,7 @@
 		9E252C1114E2F5DA0070ECB4 /* CSerializedJSONData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */; };
 		9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */; };
 		9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */; };
+		9E252C3014E2FB800070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C2F14E2FB800070ECB4 /* Parse.framework */; };
 		9E2830E814A158E7000707B8 /* GiftStixTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830E714A158E7000707B8 /* GiftStixTableCell.m */; };
 		9E2830EB14A2BAF8000707B8 /* CarouselView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830EA14A2BAF6000707B8 /* CarouselView.m */; };
 		9E2830EF14A2D998000707B8 /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830ED14A2D993000707B8 /* UserProfileViewController.m */; };
@@ -269,7 +270,6 @@
 		9EE6334714B7C7D40000AAFC /* switch_camera.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334614B7C7D40000AAFC /* switch_camera.png */; };
 		9EE6334914B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE6334814B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a */; };
 		9EE6334B14BA101D0000AAFC /* tab_addstix_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EE6334A14BA101D0000AAFC /* tab_addstix_on.png */; };
-		9EE8D95414D1BED7001F36D1 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE8D95314D1BED7001F36D1 /* Parse.framework */; };
 		9EE8D95714D1C5C1001F36D1 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE8D95614D1C5C1001F36D1 /* CFNetwork.framework */; };
 		9EE8D95914D1C5DA001F36D1 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE8D95814D1C5DA001F36D1 /* MobileCoreServices.framework */; };
 		9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EE8D95A14D1C5F0001F36D1 /* libz.1.1.3.dylib */; };
@@ -407,6 +407,7 @@
 		9E252C0514E2F5DA0070ECB4 /* CSerializedJSONData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CSerializedJSONData.m; sourceTree = "<group>"; };
 		9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
 		9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = ../tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
+		9E252C2F14E2FB800070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
 		9E2830E314A1314E000707B8 /* load_bkg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = load_bkg.png; sourceTree = "<group>"; };
 		9E2830E614A158E6000707B8 /* GiftStixTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiftStixTableCell.h; sourceTree = "<group>"; };
 		9E2830E714A158E7000707B8 /* GiftStixTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GiftStixTableCell.m; sourceTree = "<group>"; };
@@ -693,7 +694,6 @@
 		9EE6334614B7C7D40000AAFC /* switch_camera.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = switch_camera.png; sourceTree = "<group>"; };
 		9EE6334814B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libKumulos_iOS_.0.7.4.a; sourceTree = "<group>"; };
 		9EE6334A14BA101D0000AAFC /* tab_addstix_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_addstix_on.png; sourceTree = "<group>"; };
-		9EE8D95314D1BED7001F36D1 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = ../../../../../Downloads/Parse.framework; sourceTree = "<group>"; };
 		9EE8D95614D1C5C1001F36D1 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		9EE8D95814D1C5DA001F36D1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		9EE8D95A14D1C5F0001F36D1 /* libz.1.1.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.1.3.dylib; path = usr/lib/libz.1.1.3.dylib; sourceTree = SDKROOT; };
@@ -740,10 +740,10 @@
 				9EB03177142C002E0019F2BD /* CoreGraphics.framework in Frameworks */,
 				9E88A499148A8EB400E67864 /* libxml2.2.7.3.dylib in Frameworks */,
 				9EE6334914B9FF4E0000AAFC /* libKumulos_iOS_.0.7.4.a in Frameworks */,
-				9EE8D95414D1BED7001F36D1 /* Parse.framework in Frameworks */,
 				9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */,
 				9E1233D714DDDDF900D46DBD /* QuartzCore.framework in Frameworks */,
 				9E189FC614E0341B0082098C /* libKiip.a in Frameworks */,
+				9E252C3014E2FB800070ECB4 /* Parse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1206,6 +1206,7 @@
 		9EB03171142C002E0019F2BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9E252C2F14E2FB800070ECB4 /* Parse.framework */,
 				9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */,
 				9EB03243142C01640019F2BD /* QuartzCore.framework */,
 				9EB03241142C015A0019F2BD /* CoreLocation.framework */,
@@ -1217,7 +1218,6 @@
 				9E8A29CF14AFA80D00CDCE76 /* AudioToolbox.framework */,
 				9E1233D614DDDDF900D46DBD /* QuartzCore.framework */,
 				9ECB659314DDD5770067F3F3 /* MapKit.framework */,
-				9EE8D95314D1BED7001F36D1 /* Parse.framework */,
 				9E88A498148A8EB300E67864 /* libxml2.2.7.3.dylib */,
 				9EB03172142C002E0019F2BD /* UIKit.framework */,
 				9EB03174142C002E0019F2BD /* Foundation.framework */,
@@ -2035,6 +2035,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
+					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stixx/Stixx-Prefix.pch";
@@ -2076,6 +2077,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
+					"\"$(SRCROOT)\"",
 				);
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

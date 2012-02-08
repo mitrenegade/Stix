@@ -204,6 +204,7 @@
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">input.png</string>
 						</object>
+						<int key="IBUIClearButtonMode">1</int>
 						<object class="IBUIFontDescription" key="IBUIFontDescription">
 							<string key="name">Helvetica-Bold</string>
 							<string key="family">Helvetica</string>

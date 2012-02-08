@@ -172,7 +172,8 @@
 -(IBAction)buttonCancelPressed:(id)sender
 {
 	//[self.delegate didAddDescriptor:nil];
-    [self dismissModalViewControllerAnimated:YES];
+    //[self dismissModalViewControllerAnimated:YES];
+    [self.delegate didCancelAuxStix];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{

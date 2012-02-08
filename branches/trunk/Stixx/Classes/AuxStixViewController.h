@@ -13,7 +13,7 @@
 @protocol AuxStixViewControllerDelegate 
 
 -(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString*)comment;
-
+-(void)didCancelAuxStix;
 @end
 
 @interface AuxStixViewController : UIViewController <UITextFieldDelegate, UIGestureRecognizerDelegate> {

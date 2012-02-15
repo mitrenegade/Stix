@@ -18,6 +18,8 @@
 @synthesize loginEmail;
 @synthesize loginEmailBG;
 
+static bool usernameExists;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -47,9 +49,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    k = [[Kumulos alloc]init];
+    [k setDelegate:self];
     // Do any additional setup after loading the view from its nib.
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 240, 80, 80)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 300, 80, 80)];
     [self.view addSubview:activityIndicator];
+    usernameExists = FALSE;
 }
 
 - (void)viewDidUnload
@@ -60,6 +65,7 @@
 //    if (newUserImage != nil)
 //        [newUserImage release];
     [activityIndicator release];
+    [k release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -85,6 +91,10 @@
         [loginEmailBG setHidden:YES];
         [addPhoto setHidden:YES];
     }
+    [activityIndicator stopCompleteAnimation];
+    [loginName setText:@""];
+    [loginPassword setText:@""];
+    [loginEmail setText:@""];
     newUserImageSet = false;
 }
 
@@ -164,18 +174,32 @@
     [self doLogin];
 }
 
-
-
 -(void)doLogin{
     
     [activityIndicator startCompleteAnimation];    
 
+    NSString * username = [loginName text];
+    [k checkUsernameExistenceWithUsername:username];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation checkUsernameExistenceDidCompleteWithResult:(NSNumber *)aggregateResult {
+    if ([aggregateResult intValue] > 0)
+        usernameExists = YES;
+    else
+        usernameExists = NO;
+ 
+    if (bJoinOrLogin == 0) // join
+        [self continueJoin];
+    else
+        [self continueLogin];
+}
+
+
+-(void)continueLogin {
     //we want to log user in
     NSString * username = [loginName text];
     NSString * password = [loginPassword text];
     
-    Kumulos* k = [[Kumulos alloc]init];
-    [k setDelegate:self];
     //[self showLoadingIndicator];
     if ([password isEqualToString:@"admin"]) {
         [k adminLoginWithUsername:username];
@@ -194,7 +218,7 @@
         [alert setTitle:@"Admin Success"];
         [alert setMessage:[NSString stringWithFormat:@"You are now Admin logged in as %@", username]];
         [self.delegate didSelectUsername:username withResults:theResults];
-        [self dismissModalViewControllerAnimated:YES];
+        //[self dismissModalViewControllerAnimated:YES];
     }else {
         [alert setTitle:@"Admin Login Failed"];
         [alert setMessage:[NSString stringWithFormat:@"No User exists: %@.", username]];
@@ -204,7 +228,7 @@
     
     [alert show];
     [alert release];
-    [kumulos release];
+    //[kumulos release];
     
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{
@@ -218,28 +242,28 @@
         [alert setTitle:@"Success"];
         [alert setMessage:@"You are now logged in"];
         [self.delegate didSelectUsername:username withResults:theResults];
-        [self dismissModalViewControllerAnimated:YES];
+        //[self dismissModalViewControllerAnimated:YES];
     }else {
         [alert setTitle:@"Whoops"];
-        [alert setMessage:@"Sorry we could not log you in."];
+        if (usernameExists) {
+            [alert setMessage:@"Sorry we could not log you in: invalid password."];
+        }
+        else
+        {
+            [alert setMessage:[NSString stringWithFormat:@"Username %@ does not exist!", username]];
+        }
     }
     
     [activityIndicator stopCompleteAnimation];
 
     [alert show];
     [alert release];
-    [kumulos release];
-}
-
-
-- (void) kumulosAPI:(kumulosProxy*)kumulos apiOperation:(KSAPIOperation*)operation didFailWithError:(NSString*)theError {
-    NSLog(@"Kumulos in LoginViewController failed: error: %@", theError);
 }
 
 - (IBAction) cancelButtonPressed:(id)sender {
     [delegate didCancelLogin];
     [activityIndicator stopCompleteAnimation];
-    [self dismissModalViewControllerAnimated:YES];    
+//    [self dismissModalViewControllerAnimated:YES];    
 }
 
 - (IBAction)joinButtonPressed:(id)sender
@@ -250,10 +274,17 @@
     [self addUser];
 }
 
+static int addUserStage;
+
 -(void) addUser{
     
     [activityIndicator startCompleteAnimation];
+    NSString* username = [loginName text];
+    
+    [k checkUsernameExistenceWithUsername:username];
+}
 
+-(void)continueJoin {
     //Get values
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
@@ -272,8 +303,7 @@
     }
 
     //We want to register
-    Kumulos* k = [[Kumulos alloc]init];
-    [k setDelegate:self];
+    addUserStage = 0;
     [k getUserWithUsername:username]; // check if user already exists
 }
 
@@ -288,7 +318,6 @@
         [alert setMessage:@"Username already exists!"];
         [alert show];
         [alert release];
-        [kumulos release];
         [activityIndicator stopCompleteAnimation];
         return;
     }
@@ -296,6 +325,7 @@
     // in LoginViewController, getUserDidComplete causes a new user to be created        
     NSString* username = [loginName text];
     NSString* password = [loginPassword text];
+    NSString * email = [loginEmail text];
     UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
     
     NSData * photo;
@@ -303,40 +333,43 @@
         photo = UIImagePNGRepresentation(userImage);
     else
         photo = UIImageJPEGRepresentation(img, .8);
-
-    [kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSNumber*)newRecordID{
-
-    // create stix counts - not used by loginViewController
-    NSString* username = [loginName text];
-    NSString * email = [loginEmail text];
-    [kumulos addEmailToUserWithUsername:username andEmail:email];
+    
+    //[kumulos addEmailToUserWithUsername:username andEmail:email];
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
-    NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
-    [kumulos addStixToUserWithUsername:username andStix:data];
-//    [data autorelease];
-//    [stix autorelease];
+    NSMutableData * stixData = [[KumulosData dictionaryToData:stix] retain];
+    //[kumulos addStixToUserWithUsername:username andStix:data];
+
+    // add auxiliary data
+#if 0
+    NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
+    NSNumber * isFirstTimeUser = [NSNumber numberWithBool:YES];
+    NSNumber * hasAccessedStore = [NSNumber numberWithBool:NO];
+    [auxInfo setValue:isFirstTimeUser forKey:@"isFirstTimeUser"];
+    [auxInfo setValue:hasAccessedStore forKey:@"hasAccessedStore"];
+    NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
+    //[kumulos updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
+#else
+    NSData * auxData = nil;
+#endif
+    int totalTags = 0;
+    int bux = 25;
+    
+    //[kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
+    [k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
 }
 
--(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createUserDidCompleteWithResult:(NSArray *)theResults {
+    NSString* username = [loginName text];
 
-    //[self hideLoadingIndicator];
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"OK"];
-    [alert setDelegate:nil];
     [alert setTitle:@"Success"];
-    [alert setMessage:@"New user added. You are now logged in."];
-    
-    NSString* username = [loginName text];
-    [self.delegate didSelectUsername:username withResults:theResults];
-    //[self dismissModalViewControllerAnimated:YES]; // do not dismiss until delegate tells us it is done changing the username
+    [alert setMessage:[NSString stringWithFormat:@"New User %@ created!", username]];
     [alert show];
     [alert release];
-    [kumulos release];
-    
     [activityIndicator stopCompleteAnimation];
+    
+    [self.delegate didSelectUsername:username withResults:theResults];
 }
 
 @end

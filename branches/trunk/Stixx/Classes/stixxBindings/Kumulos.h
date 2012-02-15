@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Feb  8, 2012
+//  Created by Kumulos Bindings Compiler on Feb 15, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -69,11 +69,21 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber*)affectedRows;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminDeleteAllTestUsersDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminLoginDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminResetAllStixLevelDidCompleteWithResult:(NSNumber*)affectedRows;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminSetAllUserBuxDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation changeUserBuxByAmountDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation checkUsernameExistenceDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAuxiliaryDataDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults;
  
@@ -81,11 +91,17 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserStixDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setStixLevelDidCompleteWithResult:(NSNumber*)affectedRows;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateAuxiliaryDataDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createAppInfoDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAppInfoDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateAppInfoDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllCategoriesDidCompleteWithResult:(NSArray*)theResults;
  
@@ -93,13 +109,15 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation lastUpdatedCategoriesDidCompleteWithResult:(NSArray*)theResults;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricHitDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createStixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllStixViewsDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllStixTypesDidCompleteWithResult:(NSArray*)theResults;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixDataForStixStringIDDidCompleteWithResult:(NSArray*)theResults;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllStixTypesDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfCategoryDidCompleteWithResult:(NSArray*)theResults;
  
@@ -196,13 +214,28 @@
 -(KSAPIOperation*) adminAddStixToAllUsersWithStix:(NSData*)stix;
     
    
+-(KSAPIOperation*) adminDeleteAllTestUsersWithEmail:(NSString*)email;
+    
+   
 -(KSAPIOperation*) adminLoginWithUsername:(NSString*)username;
     
    
--(KSAPIOperation*) adminResetAllStixLevelWithStixLevel:(NSInteger)stixLevel;
+-(KSAPIOperation*) adminSetAllUserBuxWithBux:(NSInteger)bux;
+    
+   
+-(KSAPIOperation*) changeUserBuxByAmountWithUsername:(NSString*)username andBuxChange:(NSInteger)buxChange;
+    
+   
+-(KSAPIOperation*) checkUsernameExistenceWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) createUserWithUsername:(NSString*)username andPassword:(NSString*)password andEmail:(NSString*)email andPhoto:(NSData*)photo andStix:(NSData*)stix andAuxiliaryData:(NSData*)auxiliaryData andTotalTags:(NSInteger)totalTags andBux:(NSInteger)bux;
     
    
  -(KSAPIOperation*) getAllUsers;
+   
+-(KSAPIOperation*) getAuxiliaryDataWithUsername:(NSString*)username;
+    
    
 -(KSAPIOperation*) getUserWithUsername:(NSString*)username;
     
@@ -213,13 +246,22 @@
 -(KSAPIOperation*) getUserStixWithUsername:(NSString*)username;
     
    
--(KSAPIOperation*) setStixLevelWithUsername:(NSString*)username andStixLevel:(NSInteger)stixLevel;
+-(KSAPIOperation*) updateAuxiliaryDataWithUsername:(NSString*)username andAuxiliaryData:(NSData*)auxiliaryData;
     
    
 -(KSAPIOperation*) updateTotalTagsWithUsername:(NSString*)username andTotalTags:(NSInteger)totalTags;
     
    
 -(KSAPIOperation*) userLoginWithUsername:(NSString*)username andPassword:(NSString*)password;
+    
+   
+-(KSAPIOperation*) createAppInfoWithInfoType:(NSString*)infoType andStringInfo:(NSString*)stringInfo andIntegerInfo:(NSInteger)integerInfo;
+    
+   
+-(KSAPIOperation*) getAppInfoWithInfoType:(NSString*)infoType;
+    
+   
+-(KSAPIOperation*) updateAppInfoWithInfoType:(NSString*)infoType andStringInfo:(NSString*)stringInfo andIntegerInfo:(NSInteger)integerInfo;
     
    
  -(KSAPIOperation*) getAllCategories;
@@ -230,15 +272,18 @@
 -(KSAPIOperation*) lastUpdatedCategoriesWithTimeUpdated:(NSDate*)timeUpdated;
     
    
--(KSAPIOperation*) createStixWithStixStringID:(NSString*)stixStringID andDataPNG:(NSData*)dataPNG andStixDescriptor:(NSString*)stixDescriptor andLikelihood:(NSInteger)likelihood;
+-(KSAPIOperation*) addMetricHitWithDescription:(NSString*)description andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;
+    
+   
+-(KSAPIOperation*) createStixWithStixStringID:(NSString*)stixStringID andDataPNG:(NSData*)dataPNG andStixDescriptor:(NSString*)stixDescriptor andLikelihood:(NSInteger)likelihood andOrder:(NSInteger)order andCategoryName:(NSString*)categoryName andTags:(NSString*)tags andDesignerName:(NSString*)designerName;
     
    
  -(KSAPIOperation*) getAllStixViews;
    
- -(KSAPIOperation*) getAllStixTypes;
-   
--(KSAPIOperation*) getStixDataForStixStringIDWithStixStringID:(NSString*)stixStringID;
+-(KSAPIOperation*) getStixDataByStixStringIDWithStixStringID:(NSString*)stixStringID;
     
+   
+ -(KSAPIOperation*) getAllStixTypes;
    
 -(KSAPIOperation*) getStixOfCategoryWithCategoryName:(NSString*)categoryName;
     

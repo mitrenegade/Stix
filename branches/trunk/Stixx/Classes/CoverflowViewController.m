@@ -38,32 +38,26 @@
 	
 	// Setup the covers
 	covers = [[NSMutableArray alloc] init];
-    NSMutableArray * filenames = [self.delegate getCoverFilenames];
-    for (int i=0; i<[filenames count]; i++) {
-        NSString * name = [filenames objectAtIndex:i];
-        UIImage * coverImage = [UIImage imageNamed:name];
-        NSLog(@"Adding coverimage for category %i with filename %@", i, [filenames objectAtIndex:i]);
+    NSMutableArray * coverImgs = [self.delegate getCovers];
+    for (int i=0; i<[coverImgs count]; i++) {
+        UIImage * coverImage = [coverImgs objectAtIndex:i];
         [covers addObject:coverImage];
     }
                
-/*
-			   [UIImage imageNamed:@"category_entertainment.png"],[UIImage imageNamed:@"category_entertainment.png"],
-			   [UIImage imageNamed:@"category_entertainment.png"],[UIImage imageNamed:@"category_entertainment.png"],
-			   [UIImage imageNamed:@"category_entertainment.png"],[UIImage imageNamed:@"category_entertainment.png"],
-			   [UIImage imageNamed:@"category_entertainment.png"],[UIImage imageNamed:@"category_entertainment.png"],
-			   [UIImage imageNamed:@"category_entertainment.png"],nil] retain];
-*/
-	
 	// Add the coverflow view
-	coverflow = [[TKCoverflowView alloc] initWithFrame:CGRectMake(0, 0, 320, 150)];// self.view.frame];
+	coverflow = [[TKCoverflowView alloc] initWithFrame:CGRectMake(0, 0, 320, 140)];// self.view.frame];
 	coverflow.coverflowDelegate = self;
 	coverflow.dataSource = self;
 	[self.view addSubview:coverflow];
 	[coverflow setNumberOfCovers:[covers count]];
+    
 }
 
 -(void)setCoverflowFrame:(CGRect)frame {
     [coverflow setFrame:frame];
+}
+-(void)setCoverflowIndex:(int)index {
+    [coverflow setCurrentIndex:index];
 }
 
 - (void)viewDidUnload
@@ -95,7 +89,7 @@
         // baseline determines how far below the top the title is
         // width determines the density of titles
         // if baseline > width, then it is offcenter
-        const int width = 200;
+        const int width = 180;
         const int baseline = 180;
 		cover = [[[TKCoverflowCoverView alloc] initWithFrame:CGRectMake(0, 0, width, 0)] autorelease]; // 224
 		cover.baseline = baseline;

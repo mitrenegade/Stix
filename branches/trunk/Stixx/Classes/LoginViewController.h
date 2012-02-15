@@ -18,7 +18,6 @@
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
 - (void)didCancelLogin;
-
 @end
 
 @interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
@@ -38,6 +37,8 @@
 	id<LoginViewDelegate, NSObject> delegate;
     
     bool bJoinOrLogin; // 0 for join, 1 for login
+    
+    Kumulos * k;
 }
 
 @property (nonatomic, retain) IBOutlet UITextField * loginName;
@@ -59,5 +60,8 @@
 - (IBAction)addPhotoPressed:(id)sender;
 -(void)addUser;
 -(void)doLogin;
+
+-(void)continueLogin;
+-(void)continueJoin;
 
 @end

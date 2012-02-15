@@ -73,25 +73,7 @@
     [stix setFrame:stixFrameScaled];
     [stix setCenter:CGPointMake(centerX, centerY)];
     [self addSubview:stix];
-    
-    /*
-    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"]) {
         
-        CGRect labelFrame = stix.frame;
-        stixCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-        labelFrame = stixCount.frame; // changing center should change origin but not width
-        //[stixCount setFont:[UIFont fontWithName:@"Helvetica Bold" size:5]]; does nothing
-        if ([stixStringID isEqualToString:@"FIRE"])
-            [stixCount setTextAttributesForBadgeType:0];
-        if ([stixStringID isEqualToString:@"ICE"])
-            [stixCount setTextAttributesForBadgeType:1];
-        [stixCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-        [stixCount setText:[NSString stringWithFormat:@"%d", count]];
-        [self addSubview:stixCount];
-//        [stixCount release];
-    }
-     */
-    
     // add pinch gesture recognizer
     UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
     [myGestureRecognizer setDelegate:self];
@@ -205,7 +187,7 @@
                         [auxStix removeFromSuperview]; 
                         [self.delegate peelAnimationDidCompleteForStix:index]; 
                     }
-     ]; 
+     ];
 }
 
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

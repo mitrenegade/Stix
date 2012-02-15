@@ -34,9 +34,7 @@
 @synthesize friendController;
 @synthesize loginSplashController;
 @synthesize myStixController;
-@synthesize username;
-@synthesize userphoto;
-@synthesize usertagtotal;
+@synthesize myUserInfo;
 @synthesize lastViewController;
 @synthesize allTags;
 @synthesize timeStampOfMostRecentTag;
@@ -50,27 +48,15 @@
 @synthesize alertQueue;
 @synthesize camera;
 @synthesize storeViewController;
+@synthesize storeViewShell;
 
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
 
-// INIT code
-/* deprecated
-- (void)applicationDidFinishLaunching:(UIApplication *)application {  
-    
-    k = [[Kumulos alloc]init];
-    [k setDelegate:self];
-
-    // Override point for customization after application launch
-    [loadingMessage setText:@"Connecting to Stix Server..."];
-    
-    [window makeKeyAndVisible];
-    
-    [k getAllStixTypes];
-    [k getAllStixViews];
-}
- */
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    versionStringStable = @"0.7.6";
+    versionStringBeta = @"0.7.5.1";
     
     /*** Kumulos service ***/
     
@@ -82,8 +68,8 @@ static int init=0;
     
     [window makeKeyAndVisible];
     
-    [self initializeBadges];
-    
+    myUserInfo = malloc(sizeof(struct UserInfo));
+
     /*** Parse service ***/
     /*
     PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
@@ -104,7 +90,72 @@ static int init=0;
     [KPManager setSharedManager:manager];
     [manager release];
 #endif
+    
+	/***** create first view controller: the TagViewController *****/
+    [loadingMessage setText:@"Initializing camera..."];
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    camera = [[UIImagePickerController alloc] init];
+    camera.navigationBarHidden = YES;
+    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
+    camera.allowsEditing = NO;
+    camera.wantsFullScreenLayout = NO;
+#if !TARGET_IPHONE_SIMULATOR
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto; 
+    camera.showsCameraControls = NO;
+#else
+    camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+#endif    
+    // create an empty main controller in order to turn on camera
+    mainController = [[UIViewController alloc] init];
+    [window addSubview:mainController.view];
+
+    /* load stix types, stix views, user info, and check for version */
+    
+    [self checkVersion];
+    stixViewsLoadedFromDisk = [self loadDataFromDisk];
+    // to force loading stix data from kumulos, set stixViewsLoadedFromDisk to 0
+    //stixViewsLoadedFromDisk = 0;
+    if (stixViewsLoadedFromDisk)
+        init++;
+    [self initializeBadges];
+
     return YES;
+}
+
+-(void)checkVersion {
+    versionIsOutdated = 0;
+    [k getAppInfoWithInfoType:@"version"];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAppInfoDidCompleteWithResult:(NSArray *)theResults {
+    if ([theResults count] == 0)
+    {
+        [k createAppInfoWithInfoType:@"version" andStringInfo:versionStringStable andIntegerInfo:0];
+    }
+    else {
+        NSMutableDictionary * d = [theResults objectAtIndex:0];
+        currVersion = [[d valueForKey:@"stringInfo"] copy];
+        if (currVersion == nil)
+            [k updateAppInfoWithInfoType:@"version" andStringInfo:versionStringStable andIntegerInfo:0];
+        else
+        {
+            NSString * resultTxt = @"EQUAL";
+            NSComparisonResult result = [versionStringStable compare:currVersion];
+            if (result == NSOrderedDescending) {
+                // this version is higher than highest kumulos 
+                [k updateAppInfoWithInfoType:@"version" andStringInfo:versionStringStable andIntegerInfo:0];
+                resultTxt = @"NEWER";
+            }
+            else if (result == NSOrderedAscending) {
+                // this version is outdated
+                versionIsOutdated = 1;
+                resultTxt = @"OLDER";
+            }
+            NSLog(@"Your version: %@ Kumulos version: %@ comparison: %@", versionStringStable, currVersion, resultTxt);
+        }
+    }
 }
 
 - (void)application:(UIApplication *)application
@@ -118,8 +169,18 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 -(void)initializeBadges {
     //[BadgeView InitializeGenericStixTypes];
+    //[self showAlertWithTitle:@"Initializing badges" andMessage:@"We are checking for new badges. Please be patient" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+
+    // load all stix types from Kumulos - doesn't take much
     [k getAllStixTypes];
-    [k getAllStixViews];
+    if (!stixViewsLoadedFromDisk)
+        [k getAllStixViews];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
+    if ([theResults count] == 0)
+        NSLog(@"Could not find a stix data! May be missing in Kumulos.");
+    [BadgeView AddStixView:theResults];
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
@@ -127,6 +188,21 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [BadgeView InitializeStixTypes:theResults];
     NSLog(@"All Stix types initialized from kumulos!");
     init++;
+    if (stixViewsLoadedFromDisk)
+    {
+        // consolidate all stix types with stix views and load any stixViews that weren't loaded
+        NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
+        NSLog(@"%d views loaded from disk; %d types loaded from Kumulos", [stixViews count], [theResults count]);
+        for (int i=0; i<[BadgeView totalStixTypes]; i++) {
+            NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+            UIImageView * stixView = [stixViews objectForKey:stixStringID];
+            
+            if (stixView == nil) {
+                [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+            }
+        }
+    }
+
     if (init == 2) {
         [self continueInit];
         //[self reloadAllCarousels];
@@ -137,7 +213,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
     [BadgeView InitializeStixViews:theResults];
-    NSLog(@"All Stix data initialized from kumulos!");
+    NSLog(@"All %d Stix data initialized from kumulos!", [theResults count]);
     init++;
     if (init == 2) {
         [self continueInit];
@@ -149,38 +225,18 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 -(void) continueInit {
 
-#if 1
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
-#else
-	tabBarController = [[UITabBarController alloc] init];
-#endif
+
     allTags = [[NSMutableArray alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
-    
-	/***** create first view controller: the TagViewController *****/
-    [loadingMessage setText:@"Initializing camera..."];
-
-    camera = [[UIImagePickerController alloc] init];
-#if !TARGET_IPHONE_SIMULATOR
-    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-    camera.showsCameraControls = NO;
-    camera.navigationBarHidden = YES;
-    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
-    camera.allowsEditing = NO;
-    camera.wantsFullScreenLayout = NO;
-    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
-#endif    
-    // create an empty main controller in order to turn on camera
-    mainController = [[UIViewController alloc] init];
-    [window addSubview:mainController.view];
-    
-#if !TARGET_IPHONE_SIMULATOR
+        
+//#if !TARGET_IPHONE_SIMULATOR
     [mainController presentModalViewController:camera animated:YES];
-#endif
+//#endif
     
     // tagView subview is never added to the window but only used as an overlay for camera
   	tagViewController = [[TagViewController alloc] init];
@@ -188,8 +244,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //[window addSubview:tagViewController.view];
     camera.delegate = tagViewController;
     tagViewController.camera = camera;
+#if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tagViewController.view];
-    
+#endif
     //timeStampOfMostRecentTag = [[NSDate alloc] init];
     idOfNewestTagOnServer = -1;
     idOfOldestTagOnServer = 99999;
@@ -231,40 +288,22 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //coverflowController = [[CoverflowViewController alloc] init];
     storeViewController = [[StoreViewController alloc] init];
     storeViewController.delegate = self;
+    storeViewShell = [[StoreViewShell alloc] init];
+    [storeViewShell setCamera:self.camera];
+    [storeViewShell setStoreViewController:storeViewController];
 
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
+    [profileController setCamera:self.camera];
     [profileController setFriendController:friendController];
 #endif
     
-    loginSplashController = nil;
-    NSString *path = [self coordinateArrayPath];
-	NSLog(@"Trying to load from path %@", path);
-    username = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
-    userphoto = nil;
-    loggedIn = NO;
-    isLoggingIn = NO;
-    if (!username || [username length] == 0)
-    {
-        NSLog(@"Could not log in: forcing new login screen!");
-        // force login
-        loginSplashController = [[LoginSplashController alloc] init];
-        [loginSplashController setDelegate:self];
-        isLoggingIn = YES;
-        loggedIn = NO;
-    }
-    else
-    {
-        NSLog(@"Loggin in as %@", username);
-        //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
-        [profileController loginWithUsername:username];
-    }   
     /***** add view controllers to tab controller, and add tab to window *****/
     UIViewController * emptyview = [[UIViewController alloc] init];
     UITabBarItem *tbi = [emptyview tabBarItem];
     [tbi setTitle:@"Stix"];
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, emptyview, storeViewController, profileController, nil];
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, emptyview, storeViewShell, profileController, nil];
     //NSArray * viewControllers = [NSArray arrayWithObjects: exploreController, feedController, tagViewController, myStixController, profileController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
@@ -276,50 +315,179 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //[window addSubview:[tabBarController view]];
     
     [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
-	
-    if (isLoggingIn == YES && loggedIn == NO)
+    [tabBarController addFirstTimeInstructions];
+
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+
+    loginSplashController = [[LoginSplashController alloc] init];
+    [loginSplashController setDelegate:self];
+    myUserInfo->userphoto = nil;
+    myUserInfo->bux = 0;
+    myUserInfo->usertagtotal = 0;
+    loggedIn = NO;
+    isLoggingIn = NO;
+    if (!myUserInfo->username || [myUserInfo->username length] == 0)
     {
+        NSLog(@"Could not log in: forcing new login screen!");
+        // force login
+//        loginSplashController = [[LoginSplashController alloc] init];
+//        [loginSplashController setDelegate:self];
+        [loginSplashController setCamera:self.camera];
+        isLoggingIn = YES;
+        loggedIn = NO;
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
         [camera setCameraOverlayView:loginSplashController.view];
         isLoggingIn = NO;
     }
     else
     {
-        //[self didDismissSecondaryView];
-        //[tabBarController setSelectedIndex:0];
-        //[self.camera setCameraOverlayView:tabBarController.view];
-        //[self didPressCenterButton]; // force jump to camera view
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
-        [camera setCameraOverlayView:tabBarController.view];
+        NSLog(@"Loggin in as %@", myUserInfo->username);
+        //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
+        [profileController loginWithUsername:myUserInfo->username];
+    }   
+	
+    /* display versioning info */
+    if (versionIsOutdated)
+    {
+        [self showAlertWithTitle:@"Update Available" andMessage:[NSString stringWithFormat:@"This version of Stix (v%@) is out of date. Version %@ is available through TestFlight.", versionStringStable, currVersion] andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_UPGRADE];
+        
+        // register for notifications on update channel
+        [self Parse_subscribeToChannel:@"StixUpdates"];
     }
     
     /* add administration calls here */
     
 }
 
+
+
+- (void) saveDataToDisk {
+    NSString * path = [self coordinateArrayPath];
+ 	
+    NSMutableDictionary * rootObject;
+    rootObject = [NSMutableDictionary dictionary];
+    
+    [rootObject setValue: myUserInfo->username forKey:@"username"];
+//    [rootObject setValue: [NSNumber numberWithBool:myUserInfo->isFirstTimeUser] forKey:@"isFirstTimeUser"];
+//    [rootObject setValue: [NSNumber numberWithBool:myUserInfo->hasAccessedStore] forKey:@"hasAccessedStore"];
+
+    @try {
+        // save stix types that we know about
+        NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
+        NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];
+        NSMutableDictionary * stixLikelihoods = [BadgeView GetAllStixLikelihoodsForSave];
+        
+        [rootObject setValue:stixViews forKey:@"stixViews"];
+        [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
+        [rootObject setValue:stixLikelihoods forKey:@"stixLikelihoods"];
+        
+        [NSKeyedArchiver archiveRootObject: rootObject toFile: path];
+    } 
+    @catch (NSException *exception) {
+        NSLog(@"SaveDataToDisk encountered an exception! %@", [exception reason]);
+    }
+}
+
+- (int) loadDataFromDisk {
+    // returns 0 if no stixViews loaded, 1 if stixViews were loaded from disk
+    NSString     * path         = [self coordinateArrayPath];
+    NSDictionary * rootObject;
+    
+    rootObject = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+    // backwards compatibility
+    if (![rootObject isKindOfClass:[NSDictionary class]]) {
+        myUserInfo->username = nil;
+        //myUserInfo->isFirstTimeUser = YES;
+        //myUserInfo->hasAccessedStore = NO;
+        return 0;
+    }
+    myUserInfo->username = [[rootObject valueForKey:@"username"] copy];
+    //myUserInfo->isFirstTimeUser = [[rootObject valueForKey:@"isFirstTimeUser"] boolValue];
+    //myUserInfo->hasAccessedStore = [[rootObject valueForKey:@"hasAccessedStore"] boolValue];
+    
+    @try {
+        NSMutableDictionary * stixViews = [rootObject valueForKey:@"stixViews"];
+        NSMutableDictionary * stixDescriptors = [rootObject valueForKey:@"stixDescriptors"];
+        NSMutableDictionary * stixLikelihoods = [rootObject valueForKey:@"stixLikelihoods"];
+        
+        if (stixViews != nil)
+        {
+            NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
+            [BadgeView InitializeFromDiskWithStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:stixLikelihoods];
+            return 1;
+        }
+        else
+            NSLog(@"No Stix were saved to disk!");
+        return 0;
+    }
+    @catch (NSException * exception) {
+        NSLog(@"LoadSavedDataFromDisk encountered an exception %@:", [exception reason]);
+        return 0;
+    }
+}
+
+
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
+    if (lastViewController == viewController)
+        return;
+    
+    if (viewController == storeViewShell) {
+        [storeViewShell setLastController:lastViewController];
+        if (1) { // myUserInfo->hasAccessedStore == NO){
+            //myUserInfo->isFirstTimeUser = NO;
+            //myUserInfo->hasAccessedStore = YES;
+            [self.tabBarController toggleFirstTimeInstructions:NO];
+            [self.tabBarController toggleStixMallPointer:NO];
+            
+            //NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
+            //NSNumber * isFirstTimeUser = [NSNumber numberWithBool:myUserInfo->isFirstTimeUser];
+            //NSNumber * hasAccessedStore = [NSNumber numberWithBool:myUserInfo->hasAccessedStore];
+            //[auxInfo setValue:isFirstTimeUser forKey:@"isFirstTimeUser"];
+            //[auxInfo setValue:hasAccessedStore forKey:@"hasAccessedStore"];
+            //NSData * auxData = [KumulosData dictionaryToData:auxInfo];
+            //[k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:auxData];
+        }
+    }
+    
     if (lastViewController == tagViewController)
     {
         [self.tabBarController setButtonStateNormal]; // disable highlighted button
         [tagViewController dismissModalViewControllerAnimated:NO];
         lastCarouselView = [tagViewController carouselView];
+        [viewController viewWillAppear:TRUE];
+        lastViewController = viewController;
     }
-    if (lastViewController == friendController) // if we leave friend controller, start an update for next time
+    else if (lastViewController == friendController) // if we leave friend controller, start an update for next time
     {
         [self checkForUpdatePhotos];
         lastCarouselView = [friendController carouselView];
+        [viewController viewWillAppear:TRUE];
+        lastViewController = viewController;
     }
-    if (lastViewController == feedController)
+    else if (lastViewController == feedController)
     {
         lastCarouselView = [feedController carouselView];
+        //[viewController viewWillAppear:TRUE];
+        lastViewController = viewController;
     }
-    if (lastViewController == exploreController)
+    else if (lastViewController == exploreController)
     {
         lastCarouselView = [exploreController carouselView];
+        //[viewController viewWillAppear:TRUE];
+        lastViewController = viewController;
     }
-	[viewController viewWillAppear:TRUE];
-    lastViewController = viewController;
-    
+    else if (lastViewController == storeViewShell)
+    {
+        // if we leave storeViewShell
+        lastViewController = viewController;
+    }
+    else if (lastViewController == profileController) 
+    {
+        lastViewController = viewController;
+    }
+        
     // enabled highlighted button - not done here
     //if (viewController == tagViewController)
     //    [self.tabBarController setButtonStateSelected];
@@ -333,6 +501,21 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [self.camera setCameraOverlayView:tagViewController.view];
 }
 
+-(void)didCloseFirstTimeInstructions {
+    //myUserInfo->isFirstTimeUser = NO;
+
+    /*
+    NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
+    NSNumber * isFirstTimeUser = [NSNumber numberWithBool:myUserInfo->isFirstTimeUser];
+    NSNumber * hasAccessedStore = [NSNumber numberWithBool:myUserInfo->hasAccessedStore];
+    [auxInfo setValue:isFirstTimeUser forKey:@"isFirstTimeUser"];
+    [auxInfo setValue:hasAccessedStore forKey:@"hasAccessedStore"];
+    NSData * auxData = [KumulosData dictionaryToData:auxInfo];
+    [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:auxData];
+     */
+    
+}
+
 -(void)didDismissSecondaryView {
     [tabBarController setButtonStateNormal]; // highlight button
     if (lastViewController == feedController) {
@@ -341,8 +524,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (lastViewController == exploreController) {
         [self.tabBarController setSelectedIndex:1];
     }
-    else if (lastViewController == myStixController) {
-        [self.tabBarController setSelectedIndex:3];
+    else if (lastViewController == storeViewShell) {
+        if (storeViewShell.lastController == feedController) {
+            [self.tabBarController setSelectedIndex:0];
+        }
+        else if (storeViewShell.lastController == exploreController) {
+            [self.tabBarController setSelectedIndex:1];
+        }
+        else if (storeViewShell.lastController == profileController) {
+            [self.tabBarController setSelectedIndex:4];
+        }
+        lastViewController = storeViewShell.lastController;
     }
     else if (lastViewController == profileController) {
         [self.tabBarController setSelectedIndex:4];
@@ -353,9 +545,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 - (void)applicationWillTerminate:(UIApplication *)application
 {	// Get full path of possession archive 
     if (init == 2) {
-        NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", username);
-        [NSKeyedArchiver archiveRootObject:username toFile:path];
+        //NSString *path = [self coordinateArrayPath];
+        NSLog(@"Logging out and saving username %@", myUserInfo->username);
+        [self saveDataToDisk];
     }
 
 #if USING_KIIP
@@ -370,9 +562,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     // archive username
     if (init == 2) {
-        NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", username);
-        [NSKeyedArchiver archiveRootObject:username toFile:path];
+        //NSString *path = [self coordinateArrayPath];
+        NSLog(@"Logging out and saving username %@", myUserInfo->username);
+        [self saveDataToDisk];
     }
     
 #if USING_KIIP
@@ -386,7 +578,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // Start a Kiip session when the user enters the app
     [[KPManager sharedManager] startSession];
 #endif
-}
+    // force some updates to badgeview types
+    [self initializeBadges];}
 
 - (void)application:(UIApplication *)application 
 didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
@@ -398,16 +591,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)applicationDidEnterForeground:(UIApplication *)application {
-    // force some updates to badgeview types
-    [self initializeBadges];
-}
-
 - (void)dealloc {
 	
 	//NEW COMMENT!
     [k release];
     [window release];
+    free(myUserInfo);
     [super dealloc];
 }
 
@@ -629,7 +818,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         float scale = updatingAuxScale;
         float rotation = updatingAuxRotation;
         float peelable = YES;
-        if ([tag.username isEqualToString:username])
+        if ([tag.username isEqualToString:myUserInfo->username])
             peelable = NO;
         
         // find local tag and sync with kumulos tag
@@ -657,13 +846,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
+        [encoder release];
         
         // update kumulos version of tag with most recent tags
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         // immediately notify
         // if adding to own pix, do not notify or broadcast
-        if (![username isEqualToString:tag.username]) {
-            NSString * message = [NSString stringWithFormat:@"%@ added a %@ to your Pix \"%@\"!", username, [BadgeView getStixDescriptorForStixStringID:stixStringID], tag.descriptor];
+        if (![myUserInfo->username isEqualToString:tag.username]) {
+            NSString * message = [NSString stringWithFormat:@"%@ added a %@ to your Pix \"%@\"!", myUserInfo->username, [BadgeView getStixDescriptorForStixStringID:stixStringID], tag.descriptor];
             [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag orGiftStix:nil];
         }
         // replace old tag in allTags
@@ -697,11 +887,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // from FeedViewController: changes structure of most recently dowloaded tag
         if (updatingPeelableAction == 0) { // peel stix
             NSString * peeledAuxStixStringID = [tag removeStixAtIndex:updatingPeelableAuxStixIndex];
-            [self incrementStixCount:peeledAuxStixStringID];            
-            //NSLog(@"Adding %@ stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
+            [self incrementStixCount:peeledAuxStixStringID];
+#if 0
+            [self showAlertWithTitle:@"Peeled a Stix!" andMessage:[NSString stringWithFormat:@"You have peeled off a %@ stix and added it to your collection!", [BadgeView getStixDescriptorForStixStringID:peeledAuxStixStringID]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+#endif
+            NSLog(@"Adding %@ (%@) stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [BadgeView getStixDescriptorForStixStringID:peeledAuxStixStringID], [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
 
             // add to comment log - if comment == @"PEEL" then it is a peel action
-            [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
+            [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
             didModifyTag = YES;
         }
         else if (updatingPeelableAction == 1) { // attach stix
@@ -730,6 +923,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
+        [encoder release];
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         didModifyTag = YES;
         // send a notification to update for a peel/stick action, but no need to acknowledge or jump to the tag
@@ -824,12 +1018,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // actual comment
 
         // notify
-        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", username, comment];
+        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo->username, comment];
         Tag * tag = [self getTagWithID:tagID];
-        [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag orGiftStix:nil];
+        if (![tag.username isEqualToString:[self getUsername]])
+            [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag orGiftStix:nil];
         // update comment count
         [self updateCommentCount:tagID];
-        // reward user
         [self updateUserTagTotal];
     }
 }
@@ -867,7 +1061,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 commentCount ++;
             }
         }
-        NSLog(@"Comment %d stix string ID: %@ count %d", i, commentStixStringID, commentCount);
+        //NSLog(@"Comment %d stix string ID: %@ count %d", i, commentStixStringID, commentCount);
     }
     [allCommentCounts setObject:[NSNumber numberWithInt:commentCount] forKey:tagID];
     [feedController forceUpdateCommentCount:[tagID intValue]];
@@ -884,7 +1078,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 -(void)didSendGiftStix:(NSString *)stixStringID toUsername:(NSString *)friendName {
-    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
+    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo->username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
     [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
 }
 
@@ -915,28 +1109,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 /**** LoginSplashController delegate ****/
 
-- (void) didLoginFromSplashScreen {
-    [loginSplashController.view removeFromSuperview];
-    [loginSplashController release];
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    [mainController dismissModalViewControllerAnimated:NO];
-    //mainController = [[UIViewController alloc] init];
-    //[window addSubview:mainController.view];
-    [mainController presentModalViewController:camera animated:YES];
-//    [mainController release];
-    [self.camera setCameraOverlayView:tagViewController.view];
-    bool isLoaded = [self.camera isViewLoaded];
-    NSLog(@"Is loaded? %d", isLoaded);
-    
-    //[self.tabBarController didPressCenterButton:self];
-    [self.tabBarController setSelectedIndex:0];
-    loggedIn = YES; 
-
-    // save login info
-    NSString *path = [self coordinateArrayPath];
-    NSLog(@"Logging out and saving username %@", username);
-    [NSKeyedArchiver archiveRootObject:username toFile:path];
-}
+//- (void) setIsFirstTimeUser:(BOOL)firstTime whoHasAccessedStore:(BOOL)accessedStore{
+    //myUserInfo->isFirstTimeUser = firstTime;
+    //myUserInfo->hasAccessedStore = accessedStore;
+//}
 
 /**** ProfileViewController and login functions ****/
 
@@ -1008,13 +1184,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didChangeUserphoto:rounded];
     
     // add to kumulos
-    [k addPhotoWithUsername:username andPhoto:img];
+    [k addPhotoWithUsername:myUserInfo->username andPhoto:img];
     [picker release];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
 {
-    NSLog(@"Added photo to username %@",  username);
+    NSLog(@"Added photo to username %@",  myUserInfo->username);
     
     // force friendView to update photo after we know it is in kumulos
     [self checkForUpdatePhotos];
@@ -1023,11 +1199,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 - (NSString *)coordinateArrayPath
 {	
     return pathInDocumentDirectory(@"StixxUserData.data");
-}
-
--(void)didCancelFirstTimeLogin {
-    NSLog(@"FirstTimeLogin returned with cancel button");
-    //[self.camera setCameraOverlayView:loginSplashController.view];
 }
 
 -(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
@@ -1043,74 +1214,99 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total{
-    loggedIn = YES;
-    username = [name retain];
-    userphoto = [photo retain];
-    usertagtotal = total;
+-(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux isFirstTimeUser:(BOOL)firstTime hasAccessedStore:(BOOL)accessedStore {
     
-    NSLog(@"Username %@ with %d pix and image of %f %f", username, usertagtotal, userphoto.size.width, userphoto.size.height);
+    /***** if we used splash screen *****/
+    [self didDismissSecondaryView];
+    //[loginSplashController.view removeFromSuperview];
+    //[loginSplashController release];
+    
+    //[profileController loginWithUsername:myUserInfo->username];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+    
+    //[self.tabBarController didPressCenterButton:self];
+    [self.tabBarController setSelectedIndex:0];
 
-    NSString *path = [self coordinateArrayPath];
-    [NSKeyedArchiver archiveRootObject:username toFile:path];
+    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux isFirstTimeUser:firstTime hasAccessedStore:accessedStore];
+    
+#if 1
+    if (firstTime) {
+    //if (myUserInfo->isFirstTimeUser)
+        [tabBarController toggleFirstTimeInstructions:YES];
+    //if (!myUserInfo->hasAccessedStore)
+        [tabBarController toggleStixMallPointer:YES];
+    }
+#endif
+
+}
+
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux isFirstTimeUser:(BOOL)firstTime hasAccessedStore:(BOOL)accessedStore {
+    loggedIn = YES;
+    myUserInfo->username = [name retain];
+    myUserInfo->userphoto = [photo retain];
+    myUserInfo->usertagtotal = total;
+    myUserInfo->bux = bux;
+    //myUserInfo->isFirstTimeUser = firstTime;
+    //myUserInfo->hasAccessedStore = accessedStore;
+    
+    NSLog(@"Username %@ with %d pix and image of %f %f", myUserInfo->username, myUserInfo->usertagtotal, myUserInfo->userphoto.size.width, myUserInfo->userphoto.size.height);
     
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = [BadgeView generateDefaultStix];
+        stix = [[BadgeView generateDefaultStix] retain];
     }
     
     [allStix removeAllObjects];
-
     [allStix addEntriesFromDictionary:stix];
-    NSLog(@"Setting delegate name to %@\n", username);
+    NSLog(@"Setting delegate name to %@\n", myUserInfo->username);
         
-    [profileController updatePixCount];
-
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
     //if (lastBadgeView)
     //    [lastBadgeView resetBadgeLocations];
     
     //[myStixController forceLoadMyStix];
-#if 0    
-    [feedController reloadCarouselView];
-    [exploreController reloadCarouselView];
-    [tagViewController reloadCarouselView];
-#else
     [self reloadAllCarousels];
-#endif
-    [self Parse_subscribeToChannel:username];
+    [self Parse_subscribeToChannel:myUserInfo->username];
+    [storeViewController updateBuxCount];
+    //[storeViewController reloadTables];
+    //[profileController updatePixCount];    
+
+    [self saveDataToDisk];
 }
 
 -(void)didLogout {
     if (loggedIn == YES) {
+        // logging out from profile view controller
+        
         loggedIn = NO;
-        username = @"";
-        if (userphoto) {
-            [userphoto release];
-            userphoto = nil;
+        myUserInfo->username = @"";
+        if (myUserInfo->userphoto) {
+            [myUserInfo->userphoto release];
+            myUserInfo->userphoto = nil;
         }
-        usertagtotal = 0;
+        myUserInfo->usertagtotal = 0;
+        myUserInfo->bux = 0;
+//        myUserInfo->hasAccessedStore = NO;
+//        myUserInfo->isFirstTimeUser = YES;
+        [self saveDataToDisk];
+        
         [allStix removeAllObjects];
         [profileController updatePixCount];
         if (lastCarouselView)
             [lastCarouselView resetBadgeLocations];
         
-//        if (loginSplashController == nil) {
-            loginSplashController = [[LoginSplashController alloc] init];
-            [loginSplashController setDelegate:self];
-//        }
         [self.camera setCameraOverlayView:loginSplashController.view];
     }
     else {
         // probably came from a failed login attempt with a nonexistent user
-        loginSplashController = [[LoginSplashController alloc] init];
-        [loginSplashController setDelegate:self];
+        [self didDismissSecondaryView];
         [self.camera setCameraOverlayView:loginSplashController.view];        
     }
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
-    [self setUserphoto:photo];
+    myUserInfo->userphoto = photo;
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -1137,7 +1333,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
     float peelable = YES;
-    if ([tag.username isEqualToString:username])
+    if ([tag.username isEqualToString:myUserInfo->username])
         peelable = NO;
     [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
 
@@ -1153,7 +1349,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     // immediately add comment, update total, decrement stix count
-    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
+    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
     [self updateUserTagTotal];        
     [self decrementStixCount:stixStringID];
     
@@ -1187,7 +1383,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (loggedIn == YES)
     {
         //NSLog(@"[delegate getUsername] returning %@", username);
-        return username;
+        return myUserInfo->username;
     }
     //NSLog(@"[delegate getUsername] returning anonymous");
     return @"anonymous";
@@ -1196,13 +1392,26 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(UIImage *) getUserPhoto {
     if ([self isLoggedIn] == NO)
         return [UIImage imageNamed:@"graphic_nouser.png"];
-    return userphoto;
+    return myUserInfo->userphoto;
 }
 
--(int)getUserTagTotal {
-    return usertagtotal;
+-(int)getUserTagTotal { return myUserInfo->usertagtotal; }
+-(int)getBuxCount { return myUserInfo->bux; }
+-(bool)isFirstTimeUser { return NO; }// myUserInfo->isFirstTimeUser; }
+-(bool)hasAccessedStore { return YES; }//myUserInfo->hasAccessedStore; }
+
+
+-(void)changeBuxCountByAmount:(int)change {
+    myUserInfo->bux += change;
+    [k changeUserBuxByAmountWithUsername:[self getUsername] andBuxChange:change];
+    [profileController updateBuxCount];
+    [storeViewController updateBuxCount];
 }
 
+-(void)rewardBux {
+    [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    [self changeBuxCountByAmount:5];
+}
 -(void)rewardStix {
     NSString * newStixStringID = [BadgeView getRandomStixStringID];
     int count = [[allStix objectForKey:newStixStringID] intValue];
@@ -1210,7 +1419,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if USING_KIIP
         [[KPManager sharedManager] unlockAchievement:@"1"];
 #else
-        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new Stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
+        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new Stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 #endif
     }
     else
@@ -1218,21 +1427,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if USING_KIIP
         [[KPManager sharedManager] unlockAchievement:@"1"];
 #else
-        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil];
+        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 #endif
     }
     [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
     NSMutableData * data = [KumulosData dictionaryToData:allStix];
-    [k addStixToUserWithUsername:username andStix:data];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
 }
 
 -(void)updateUserTagTotal {
     // update usertagtotal
-    usertagtotal += 1;
-    [k updateTotalTagsWithUsername:username andTotalTags:usertagtotal];
-
-    if ((usertagtotal % 5) == 0) {
-        [self rewardStix];
+    myUserInfo->usertagtotal += 1;
+    [k updateTotalTagsWithUsername:myUserInfo->username andTotalTags:myUserInfo->usertagtotal];
+    if ((myUserInfo->usertagtotal % 5) == 0) {
+        //[self rewardStix];
+        [self rewardBux];
         [self reloadAllCarousels];
     }
 #if USING_KIIP
@@ -1278,7 +1487,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
-    NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, username];
+    NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo->username];
 	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:message];
     [self didDismissSecondaryView];
 }
@@ -1288,21 +1497,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSString * subject = [NSString stringWithFormat:@"Become a Stixster!"];
     NSString * body = [NSString stringWithFormat:@"I'm playing Stix on my iPhone and I think you'd enjoy it too! Just click <a href=\"http://bit.ly/sjvbNE\">here</a> to get started!"];
     [self sendEmailTo:@"" withCC:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:body];
-    [self rewardStix];
+    [self rewardBux];
 }
 
 /*** processing stix counts ***/
-
--(void)getUserInformation {
-}
 
 // debug
 -(void)adminUpdateAllStixCountsToZero {
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [k adminAddStixToAllUsersWithStix:data];
-    [data autorelease];
-    [stix autorelease];
+    //[data autorelease];
+    //[stix autorelease];
 }
 
 -(void)adminUpdateAllStixCountsToOne {
@@ -1311,8 +1517,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Heart: %d", ct);
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [k adminAddStixToAllUsersWithStix:data];
-    [data autorelease];
-    [stix autorelease];
+    //[data autorelease];
+    //[stix autorelease];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber *)affectedRows {
@@ -1320,16 +1526,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminIncrementAllStixCounts {
-    for (int i=0; i<[allStix count]; i++) {
+    int totalStixTypes = [BadgeView totalStixTypes];
+    NSLog(@"Total stix: %d", totalStixTypes);
+    for (int i=0; i<totalStixTypes; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         if (![stixStringID isEqualToString:@"FIRE"] && ![stixStringID isEqualToString:@"ICE"]) {
             int count = [[allStix objectForKey:stixStringID] intValue];
+            NSLog(@"New count for %@: %d", stixStringID, count+1);
             [allStix setObject:[NSNumber numberWithInt:count+1] forKey:stixStringID];
         }
     }
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
-    [k addStixToUserWithUsername:username andStix:data];
-    [data autorelease];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
+    //[data autorelease];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
@@ -1359,15 +1568,56 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didPressAdminEasterEgg:(NSString *)view {
     if ([view isEqualToString:@"ProfileView"]) {
-        [self adminIncrementAllStixCounts];
-        //[self adminUpdateAllStixCountsToOne];
-        [self reloadAllCarousels];        
+        [self showAlertWithTitle:@"Authorized Access Only" andMessage:@"" andButton:@"Cancel" andOtherButton:@"Stix it to the Man" andAlertType:ALERTVIEW_PROMPT];
     }
     else if ([view isEqualToString:@"FeedView"]) {
 #if USING_KIIP
         [[KPManager sharedManager] unlockAchievement:@"1"];
 #endif
     }
+}
+
+-(void)adminEasterEggShowMenu:(NSString *)password {
+    if ([password isEqualToString:@"admin"]) {
+//        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Ye ol' Admin Menu" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users' Stix", @"Get me one of each", "Set all Users' bux", nil];
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set all Users bux", @"Save Stix Feed", nil];
+        [actionSheet showFromTabBar:tabBarController.tabBar ];
+        [actionSheet release];
+    }
+    else
+        [self showAlertWithTitle:@"Wrong Password!" andMessage:@"You cannot access the super secret club." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    // button index: 
+    // 0 = "Reset all Users' Stix"
+    // 1 = "Get me one of each"
+    // 2 = "Set all Users' bux"
+    // 3 = "Cancel"
+    switch (buttonIndex) {
+        case 0:
+            NSLog(@"button 0");
+            [self adminUpdateAllStixCountsToOne];
+            break;
+        case 1:
+            NSLog(@"button 1");
+            [self adminIncrementAllStixCounts];
+            break;
+        case 2:
+            NSLog(@"button 2");
+            [self adminSetAllUsersBuxCounts];
+            break;
+        case 3:
+            NSLog(@"button 3: Save stix feed");
+            [self adminSaveFeed];
+        default:
+            return;
+            break;
+    }
+}
+
+-(void) adminSetAllUsersBuxCounts {
+    [k adminSetAllUserBuxWithBux:25];
 }
 
 -(void)decrementStixCount:(NSString *)stixStringID {
@@ -1383,15 +1633,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
     
     // todo: when giftstx are used, we must check to sync with kumulos
-    [k addStixToUserWithUsername:username andStix:data];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data release];
     
 }
 
--(void)incrementStixCount:(NSString *)stixStringID {
+-(void)adminSaveFeed {
+    
+}
+
+-(void)incrementStixCount:(NSString *)stixStringID{
+    [self incrementStixCount:stixStringID byNumber:1];
+}
+
+-(void)incrementStixCount:(NSString *)stixStringID byNumber:(int)increment{
     int count = [[allStix objectForKey:stixStringID] intValue];
     if (![stixStringID isEqualToString:@"FIRE"] && ![stixStringID isEqualToString:@"ICE"]) {
-        count++;
+        count+=increment;
         [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID]; 
         
         for (int i=0; i<[allCarouselViews count]; i++) {
@@ -1399,11 +1657,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
-    [k addStixToUserWithUsername:username andStix:data];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data release];
-
-    if (count == 1)
-        [self showAlertWithTitle:@"Peeled a Stix!" andMessage:[NSString stringWithFormat:@"You have peeled off a %@ stix and added it to your collection!", [BadgeView getStixDescriptorForStixStringID:stixStringID]] andButton:@"OK" andOtherButton:nil];
 }
 
 -(Tag*) getTagWithID:(int)tagID {
@@ -1495,7 +1750,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ( application.applicationState == UIApplicationStateActive && ([notificationTargetChannel isEqualToString:[self getUsername]] || [notificationTargetChannel isEqualToString:@""]) && doAlert) {
         // app was already in the foreground
         // create something that will parse and jump to the correct tag
-        [self showAlertWithTitle:@"Stix Alert" andMessage:message andButton:@"Close" andOtherButton:@"View"];
+        [self showAlertWithTitle:@"Stix Alert" andMessage:message andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_NOTIFICATION];
     }
     else {
         // app was just brought from background to foreground due to clicking
@@ -1508,14 +1763,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (notificationTagID == -1) {
         // gift stix only - no need to jump to or update feed
         if (notificationBookmarkType == NB_UPDATECAROUSEL) {
-            [k getUserStixWithUsername:username];
+            [k getUserStixWithUsername:myUserInfo->username];
             doJump = NO;
         }
         if (notificationBookmarkType == NB_NEWGIFT) {
             if (doJump) {
                 [tabBarController setSelectedIndex:3]; // go to mystixview
-                NSString * message = [NSString stringWithFormat:@"You have received a %@!", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
-                [self showAlertWithTitle:@"New Stix" andMessage:message andButton:@"Close" andOtherButton:nil];
+                NSString * message;
+                if ([self getStixCount:notificationGiftStixStringID] == -1) {
+                    message = [NSString stringWithFormat:@"You have received a %@ but you already have it permanently!", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
+                }
+                else
+                {
+                    message = [NSString stringWithFormat:@"You have received 3 one-time use %@.", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
+                    [self incrementStixCount:notificationGiftStixStringID byNumber:3];
+               }
+                [self showAlertWithTitle:@"New Stix" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             }
         }
     }
@@ -1532,7 +1795,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
-- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString *)otherButtonTitle {
+- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString *)otherButtonTitle andAlertType:(int)alertType {
     /*
      UIAlertView* alert = [[UIAlertView alloc]init];
      [alert addButtonWithTitle:buttonTitle];
@@ -1542,23 +1805,32 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
      [alert release];
      */
     UIAlertView * alert;
-    if (otherButtonTitle) {
-        alert = [[UIAlertView alloc] initWithTitle:title
-                                           message:message
-                                          delegate:self
-                                 cancelButtonTitle:buttonTitle
-                                 otherButtonTitles:otherButtonTitle, nil];    
+    if (alertType == ALERTVIEW_PROMPT) {
+        alert = [[AlertPrompt alloc] initWithTitle:title message:@"Here goes the prompt" delegate:self cancelButtonTitle:buttonTitle okButtonTitle:otherButtonTitle];
     }
-    else {
-        alert = [[UIAlertView alloc] initWithTitle:title
-                                           message:message
-                                          delegate:self
-                                 cancelButtonTitle:buttonTitle
-                                 otherButtonTitles: nil];    
+    else
+    {
+        if (otherButtonTitle) {
+            alert = [[UIAlertView alloc] initWithTitle:title
+                                               message:message
+                                              delegate:self
+                                     cancelButtonTitle:buttonTitle
+                                     otherButtonTitles:otherButtonTitle, nil];    
+        }
+        else {
+            alert = [[UIAlertView alloc] initWithTitle:title
+                                               message:message
+                                              delegate:self
+                                     cancelButtonTitle:buttonTitle
+                                     otherButtonTitles: nil];    
+        }
     }
-    if (alertQueue == nil)
+    if (alertQueue == nil) {
         alertQueue = [[NSMutableArray alloc] init];
+        alertAction = [[NSMutableArray alloc] init];
+    }
     [alertQueue insertObject:alert atIndex:[alertQueue count]]; // insert at end
+    [alertAction insertObject:[NSNumber numberWithInt:alertType] atIndex:[alertAction count]];
     [alert release];
     [self showAllAlerts];
 }
@@ -1569,6 +1841,8 @@ static bool isShowingAlerts = NO;
         return;
     UIAlertView * firstAlert = [[alertQueue objectAtIndex:0] retain];
     [alertQueue removeObjectAtIndex:0];
+    alertActionCurrent = [[alertAction objectAtIndex:0] intValue];
+    [alertAction removeObjectAtIndex:0];
     [firstAlert show];
     isShowingAlerts = YES;
     [firstAlert release];
@@ -1578,41 +1852,90 @@ static bool isShowingAlerts = NO;
     NSLog(@"Button index: %d", buttonIndex);    
     // 0 = close
     // 1 = view
+    
     isShowingAlerts = NO;
-    if (buttonIndex == 0) {
-        [self handleNotificationBookmarks:NO];
-        if ([alertQueue count] == 0)
-            return;
-        UIAlertView * nextAlert = [[alertQueue objectAtIndex:0] retain];
-        [alertQueue removeObjectAtIndex:0];
-        [nextAlert show];
-        isShowingAlerts = YES;
-        [nextAlert release];
+    if (alertActionCurrent == ALERTVIEW_NOTIFICATION) {
+        if (buttonIndex == 0) {
+            [self handleNotificationBookmarks:NO];
+        }
+        if (buttonIndex == 1) {
+            [self handleNotificationBookmarks:YES];
+        }
     }
-    if (buttonIndex == 1) {
-        [self handleNotificationBookmarks:YES];
-        if ([alertQueue count] == 0)
-            return;
-        UIAlertView * nextAlert = [[alertQueue objectAtIndex:0] retain];
-        [alertQueue removeObjectAtIndex:0];
-        [nextAlert show];
-        isShowingAlerts = YES;
-        [nextAlert release];
+    else if (alertActionCurrent == ALERTVIEW_UPGRADE) {
+        if (buttonIndex == 1) {
+            NSString* launchUrl = @"http://testflightapp.com/";
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString: launchUrl]];
+        }            
     }
+    else if (alertActionCurrent == ALERTVIEW_PROMPT) {
+        if (buttonIndex != [alertView cancelButtonIndex])
+        {
+            NSString *entered = [(AlertPrompt *)alertView enteredText];
+            NSLog(@"Alert prompt input value: %@", entered);
+            
+            [self adminEasterEggShowMenu:entered];
+        }
+    }
+    else if (alertActionCurrent == ALERTVIEW_GOTOSTORE) {
+        if (buttonIndex != [alertView cancelButtonIndex])
+        {
+            // for now just go to the store
+            [self.tabBarController setSelectedIndex:3];
+            [self.storeViewShell viewWillAppear:YES];
+            //[self.storeViewController displayBuxPricing];
+        }
+    }
+    if ([alertQueue count] == 0)
+        return;
+    UIAlertView * nextAlert = [[alertQueue objectAtIndex:0] retain];
+    [alertQueue removeObjectAtIndex:0];
+    [nextAlert show];
+    isShowingAlerts = YES;
+    [nextAlert release];
 }
 
 /**** StoreView delegate ****/
--(void)didClickGetStix:(NSString *)stixStringID {
-    NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-    [self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil];
-    [self incrementStixCount:stixStringID];
+-(void)didGetStixFromStore:(NSString *)stixStringID {
+    //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+    //[self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    //[self incrementStixCount:stixStringID];
+    [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID]; 
+    for (int i=0; i<[allCarouselViews count]; i++) {
+        [[allCarouselViews objectAtIndex:i] reloadAllStix];
+    }
+    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
+    [self changeBuxCountByAmount:-5];
+    [data release];
+    
+    NSString * metricName = @"GetStixFromStore";
+    NSString * metricData = [NSString stringWithFormat:@"User: %@ Stix: %@", [self getUsername], stixStringID];
+    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
 }
 
-/**********************************
- Kiip library 
- *********************************/
-- (void) willPresentNotification:(NSString*)rid {
-    // do nothing
+-(void)showNoMoreMoneyMessage {
+    [self showAlertWithTitle:@"No More Bux" 
+                  andMessage:@"You can't get any more stickers without any Bux!" 
+                   andButton:@"OK"
+//               andOtherButton:@"View" 
+//                andAlertType:ALERTVIEW_GOTOSTORE];
+              andOtherButton:nil
+                andAlertType:ALERTVIEW_SIMPLE];
 }
 
+-(void)didPurchaseBux:(int)buxPurchased {
+    [self showAlertWithTitle:@"Thank you!" andMessage:[NSString stringWithFormat:@"You have received %d Bux. Have fun buying stickers!", buxPurchased] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    [self changeBuxCountByAmount:buxPurchased];
+    if  (buxPurchased == 25) {
+        NSString * metricName = @"ExpressBux";
+        NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
+        [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:buxPurchased];
+    }
+    else { 
+        NSString * metricName = @"MoreBux";
+        NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
+        [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:buxPurchased];
+    }
+}
 @end

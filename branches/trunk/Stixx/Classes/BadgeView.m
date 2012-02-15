@@ -70,156 +70,6 @@ static int totalStixTypes = 0;
     [[NSBundle mainBundle] loadNibNamed:@"BadgeView" owner:self options:nil];
     //[self addSubview:self];
 }
-
-/*
--(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *touch = [[event allTouches] anyObject];	
-	CGPoint location = [touch locationInView:self];//touch.view];
-	drag = 0;
-    
-    if ([self.delegate respondsToSelector:@selector(didStartDrag)]) 
-        [self.delegate performSelector:@selector(didStartDrag)];
-	
-	// find which icon is being dragged
-	unsigned numEls = 2; // for badgeView, only use first two// [badges count];
-	while (numEls--)
-	{
-		UIImageView * badge = [badges objectAtIndex:numEls];
-		CGRect frame = badge.frame;
-        if (CGRectContainsPoint(frame, location))
-		{
-			badgeTouched = badge;
-			drag = 1;
-			badgeSelect = numEls; // index into badgesLarge and badgeLocations arrays
-            selectedStixStringID = [stixStringIDs objectAtIndex:numEls];
-            [[labels objectAtIndex:numEls] removeFromSuperview];
-			break;
-		}
-	}
-	if (drag == 0)
-	{
-		//NSLog(@"No badge dragged");
-        // pass event to nextResponder, which is first the controller, then the view's superview
-	}
-	else
-	{		
-        badgeTouched.contentMode = UIViewContentModeScaleAspectFit; // allow scaling based on frame
-		badgeLifted = [BadgeView getBadgeWithStixStringID:selectedStixStringID];  // the stix size to be added to a 300x275 camera view
-        float centerX = badgeTouched.center.x; 
-		float centerY = badgeTouched.center.y; 
-        
-        badgeLifted.center = CGPointMake(centerX, centerY);
-		CGRect frameEnd = badgeLifted.frame;
-		
-        // point where finger clicked badge
-		offset_from_center_X = (location.x - centerX);
-		offset_from_center_Y = (location.y - centerY);
-		
-		// animate a scaling transition
-		[UIView 
-		 animateWithDuration:0.2
-		 delay:0 
-		 options:UIViewAnimationCurveEaseOut
-		 animations:^{
-			 badgeTouched.frame = frameEnd;
-		 }
-		 completion:^(BOOL finished){
-			 badgeTouched.hidden = NO;
-		 }
-		 ];
-		
-		//NSLog(@"Dragging badge %d", badgeSelect);
-		
-	}
-    [super touchesBegan: touches withEvent: event];
-}
-
--(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	//[self touchesBegan:touches withEvent:event];
-	if (drag == 1)
-	{
-		UITouch *touch = [[event allTouches] anyObject];
-		CGPoint location = [touch locationInView:self];
-
-		//NSLog(@"Dragging to %f %f", location.x, location.y);
-
-		// update frame of dragged badge, also scale
-		if (badgeTouched == nil)
-			return;
-		float centerX = location.x - offset_from_center_X;
-		float centerY = location.y - offset_from_center_Y;
-        badgeTouched.center = CGPointMake(centerX, centerY);
-	}
-    [super touchesMoved:touches withEvent:event];
-}
-
--(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (drag == 1)
-	{
-		if (badgeTouched != nil)
-		{
-			CGRect originalFrame = [[badgeLocations objectAtIndex:badgeSelect] CGRectValue];
-            UIImageView * newFrameView = [[UIImageView alloc] initWithFrame:originalFrame];
-            newFrameView.center = CGPointMake(badgeTouched.center.x, badgeTouched.center.y);
-            CGRect frame = newFrameView.frame;
-            [newFrameView release];
-            
-			//NSLog(@"Badge released with frame origin at %f %f", frame.origin.x, frame.origin.y);
-			
-			// animate a scaling transition
-			[UIView 
-			 animateWithDuration:0.2
-			 delay:0 
-			 options:UIViewAnimationCurveEaseOut
-			 animations:^{
-				 badgeTouched.frame = frame;
-			 }
-			 completion:^(BOOL finished){
-				 badgeTouched.hidden = NO;
-			 }
-			 ];
-			
-			// tells delegate to do necessary things such as take a photo
-            [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
-		}
-	}
-}
-
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    // badgeView should only respond to touch events if we are touching the badges. otherwise,
-    // foward the event to the underlay of badgeController, which is a sibling/same level view controller
-    // that is also a subview of badgeController's superview
-    //
-    // for example:
-    // badgeView
-    //   ^                  scrollView
-    //   |                      ^
-    //   |                      |
-    //    ---- feedView --------
-    // this specifically makes badgeView call hitTest on scrollView; scrollView must be set
-    // as an underlay of badgeController by feedView when the subviews are laid out
-    
-    UIView * result;
-    if (self.underlay)
-        result = [self.underlay hitTest:point withEvent:event];
-    else 
-        result = [super hitTest:point withEvent:event];
-    
-	unsigned numEls = [badges count];
-	while (numEls--)
-	{
-		UIImageView * badge = [badges objectAtIndex:numEls];        
-        CGPoint buttonPoint = [badge convertPoint:point fromView:self];
-        if ([badge pointInside:buttonPoint withEvent:event])
-            return self; // if touch event is on a badge, then have badgeView process it
-    }
-    
-    // if the touch was not on one of the badges, either return the known underlay or just
-    // return self which means the hit is not passed downwards to anything else
-    return result;
-}
-*/
-
 -(void)resetBadgeLocations {
     for (int i=0; i<totalStixTypes; i++)
     {
@@ -314,10 +164,11 @@ static int totalStixTypes = 0;
     }
     stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
     stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
+    int ct = 0;
     for (NSMutableDictionary * d in stixStringIDsFromKumulos) {
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         [stixStringIDs addObject:stixStringID];
-        
+        //NSLog(@"Initializing stix %@: total Stix types %d", stixStringID, ct++);
         NSString * categoryName = [d valueForKey:@"categoryName"];
         NSMutableArray * category = [stixCategories objectForKey:categoryName];
         if (!category) {
@@ -326,10 +177,60 @@ static int totalStixTypes = 0;
         [category addObject:stixStringID];
         [stixCategories setObject:category forKey:categoryName];
     }
-    totalStixTypes = MIN([stixStringIDs count], [stixViews count]);
+    totalStixTypes = [stixStringIDs count]; //MIN([stixStringIDs count], [stixViews count]);
 }
 
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos {
+    // initialize all data from kumulos results
+    if (!stixViews) {
+        stixViews = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    }
+    if (!stixDescriptors) {
+        stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    }
+    if (stixLikelihood)
+    {
+        stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
+    }
+    if (pool)
+    {
+        [pool release];
+        pool = nil;
+    }
+    int ct = 0;
+    // enable stixRepeat to check for repeats
+    //NSMutableDictionary * stixRepeat = [[NSMutableDictionary alloc] init];
+    for (NSMutableDictionary * d in stixViewsFromKumulos) {
+        NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+        NSNumber * likelihood = [d valueForKey:@"likelihood"];
+        NSData * dataPNG = [d valueForKey:@"dataPNG"];
+        UIImage * img = [[UIImage alloc] initWithData:dataPNG];
+        UIImageView * stix = [[UIImageView alloc] initWithImage:img];
+        [stixViews setObject:stix forKey:stixStringID];
+        [stixDescriptors setObject:descriptor forKey:stixStringID];
+        [stixLikelihood setObject:likelihood forKey:stixStringID];
+        [img release];
+        [stix release];
+        /*
+        if ([stixStringIDs containsObject:stixStringID] == 0)
+            NSLog(@"Stix View for %@ downloaded but not in Stix Types!", stixStringID);
+        UIImageView * repeated = [stixRepeat objectForKey:stixStringID];
+        if (!repeated)
+            [stixRepeat setObject:stix forKey:stixStringID];
+        else
+            NSLog(@"There is a repeat! %@ is already in dictionary!", stixStringID);
+         */
+        //NSLog(@"Initializing stix %@: total Stix types %d", stixStringID, ct++);
+    }
+//    [stixRepeat release];
+}
+
++(void)InitializeFromDiskWithStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods {
+    // load from saved data on disk.
+    // this should be done first upon loading the app so all stix dictionaries should be reset
+    // this saves from having to download the PNG file for each stix, but we should still
+    // call InitializeStixTypes to get the current stix types and categories from Kumulos
     if (stixViews) {
         [stixViews release];
         stixViews = nil;
@@ -348,24 +249,31 @@ static int totalStixTypes = 0;
         [pool release];
         pool = nil;
     }
-    stixViews = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
-    stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
-    stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
-    for (NSMutableDictionary * d in stixViewsFromKumulos) {
-        NSString * stixStringID = [d valueForKey:@"stixStringID"];
-        NSString * descriptor = [d valueForKey:@"stixDescriptor"];
-        NSNumber * likelihood = [d valueForKey:@"likelihood"];
-        NSData * dataPNG = [d valueForKey:@"dataPNG"];
-        UIImage * img = [[UIImage alloc] initWithData:dataPNG];
-        UIImageView * stix = [[UIImageView alloc] initWithImage:img];
-        [stixViews setObject:stix forKey:stixStringID];
-        [stixDescriptors setObject:descriptor forKey:stixStringID];
-        [stixLikelihood setObject:likelihood forKey:stixStringID];
-        [img release];
-        [stix release];
-    }
-    totalStixTypes = MIN([stixStringIDs count], [stixViews count]);
+    stixViews = [[NSMutableDictionary alloc] initWithCapacity:[savedStixViews count]];
+    stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[savedStixDescriptors count]];
+    stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[savedStixLikelihoods count]];
+    [stixViews addEntriesFromDictionary:savedStixViews];
+    [stixDescriptors addEntriesFromDictionary:savedStixDescriptors];
+    [stixLikelihood addEntriesFromDictionary:savedStixLikelihoods];
 }
+
++(void)AddStixView:(NSArray*)resultFromKumulos {
+    // takes a result from getStixDataForStixStringID
+    NSMutableDictionary * d = [resultFromKumulos objectAtIndex:0]; 
+    NSString * stixStringID = [d valueForKey:@"stixStringID"];
+    NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+    NSNumber * likelihood = [d valueForKey:@"likelihood"];
+    NSData * dataPNG = [d valueForKey:@"dataPNG"];
+    UIImage * img = [[UIImage alloc] initWithData:dataPNG];
+    UIImageView * stix = [[UIImageView alloc] initWithImage:img];
+    [stixViews setObject:stix forKey:stixStringID];
+    [stixDescriptors setObject:descriptor forKey:stixStringID];
+    [stixLikelihood setObject:likelihood forKey:stixStringID];
+    [img release];
+    [stix release];
+    NSLog(@"Adding a new Stix view downloaded from Kumulos: %@", stixStringID);
+}
+
 +(int)totalStixTypes {
     return totalStixTypes;
 }
@@ -403,13 +311,19 @@ static int totalStixTypes = 0;
 
 +(NSMutableDictionary *)generateDefaultStix {
     NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
-    for (int i=0; i<2; i++)
-        [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
+    NSString * randomBadge1 = [BadgeView getRandomStixStringID];
+    NSString * randomBadge2 = [BadgeView getRandomStixStringID];
+    NSString * randomBadge3 = [BadgeView getRandomStixStringID];
+    NSLog(@"Generate Default Stix: random free stix %@, %@, %@", randomBadge1, randomBadge2, randomBadge3);
+
     for (int i=2; i<[BadgeView totalStixTypes]; i++) {
         NSString * stixID = [stixStringIDs objectAtIndex:i];
         int num = 0;
-        if ([stixID isEqualToString:@"FOOTBALL"] || [stixID isEqualToString:@"BEERSTEIN"] || [stixID isEqualToString:@"FOOTBALLJERSEY_RED"] || [stixID isEqualToString:@"FOOTBALLJERSEY_BLUE"] || [stixID isEqualToString:@"BURGER"])
-        {            
+        if ([stixID isEqualToString:@"FIRE"] || [stixID isEqualToString:@"ICE"])
+            num = -1;
+        if ([stixID isEqualToString:randomBadge1] || [stixID isEqualToString:randomBadge2] || [stixID isEqualToString:randomBadge3])
+        {   
+            NSLog(@"Setting stix %d: %@ %@ to 3", i, stixID, [BadgeView getStixDescriptorForStixStringID:stixID]);
             num = 3;
         }
         [stixCounts setObject:[NSNumber numberWithInt:num] forKey:[stixStringIDs objectAtIndex:i]];
@@ -432,7 +346,7 @@ static int totalStixTypes = 0;
         pool = [[NSMutableArray alloc] init];
         for (int i=0; i<[self totalStixTypes]; i++) {
             NSString * stixStringID = [self getStixStringIDAtIndex:i];
-            int likelihood = [[stixLikelihood objectForKey:stixStringID] intValue];
+            int likelihood = MAX(1, [[stixLikelihood objectForKey:stixStringID] intValue]);
             for (int j=0; j<likelihood; j++) {
                 [pool addObject:stixStringID];
             }
@@ -463,6 +377,20 @@ static int totalStixTypes = 0;
     }
     return nil;
 }
+
++(NSMutableDictionary *)GetAllStixViewsForSave {
+    // for saving to disk
+    return stixViews;
+}
++(NSMutableDictionary *)GetAllStixDescriptorsForSave {
+    // for saving to disk
+    return stixDescriptors;
+}
++(NSMutableDictionary *)GetAllStixLikelihoodsForSave {
+    // for saving to disk
+    return stixLikelihood;
+}
+
 - (void)dealloc {
 	[super dealloc];
     

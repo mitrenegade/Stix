@@ -101,7 +101,8 @@
 
 -(IBAction)didClickCancelButton:(id)sender {
     [self.locationController setNeedSearch:NO];
-    [self dismissModalViewControllerAnimated:YES];
+    //[self dismissModalViewControllerAnimated:YES];
+    [self.view removeFromSuperview];
     [self.delegate didCancelLocation];
 }
 
@@ -120,7 +121,8 @@
     // populate with a message that says "No internet connection" and allow entering text
     
     [self.delegate didReceiveConnectionError];
-    [self dismissModalViewControllerAnimated:YES];
+    //[self dismissModalViewControllerAnimated:YES];
+    [self.view removeFromSuperview];
 }
 
 /*** search bar ****/

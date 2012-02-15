@@ -98,6 +98,7 @@ enum {
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos;
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
++(void)InitializeFromDiskWithStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods;
 
 // returns stixStringID for given badge type. THIS IS DONE FOR BACKWARD COMPATIBILITY.
 // Type is still drawn from a static list by some old builds.
@@ -114,4 +115,9 @@ enum {
 +(NSString*) getStixStringIDAtIndex:(int)index;
 +(NSString*) getRandomStixStringID;
 +(NSMutableArray *) getStixForCategory:(NSString*)categoryName;
++(NSMutableDictionary *)GetAllStixViewsForSave;
++(NSMutableDictionary *)GetAllStixDescriptorsForSave;
++(NSMutableDictionary *)GetAllStixLikelihoodsForSave;
++(void)AddStixView:(NSArray*)resultFromKumulos;
+
 @end

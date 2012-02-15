@@ -144,7 +144,7 @@
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-        NSLog(@"CarouselView reloading stix %d: stixStringID: %@ count: %d", i, stixStringID, count);
+        //NSLog(@"CarouselView reloading stix %d: stixStringID: %@ count: %d", i, stixStringID, count);
         if ([stixStringID isEqualToString:@"FIRE"]) {
             [basicStix setCenter:CGPointMake(stixSize*(0+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
             [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];

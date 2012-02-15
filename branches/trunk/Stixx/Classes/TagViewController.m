@@ -50,16 +50,18 @@
     
 	/***** create camera controller *****/
 	NSLog(@"Initializing camera.");
-#if !TARGET_IPHONE_SIMULATOR
     camera = [[UIImagePickerController alloc] init];
-    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-    camera.showsCameraControls = NO;
+    camera.delegate = self;
     camera.navigationBarHidden = YES;
     camera.toolbarHidden = YES; // prevents bottom bar from being displayed
     camera.allowsEditing = NO;
     camera.wantsFullScreenLayout = NO;
-    camera.delegate = self;
+#if !TARGET_IPHONE_SIMULATOR
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.showsCameraControls = NO;
     camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
+#else
+    camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 #endif
 	// hierarchy of tagView overlays:
 	// 1. self.view = overlayView = blank;
@@ -335,10 +337,14 @@
     }
     else if ([descriptor length] == 0 && [comment length] == 0)
     {
+        /*
         NSDate *now = [NSDate date];
         NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
         [formatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
         desc = [formatter stringFromDate:now];
+        com = @"";
+         */
+        desc = @"";
         com = @"";
     }
     newCoord = [arViewController createCoordinateWithLabel:desc];

@@ -123,7 +123,9 @@
     [commentField resignFirstResponder];
     [commentField2 resignFirstResponder];
     [locationField resignFirstResponder];
-    [self presentModalViewController:locationController animated:YES];
+    //[self presentModalViewController:locationController animated:YES];
+    //[stixView setInteractionAllowed:NO];
+    [self.view addSubview:locationController.view];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
@@ -137,7 +139,9 @@
 -(void)didChooseLocation:(NSString *)location {
     NSLog(@"FourSquare locator returned %@\n", location);
     [locationField setText:location];
-    [self dismissModalViewControllerAnimated:YES];
+    //[self dismissModalViewControllerAnimated:YES];
+    //[stixView setInteractionAllowed:YES];
+    [locationController.view removeFromSuperview];
 }
 
 -(void)didCancelLocation

@@ -10,7 +10,7 @@
 
 @protocol CoverflowViewControllerDelegate
 -(void)didSelectCoverAtIndex:(int)index;
--(NSMutableArray*)getCoverFilenames;
+-(NSMutableArray*)getCovers;
 @end
 
 @interface CoverflowViewController : UIViewController <TKCoverflowViewDelegate, TKCoverflowViewDataSource> {
@@ -25,6 +25,7 @@
 }
 
 -(void)setCoverflowFrame:(CGRect)frame;
+-(void)setCoverflowIndex:(int)index;
 
 @property (retain,nonatomic) TKCoverflowView *coverflow;
 @property (nonatomic, retain) NSObject<CoverflowViewControllerDelegate> * delegate;

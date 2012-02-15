@@ -15,10 +15,10 @@
 
 //- (void) doJoin;
 //- (void) doAddUser;
-- (void) didLoginFromSplashScreen;
 -(void)didLogout; // if cancel is pressed - goes back to splash screen
+-(void)didDismissSecondaryView;
 
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total;
+- (void)didLoginFromSplashScreenWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux isFirstTimeUser:(BOOL)firstTime hasAccessedStore:(BOOL)accessedStore;
 
 @end
 
@@ -29,12 +29,15 @@
     NSObject<LoginSplashDelegate> *delegate;
     
     LoginViewController * loginController;
+    
+    UIImagePickerController * camera;
 }
 
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
 @property (nonatomic, retain) IBOutlet UIButton * joinButton;
 @property (nonatomic, retain) LoginViewController * loginController;
 @property (nonatomic, assign) NSObject<LoginSplashDelegate> *delegate;
+@property (nonatomic, assign) UIImagePickerController * camera;
 
 -(IBAction)didClickJoinButton:(id)sender;
 -(IBAction)didClickLoginButton:(id)sender;

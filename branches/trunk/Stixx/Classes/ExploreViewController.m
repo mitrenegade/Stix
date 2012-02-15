@@ -120,7 +120,7 @@
         {
             [allTags replaceObjectAtIndex:[new_id intValue] withObject:tag];
         }
-        NSLog(@"Downloaded and added tag with id %d at index %d\n", [new_id intValue], index);
+        //NSLog(@"Downloaded and added tag with id %d at index %d\n", [new_id intValue], index);
     }
 }
 
@@ -142,7 +142,7 @@
             [allTags replaceObjectAtIndex:ct withObject:tag];
         }
         ct++;
-        NSLog(@"Downloaded and added tag with id %d, name %@, comment %@ at index %d\n", new_id, name, comment, index);
+        //NSLog(@"Downloaded and added tag with id %d, name %@, comment %@ at index %d\n", new_id, name, comment, index);
     }
  
     [scrollView populateScrollPagesAtPage:0];
@@ -219,7 +219,6 @@
         if (ct >= start_index && ct <= end_index) {
             Tag * tag = [allTags objectAtIndex:i];
             
-            NSString * comment = tag.comment;
             UIImageView * shadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dropshadow_140.png"]];
             int w = shadow.frame.size.width;
             int h = shadow.frame.size.height;

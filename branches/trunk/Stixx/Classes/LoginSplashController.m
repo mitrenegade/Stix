@@ -12,6 +12,7 @@
 
 @synthesize loginButton, joinButton;
 @synthesize delegate;
+@synthesize camera;
 @synthesize loginController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -62,47 +63,70 @@
 
 -(IBAction)didClickLoginButton:(id)sender {
     loginController.bJoinOrLogin = 1;
-    [self presentModalViewController:loginController animated:YES];
+    [self.view addSubview:loginController.view];
 }
 
 -(IBAction)didClickJoinButton:(id)sender {
     loginController.bJoinOrLogin = 0;
-    [self presentModalViewController:loginController animated:YES];
+    [self.view addSubview:loginController.view];
 }
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
     NSLog(@"Selected username: %@", name);
-    for (NSMutableDictionary * d in theResults) {
-        NSString * newname = [d valueForKey:@"username"];
-        if ([newname isEqualToString:name] == NO) 
-            continue;        
-        UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
-        // badge count array
-        NSMutableDictionary * stix;
-        if (loginController.bJoinOrLogin == 1) {
-            stix = [[KumulosData dataToDictionary:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
-            // total badge count
-            int totalTags = [[d valueForKey:@"totalTags"] intValue];
-            [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
-            [stix release];         }
-        else
-        {
-            stix = [[BadgeView generateDefaultStix] retain];
-            NSLog(@"DidLoginWithUsername: %@", name);
-            // total badge count
-            int totalTags = [[d valueForKey:@"totalTags"] intValue];
-            [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
-            [stix release]; 
-        }
-        
-        
-        [newPhoto release];
+    //for (NSMutableDictionary * d in theResults) {
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+    NSString * newname = [d valueForKey:@"username"];
+    if ([newname isEqualToString:name] == NO) 
+        return;
+    UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
+    // badge count array
+    NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
+    // total badge count
+    int totalTags;
+    int bux;
+    if (loginController.bJoinOrLogin == 1) { // login
+        bux = [[d valueForKey:@"bux"] intValue];
+        totalTags = [[d valueForKey:@"totalTags"] intValue];
     }
-    
-    [self.delegate didLoginFromSplashScreen]; 
+    else { // join
+        bux = 25; // should be set in kumulos but go ahead and set it here
+        totalTags = 0;
+    }
+
+    NSMutableData * data = nil; //[d valueForKey:@"auxiliaryData"];
+    // loading auxiliary data for new users
+    bool firstTimeUser = YES; 
+    bool hasAccessedStore = NO;
+    if (data == nil) {
+        if (loginController.bJoinOrLogin == 0) { // join 
+            firstTimeUser = YES;
+            hasAccessedStore = NO;   
+        }        
+        else {
+            firstTimeUser = NO;
+            hasAccessedStore = YES;   
+        }        
+    }
+    else {
+        @try {
+            NSMutableDictionary * auxiliaryData = [[KumulosData dataToDictionary:data] retain];
+            if (auxiliaryData != nil)
+            {
+                firstTimeUser = [[auxiliaryData objectForKey:@"isFirstTimeUser"] boolValue]; 
+                hasAccessedStore = [[auxiliaryData objectForKey:@"hasAccessedStore"] boolValue]; 
+            }
+        }
+        @catch (NSException* exception) { 
+            firstTimeUser = YES;
+            hasAccessedStore = NO;
+        }              
+    }
+    [loginController.view removeFromSuperview];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux isFirstTimeUser:firstTimeUser hasAccessedStore:hasAccessedStore];
 }
      
 -(void)didCancelLogin {
+    [loginController.view removeFromSuperview];
     [self.delegate didLogout];
 }
 

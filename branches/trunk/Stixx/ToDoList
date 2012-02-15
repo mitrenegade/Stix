@@ -13,6 +13,7 @@ hide stix mode for viewing original pictures without stix - in zoom view?
 fast scroll for feed
 
 bugs:
+join as user crashes
 clicking on connection message causes keyboard
 partially uploaded stix looks bad on feed - add upload complete/success flag
 no stix drag outside of stixview

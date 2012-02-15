@@ -208,7 +208,7 @@
     
     if (needSearch) {
         [fsLocationStrings removeAllObjects];
-#if 0
+#if 1
         for (int i=0; i<[venueNames count]; i++) {
             int insertIndexTarget = 0;
             double distFromHere = [fsl distanceFromLatLong:[latlong objectAtIndex:i]];

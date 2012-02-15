@@ -24,7 +24,8 @@
 @interface FeedItemViewController : UIViewController <StixViewDelegate>{
     
 	IBOutlet UILabel * labelName;
-    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
+//    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
+    IBOutlet UIImageView * labelDescriptorBG;
 	IBOutlet UILabel * labelDescriptor;
     IBOutlet UILabel * labelComment;
 	IBOutlet UILabel * labelTime;
@@ -49,7 +50,7 @@
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
 @property (retain, nonatomic) IBOutlet UILabel * labelDescriptor;
-@property (retain, nonatomic) IBOutlet UILabel * labelDescriptorBG;
+@property (retain, nonatomic) IBOutlet UIImageView * labelDescriptorBG;
 @property (retain, nonatomic) IBOutlet UILabel * labelTime;
 @property (retain, nonatomic) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;

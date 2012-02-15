@@ -288,7 +288,7 @@
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
-    NSString * friendName = nil;
+    //NSString * friendName = nil;
     NSEnumerator *e = [userPhotoFrames keyEnumerator];
     id key;
     while (key = [e nextObject]) {
@@ -303,7 +303,7 @@
             [userProfileController setUsername:currentProfile];
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
             [userProfileController setPhoto:[photo autorelease]];
-            friendName = key;
+            //friendName = key;
             break;
         }
     }

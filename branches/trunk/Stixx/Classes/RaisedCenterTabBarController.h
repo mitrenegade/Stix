@@ -9,7 +9,7 @@
 @protocol RaisedCenterTabBarControllerDelegate 
 
 -(void)didPressCenterButton;
-
+-(void)didCloseFirstTimeInstructions;
 @end
 
 @interface RaisedCenterTabBarController : UITabBarController
@@ -19,6 +19,10 @@
     UIButton * button;
     UIImage * bgNormal;
     UIImage * bgSelected;
+    
+    UIImageView * firstTimeInstructions;
+    UIImageView * firstTimeMallPointer;
+    UIButton * buttonClose;
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -29,9 +33,13 @@
 
 // Create a custom UIButton and add it to the center of our tab bar
 -(void) addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage;
-
+-(void) addFirstTimeInstructions;
 -(IBAction)didPressCenterButton:(id)sender;
 -(void)setButtonStateSelected;
 -(void)setButtonStateNormal;
-
+-(void)toggleFirstTimeInstructions:(BOOL)showInstructions;
+-(void)toggleStixMallPointer:(BOOL)showPointer;
+-(IBAction)closeInstructions:(id)sender;
+-(void)addPointerAnimationUp;
+-(void)addPointerAnimationDown;
 @end

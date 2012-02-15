@@ -17,10 +17,9 @@
 @synthesize nameLabel;
 @synthesize buttonInstructions;
 @synthesize photoButton;
-@synthesize loginController;
 @synthesize friendController;
-@synthesize attemptedUsername;
 @synthesize k;
+@synthesize camera;
 
 -(id)init
 {
@@ -52,28 +51,9 @@
         k = [[Kumulos alloc]init];
         [k setDelegate:self];    
     }
-    loginController = [[LoginViewController alloc] init];
-    loginController.delegate = self;
-	//return self;
 }
 
 /***** logging in with a username ****/
-
--(void)firstTimeLogin {
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Welcome!"];
-    [alert setMessage:@"Because this is your first time, please login or create an account!"];
-    [alert show];
-    [alert release];
-
-    //[self showLoginScreen:nil];
-    // hack todo: this screen doesnt show
-}
-
--(IBAction)showLoginScreen:(id)sender{
-    [self presentModalViewController:loginController animated:YES];
-}
 
 -(void)loginWithUsername:(NSString *)name {
     // called by delegate, first time when no data has been loaded from kumulos
@@ -83,19 +63,16 @@
         [k setDelegate:self];    
     }
     [k getUserWithUsername:name];
-    attemptedUsername = [NSString stringWithFormat:@"%@", name];//[name retain];
-
-    //[self didSelectUsername:name withResults:nil];
 }
 
-// LoginViewDelegate - username is the name used to login, now need to get other info
-- (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
-    NSLog(@"Selected username: %@", name);
-    for (NSMutableDictionary * d in theResults) {
-        NSString * newname = [d valueForKey:@"username"];
-        if ([newname isEqualToString:name] == NO) 
-            continue;
-        
+// getUserWithUsername in ProfileViewController is a login operation that populates the profile with all the new user's info
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults {
+    if ([theResults count] > 0)
+    {
+        //for (NSMutableDictionary * d in theResults) {
+        NSMutableDictionary * d = [theResults objectAtIndex:0];
+        NSString * name = [d valueForKey:@"username"];
+        //[self didSelectUsername:name withResults:theResults];
         [self.nameLabel setText:name];
         UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
         if (newPhoto) {
@@ -109,52 +86,57 @@
             [photoButton setTitle:@"" forState:UIControlStateNormal]; 
         }
         // badge count array
-        NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
+        NSMutableDictionary * stix;
+        @try {
+            stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
+        }
+        @catch (NSException* exception) { 
+            NSLog(@"Error! Exception caught while trying to load stix! Error %@", [exception reason]);
+            stix = [BadgeView generateDefaultStix];
+        }
         NSLog(@"DidLoginWithUsername: %@", name);
-        
         // total Pix count
         int totalTags = [[d valueForKey:@"totalTags"] intValue];
+        int bux = [[d valueForKey:@"bux"] intValue];
         
-        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags];
+        NSMutableData * data = nil; //[d valueForKey:@"auxiliaryData"];
+        bool firstTimeUser;
+        bool hasAccessedStore;
+        if (data == nil) {
+            firstTimeUser = NO;
+            hasAccessedStore = YES;
+        }
+        else {
+            NSMutableDictionary * auxiliaryData;
+            @try {
+                auxiliaryData = [KumulosData dataToDictionary:data];
+                if (auxiliaryData == nil)
+                {
+                    firstTimeUser = YES;
+                    hasAccessedStore = NO;
+                }
+                else {
+                    firstTimeUser = [[auxiliaryData objectForKey:@"isFirstTimeUser"] boolValue]; 
+                    hasAccessedStore = [[auxiliaryData objectForKey:@"hasAccessedStore"] boolValue]; 
+                }
+            }
+            @catch (NSException* exception) { 
+                NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
+                firstTimeUser = YES;
+                hasAccessedStore = NO;
+            }
+        }
+        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux isFirstTimeUser:firstTimeUser hasAccessedStore:hasAccessedStore];
         [newPhoto release];
     }
-    
-    //[loginScreenButton setTitle:@"Switch account" forState:UIControlStateNormal];
-    [loginController dismissModalViewControllerAnimated:YES]; // do not dismiss until now, so profileView's viewWillAppear will not be summoned, causing login with old delegate.username
-}
-
-- (void)didCancelLogin {
-    // did not want to login
-    // if we are still anonymous, we should increment badges
-    if ([delegate isLoggedIn] == NO) // not needed
+    else if ([theResults count] == 0)
     {
-        [delegate didCancelFirstTimeLogin]; // does nothing
-    }
-}
-
-// getUserWithUsername in ProfileViewController is a login operation that populates the profile with all the new user's info
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults {
-    if ([theResults count] > 0)
-    {
-        for (NSMutableDictionary * d in theResults) {
-            NSString * name = [d valueForKey:@"username"];
-            [self didSelectUsername:name withResults:theResults];
-            // should only have one
-        }
-    }
-    if ([theResults count] == 0)
-    {
-        /*
-        UIAlertView* alert = [[UIAlertView alloc]init];
-        [alert addButtonWithTitle:@"Ok"];
-        [alert setTitle:[NSString stringWithFormat:@"The username %@ doesn't seem to exist! Please try logging in again or adding a new account.", attemptedUsername]];
-        [alert show];
-        [alert release];
-        */
-        
         [delegate didLogout]; // force logout
     }
-    //[attemptedUsername release];
+}
+
+-(void)updateBuxCount {
+    // do nothing
 }
 
 -(IBAction) didClickLogoutButton:(id)sender {
@@ -195,20 +177,12 @@
 /***** modifying user photo *******/
 
 - (void)changePhoto:(id)sender {
-    if (![delegate isLoggedIn]) // show login screen
-    {
-        [self showLoginScreen:nil];
-    }
-    else
-    {
-        [self.delegate didClickChangePhoto];
-        //[self takeProfilePicture];
-    }
+    [self.delegate didClickChangePhoto];
 }
 
 -(void)takeProfilePicture {
 #if !TARGET_IPHONE_SIMULATOR
-    UIImagePickerController * camera = [[UIImagePickerController alloc] init];
+    UIImagePickerController * cam = [[UIImagePickerController alloc] init];
 #if 0
     camera.sourceType = UIImagePickerControllerSourceTypeCamera;
     camera.showsCameraControls = YES;
@@ -216,11 +190,11 @@
     camera.toolbarHidden = YES;
     camera.wantsFullScreenLayout = YES;
 #else
-    camera.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    cam.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
 #endif
-    camera.allowsEditing = YES;
-    camera.delegate = self;
-    [self presentModalViewController:camera animated:YES];
+    cam.allowsEditing = YES;
+    cam.delegate = self;
+    [self presentModalViewController:cam animated:YES];
 #endif
 }
 
@@ -297,8 +271,8 @@
         NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];
         NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
         [k addStixToUserWithUsername:name andStix:data];
-        [data autorelease];
-        [stix autorelease];
+        //[data autorelease];
+        //[stix autorelease];
     }
  }
 
@@ -409,7 +383,6 @@
 
 - (void)dealloc {
     [k release]; 
-    [loginController release];
     //[loginScreenButton release];
     //loginScreenButton = nil;
     [stixCountButton release];
@@ -423,6 +396,12 @@
     [buttonInstructions release];
     buttonInstructions = nil;
     [super dealloc];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+	[textField resignFirstResponder];
+	//NSLog(@"Comment entered: %@", [textField text]); 
+	return YES;
 }
 
 

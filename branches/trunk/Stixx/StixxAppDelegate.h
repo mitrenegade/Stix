@@ -26,6 +26,8 @@
 #import <Parse/Parse.h>
 #import "CoverflowViewController.h"
 #import "StoreViewController.h"
+#import "StoreViewShell.h"
+#import "AlertPrompt.h"
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -35,9 +37,28 @@ enum notification_bookmarks {
     NB_UPDATECAROUSEL
 };
 
-#define USING_KIIP 1
+enum alertview_actions {
+    ALERTVIEW_SIMPLE = 0,
+    ALERTVIEW_UPGRADE,
+    ALERTVIEW_NOTIFICATION,
+    ALERTVIEW_PROMPT,
+    ALERTVIEW_GOTOSTORE
+};
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate> {
+struct UserInfo {
+    NSString * username;
+    UIImage * userphoto;
+    int usertagtotal;
+    int bux;
+
+    // user info
+//    bool isFirstTimeUser;
+//    bool hasAccessedStore;
+};
+
+#define USING_KIIP 0
+
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate> {
     UIWindow *window;
     
     UIViewController * mainController;
@@ -52,15 +73,15 @@ enum notification_bookmarks {
     MyStixViewController * myStixController;
 //    LoadingViewController * loadingController;
     StoreViewController * storeViewController;
+    StoreViewShell * storeViewShell;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
 
     bool loggedIn;
     bool isLoggingIn;
-    NSString * username;
-    UIImage * userphoto;
-    int usertagtotal;
+    struct UserInfo * myUserInfo;
+    bool stixViewsLoadedFromDisk;
     
     NSMutableDictionary * allStix;
     NSMutableArray * allTags;
@@ -107,15 +128,25 @@ enum notification_bookmarks {
     bool isUpdatingNotifiedTag;
     NSString * notificationGiftStixStringID;
     
-    NSMutableArray * alertQueue;
     UIImagePickerController * camera;
 
     Kumulos* k;
+    NSString * versionStringStable;
+    NSString * versionStringBeta;
+    NSString * currVersion;
+    int versionIsOutdated;
+    
+    NSMutableArray * alertAction;
+    NSMutableArray * alertQueue;
+    int alertActionCurrent;
 }
 
 -(void)initializeBadges;
+-(void)checkVersion;
+-(int)loadDataFromDisk;
+-(void)saveDataToDisk;
 
-- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle;
+- (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle andAlertType:(int)alertType;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
@@ -123,10 +154,15 @@ enum notification_bookmarks {
 -(void)continueInit;
 -(void)adminUpdateAllStixCountsToZero;
 -(void)adminIncrementAllStixCounts;
+-(void) adminSetAllUsersBuxCounts;
+-(void)adminEasterEggShowMenu:(NSString*)password;
 -(void)updateUserTagTotal;
+-(void)changeBuxCountByAmount:(int)change;
+-(void)adminSaveFeed;
 
 -(void)decrementStixCount:(NSString*)stixStringID;
 -(void)incrementStixCount:(NSString*)stixStringID;
+-(void)incrementStixCount:(NSString *)stixStringID byNumber:(int)increment;
 -(Tag*) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
@@ -149,9 +185,7 @@ enum notification_bookmarks {
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) LoginSplashController * loginSplashController;
 @property (nonatomic, retain) MyStixViewController * myStixController;
-@property (nonatomic, retain) NSString * username;
-@property (nonatomic, retain) UIImage * userphoto;
-@property (nonatomic, assign) int usertagtotal;
+@property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
@@ -165,5 +199,6 @@ enum notification_bookmarks {
 @property (nonatomic, retain) NSMutableArray * alertQueue;
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) StoreViewController * storeViewController;
+@property (nonatomic, retain) StoreViewShell * storeViewShell;  
 @end
 

@@ -50,14 +50,21 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location {// andWithImage:(UIImage*)image {
-    //NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@ image of size %f %f\n", name, descriptor, comment, location, image.size.width, image.size.height);
+    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@\n", name, descriptor, comment, location);
     
     nameString = name;
     descriptorString = descriptor;
     commentString = comment;
     if (descriptor == nil || [descriptor length] == 0) {
-        descriptorString = comment;
-        commentString = nil;
+        if (comment == nil || [comment length] == 0) {
+            [labelDescriptorBG setHidden:YES];
+            descriptorString = nil;
+            commentString = nil;
+        } 
+        else {
+            descriptorString = comment;
+            commentString = nil;
+        }
     }
     //imageData = image;
     locationString = location;
@@ -179,9 +186,16 @@
     [imageView setImage:imageData];
     [labelLocationString setText:locationString];
     if ([commentString length] == 0) {
-        [labelDescriptor setFrame:CGRectMake(labelDescriptor.frame.origin.x, labelDescriptor.frame.origin.y, labelDescriptor.frame.size.width, 46)]; // combined heights
-        [labelDescriptorBG setFrame:CGRectMake(labelDescriptorBG.frame.origin.x, labelDescriptorBG.frame.origin.y, labelDescriptorBG.frame.size.width, 46)];
-        [labelComment setHidden:YES];
+        if ([descriptorString length] != 0) {
+            [labelDescriptor setFrame:CGRectMake(labelDescriptor.frame.origin.x, labelDescriptor.frame.origin.y, labelDescriptor.frame.size.width, 46)]; // combined heights
+            //[labelDescriptorBG setFrame:CGRectMake(labelDescriptorBG.frame.origin.x, labelDescriptorBG.frame.origin.y, labelDescriptorBG.frame.size.width, 46)];
+            [labelComment setHidden:YES];
+        }
+        else {
+            [labelDescriptor setHidden:YES];
+            [labelComment setHidden:YES];
+            [labelDescriptorBG setHidden:YES];
+        }
     }
     if ([locationString length] == 0)
         [locationIcon setHidden:YES];

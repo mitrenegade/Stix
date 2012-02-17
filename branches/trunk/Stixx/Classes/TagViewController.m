@@ -318,7 +318,7 @@
     [self viewDidAppear:NO];    
 }
 
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center andScale:(float)stixScale andRotation:(float)stixRotation
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center andScale:(float)stixScale andRotation:(float)stixRotation andTransform:(CGAffineTransform)transform
 {
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
@@ -377,7 +377,7 @@
     NSLog(@"TagViewController: Badge frame added at %f %f and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
     [tag addImage:image];
     [tag addARCoordinate:newCoord];
-    [tag addStix:selectedStixStringID withLocation:center withScale:stixScale withRotation:stixRotation withPeelable:NO];
+    [tag addStix:selectedStixStringID withLocation:center withScale:stixScale withRotation:stixRotation withTransform:transform withPeelable:NO];
     [image release];
     [self.delegate didCreateNewPix:tag];
     [tag release];

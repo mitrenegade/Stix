@@ -32,13 +32,15 @@
     NSMutableArray * auxCanManipulate;
     bool isDragging;
     bool isPinching;
+    bool isTap;
     float offset_x, offset_y;
     
     CGSize originalImageSize;
 
+    // these refer to the current active stix
     float stixScale;
-    CGRect frameBeforeScale;
     float stixRotation;
+    CGAffineTransform referenceTransform;
 
     bool interactionAllowed;
     float imageScale;
@@ -52,9 +54,11 @@
     
     int stixPeelSelected;
     
-    UIImageView * transformBox;
+    bool showTransformCanvas;
+    UIView * transformCanvas;
 
     NSObject<StixViewDelegate> * delegate;    
+    NSMutableSet *_activeRecognizers;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -66,6 +70,7 @@
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, assign) bool isPeelable;
 @property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
+@property (nonatomic, assign) CGAffineTransform referenceTransform;
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)populateWithAuxStixFromTag:(Tag*)tag;
@@ -75,4 +80,5 @@
 -(void)doPeelAnimationForStix:(int)index;
 
 -(void)didTouchAtLocation:(CGPoint)location;
+-(void)transformBoxShowAtFrame:(CGRect)frame;
 @end

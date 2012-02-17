@@ -19,6 +19,7 @@
 @synthesize auxStixViews, auxStixStringIDs;
 @synthesize isPeelable;
 @synthesize delegate;
+@synthesize referenceTransform;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -40,7 +41,7 @@
     [imageView setImage:imageData];
     [self addSubview:imageView];
     [imageView release];
-    transformBox = nil;
+    _activeRecognizers = [[NSMutableSet alloc] init];
 }
 
 // originally initializeWithImage: withStix:
@@ -76,8 +77,13 @@
     [self addSubview:stix];
         
     // add pinch gesture recognizer
-    UIPinchGestureRecognizer * myGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureHandler:)];
-    [myGestureRecognizer setDelegate:self];
+    // add gesture recognizer
+    UIPinchGestureRecognizer * myPinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)]; //(pinchGestureHandler:)];
+    [myPinchRecognizer setDelegate:self];
+    
+    
+    UIRotationGestureRecognizer *myRotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)]; //(pinchRotateHandler:)];
+    [myRotateRecognizer setDelegate:self];
     
 #if 0
     UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
@@ -90,8 +96,14 @@
 #endif
     
     if (interactionAllowed) {
-        [self addGestureRecognizer:myGestureRecognizer];
+        [self addGestureRecognizer:myPinchRecognizer];
+        [self addGestureRecognizer:myRotateRecognizer];    
     }
+
+    // display transform box 
+    showTransformCanvas = YES;
+    transformCanvas = nil;
+    [self transformBoxShowAtFrame:stix.frame];
 }
 
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
@@ -197,6 +209,66 @@
      ];
 }
 
+-(void)transformBoxShowAtFrame:(CGRect)frame {
+    int canvasOffset = 5;
+    CGRect frameCanvas = frame;
+    frameCanvas.origin.x -= canvasOffset;
+    frameCanvas.origin.y -= canvasOffset;
+    frameCanvas.size.width += 2*canvasOffset;
+    frameCanvas.size.height += 2*canvasOffset;
+    transformCanvas = [[UIView alloc] initWithFrame:frameCanvas];
+    [transformCanvas setAutoresizesSubviews:YES];
+    frame.origin.x = canvasOffset;
+    frame.origin.y = canvasOffset;
+    CGRect frameInside = frame;
+    frameInside.origin.x +=1;
+    frameInside.origin.y +=1;
+    frameInside.size.width -= 2;
+    frameInside.size.height -=2;
+    UIImageView * transformBox = [[UIImageView alloc] initWithFrame:frameInside];
+    transformBox.backgroundColor = [UIColor clearColor];
+    transformBox.layer.borderColor = [[UIColor whiteColor] CGColor];
+    transformBox.layer.borderWidth = 2.0;
+    
+    UIImageView * transformBoxShadow = [[UIImageView alloc] initWithFrame:frame];
+    transformBoxShadow.backgroundColor = [UIColor clearColor];
+    transformBoxShadow.layer.borderColor = [[UIColor blackColor] CGColor];
+    transformBoxShadow.layer.borderWidth = 4.0;
+    
+    [transformCanvas addSubview:transformBoxShadow];
+    [transformCanvas addSubview:transformBox];
+    UIImage * corners = [UIImage imageNamed:@"dot_boundingbox.png"];
+    
+    UIImageView * dot1 = [[UIImageView alloc] initWithImage:corners];
+    UIImageView * dot2 = [[UIImageView alloc] initWithImage:corners];
+    UIImageView * dot3 = [[UIImageView alloc] initWithImage:corners];
+    UIImageView * dot4 = [[UIImageView alloc] initWithImage:corners];
+    
+    [transformCanvas addSubview:dot1];
+    [transformCanvas addSubview:dot2];
+    [transformCanvas addSubview:dot3];
+    [transformCanvas addSubview:dot4];
+    float width = frame.size.width / 5;
+    float height = frame.size.height / 5;
+    [dot1 setFrame:CGRectMake(0, 0, width, height)];
+    [dot2 setFrame:CGRectMake(0, 0, width, height)];
+    [dot3 setFrame:CGRectMake(0, 0, width, height)];
+    [dot4 setFrame:CGRectMake(0, 0, width, height)];
+    [dot1 setCenter:CGPointMake(frame.origin.x, frame.origin.y)];
+    [dot2 setCenter:CGPointMake(frame.origin.x, frame.origin.y + frame.size.height)];
+    [dot3 setCenter:CGPointMake(frame.origin.x+frame.size.width, frame.origin.y)];
+    [dot4 setCenter:CGPointMake(frame.origin.x+frame.size.width, frame.origin.y+frame.size.height)];
+    
+    [self addSubview:transformCanvas];
+    
+    [transformBox release];
+    [transformBoxShadow release];
+    [dot1 release];
+    [dot2 release];
+    [dot3 release];
+    [dot4 release];
+}
+
 -(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if (interactionAllowed == NO) { // skips interaction with stix for dragging
         [super touchesBegan:touches withEvent:event];
@@ -214,7 +286,7 @@
     CGRect frame = stix.frame;
     if (CGRectContainsPoint(frame, location))
     {
-        isDragging = 1;
+        isTap = 1;
     }
     
     // point where finger clicked badge
@@ -230,8 +302,10 @@
         return;
     }
 
-	if (isDragging == 1)
+	if (isTap == 1 || isDragging == 1)
 	{
+        isDragging = 1;
+        isTap = 0;
 		UITouch *touch = [[event allTouches] anyObject];
 		CGPoint location = [touch locationInView:self];
 		// update frame of dragged badge, also scale
@@ -247,6 +321,9 @@
         stix.center = CGPointMake(centerX, centerY);
         if (stixCount != nil)
             stixCount.center = CGPointMake(centerX - [BadgeView getOutlineOffsetX:0], centerY - [BadgeView getOutlineOffsetX:0]);
+        if (transformCanvas) {
+            [transformCanvas setCenter:stix.center];
+        }
         NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
 	}
 }
@@ -262,42 +339,96 @@
 	if (isDragging == 1)
 	{
         isDragging = 0;
+        isTap = 0;
 	}
+    else if (isTap == 1) {
+        isTap = 0;
+        isDragging = 0;
+#if 0
+        if (stix) {
+            if (showTransformCanvas) {
+                // hide transform canvas
+                showTransformCanvas = NO;
+                [transformCanvas setHidden:YES];
+            }
+            else
+            {
+                if (transformCanvas != nil) {
+                    showTransformCanvas = YES;
+                    [transformCanvas setHidden:NO];
+                }
+                else {
+                    [self transformBoxShowAtFrame:stix.frame];
+                }
+            }
+        }
+#endif
+    }
 }
+
+/*** Gesture handlers ***/
+
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    // enables recognizing two gestures at the same time
+    return YES;
+}
+
+- (CGAffineTransform)applyRecognizer:(UIGestureRecognizer *)recognizer toTransform:(CGAffineTransform)transform
+{
+    if ([recognizer respondsToSelector:@selector(rotation)])
+        return CGAffineTransformRotate(transform, [(UIRotationGestureRecognizer *)recognizer rotation]);
+    else if ([recognizer respondsToSelector:@selector(scale)]) {
+        CGFloat newscale = [(UIPinchGestureRecognizer *)recognizer scale];
+        //if ((auxScale * newscale) > 3)
+        //    newscale = 1;
+        //auxScale = auxScale * newscale;
+        return CGAffineTransformScale(transform, newscale, newscale);
+    }
+    else
+        return transform;
+}
+
 
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
     // do nothing
 }
 
--(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {
-    if ([gesture state] == UIGestureRecognizerStateBegan) {
-        isPinching = YES;
-        NSLog(@"StixView: Pinch motion started! scale %f velocity %f", [gesture scale], [gesture velocity]);
-        frameBeforeScale = stix.frame;
-        CGPoint center = stix.center;
-        NSLog(@"Original center: %f %f", center.x, center.y);
-    }
-    else if ([gesture state] == UIGestureRecognizerStateChanged) {
-        //if (isDragging) return;
-        NSLog(@"StixView: Pinch changing! scale %f velocity %f", [gesture scale], [gesture velocity]);
-        float newscale = [gesture scale];
-        if ((stixScale * newscale) > 3)
-            return;
-        CGPoint center = stix.center;
-        NSLog(@"Old center: %f %f", center.x, center.y);
-        CGRect stixFrameScaled = frameBeforeScale;
-        stixFrameScaled.size.width *= newscale;
-        stixFrameScaled.size.height *= newscale;
-        stix.frame = stixFrameScaled;
-        stix.center = center;
-        NSLog(@"New center: %f %f", center.x, center.y);
-    }    
-    else if ([gesture state] == UIGestureRecognizerStateEnded) {
-        //if (isDragging) return;
-        stixScale = stixScale * [gesture scale];
-        if (stixScale > 3)
-            stixScale = 3;
-        NSLog(@"Frame scale changed by %f: overall scale %f", [gesture scale], stixScale);
+//-(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {
+- (IBAction)handleGesture:(UIGestureRecognizer *)recognizer
+{
+    switch (recognizer.state) {
+        case UIGestureRecognizerStateBegan:
+            if ([recognizer respondsToSelector:@selector(scale)]) {
+                // scaling transform
+                NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [(UIPinchGestureRecognizer*)recognizer scale], [(UIPinchGestureRecognizer*)recognizer velocity]);
+            }
+            if (_activeRecognizers.count == 0)
+                referenceTransform = stix.transform;
+            [_activeRecognizers addObject:recognizer];
+            break;
+            
+        case UIGestureRecognizerStateEnded:
+            referenceTransform = [self applyRecognizer:recognizer toTransform:referenceTransform];
+            [_activeRecognizers removeObject:recognizer];
+            
+            break;
+            
+        case UIGestureRecognizerStateChanged: {
+            CGAffineTransform transform = referenceTransform;
+            for (UIGestureRecognizer *recognizer in _activeRecognizers)
+                transform = [self applyRecognizer:recognizer toTransform:transform];
+            stix.transform = transform;
+            
+            if (transformCanvas)
+            {
+                transformCanvas.transform = transform;
+            }
+            break;
+        }
+            
+        default:
+            break;
     }
 }
 
@@ -322,7 +453,7 @@
     return !transparent;
 }
 
-// hack: sent through delegate functions
+// sent through delegate functions for clicks on scrollView; after interaction with main stix is disabled, the touch filters out of StixView but then comes back through its delegates
 -(void)didTouchAtLocation:(CGPoint)location {
     if ([self isPeelable]) {
 
@@ -357,25 +488,6 @@
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
         [actionSheet showInView:self];
         [actionSheet release];
-    } else {
-        if (stix) {
-            // possibly called from AuxView or TagView for tapping
-            // single tap - should display scale/rotate box
-            if (transformBox != nil) {
-                [transformBox removeFromSuperview];
-                [transformBox release];
-                transformBox = nil;
-            }
-            else {
-                transformBox = [[UIImageView alloc] initWithFrame:stix.frame];
-                //UIImage * corners = [UIImage imageNamed:@"dot_boundingbox.png"];
-                transformBox.backgroundColor = [UIColor clearColor];
-                transformBox.layer.borderColor = [[UIColor whiteColor] CGColor];
-                transformBox.layer.borderWidth = 2.0;
-                [transformBox setFrame:stix.frame];
-                [self addSubview:transformBox];
-            }  
-        }
     }
 }
 

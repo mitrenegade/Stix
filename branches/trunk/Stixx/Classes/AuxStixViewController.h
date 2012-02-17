@@ -9,10 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "StixView.h"
 #import "Tag.h"
+#import "QuartzCore/QuartzCore.h"
 
 @protocol AuxStixViewControllerDelegate 
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString*)comment;
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform withComment:(NSString*)comment;
 -(void)didCancelAuxStix;
 @end
 
@@ -31,6 +32,7 @@
     NSString * stixStringID;
     
     int drag;
+    int tap;
     float offset_x;
     float offset_y;
     float auxScale;
@@ -38,7 +40,12 @@
     CGRect frameBeforeScale;
     float stixScale;
     
+    bool showTransformCanvas;
+    UIView * transformCanvas;
+    CGAffineTransform totalTransform;
+    
 	NSObject<AuxStixViewControllerDelegate> *delegate;
+    NSMutableSet *_activeRecognizers;
 }
 
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
@@ -58,4 +65,5 @@
 
 -(void)initStixView:(Tag *) tag;
 -(void)addNewAuxStix:(UIImageView *)newStix ofType:(NSString*)newStixStringID atLocation:(CGPoint)location;
+-(void)transformBoxShowAtFrame:(CGRect)frame;
 @end

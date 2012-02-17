@@ -28,6 +28,7 @@
 #import "StoreViewController.h"
 #import "StoreViewShell.h"
 #import "AlertPrompt.h"
+#import "FBConnect.h"
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -58,7 +59,7 @@ struct UserInfo {
 
 #define USING_KIIP 0
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate> {
+@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, FBSessionDelegate> {
     UIWindow *window;
     
     UIViewController * mainController;
@@ -108,6 +109,7 @@ struct UserInfo {
     CGPoint updatingAuxLocation;
     float updatingAuxScale;
     float updatingAuxRotation;
+    CGAffineTransform updatingAuxTransform;
     
     // hack: for peelable stix actions
     bool isUpdatingPeelableStix;
@@ -139,6 +141,8 @@ struct UserInfo {
     NSMutableArray * alertAction;
     NSMutableArray * alertQueue;
     int alertActionCurrent;
+    
+    Facebook * facebook;
 }
 
 -(void)initializeBadges;
@@ -174,6 +178,7 @@ struct UserInfo {
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
 -(void)rewardStix;
+-(void)rewardBux;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -200,5 +205,6 @@ struct UserInfo {
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) StoreViewController * storeViewController;
 @property (nonatomic, retain) StoreViewShell * storeViewShell;  
+@property (nonatomic, retain) Facebook *facebook;
 @end
 

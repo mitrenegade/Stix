@@ -49,6 +49,7 @@
 @synthesize camera;
 @synthesize storeViewController;
 @synthesize storeViewShell;
+@synthesize facebook;
 
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
@@ -91,6 +92,20 @@ static int init=0;
     [manager release];
 #endif
     
+    /*** Facebook service ***/
+#if 0
+    facebook = [[Facebook alloc] initWithAppId:@"191699640937330" andDelegate:self];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"FBAccessTokenKey"] 
+        && [defaults objectForKey:@"FBExpirationDateKey"]) {
+        facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+        facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+    }
+    if (![facebook isSessionValid]) {
+        [facebook authorize:nil];
+    }
+#endif
+    
 	/***** create first view controller: the TagViewController *****/
     [loadingMessage setText:@"Initializing camera..."];
     
@@ -123,6 +138,28 @@ static int init=0;
 
     return YES;
 }
+
+/*** Facebook api calls ***/
+// Pre 4.2 support
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    return [facebook handleOpenURL:url]; 
+}
+
+// For 4.2+ support
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    return [facebook handleOpenURL:url]; 
+}
+
+- (void)fbDidLogin {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
+    [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
+    [defaults synchronize];
+    
+}
+
+/*** Versioning ***/
 
 -(void)checkVersion {
     versionIsOutdated = 0;
@@ -680,13 +717,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
 	[encoder encodeObject:newTag.auxLocations forKey:@"auxLocations"];
 	[encoder encodeObject:newTag.auxStixStringIDs forKey:@"auxStixStringIDs"];
-    [encoder encodeObject:newTag.auxScales forKey:@"auxScales"];
-    [encoder encodeObject:newTag.auxRotations forKey:@"auxRotations"];
+    [encoder encodeObject:newTag.auxScales forKey:@"auxScales"]; // deprecated
+    [encoder encodeObject:newTag.auxRotations forKey:@"auxRotations"]; // deprecated
+    [encoder encodeObject:newTag.auxTransforms forKey:@"auxTransforms"];
     [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
     [encoder finishEncoding];
     [encoder release];
     
-    [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];    
+    [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
+    
+    NSString * loc = newTag.locationString;
+    //NSLog(@"Location: %@", newTag.locationString);
+    if ([loc length] > 0)
+        [self updateUserTagTotal];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixDidCompleteWithResult:(NSNumber *)newRecordID {
@@ -817,6 +860,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         CGPoint location = updatingAuxLocation;
         float scale = updatingAuxScale;
         float rotation = updatingAuxRotation;
+        CGAffineTransform transform = updatingAuxTransform;
         float peelable = YES;
         if ([tag.username isEqualToString:myUserInfo->username])
             peelable = NO;
@@ -837,13 +881,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // this can be done by creating an auxStix table where addition of a stix
         // simply adds to that database instead of adding to a data structure that gets
         // loaded to the pix in allTags
-        [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+        [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withTransform:transform withPeelable:peelable];
         NSMutableData *theAuxStixData = [NSMutableData data];
         NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
         [encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
         [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
-        [encoder encodeObject:tag.auxScales forKey:@"auxScales"];
-        [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
+        [encoder encodeObject:tag.auxScales forKey:@"auxScales"]; // deprecated
+        [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"]; // deprecated
+        [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
         [encoder release];
@@ -867,8 +912,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // we get here from didPerformPeelableAction
     // so that we can modify the new peelable stix status to the correct tag structure
-    bool didModifyTag = NO;     // here, we flag if a tag has been modified locally. it will be modified if the user is adding auxstix, or peeling/sticking stix.
-    
+
     if (isUpdatingPeelableStix) {
         
         // find the correct tag in allTags;
@@ -895,11 +939,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
             // add to comment log - if comment == @"PEEL" then it is a peel action
             [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
-            didModifyTag = YES;
         }
         else if (updatingPeelableAction == 1) { // attach stix
             [[tag auxPeelable] replaceObjectAtIndex:updatingPeelableAuxStixIndex withObject:[NSNumber numberWithBool:NO]];
-            didModifyTag = YES;
         }
         
         // find index in current tags
@@ -921,11 +963,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
         [encoder encodeObject:tag.auxScales forKey:@"auxScales"];
         [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
+        [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
         [encoder release];
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
-        didModifyTag = YES;
         // send a notification to update for a peel/stick action, but no need to acknowledge or jump to the tag
         [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag orGiftStix:nil];
     }
@@ -1328,14 +1370,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }    
 }
 
--(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation{
+-(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform{
     
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
     float peelable = YES;
     if ([tag.username isEqualToString:myUserInfo->username])
         peelable = NO;
-    [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withPeelable:peelable];
+    [tag addStix:stixStringID withLocation:location withScale:scale withRotation:rotation withTransform:transform withPeelable:peelable];
 
     NSNumber * tagID = tag.tagID;
     for (int i=0; i<[allTags count]; i++) {
@@ -1359,6 +1401,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     updatingAuxLocation = location;
     updatingAuxScale = scale;
     updatingAuxRotation = rotation;
+    updatingAuxTransform = transform;
 
     isUpdatingAuxStix = YES;
     [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
@@ -1548,7 +1591,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; 
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = [BadgeView generateDefaultStix];
+        stix = [[BadgeView generateDefaultStix] retain];
     }
     [allStix removeAllObjects];
     [allStix addEntriesFromDictionary:stix];
@@ -1777,6 +1820,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 {
                     message = [NSString stringWithFormat:@"You have received 3 one-time use %@.", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
                     [self incrementStixCount:notificationGiftStixStringID byNumber:3];
+                    [self reloadAllCarousels];
                }
                 [self showAlertWithTitle:@"New Stix" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             }

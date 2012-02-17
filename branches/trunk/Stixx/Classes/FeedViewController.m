@@ -219,13 +219,13 @@
     [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
 }
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withComment:(NSString *)comment {
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform withComment:(NSString *)comment {
 
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
     
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
-    [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withScale:scale withRotation:rotation];
+    [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withScale:scale withRotation:rotation withTransform:transform];
     if ([comment length] > 0)
         [self didAddNewComment:comment withTagID:[t.tagID intValue]];
 

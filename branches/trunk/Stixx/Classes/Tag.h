@@ -46,9 +46,10 @@
     // auxiliary stix - stored in Kumulos as a separate table //an array of dictionaries
     NSMutableArray * auxStixStringIDs;
     NSMutableArray * auxLocations;
-    NSMutableArray * auxScales;
-    NSMutableArray * auxRotations;
+    NSMutableArray * auxScales; // deprecated
+    NSMutableArray * auxRotations; // deprecated
     NSMutableArray * auxPeelable;
+    NSMutableArray * auxTransforms; // rotation and scale combined
     
     // data blob saved by Kumulos
     ARCoordinate * coordinate;
@@ -63,7 +64,7 @@
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 - (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
--(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable;
+-(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable;
 //-(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 //-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
 -(NSString*)removeStixAtIndex:(int)index;
@@ -90,7 +91,7 @@
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, retain) NSMutableArray * auxLocations;
 @property (nonatomic, retain) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
-@property (nonatomic, retain) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation)
-@property (nonatomic, retain) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner
-
+@property (nonatomic, retain) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
+@property (nonatomic, retain) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
+@property (nonatomic, retain) NSMutableArray * auxTransforms;
 @end

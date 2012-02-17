@@ -14,7 +14,7 @@
 @synthesize comment;
 @synthesize descriptor;
 @synthesize locationString;
-@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable;
+@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable, auxTransforms;
 //@synthesize badge_x, badge_y, badgeCount;
 //@synthesize stixStringID;
 //@synthesize stixScale, stixRotation;
@@ -54,7 +54,7 @@
 }
 */
 
--(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withPeelable:(bool)newPeelable {
+-(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable {
     // called by StixAppDelegate multiple places - makes a decision whether
     // to increment count or add an aux stix
     
@@ -85,6 +85,7 @@
             auxScales = [[NSMutableArray alloc] init];
             auxRotations = [[NSMutableArray alloc] init];
             auxPeelable = [[NSMutableArray alloc] init];
+            auxTransforms = [[NSMutableArray alloc] init];
         }
         //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
         // array for the tag
@@ -95,18 +96,9 @@
         [auxScales addObject:[NSNumber numberWithFloat:newScale]];
         [auxRotations addObject:[NSNumber numberWithFloat:newRotation]];
         [auxPeelable addObject:[NSNumber numberWithBool:newPeelable]];
+        [auxTransforms addObject:NSStringFromCGAffineTransform(transform)];
     }
 }
-
-/*
--(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable{
-    [auxStixStringIDs addObject:stringID];
-    [auxLocations addObject:[NSValue valueWithCGPoint:location]];
-    [auxScales addObject:[NSNumber numberWithFloat:scale]];
-    [auxRotations addObject:[NSNumber numberWithFloat:rotation]];
-    [auxPeelable addObject:[NSNumber numberWithBool:peelable]];
-}
- */
 
 -(NSString*)removeStixAtIndex:(int)index {
     NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
@@ -114,6 +106,7 @@
     [auxLocations removeObjectAtIndex:index];
     [auxScales removeObjectAtIndex:index];
     [auxRotations removeObjectAtIndex:index];
+    [auxTransforms removeObjectAtIndex:index];
     [auxPeelable removeObjectAtIndex:index];
     return auxStringID;
 }
@@ -146,32 +139,19 @@
     tag.auxLocations = [decoder decodeObjectForKey:@"auxLocations"];
     tag.auxScales = [decoder decodeObjectForKey:@"auxScales"];
     tag.auxRotations = [decoder decodeObjectForKey:@"auxRotations"];
+    tag.auxTransforms = [decoder decodeObjectForKey:@"auxTransforms"];
     tag.auxPeelable = [decoder decodeObjectForKey:@"auxPeelable"];
     [decoder finishDecoding];
     [decoder release];
-
-    /*
-    if (stixStringIDs == nil)
-        tag.auxStixStringIDs = [[NSMutableArray alloc] init];
-    if (stixLocations == nil)
-        tag.auxLocations = [[NSMutableArray alloc] init];
-    if (stixScales == nil) {
-        tag.auxScales = [[NSMutableArray alloc] init];        
-        for (int i=0; i<[tag.auxStixStringIDs count]; i++)
-            [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
-    }
-    if (stixRotations == nil) {
-        tag.auxRotations = [[NSMutableArray alloc] init];
-        for (int i=0; i<[tag.auxStixStringIDs count]; i++)
-            [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
-    }
-    if (stixPeelable == nil) {
-        tag.auxPeelable = [[NSMutableArray alloc] init];
+    
+    // backwards compatibility
+    if (tag.auxTransforms == nil) {
+        tag.auxTransforms = [[NSMutableArray alloc] init];
         for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
-            [tag.auxPeelable addObject:[NSNumber numberWithBool:YES]];
+            CGAffineTransform t = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
+            [tag.auxTransforms addObject:NSStringFromCGAffineTransform(t)];
         }
     }
-     */
 
     //tag.stixScale = stixScale; // no more main stix
     //tag.stixRotation = stixRotation;

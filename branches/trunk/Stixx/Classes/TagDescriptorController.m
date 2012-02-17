@@ -106,10 +106,11 @@
     float centery = stixView.stix.center.y * imageScale;
     float stixScale = [stixView stixScale];
     float stixRotation = [stixView stixRotation];
+    CGAffineTransform stixTransform = [stixView referenceTransform];
     //stix.frame = badgeFrame;
     //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery) andScale:stixScale andRotation:stixRotation];
+	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery) andScale:stixScale andRotation:stixRotation andTransform:stixTransform];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender

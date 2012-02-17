@@ -234,10 +234,6 @@
         drag = 0;
         tap = 0;
 #if 0
-        UITouch *touch = [[event allTouches] anyObject];	
-        CGPoint locationInStixView = [touch locationInView:stixView];
-        [[self stixView] didTouchAtLocation:locationInStixView];
-#else
         // auxStix being added is handled here, not in StixView.touchesEnded
         // single tap - should display scale/rotate box
         if (stix) {
@@ -257,6 +253,9 @@
                 }
             }
         }
+#else
+        // single tap is equivalent to done
+        [self buttonOKPressed:self];
 #endif
     }
 }

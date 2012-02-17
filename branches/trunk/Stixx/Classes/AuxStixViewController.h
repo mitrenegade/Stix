@@ -42,7 +42,6 @@
     
     bool showTransformCanvas;
     UIView * transformCanvas;
-    CGAffineTransform totalTransform;
     
 	NSObject<AuxStixViewControllerDelegate> *delegate;
     NSMutableSet *_activeRecognizers;

@@ -40,6 +40,7 @@
     [imageView setImage:imageData];
     [self addSubview:imageView];
     [imageView release];
+    transformBox = nil;
 }
 
 // originally initializeWithImage: withStix:
@@ -52,7 +53,7 @@
     stixScale = scale;
     stixRotation = rotation;
     
-    stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+    stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
     float centerY = y;
@@ -93,11 +94,11 @@
     }
 }
 
-//-(void)populateWithAuxStix:(NSMutableArray *)auxStix withLocations:(NSMutableArray *)auxLocations withScales:(NSMutableArray *)auxScales withRotations:(NSMutableArray *)auxRotations {
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
     auxStixStringIDs = tag.auxStixStringIDs;
-    NSMutableArray * auxLocations = tag.auxLocations;
-    NSMutableArray * auxRotations = tag.auxRotations;
+    NSMutableArray * auxLocations = tag.auxLocations; // deprecated
+    NSMutableArray * auxRotations = tag.auxRotations; // deprecated
+    NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
     auxScales = [[NSMutableArray alloc] init];
@@ -105,17 +106,22 @@
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
         float auxScale, auxRotation;
+        CGAffineTransform auxTransform;
         // hack: backwards compatibility 
         if ([tag.auxScales count] == [auxStixStringIDs count]) {
-            auxScale = [[tag.auxScales objectAtIndex:i] floatValue];
-            auxRotation = [[auxRotations objectAtIndex:i] floatValue];
+            auxScale = [[tag.auxScales objectAtIndex:i] floatValue]; // deprecated
+            auxRotation = [[auxRotations objectAtIndex:i] floatValue]; // deprecated
+            // HACK
+            NSString * transformString = [auxTransforms objectAtIndex:i];
+            auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         }
         else
         {
             auxScale = 1;
             auxRotation = 0;
+            auxTransform = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
         }
-        UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        UIImageView * auxStix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
         //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
         float centerX = location.x;
         float centerY = location.y;
@@ -133,6 +139,7 @@
         //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
         [auxStix setFrame:stixFrameScaled];
         [auxStix setCenter:CGPointMake(centerX, centerY)];
+        auxStix.transform = auxTransform;
         
         bool isPeelableByUser = NO;
         if (isPeelable) {
@@ -350,7 +357,26 @@
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
         [actionSheet showInView:self];
         [actionSheet release];
-    } 
+    } else {
+        if (stix) {
+            // possibly called from AuxView or TagView for tapping
+            // single tap - should display scale/rotate box
+            if (transformBox != nil) {
+                [transformBox removeFromSuperview];
+                [transformBox release];
+                transformBox = nil;
+            }
+            else {
+                transformBox = [[UIImageView alloc] initWithFrame:stix.frame];
+                //UIImage * corners = [UIImage imageNamed:@"dot_boundingbox.png"];
+                transformBox.backgroundColor = [UIColor clearColor];
+                transformBox.layer.borderColor = [[UIColor whiteColor] CGColor];
+                transformBox.layer.borderWidth = 2.0;
+                [transformBox setFrame:stix.frame];
+                [self addSubview:transformBox];
+            }  
+        }
+    }
 }
 
 //-(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {

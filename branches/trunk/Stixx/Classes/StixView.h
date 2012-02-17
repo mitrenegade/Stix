@@ -20,7 +20,7 @@
 -(void)didAttachStix:(int)index;
 -(void)didPeelStix:(int)index;
 -(void)peelAnimationDidCompleteForStix:(int)index;
-
+@optional
 @end
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
@@ -52,6 +52,8 @@
     
     int stixPeelSelected;
     
+    UIImageView * transformBox;
+
     NSObject<StixViewDelegate> * delegate;    
 }
 

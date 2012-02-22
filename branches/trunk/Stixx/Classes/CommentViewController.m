@@ -16,6 +16,7 @@
 @synthesize backButton, addButton;
 @synthesize commentField;
 @synthesize delegate;
+@synthesize activityIndicator;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,15 +43,33 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 300, 80, 80)];
+    [self.view addSubview:activityIndicator];
+}
+
+-(void)initCommentViewWithTagID:(int)_tagID andNameString:(NSString*)_nameString {
+    [self setTagID:_tagID];
+    [self setNameString:_nameString];
     // Do any additional setup after loading the view from its nib.
+    if (commentsTable)
+    {
+        [commentsTable.view removeFromSuperview];
+        [commentsTable release];
+    }
     commentsTable = [[CommentFeedTableController alloc] init];
-    [commentsTable.view setFrame:CGRectMake(0, 150, 320, 400)];
+    [commentsTable.view setFrame:CGRectMake(0, 150, 320, 330)];
     [commentsTable setDelegate:self];
     [self.view addSubview:commentsTable.view];
-
+    
     // Custom initialization   
     // tagID must be set before this
     
+    if (names)
+        [names release];
+    if (comments)
+        [comments release];
+    if (stixStringIDs)
+        [stixStringIDs release];
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
     stixStringIDs = [[NSMutableArray alloc] init];
@@ -59,9 +78,11 @@
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
     
     [k getAllHistoryWithTagID:tagID];
+    [activityIndicator startCompleteAnimation];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
+
     for (NSMutableDictionary * d in theResults) {        
         NSString * name = [d valueForKey:@"username"];
         NSString * comment = [d valueForKey:@"comment"];
@@ -77,6 +98,7 @@
         [stixStringIDs addObject:stixStringID];
     }
     [commentsTable.tableView reloadData];
+    [activityIndicator stopCompleteAnimation];
 }
 
 - (void)viewDidUnload

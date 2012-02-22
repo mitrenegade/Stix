@@ -92,41 +92,41 @@
         }
         @catch (NSException* exception) { 
             NSLog(@"Error! Exception caught while trying to load stix! Error %@", [exception reason]);
-            stix = [BadgeView generateDefaultStix];
+            stix = [[BadgeView generateDefaultStix] retain];
         }
         NSLog(@"DidLoginWithUsername: %@", name);
         // total Pix count
         int totalTags = [[d valueForKey:@"totalTags"] intValue];
         int bux = [[d valueForKey:@"bux"] intValue];
         
-        NSMutableData * data = nil; //[d valueForKey:@"auxiliaryData"];
-        bool firstTimeUser;
-        bool hasAccessedStore;
-        if (data == nil) {
-            firstTimeUser = NO;
-            hasAccessedStore = YES;
-        }
-        else {
-            NSMutableDictionary * auxiliaryData;
-            @try {
-                auxiliaryData = [KumulosData dataToDictionary:data];
-                if (auxiliaryData == nil)
-                {
-                    firstTimeUser = YES;
-                    hasAccessedStore = NO;
-                }
-                else {
-                    firstTimeUser = [[auxiliaryData objectForKey:@"isFirstTimeUser"] boolValue]; 
-                    hasAccessedStore = [[auxiliaryData objectForKey:@"hasAccessedStore"] boolValue]; 
-                }
+        /* auxiliary data */
+        NSMutableData * data = [d valueForKey:@"auxiliaryData"];
+        NSMutableDictionary * auxiliaryData;
+        NSMutableDictionary * stixOrder;
+        @try {
+            auxiliaryData = [KumulosData dataToDictionary:data];
+            if (auxiliaryData == nil || ![auxiliaryData isKindOfClass:[NSMutableDictionary class]]) {
+                
+                // set to nil to make delegate generate default one
+                stixOrder = nil;
             }
-            @catch (NSException* exception) { 
-                NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
-                firstTimeUser = YES;
-                hasAccessedStore = NO;
+            else {
+                stixOrder = [auxiliaryData objectForKey:@"stixOrder"]; 
+                NSEnumerator *e = [auxiliaryData keyEnumerator];
+                id key;
+                while (key = [e nextObject]) {
+                    int ct = [[auxiliaryData objectForKey:key] intValue];
+                    if (ct != 0) {
+                        int order = [[auxiliaryData objectForKey:key] intValue];
+                        NSLog(@"Stix: %@ order %d", key, order); 
+                    }
+                }    
             }
         }
-        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux isFirstTimeUser:firstTimeUser hasAccessedStore:hasAccessedStore];
+        @catch (NSException* exception) { 
+            NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
+        }
+        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux andStixOrder:stixOrder];
         [newPhoto release];
     }
     else if ([theResults count] == 0)
@@ -271,8 +271,8 @@
         NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];
         NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
         [k addStixToUserWithUsername:name andStix:data];
-        //[data autorelease];
-        //[stix autorelease];
+        [data autorelease]; // MRC
+        [stix autorelease]; 
     }
  }
 
@@ -325,6 +325,11 @@
 - (NSString*)getUsername {return [self.delegate getUsername];}
 
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
+}
+
 -(void)didCreateBadgeView:(UIView*)newBadgeView {[self.delegate didCreateBadgeView:newBadgeView];}
 
 -(void)didDismissFriendView {

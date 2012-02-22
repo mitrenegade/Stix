@@ -49,7 +49,7 @@
     float item_width = imageView.frame.size.width;
     float item_height = imageView.frame.size.height;
     
-    stix = [BadgeView getBadgeWithStixStringID:tag.stixStringID];
+    stix = [[BadgeView getBadgeWithStixStringID:tag.stixStringID] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = tag.badge_x;
     float centerY = tag.badge_y;

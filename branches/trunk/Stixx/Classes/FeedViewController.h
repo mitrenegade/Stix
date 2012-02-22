@@ -32,7 +32,8 @@
 
 - (bool) isLoggedIn;
 -(int)getStixCount:(NSString*)stixStringID;
--(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform;
+-(int)getStixOrder:(NSString*)stixStringID;
+-(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
 

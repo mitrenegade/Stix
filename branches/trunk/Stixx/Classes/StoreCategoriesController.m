@@ -108,6 +108,30 @@ static UIImageView * blankAccessoryView;
     [subcategories addObjectsFromArray:subarray];
 }
 
+-(void)updateTableButtons:(NSMutableArray *)stixArray withHasList:(NSMutableArray *)hasStix{
+    for (int i=0; i<[stixArray count]; i++) {
+        NSString * stixStringID = [stixArray objectAtIndex:i];
+        
+        UIButton * buttonGetStix = [UIButton buttonWithType:UIButtonTypeCustom];
+        UIImage * buttonImg;
+        if ([[hasStix objectAtIndex:i] boolValue] == YES) {
+            buttonImg = [UIImage imageNamed:@"check.png"];            
+        }
+        else
+        {
+            buttonImg = [UIImage imageNamed:@"btn_addstix.png"];
+            [buttonGetStix addTarget:self action:@selector(didClickGetStix:event:) forControlEvents:UIControlEventTouchUpInside];
+        }
+        CGRect frame = CGRectMake(0.0, 0.0, buttonImg.size.width, buttonImg.size.height);
+        [buttonGetStix setFrame:frame];
+        [buttonGetStix setBackgroundImage:buttonImg forState:UIControlStateNormal];
+        buttonGetStix.backgroundColor = [UIColor clearColor];
+        
+        //NSLog(@"Changing button for %@ to %@", stixStringID, [[hasStix objectAtIndex:i] boolValue]?@"Check":@"AddStix");
+        [stixStringButtons setValue:buttonGetStix forKey:stixStringID];
+    }
+}
+
 -(void)addStixFromArray:(NSMutableArray *)stixArray withHasList:(NSMutableArray *)hasStix {
     [stixStringIDs addObjectsFromArray:stixArray];
     
@@ -143,6 +167,10 @@ static UIImageView * blankAccessoryView;
         [stixContentViews setValue:contentView forKey:stixStringID];
         [stixTopLabels setValue:topLabel forKey:stixStringID];
         [stixBottomLabels setValue:bottomLabel forKey:stixStringID];
+        
+        [topLabel release]; // MRC
+        [bottomLabel release];
+        [contentView release];
     }
 }
 -(int)getTypeForRow:(int)row {
@@ -236,6 +264,9 @@ static UIImageView * blankAccessoryView;
         */
         [cell addSubview:cell.contentView];
         [divider release];
+        [topLabel release];
+        [bottomLabel release];
+        
     }
     /*
     else {
@@ -264,7 +295,8 @@ static UIImageView * blankAccessoryView;
         else
             [bgimage setAlpha:.15];
         [cell setBackgroundView:bgimage];
-
+        [bgimage release]; // MRC
+        
         [cell.imageView setImage:[UIImage imageNamed:@"120_blank.png"]];
         
         [cell.textLabel setText:[subcategoryName uppercaseString]];
@@ -276,13 +308,14 @@ static UIImageView * blankAccessoryView;
         UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
         [topLabel setText:nil];
         [bottomLabel setText:nil];
+        
     }
     else if (y < [subcategories count] + [stixStringIDs count] ) {         
         // CATEGORY_TYPE_STIX
         NSString * stixStringID = [stixStringIDs objectAtIndex:y - [subcategories count]];
         NSString * stixStringDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
         
-        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
         [stix setFrame:CGRectMake(0,0,50,50)];
         
         UIImageView * bgimage = [[UIImageView alloc] init];
@@ -292,21 +325,21 @@ static UIImageView * blankAccessoryView;
         else
             [bgimage setAlpha:.15];
         [cell setBackgroundView:bgimage];
+        [bgimage release]; // MRC
         
-#if 0
-        [cell.textLabel setText:stixStringDescriptor];
-#else
         UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
         UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
         [topLabel setText:[stixStringDescriptor uppercaseString]];
         [bottomLabel setText:@"5 BUX"];
-#endif
+
         [cell.imageView setImage:stix.image];
         cell.accessoryView = [stixStringButtons objectForKey:stixStringID];
 		cell.accessoryType = UITableViewCellAccessoryNone;
         
         // clear text if cell was previously used as a subcategory
         [cell.textLabel setText:nil];
+        
+        [stix release];
     }
     else
     {
@@ -318,6 +351,7 @@ static UIImageView * blankAccessoryView;
         else
             [bgimage setAlpha:.15];
         [cell setBackgroundView:bgimage];
+        [bgimage release];
         
         [cell.textLabel setText:nil];
         UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];

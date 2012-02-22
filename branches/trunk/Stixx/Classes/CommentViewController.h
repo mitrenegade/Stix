@@ -10,6 +10,7 @@
 #import "CommentFeedTableController.h"
 #import "Kumulos.h"
 #import "BadgeView.h"
+#import "LoadingAnimationView.h"
 
 @protocol CommentViewDelegate <NSObject>
 
@@ -37,6 +38,8 @@
     IBOutlet UITextField * commentField;
     
     NSObject<CommentViewDelegate> * delegate;
+    
+    LoadingAnimationView * activityIndicator;
 }
 
 @property (nonatomic, assign) int tagID;
@@ -46,7 +49,9 @@
 @property (nonatomic, retain) IBOutlet UIButton * addButton;
 @property (nonatomic, retain) IBOutlet UITextField * commentField;
 @property (nonatomic, assign) NSObject<CommentViewDelegate> * delegate;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 
 -(IBAction) backButtonPressed:(id)sender;
 -(IBAction) addButtonPressed:(id)sender;
+-(void)initCommentViewWithTagID:(int)tagID andNameString:(NSString*)nameString;
 @end

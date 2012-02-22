@@ -280,6 +280,11 @@
     return [self.delegate getStixCount:stixStringID];
 }
 
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
+}
+
 -(void)didStartDrag {
     [self.buttonInstructions setHidden:YES];
 }
@@ -318,7 +323,7 @@
     [self viewDidAppear:NO];    
 }
 
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center andScale:(float)stixScale andRotation:(float)stixRotation andTransform:(CGAffineTransform)transform
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center /*andScale:(float)stixScale andRotation:(float)stixRotation */andTransform:(CGAffineTransform)transform
 {
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
@@ -377,7 +382,14 @@
     NSLog(@"TagViewController: Badge frame added at %f %f and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
     [tag addImage:image];
     [tag addARCoordinate:newCoord];
-    [tag addStix:selectedStixStringID withLocation:center withScale:stixScale withRotation:stixRotation withTransform:transform withPeelable:NO];
+    [tag addStix:selectedStixStringID withLocation:center /*withScale:stixScale withRotation:stixRotation*/ withTransform:transform withPeelable:NO];
+    // backwards compatibility
+    [tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    [tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+        [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
+        [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    }
     [image release];
     [self.delegate didCreateNewPix:tag];
     [tag release];

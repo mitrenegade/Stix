@@ -13,6 +13,8 @@
 
 @protocol GiftStixTableControllerDelegate
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
+
 @end
 
 @interface GiftStixTableController : UITableViewController

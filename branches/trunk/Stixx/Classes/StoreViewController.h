@@ -14,6 +14,7 @@
 #import "Kumulos.h"
 #import "UIImage+Resize.h"
 #import "LoadingAnimationView.h"
+#import "OutlineLabel.h"
 
 @protocol StoreViewDelegate
 
@@ -21,6 +22,7 @@
 
 // forward from BadgeViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
@@ -92,7 +94,8 @@
 -(void)populateCoverflow;
 -(void)updateBuxCount;
 -(StoreCategoriesController *)populateTableForCategory:(NSString*)category;
--(void)reloadTables;
+-(void)reloadTableButtons;
 -(IBAction)didClickExpressBuxButton:(id)sender;
 -(IBAction)didClickMoreBuxButton:(id)sender;
+-(void)updateTableForCategory:(NSString*)category;
 @end

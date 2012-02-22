@@ -20,6 +20,8 @@
 -(void)didDismissFriendView;
 
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
+
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 
 -(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;

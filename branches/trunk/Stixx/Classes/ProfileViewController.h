@@ -21,7 +21,7 @@
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux isFirstTimeUser:(BOOL)firstTime hasAccessedStore:(BOOL)accessedStore;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
@@ -31,6 +31,7 @@
 - (void)didChangeUserphoto:(UIImage*)photo;
 
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
 
 -(void)didClickFeedbackButton:(NSString*)fromView;

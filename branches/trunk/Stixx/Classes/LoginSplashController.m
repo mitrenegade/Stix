@@ -93,36 +93,62 @@
         totalTags = 0;
     }
 
-    NSMutableData * data = nil; //[d valueForKey:@"auxiliaryData"];
-    // loading auxiliary data for new users
+    // set First time user flags
     bool firstTimeUser = YES; 
-    bool hasAccessedStore = NO;
-    if (data == nil) {
-        if (loginController.bJoinOrLogin == 0) { // join 
-            firstTimeUser = YES;
-            hasAccessedStore = NO;   
-        }        
-        else {
-            firstTimeUser = NO;
-            hasAccessedStore = YES;   
-        }        
-    }
+    if (loginController.bJoinOrLogin == 0) { // join 
+        firstTimeUser = YES;
+    }        
     else {
-        @try {
-            NSMutableDictionary * auxiliaryData = [[KumulosData dataToDictionary:data] retain];
-            if (auxiliaryData != nil)
-            {
-                firstTimeUser = [[auxiliaryData objectForKey:@"isFirstTimeUser"] boolValue]; 
-                hasAccessedStore = [[auxiliaryData objectForKey:@"hasAccessedStore"] boolValue]; 
+        firstTimeUser = NO;
+    }        
+    
+    /* auxiliary data */
+    NSMutableData * data = [d valueForKey:@"auxiliaryData"];
+    NSMutableDictionary * auxiliaryData;
+    NSMutableDictionary * stixOrder;
+    @try {
+        auxiliaryData = [KumulosData dataToDictionary:data];
+        if (auxiliaryData == nil || ![auxiliaryData isKindOfClass:[NSMutableDictionary class]]) {
+#if 1
+            stixOrder = nil;
+#else
+            stixOrder = [[NSMutableDictionary alloc] init];
+            [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
+            [stixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
+            NSLog(@"Generating stix order:");
+            NSEnumerator *e = [stix keyEnumerator];
+            id key;
+            while (key = [e nextObject]) {
+                if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
+                    int ct = [self.delegate getStixCount:key];
+                    if (ct != 0)
+                        [stixOrder setObject:[NSNumber numberWithInt:[stixOrder count]] forKey:key];
+                    NSLog(@"Stix: %@ count %d order %d", key, ct, [[stixOrder valueForKey:key] intValue]); 
+                }
             }
+#endif
         }
-        @catch (NSException* exception) { 
-            firstTimeUser = YES;
-            hasAccessedStore = NO;
-        }              
+        else {
+            stixOrder = [auxiliaryData objectForKey:@"stixOrder"]; 
+            // debug
+            NSEnumerator *e = [stixOrder keyEnumerator];
+            id key;
+            while (key = [e nextObject]) {
+                int ct = [[stixOrder objectForKey:key] intValue];
+                if (ct != 0) {
+                    int order = [[stixOrder objectForKey:key] intValue];
+                    NSLog(@"Stix: %@ order %d", key, order); 
+                }
+            }    
+        }
     }
+    @catch (NSException* exception) { 
+        NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
+    }            
     [loginController.view removeFromSuperview];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux isFirstTimeUser:firstTimeUser hasAccessedStore:hasAccessedStore];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:firstTimeUser];
+    [stix release]; // MRC
+    [newPhoto release]; // MRC
 }
      
 -(void)didCancelLogin {

@@ -49,7 +49,7 @@
     int x = badgeFrame.origin.x + badgeFrame.size.width / 2;
     int y = badgeFrame.origin.y + badgeFrame.size.height / 2;
     [stixView initializeWithImage:tmp];
-    [stixView populateWithStixForManipulation:stixStringID withCount:1 atLocationX:x andLocationY:y andScale:1 andRotation:0];
+    [stixView populateWithStixForManipulation:stixStringID withCount:1 atLocationX:x andLocationY:y /*andScale:1 andRotation:0*/];
     [self.view addSubview:stixView];
     
     drag = 0;
@@ -72,6 +72,10 @@
     [locationController setDelegate:self];
 //#endif
 }
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
@@ -93,6 +97,11 @@
 	[imageView release];
 }
 
+// hack
+- (BOOL)disablesAutomaticKeyboardDismissal {
+    return NO;
+}
+
 -(IBAction)buttonOKPressed:(id)sender
 {
     // scale stix frame back
@@ -104,13 +113,13 @@
 	stixFrameScaled.size.height *= imageScale;
     float centerx = stixView.stix.center.x * imageScale; // center coordinates in original 300x275 space
     float centery = stixView.stix.center.y * imageScale;
-    float stixScale = [stixView stixScale];
-    float stixRotation = [stixView stixRotation];
+    //float stixScale = [stixView stixScale];
+    //float stixRotation = [stixView stixRotation];
     CGAffineTransform stixTransform = [stixView referenceTransform];
     //stix.frame = badgeFrame;
     //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery) andScale:stixScale andRotation:stixRotation andTransform:stixTransform];
+	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text] andStixCenter:CGPointMake(centerx, centery) /*andScale:stixScale andRotation:stixRotation*/ andTransform:stixTransform];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
@@ -119,11 +128,12 @@
     //[self dismissModalViewControllerAnimated:YES];
 }
 
+-(IBAction)commentFieldExited:(id)sender {
+    [(UITextField*)sender resignFirstResponder];
+}
+
 -(IBAction)locationTextBoxEntered:(id)sender
 {   
-    [commentField resignFirstResponder];
-    [commentField2 resignFirstResponder];
-    [locationField resignFirstResponder];
     //[self presentModalViewController:locationController animated:YES];
     //[stixView setInteractionAllowed:NO];
     [self.view addSubview:locationController.view];
@@ -131,11 +141,17 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
-	//NSLog(@"Comment entered: %@", [textField text]); 
-	return YES;
+
+	return NO;
 }
 
 /*** LocationHeaderViewControllerDelegate ****/
+
+-(void)closeAllKeyboards {
+    [commentField resignFirstResponder];
+    [commentField2 resignFirstResponder];
+    [locationField resignFirstResponder];
+}
 
 -(void)didChooseLocation:(NSString *)location {
     NSLog(@"FourSquare locator returned %@\n", location);
@@ -148,7 +164,6 @@
 -(void)didCancelLocation
 {
     [self.locationField resignFirstResponder];
-	//[self.delegate didAddDescriptor:nil];
 }
 
 -(IBAction)closeInstructions:(id)sender

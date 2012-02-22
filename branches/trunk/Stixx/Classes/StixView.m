@@ -14,8 +14,8 @@
 @synthesize stix;
 @synthesize stixCount;
 @synthesize interactionAllowed;
-@synthesize stixScale;
-@synthesize stixRotation;
+//@synthesize stixScale;
+//@synthesize stixRotation;
 @synthesize auxStixViews, auxStixStringIDs;
 @synthesize isPeelable;
 @synthesize delegate;
@@ -46,13 +46,13 @@
 
 // originally initializeWithImage: withStix:
 // this function creates a temporary stix object that can be manipulated
--(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation {
+-(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation */{
     CGRect frame = self.frame;
     frame.origin.x = 0;
     frame.origin.y = 0;
     
-    stixScale = scale;
-    stixRotation = rotation;
+    //stixScale = scale;
+    //stixRotation = rotation;
     
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
@@ -67,8 +67,8 @@
     imageScale =  targetSize.width / originalSize.width;
     
 	CGRect stixFrameScaled = stix.frame;
-	stixFrameScaled.size.width *= imageScale * stixScale;
-	stixFrameScaled.size.height *= imageScale * stixScale;
+	stixFrameScaled.size.width *= imageScale;// * stixScale;
+	stixFrameScaled.size.height *= imageScale;// * stixScale;
     centerX *= imageScale;
     centerY *= imageScale;
     //NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, imageView.frame.size.width, imageView.frame.size.height); 
@@ -109,28 +109,28 @@
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
     auxStixStringIDs = tag.auxStixStringIDs;
     NSMutableArray * auxLocations = tag.auxLocations; // deprecated
-    NSMutableArray * auxRotations = tag.auxRotations; // deprecated
+    //NSMutableArray * auxRotations = tag.auxRotations; // deprecated
     NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
-    auxScales = [[NSMutableArray alloc] init];
+    //auxScales = [[NSMutableArray alloc] init];
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
-        float auxScale, auxRotation;
+        //float auxScale, auxRotation;
         CGAffineTransform auxTransform;
         // hack: backwards compatibility 
-        if ([tag.auxScales count] == [auxStixStringIDs count]) {
-            auxScale = [[tag.auxScales objectAtIndex:i] floatValue]; // deprecated
-            auxRotation = [[auxRotations objectAtIndex:i] floatValue]; // deprecated
+        if ([auxTransforms count] == [auxStixStringIDs count]) {
+            //auxScale = [[tag.auxScales objectAtIndex:i] floatValue]; // deprecated
+            //auxRotation = [[auxRotations objectAtIndex:i] floatValue]; // deprecated
             // HACK
             NSString * transformString = [auxTransforms objectAtIndex:i];
             auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         }
         else
         {
-            auxScale = 1;
-            auxRotation = 0;
+            //auxScale = 1;
+            //auxRotation = 0;
             auxTransform = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
         }
         UIImageView * auxStix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
@@ -144,8 +144,8 @@
         imageScale =  targetSize.width / originalSize.width;
 
         CGRect stixFrameScaled = auxStix.frame;
-        stixFrameScaled.size.width *= imageScale * auxScale;
-        stixFrameScaled.size.height *= imageScale * auxScale;
+        stixFrameScaled.size.width *= imageScale;// * auxScale;
+        stixFrameScaled.size.height *= imageScale;// * auxScale;
         centerX *= imageScale;
         centerY *= imageScale;
         //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
@@ -168,6 +168,7 @@
                 crossFade.autoreverses = YES;
                 crossFade.repeatCount = HUGE_VALF;
                 [auxStix.layer addAnimation:crossFade forKey:@"crossFade"];
+                [img1 release];
             } 
             else {
                 isPeelableByUser = NO;
@@ -177,7 +178,8 @@
         //NSLog(@"StixView: adding %@ auxStix %@ at center %f %f\n", isPeelableByUser?@"peelable":@"attached", stixStringID, centerX, centerY);
         
         [auxStixViews addObject:auxStix];
-        [auxScales addObject:[NSNumber numberWithFloat:auxScale]];
+        [auxStix release];
+        //[auxScales addObject:[NSNumber numberWithFloat:auxScale]];
         [auxPeelableByUser addObject:[NSNumber numberWithBool:isPeelableByUser]];
     }
 }

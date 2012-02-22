@@ -72,8 +72,10 @@
 
 -(void)populateWithUserPhoto:(UIImage*)photo {
     if (photo){
+        [photo retain];
         [userPhotoView setImage:photo];
         [userPhotoView setBackgroundColor:[UIColor blackColor]];
+        [photo release];
     }
 }
 

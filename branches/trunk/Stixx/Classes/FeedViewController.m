@@ -219,13 +219,13 @@
     [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
 }
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform withComment:(NSString *)comment {
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform withComment:(NSString *)comment {
 
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
     
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
-    [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withScale:scale withRotation:rotation withTransform:transform];
+    [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location /*withScale:scale withRotation:rotation*/ withTransform:transform];
     if ([comment length] > 0)
         [self didAddNewComment:comment withTagID:[t.tagID intValue]];
 
@@ -241,6 +241,9 @@
 
 -(int)getStixCount:(NSString*)stixStringID {
     return [self.delegate getStixCount:stixStringID];
+}
+-(int)getStixOrder:(NSString*)stixStringID {
+    return [self.delegate getStixOrder:stixStringID];
 }
 /*********** PagedScrollViewDelegate functions *******/
 
@@ -292,7 +295,7 @@
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
         [feedItem populateWithUserPhoto:photo];
-//        [photo autorelease];
+        [photo autorelease]; // MRC
     }
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
@@ -452,10 +455,13 @@
 
 /*** feedItemViewDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
-    commentView = [[CommentViewController alloc] init];
-    [commentView setTagID:tagID];
-    [commentView setNameString:nameString];
-    [commentView setDelegate:self];
+    if (commentView == nil) {
+        commentView = [[CommentViewController alloc] init];
+        [commentView setDelegate:self];
+    }
+    [commentView initCommentViewWithTagID:tagID andNameString:nameString];
+    //[commentView setTagID:tagID];
+    //[commentView setNameString:nameString];
 
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -474,8 +480,8 @@
 -(void)didCloseComments {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView]; // same as aux view
-    [commentView release];
-    commentView = nil;
+    //[commentView release];
+    //commentView = nil;
 }
 
 -(void)didAddNewComment:(NSString *)newComment withTagID:(int)tagID{

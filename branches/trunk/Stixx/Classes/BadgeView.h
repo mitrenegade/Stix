@@ -44,6 +44,7 @@ enum {
 @protocol BadgeViewDelegate
 
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
 
 @optional
 
@@ -71,7 +72,7 @@ enum {
 	NSObject<BadgeViewDelegate> *delegate;
 	UIView * underlay; // pointer to a sibling view of the badgeView owned by its superview's controller - for hitTest
     
-    NSMutableArray * labels;
+    //NSMutableArray * labels;
     
     bool showStixCounts;
 }
@@ -84,7 +85,7 @@ enum {
 @property (nonatomic, assign) NSString * selectedStixStringID;
 
 -(void)resetBadgeLocations;
--(void)updateStixCounts;
+//-(void)updateStixCounts;
 +(int)getOutlineOffsetX:(int) type;
 +(int)getOutlineOffsetY:(int) type;
 

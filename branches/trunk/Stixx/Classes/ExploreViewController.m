@@ -108,7 +108,7 @@
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray*)theResults {
 	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [Tag getTagFromDictionary:d];
+        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
         id new_id = [d valueForKey:@"allTagID"];
 
         int index = [allTagIDs indexOfObject:new_id];
@@ -120,6 +120,7 @@
         {
             [allTags replaceObjectAtIndex:[new_id intValue] withObject:tag];
         }
+        [tag release]; // MRC
         //NSLog(@"Downloaded and added tag with id %d at index %d\n", [new_id intValue], index);
     }
 }
@@ -127,10 +128,7 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getMostRecentlyUpdatedTagDidCompleteWithResult:(NSArray*)theResults {
     int ct = 0;
 	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [Tag getTagFromDictionary:d];
-        int new_id = [tag.tagID intValue];
-        NSString * comment = tag.comment;
-        NSString * name = tag.username;
+        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
         
         int index = ct;
         if (index >= [allTags count])
@@ -142,6 +140,7 @@
             [allTags replaceObjectAtIndex:ct withObject:tag];
         }
         ct++;
+        [tag release]; // MRC
         //NSLog(@"Downloaded and added tag with id %d, name %@, comment %@ at index %d\n", new_id, name, comment, index);
     }
  
@@ -168,37 +167,6 @@
     scrollView.myDelegate = self; // needs delegates for both scrolls
     scrollView.delegate = self;
 }
-/*
--(UIImageView *)populateWithBadge:(NSString*)stixStringIDs withCount:(int)count atLocationX:(int)x andLocationY:(int)y {
-    float item_width = 140;
-    float item_height = 128;
-
-    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringIDs];
-    //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
-    float centerX = x;
-    float centerY = y;
-    NSLog(@"Adding badge to %d %d in image of size %f %f", x, y, item_width, item_height);
-    
-    // scale stix and label down to 270x270 which is the size of the feedViewItem
-    CGSize originalSize = CGSizeMake(300, 275);
-	CGSize targetSize = CGSizeMake(item_width, item_height);
-	
-	float imageScale =  targetSize.width / originalSize.width;
-    
-	CGRect stixFrameScaled = stix.frame;
-	stixFrameScaled.origin.x *= imageScale;
-	stixFrameScaled.origin.y *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    centerX *= imageScale;
-    centerY *= imageScale;
-    NSLog(@"Scaling badge of %f %f in image %f %f down to %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, 300.0, 300.0, stixFrameScaled.size.width, stixFrameScaled.size.height, item_width, item_height); 
-    [stix setFrame:stixFrameScaled];
-    [stix setCenter:CGPointMake(centerX, centerY)];
-    
-    return stix;
-}
-*/
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
@@ -534,6 +502,10 @@
 
 -(int)getStixCount:(NSString*)stixStringID {
     return [self.delegate getStixCount:stixStringID];
+}
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
 }
 
 -(void)viewDidUnload {

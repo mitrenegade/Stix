@@ -101,8 +101,8 @@
     location.y += stixView.frame.origin.y;
     badgeFrame.size.width *= imageScale;
     badgeFrame.size.height *= imageScale;
-    auxScale = 1;
-    auxRotation = 0;
+    //auxScale = 1;
+    //auxRotation = 0;
     
     // location is already the point inside stixFrame
     stixStringID = newStixStringID;
@@ -275,9 +275,9 @@
     NSLog(@"AuxStix: set aux stix of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
     
     // hack: debug to test display
-    auxRotation = 0; //3.1415/4;
+    //auxRotation = 0; //3.1415/4;
     
-    [delegate didAddAuxStixWithStixStringID:stixStringID withLocation:CGPointMake(centerX, centerY) withScale:auxScale withRotation:auxRotation withTransform:stix.transform withComment:[commentField text]];
+    [delegate didAddAuxStixWithStixStringID:stixStringID withLocation:CGPointMake(centerX, centerY) /*withScale:auxScale withRotation:auxRotation */withTransform:stix.transform withComment:[commentField text]];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
@@ -329,8 +329,8 @@ CGAffineTransform referenceTransform;
         case UIGestureRecognizerStateBegan:
             if ([recognizer respondsToSelector:@selector(scale)]) {
                 // scaling transform
-                NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [(UIPinchGestureRecognizer*)recognizer scale], [(UIPinchGestureRecognizer*)recognizer velocity]);
-                frameBeforeScale = stix.frame;                
+                //NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [(UIPinchGestureRecognizer*)recognizer scale], [(UIPinchGestureRecognizer*)recognizer velocity]);
+                //frameBeforeScale = stix.frame;                
             }
             if (_activeRecognizers.count == 0)
                 referenceTransform = stix.transform;
@@ -340,7 +340,7 @@ CGAffineTransform referenceTransform;
         case UIGestureRecognizerStateEnded:
             if ([recognizer respondsToSelector:@selector(scale)]) {
                 // scaling transform
-                NSLog(@"Frame scale changed by %f: overall scale %f", [(UIPinchGestureRecognizer*)recognizer scale], auxScale);
+                //NSLog(@"Frame scale changed by %f: overall scale %f", [(UIPinchGestureRecognizer*)recognizer scale], auxScale);
             }
             referenceTransform = [self applyRecognizer:recognizer toTransform:referenceTransform];
             [_activeRecognizers removeObject:recognizer];

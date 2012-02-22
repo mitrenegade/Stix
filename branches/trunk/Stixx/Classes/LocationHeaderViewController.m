@@ -59,7 +59,7 @@
     [self.view addSubview:locationController.view];
 }
 
--(void)viewWillAppear:(BOOL)animated {
+-(void)viewDidAppear:(BOOL)animated {
     [locationController setNeedSearch:YES];
     if ([self savedSearchTerm])
         [locationController getFoursquareVenues:[self savedSearchTerm]];
@@ -68,6 +68,7 @@
     
     [locationInputField setHidden:YES];
     [manualEnterLocationButton setHidden:NO];
+    [self.delegate closeAllKeyboards];
 }
 
 - (void)viewDidUnload

@@ -169,6 +169,10 @@
 -(int)getStixCount:(NSString*)stixStringID {
     return [self.delegate getStixCount:stixStringID];
 }
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
+}
 
 /*********** PagedScrollViewDelegate functions *******/
 

@@ -6,13 +6,16 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#import "OutlineLabel.h"
+#import "StixAnimation.h"
+
 @protocol RaisedCenterTabBarControllerDelegate 
 
 -(void)didPressCenterButton;
--(void)didCloseFirstTimeInstructions;
+//-(void)didCloseFirstTimeInstructions;
 @end
 
-@interface RaisedCenterTabBarController : UITabBarController
+@interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
     
@@ -22,7 +25,11 @@
     
     UIImageView * firstTimeInstructions;
     UIImageView * firstTimeMallPointer;
+    bool showMallPointer;
     UIButton * buttonClose;
+    
+    int allAnimationIDs[4];
+    int mallPointerAnimationID;
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -40,6 +47,6 @@
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions;
 -(void)toggleStixMallPointer:(BOOL)showPointer;
 -(IBAction)closeInstructions:(id)sender;
--(void)addPointerAnimationUp;
--(void)addPointerAnimationDown;
+-(void)doRewardAnimation:(NSString *)title withAmount:(int)amount;
+-(void)doPointerAnimation;
 @end

@@ -18,6 +18,8 @@
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
+-(int)getStixOrder:(NSString*)stixStringID;
+
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 @end

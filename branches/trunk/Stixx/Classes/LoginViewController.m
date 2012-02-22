@@ -340,14 +340,22 @@ static int addUserStage;
     //[kumulos addStixToUserWithUsername:username andStix:data];
 
     // add auxiliary data
-#if 0
+#if 1
     NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
-    NSNumber * isFirstTimeUser = [NSNumber numberWithBool:YES];
-    NSNumber * hasAccessedStore = [NSNumber numberWithBool:NO];
-    [auxInfo setValue:isFirstTimeUser forKey:@"isFirstTimeUser"];
-    [auxInfo setValue:hasAccessedStore forKey:@"hasAccessedStore"];
+    NSMutableDictionary * stixOrder = [[NSMutableDictionary alloc] init];
+    [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
+    [stixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
+    NSEnumerator *e = [stix keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
+            [stixOrder setObject:[NSNumber numberWithInt:[stixOrder count]] forKey:key];
+        }
+    }
+    [auxInfo setValue:stixOrder forKey:@"stixOrder"];
     NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
-    //[kumulos updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
+    [kumulos updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
+    [auxData release];
 #else
     NSData * auxData = nil;
 #endif
@@ -356,6 +364,9 @@ static int addUserStage;
     
     //[kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
     [k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
+    // MRC
+    [stixData release];
+    [stix release];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createUserDidCompleteWithResult:(NSArray *)theResults {

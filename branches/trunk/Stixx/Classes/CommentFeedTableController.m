@@ -102,6 +102,7 @@
     CommentTableCell *cell = (CommentTableCell*) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[CommentTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.textLabel.numberOfLines = 2;
     }
     
     // Configure the cell...

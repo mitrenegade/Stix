@@ -51,60 +51,119 @@
 
 -(IBAction)closeInstructions:(id)sender {
     [self toggleFirstTimeInstructions:NO];
-    [self.myDelegate didCloseFirstTimeInstructions];
 }
 
 -(void)addFirstTimeInstructions {
     UIImage * img1 = [UIImage imageNamed:@"message_firsttime_25.png"];
-    UIImage * img2 = [UIImage imageNamed:@"green_arrow.png"];
     UIImage * img3 = [UIImage imageNamed:@"btn_close.png"];
     firstTimeInstructions = [[UIImageView alloc] initWithImage:img1];
-    firstTimeMallPointer = [[UIImageView alloc] initWithImage:img2];
     buttonClose = [[UIButton alloc] init];
     [buttonClose setImage:img3 forState:UIControlStateNormal];
     
     [firstTimeInstructions setFrame:CGRectMake(5, 30, img1.size.width+25, img1.size.height+20)];
-    [firstTimeMallPointer setFrame:CGRectMake(200, 375, img2.size.width, img2.size.height)];
     [buttonClose setFrame:CGRectMake(0, 22, img3.size.width, img3.size.height)];
     
     [buttonClose addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    [self toggleFirstTimeInstructions:NO];
-    [self toggleStixMallPointer:NO];
-        
     [self.view addSubview:firstTimeInstructions];
-    [self.view addSubview:firstTimeMallPointer];
     [self.view addSubview:buttonClose];
-    [self addPointerAnimationUp];
+    [self toggleFirstTimeInstructions:YES];
+    [self toggleStixMallPointer:YES];
+        
 }
 
--(void)addPointerAnimationUp {
-    CGRect endFrame = firstTimeMallPointer.frame;
-    endFrame.origin.y -= 20;
-    [UIView animateWithDuration:0.5
-                          delay:0
-                        options: UIViewAnimationCurveEaseIn
-                     animations:^{
-                         firstTimeMallPointer.frame = endFrame;
-                     } 
-                     completion:^(BOOL finished){
-                         firstTimeMallPointer.frame = endFrame;
-                         [self addPointerAnimationDown];
-                     }];  
+-(void)doPointerAnimation {
+    UIImage * pointerImg = [UIImage imageNamed:@"green_arrow.png"];
+    CGRect canvasFrame = CGRectMake(200, 375, pointerImg.size.width, pointerImg.size.height);
+    UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
+    UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+    [pointerCanvas addSubview:pointer];
+    [pointer release];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
+    [pointerCanvas release];
+    [animation release];
 }
--(void)addPointerAnimationDown {
-    CGRect endFrame = firstTimeMallPointer.frame;
-    endFrame.origin.y += 20;
-    [UIView animateWithDuration:0.5
-                          delay:0
-                        options: UIViewAnimationCurveEaseOut
-                     animations:^{
-                         firstTimeMallPointer.frame = endFrame;
-                     } 
-                     completion:^(BOOL finished){
-                         firstTimeMallPointer.frame = endFrame;
-                         [self addPointerAnimationUp];
-                     }];  
+
+-(void)doRewardAnimation:(NSString*)title withAmount:(int)amount {
+    int width = 100;
+    UIImage * coinImage = [UIImage imageNamed:@"bux_coin.png"];
+    CGRect canvasFrame = CGRectMake(190, 275, width, 100);
+    UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
+    UIImageView * coinView = [[UIImageView alloc] initWithImage:coinImage];
+    CGRect rewardNameFrame = CGRectMake(0, 60, width, 15);
+    CGRect rewardAmountFrame = CGRectMake(0, 70, width, 35);
+    OutlineLabel * rewardName = [[OutlineLabel alloc] initWithFrame:rewardNameFrame];
+    OutlineLabel * rewardAmount = [[OutlineLabel alloc] initWithFrame:rewardAmountFrame];
+    [rewardName setTextColor:[UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
+    [rewardName setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
+    [rewardName setFontSize:12];
+    [rewardAmount setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
+    [rewardAmount setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
+    [rewardAmount setFontSize:20];
+    [rewardName setText:title];
+    [rewardAmount setText:[NSString stringWithFormat:@"+%d BUX", amount]];
+
+    [rewardCanvas addSubview:coinView];
+    [rewardCanvas addSubview:rewardName];
+    [rewardCanvas addSubview:rewardAmount];
+    [coinView setCenter:CGPointMake(canvasFrame.size.width/2, coinView.center.y)];
+    [rewardName setCenter:CGPointMake(canvasFrame.size.width/2, rewardName.center.y)];
+    [rewardAmount setCenter:CGPointMake(canvasFrame.size.width/2, rewardAmount.center.y)];
+    
+    [coinView release];
+    [rewardName release];
+    [rewardAmount release];
+
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    allAnimationIDs[0] = [animation doJump:rewardCanvas inView:self.view forDistance:15 forTime:.5];
+    [rewardCanvas release];
+    [animation release];
 }
+
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
+    NSLog(@"Animation %d finished!", animationID);
+    [canvas retain]; // animations autorelease the canvas they are sent
+    /* reward animations */
+    if (animationID == allAnimationIDs[0]) // first jump animation finished
+    {
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        allAnimationIDs[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        [animation release];
+    }
+    else if (animationID == allAnimationIDs[1]) // second jump animation finished
+    {
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        allAnimationIDs[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        [animation release];
+    }
+    else if (animationID == allAnimationIDs[2]) // first animation finished
+    {
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        allAnimationIDs[3] = [animation doDownwardFade:canvas inView:self.view forDistance:100 forTime:1];
+        [animation release];
+    }
+    
+    /* first time mall pointer */
+    if (animationID == mallPointerAnimationID) // first jump animation finished
+    {
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        if (showMallPointer)
+            mallPointerAnimationID = [animation doJump:canvas inView:self.view forDistance:20 forTime:1];
+        else {
+            [canvas removeFromSuperview];
+        }
+        [animation release];
+    }
+    [canvas release];
+}
+
+
 /*
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -129,7 +188,9 @@
 }
 
 -(void)toggleStixMallPointer:(BOOL)showPointer {
-    [firstTimeMallPointer setHidden:!showPointer];
+    showMallPointer = showPointer;
+    if (showPointer)
+        [self doPointerAnimation];
 }
 
 @end

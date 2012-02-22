@@ -37,7 +37,7 @@
     self.comment = newComment;
     if (![stixStringID isEqualToString:@"COMMENT"] && ![comment isEqualToString:@"PEEL"])
     {
-        self.stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        [self setStix:[BadgeView getBadgeWithStixStringID:stixStringID]];
         [self.stix setFrame:CGRectMake(250,0,60,60)];
     }
     

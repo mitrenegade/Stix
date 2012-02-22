@@ -38,8 +38,8 @@
     CGSize originalImageSize;
 
     // these refer to the current active stix
-    float stixScale;
-    float stixRotation;
+    //float stixScale;
+    //float stixRotation;
     CGAffineTransform referenceTransform;
 
     bool interactionAllowed;
@@ -49,7 +49,7 @@
     
     NSMutableArray * auxStixViews;
     NSMutableArray * auxStixStringIDs;
-    NSMutableArray * auxScales; // needed for touch test
+    //NSMutableArray * auxScales; // needed for touch test
     NSMutableArray * auxPeelableByUser;
     
     int stixPeelSelected;
@@ -64,8 +64,8 @@
 @property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) OutlineLabel * stixCount;
 @property (nonatomic, assign) bool interactionAllowed;
-@property (nonatomic, assign) float stixScale;
-@property (nonatomic, assign) float stixRotation;
+//@property (nonatomic, assign) float stixScale;
+//@property (nonatomic, assign) float stixRotation;
 @property (nonatomic, retain) NSMutableArray * auxStixViews;
 @property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, assign) bool isPeelable;
@@ -74,7 +74,7 @@
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)populateWithAuxStixFromTag:(Tag*)tag;
--(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y andScale:(float)scale andRotation:(float)rotation;
+-(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation*/;
 -(bool)isStixPeelable:(int)index;
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
 -(void)doPeelAnimationForStix:(int)index;

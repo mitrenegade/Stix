@@ -161,13 +161,13 @@
         //if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
         //    continue;
         
-        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
                  
         int count = [[allGiftStixCounts objectAtIndex:stixType] intValue];
         [cell addCellItem:stix atPosition:x];
         if (count != -1)
             [cell addCellLabel:[NSString stringWithFormat:@"%d", count] atPosition:x];
-        
+        [stix release];
         NSLog(@"Row %d position %d type %d %@ count %d\n", y, x, stixType, stixStringID, count);
         x++;
     }    

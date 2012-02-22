@@ -41,7 +41,7 @@
 }
 
 - (void) addImage:(UIImage*)newImage {
-    [self setImage:[newImage copy]];
+    [self setImage:newImage]; // MRC: setter should call retain automatically
 }
 
 /*
@@ -54,61 +54,39 @@
 }
 */
 
--(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation withScale:(float)newScale withRotation:(float)newRotation withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable {
+-(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation /*withScale:(float)newScale withRotation:(float)newRotation */withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable {
     // called by StixAppDelegate multiple places - makes a decision whether
     // to increment count or add an aux stix
     
-    /* NO STIX COUNTS 
-    if ( ([newStixStringID isEqualToString:@"FIRE"] || [newStixStringID isEqualToString:@"ICE"]) && 
-        ([self.stixStringID isEqualToString:@"FIRE"] || [self.stixStringID isEqualToString:@"ICE"]))
-    {
-        // increment/decrement fire and ice if it is the primary stix; do not change other stix counts
-        if ([self.stixStringID isEqualToString:newStixStringID])
-            self.badgeCount++;
-        else {
-            self.badgeCount--;
-            if (self.badgeCount < 0) {
-                self.badgeCount = -self.badgeCount;
-                if ([self.stixStringID isEqualToString:@"FIRE"])
-                    self.stixStringID = @"ICE";
-                else
-                    self.stixStringID = @"FIRE";
-            }
-        }
+    if (auxStixStringIDs == nil) {
+        auxStixStringIDs = [[NSMutableArray alloc] init];
+        auxLocations = [[NSMutableArray alloc] init];
+        //auxScales = [[NSMutableArray alloc] init];
+        //auxRotations = [[NSMutableArray alloc] init];
+        auxPeelable = [[NSMutableArray alloc] init];
+        auxTransforms = [[NSMutableArray alloc] init];
     }
-    else 
-     */
-    {
-        if (auxStixStringIDs == nil) {
-            auxStixStringIDs = [[NSMutableArray alloc] init];
-            auxLocations = [[NSMutableArray alloc] init];
-            auxScales = [[NSMutableArray alloc] init];
-            auxRotations = [[NSMutableArray alloc] init];
-            auxPeelable = [[NSMutableArray alloc] init];
-            auxTransforms = [[NSMutableArray alloc] init];
-        }
-        //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
-        // array for the tag
-        //[self addAuxiliaryStixOfType:newStixStringID withLocation:newLocation withScale:newScale withRotation:newRotation withPeelable:newPeelable];
-        
-        [auxStixStringIDs addObject:newStixStringID];
-        [auxLocations addObject:[NSValue valueWithCGPoint:newLocation]];
-        [auxScales addObject:[NSNumber numberWithFloat:newScale]];
-        [auxRotations addObject:[NSNumber numberWithFloat:newRotation]];
-        [auxPeelable addObject:[NSNumber numberWithBool:newPeelable]];
-        [auxTransforms addObject:NSStringFromCGAffineTransform(transform)];
-    }
+    //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
+    // array for the tag
+    //[self addAuxiliaryStixOfType:newStixStringID withLocation:newLocation withScale:newScale withRotation:newRotation withPeelable:newPeelable];
+    
+    [auxStixStringIDs addObject:newStixStringID];
+    [auxLocations addObject:[NSValue valueWithCGPoint:newLocation]];
+    //[auxScales addObject:[NSNumber numberWithFloat:newScale]];
+    //[auxRotations addObject:[NSNumber numberWithFloat:newRotation]];
+    [auxPeelable addObject:[NSNumber numberWithBool:newPeelable]];
+    [auxTransforms addObject:NSStringFromCGAffineTransform(transform)];
 }
 
 -(NSString*)removeStixAtIndex:(int)index {
     NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
     [auxStixStringIDs removeObjectAtIndex:index];
     [auxLocations removeObjectAtIndex:index];
-    [auxScales removeObjectAtIndex:index];
-    [auxRotations removeObjectAtIndex:index];
+    //[auxScales removeObjectAtIndex:index];
+    //[auxRotations removeObjectAtIndex:index];
     [auxTransforms removeObjectAtIndex:index];
     [auxPeelable removeObjectAtIndex:index];
-    return auxStringID;
+    return [auxStringID autorelease]; // MRC
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
@@ -130,23 +108,31 @@
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
-    //[tag addMainStixOfType:stixStringID andCount:badgeCount atLocationX:badge_x andLocationY:badge_y];
     [tag addARCoordinate:coordinate];
+    [image release]; // MRC
     
     NSMutableData *theData2 = (NSMutableData*)[d valueForKey:@"auxStix"];
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
-    tag.auxStixStringIDs = [decoder decodeObjectForKey:@"auxStixStringIDs"];
-    tag.auxLocations = [decoder decodeObjectForKey:@"auxLocations"];
-    tag.auxScales = [decoder decodeObjectForKey:@"auxScales"];
-    tag.auxRotations = [decoder decodeObjectForKey:@"auxRotations"];
-    tag.auxTransforms = [decoder decodeObjectForKey:@"auxTransforms"];
-    tag.auxPeelable = [decoder decodeObjectForKey:@"auxPeelable"];
+    [tag setAuxStixStringIDs:[decoder decodeObjectForKey:@"auxStixStringIDs"]];
+    [tag setAuxLocations:[decoder decodeObjectForKey:@"auxLocations"] ];
+    //tag.auxScales = [decoder decodeObjectForKey:@"auxScales"];
+    //tag.auxRotations = [decoder decodeObjectForKey:@"auxRotations"];
+    [tag setAuxTransforms:[decoder decodeObjectForKey:@"auxTransforms"]];
+    [tag setAuxPeelable:[decoder decodeObjectForKey:@"auxPeelable"]];
     [decoder finishDecoding];
     [decoder release];
     
     // backwards compatibility
+    [tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]]; // MRC
+    [tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+        [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
+        [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    }
+    
+    // backwards compatibility
     if (tag.auxTransforms == nil) {
-        tag.auxTransforms = [[NSMutableArray alloc] init];
+        [tag setAuxTransforms:[[[NSMutableArray alloc] init] autorelease]]; // MRC
         for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
             CGAffineTransform t = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
             [tag.auxTransforms addObject:NSStringFromCGAffineTransform(t)];
@@ -157,7 +143,7 @@
     //tag.stixRotation = stixRotation;
     tag.tagID = [d valueForKey:@"allTagID"];
     tag.timestamp = [d valueForKey:@"timeCreated"];
-    return tag;
+    return [tag autorelease];
 }
 
 

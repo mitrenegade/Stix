@@ -13,7 +13,7 @@
 
 @protocol AuxStixViewControllerDelegate 
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withTransform:(CGAffineTransform)transform withComment:(NSString*)comment;
+-(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation*/ withTransform:(CGAffineTransform)transform withComment:(NSString*)comment;
 -(void)didCancelAuxStix;
 @end
 
@@ -35,10 +35,10 @@
     int tap;
     float offset_x;
     float offset_y;
-    float auxScale;
-    float auxRotation;
-    CGRect frameBeforeScale;
-    float stixScale;
+    //float auxScale;
+    //float auxRotation;
+    //CGRect frameBeforeScale;
+    //float stixScale;
     
     bool showTransformCanvas;
     UIView * transformCanvas;

@@ -36,6 +36,7 @@ enum {
 -(void)addSubcategoriesFromArray:(NSMutableArray *)subarray;
 //-(void)addStix:(NSString *)stixID;
 -(void)addStixFromArray:(NSMutableArray *)stixArray withHasList:(NSMutableArray *)hasStix;
+-(void)updateTableButtons:(NSMutableArray *)stixArray withHasList:(NSMutableArray *)hasStix;
 
 -(int)getTypeForRow:(int)row;
 -(NSString *)getStringForRow:(int)row;

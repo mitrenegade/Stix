@@ -17,5 +17,6 @@
 @property (nonatomic, retain) UIColor * outlineColor;
 
 -(void)setTextAttributesForBadgeType:(int)type;
+-(void)setFontSize:(int)size;
 
 @end

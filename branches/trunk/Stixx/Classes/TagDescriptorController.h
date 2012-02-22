@@ -13,7 +13,7 @@
 #import "StixView.h"
 
 @protocol TagDescriptorDelegate
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center andScale:(float)stixScale andRotation:(float)stixRotation andTransform:(CGAffineTransform)stixTransform;
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location andStixCenter:(CGPoint) center /*andScale:(float)stixScale andRotation:(float)stixRotation*/ andTransform:(CGAffineTransform)stixTransform;
 -(void)didCancelAddDescriptor;
 @end
 
@@ -39,6 +39,8 @@
     float offset_x;
     float offset_y;
     
+    bool shouldShowLocationView;
+    
 	NSObject<TagDescriptorDelegate> *delegate;
 }
 
@@ -59,6 +61,7 @@
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)locationTextBoxEntered:(id)sender;
 -(IBAction)buttonCancelPressed:(id)sender;
+-(IBAction)commentFieldExited:(id)sender;
 //-(UIImageView *)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(IBAction)closeInstructions:(id)sender;
 

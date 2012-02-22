@@ -14,6 +14,7 @@
 -(void)didChooseLocation:(NSString*)location;
 -(void)didCancelLocation;
 -(void)didReceiveConnectionError;
+-(void)closeAllKeyboards;
 @end
 
 @interface LocationHeaderViewController : UIViewController <UITextFieldDelegate,   

@@ -58,8 +58,13 @@ struct UserInfo {
 };
 
 #define USING_KIIP 0
+#define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <UIApplicationDelegate, TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, FBSessionDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate,
+#if USING_FACEBOOK
+    FBSessionDelegate,
+#endif
+    UIApplicationDelegate> {
     UIWindow *window;
     
     UIViewController * mainController;
@@ -85,6 +90,7 @@ struct UserInfo {
     bool stixViewsLoadedFromDisk;
     
     NSMutableDictionary * allStix;
+    NSMutableDictionary * allStixOrder;
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
@@ -107,8 +113,8 @@ struct UserInfo {
     int updatingAuxTagID;
     NSString * updatingAuxStixStringID;
     CGPoint updatingAuxLocation;
-    float updatingAuxScale;
-    float updatingAuxRotation;
+    //float updatingAuxScale;
+    //float updatingAuxRotation;
     CGAffineTransform updatingAuxTransform;
     
     // hack: for peelable stix actions
@@ -141,8 +147,9 @@ struct UserInfo {
     NSMutableArray * alertAction;
     NSMutableArray * alertQueue;
     int alertActionCurrent;
-    
+#if USING_FACEBOOK
     Facebook * facebook;
+#endif
 }
 
 -(void)initializeBadges;
@@ -155,7 +162,6 @@ struct UserInfo {
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 -(void)updateCommentCount:(int)tagID;
--(void)continueInit;
 -(void)adminUpdateAllStixCountsToZero;
 -(void)adminIncrementAllStixCounts;
 -(void) adminSetAllUsersBuxCounts;
@@ -170,15 +176,13 @@ struct UserInfo {
 -(Tag*) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
-//-(void) Parse_sendNotification:(NSString*) message toChannel:(NSString*) channel;
-//-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel;
-//-(void) Parse_sendBadgedNotification:(NSString*)message toChannel:(NSString*) channel withTag:(Tag*)tag;
--(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(Tag*)tag orGiftStix:(NSString*)giftStixStringID;
+-(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID;
 -(void)handleNotificationBookmarks:(bool)doJump;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
 -(void)rewardStix;
 -(void)rewardBux;
+-(void)rewardLocation;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
@@ -196,6 +200,7 @@ struct UserInfo {
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
 @property (nonatomic, retain) NSMutableDictionary * allStix;
+@property (nonatomic, retain) NSMutableDictionary * allStixOrder;
 @property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
@@ -205,6 +210,8 @@ struct UserInfo {
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) StoreViewController * storeViewController;
 @property (nonatomic, retain) StoreViewShell * storeViewShell;  
+#if USING_FACEBOOK
 @property (nonatomic, retain) Facebook *facebook;
+#endif
 @end
 

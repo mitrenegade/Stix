@@ -20,7 +20,7 @@
         self.textColor = [UIColor whiteColor];
         [self setBackgroundColor:[UIColor clearColor]];
         [self setOutlineColor:[UIColor blackColor]];
-        //[self setFont:[UIFont fontWithName:@"Helvetica Bold" size:35]]; does nothing
+        [self setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]]; //does nothing
         [self setTextAlignment:UITextAlignmentCenter];
         [self setFrame:frame];
 
@@ -68,5 +68,7 @@
     }
 }
 
-
+-(void)setFontSize:(int)size {
+    [self setFont:[UIFont fontWithName:@"Helvetica-Bold" size:size]]; //does nothing
+}
 @end

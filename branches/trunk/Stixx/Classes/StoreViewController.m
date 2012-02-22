@@ -32,30 +32,41 @@ static NSDate * timestampStixTypes;
     self = [super init];
     timestampStixTypes = [[NSDate alloc] initWithTimeIntervalSince1970:0];
     timestampCategories = [[NSDate alloc] initWithTimeIntervalSince1970:0];
+    
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+    [k getAllCategories];
+
     return self;
 }
 
 -(void) viewDidLoad {
     [super viewDidLoad];
     lastCategorySelected = 4; // start in middle
-    
-    k = [[Kumulos alloc] init];
-    [k setDelegate:self];
-    
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(280, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
     
-    [activityIndicator startCompleteAnimation];
-    [k getAllCategories];
+    //[k getAllCategories];
 }
 
 -(void) viewDidAppear:(BOOL)animated {
     [buxBarBg setHidden:YES];
-//    [k getAllCategories];
+    [self.coverflowController setCoverflowIndex:lastCategorySelected];
 }
 
--(void)reloadTables {
-    [k getAllCategories];
+-(void)reloadTableButtons {
+    //[k getAllCategories];
+    for (int i=0; i<[categories count]; i++) {
+        NSString * currentCategory = [categories objectAtIndex:i];
+        [self updateTableForCategory:currentCategory];
+        NSMutableArray * subArray = [subcategories valueForKey:currentCategory];
+        if (subArray) {
+            for (int i=0; i<[subArray count]; i++) {
+                NSString * currentSubcategory = [subArray objectAtIndex:i];
+                [self updateTableForCategory:currentSubcategory];
+            }
+        }
+    }
 }
 
 -(int)addCategory:(NSString*) categoryName withCoverImage:(UIImage *)coverImage{
@@ -71,6 +82,13 @@ static NSDate * timestampStixTypes;
 }
 
 -(int)addSubcategory:(NSString*)subcategoryName toCategory:(NSString*)categoryName {
+    NSEnumerator *e = [subcategories keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        NSLog(@"Key: %@", key);
+    }
+    
+
     NSMutableArray * subArray = [subcategories valueForKey:categoryName];
     if (subArray) {
         for (int i=0; i<[subArray count]; i++) {
@@ -78,13 +96,17 @@ static NSDate * timestampStixTypes;
             if ([currentSubcategory isEqualToString:subcategoryName])
                 return 0;
         }
+        [subArray addObject:subcategoryName];
+        [subcategories setObject:subArray forKey:categoryName];
+        [tables setObject:[NSNull null] forKey:subcategoryName];
     }
     else {
         subArray = [[NSMutableArray alloc] init];
+        [subArray addObject:subcategoryName];
+        [subcategories setObject:subArray forKey:categoryName];
+        [tables setObject:[NSNull null] forKey:subcategoryName];
+        [subArray release]; // MRC
     }
-    [subArray addObject:subcategoryName];
-    [subcategories setObject:subArray forKey:categoryName];
-    [tables setObject:[NSNull null] forKey:subcategoryName];
     return 1;
 }
 
@@ -115,7 +137,6 @@ static NSDate * timestampStixTypes;
     for (NSMutableDictionary * d in theResults) {
         NSString * categoryName = [d valueForKey:@"categoryName"];
         NSString * subcategoryOf = [d valueForKey:@"subcategoryOf"];
-//        NSString * filename = [d valueForKey:@"filename"];
         NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
         NSData * coverPNG = [d valueForKey:@"coverPNG"];
         UIImage * coverImage = [[UIImage alloc] initWithData:coverPNG];
@@ -133,6 +154,7 @@ static NSDate * timestampStixTypes;
         if ([timeUpdated compare:timestampCategories] == NSOrderedDescending) {
             timestampCategories = [timeUpdated copy];    
         }
+        [coverImage release];
     }
     NSLog(@"Added %d categories and %d subcategories", totalCat, totalSub);  
     NSLog(@"Categories has %d objects", [categories count]);
@@ -143,6 +165,7 @@ static NSDate * timestampStixTypes;
         if ([tables objectForKey:categoryName] == [NSNull null]) {
             StoreCategoriesController * newTable = [[self populateTableForCategory:categoryName] retain];
             [tables setObject:newTable forKey:categoryName];
+            [newTable release]; // MRC
         }
     }
     [self populateCoverflow];
@@ -195,15 +218,38 @@ static NSDate * timestampStixTypes;
         [tableController addSubcategoriesFromArray:subcategoryList];
     NSMutableArray * stixList = [BadgeView getStixForCategory:category];
     NSMutableArray * hasStix = [[NSMutableArray alloc] initWithCapacity:[stixList count]];
-    for (int i=0; i<[stixList count]; i++)
+    for (int i=0; i<[stixList count]; i++) {
         if ([self.delegate getStixCount:[stixList objectAtIndex:i]] != -1) {
             [hasStix insertObject:[NSNumber numberWithBool:NO] atIndex:i];
         }
         else {
             [hasStix insertObject:[NSNumber numberWithBool:YES] atIndex:i];
         }
+    }
     [tableController addStixFromArray:stixList withHasList:hasStix];
+    [hasStix release];
     return [tableController autorelease];
+}
+
+-(void)updateTableForCategory:(NSString*)category {
+    StoreCategoriesController * tableController = [tables valueForKey:category];
+    NSMutableArray * stixList = [BadgeView getStixForCategory:category];
+    NSMutableArray * hasStix = [[NSMutableArray alloc] initWithCapacity:[stixList count]];
+    //NSLog(@"Updating table for category %@ with %d objects", category, [stixList count]);
+    for (int i=0; i<[stixList count]; i++) {
+        NSString * stixStringID = [stixList objectAtIndex:i];
+        int ct = [self.delegate getStixCount:stixStringID];
+        //NSLog(@"Stix %@ count %d", stixStringID, ct);
+        if (ct != -1) {
+            [hasStix insertObject:[NSNumber numberWithBool:NO] atIndex:i];
+        }
+        else {
+            [hasStix insertObject:[NSNumber numberWithBool:YES] atIndex:i];
+        }
+    }
+    [tableController updateTableButtons:stixList withHasList:hasStix];
+    [tableController.view removeFromSuperview];
+    [hasStix release];
 }
 
 -(void) didSelectCoverAtIndex:(int)index {
@@ -226,7 +272,7 @@ static NSDate * timestampStixTypes;
         [self.delegate showNoMoreMoneyMessage];
         return;
     }
-    UIImageView * stix = [BadgeView getLargeBadgeWithStixStringID:stixStringID];
+    UIImageView * stix = [[BadgeView getLargeBadgeWithStixStringID:stixStringID] retain];
     // ignore frame
     [stix setFrame:frame];
     [stix setCenter:[self.view.superview center]];
@@ -351,6 +397,11 @@ static NSDate * timestampStixTypes;
 
 -(int)getStixCount:(NSString *)stixStringID {
     return [self.delegate getStixCount:stixStringID];
+}
+
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
 }
 
 -(IBAction)didClickBackButton:(id)sender {

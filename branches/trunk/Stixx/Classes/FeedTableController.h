@@ -50,5 +50,7 @@
 -(void)populatePagesAtPage:(int)currentPage;
 -(void)setContentPageIDs:(NSMutableArray *) tags;
 -(int)getCurrentSectionAtPoint:(CGPoint) point;
--(CGPoint)getContentPointInCurrentSection:(CGPoint)point;
+//-(CGPoint)getContentPointInCurrentSection:(CGPoint)point;
+-(CGPoint)getContentPoint:(CGPoint)point inSection:(int)section;
+-(CGPoint)getPointInTableViewFrame:(CGPoint)point fromPage:(int)section;
 @end

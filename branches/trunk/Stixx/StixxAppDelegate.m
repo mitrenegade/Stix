@@ -151,10 +151,11 @@ static int init=0;
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
     
-    //#if !TARGET_IPHONE_SIMULATOR
+#if !TARGET_IPHONE_SIMULATOR
     [mainController presentModalViewController:camera animated:YES];
-    //#endif
-    
+#else
+    [mainController presentModalViewController:tabBarController animated:YES];
+#endif
     // tagView subview is never added to the window but only used as an overlay for camera
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
@@ -179,11 +180,14 @@ static int init=0;
 	/***** create feed view *****/
     //[loadingMessage setText:@"Loading feed..."];
     
-	feedController = [[FeedViewController alloc] init];
+	//feedController = [[FeedViewController alloc] init];
+    feedController = [[VerticalFeedController alloc] init];
     [feedController setDelegate:self];
-    //[feedController setIndicator:YES];
     feedController.allTags = allTags;
-    feedController.camera = camera; // hack: in order to present modal controllers that respond to touch
+    feedController.tabBarController = tabBarController;
+    feedController.camera = camera; // hack: in order to present modal controllers that respond 
+    [feedController.activityIndicator startCompleteAnimation]; // should be triggered by call to [self checkForUpdateTags]
+    
 #endif
     
 #if 1
@@ -221,7 +225,6 @@ static int init=0;
     UITabBarItem *tbi = [emptyview tabBarItem];
     [tbi setTitle:@"Stix"];
 	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, emptyview, storeViewShell, profileController, nil];
-    //NSArray * viewControllers = [NSArray arrayWithObjects: exploreController, feedController, tagViewController, myStixController, profileController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
     [emptyview release];
@@ -235,7 +238,9 @@ static int init=0;
     [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
+#endif
     
     loginSplashController = [[LoginSplashController alloc] init];
     [loginSplashController setDelegate:self];
@@ -254,7 +259,9 @@ static int init=0;
         isLoggingIn = YES;
         loggedIn = NO;
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
         [camera setCameraOverlayView:loginSplashController.view];
+#endif
         isLoggingIn = NO;
     }
     else
@@ -407,13 +414,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
     @try {
         // save stix types that we know about
+        NSMutableArray * stixStringIDs = [BadgeView GetAllStixStringIDsForSave];
         NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
         NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];
         NSMutableDictionary * stixLikelihoods = [BadgeView GetAllStixLikelihoodsForSave];
+        NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
         
+        [rootObject setValue:stixStringIDs forKey:@"stixStringIDs"];
         [rootObject setValue:stixViews forKey:@"stixViews"];
         [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
         [rootObject setValue:stixLikelihoods forKey:@"stixLikelihoods"];
+        [rootObject setValue:stixCategories forKey:@"stixCategories"];
         
         [NSKeyedArchiver archiveRootObject: rootObject toFile: path];
     } 
@@ -436,14 +447,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     myUserInfo->username = [[rootObject valueForKey:@"username"] copy];
     
     @try {
+        NSMutableArray * stixStringIDs = [rootObject valueForKey:@"stixStringIDs"];
         NSMutableDictionary * stixViews = [rootObject valueForKey:@"stixViews"];
         NSMutableDictionary * stixDescriptors = [rootObject valueForKey:@"stixDescriptors"];
         NSMutableDictionary * stixLikelihoods = [rootObject valueForKey:@"stixLikelihoods"];
+        NSMutableDictionary * stixCategories = [rootObject valueForKey:@"stixCategories"];
         
         if (stixViews != nil)
         {
             NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
-            [BadgeView InitializeFromDiskWithStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:stixLikelihoods];
+            [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:stixLikelihoods andStixCategories:stixCategories];
             return 1;
         }
         else
@@ -523,7 +536,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setSelectedIndex:2];
     [tabBarController setButtonStateSelected]; // highlight button
+#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:tagViewController.view];
+#endif
 }
 
 -(void)didDismissSecondaryView {
@@ -549,7 +564,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (lastViewController == profileController) {
         [self.tabBarController setSelectedIndex:4];
     }
+#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:tabBarController.view];
+#endif
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -716,7 +733,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (added)
     {
         NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
-        [feedController.scrollView populateScrollPagesAtPage:0]; // force update first page
+        //[feedController.scrollView populateScrollPagesAtPage:0]; // force update first page
+        //[feedController.tableController populateScrollPagesAtPage:0];
+        [feedController viewWillAppear:YES];
     }
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
@@ -802,7 +821,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (isUpdatingNotifiedTag) {
         if (updatingNotifiedTagDoJump) {
             [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
             [self.camera setCameraOverlayView:tabBarController.view];
+#endif
             [tabBarController setSelectedIndex:0];
             [feedController jumpToPageWithTagID:notificationTagID];
         }
@@ -981,7 +1002,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)getOlderTagsThanID:(int)tagID {
-    if (pageOfLastOlderTagsRequest != tagID) {
+    if (1) { //pageOfLastOlderTagsRequest != tagID) {
         pageOfLastOlderTagsRequest = tagID;
         [k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
     }
@@ -1011,8 +1032,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // if we've added more than one page, the correct new page number is lastPageViewed+totalAdded-1.
     if (totalAdded>0)
     {
-        [feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed + totalAdded - 1]; 
-        //NSLog(@"Added %d tags with id greater than current id at page %d", totalAdded, feedController.lastPageViewed);
+        //[feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed + totalAdded - 1]; 
+        //[feedController viewWillAppear:YES];
+        [feedController finishedCheckingForNewData:YES];
+    }
+    else {
+        [feedController finishedCheckingForNewData:NO];
     }
     [feedController.activityIndicator stopCompleteAnimation];
 }
@@ -1034,8 +1059,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     if (totalAdded>0) 
     {
-        [feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed]; // hack: forced reload of end
-        //NSLog(@"Added %d tags with id less than current id at page %d", totalAdded, feedController.lastPageViewed);
+        //[feedController.scrollView populateScrollPagesAtPage:feedController.lastPageViewed]; // hack: forced reload of end
+//        [feedController viewWillAppear:YES];
+        [feedController finishedCheckingForNewData:YES];
+    }
+    else
+    {
+        [feedController finishedCheckingForNewData:NO];
     }
     [feedController.activityIndicator stopCompleteAnimation];
 }
@@ -1174,7 +1204,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [camera dismissModalViewControllerAnimated:TRUE];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
+#endif
     [tabBarController setSelectedIndex:0];
     [profileController viewWillAppear:YES];
     [picker release];
@@ -1194,7 +1226,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
     [camera dismissModalViewControllerAnimated:TRUE];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
+#endif
     [tabBarController setSelectedIndex:0];
     [profileController viewWillAppear:YES];
     
@@ -1254,8 +1288,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     //[profileController loginWithUsername:myUserInfo->username];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
-    
+#endif
     //[self.tabBarController didPressCenterButton:self];
     [self.tabBarController setSelectedIndex:0];
 
@@ -1358,12 +1393,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (lastCarouselView)
             [lastCarouselView resetBadgeLocations];
         
+#if !TARGET_IPHONE_SIMULATOR
         [self.camera setCameraOverlayView:loginSplashController.view];
+#endif
     }
     else {
         // probably came from a failed login attempt with a nonexistent user
         [self didDismissSecondaryView];
+#if !TARGET_IPHONE_SIMULATOR
         [self.camera setCameraOverlayView:loginSplashController.view];        
+#endif
     }
 }
 
@@ -1373,7 +1412,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(int)getStixCount:(NSString*)stixStringID {
     //if (loggedIn)
-    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"])
+    if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"] || [[BadgeView getStixDescriptorForStixStringID:stixStringID] isEqualToString:@"Generic"])
         return -1;
     int ret = [[allStix objectForKey:stixStringID] intValue];
     //NSLog(@"Stix count for %@: %d", stixStringID, ret);
@@ -1550,7 +1589,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [feedbackController.view setFrame:frameShifted];
+#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:feedbackController.view];
+#endif
 }
 
 -(void)didCancelFeedback {
@@ -1715,7 +1756,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     int count = [[allStix objectForKey:stixStringID] intValue];
     if (count > 0) {
         count--;
-        [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID]; 
+        [allStix setObject:[NSNumber numberWithInt:count] forKey:stixStringID];
         
         for (int i=0; i<[allCarouselViews count]; i++) {
             [[allCarouselViews objectAtIndex:i] reloadAllStix];
@@ -1992,7 +2033,10 @@ static bool isShowingAlerts = NO;
     //[self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     //[self incrementStixCount:stixStringID];
     [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID]; 
-    [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
+    if ([allStixOrder valueForKey:stixStringID] == nil) {
+        [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
+    }
+    // todo: check for consistency - the number of keys in allStixOrder should equal the largest value
     for (int i=0; i<[allCarouselViews count]; i++) {
         [[allCarouselViews objectAtIndex:i] reloadAllStix];
     }
@@ -2014,6 +2058,7 @@ static bool isShowingAlerts = NO;
     NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
     [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
     NSMutableData * stixOrderData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
+    //[auxiliaryDict release];    
     [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:stixOrderData];
     
     [self changeBuxCountByAmount:-5];

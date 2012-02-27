@@ -290,7 +290,7 @@
 
 -(void)updatePixCount {
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
-    int ct = [delegate getUserTagTotal];
+    int ct = [self.delegate getUserTagTotal];
     [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
 }
 

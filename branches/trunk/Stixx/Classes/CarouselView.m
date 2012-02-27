@@ -38,7 +38,7 @@
     return self;
 }
 
-#define NUM_STIX_FOR_BORDER 1 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
+#define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
 -(void)initCarouselWithFrame:(CGRect)frame{
     scrollView = [[UIScrollView alloc] initWithFrame:frame];
     carouselHeight = scrollView.frame.size.height;
@@ -74,11 +74,10 @@
 #if 0
     [self reloadAllStixWithFrame:frame];
 #else
-    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"FIRE"] retain];
+    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"ICE"] retain];
+
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
-    if ([self showGiftStix] == NO)
-        totalStix = 2;
     int ct = 0;
     for (int i=0; i<totalStix; i++)
     {
@@ -86,7 +85,8 @@
         int count = [self.delegate getStixCount:stixStringID];
         if (count > 0 || count == -1) {
             [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize/2, stixSize/2)];
-            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:basicStix.frame]];
+            CGRect basicFrame = basicStix.frame;
+            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:basicFrame]];
             ct++;
         }
         else
@@ -137,36 +137,23 @@
     
     int stixSize = carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
-    if ([self showGiftStix] == NO || [BadgeView totalStixTypes] == 2)
-        totalStix = 2;
     int ct=0; //2;
-    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"FIRE"] retain];
+    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"ICE"] retain];
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-        //NSLog(@"CarouselView reloading stix %d: stixStringID: %@ count: %d", i, stixStringID, count);
-        /*
-        if ([stixStringID isEqualToString:@"FIRE"]) {
-            [basicStix setCenter:CGPointMake(stixSize*(0+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
-            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
-        } else if ([stixStringID isEqualToString:@"ICE"]) {
-            [basicStix setCenter:CGPointMake(stixSize*(1+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
-            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
-        } else 
-         */
-        if (1) {
-            int order = [self.delegate getStixOrder:stixStringID];
-            if (order != -1) { //(count > 0 || count == -1) {
-                [basicStix setCenter:CGPointMake(stixSize*(order+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
-                [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:[basicStix frame]]];
-                NSLog(@"Repositioning CarouselView stix %d: stixStringID: %@ count: %d order %d frame %f %f", i, stixStringID, count, order, basicStix.frame.origin.x, basicStix.frame.origin.y);
-                ct++;
-            }
-            else
-            {
-                CGRect stixFrame = CGRectMake(0, 0, 0, 0);
-                [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
-            }
+        int order = [self.delegate getStixOrder:stixStringID];
+        if (order != -1) { //(count > 0 || count == -1) {
+            [basicStix setCenter:CGPointMake(stixSize*(order+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+            CGRect basicFrame = basicStix.frame;
+            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:basicFrame]];
+            NSLog(@"Repositioning CarouselView stix %d: stixStringID: %@ count: %d order %d frame %f %f", i, stixStringID, count, order, basicStix.frame.origin.x, basicStix.frame.origin.y);
+            ct++;
+        }
+        else
+        {
+            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
+            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
         }
     }
     [basicStix release];
@@ -179,11 +166,21 @@
         
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
+        int order = [self.delegate getStixOrder:stixStringID];
         //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
-        if (count > 0 || count == -1) {
+        if  (count > 0 || count == -1) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
             [stix setFrame:fr];
+            [scrollView addSubview:stix];
+            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+            [stix release];
+        }
+        if (count == 0 && order != -1) {
+            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+            [stix setFrame:fr];
+            [stix setAlpha:.25];
             [scrollView addSubview:stix];
             [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
             [stix release];
@@ -223,6 +220,8 @@
     int totalStix = [BadgeView totalStixTypes];
     for (int i=0; i<totalStix; i++)
     {
+        if ([allCarouselStixViews count] < totalStix)
+            continue;
         if ([NSNull null] == [allCarouselStixViews objectAtIndex:i])
             continue;
         UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
@@ -230,17 +229,7 @@
 
         stix.frame = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
         [self.scrollView addSubview:stix];
-        
-        /* no labels for stix on shelf */
-        /*
-         OutlineLabel * label = [[OutlineLabel alloc] initWithFrame:badge.frame];
-         [label setCenter:CGPointMake(badge.center.x+[BadgeView getOutlineOffsetX:i], badge.center.y+[BadgeView getOutlineOffsetY:i])];
-         [label setTextAttributesForBadgeType:i];
-         [label drawTextInRect:CGRectMake(0,0, badge.frame.size.width, badge.frame.size.height)];
-         
-         [self addSubview:label];
-         */
-    }
+}
     drag = 0;
 #endif
 }
@@ -304,6 +293,9 @@ static int lastContentOffsetY = 0;
 #define HORIZONTAL 1
 #define VERTICAL 2
 -(void)verticalGestureHandler:(UIVerticalGestureRecognizer*)vgr {
+    if (self.hidden)
+        return;
+    
     if ([vgr state] == UIGestureRecognizerStateBegan) {
         // identify which badge it is
         // basically touchesBegan from BadgeView
@@ -315,8 +307,11 @@ static int lastContentOffsetY = 0;
             [self.delegate performSelector:@selector(didStartDrag)];
         
         // find which icon is being dragged
-        for (int i=0; i<[BadgeView totalStixTypes]; i++)
+        int totalStixTypes = [BadgeView totalStixTypes];
+        for (int i=0; i<totalStixTypes; i++)
         {
+            if ([allCarouselStixViews count] < totalStixTypes)
+                continue;
             if ([allCarouselStixViews objectAtIndex:i] == [NSNull null])
                 continue;
             UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
@@ -420,13 +415,19 @@ static int lastContentOffsetY = 0;
                 
                 // tells delegate to do necessary things such as take a photo
                 drag = 0;
-                [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
+                if ([self.delegate getStixCount:selectedStixStringID] != 0)
+                    [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
+                else
+                    [self resetBadgeLocations];
             }
         }   
     }
 }
 
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) sender {
+    if (self.hidden)
+        return;
+    
     if (sender.state == UIGestureRecognizerStateEnded) {
         // so tap is not continuously sent
         if (allowTap) {
@@ -439,6 +440,7 @@ static int lastContentOffsetY = 0;
                     NSLog(@"Stix of type %@ touched", stixStringID);
                     UIImageView * stixTouched = [allCarouselStixViews objectAtIndex:i];                    
 
+#if 0
                     // remove from scrollView and onto carouselView
                     [stixTouched removeFromSuperview];
                     CGRect frameOutsideCarousel = stixTouched.frame;
@@ -452,6 +454,11 @@ static int lastContentOffsetY = 0;
                     [stixTouched setFrame:frameOutsideCarousel];
                     [self addSubview:stixTouched];
                     [self.delegate didDropStix:stixTouched ofType:stixStringID];
+#else
+                    if ([self.delegate getStixCount:stixStringID] != 0)
+                        [self.delegate didTapStix:stixTouched ofType:stixStringID];
+                    break;
+#endif
                 }
             }
         }

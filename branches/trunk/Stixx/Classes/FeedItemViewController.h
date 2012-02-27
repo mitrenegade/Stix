@@ -72,5 +72,6 @@
 -(void)populateWithCommentCount:(int)count;
 
 -(void)initStixView:(Tag*)tag;
++(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 
 @end

@@ -29,6 +29,7 @@
 #import "StoreViewShell.h"
 #import "AlertPrompt.h"
 #import "FBConnect.h"
+#import "VerticalFeedController.h"
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -60,7 +61,7 @@ struct UserInfo {
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate,
 #if USING_FACEBOOK
     FBSessionDelegate,
 #endif
@@ -70,14 +71,15 @@ struct UserInfo {
     UIViewController * mainController;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
-	//UITabBarController * tabBarController; 	TagViewController * tagViewController;
-	FeedViewController *feedController;
+	//UITabBarController * tabBarController; 	
+    TagViewController * tagViewController;
+	//FeedViewController *feedController;
+    VerticalFeedController *feedController;
 	FriendsViewController *friendController;
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
     LoginSplashController * loginSplashController;
     MyStixViewController * myStixController;
-//    LoadingViewController * loadingController;
     StoreViewController * storeViewController;
     StoreViewShell * storeViewShell;
     
@@ -185,10 +187,10 @@ struct UserInfo {
 -(void)rewardLocation;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet RaisedCenterTabBarController *tabBarController;
-//@property (nonatomic, retain) IBOutlet UITabBarController *tabBarController;
-@property (nonatomic, retain) IBOutlet TagViewController *tagViewController;
-@property (nonatomic, retain) FeedViewController *feedController;
+@property (nonatomic, retain) RaisedCenterTabBarController *tabBarController;
+@property (nonatomic, retain) TagViewController *tagViewController;
+//@property (nonatomic, retain) FeedViewController *feedController;
+@property (nonatomic, retain) VerticalFeedController *feedController;
 @property (nonatomic, retain) ProfileViewController *profileController;
 @property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;

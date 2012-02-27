@@ -53,6 +53,7 @@
     
     //stixScale = scale;
     //stixRotation = rotation;
+    referenceTransform = CGAffineTransformIdentity;
     
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
@@ -456,7 +457,7 @@
 }
 
 // sent through delegate functions for clicks on scrollView; after interaction with main stix is disabled, the touch filters out of StixView but then comes back through its delegates
--(void)didTouchAtLocation:(CGPoint)location {
+-(int)findPeelableStixAtLocation:(CGPoint)location {
     if ([self isPeelable]) {
 
         NSLog(@"Tap detected in stix view at %f %f", location.x, location.y);
@@ -480,7 +481,7 @@
             }
         }
         if (lastStixView == -1)
-            return;
+            return -1;
         
         // display action sheet
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
@@ -490,7 +491,9 @@
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
         [actionSheet showInView:self];
         [actionSheet release];
+        return lastStixView;
     }
+    return -1;
 }
 
 //-(void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {

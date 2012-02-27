@@ -95,7 +95,8 @@
     //[stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
     
 }
--(void)populateWithTimestamp:(NSDate *)timestamp {
+
++(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp {
     // format timestring
     // from 1 min - 1 hour, display # of minutes since tag
     // from 1 hr to 24 hour, display # of hours since tag
@@ -121,17 +122,17 @@
     {
         num = interval / 60;
         if (num == 1)
-            unit = @"min ago";
+            unit = @"min";
         else
-            unit = @"mins ago";
+            unit = @"min";
     }
     else if (interval < 86400)
     {
         num = interval / 3600;
         if (num == 1)
-            unit = @"hour ago";
+            unit = @"hr";
         else
-            unit = @"hours ago";
+            unit = @"hr";
     }
     else //if (interval >= 86400)
     {
@@ -141,10 +142,16 @@
         num = 0;
     }
     
+    NSString * timeLabel;
     if (num > 0)
-        [labelTime setText:[NSString stringWithFormat:@"%d %@", num, unit]];
+        timeLabel = [NSString stringWithFormat:@"%d %@", num, unit];
     else
-        [labelTime setText:[NSString stringWithFormat:@"%@", unit]];
+        timeLabel = [NSString stringWithFormat:@"%@", unit];
+    return timeLabel;
+}
+
+-(void)populateWithTimestamp:(NSDate *)timestamp {    
+    [labelTime setText:[FeedItemViewController getTimeLabelFromTimestamp:timestamp]];
 } 
 
 -(void)populateWithCommentCount:(int)count {

@@ -188,7 +188,9 @@
 {
 //    [self setOverlayView:cameraOverlayView];
     @try {
+#if !TARGET_IPHONE_SIMULATOR
         [camera setCameraOverlayView:cameraOverlayView];
+#endif
     }
     @catch (NSException* exception) {
     }
@@ -261,18 +263,21 @@
 }
 
 // BadgeViewDelegate function
+-(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
+    // remove from scrollView and onto carouselView
+    [badge setCenter:rectView.center];
+    CGRect frame = badge.frame;
+    [self.carouselView addSubview:badge];
+    [self didDropStix:badge ofType:stixStringID];
+}
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID{
     [[self camera] takePicture];
+    //[badge removeFromSuperview];
     badgeFrame = badge.frame;
     // save frame of badge relative to cropped image
     CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
-#if 0
-    badgeFrame.origin.x = badgeFrame.origin.x - cameraController.ROI.origin.x;
-    badgeFrame.origin.y = badgeFrame.origin.y - cameraController.ROI.origin.y + statusFrame.size.height;
-#else
     badgeFrame.origin.x = badgeFrame.origin.x - rectView.frame.origin.x;
-    badgeFrame.origin.y = badgeFrame.origin.y - rectView.frame.origin.y + statusFrame.size.height;    
-#endif
+    badgeFrame.origin.y = badgeFrame.origin.y - rectView.frame.origin.y;// + statusFrame.size.height;    
     selectedStixStringID = stixStringID;
 }
 
@@ -396,9 +401,6 @@
     
     [carouselView resetBadgeLocations];
     
-    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
-    //[self.camera dismissModalViewControllerAnimated:YES];
-    //[self.camera setCameraOverlayView:self.view];
     needToShowCamera = YES;
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];
@@ -449,21 +451,42 @@
     // that means the actual image is 320x428.42 on the iphone
     
     // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
+    if (1) {
+        CGSize newsize = CGSizeMake(1000, 2592*1000/1936.0);
+        
+        // scale to convert base image from 1936x2592 to 320x428 - iphone size
+        float baseScale2 =  newsize.width / baseImage.size.width;
+        CGRect scaledFrameImage2 = CGRectMake(0, 0, baseImage.size.width * baseScale2, baseImage.size.height * baseScale2);
+        UIGraphicsBeginImageContext(newsize);
+        [baseImage drawInRect:scaledFrameImage2];	
+        UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        // save edited image to photo album
+        CGRect frame = [self.rectView frame];
+        float scale2 = 1000 / frame.size.width;
+        frame.size.width *= scale2;
+        frame.size.height *= scale2;
+        
+        frame.origin.x *= scale2;
+        frame.origin.y *= scale2;
+        UIImage * cropped = [result croppedImage:frame];
+        UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
+        
+    }
     CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
 	
     // scale to convert base image from 1936x2592 to 320x428 - iphone size
 	float baseScale =  screenContext.width / baseImage.size.width;
-    
 	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
     
 	UIGraphicsBeginImageContext(screenContext);	
 	[baseImage drawInRect:scaledFrameImage];	
 	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();	
-    
-    UIImage * cropped = [result croppedImage:[self.rectView frame]];
+
     // save edited image to photo album
-    UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
+    UIImage * cropped = [result croppedImage:[self.rectView frame]];
+    //UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album    
     
 	// hack: use the image cache in the easy way - just cache one image each time
 	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])

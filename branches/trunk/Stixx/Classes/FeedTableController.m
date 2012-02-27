@@ -259,13 +259,21 @@
     NSIndexPath * indexPath = [self.tableView indexPathForRowAtPoint: point];
     return [indexPath section];
 }
--(CGPoint)getContentPointInCurrentSection:(CGPoint)point {
-    int section = [self getCurrentSectionAtPoint:point];
+-(CGPoint)getContentPoint:(CGPoint)point inSection:(int)section {
+//    int section = [self getCurrentSectionAtPoint:point];
     int originy = section * (HEADER_HEIGHT + CONTENT_HEIGHT) + HEADER_HEIGHT;
     int offsety = self.tableView.contentOffset.y - originy;
+    NSLog(@"Originy: %d offsety: %d contentoffset: %f", originy, offsety, self.tableView.contentOffset.y);
     return CGPointMake(point.x, point.y+offsety);
 }
-
+-(CGPoint)getPointInTableViewFrame:(CGPoint)point fromPage:(int)section{
+    // we get a point that comes from the feedItem's frame
+    // we return the location in the current static table's frame
+    //int section = [self getCurrentSectionAtPoint:point];
+    int originy = section * (HEADER_HEIGHT + CONTENT_HEIGHT) + HEADER_HEIGHT;
+    point.y += originy;
+    return point;
+}
 
 #pragma mark -
 #pragma mark ScrollView Callbacks
@@ -308,7 +316,14 @@
 }
 - (void) reloadTableViewDataSource
 {
+    int pages = [contentPageIDs count];
+    int totalPages = [self.delegate itemCount];
+    NSLog(@"Table pages: %d tags available: %d", pages, totalPages);
     [self.delegate updateScrollPagesAtPage:-1];
+    if ([self.delegate itemCount] == 1) {
+        NSLog(@"Only one page so far, we should load more!");
+        [self.delegate updateScrollPagesAtPage:[self.delegate itemCount]];
+    }
 }
 
 

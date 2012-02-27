@@ -26,6 +26,8 @@
 #import "OutlineLabel.h"
 #import "StixView.h"
 
+@class VerticalFeedItemController;
+
 @protocol VerticalFeedItemDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
@@ -33,6 +35,7 @@
 // forward from StixView
 -(NSString*)getUsername;
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
+-(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
 @end
 
 @interface VerticalFeedItemController : UIViewController <StixViewDelegate>{
@@ -87,7 +90,6 @@
 
 -(void)initStixView:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
-
 @end
 
 

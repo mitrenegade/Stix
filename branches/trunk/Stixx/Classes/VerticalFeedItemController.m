@@ -250,4 +250,23 @@
     [self.delegate didPerformPeelableAction:0 forAuxStix:index];
 }
 
+
+/******** process clicks *******/
+/*
+-(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	int drag = 0;    
+}
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	int drag = 1;
+}
+ */
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	//if (drag != 1)
+	{
+        UITouch *touch = [[event allTouches] anyObject];	
+        CGPoint location = [touch locationInView:self.view];
+        [self.delegate didClickAtLocation:location withFeedItem:self];
+    }
+}
+
 @end

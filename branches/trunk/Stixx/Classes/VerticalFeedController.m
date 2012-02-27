@@ -23,6 +23,10 @@
 @synthesize commentView;
 @synthesize buttonFeedback;
 @synthesize camera;
+@synthesize buttonShowCarousel;
+@synthesize carouselTab;
+@synthesize tabBarController;
+@synthesize stixSelected;
 
 -(id)init
 {
@@ -47,13 +51,13 @@
 {
     // We need to do some setup once the view is visible. This will only be done once.
     // Position and size the scrollview. It will be centered in the view.    
-    CGRect frame = CGRectMake(0,44, 320, 400);
+    CGRect frame = CGRectMake(0,44, 320, 380);
     tableController = [[FeedTableController alloc] init];
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
-    
+
     tableController.delegate = self;
-    [self.view addSubview:tableController.view];
+    [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
 }
 
 -(void) viewDidLoad {
@@ -62,10 +66,10 @@
     
     //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
-    [self.view insertSubview:tableController.view belowSubview:[self buttonFeedback]];
     
 	/****** init badge view ******/
     [self createCarouselView];
+    //[self toggleCarouselView:NO];
     
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
@@ -85,17 +89,49 @@
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
+    [carouselView toggleHideShelf:YES]; // always hide shelf
+#if 1
+    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,410,320,SHELF_STIX_SIZE)];
+    [carouselView setFrame:CGRectMake(SHELF_STIX_X, 0, 320, SHELF_STIX_SIZE)];
+    //[carouselTab addSubview:carouselView];
+    [self.view insertSubview:carouselView aboveSubview:carouselTab];
+#else
     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-    
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
+#endif
+    [carouselView setAllowTap:YES]; // allow single tap
     [carouselView setUnderlay:tableController.view];
     [delegate didCreateBadgeView:carouselView];
 }
 
+-(void)toggleCarouselView:(BOOL)showCarousel {
+    [carouselView setHidden:!showCarousel];
+    [carouselView toggleHideShelf:YES]; // always hide shelf
+    isShowingCarousel = showCarousel;
+}
+
 -(void)reloadCarouselView {
+#if 1
+    [[self carouselView] reloadAllStix];
+    //[[self carouselView] removeFromSuperview];
+    
+    //[carouselTab addSubview:carouselView];
+    //[carouselTab removeFromSuperview];
+    //[self.view insertSubview:carouselTab aboveSubview:tableController.view];
+
+    //[self.view insertSubview:carouselView aboveSubview:carouselTab];
+#else
     [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
+#endif
+    
+    /*
+    if (isShowingCarousel)
+        [self carouselTabExpand];
+    else
+        [self carouselTabDismiss];
+     */
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -111,6 +147,8 @@
     
     //[tableController populateScrollPagesAtPage:lastPageViewed];
     [tableController setContentPageIDs:allTags];
+    
+//    [self carouselTabDismiss];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -162,26 +200,50 @@
 }
 
 /******* badge view delegate ******/
+-(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
+    // selection of a stix to use from the carousel
+    [self carouselTabDismissWithStix:badge];
+    [self setStixSelected:stixStringID];
+}
+
+-(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
+    // tap inside the feed to add a stix
+    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didClickAtLocation
+    [self addAuxStix:badge ofType:stixStringID toTag:tag];
+}
+
+-(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
+    CGPoint locationInSection = [tableController getContentPoint:badge.center inSection:lastPageViewed];
+    locationInSection.y -= tableController.view.frame.origin.y; // remove tableController offset
+    [badge setCenter:locationInSection];
+    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didClickAtLocation
+    [self addAuxStix:badge ofType:stixStringID toTag:tag];
+}
+
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
+    // comes here through carousel delegate
+    // the frame of the badge is in the carousel frame
+    // contains no information about which feedItem it was
+    [self carouselTabDismiss];
+    
     CGPoint center = badge.center;
-    center.y -= tableController.view.frame.origin.y;
+    // this was for drag and drop 
+    //center.y -= tableController.view.frame.origin.y;
     int section = [tableController getCurrentSectionAtPoint:center];
     lastPageViewed = section;
-    CGPoint touchInSection = [tableController getContentPointInCurrentSection:center];
-    // stix dropped onto the image are the correct size relative to the feed image's imageView. That means they are
-    // already scaled down to fit correctly in a 250x230 sized pix. the center of the badge is still in full window coordinates
-    // so it must be corrected.
-    
-    // increment stix count for given feed item
-    // badge's frame is currently in carouselView space which is the full screen
-    
+    [self didDropStixByDrag:badge ofType:stixStringID];
+}
+
+-(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*) tag{ 
+    // input badge should have frame within the tag's frame
+    NSLog(@"Adding Aux Stix: Badge frame center: %f %f", badge.center.x, badge.center.y);
     if ([allTags count] == 0) {
         // nothing loaded yet
         [carouselView resetBadgeLocations];
         return;
     }
     allTags = [self.delegate getTags];
-    Tag * t = (Tag*) [allTags objectAtIndex:section];   
+    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     
     NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
     
@@ -194,8 +256,8 @@
 	CGRect stixFrameScaled = badge.frame;
     CGRect tableFrame = tableController.view.frame;
     CGRect imageViewFrame = feedItem.imageView.frame;
-    float centerx = touchInSection.x; //badge.center.x - (tableFrame.origin.x + imageViewFrame.origin.x);
-    float centery = touchInSection.y;//badge.center.y - (tableFrame.origin.y + imageViewFrame.origin.y);
+    float centerx = badge.center.x; //badge.center.x - (tableFrame.origin.x + imageViewFrame.origin.x);
+    float centery = badge.center.y;//badge.center.y - (tableFrame.origin.y + imageViewFrame.origin.y);
 	stixFrameScaled.size.width *= imageScale;
 	stixFrameScaled.size.height *= imageScale;
     [badge setFrame:stixFrameScaled];
@@ -215,6 +277,7 @@
     auxView.delegate = self;
     [auxView initStixView:t];
     [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
+    [carouselView resetBadgeLocations];
 }
 
 -(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform withComment:(NSString *)comment {
@@ -227,6 +290,7 @@
         [self didAddNewComment:comment withTagID:[t.tagID intValue]];
     
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
+    
     [carouselView resetBadgeLocations];
     [self reloadCurrentPage];
 }
@@ -443,10 +507,13 @@
     self.allTags = [self.delegate getTags];
     [self reloadViewForItemAtIndex:section];
 }
+
 -(void)finishedCheckingForNewData:(bool)updated {
     [tableController dataSourceDidFinishLoadingNewData];
     if (updated)
         [self reloadViewForItemAtIndex:0];
+    [tableController setContentPageIDs:allTags];
+    [self.activityIndicator stopCompleteAnimation];
 }
 
 -(int)itemCount
@@ -467,20 +534,34 @@
 }
 
 /************** FeedZoomView ***********/
--(void)didClickAtLocation:(CGPoint)location {
-    //location.x -= scrollView.contentOffset.x;
-    NSLog(@"VerticalFeedController: Click on table at position %f %f\n", location.x, location.y);
-    /*
-    Tag * tag = [allTags objectAtIndex:[scrollView currentPage]];
-    CGPoint locationInFeedItem = location;
-    //locationInFeedItem.x -= lastContentOffset; // converts to feedItem frame
+// comes from feedItem instead of carousel
+-(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController*)feedItem {
+    // location is the click location inside feeditem's frame
     
-    FeedItemViewController * feedItem = [feedItems objectForKey:tag.tagID];
-    CGPoint locationInStixView = locationInFeedItem;
-    locationInStixView.x -= feedItem.stixView.frame.origin.x;
-    locationInStixView.y -= feedItem.stixView.frame.origin.y;
-    [[feedItem stixView] didTouchAtLocation:locationInStixView];
-     */
+    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
+
+    CGPoint locationInStixView = location;
+    //locationInStixView.x -= feedItem.stixView.frame.origin.x;
+    //locationInStixView.y -= feedItem.stixView.frame.origin.y;
+    int peelableFound = [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == feedItem.tagID) {
+            lastPageViewed = i;
+            break;            
+        }
+    }
+    
+    // if just a tap, add aux stix
+    if (peelableFound == -1) {
+        if (stixSelected != nil) {
+            UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixSelected];
+            //locationInStixView = [tableController getPointInTableViewFrame:locationInStixView fromPage:lastPageViewed];
+            //locationInStixView.y += tableController.view.frame.origin.y; // hack: didDropStix takes away tableController's y offset
+            [stix setCenter:locationInStixView];
+            [self didDropStixByTap:stix ofType:stixSelected];
+        }
+    }
 }
 
 /*** feedItemViewDelegate ****/
@@ -524,6 +605,86 @@
 
 -(IBAction)feedbackButtonClicked:(id)sender {
     [self.delegate didClickFeedbackButton:@"Feed view"];
+}
+
+-(void)carouselTabDismiss {
+    CGRect tabFrameHidden = CGRectMake(0, 365, 320, 400);
+    CGRect tabButtonHidden = CGRectMake(14, 366, 80, 40);
+    CGRect carouselFrameHidden = CGRectMake(SHELF_STIX_X, 410, 320, SHELF_STIX_SIZE);
+    if (isShowingCarousel == 3) {
+        [buttonShowCarousel setCenter:CGPointMake(buttonShowCarousel.center.x, 385)];
+        isShowingCarousel = 2;
+    }
+    else {
+        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
+        [buttonShowCarousel setFrame:tabButtonHidden];
+        isShowingCarousel = 0;
+        [self setStixSelected:nil];
+    }
+    [carouselTab setFrame:tabFrameHidden];
+    [carouselView.scrollView setFrame:carouselFrameHidden];
+    CGRect newFrame = CGRectMake(0, 0, 320, 480);
+    [self.tabBarController.view setFrame:newFrame];
+}
+-(void)carouselTabDismissWithStix:(UIImageView*)stix {
+    CGRect tabFrameHidden = CGRectMake(0, 365, 320, 400);
+    //CGRect tabButtonHidden = CGRectMake(14, 366, 80, 40);
+    CGRect carouselFrameHidden = CGRectMake(SHELF_STIX_X, 410, 320, SHELF_STIX_SIZE);
+
+    CGRect imageFrame = buttonShowCarousel.imageView.frame;
+    imageFrame.size.height = 60; // set a size for the tab icon
+    imageFrame.size.width = imageFrame.size.height;
+    CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, 385);
+    [buttonShowCarousel setFrame:imageFrame];
+    [buttonShowCarousel setCenter:imageCenter];
+    [buttonShowCarousel setImage:stix.image forState:UIControlStateNormal];
+    isShowingCarousel = 2; // dismissed with stix already selected
+    
+    [carouselTab setFrame:tabFrameHidden];
+    [carouselView.scrollView setFrame:carouselFrameHidden];
+    CGRect newFrame = CGRectMake(0, 0, 320, 480);
+    [self.tabBarController.view setFrame:newFrame];
+}
+
+-(void)carouselTabExpand {
+    CGRect tabFrameShow = CGRectMake(0, 330, 320, 400);
+    CGRect tabButtonShow = CGRectMake(14, 331, 80, 40);
+    CGRect carouselFrameShow = CGRectMake(SHELF_STIX_X, 380, 320, SHELF_STIX_SIZE);
+    if (isShowingCarousel == 2) {
+        CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, 350);
+        [buttonShowCarousel setCenter:imageCenter];
+        isShowingCarousel = 3;
+    }
+    else {
+        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
+        [buttonShowCarousel setFrame:tabButtonShow];
+        isShowingCarousel = 1;
+        [self setStixSelected:nil];
+    }
+    [carouselTab setFrame:tabFrameShow];
+    [carouselView.scrollView setFrame:carouselFrameShow];
+    CGRect newFrame = self.tabBarController.view.frame;
+    newFrame.origin.y = 20;
+    newFrame.size.height += 80;
+    [self.tabBarController.view setFrame:newFrame];
+}
+
+-(IBAction)didClickShowCarousel:(id)sender {
+    if (isShowingCarousel == 1) {
+        // dismiss carousel, change tab button, disable stix attachment
+        [self carouselTabDismiss];
+    }
+    else if (isShowingCarousel == 0) {
+        // display carousel above tab bar, change tab button to close tab
+        [self carouselTabExpand];
+    }
+    else if (isShowingCarousel == 2) {
+        // stix has been chosen, carousel tab is dismissed but should be shown
+        [self carouselTabExpand];
+    }    
+    else if (isShowingCarousel == 3) {
+        [self carouselTabDismiss];
+    }
 }
 
 /*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/

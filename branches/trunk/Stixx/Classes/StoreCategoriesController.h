@@ -42,6 +42,7 @@ enum {
 -(NSString *)getStringForRow:(int)row;
 
 -(void)didClickGetStix:(id)sender event:(id)event;
+-(void)didGetStix:(NSString*)stixStringID;
 
 @property (nonatomic, assign) NSObject<StoreCategoriesControllerDelegate> *delegate;
 

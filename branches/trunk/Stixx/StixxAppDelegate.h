@@ -167,6 +167,7 @@ struct UserInfo {
 -(void)adminUpdateAllStixCountsToZero;
 -(void)adminIncrementAllStixCounts;
 -(void) adminSetAllUsersBuxCounts;
+-(void)adminSetUnlimitedStix;
 -(void)adminEasterEggShowMenu:(NSString*)password;
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;

@@ -48,13 +48,14 @@
 
     if (refreshHeaderView == nil) {
         refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];
-        refreshHeaderView.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
+        refreshHeaderView.backgroundColor = [UIColor colorWithWhite:0 alpha:.85]; //[UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
         refreshHeaderView.bottomBorderThickness = 1.0;
         [self.tableView addSubview:refreshHeaderView];
         self.tableView.showsVerticalScrollIndicator = YES;
         [refreshHeaderView release];
     }
     
+    cellDictionary = [[NSMutableDictionary alloc] init];
 }
 
 - (void)viewDidUnload
@@ -154,9 +155,6 @@
         [cell.textLabel setHighlightedTextColor:[cell.textLabel textColor]];
         cell.textLabel.numberOfLines = 1;
         [cell setBackgroundColor:[UIColor clearColor]];
-        
-        for (UIView * view in cell.contentView.subviews)
-            [view removeFromSuperview];
     }
     /*
      else {
@@ -164,13 +162,18 @@
      [cell.contentView removeFromSuperview];
      }
      */
+    UIView * cellOldView = [cellDictionary objectForKey:[NSNumber numberWithInt:cell.hash]];
+    if (cellOldView != nil)
+        [cellOldView removeFromSuperview];
     
     int y = [indexPath section];
     NSLog(@"Vertical Feed Table: Loading row %d", y);
     //NSNumber * tagID = [contentPageIDs objectAtIndex:y];
     UIView * view;
     view = [self.delegate viewForItemAtIndex:y];
+    //[cell.contentView removeFromSuperview];
     [cell.contentView addSubview:view];
+    [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
     
     if (y == [contentPageIDs count]-1) // last available row reached 
     {

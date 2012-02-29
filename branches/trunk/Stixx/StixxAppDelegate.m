@@ -59,7 +59,7 @@ static int init=0;
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     versionStringStable = @"0.7.6";
-    versionStringBeta = @"0.7.5.1";
+    versionStringBeta = @"0.7.7.4";
     
     /*** Kumulos service ***/
     
@@ -186,7 +186,6 @@ static int init=0;
     feedController.allTags = allTags;
     feedController.tabBarController = tabBarController;
     feedController.camera = camera; // hack: in order to present modal controllers that respond 
-    [feedController.activityIndicator startCompleteAnimation]; // should be triggered by call to [self checkForUpdateTags]
     
 #endif
     
@@ -512,7 +511,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     else if (lastViewController == exploreController)
     {
-        lastCarouselView = [exploreController carouselView];
+        //lastCarouselView = [exploreController carouselView];
         //[viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
@@ -598,6 +597,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // End the Kiip session when the user leaves the app
     [[KPManager sharedManager] endSession];
 #endif
+    [mainController dismissModalViewControllerAnimated:YES]; 
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -605,8 +605,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // Start a Kiip session when the user enters the app
     [[KPManager sharedManager] startSession];
 #endif
+    [mainController presentModalViewController:camera animated:YES];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+
     // force some updates to badgeview types
-    [self initializeBadges];}
+    [self initializeBadges];
+}
 
 - (void)application:(UIApplication *)application 
 didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
@@ -1436,7 +1441,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     {
         NSString * name = [d valueForKey:@"username"];
         NSLog(@"Updated stix counts for user %@", name);
-    }    
+    }
+    [self reloadAllCarousels];
 }
 
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation*/ withTransform:(CGAffineTransform)transform{
@@ -1463,6 +1469,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
     [self updateUserTagTotal];        
     [self decrementStixCount:stixStringID];
+    
+    if ([self getStixCount:stixStringID] == 0) {
+        // ran out of a nonpermanent stix
+        [feedController.carouselView carouselTabDismissRemoveStix];
+        [tagViewController.carouselView carouselTabDismissRemoveStix];
+    }
     
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
@@ -1612,7 +1624,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
     NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo->username];
-	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:message];
+    NSString * fullmessage = [NSString stringWithFormat:@"Stix version %@\n\n%@", versionStringStable, message];
+	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:fullmessage];
     [self didDismissSecondaryView];
 }
 
@@ -1665,6 +1678,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [data autorelease]; // MRC
 }
 
+-(void)adminSetUnlimitedStix {
+    int totalStixTypes = [BadgeView totalStixTypes];
+    NSLog(@"Total stix: %d", totalStixTypes);
+    for (int i=0; i<totalStixTypes; i++) {
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        int order = [[allStixOrder objectForKey:stixStringID] intValue];
+        int count = [[allStix objectForKey:stixStringID] intValue];
+        NSLog(@"For %@: old count %d order %d", stixStringID, count, order);
+        if (order != -1)
+            [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
+    }
+    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
+    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
+    [data autorelease]; // MRC
+}
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
     // called by NB_UPDATECAROUSEL notification
     if ([theResults count] == 0)
@@ -1691,7 +1720,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 #else
     [feedController reloadCarouselView];
-    [exploreController reloadCarouselView];
+    //[exploreController reloadCarouselView];
     [tagViewController reloadCarouselView];
 #endif
 }
@@ -1712,7 +1741,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)adminEasterEggShowMenu:(NSString *)password {
     if ([password isEqualToString:@"admin"]) {
 //        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Ye ol' Admin Menu" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users' Stix", @"Get me one of each", "Set all Users' bux", nil];
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set all Users bux", @"Save Stix Feed", nil];
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set my stix to unlimited", @"Set all Users bux", @"Save Stix Feed", nil];
         [actionSheet showFromTabBar:tabBarController.tabBar ];
         [actionSheet release];
     }
@@ -1724,8 +1753,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // button index: 
     // 0 = "Reset all Users' Stix"
     // 1 = "Get me one of each"
-    // 2 = "Set all Users' bux"
-    // 3 = "Cancel"
+    // 2 = "Set my stix to unlimited"
+    // 3 = "Set all Users' bux"
+    // 4 = "Cancel"
     switch (buttonIndex) {
         case 0:
             NSLog(@"button 0");
@@ -1736,11 +1766,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self adminIncrementAllStixCounts];
             break;
         case 2:
-            NSLog(@"button 2");
-            [self adminSetAllUsersBuxCounts];
+            NSLog(@"button 2 set my stix to unlimited");
+            [self adminSetUnlimitedStix];
             break;
         case 3:
-            NSLog(@"button 3: Save stix feed");
+            NSLog(@"button 3");
+            [self adminSetAllUsersBuxCounts];
+            break;
+        case 4:
+            NSLog(@"button 4: Save stix feed");
             [self adminSaveFeed];
         default:
             return;
@@ -2033,13 +2067,16 @@ static bool isShowingAlerts = NO;
     //[self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     //[self incrementStixCount:stixStringID];
     [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID]; 
-    if ([allStixOrder valueForKey:stixStringID] == nil) {
+    if ([allStixOrder valueForKey:stixStringID] == nil || [[allStixOrder valueForKey:stixStringID] intValue] == -1) {
         [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
     }
     // todo: check for consistency - the number of keys in allStixOrder should equal the largest value
+    /*
     for (int i=0; i<[allCarouselViews count]; i++) {
         [[allCarouselViews objectAtIndex:i] reloadAllStix];
     }
+     */
+    [self reloadAllCarousels];
     NSMutableData * stixData = [[KumulosData dictionaryToData:allStix] retain];
     [k addStixToUserWithUsername:[self getUsername] andStix:stixData];
     

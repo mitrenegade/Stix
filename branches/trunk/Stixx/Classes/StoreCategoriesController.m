@@ -489,12 +489,14 @@ static UIImageView * blankAccessoryView;
         frame.origin.x = frame.origin.x + cellframe.origin.x + tableframe.origin.x;
         frame.origin.y = frame.origin.y + cellframe.origin.y + tableframe.origin.y;
         [self.delegate didClickGetStix:stixStringID withFrame:frame];
-        
-        UIButton * button = [stixStringButtons objectForKey:stixStringID];
-        UIImage * buttonImg = [UIImage imageNamed:@"check.png"];
-        [button setBackgroundImage:buttonImg forState:UIControlStateNormal];
-        [button removeTarget:self action:@selector(didClickGetStix:event:) forControlEvents:UIControlEventAllEvents];        
-	}
+    }
+}
+-(void)didGetStix:(NSString*)stixStringID {
+    UIButton * button = [stixStringButtons objectForKey:stixStringID];
+    UIImage * buttonImg = [UIImage imageNamed:@"check.png"];
+    [button setBackgroundImage:buttonImg forState:UIControlStateNormal];
+    [button removeTarget:self action:@selector(didClickGetStix:event:) forControlEvents:UIControlEventAllEvents];        
+
 }
 
 @end

@@ -51,6 +51,9 @@ enum {
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
 -(void)didTapStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
 -(void)didStartDrag;
+
+-(void)didDismissCarouselTab;
+-(void)didExpandCarouselTab;
 @end
 
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{

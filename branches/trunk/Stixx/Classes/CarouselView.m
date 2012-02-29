@@ -13,6 +13,8 @@
 @synthesize sizeOfStixContext;
 @synthesize allowTap;
 @synthesize tapDefaultOffset;
+@synthesize buttonShowCarousel, carouselTab, stixSelected;
+@synthesize dismissedTabY, expandedTabY;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -46,6 +48,13 @@
     scrollView.scrollEnabled = YES;
     scrollView.directionalLockEnabled = YES; // only allow vertical or horizontal scroll
     [scrollView setDelegate:self];
+    
+    buttonShowCarousel = [[UIButton alloc] init];
+    [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
+    carouselTab = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];
+    [self addSubview:carouselTab];
+    [self addSubview:buttonShowCarousel];
+    [self carouselTabDismiss];
 
     shelf.frame = CGRectMake(scrollView.frame.origin.x, scrollView.frame.origin.y+50, 320, 30);
     
@@ -263,6 +272,13 @@
     
     if (CGRectContainsPoint(scrollView.frame, point))
         return self.scrollView;
+    if (CGRectContainsPoint(buttonShowCarousel.frame, point))
+        return self.buttonShowCarousel;
+    // catch the rest of the tab so what's behind it doesn't actually get hit
+    CGRect tabMainFrame = carouselTab.frame;
+    tabMainFrame.origin.y += 40;
+    if (CGRectContainsPoint(tabMainFrame, point))
+        return self.scrollView;
     
     // if the touch was not on one of the badges, either return the known underlay or just
     // return self which means the hit is not passed downwards to anything else
@@ -364,7 +380,6 @@ static int lastContentOffsetY = 0;
                  badgeTouched.hidden = NO;
              }
              ];
-
         }
     }
     else if ([vgr state] == UIGestureRecognizerStateChanged) {
@@ -473,4 +488,91 @@ static int lastContentOffsetY = 0;
     //if (drag==1)
     //    [self performSelector:@selector(vibe:) withObject:self afterDelay:.3f];
 }
+
+/**** Carousel Tab *****/
+
+-(void)carouselTabDismiss {
+    CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
+    CGRect tabButtonHidden = CGRectMake(14, dismissedTabY+1, 80, 40);
+    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
+    if (isShowingCarousel == 3) {
+        [buttonShowCarousel setCenter:CGPointMake(buttonShowCarousel.center.x, dismissedTabY+15)];
+        isShowingCarousel = 2;
+    }
+    else {
+        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
+        [buttonShowCarousel setFrame:tabButtonHidden];
+        isShowingCarousel = 0;
+        [self setStixSelected:nil];
+    }
+    [carouselTab setFrame:tabFrameHidden];
+    [scrollView setFrame:carouselFrameHidden];
+    [self.delegate didDismissCarouselTab];
+}
+-(void)carouselTabDismissWithStix:(UIImageView*)stix {
+    CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
+    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
+    CGRect imageFrame = buttonShowCarousel.imageView.frame;
+    imageFrame.size.height = 55; // set a size for the tab icon
+    imageFrame.size.width = imageFrame.size.height;
+    CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, dismissedTabY+15);
+    [buttonShowCarousel setFrame:imageFrame];
+    [buttonShowCarousel setCenter:imageCenter];
+    [buttonShowCarousel setImage:stix.image forState:UIControlStateNormal];
+    isShowingCarousel = 2; // dismissed with stix already selected
+    
+    [carouselTab setFrame:tabFrameHidden];
+    [scrollView setFrame:carouselFrameHidden];
+    [self.delegate didDismissCarouselTab];
+}
+-(void)carouselTabDismissRemoveStix {
+    CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
+    CGRect tabButtonHidden = CGRectMake(14, dismissedTabY+1, 80, 40);
+    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
+    [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
+    [buttonShowCarousel setFrame:tabButtonHidden];
+    isShowingCarousel = 0;
+    [self setStixSelected:nil];
+    [carouselTab setFrame:tabFrameHidden];
+    [scrollView setFrame:carouselFrameHidden];
+    [self.delegate didDismissCarouselTab];
+}
+-(void)carouselTabExpand {
+    CGRect tabFrameShow = CGRectMake(0, expandedTabY, 320, 400);
+    CGRect tabButtonShow = CGRectMake(14, expandedTabY + 1, 80, 40);
+    CGRect carouselFrameShow = CGRectMake(0, expandedTabY + 50, 320, SHELF_STIX_SIZE);    
+    if (isShowingCarousel == 2) {
+        CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, expandedTabY+15);
+        [buttonShowCarousel setCenter:imageCenter];
+        isShowingCarousel = 3;
+    }
+    else {
+        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
+        [buttonShowCarousel setFrame:tabButtonShow];
+        isShowingCarousel = 1;
+        [self setStixSelected:nil];
+    }
+    [carouselTab setFrame:tabFrameShow];
+    [scrollView setFrame:carouselFrameShow];
+    [self.delegate didExpandCarouselTab];
+}
+
+-(void)didClickShowCarousel:(id)sender {
+    if (isShowingCarousel == 1) {
+        // dismiss carousel, change tab button, disable stix attachment
+        [self carouselTabDismiss];
+    }
+    else if (isShowingCarousel == 0) {
+        // display carousel above tab bar, change tab button to close tab
+        [self carouselTabExpand];
+    }
+    else if (isShowingCarousel == 2) {
+        // stix has been chosen, carousel tab is dismissed but should be shown
+        [self carouselTabExpand];
+    }    
+    else if (isShowingCarousel == 3) {
+        [self carouselTabDismiss];
+    }
+}
+
 @end

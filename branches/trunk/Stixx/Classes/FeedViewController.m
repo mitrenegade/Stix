@@ -83,7 +83,8 @@
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [carouselView setDismissedTabY:380];
+    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
     
     [self.view insertSubview:carouselView aboveSubview:scrollView];
     [carouselView setUnderlay:scrollView];
@@ -91,7 +92,8 @@
 }
 
 -(void)reloadCarouselView {
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [carouselView setDismissedTabY:380];
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:scrollView];
 }

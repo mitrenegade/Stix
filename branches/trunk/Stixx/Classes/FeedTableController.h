@@ -31,6 +31,7 @@
 @interface FeedTableController : UITableViewController <UITableViewDelegate, UITableViewDataSource>
 {
     NSObject<FeedTableControllerDelegate> * delegate;
+    NSMutableDictionary * cellDictionary;
 
     NSMutableArray *contentPageIDs; 
     int drag;
@@ -46,8 +47,8 @@
 - (void)reloadTableViewDataSource;
 - (void)dataSourceDidFinishLoadingNewData;
 
--(void)loadPage:(int)page;
--(void)populatePagesAtPage:(int)currentPage;
+//-(void)loadPage:(int)page;
+//-(void)populatePagesAtPage:(int)currentPage;
 -(void)setContentPageIDs:(NSMutableArray *) tags;
 -(int)getCurrentSectionAtPoint:(CGPoint) point;
 //-(CGPoint)getContentPointInCurrentSection:(CGPoint)point;

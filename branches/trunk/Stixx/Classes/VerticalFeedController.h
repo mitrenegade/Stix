@@ -70,10 +70,10 @@
     UIView * stixHeader;
     UIView * stixHeaderBody;
     
-    IBOutlet UIButton * buttonShowCarousel;
-    IBOutlet UIImageView * carouselTab;
-    int isShowingCarousel;
-    NSString * stixSelected;
+//    IBOutlet UIButton * buttonShowCarousel;
+//    IBOutlet UIImageView * carouselTab;
+//    int isShowingCarousel;
+//    NSString * stixSelected;
     
     RaisedCenterTabBarController * tabBarController;
 }
@@ -89,10 +89,10 @@
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) CommentViewController * commentView;
 @property (nonatomic, retain) UIImagePickerController * camera;
-@property (nonatomic, retain) IBOutlet UIButton * buttonShowCarousel;
-@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonShowCarousel;
+//@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
-@property (nonatomic, retain) NSString * stixSelected;
+//@property (nonatomic, retain) NSString * stixSelected;
 
 
 -(void)forceUpdateCommentCount:(int)tagID;
@@ -106,11 +106,6 @@
 -(IBAction)adminStixButtonPressed:(id)sender;
 -(UIView*)reloadViewForItemAtIndex:(int)index;
 -(void)finishedCheckingForNewData:(bool)updated;
--(void)toggleCarouselView:(BOOL)showCarousel;
--(IBAction)didClickShowCarousel:(id)sender;
--(void)carouselTabDismiss;
--(void)carouselTabExpand;
--(void)carouselTabDismissWithStix:(UIImageView*)stix;
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*)tag;

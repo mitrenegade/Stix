@@ -343,13 +343,21 @@ static int addUserStage;
 #if 1
     NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
     NSMutableDictionary * stixOrder = [[NSMutableDictionary alloc] init];
-    [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
-    [stixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
+    int orderct = 0;
+    [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:@"FIRE"]; 
+    [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:@"ICE"]; 
     NSEnumerator *e = [stix keyEnumerator];
     id key;
     while (key = [e nextObject]) {
+        int ct = [[stix objectForKey:key] intValue];
+        NSLog(@"Stix %@ count %d", key, ct);
+        if (ct != 0)
+            NSLog(@"Here!");
         if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
-            [stixOrder setObject:[NSNumber numberWithInt:[stixOrder count]] forKey:key];
+            if (ct != 0)
+                [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:key];
+            //else    
+            //    [stixOrder setObject:[NSNumber numberWithInt:-1] forKey:key];
         }
     }
     [auxInfo setValue:stixOrder forKey:@"stixOrder"];

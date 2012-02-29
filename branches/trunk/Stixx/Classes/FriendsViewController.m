@@ -305,9 +305,8 @@
             [self.view addSubview:userProfileController.view];
             
             // must add to subview before changing name/photo
-            [userProfileController setUsername:currentProfile];
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
-            [userProfileController setPhoto:[photo autorelease]];
+            [userProfileController initializeProfile:currentProfile withPhoto:[photo autorelease]];
             //friendName = key;
             break;
         }
@@ -321,5 +320,13 @@
     [userProfileController.view removeFromSuperview];
     [userProfileController release];
     userProfileController = nil;
+}
+
+-(NSMutableDictionary *)getUserPhotos {
+    return userPhotos;
+}
+
+-(NSString *)getUsername {
+    return [self.delegate getUsername];
 }
 @end

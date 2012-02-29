@@ -21,6 +21,12 @@
 -(id)init
 {
 	self = [super initWithNibName:@"UserProfileViewController" bundle:nil];
+    
+    k = nil;
+    k = [[Kumulos alloc]init];
+    [k setDelegate:self];    
+    //isLoggedIn = NO;
+    
     return self;
 
 }
@@ -30,6 +36,35 @@
     
 	//return self;
 }
+
+// getUserWithUsername in ProfileViewController is a login operation that populates the profile with all the new user's info
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults {
+    if ([theResults count] > 0)
+    {
+        //for (NSMutableDictionary * d in theResults) {
+        NSMutableDictionary * d = [theResults objectAtIndex:0];
+        
+        // update friend count
+        NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
+        int ct = [allUserPhotos count];
+        [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
+
+        // total Pix count
+        int totalTags = [[d valueForKey:@"totalTags"] intValue];
+        // int bux = [[d valueForKey:@"bux"] intValue];
+        
+        // set Pix count
+        [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", totalTags] forState:UIControlStateNormal];
+    }
+    else if ([theResults count] == 0)
+    {
+        NSLog(@"user doesn't exist!"); // force logout
+    }
+}
+
+
+
+
 #if 0
 -(void)updateFriendCount {
     NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
@@ -39,8 +74,6 @@
 
 -(void)updatePixCount {
     //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
-    int ct = [delegate getUserTagTotal];
-    [stixCountButton setTitle:[NSString stringWithFormat:@"%d Pix", ct] forState:UIControlStateNormal];
 }
 #endif
 
@@ -51,10 +84,31 @@
 
 -(void)setUsername:(NSString*)username {
     [nameLabel setText:username];
+    
 }
 -(void)setPhoto:(UIImage*)photo {
     [photoButton setImage:photo forState:UIControlStateNormal];
     [photoButton setBackgroundColor:[UIColor blackColor]];
+}
+
+-(void)initializeProfile:(NSString*)username withPhoto: (UIImage*)photo {
+    [nameLabel setText:username];
+    [photoButton setImage:photo forState:UIControlStateNormal];
+    [photoButton setBackgroundColor:[UIColor blackColor]];
+    
+    // check if trying to access own page
+    if ([username isEqualToString:[self.delegate getUsername]])
+    {
+        [addFriendButton setHidden:YES];
+    }
+    
+    if (k == nil)
+    {
+        k = [[Kumulos alloc]init];
+        [k setDelegate:self];    
+    }
+    
+    [k getUserWithUsername:username];
 }
 
 -(void)addFriendButtonClicked:(id)sender {

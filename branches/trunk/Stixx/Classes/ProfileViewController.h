@@ -21,7 +21,7 @@
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet*)friendsList;
 -(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
@@ -32,6 +32,7 @@
 
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+-(NSMutableSet*)getFriendsList;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
 
 -(void)didClickFeedbackButton:(NSString*)fromView;
@@ -42,6 +43,7 @@
 
 -(void)didClickInviteButton;
 -(void)didDismissSecondaryView;
+
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, /*LoginViewDelegate, */FriendsViewDelegate, UITextFieldDelegate>{

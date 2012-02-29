@@ -182,7 +182,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1323"
          endingLineNumber = "1323"
-         landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:andBuxCount:andStixOrder:"
+         landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:andBuxCount:andStixOrder:andFriendsList:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -280,8 +280,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1010"
          endingLineNumber = "1010"
-         landmarkName = "-getOlderTagsThanID:"
-         landmarkType = "5">
+         landmarkName = "@implementation StixxAppDelegate"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -938,7 +938,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2079"
          endingLineNumber = "2079"
-         landmarkName = "-didGetStixFromStore:"
+         landmarkName = "-alertView:didDismissWithButtonIndex:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -966,7 +966,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2069"
          endingLineNumber = "2069"
-         landmarkName = "-didGetStixFromStore:"
+         landmarkName = "-alertView:didDismissWithButtonIndex:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint

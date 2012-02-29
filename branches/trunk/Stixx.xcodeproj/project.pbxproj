@@ -22,11 +22,6 @@
 		9E029BB314F558B800D056C8 /* VerticalFeedController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E029BB114F558B700D056C8 /* VerticalFeedController.xib */; };
 		9E06552014B5699400A638AA /* AuxStixViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E06551E14B5699200A638AA /* AuxStixViewController.m */; };
 		9E06552114B5699400A638AA /* AuxStixViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E06551F14B5699300A638AA /* AuxStixViewController.xib */; };
-		9E0C9B0314EC45A700FF4C8D /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9AE814EC45A700FF4C8D /* Facebook.m */; };
-		9E0C9B0414EC45A700FF4C8D /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9AEB14EC45A700FF4C8D /* FBDialog.bundle */; };
-		9E0C9B0514EC45A700FF4C8D /* FBDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9AED14EC45A700FF4C8D /* FBDialog.m */; };
-		9E0C9B0614EC45A700FF4C8D /* FBLoginDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9AEF14EC45A700FF4C8D /* FBLoginDialog.m */; };
-		9E0C9B0714EC45A700FF4C8D /* FBRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9AF114EC45A700FF4C8D /* FBRequest.m */; };
 		9E0C9B5D14ECA38200FF4C8D /* dot_boundingbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9B5C14ECA38200FF4C8D /* dot_boundingbox.png */; };
 		9E0C9C8214EEADE100FF4C8D /* bux_coin.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8114EEADE100FF4C8D /* bux_coin.png */; };
 		9E0C9C8D14EECECF00FF4C8D /* StixAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8C14EECECB00FF4C8D /* StixAnimation.m */; };
@@ -306,13 +301,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E0C9B0F14EC45A700FF4C8D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E0C9AE414EC45A700FF4C8D /* facebook-ios-sdk.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC07E0554694100DB518D;
-			remoteInfo = "facebook-ios-sdk";
-		};
 		9E252C1D14E2F6E00070ECB4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
@@ -366,18 +354,6 @@
 		9E06551D14B5699100A638AA /* AuxStixViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AuxStixViewController.h; sourceTree = "<group>"; };
 		9E06551E14B5699200A638AA /* AuxStixViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AuxStixViewController.m; sourceTree = "<group>"; };
 		9E06551F14B5699300A638AA /* AuxStixViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AuxStixViewController.xib; sourceTree = "<group>"; };
-		9E0C9AE414EC45A700FF4C8D /* facebook-ios-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "facebook-ios-sdk.xcodeproj"; sourceTree = "<group>"; };
-		9E0C9AE714EC45A700FF4C8D /* Facebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Facebook.h; sourceTree = "<group>"; };
-		9E0C9AE814EC45A700FF4C8D /* Facebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Facebook.m; sourceTree = "<group>"; };
-		9E0C9AE914EC45A700FF4C8D /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = facebook_ios_sdk_Prefix.pch; sourceTree = "<group>"; };
-		9E0C9AEA14EC45A700FF4C8D /* FBConnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBConnect.h; sourceTree = "<group>"; };
-		9E0C9AEB14EC45A700FF4C8D /* FBDialog.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = FBDialog.bundle; sourceTree = "<group>"; };
-		9E0C9AEC14EC45A700FF4C8D /* FBDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBDialog.h; sourceTree = "<group>"; };
-		9E0C9AED14EC45A700FF4C8D /* FBDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBDialog.m; sourceTree = "<group>"; };
-		9E0C9AEE14EC45A700FF4C8D /* FBLoginDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBLoginDialog.h; sourceTree = "<group>"; };
-		9E0C9AEF14EC45A700FF4C8D /* FBLoginDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBLoginDialog.m; sourceTree = "<group>"; };
-		9E0C9AF014EC45A700FF4C8D /* FBRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBRequest.h; sourceTree = "<group>"; };
-		9E0C9AF114EC45A700FF4C8D /* FBRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBRequest.m; sourceTree = "<group>"; };
 		9E0C9B5C14ECA38200FF4C8D /* dot_boundingbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dot_boundingbox.png; sourceTree = "<group>"; };
 		9E0C9C8114EEADE100FF4C8D /* bux_coin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_coin.png; sourceTree = "<group>"; };
 		9E0C9C8B14EECEC800FF4C8D /* StixAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixAnimation.h; sourceTree = "<group>"; };
@@ -827,33 +803,6 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
-		9E0C9AE314EC45A700FF4C8D /* Facebook */ = {
-			isa = PBXGroup;
-			children = (
-				9E0C9AE414EC45A700FF4C8D /* facebook-ios-sdk.xcodeproj */,
-				9E0C9AE714EC45A700FF4C8D /* Facebook.h */,
-				9E0C9AE814EC45A700FF4C8D /* Facebook.m */,
-				9E0C9AE914EC45A700FF4C8D /* facebook_ios_sdk_Prefix.pch */,
-				9E0C9AEA14EC45A700FF4C8D /* FBConnect.h */,
-				9E0C9AEB14EC45A700FF4C8D /* FBDialog.bundle */,
-				9E0C9AEC14EC45A700FF4C8D /* FBDialog.h */,
-				9E0C9AED14EC45A700FF4C8D /* FBDialog.m */,
-				9E0C9AEE14EC45A700FF4C8D /* FBLoginDialog.h */,
-				9E0C9AEF14EC45A700FF4C8D /* FBLoginDialog.m */,
-				9E0C9AF014EC45A700FF4C8D /* FBRequest.h */,
-				9E0C9AF114EC45A700FF4C8D /* FBRequest.m */,
-			);
-			path = Facebook;
-			sourceTree = "<group>";
-		};
-		9E0C9AE514EC45A700FF4C8D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9E0C9B1014EC45A700FF4C8D /* libfacebook_ios_sdk.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		9E189F8914E0341B0082098C /* Kiip-v1.0.13 */ = {
 			isa = PBXGroup;
 			children = (
@@ -1036,7 +985,6 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				9E0C9AE314EC45A700FF4C8D /* Facebook */,
 				9E189F8914E0341B0082098C /* Kiip-v1.0.13 */,
 				444C3A92148BF4C1005EB6DB /* Foursquare2-iOS */,
 				9E88A42A148A8D9500E67864 /* Foursquare2 */,
@@ -1347,9 +1295,6 @@
 				9EB031CC142C01260019F2BD /* FileHelpers.m */,
 				44E3CA13148AC50E00554E82 /* FourSquareLocator.h */,
 				44E3CA14148AC50E00554E82 /* FourSquareLocator.m */,
-				9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */,
-				9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */,
-				9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */,
 				9E2830E614A158E6000707B8 /* GiftStixTableCell.h */,
 				9E2830E714A158E7000707B8 /* GiftStixTableCell.m */,
 				9EC1EBC514A0523700592DE7 /* GiftStixTableController.h */,
@@ -1395,12 +1340,17 @@
 				9ECCBFEE14B26353003E122B /* NoClipModalView.m */,
 				9EF173C1146D01F00073F83B /* OutlineLabel.h */,
 				9EF173C2146D01F30073F83B /* OutlineLabel.m */,
-				9E2830EC14A2D992000707B8 /* UserProfileViewController.h */,
-				9E2830ED14A2D993000707B8 /* UserProfileViewController.m */,
-				9E2830EE14A2D996000707B8 /* UserProfileViewController.xib */,
+				9ECF1C5D145DD4DD00B7F7F1 /* PagedScrollView.h */,
+				9ECF1C5E145DD4DD00B7F7F1 /* PagedScrollView.m */,
+				9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */,
+				9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */,
+				9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */,
 				9EB031BF142C01260019F2BD /* ProfileViewController.h */,
 				9EB031C0142C01260019F2BD /* ProfileViewController.m */,
 				9EB031C1142C01260019F2BD /* ProfileViewController.xib */,
+				9E2830EC14A2D992000707B8 /* UserProfileViewController.h */,
+				9E2830ED14A2D993000707B8 /* UserProfileViewController.m */,
+				9E2830EE14A2D996000707B8 /* UserProfileViewController.xib */,
 				9E91C6171480449E003567ED /* RaisedCenterTabBarController.h */,
 				9E91C618148044A0003567ED /* RaisedCenterTabBarController.m */,
 				9E0C9C8B14EECEC800FF4C8D /* StixAnimation.h */,
@@ -1620,10 +1570,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 9E0C9AE514EC45A700FF4C8D /* Products */;
-					ProjectRef = 9E0C9AE414EC45A700FF4C8D /* facebook-ios-sdk.xcodeproj */;
-				},
-				{
 					ProductGroup = 9E252C1614E2F6E00070ECB4 /* Products */;
 					ProjectRef = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
 				},
@@ -1637,13 +1583,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		9E0C9B1014EC45A700FF4C8D /* libfacebook_ios_sdk.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libfacebook_ios_sdk.a;
-			remoteRef = 9E0C9B0F14EC45A700FF4C8D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1830,7 +1769,6 @@
 				9EE85BBE14E8D447008E5676 /* btn_close.png in Resources */,
 				9EE85BC014E8D44E008E5676 /* green_arrow.png in Resources */,
 				9EE85BC214E8D462008E5676 /* message_firsttime_25.png in Resources */,
-				9E0C9B0414EC45A700FF4C8D /* FBDialog.bundle in Resources */,
 				9E0C9B5D14ECA38200FF4C8D /* dot_boundingbox.png in Resources */,
 				9E0C9C8214EEADE100FF4C8D /* bux_coin.png in Resources */,
 				9E029BAE14F548A900D056C8 /* FeedTableController.xib in Resources */,
@@ -1962,10 +1900,6 @@
 				9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */,
 				9E65B02014E565270021DD96 /* StoreViewShell.m in Sources */,
 				9E75E73F14E6EA1B0017DC3D /* AlertPrompt.m in Sources */,
-				9E0C9B0314EC45A700FF4C8D /* Facebook.m in Sources */,
-				9E0C9B0514EC45A700FF4C8D /* FBDialog.m in Sources */,
-				9E0C9B0614EC45A700FF4C8D /* FBLoginDialog.m in Sources */,
-				9E0C9B0714EC45A700FF4C8D /* FBRequest.m in Sources */,
 				9E0C9C8D14EECECF00FF4C8D /* StixAnimation.m in Sources */,
 				9E029BAD14F548A900D056C8 /* FeedTableController.m in Sources */,
 				9E029BB214F558B800D056C8 /* VerticalFeedController.m in Sources */,
@@ -2085,7 +2019,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -2115,7 +2049,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
+				PROVISIONING_PROFILE = "";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
@@ -2127,7 +2061,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -2158,7 +2092,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
+				PROVISIONING_PROFILE = "";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

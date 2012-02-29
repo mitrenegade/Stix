@@ -106,11 +106,13 @@
     NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
     NSMutableDictionary * stixOrder;
+    NSMutableSet * friendsList;
     @try {
         auxiliaryData = [KumulosData dataToDictionary:data];
         if (auxiliaryData == nil || ![auxiliaryData isKindOfClass:[NSMutableDictionary class]]) {
 #if 1
             stixOrder = nil;
+            friendsList = nil;
 #else
             stixOrder = [[NSMutableDictionary alloc] init];
             [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
@@ -139,14 +141,16 @@
                     int order = [[stixOrder objectForKey:key] intValue];
                     NSLog(@"Stix: %@ order %d", key, order); 
                 }
-            }    
+            }
+            
+            friendsList = [auxiliaryData objectForKey:@"friendsList"];
         }
     }
     @catch (NSException* exception) { 
         NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
     }            
     [loginController.view removeFromSuperview];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:firstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList isFirstTimeUser:firstTimeUser];
     [stix release]; // MRC
     [newPhoto release]; // MRC
 }

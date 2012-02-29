@@ -41,6 +41,7 @@
 @synthesize allUserPhotos;
 @synthesize allStix;
 @synthesize allStixOrder;
+@synthesize allFriends;
 @synthesize k;
 @synthesize lastCarouselView;
 @synthesize allCommentCounts;
@@ -148,6 +149,7 @@ static int init=0;
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
     allStixOrder = [[NSMutableDictionary alloc] init];
+    allFriends = [[NSMutableSet alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
     
@@ -902,7 +904,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder release];
         
         // update kumulos version of tag with most recent tags
-        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
+        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix2:theAuxStixData];
         // immediately notify
         // if adding to own pix, do not notify or broadcast
         if (![myUserInfo->username isEqualToString:tag.username]) {
@@ -1281,7 +1283,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
 }
 
--(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
+-(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime {
     
     [photo retain];
     [stix retain];
@@ -1299,7 +1301,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self.tabBarController didPressCenterButton:self];
     [self.tabBarController setSelectedIndex:0];
 
-    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
+    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList];
     [photo release];
     [stix release];
     if (firstTime) {
@@ -1307,7 +1309,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet *)friendsList {
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = [[BadgeView generateDefaultStix] retain];
         [allStix removeAllObjects];
@@ -1355,7 +1357,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 NSLog(@"Stix: %@ order %d", key, order); 
             }
         }    
-    }    
+    }  
+    if (![friendsList isKindOfClass:[NSMutableSet class]]) {
+        [allFriends removeAllObjects];
+        [allFriends addObject:@"bobo"];
+        [allFriends addObject:@"willh103"];
+    }
+    else {
+        [friendsList retain];
+        [allFriends removeAllObjects];
+        [allFriends unionSet:friendsList];
+        [friendsList release];
+    }
     loggedIn = YES;
     myUserInfo->username = [name retain];
     myUserInfo->userphoto = [photo retain];
@@ -1432,6 +1445,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     else
         return [[allStixOrder objectForKey:stixStringID] intValue];
+}
+
+-(NSMutableSet*)getFriendsList {
+    return allFriends;
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;

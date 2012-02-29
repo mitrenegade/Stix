@@ -6,6 +6,9 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#define USING_KIIP 0
+#define USING_FACEBOOK 0
+
 #import <UIKit/UIKit.h>
 
 #import "TagViewController.h"
@@ -28,7 +31,10 @@
 #import "StoreViewController.h"
 #import "StoreViewShell.h"
 #import "AlertPrompt.h"
+
+#if USING_FACEBOOK
 #import "FBConnect.h"
+#endif
 #import "VerticalFeedController.h"
 
 enum notification_bookmarks {
@@ -58,10 +64,13 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
+
+
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
 @interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate,
+
 #if USING_FACEBOOK
     FBSessionDelegate,
 #endif
@@ -93,6 +102,7 @@ struct UserInfo {
     
     NSMutableDictionary * allStix;
     NSMutableDictionary * allStixOrder;
+    NSMutableSet * allFriends;
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
@@ -204,6 +214,7 @@ struct UserInfo {
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
 @property (nonatomic, retain) NSMutableDictionary * allStix;
 @property (nonatomic, retain) NSMutableDictionary * allStixOrder;
+@property (nonatomic, retain) NSMutableSet * allFriends;
 @property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;

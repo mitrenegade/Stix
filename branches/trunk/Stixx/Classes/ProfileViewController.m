@@ -103,12 +103,14 @@
         NSMutableData * data = [d valueForKey:@"auxiliaryData"];
         NSMutableDictionary * auxiliaryData;
         NSMutableDictionary * stixOrder;
+        NSMutableSet * friendsList;
         @try {
             auxiliaryData = [KumulosData dataToDictionary:data];
             if (auxiliaryData == nil || ![auxiliaryData isKindOfClass:[NSMutableDictionary class]]) {
                 
                 // set to nil to make delegate generate default one
                 stixOrder = nil;
+                friendsList = nil;
             }
             else {
                 stixOrder = [auxiliaryData objectForKey:@"stixOrder"]; 
@@ -116,19 +118,22 @@
                 NSEnumerator *e = [auxiliaryData keyEnumerator];
                 id key;
                 while (key = [e nextObject]) {
-                    int ct = [[stix objectForKey:key] intValue];
+                    int ct = [[stix objectForKey:key] intValue];
                     if (ct != 0) {
                         int order = [[stixOrder objectForKey:key] intValue];
                         NSLog(@"Stix: %@ order %d", key, order); 
+                        if (order==29)
+                            NSLog(@"here!");
                     }
-                } 
-                 */
+                 }
+                */
+                friendsList = [auxiliaryData objectForKey:@"friendsList"];
             }
         }
         @catch (NSException* exception) { 
             NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
         }
-        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux andStixOrder:stixOrder];
+        [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux andStixOrder:stixOrder andFriendsList:friendsList];
         [newPhoto release];
     }
     else if ([theResults count] == 0)
@@ -285,8 +290,8 @@
 }
 
 -(void)updateFriendCount {
-    NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
-    int ct = [allUserPhotos count];
+    NSMutableSet * friendsList = [self.delegate getFriendsList];
+    int ct = [friendsList count];
     [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
 }
 

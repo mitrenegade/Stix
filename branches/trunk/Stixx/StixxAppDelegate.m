@@ -499,7 +499,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (lastViewController == friendController) // if we leave friend controller, start an update for next time
     {
         [self checkForUpdatePhotos];
-        lastCarouselView = [friendController carouselView];
+        //lastCarouselView = [friendController carouselView];
         [viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }

@@ -81,4 +81,35 @@
         @throw exception;
     }
 }
+
+// use this if the data to be stored into the archiver is of type dictionary
++(NSMutableSet *) dataToSet:(NSMutableData *) data{ 
+    @try {
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+        NSMutableSet * set = [unarchiver decodeObjectForKey:@"set"];
+        [unarchiver finishDecoding];
+        [unarchiver release];
+        //[data release];
+        return set;
+    }
+    @catch (NSException *exception) {
+        NSLog(@"DataToSet failed with exception %@", [exception reason]);
+        @throw exception;
+    }
+}
++(NSMutableData * ) setToData:(NSMutableSet *) set {
+    @try {
+        // used to be dictionaryToData
+        NSMutableData *data = [[NSMutableData alloc]init];
+        NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
+        [archiver encodeObject:set forKey:@"set"];
+        [archiver finishEncoding];
+        [archiver release];
+        return [data autorelease];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"SetToData failed with exception %@", [exception reason]);
+        @throw exception;
+    }
+}
 @end

@@ -14,5 +14,7 @@
 +(NSMutableArray *) dataToArray:(NSMutableData *) data; 
 +(NSMutableData * ) dictionaryToData:(NSMutableDictionary *) dict;
 +(NSMutableDictionary *) dataToDictionary:(NSMutableData *) data; 
++(NSMutableData * ) setToData:(NSMutableSet *) set;
++(NSMutableSet *) dataToSet:(NSMutableData *) data; 
 
 @end

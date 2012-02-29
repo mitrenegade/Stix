@@ -361,6 +361,13 @@ static int addUserStage;
         }
     }
     [auxInfo setValue:stixOrder forKey:@"stixOrder"];
+    
+    NSMutableSet * friendsList = [[NSMutableSet alloc] init];
+    [friendsList addObject:@"bobo"];
+    [friendsList addObject:@"willh103"];
+    [auxInfo setValue:friendsList forKey:@"friendsList"];
+
+    
     NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
     [kumulos updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
     [auxData release];

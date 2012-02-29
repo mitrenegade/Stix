@@ -102,6 +102,7 @@ struct UserInfo {
     
     NSMutableDictionary * allStix;
     NSMutableDictionary * allStixOrder;
+    NSMutableSet * allFriends;
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
@@ -213,6 +214,7 @@ struct UserInfo {
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
 @property (nonatomic, retain) NSMutableDictionary * allStix;
 @property (nonatomic, retain) NSMutableDictionary * allStixOrder;
+@property (nonatomic, retain) NSMutableSet * allFriends;
 @property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;

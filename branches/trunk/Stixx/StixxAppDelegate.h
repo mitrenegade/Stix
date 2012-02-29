@@ -6,6 +6,9 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#define USING_KIIP 0
+#define USING_FACEBOOK 0
+
 #import <UIKit/UIKit.h>
 
 #import "TagViewController.h"
@@ -28,7 +31,10 @@
 #import "StoreViewController.h"
 #import "StoreViewShell.h"
 #import "AlertPrompt.h"
+
+#if USING_FACEBOOK
 #import "FBConnect.h"
+#endif
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -56,9 +62,6 @@ struct UserInfo {
 //    bool isFirstTimeUser;
 //    bool hasAccessedStore;
 };
-
-#define USING_KIIP 0
-#define USING_FACEBOOK 0
 
 @interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate,
 #if USING_FACEBOOK

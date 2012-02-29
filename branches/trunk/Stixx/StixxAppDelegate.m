@@ -876,7 +876,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder release];
         
         // update kumulos version of tag with most recent tags
-        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
+        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix2:theAuxStixData];
         // immediately notify
         // if adding to own pix, do not notify or broadcast
         if (![myUserInfo->username isEqualToString:tag.username]) {

@@ -112,15 +112,17 @@
             }
             else {
                 stixOrder = [auxiliaryData objectForKey:@"stixOrder"]; 
+                /*
                 NSEnumerator *e = [auxiliaryData keyEnumerator];
                 id key;
                 while (key = [e nextObject]) {
-                    int ct = [[auxiliaryData objectForKey:key] intValue];
+                    int ct = [[stix objectForKey:key] intValue];
                     if (ct != 0) {
-                        int order = [[auxiliaryData objectForKey:key] intValue];
+                        int order = [[stixOrder objectForKey:key] intValue];
                         NSLog(@"Stix: %@ order %d", key, order); 
                     }
-                }    
+                } 
+                 */
             }
         }
         @catch (NSException* exception) { 

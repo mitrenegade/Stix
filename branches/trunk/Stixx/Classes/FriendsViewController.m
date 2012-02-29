@@ -15,7 +15,7 @@
 @synthesize delegate;
 @synthesize buttonInstructions;
 @synthesize buttonBack;
-@synthesize carouselView;
+//@synthesize carouselView;
 @synthesize activityIndicator;
 @synthesize scrollView;
 @synthesize friendPages;
@@ -55,14 +55,14 @@
     */
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
-    [delegate didCreateBadgeView:carouselView];
+    //[delegate didCreateBadgeView:carouselView];
   
     // add badgeView and scrollView as subviews of feedview; set underlay
     // important: in the beginning, buttonInstructions is the underlay for badgeView which means
     // any touch events get fowarded to buttonInstructions, as long as it is above the view 
     // for the scrollview
     [self.view insertSubview:scrollView belowSubview:buttonInstructions];
-    [self.view insertSubview:carouselView aboveSubview:scrollView];
+    //[self.view insertSubview:carouselView aboveSubview:scrollView];
     //[carouselView setUnderlay:buttonInstructions];
     //[carouselView setHidden:YES];
 

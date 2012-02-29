@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CarouselView.h"
+//#import "CarouselView.h"
 #import "PagedScrollView.h"
 #import "LoadingAnimationView.h"
 #import "UserProfileViewController.h"
@@ -28,14 +28,14 @@
 
 @end
 
-@interface FriendsViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, UserProfileViewDelegate>
+@interface FriendsViewController : UIViewController </*BadgeViewDelegate, */PagedScrollViewDelegate, UserProfileViewDelegate>
 {
     NSMutableDictionary *userPhotos;
     NSMutableDictionary *userPhotoFrames;
     NSMutableArray * friendPages;
     IBOutlet UIButton * buttonInstructions;
     IBOutlet UIButton * buttonBack;
-    CarouselView * carouselView;
+    //CarouselView * carouselView;
     
     PagedScrollView *scrollView;	
     LoadingAnimationView * activityIndicator;
@@ -53,7 +53,7 @@
 @property (nonatomic, assign) NSObject<FriendsViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) IBOutlet UIButton * buttonBack;
-@property (nonatomic, retain) CarouselView * carouselView;
+//@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, retain) NSString * currentProfile;

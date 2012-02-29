@@ -49,7 +49,11 @@ enum {
 @optional
 
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
+-(void)didTapStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
 -(void)didStartDrag;
+
+-(void)didDismissCarouselTab;
+-(void)didExpandCarouselTab;
 @end
 
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{
@@ -99,7 +103,7 @@ enum {
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos;
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
-+(void)InitializeFromDiskWithStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods;
++(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods andStixCategories:(NSMutableDictionary*)savedStixCategories;
 
 // returns stixStringID for given badge type. THIS IS DONE FOR BACKWARD COMPATIBILITY.
 // Type is still drawn from a static list by some old builds.
@@ -119,6 +123,8 @@ enum {
 +(NSMutableDictionary *)GetAllStixViewsForSave;
 +(NSMutableDictionary *)GetAllStixDescriptorsForSave;
 +(NSMutableDictionary *)GetAllStixLikelihoodsForSave;
++(NSMutableArray *)GetAllStixStringIDsForSave;
++(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
 
 @end

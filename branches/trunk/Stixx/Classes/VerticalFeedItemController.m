@@ -1,15 +1,21 @@
 //
-//  FeedItemViewController.m
+//  VerticalFeedItemController.m
+//  Stixx
+//
+//  Created by Bobby Ren on 2/22/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//
+//
+//  VerticalFeedItemController.m
 //  ARKitDemo
 //
 //  Created by Administrator on 9/13/11.
 //  Copyright 2011 Neroh. All rights reserved.
 //
 
-#import "FeedItemViewController.h"
+#import "VerticalFeedItemController.h"
 
-@implementation FeedItemViewController
-
+@implementation VerticalFeedItemController
 
 @synthesize labelName;
 @synthesize labelComment;
@@ -27,20 +33,20 @@
 @synthesize stixView;
 @synthesize locationIcon;
 /*
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
+ - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+ {
+ self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+ if (self) {
+ // Custom initialization
+ }
+ return self;
+ }
  */
 
 -(id)init
 {
 	// call superclass's initializer
-	self = [super initWithNibName:@"FeedItemViewController" bundle:nil];
+	self = [super initWithNibName:@"VerticalFeedItemController" bundle:nil];
     
     //nameString = [NSString alloc];
     //commentString = [NSString alloc];
@@ -82,7 +88,7 @@
 -(void)initStixView:(Tag*)tag {
     imageData = tag.image;
     
-    //NSLog(@"FeedItemView: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
+    //NSLog(@"VerticalFeedItem: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
     
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
@@ -122,17 +128,17 @@
     {
         num = interval / 60;
         if (num == 1)
-            unit = @"min";
+            unit = @"min ago";
         else
-            unit = @"min";
+            unit = @"mins ago";
     }
     else if (interval < 86400)
     {
         num = interval / 3600;
         if (num == 1)
-            unit = @"hr";
+            unit = @"hour ago";
         else
-            unit = @"hr";
+            unit = @"hours ago";
     }
     else //if (interval >= 86400)
     {
@@ -151,7 +157,7 @@
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    
-    [labelTime setText:[FeedItemViewController getTimeLabelFromTimestamp:timestamp]];
+    [labelTime setText:[VerticalFeedItemController getTimeLabelFromTimestamp:timestamp]];
 } 
 
 -(void)populateWithCommentCount:(int)count {
@@ -242,6 +248,25 @@
 
 -(void)peelAnimationDidCompleteForStix:(int)index {
     [self.delegate didPerformPeelableAction:0 forAuxStix:index];
+}
+
+
+/******** process clicks *******/
+/*
+-(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	int drag = 0;    
+}
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	int drag = 1;
+}
+ */
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	//if (drag != 1)
+	{
+        UITouch *touch = [[event allTouches] anyObject];	
+        CGPoint location = [touch locationInView:self.view];
+        [self.delegate didClickAtLocation:location withFeedItem:self];
+    }
 }
 
 @end

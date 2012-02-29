@@ -79,6 +79,6 @@
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
 -(void)doPeelAnimationForStix:(int)index;
 
--(void)didTouchAtLocation:(CGPoint)location;
+-(int)findPeelableStixAtLocation:(CGPoint)location;
 -(void)transformBoxShowAtFrame:(CGRect)frame;
 @end

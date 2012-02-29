@@ -48,10 +48,11 @@
 -(void)viewDidLoad {
     [super viewDidLoad];
 	/****** init badge view ******/
+    /*
 	carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X, SHELF_STIX_Y, 320, SHELF_STIX_SIZE)];
-    
+    */
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
     [delegate didCreateBadgeView:carouselView];
@@ -62,8 +63,8 @@
     // for the scrollview
     [self.view insertSubview:scrollView belowSubview:buttonInstructions];
     [self.view insertSubview:carouselView aboveSubview:scrollView];
-    [carouselView setUnderlay:buttonInstructions];
-    [carouselView setHidden:YES];
+    //[carouselView setUnderlay:buttonInstructions];
+    //[carouselView setHidden:YES];
 
     if (activityIndicator == nil)
         activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
@@ -89,8 +90,8 @@
     buttonInstructions = nil;
     [activityIndicator release];
     activityIndicator = nil;
-    [carouselView release];
-    carouselView = nil;
+    //[carouselView release];
+    //carouselView = nil;
     [scrollView release];
     scrollView = nil;
     [userPhotoFrames release];
@@ -113,11 +114,11 @@
 
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
     [self forceReloadAll];    
-    [carouselView resetBadgeLocations];    
+    //[carouselView resetBadgeLocations];    
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [carouselView resetBadgeLocations];    
+    //[carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -143,8 +144,8 @@
 -(IBAction)closeInstructions:(id)sender
 {
     [buttonInstructions setHidden:YES];
-    [carouselView setHidden:NO];
-    [carouselView setUnderlay:scrollView];
+    //[carouselView setHidden:NO];
+    //[carouselView setUnderlay:scrollView];
 }
 
 /******* badge view delegate ******/
@@ -163,7 +164,7 @@
     }
     if (friendName != nil)
         [self.delegate didSendGiftStix:stixStringID toUsername:friendName];
-    [carouselView resetBadgeLocations];
+    //[carouselView resetBadgeLocations];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

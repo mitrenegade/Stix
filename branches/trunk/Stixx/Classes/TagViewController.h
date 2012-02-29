@@ -64,6 +64,7 @@
     TagDescriptorController * descriptorController;
     bool descriptorIsOpen;
     bool needToShowCamera;
+    int drag;
 }
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) CarouselView * carouselView;
@@ -100,4 +101,5 @@
 -(IBAction)didClickCloseButton:(id)sender;
 -(IBAction)didClickZoomIn:(id)sender;
 -(IBAction)didClickZoomOut:(id)sender;
+-(void)didClickAtLocation:(CGPoint)location;
 @end

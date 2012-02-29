@@ -83,7 +83,8 @@
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
     carouselView.delegate = self;
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [carouselView setDismissedTabY:380];
+    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
     
     [self.view insertSubview:carouselView aboveSubview:scrollView];
     [carouselView setUnderlay:scrollView];
@@ -91,7 +92,8 @@
 }
 
 -(void)reloadCarouselView {
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
+    [carouselView setDismissedTabY:380];
+    [[self carouselView] reloadAllStixWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:scrollView];
 }
@@ -151,9 +153,7 @@
 
 - (void)dealloc 
 {
-	[scrollView release];
 	[allTags release];
-	[scrollView release];
     [activityIndicator release];
     [nameLabel release];
     
@@ -212,8 +212,9 @@
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [auxView.view setFrame:frameShifted];
+#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:auxView.view];
-    
+#endif    
     auxView.delegate = self;
     [auxView initStixView:t];
     [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
@@ -276,38 +277,39 @@
      */
 
     Tag * tag = [allTags objectAtIndex:index];
-    
-    NSString * name = tag.username;
-    NSString * descriptor = tag.descriptor;
-    NSString * comment = tag.comment;
-    NSString * locationString = tag.locationString;
-    //int tagID = [tag.tagID intValue];
-    //UIImage * image = tag.image;
-    //NSLog(@"Creating feed item %d at index %d: name %@ comment %@ dims %f %f\n", tagID, index, name, comment, image.size.width, image.size.height);
-    
-    FeedItemViewController * feedItem = [[[FeedItemViewController alloc] init] autorelease];
-    [feedItem setDelegate:self];
-    [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
-    [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-    [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-    UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
-    if (photo)
-    {
-        //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
-        [feedItem populateWithUserPhoto:photo];
-        [photo autorelease]; // MRC
+    FeedItemViewController * feedItem = [feedItems objectForKey:tag.tagID];
+    if (!feedItem) {
+        NSString * name = tag.username;
+        NSString * descriptor = tag.descriptor;
+        NSString * comment = tag.comment;
+        NSString * locationString = tag.locationString;
+        //int tagID = [tag.tagID intValue];
+        //UIImage * image = tag.image;
+        //NSLog(@"Creating feed item %d at index %d: name %@ comment %@ dims %f %f\n", tagID, index, name, comment, image.size.width, image.size.height);
+        
+        feedItem = [[[FeedItemViewController alloc] init] autorelease];
+        [feedItem setDelegate:self];
+        [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
+        [feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+        [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+        UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
+        if (photo)
+        {
+            //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
+            [feedItem populateWithUserPhoto:photo];
+            [photo autorelease]; // MRC
+        }
+        // add timestamp
+        [feedItem populateWithTimestamp:tag.timestamp];
+        // add badge and counts
+        [feedItem initStixView:tag];
+        feedItem.tagID = [tag.tagID intValue];
+        int count = [self.delegate getCommentCount:feedItem.tagID];
+        [feedItem populateWithCommentCount:count];
+        
+        // this object must be retained so that the button actions can be used
+        [feedItems setObject:feedItem forKey:tag.tagID];
     }
-    // add timestamp
-    [feedItem populateWithTimestamp:tag.timestamp];
-    // add badge and counts
-    [feedItem initStixView:tag];
-    feedItem.tagID = [tag.tagID intValue];
-    int count = [self.delegate getCommentCount:feedItem.tagID];
-    [feedItem populateWithCommentCount:count];
-    
-    // this object must be retained so that the button actions can be used
-    [feedItems setObject:feedItem forKey:tag.tagID];
-    
     return feedItem.view;
 }
 
@@ -444,7 +446,7 @@
     CGPoint locationInStixView = locationInFeedItem;
     locationInStixView.x -= feedItem.stixView.frame.origin.x;
     locationInStixView.y -= feedItem.stixView.frame.origin.y;
-    [[feedItem stixView] didTouchAtLocation:locationInStixView];
+    [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];
 }
 
 -(void)didDismissZoom {
@@ -466,7 +468,9 @@
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [commentView.view setFrame:frameShifted];
+#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:commentView.view];
+#endif
 }
     
 // hack: forced display of comment page

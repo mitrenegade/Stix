@@ -295,6 +295,7 @@ static NSDate * timestampStixTypes;
                          // change + marker to check
                          [self.delegate didGetStixFromStore:stixStringID];                         
                      }];  
+    [currTableController didGetStix:stixStringID];
 }
 
 /**** StoreCategories table delegate ****/

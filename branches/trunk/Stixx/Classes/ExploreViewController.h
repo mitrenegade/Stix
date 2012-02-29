@@ -13,7 +13,7 @@
 #import "Tag.h"
 #import "ZoomViewController.h"
 #import "LoadingAnimationView.h"
-#import "CarouselView.h"
+//#import "CarouselView.h"
 #import "StixView.h"
 
 @protocol ExploreViewDelegate
@@ -24,9 +24,9 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
-@interface ExploreViewController : UIViewController <BadgeViewDelegate, PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
+@interface ExploreViewController : UIViewController <PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
 {
-    CarouselView * carouselView; 
+    //CarouselView * carouselView; 
     PagedScrollView *scrollView;	
     NSObject<ExploreViewDelegate> * delegate;
     ZoomViewController * zoomViewController;
@@ -48,7 +48,7 @@
     Kumulos * k;
 }
 
-@property (nonatomic, retain) CarouselView * carouselView;
+//@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
@@ -58,8 +58,8 @@
 
 - (IBAction)refreshUpdates:(id)sender;
 -(void)getTagWithID:(int)id;
--(void)createCarouselView;
--(void)reloadCarouselView;
+//-(void)createCarouselView;
+//-(void)reloadCarouselView;
 -(IBAction)feedbackButtonClicked:(id)sender;
 
 @end

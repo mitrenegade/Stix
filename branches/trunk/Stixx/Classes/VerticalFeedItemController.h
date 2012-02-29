@@ -1,5 +1,19 @@
 //
-//  FeedItemViewController.h
+//  VerticalFeedItemController.h
+//  Stixx
+//
+//  Created by Bobby Ren on 2/22/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//
+//
+//  FeedViewController.h
+//  ARKitDemo
+//
+//  Created by Administrator on 8/17/11.
+//  Copyright 2011 Neroh. All rights reserved.
+//
+//
+//  VerticalFeedItemController.h
 //  ARKitDemo
 //
 //  Created by Administrator on 9/13/11.
@@ -12,19 +26,22 @@
 #import "OutlineLabel.h"
 #import "StixView.h"
 
-@protocol FeedItemViewDelegate 
+@class VerticalFeedItemController;
+
+@protocol VerticalFeedItemDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
 
 // forward from StixView
 -(NSString*)getUsername;
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
+-(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
 @end
 
-@interface FeedItemViewController : UIViewController <StixViewDelegate>{
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate>{
     
 	IBOutlet UILabel * labelName;
-//    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
+    //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
     IBOutlet UIImageView * labelDescriptorBG;
 	IBOutlet UILabel * labelDescriptor;
     IBOutlet UILabel * labelComment;
@@ -35,7 +52,7 @@
     IBOutlet UIImageView * userPhotoView;
     IBOutlet UIButton * addCommentButton;
     
-    NSObject<FeedItemViewDelegate> * delegate;    
+    NSObject<VerticalFeedItemDelegate> * delegate;    
     
     NSString * nameString;
     NSString * descriptorString;
@@ -45,7 +62,7 @@
     UIImageView * locationIcon;
     int commentCount;
     int tagID;
-   
+    
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
@@ -62,7 +79,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * addCommentButton;
 @property (nonatomic, assign) int tagID;
 @property (nonatomic, assign) int commentCount;
-@property (nonatomic, assign) NSObject<FeedItemViewDelegate> * delegate;   
+@property (nonatomic, assign) NSObject<VerticalFeedItemDelegate> * delegate;   
 @property (nonatomic, retain) StixView * stixView;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
@@ -73,5 +90,6 @@
 
 -(void)initStixView:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
-
 @end
+
+

@@ -9,7 +9,7 @@
 #import "ExploreViewController.h"
 
 @implementation ExploreViewController
-@synthesize carouselView;
+//@synthesize carouselView;
 @synthesize scrollView;
 @synthesize delegate;
 @synthesize buttonFeedback;
@@ -56,7 +56,7 @@
     [self.view insertSubview:scrollView belowSubview:[self buttonFeedback]];
 
     /*** create badgeView ***/
-    [self createCarouselView];
+    //[self createCarouselView];
 
     [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
@@ -66,7 +66,7 @@
 
 //	return self;
 }
-
+/*
 -(void)createCarouselView {
     if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
         [carouselView clearAllViews];
@@ -80,12 +80,13 @@
     [carouselView setUnderlay:scrollView];
     [delegate didCreateBadgeView:carouselView];
 }
-
+ 
 -(void)reloadCarouselView {
     [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
     [[self carouselView] removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:scrollView];
 }
+ */
 
 -(IBAction)refreshUpdates:(id)sender {
     [self forceReloadAll];
@@ -417,7 +418,7 @@
     [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
     [zoomViewController setLabel:label];
     [zoomViewController setStixUsingTag:tag];
-    [carouselView setUnderlay:zoomViewController.view];
+    //[carouselView setUnderlay:zoomViewController.view];
     isZooming = NO;
     
 }
@@ -459,7 +460,7 @@
      ];
      */
     isZooming = NO;
-    [carouselView setUnderlay:scrollView];
+    //[carouselView setUnderlay:scrollView];
     [zoomViewController.view removeFromSuperview];
 }
 
@@ -479,7 +480,7 @@
 #pragma mark - View lifecycle
 
 - (void)viewDidAppear:(BOOL)animated {
-    [carouselView resetBadgeLocations];    
+    //[carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -497,7 +498,7 @@
     [alert setMessage:@"Adding Stix in the Explore view coming soon!"];
     [alert show];
     [alert release];
-    [carouselView resetBadgeLocations];
+    //[carouselView resetBadgeLocations];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -510,8 +511,8 @@
 
 -(void)viewDidUnload {
     
-    [carouselView release];
-    carouselView = nil;
+    //[carouselView release];
+    //carouselView = nil;
     [scrollView release];
     scrollView = nil;
     [activityIndicator release];
@@ -521,7 +522,7 @@
 }
 -(void)dealloc {
     [k release];
-    [carouselView release];
+    //[carouselView release];
     [scrollView release];
     [activityIndicator release];
     [super dealloc];

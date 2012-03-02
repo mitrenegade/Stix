@@ -507,7 +507,8 @@ static int lastContentOffsetY = 0;
     }
     [carouselTab setFrame:tabFrameHidden];
     [scrollView setFrame:carouselFrameHidden];
-    [self.delegate didDismissCarouselTab];
+    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
+        [self.delegate didDismissCarouselTab];
 }
 -(void)carouselTabDismissWithStix:(UIImageView*)stix {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
@@ -523,7 +524,8 @@ static int lastContentOffsetY = 0;
     
     [carouselTab setFrame:tabFrameHidden];
     [scrollView setFrame:carouselFrameHidden];
-    [self.delegate didDismissCarouselTab];
+    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
+        [self.delegate didDismissCarouselTab];
 }
 -(void)carouselTabDismissRemoveStix {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
@@ -535,7 +537,8 @@ static int lastContentOffsetY = 0;
     [self setStixSelected:nil];
     [carouselTab setFrame:tabFrameHidden];
     [scrollView setFrame:carouselFrameHidden];
-    [self.delegate didDismissCarouselTab];
+    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
+        [self.delegate didDismissCarouselTab];
 }
 -(void)carouselTabExpand {
     CGRect tabFrameShow = CGRectMake(0, expandedTabY, 320, 400);
@@ -554,7 +557,8 @@ static int lastContentOffsetY = 0;
     }
     [carouselTab setFrame:tabFrameShow];
     [scrollView setFrame:carouselFrameShow];
-    [self.delegate didExpandCarouselTab];
+    if ([self.delegate respondsToSelector:@selector(didExpandCarouselTab)])
+        [self.delegate didExpandCarouselTab];
 }
 
 -(void)didClickShowCarousel:(id)sender {

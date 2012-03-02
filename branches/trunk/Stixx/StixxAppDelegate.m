@@ -140,7 +140,8 @@ static int init=0;
 //    [self initializeBadges];
     [BadgeView InitializeGenericStixTypes];
 
-    [self initializeBadges];
+    [self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
+    //[self initializeBadges];
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
@@ -494,7 +495,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     {
         [self.tabBarController setButtonStateNormal]; // disable highlighted button
         [tagViewController dismissModalViewControllerAnimated:NO];
-        lastCarouselView = [tagViewController carouselView];
+        lastCarouselView = [tagViewController.descriptorController carouselView];
         [viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
@@ -599,7 +600,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // End the Kiip session when the user leaves the app
     [[KPManager sharedManager] endSession];
 #endif
-    [mainController dismissModalViewControllerAnimated:YES]; 
+    //[mainController dismissModalViewControllerAnimated:YES]; 
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -607,12 +608,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // Start a Kiip session when the user enters the app
     [[KPManager sharedManager] startSession];
 #endif
+    /*
     [mainController presentModalViewController:camera animated:YES];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [camera setCameraOverlayView:tabBarController.view];
-
+     */
     // force some updates to badgeview types
-    [self initializeBadges];
+    [self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
+    //[self initializeBadges];
 }
 
 - (void)application:(UIApplication *)application 
@@ -904,7 +907,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder release];
         
         // update kumulos version of tag with most recent tags
-        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix2:theAuxStixData];
+        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         // immediately notify
         // if adding to own pix, do not notify or broadcast
         if (![myUserInfo->username isEqualToString:tag.username]) {
@@ -1389,7 +1392,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [storeViewController reloadTableButtons];
     //[profileController updatePixCount];    
 
-    [self saveDataToDisk];
+    [self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+    //[self saveDataToDisk];
 }
 
 -(void)didLogout {
@@ -1404,7 +1408,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         myUserInfo->usertagtotal = 0;
         myUserInfo->bux = 0;
-        [self saveDataToDisk];
+        [self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+        //[self saveDataToDisk];
         
         [allStix removeAllObjects];
         [profileController updatePixCount];
@@ -1490,7 +1495,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([self getStixCount:stixStringID] == 0) {
         // ran out of a nonpermanent stix
         [feedController.carouselView carouselTabDismissRemoveStix];
-        [tagViewController.carouselView carouselTabDismissRemoveStix];
+        [tagViewController.descriptorController.carouselView carouselTabDismissRemoveStix];
     }
     
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
@@ -1738,7 +1743,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #else
     [feedController reloadCarouselView];
     //[exploreController reloadCarouselView];
-    [tagViewController reloadCarouselView];
+    [tagViewController.descriptorController reloadCarouselView];
 #endif
 }
 

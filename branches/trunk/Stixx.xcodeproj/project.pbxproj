@@ -298,6 +298,9 @@
 		9EF297881485F5BE00B1782C /* input.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF297861485F5BE00B1782C /* input.png */; };
 		9EF2979B1487347C00B1782C /* LoginSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF297991487347C00B1782C /* LoginSplashController.m */; };
 		9EF2979C1487347C00B1782C /* LoginSplashController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EF2979A1487347C00B1782C /* LoginSplashController.xib */; };
+		9EF94F501500000600372970 /* import.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF94F4F1500000600372970 /* import.png */; };
+		9EF94F521500001800372970 /* camerabutton.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF94F511500001800372970 /* camerabutton.png */; };
+		9EF94F54150002F000372970 /* blackbar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EF94F53150002F000372970 /* blackbar.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -728,6 +731,9 @@
 		9EF297981487347C00B1782C /* LoginSplashController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginSplashController.h; sourceTree = "<group>"; };
 		9EF297991487347C00B1782C /* LoginSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginSplashController.m; sourceTree = "<group>"; };
 		9EF2979A1487347C00B1782C /* LoginSplashController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoginSplashController.xib; sourceTree = "<group>"; };
+		9EF94F4F1500000600372970 /* import.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = import.png; sourceTree = "<group>"; };
+		9EF94F511500001800372970 /* camerabutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = camerabutton.png; sourceTree = "<group>"; };
+		9EF94F53150002F000372970 /* blackbar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blackbar.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1383,6 +1389,9 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9EF94F53150002F000372970 /* blackbar.png */,
+				9EF94F511500001800372970 /* camerabutton.png */,
+				9EF94F4F1500000600372970 /* import.png */,
 				9E919A4014FB0D1900D03085 /* tab_close_icon.png */,
 				9E919A4114FB0D1900D03085 /* tab_open_icon.png */,
 				9E919A4214FB0D1900D03085 /* tab_open.png */,
@@ -1779,6 +1788,9 @@
 				9E919A4314FB0D1A00D03085 /* tab_close_icon.png in Resources */,
 				9E919A4414FB0D1A00D03085 /* tab_open_icon.png in Resources */,
 				9E919A4514FB0D1A00D03085 /* tab_open.png in Resources */,
+				9EF94F501500000600372970 /* import.png in Resources */,
+				9EF94F521500001800372970 /* camerabutton.png in Resources */,
+				9EF94F54150002F000372970 /* blackbar.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2019,7 +2031,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -2049,7 +2061,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
@@ -2061,7 +2073,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -2092,7 +2104,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

@@ -73,8 +73,10 @@
 @property (nonatomic, assign) CGAffineTransform referenceTransform;
 
 -(void)initializeWithImage:(UIImage*)imageData;
+-(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;
 -(void)populateWithAuxStixFromTag:(Tag*)tag;
 -(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation*/;
+-(void)updateStixForManipulation:(NSString*)stixStringID;
 -(bool)isStixPeelable:(int)index;
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
 -(void)doPeelAnimationForStix:(int)index;

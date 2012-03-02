@@ -43,6 +43,19 @@
     [imageView release];
     _activeRecognizers = [[NSMutableSet alloc] init];
 }
+-(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame{
+    // context frame in which a stix will be dropped - different if we are dropping directly 
+    // onto stix View or dropping it from a feed or a live camera
+    originalImageSize = CGSizeMake(contextFrame.size.width, contextFrame.size.height);
+    CGRect frame = self.frame;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
+    UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
+    [imageView setImage:imageData];
+    [self addSubview:imageView];
+    [imageView release];
+    _activeRecognizers = [[NSMutableSet alloc] init];
+}
 
 // originally initializeWithImage: withStix:
 // this function creates a temporary stix object that can be manipulated
@@ -105,6 +118,15 @@
     showTransformCanvas = YES;
     transformCanvas = nil;
     [self transformBoxShowAtFrame:stix.frame];
+}
+
+-(void)updateStixForManipulation:(NSString*)stixStringID {
+    CGRect frame = stix.frame;
+    [stix removeFromSuperview];
+    [stix release];
+    stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    [stix setFrame:frame];
+    [self addSubview:stix];
 }
 
 -(void)populateWithAuxStixFromTag:(Tag *)tag {

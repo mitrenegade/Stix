@@ -33,7 +33,7 @@
     
     NSObject<UserProfileViewDelegate> *delegate;
     
-        Kumulos * k;
+    Kumulos * k;
 }
 
 @property (nonatomic, retain) IBOutlet UIButton * stixCountButton;

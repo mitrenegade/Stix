@@ -6,7 +6,6 @@
 @implementation TagViewController
 
 @synthesize delegate;
-@synthesize carouselView;
 @synthesize cameraController;
 @synthesize arViewController;
 @synthesize rectView;
@@ -21,8 +20,8 @@
 @synthesize cameraDeviceButton;
 @synthesize flashModeButton;
 @synthesize buttonClose;
-@synthesize buttonZoomIn;
-@synthesize buttonZoomOut;
+@synthesize buttonTakePicture;
+@synthesize buttonImport;
 
 - (id)init {
 	
@@ -38,6 +37,7 @@
 //-(void)viewDidLoad {
 //	[super viewDidLoad];
     /****** init AR view ******/
+    /*
     arViewController = [[ARViewController alloc] init];
 	CLLocation *newCenter = [[CLLocation alloc] initWithLatitude:42.369182 longitude:-71.080427];
 	arViewController.scaleViewsBasedOnDistance = YES;
@@ -45,6 +45,7 @@
 	arViewController.rotateViewsBasedOnPerspective = NO;
 	arViewController.centerLocation = newCenter;
 	[newCenter release];
+     */
     descriptorIsOpen = NO;
     needToShowCamera = YES;
     
@@ -122,69 +123,7 @@
 -(void) viewDidLoad {
     [super viewDidLoad];
 
-    /****** init badge view ******/
-    [self createCarouselView];
-#if 0
-    badgeView = [[BadgeView alloc] initWithFrame:self.view.frame];
-    badgeView.delegate = self;
-    [badgeView setUnderlay:buttonInstructions];
-    [badgeView setShowStixCounts:NO]; // do not show or change stix counts
-    [delegate didCreateBadgeView:badgeView];
-	[badgeView addSubview:arViewController.view];
-    [self.view addSubview:badgeView];
-#endif
 }
-
--(void)createCarouselView {
-    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
-        [carouselView clearAllViews];
-        [carouselView release];
-    }
-    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-    carouselView.delegate = self;
-    // to set the correct underlay:
-    // if no underlay is set, the hittest order is carouselView->badgeView->self.view
-    // but badgeView will incorrectly toggle a hit because it contains badgeFrames
-    // so we make carouselView return its underlay to skip badgeView. If the underlay is
-    // another subview in self.view's subview, it will then cause hittest to traverse
-    // all of self.view's subviews after carouselView natually, thus enabling all other buttons
-    // and touch interactions
-//    [carouselView setUnderlay:flashModeButton];
-    [carouselView setDismissedTabY:443];
-    [carouselView setExpandedTabY:350];
-    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
-    //[carouselView toggleHideShelf:YES];
-    [carouselView setAllowTap:YES];
-    [carouselView setTapDefaultOffset:CGPointMake(carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
-    
-    [carouselView addSubview:arViewController.view];
-//    [self.view insertSubview:carouselView belowSubview:buttonClose];
-    [self.view insertSubview:carouselView belowSubview:camera.view];
-//    [self.view addSubview:carouselView];
-//    [self.view insertSubview:carouselView atIndex:[[self.view subviews] count]];
-//    [self.view insertSubview:carouselView atIndex:0];
-    [delegate didCreateBadgeView:carouselView];
-}
-
--(void)reloadCarouselView {
-    // hack: if carouselView is not scrolling, it is being eclipsed by the tabbar
-    [[self carouselView] reloadAllStix]; //WithFrame:CGRectMake(0,carouselView.dismissedTabY+60,320,SHELF_STIX_SIZE)];
-    // HACK: make sure carouselView doesn't prevent other buttons from being touched
-    // this is different because of the weird camera layer that doesn't exist in others (feedView, exploreView)
-    [[self carouselView] removeFromSuperview];    
-    [self.buttonClose removeFromSuperview];
-    [self.flashModeButton removeFromSuperview];
-    [self.cameraDeviceButton removeFromSuperview];
-    [self.buttonZoomIn removeFromSuperview];
-    [self.buttonZoomOut removeFromSuperview];
-    [self.view addSubview:carouselView];
-    [self.view addSubview:buttonClose];
-    [self.view addSubview:flashModeButton];
-    [self.view addSubview:cameraDeviceButton];
-    [self.view addSubview:buttonZoomIn];
-    [self.view addSubview:buttonZoomOut];
-}
-
 // called by main delegate to add tabBarView to camera overlay
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView
 {
@@ -199,8 +138,8 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [buttonZoomIn setHidden:YES];
-    [buttonZoomOut setHidden:YES];
+    //[buttonZoomIn setHidden:YES];
+    //[buttonZoomOut setHidden:YES];
 /*    
     NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
  */    
@@ -218,8 +157,6 @@
         needToShowCamera = NO;
     }
 #endif
-    [carouselView resetBadgeLocations];
-    //[badgeView resetBadgeLocations];
     
     [self updateCameraControlButtons];
 	[super viewDidAppear:animated];
@@ -264,57 +201,6 @@
     [super dealloc];
 }
 
-// BadgeViewDelegate function
-#if 0
--(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
-    // remove from scrollView and onto carouselView
-    [badge setCenter:rectView.center];
-    [self.carouselView addSubview:badge];
-    [self didDropStix:badge ofType:stixStringID];
-}
-#else
--(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
-    // selection of a stix to use from the carousel
-    [self.carouselView carouselTabDismissWithStix:badge];
-    [self.carouselView setStixSelected:stixStringID];
-}
-#endif
-
--(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
-    // do not dismiss because tab is already minimized; dismissing will remove the current stix type
-    [self didDropStix:badge ofType:stixStringID];
-}
-
--(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
-    [carouselView carouselTabDismiss];
-    [self didDropStix:badge ofType:stixStringID];
-}
-
--(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID{
-    [[self camera] takePicture];
-    //[badge removeFromSuperview];
-    badgeFrame = badge.frame;
-    // save frame of badge relative to cropped image
-    //CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
-    badgeFrame.origin.x = badgeFrame.origin.x - rectView.frame.origin.x;
-    badgeFrame.origin.y = badgeFrame.origin.y - rectView.frame.origin.y;// + statusFrame.size.height;    
-    selectedStixStringID = stixStringID;
-}
-
--(int)getStixCount:(NSString*)stixStringID {
-    return [self.delegate getStixCount:stixStringID];
-}
-
--(int)getStixOrder:(NSString*)stixStringID;
-{
-    return [self.delegate getStixOrder:stixStringID];
-}
-
--(void)didStartDrag {
-    [self.carouselView carouselTabDismiss];
-    [self.buttonInstructions setHidden:YES];
-}
-
 - (void)cameraDidTakePicture:(id)sender {
 	// called by BTLFullScreenCameraController
 	// set a title
@@ -325,7 +211,6 @@
     
     [descriptorController setDelegate:self];
     [descriptorController setBadgeFrame:badgeFrame];
-    [descriptorController setStixStringID:selectedStixStringID];
 #if !TARGET_IPHONE_SIMULATOR
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -335,12 +220,10 @@
 }
 
 - (void)clearTags {
-    [arViewController removeAllCoordinates];
+    //[arViewController removeAllCoordinates];
 }
 
 -(void)didCancelAddDescriptor {
-    [carouselView resetBadgeLocations];
-    
     //[[UIApplication sharedApplication] setStatusBarHidden:YES];
     //[self.camera dismissModalViewControllerAnimated:YES];
     [self.camera setCameraOverlayView:self.view];
@@ -349,7 +232,7 @@
     [self viewDidAppear:NO];    
 }
 
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location andStixCenter:(CGPoint)center /*andScale:(float)stixScale andRotation:(float)stixRotation */andTransform:(CGAffineTransform)transform
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location withStix:(NSString*)stixStringID andStixCenter:(CGPoint)center andTransform:(CGAffineTransform)transform
 {
     ARCoordinate * newCoord;
     NSString * desc = descriptor;
@@ -378,7 +261,7 @@
         desc = @"";
         com = @"";
     }
-    newCoord = [arViewController createCoordinateWithLabel:desc];
+    //newCoord = [arViewController createCoordinateWithLabel:desc];
     
     // check if user is logged in
     if ([delegate isLoggedIn] == NO)
@@ -408,19 +291,18 @@
     NSLog(@"TagViewController: Badge frame added at %f %f and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
     [tag addImage:image];
     [tag addARCoordinate:newCoord];
-    [tag addStix:selectedStixStringID withLocation:center /*withScale:stixScale withRotation:stixRotation*/ withTransform:transform withPeelable:NO];
+    if (stixStringID != nil)
+        [tag addStix:stixStringID withLocation:center withTransform:transform withPeelable:NO];
     // backwards compatibility
-    [tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
-    [tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
-    for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
-        [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
-        [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
-    }
+    //[tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    //[tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    //for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+    //    [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
+    //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    //}
     [image release];
     [self.delegate didCreateNewPix:tag];
     [tag release];
-    
-    [carouselView resetBadgeLocations];
     
     needToShowCamera = YES;
     descriptorIsOpen = NO;
@@ -429,10 +311,10 @@
 
 
 - (void)addCoordinateOfTag:(Tag*)tag {
-    if (tag.coordinate)
-        [arViewController addCoordinate:[tag coordinate]];
+    //if (tag.coordinate)
+    //    [arViewController addCoordinate:[tag coordinate]];
     // this error is handled right now by adding a default ARCoordinate
-    else
+    //else
         NSLog(@"Added invalid coordinate for tag: %i", [tag.tagID intValue]);
     //else
     //    [self.delegate failedToAddCoordinateOfTag:tag];
@@ -450,30 +332,30 @@
 
 /*** camera delegate ***/
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    if (photoAlbumOpened) {
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [self.camera dismissModalViewControllerAnimated:YES];
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    }
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
-    UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
+    //UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
     UIImage * newPhoto; 
-    //newPhoto = [UIImage imageNamed:@"friend1.png"];
-    if (editedPhoto)
-    {
-        // shouldn't go here
-        newPhoto = editedPhoto;
-    }
-    else
-    {
-        newPhoto = originalPhoto;
-    }
+    newPhoto = originalPhoto;
     
 	UIImage *baseImage = newPhoto;//[info objectForKey:UIImagePickerControllerOriginalImage];
 	if (baseImage == nil) return;
-	
+    UIImageOrientation or = [baseImage imageOrientation];
+    // orientation 3 is normal camera use, orientation 0 is landscape mode
+	    
 	// save composite
     // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
     // that means the actual image is 320x428.42 on the iphone
     
     // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
-    if (1) {
-        CGSize newsize = CGSizeMake(1000, 2592*1000/1936.0);
+    if (!photoAlbumOpened) {
+        CGSize newsize = CGSizeMake(1000, 1000*2592.0/1936.0);
+        if (or == 0 && !photoAlbumOpened)
+            newsize = CGSizeMake(2592.0/1936.0*1000, 1000);
         
         // scale to convert base image from 1936x2592 to 320x428 - iphone size
         float baseScale2 =  newsize.width / baseImage.size.width;
@@ -494,7 +376,11 @@
         UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
         
     }
-    CGSize screenContext = CGSizeMake(320, 2592*320/1936.0);
+    int original_height = baseImage.size.height;
+    int original_width = baseImage.size.width;
+    CGSize screenContext = CGSizeMake(320, original_height*320/original_width);
+    if (or == 0 && !photoAlbumOpened)
+        screenContext = CGSizeMake(original_width*320/original_height, 320);
 	
     // scale to convert base image from 1936x2592 to 320x428 - iphone size
 	float baseScale =  screenContext.width / baseImage.size.width;
@@ -505,8 +391,51 @@
 	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();	
 
-    // save edited image to photo album
-    UIImage * cropped = [result croppedImage:[self.rectView frame]];
+    // crop to camera view size - 315 x 281
+    // baseImage should be 320x428 - crop the middle 315x281
+    int target_width = self.rectView.frame.size.width;
+    int target_height = self.rectView.frame.size.height;
+    UIImage * cropped;
+    int minHeight = self.rectView.frame.origin.y + self.rectView.frame.size.height;
+    int minWidth = self.rectView.frame.origin.x + self.rectView.frame.size.width;
+        
+    if ((or == 3 && result.size.height > minHeight) || (or == 0 && !photoAlbumOpened && result.size.width > minWidth)) {
+        // if resized image has height greater than the bottom of the crop frame
+        CGRect targetFrame = [self.rectView frame];
+        if (or == 0 && !photoAlbumOpened) { // hack: loaded images from photo album will be or=0 even if they were taken normally
+            int width = targetFrame.size.width;
+            int height = targetFrame.size.height;
+            int x = targetFrame.origin.y - (width - height)/2; // camera will take a picture that is taller than wide, but we display images that are wider than tall, so we offset the x by half that difference to keep the correct center and aspect ratio
+            int y = self.view.frame.size.width - (targetFrame.origin.x + targetFrame.size.width);
+            targetFrame = CGRectMake(x, y, width, height);
+        }
+        cropped = [result croppedImage:targetFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
+    else if (result.size.height >= target_height) {
+        // resized image has height greater than target height, crop evenly
+        int ydiff = result.size.height - target_height;
+        CGRect targetFrame = CGRectMake(0, ydiff/2, target_width, target_height);
+        cropped = [result croppedImage:targetFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
+    else if (result.size.height < target_height) {
+        // if the picture is not tall enough (a wide image from library), crop from left and right evenly
+        int new_width = baseImage.size.width/baseImage.size.height*target_height;
+        CGRect scaledFrameImage = CGRectMake(0, 0, new_width, target_height);
+        
+        UIGraphicsBeginImageContext(screenContext);	
+        [baseImage drawInRect:scaledFrameImage];	
+        UIImage* result2 = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        int xdiff = new_width - target_width;
+        CGRect cropFrame = CGRectMake(xdiff/2, 0, target_width, target_height);
+        cropped = [result2 croppedImage:cropFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
     //UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album    
     
 	// hack: use the image cache in the easy way - just cache one image each time
@@ -517,7 +446,8 @@
 	if ([self respondsToSelector:@selector(cameraDidTakePicture:)]) {
 		[self performSelector:@selector(cameraDidTakePicture:) withObject:self];
 	}
-	
+
+    photoAlbumOpened = NO;
 }
 - (void)image:(UIImage*)image didFinishSavingWithError:(NSError *)error contextInfo:(NSDictionary*)info {
 	NSLog(@"Did finish saving with error!");
@@ -590,67 +520,36 @@
     [self.delegate didDismissSecondaryView];
 }
 
--(IBAction)didClickZoomIn:(id)sender {
+-(IBAction)didClickTakePicture:(id)sender {
+    NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
+    [[self camera] takePicture];
 }
 
--(IBAction)didClickZoomOut:(id)sender {
-    
+-(IBAction)didClickImport:(id)sender {
+    NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
+    UIImagePickerController * album = [[UIImagePickerController alloc] init];
+    album.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    album.allowsEditing = NO;
+    album.delegate = self;
+    photoAlbumOpened = YES;
+    [self.camera presentModalViewController:album animated:YES];
 }
 
-// should be done in tagDescriptorController
--(void)didDismissCarouselTab {
-    //CGRect newFrame = CGRectMake(0, 0, 320, 480);
-    //[self.tabBarController.view setFrame:newFrame];
+- (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
+    [self.camera dismissModalViewControllerAnimated:YES];
+    photoAlbumOpened = NO;
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [picker release];
 }
 
--(void)didExpandCarouselTab {
-    //CGRect newFrame = self.tabBarController.view.frame;
-    //newFrame.origin.y = 20;
-    //newFrame.size.height += 80;
-    //[self.tabBarController.view setFrame:newFrame];
+-(int)getStixCount:(NSString*)stixStringID {
+    return [self.delegate getStixCount:stixStringID];
 }
 
-/** touch messages **/
-// a single click on the camera should take a picture
-// single click will trigger at the end of a drag motion
-// unlike in VerticalFeedItemController because the table
-// is not present here.
--(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	drag = 0;    
+-(int)getStixOrder:(NSString*)stixStringID;
+{
+    return [self.delegate getStixOrder:stixStringID];
 }
-
--(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	drag = 1;
-}
-
--(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (drag != 1)
-	{
-        UITouch *touch = [[event allTouches] anyObject];	
-        CGPoint location = [touch locationInView:self.view];
-        [self didClickAtLocation:location];
-    }
-}
-
--(void)didClickAtLocation:(CGPoint)location {
-    // location is the click location inside feeditem's frame
-    
-    NSLog(@"VerticalFeedController: Click on table at position %f %f\n", location.x, location.y);
-
-    if (carouselView.stixSelected != nil && [self.delegate getStixCount:carouselView.stixSelected] > 0) {
-        // if a stix was selected already from the carousel tab        
-        UIImageView * stix = [BadgeView getBadgeWithStixStringID:[carouselView stixSelected]];
-        [stix setCenter:location];
-        [self didDropStixByTap:stix ofType:[carouselView stixSelected]];
-    }
-    else {
-        // auto take a photo?
-        // focus?
-    }
-}
-
-
-#pragma mark -
 
 
 @end

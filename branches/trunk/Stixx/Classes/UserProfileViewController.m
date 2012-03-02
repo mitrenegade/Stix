@@ -17,6 +17,7 @@
 @synthesize photoButton;
 @synthesize navBackButton;
 @synthesize addFriendButton;
+@synthesize k;
 
 -(id)init
 {

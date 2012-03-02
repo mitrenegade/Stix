@@ -15,7 +15,6 @@
 #import "ARViewController.h"
 #import "Tag.h"
 #import "ARCoordinate.h"
-#import "CarouselView.h"
 #import "NoClipModalView.h"
 
 #define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
@@ -38,8 +37,6 @@
 @interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, TagDescriptorDelegate, ARViewDelegate,UIImagePickerControllerDelegate, UINavigationControllerDelegate > {
 	
 	// layers of UIViewControllers
-	CarouselView * carouselView; // for dragging and releasing badge
-    BadgeView * badgeView;
 	BTLFullScreenCameraController *cameraController; // for viewing through camera
     UIImagePickerController * camera;
 	ARViewController *arViewController; // for saving and displaying coordinates
@@ -47,7 +44,6 @@
 	NSObject<TagViewDelegate> *delegate;
 //	UIView *overlayView;
     CGRect badgeFrame;
-    NSString * selectedStixStringID;
 
     IBOutlet UIImageView * aperture;
     IBOutlet UIImageView * rectView; // exists purely to give us the coordinates of the aperture
@@ -58,16 +54,19 @@
 //    IBOutlet UIButton * buttonFeedback;
     
     IBOutlet UIButton * buttonClose;
-    IBOutlet UIButton * buttonZoomIn;
-    IBOutlet UIButton * buttonZoomOut;
+    //IBOutlet UIButton * buttonZoomIn;
+    //IBOutlet UIButton * buttonZoomOut;
+    
+    IBOutlet UIButton * buttonTakePicture;
+    IBOutlet UIButton * buttonImport;
     
     TagDescriptorController * descriptorController;
     bool descriptorIsOpen;
     bool needToShowCamera;
+    bool photoAlbumOpened;
     int drag;
 }
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-@property (nonatomic, retain) CarouselView * carouselView;
 @property (nonatomic, retain) BadgeView * badgeView;
 @property (nonatomic, retain) BTLFullScreenCameraController *cameraController;
 @property (nonatomic, retain) ARViewController *arViewController;
@@ -83,8 +82,8 @@
 @property (nonatomic, retain) IBOutlet UIButton * cameraDeviceButton;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) IBOutlet UIButton * buttonClose;
-@property (nonatomic, retain) IBOutlet UIButton * buttonZoomIn;
-@property (nonatomic, retain) IBOutlet UIButton * buttonZoomOut;
+@property (nonatomic, retain) IBOutlet UIButton * buttonTakePicture;
+@property (nonatomic, retain) IBOutlet UIButton * buttonImport;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;
@@ -92,14 +91,11 @@
 - (void)addCoordinateOfTag:(Tag *) tag;
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView;
 -(IBAction)closeInstructions:(id)sender;
--(void)createCarouselView;
--(void)reloadCarouselView;
 -(void)updateCameraControlButtons;
 -(IBAction)toggleFlashMode:(id)sender;
 -(IBAction)toggleCameraDevice:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickCloseButton:(id)sender;
--(IBAction)didClickZoomIn:(id)sender;
--(IBAction)didClickZoomOut:(id)sender;
--(void)didClickAtLocation:(CGPoint)location;
+-(IBAction)didClickTakePicture:(id)sender;
+-(IBAction)didClickImport:(id)sender;
 @end

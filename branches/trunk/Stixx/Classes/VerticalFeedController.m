@@ -199,9 +199,18 @@
 
 /******* badge view delegate ******/
 -(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
+#if 0
     // selection of a stix to use from the carousel
     [self.carouselView carouselTabDismissWithStix:badge];
     [self.carouselView setStixSelected:stixStringID];
+#else
+    [self.carouselView carouselTabDismissWithStix:badge];
+    [self.carouselView setStixSelected:stixStringID];
+    CGPoint center = self.view.center;
+    center.y -= tableController.view.frame.origin.y; // remove tableController offset
+    [badge setCenter:center];
+    [self didDropStixByTap:badge ofType:stixStringID];
+#endif
 }
 
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {

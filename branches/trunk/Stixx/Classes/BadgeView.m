@@ -327,6 +327,10 @@ static int totalStixTypes = 0;
     // returns a half size image view
     //NSLog(@"Loading large badge with string ID %@\n", stixStringID);
     UIImageView * stix = [[UIImageView alloc] initWithImage:[[stixViews objectForKey:stixStringID] image]];
+    CGRect frame = stix.frame;
+    frame.size.width = 120;
+    frame.size.height = 120;
+    [stix setFrame:frame]; // hack: for different resolution badges, start them off at 120x120
     //NSLog(@"StixViews: %d objects", [stixViews count]);
     //NSLog(@"Frame of stix: %f %f %f %f", stix.frame.origin.x, stix.frame.origin.y, stix.frame.size.width, stix.frame.size.height);
     return [stix autorelease];
@@ -338,17 +342,27 @@ static int totalStixTypes = 0;
 
 +(NSMutableDictionary *)generateDefaultStix {
     NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
-    NSString * randomBadge1 = [BadgeView getRandomStixStringID];
-    NSString * randomBadge2 = [BadgeView getRandomStixStringID];
-    NSString * randomBadge3 = [BadgeView getRandomStixStringID];
-    NSLog(@"Generate Default Stix: random free stix %@, %@, %@", randomBadge1, randomBadge2, randomBadge3);
+    const int TOTAL_RANDOM_BADGES = 8;
+    NSMutableSet * randomBadges = [[NSMutableSet alloc] initWithCapacity:TOTAL_RANDOM_BADGES];
+    for (int i=0; i<TOTAL_RANDOM_BADGES; i++) {
+        NSString * randomBadge = [BadgeView getRandomStixStringID];
+        while ([randomBadges containsObject:randomBadge] || [randomBadge isEqualToString:@"FIRE"] || [randomBadge isEqualToString:@"ICE"]) {
+            randomBadge = [BadgeView getRandomStixStringID];
+        }
+        [randomBadges addObject:randomBadge];
+        NSLog(@"Random badge %d: %@", i, [BadgeView getStixDescriptorForStixStringID:randomBadge]);
+    }
+    //NSString * randomBadge1 = [BadgeView getRandomStixStringID];
+    //NSString * randomBadge2 = [BadgeView getRandomStixStringID];
+    //NSString * randomBadge3 = [BadgeView getRandomStixStringID];
+    //NSLog(@"Generate Default Stix: random free stix %@, %@, %@", randomBadge1, randomBadge2, randomBadge3);
 
     for (int i=2; i<[BadgeView totalStixTypes]; i++) {
         NSString * stixID = [stixStringIDs objectAtIndex:i];
         int num = 0;
         if ([stixID isEqualToString:@"FIRE"] || [stixID isEqualToString:@"ICE"])
             num = -1;
-        if ([stixID isEqualToString:randomBadge1] || [stixID isEqualToString:randomBadge2] || [stixID isEqualToString:randomBadge3])
+        if ([randomBadges containsObject:stixID])
         {   
             NSLog(@"Setting stix %d: %@ %@ to 3", i, stixID, [BadgeView getStixDescriptorForStixStringID:stixID]);
             num = 3;

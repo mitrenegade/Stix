@@ -1716,6 +1716,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [data autorelease]; // MRC
 }
 
+-(void)adminResetAllStixOrders {
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh setFunction:@"adminUpdateAllStixOrders"];
+    //[kh setFunction:@"adminUpdateAllFriendsLists"];
+    [kh execute];
+}
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
     // called by NB_UPDATECAROUSEL notification
     if ([theResults count] == 0)
@@ -1748,6 +1755,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didPressAdminEasterEgg:(NSString *)view {
+    //if ([[self getUsername] isEqualToString:@"bobo"]) {
+    //    [self adminEasterEggShowMenu:@""];
+    //}
+    //else 
     if ([view isEqualToString:@"ProfileView"]) {
         [self showAlertWithTitle:@"Authorized Access Only" andMessage:@"" andButton:@"Cancel" andOtherButton:@"Stix it to the Man" andAlertType:ALERTVIEW_PROMPT];
     }
@@ -1761,9 +1772,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminEasterEggShowMenu:(NSString *)password {
-    if ([password isEqualToString:@"admin"]) {
+    if ([[self getUsername] isEqualToString:@"bobo"] || [password isEqualToString:@"admin"]) {
 //        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Ye ol' Admin Menu" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users' Stix", @"Get me one of each", "Set all Users' bux", nil];
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set my stix to unlimited", @"Set all Users bux", @"Save Stix Feed", nil];
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set my stix to unlimited", @"Set all Users bux", @"Save Stix Feed", @"Reset all stix orders", nil];
         [actionSheet showFromTabBar:tabBarController.tabBar ];
         [actionSheet release];
     }
@@ -1777,19 +1788,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // 1 = "Get me one of each"
     // 2 = "Set my stix to unlimited"
     // 3 = "Set all Users' bux"
-    // 4 = "Cancel"
+    // 4 = "Save stix feed"
+    // 5 = "Reset all Stix Orders"
+    // 6 = "Cancel"
     switch (buttonIndex) {
         case 0:
             NSLog(@"button 0");
-            [self adminUpdateAllStixCountsToOne];
+            //[self adminUpdateAllStixCountsToOne];
             break;
         case 1:
             NSLog(@"button 1");
-            [self adminIncrementAllStixCounts];
+            //[self adminIncrementAllStixCounts];
             break;
         case 2:
             NSLog(@"button 2 set my stix to unlimited");
-            [self adminSetUnlimitedStix];
+            //[self adminSetUnlimitedStix];
             break;
         case 3:
             NSLog(@"button 3");
@@ -1798,6 +1811,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         case 4:
             NSLog(@"button 4: Save stix feed");
             [self adminSaveFeed];
+            break;
+        case 5:
+            NSLog(@"button 5: Reset all stix orders");
+            [self adminResetAllStixOrders];
+            break;
         default:
             return;
             break;
@@ -2113,16 +2131,16 @@ static bool isShowingAlerts = NO;
         }
     }    
     
-    // HACK: right now auxiliary data doesn't have anything other than stixOrder
     NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
     [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
-    NSMutableData * stixOrderData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
+    [auxiliaryDict setObject:allFriends forKey:@"friendsList"];
+    NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
     //[auxiliaryDict release];    
-    [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:stixOrderData];
+    [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
     
     [self changeBuxCountByAmount:-5];
     [stixData release];
-    [stixOrderData release];
+    [newAuxData release];
     
     NSString * metricName = @"GetStixFromStore";
     NSString * metricData = [NSString stringWithFormat:@"User: %@ Stix: %@", [self getUsername], stixStringID];

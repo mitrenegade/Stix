@@ -1,9 +1,9 @@
 //
-//  TagDescriptorController.h
-//  ARKitDemo
+//  AddStixViewController.h
+//  Stixx
 //
-//  Created by Administrator on 7/18/11.
-//  Copyright 2011 Neroh. All rights reserved.
+//  Created by Bobby Ren on 3/5/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -12,15 +12,22 @@
 #import "LocationHeaderViewController.h"
 #import "StixView.h"
 #import "CarouselView.h"
+#import "Tag.h"
+#import "QuartzCore/QuartzCore.h"
 
-@protocol TagDescriptorDelegate
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location withStix:(NSString*)stixStringID andStixCenter:(CGPoint) center /*andScale:(float)stixScale andRotation:(float)stixRotation*/ andTransform:(CGAffineTransform)stixTransform;
--(void)didCancelAddDescriptor;
+@protocol AddStixViewControllerDelegate
+
+// tagdescriptor
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString *)comment andLocation:(NSString*)location;
+-(void)didAddStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform;
+
+-(void)didCancelAddStix;
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+
 @end
 
-@interface TagDescriptorController : UIViewController <BadgeViewDelegate, UITextFieldDelegate, LocationHeaderViewControllerDelegate>{
+@interface AddStixViewController : UIViewController <BadgeViewDelegate, UITextFieldDelegate, LocationHeaderViewControllerDelegate, UIGestureRecognizerDelegate>{
 	IBOutlet UIImageView * imageView;
     StixView * stixView;
 	IBOutlet UITextField * commentField;
@@ -35,8 +42,8 @@
     LocationHeaderViewController * locationController;
     
     CGRect badgeFrame;
-    NSString * selectedStixStringID;
     
+    int tap;
     int drag;
     float offset_x;
     float offset_y;
@@ -44,7 +51,13 @@
     bool shouldShowLocationView;
     bool didAddStixToStixView;
     
-	NSObject<TagDescriptorDelegate> *delegate;
+	NSObject<AddStixViewControllerDelegate> *delegate;
+
+    // new stix being added to this view
+    bool showTransformCanvas;
+    UIView * transformCanvas;
+    
+    NSMutableSet *_activeRecognizers;
 }
 
 @property (nonatomic, retain) IBOutlet UIImageView * imageView;
@@ -54,13 +67,19 @@
 @property (nonatomic, retain) IBOutlet UIButton * locationButton;
 @property (nonatomic, retain) IBOutlet UIButton * buttonOK;
 @property (nonatomic, retain) IBOutlet UIButton * buttonCancel;
-@property (nonatomic, assign) NSObject<TagDescriptorDelegate> *delegate;
+@property (nonatomic, assign) NSObject<AddStixViewControllerDelegate> *delegate;
 @property (nonatomic, assign) CGRect badgeFrame;
-@property (nonatomic, retain) NSString * selectedStixStringID;
-//@property (nonatomic, retain) UIImageView * stix;
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) StixView * stixView;
 @property (nonatomic, retain) CarouselView * carouselView;
+
+-(void)toggleCarouselView:(BOOL)carouselEnabled;
+
+-(IBAction)closeInstructions:(id)sender;
+
+-(void)initStixView:(Tag *) tag;
+-(void)addNewAuxStix:(UIImageView *)newStix ofType:(NSString*)newStixStringID atLocation:(CGPoint)location;
+-(void)transformBoxShowAtFrame:(CGRect)frame;
 
 -(IBAction)buttonOKPressed:(id)sender;
 -(IBAction)locationTextBoxEntered:(id)sender;
@@ -72,6 +91,7 @@
 -(void)createCarouselView;
 -(void)reloadCarouselView;
 
+-(void)didClickAtLocation:(CGPoint)location;
 -(void)didDropStixByTap:(NSString*)stixStringID atLocation:(CGPoint)location;
 -(void)addStixToStixView:(NSString*)stixStringID atLocation:(CGPoint)location;
 -(void)didDropStixByDrag:(NSString*)stixStringID atLocation:(CGPoint)location;

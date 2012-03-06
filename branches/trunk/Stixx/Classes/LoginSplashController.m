@@ -76,7 +76,7 @@
     //for (NSMutableDictionary * d in theResults) {
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * newname = [d valueForKey:@"username"];
-    if ([newname isEqualToString:name] == NO) 
+    if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
         return;
     UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
     // badge count array
@@ -105,30 +105,14 @@
     /* auxiliary data */
     NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
-    NSMutableDictionary * stixOrder;
-    NSMutableSet * friendsList;
+    NSMutableDictionary * stixOrder = nil;
+    NSMutableSet * friendsList = nil;
+#if 0
     @try {
         auxiliaryData = [KumulosData dataToDictionary:data];
         if (auxiliaryData == nil || ![auxiliaryData isKindOfClass:[NSMutableDictionary class]]) {
-#if 1
             stixOrder = nil;
             friendsList = nil;
-#else
-            stixOrder = [[NSMutableDictionary alloc] init];
-            [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
-            [stixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
-            NSLog(@"Generating stix order:");
-            NSEnumerator *e = [stix keyEnumerator];
-            id key;
-            while (key = [e nextObject]) {
-                if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
-                    int ct = [self.delegate getStixCount:key];
-                    if (ct != 0)
-                        [stixOrder setObject:[NSNumber numberWithInt:[stixOrder count]] forKey:key];
-                    NSLog(@"Stix: %@ count %d order %d", key, ct, [[stixOrder valueForKey:key] intValue]); 
-                }
-            }
-#endif
         }
         else {
             stixOrder = [auxiliaryData objectForKey:@"stixOrder"]; 
@@ -148,7 +132,25 @@
     }
     @catch (NSException* exception) { 
         NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
-    }            
+    }    
+#else
+    auxiliaryData = [[NSMutableDictionary alloc] init];
+    int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
+    if (ret == 0) {
+        stixOrder = [auxiliaryData objectForKey:@"stixOrder"];
+        friendsList = [auxiliaryData objectForKey:@"friendsList"];
+    }
+    else if (ret == 1) {
+        stixOrder = nil;
+    }
+    else if (ret == 2) {
+        friendsList = nil;
+    }
+    else {
+        stixOrder = nil;
+        friendsList = nil;
+    }
+#endif
     [loginController.view removeFromSuperview];
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList isFirstTimeUser:firstTimeUser];
     [stix release]; // MRC

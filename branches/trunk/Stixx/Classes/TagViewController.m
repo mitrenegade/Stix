@@ -7,7 +7,7 @@
 
 @synthesize delegate;
 @synthesize cameraController;
-@synthesize arViewController;
+//@synthesize arViewController;
 @synthesize rectView;
 @synthesize buttonInstructions;
 @synthesize badgeView;
@@ -22,6 +22,7 @@
 @synthesize buttonClose;
 @synthesize buttonTakePicture;
 @synthesize buttonImport;
+@synthesize newTag;
 
 - (id)init {
 	
@@ -206,24 +207,30 @@
 	// set a title
     descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
     needToShowCamera = NO; // still not need to show camera
-	// prompt for label: use TagDescriptorController
-	descriptorController = [[TagDescriptorController alloc] init];
     
+    UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
+    newTag = [[Tag alloc] init]; 
+    [newTag addImage:tmp];
+    
+	// prompt for label: use TagDescriptorController
+	descriptorController = [[AddStixViewController alloc] init];
     [descriptorController setDelegate:self];
-    [descriptorController setBadgeFrame:badgeFrame];
 #if !TARGET_IPHONE_SIMULATOR
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [descriptorController.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:descriptorController.view];
 #endif
+    
+    // populate
+    [descriptorController initStixView:newTag];
 }
 
 - (void)clearTags {
     //[arViewController removeAllCoordinates];
 }
 
--(void)didCancelAddDescriptor {
+-(void)didCancelAddStix {
     //[[UIApplication sharedApplication] setStatusBarHidden:YES];
     //[self.camera dismissModalViewControllerAnimated:YES];
     [self.camera setCameraOverlayView:self.view];
@@ -232,9 +239,9 @@
     [self viewDidAppear:NO];    
 }
 
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location withStix:(NSString*)stixStringID andStixCenter:(CGPoint)center andTransform:(CGAffineTransform)transform
+-(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location
 {
-    ARCoordinate * newCoord;
+    //ARCoordinate * newCoord;
     NSString * desc = descriptor;
     NSString * com = comment;
     NSString * loc = location;
@@ -280,19 +287,15 @@
     {
         username = @"anonymous";
     }
-    Tag * tag = [[Tag alloc] init]; 
-    [tag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
-    UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
-    if ([delegate isLoggedIn] == NO)
-    {
-        [image release];
-        image = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
-    }
-    NSLog(@"TagViewController: Badge frame added at %f %f and image size at %f %f", center.x, center.y, image.size.width, image.size.height);
-    [tag addImage:image];
-    [tag addARCoordinate:newCoord];
+    [newTag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
+    //UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
+    //[newTag addImage:image];
+    //[tag addARCoordinate:newCoord];
+}
+
+-(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     if (stixStringID != nil)
-        [tag addStix:stixStringID withLocation:center withTransform:transform withPeelable:NO];
+        [newTag addStix:stixStringID withLocation:location withTransform:transform withPeelable:NO];
     // backwards compatibility
     //[tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
     //[tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
@@ -300,10 +303,9 @@
     //    [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
     //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
     //}
-    [image release];
-    [self.delegate didCreateNewPix:tag];
-    [tag release];
-    
+    [self.delegate didCreateNewPix:newTag];
+    [newTag release];
+    newTag = nil;
     needToShowCamera = YES;
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];
@@ -391,8 +393,8 @@
 	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();	
 
-    // crop to camera view size - 315 x 281
-    // baseImage should be 320x428 - crop the middle 315x281
+    // crop to camera view size - 314 x 282
+    // baseImage should be 320x428 - crop the middle 314x282
     int target_width = self.rectView.frame.size.width;
     int target_height = self.rectView.frame.size.height;
     UIImage * cropped;

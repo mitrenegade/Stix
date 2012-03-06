@@ -93,12 +93,13 @@
     badgeFrame = newStix.frame;
     // save frame of badge relative to cropped image
     // stix frame coming in relative to a full size 300x275 view at origin 0,0
-	float imageScale =  stixView.frame.size.width / 300;
+	float imageScale = 1;// stixView.frame.size.width / 300;
     NSLog(@"AuxStix: badge of frame %f %f %f %f at location %f %f in view %f %f changed to frame %f %f %f %f at location %f %f in view %f %f\n", badgeFrame.origin.x, badgeFrame.origin.y, badgeFrame.size.width, badgeFrame.size.height, location.x, location.y, 300.0, 300.0, badgeFrame.origin.x * imageScale, badgeFrame.origin.y * imageScale, badgeFrame.size.width * imageScale, badgeFrame.size.height * imageScale, location.x * imageScale, location.y * imageScale, stixView.frame.size.width, stixView.frame.size.height);
     location.x *= imageScale; // scale to fit in stixView
     location.y *= imageScale;
-    location.x += stixView.frame.origin.x; // move center into stixView in this view's reference
-    location.y += stixView.frame.origin.y;
+    // location of stix should be in auxStix's frame, not stixView's frame
+    //location.x += stixView.frame.origin.x; // move center into stixView in this view's reference
+    //location.y += stixView.frame.origin.y;
     badgeFrame.size.width *= imageScale;
     badgeFrame.size.height *= imageScale;
     //auxScale = 1;
@@ -263,7 +264,7 @@
 -(IBAction)buttonOKPressed:(id)sender
 {
     // scale stix frame back
-	float imageScale =  300 / imageView.frame.size.width;
+	float imageScale = 1; // 300 / imageView.frame.size.width;
     
 	CGRect stixFrameScaled = stix.frame;
     float centerX = stix.center.x - stixView.frame.origin.x;

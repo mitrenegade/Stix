@@ -92,8 +92,10 @@
     {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-        if (count > 0 || count == -1) {
-            [basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize/2, stixSize/2)];
+        int order = [self.delegate getStixOrder:stixStringID];
+        if (order != -1 && (count > 0 || count == -1)) {
+            [basicStix setCenter:CGPointMake(stixSize*(order+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
+            //[basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize/2, stixSize/2)];
             CGRect basicFrame = basicStix.frame;
             [allCarouselStixFrames addObject:[NSValue valueWithCGRect:basicFrame]];
             ct++;
@@ -111,11 +113,22 @@
     for (int i=0; i<totalStix; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
-//        NSLog(@"CarouselView stix %d: stixStringID: %@ count: %d order %f frame %f %f", i, stixStringID, count);
-        if (count > 0 || count == -1) {
+        int order = [self.delegate getStixOrder:stixStringID];
+        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
+        if  ((count >= 0 || count == -1)&& order != -1) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
             [stix setFrame:fr];
+            [scrollView addSubview:stix];
+            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+            [stix release];
+        }
+        // display numbered stix that have run out dimmer
+        if (count == 0 && order != -1) {
+            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+            [stix setFrame:fr];
+            [stix setAlpha:.25];
             [scrollView addSubview:stix];
             [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
             [stix release];
@@ -177,7 +190,7 @@
         int count = [self.delegate getStixCount:stixStringID];
         int order = [self.delegate getStixOrder:stixStringID];
         //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
-        if  (count > 0 || count == -1) {
+        if  ((count >= 0 || count == -1)&& order != -1) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
             [stix setFrame:fr];
@@ -185,6 +198,7 @@
             [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
             [stix release];
         }
+        // display numbered stix that have run out dimmer
         if (count == 0 && order != -1) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
@@ -361,6 +375,8 @@ static int lastContentOffsetY = 0;
             float centerX = badgeTouched.center.x; 
             float centerY = badgeTouched.center.y; 
             badgeLifted.center = CGPointMake(centerX, centerY);
+            // debug
+            //badgeTouched.backgroundColor = [UIColor whiteColor];
             
             // point where finger clicked badge
             offset_from_center_X = (location.x - centerX);
@@ -430,8 +446,12 @@ static int lastContentOffsetY = 0;
                 
                 // tells delegate to do necessary things such as take a photo
                 drag = 0;
-                if ([self.delegate getStixCount:selectedStixStringID] != 0)
+                if ([self.delegate getStixCount:selectedStixStringID] != 0) {
+                    CGRect frame = badgeTouched.frame;
+                    CGPoint center = badgeTouched.center;
+                    NSLog(@"CarouselView: didDropStix at origin %f %f center %f %f size %f %f in carousel frame %f %f %f %f", frame.origin.x, frame.origin.y, center.x, center.y, frame.size.width, frame.size.height, self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
                     [self.delegate didDropStix:badgeTouched ofType:selectedStixStringID];
+                }
                 else
                     [self resetBadgeLocations];
             }
@@ -470,8 +490,9 @@ static int lastContentOffsetY = 0;
                     [self addSubview:stixTouched];
                     [self.delegate didDropStix:stixTouched ofType:stixStringID];
 #else
-                    if ([self.delegate getStixCount:stixStringID] != 0)
+                    if ([self.delegate getStixCount:stixStringID] != 0) { 
                         [self.delegate didTapStix:stixTouched ofType:stixStringID];
+                    }
                     break;
 #endif
                 }

@@ -110,7 +110,7 @@
 -(IBAction)buttonOKPressed:(id)sender
 {
     // scale stix frame back
-	float imageScale =  300 / stixView.frame.size.width;
+	float imageScale = 1;// 300 / stixView.frame.size.width;
     CGRect stixFrameScaled = stixView.stix.frame;
 	stixFrameScaled.origin.x *= imageScale;
 	stixFrameScaled.origin.y *= imageScale;
@@ -229,7 +229,12 @@
     [self.carouselView setStixSelected:stixStringID];
     if (didAddStixToStixView) {
         // we've already added a stix, so the only thing we can do is now change it
+        selectedStixStringID = stixStringID;
         [self.stixView updateStixForManipulation:stixStringID];
+    }
+    else {
+        CGPoint center = stixView.center;
+        [self didDropStixByTap:stixStringID atLocation:center];
     }
 }
 

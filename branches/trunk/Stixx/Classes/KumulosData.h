@@ -16,5 +16,5 @@
 +(NSMutableDictionary *) dataToDictionary:(NSMutableData *) data; 
 +(NSMutableData * ) setToData:(NSMutableSet *) set;
 +(NSMutableSet *) dataToSet:(NSMutableData *) data; 
-
++(int) extractAuxiliaryDataFromUserData:(NSMutableDictionary *) dict intoAuxiliaryData:(NSMutableDictionary *)auxiliaryData;
 @end

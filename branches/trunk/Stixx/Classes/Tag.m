@@ -36,7 +36,7 @@
 }
 
 - (void)addARCoordinate:(ARCoordinate*)newARCoordinate {
-    [self setCoordinate:newARCoordinate];
+    //[self setCoordinate:newARCoordinate];
     //NSLog(@"Added coordinate %@ to tag", newARCoordinate);
 }
 
@@ -101,14 +101,14 @@
     NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
     NSKeyedUnarchiver *decoder;
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData];
-    ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
+    //ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
     [decoder finishDecoding];
     [decoder release];
     
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
-    [tag addARCoordinate:coordinate];
+    //[tag addARCoordinate:coordinate];
     [image release]; // MRC
     
     NSMutableData *theData2 = (NSMutableData*)[d valueForKey:@"auxStix"];

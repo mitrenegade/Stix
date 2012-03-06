@@ -20,8 +20,6 @@
 		9E029BAE14F548A900D056C8 /* FeedTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E029BAC14F548A800D056C8 /* FeedTableController.xib */; };
 		9E029BB214F558B800D056C8 /* VerticalFeedController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E029BB014F558B700D056C8 /* VerticalFeedController.m */; };
 		9E029BB314F558B800D056C8 /* VerticalFeedController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E029BB114F558B700D056C8 /* VerticalFeedController.xib */; };
-		9E06552014B5699400A638AA /* AuxStixViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E06551E14B5699200A638AA /* AuxStixViewController.m */; };
-		9E06552114B5699400A638AA /* AuxStixViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E06551F14B5699300A638AA /* AuxStixViewController.xib */; };
 		9E0C9B5D14ECA38200FF4C8D /* dot_boundingbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9B5C14ECA38200FF4C8D /* dot_boundingbox.png */; };
 		9E0C9C8214EEADE100FF4C8D /* bux_coin.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8114EEADE100FF4C8D /* bux_coin.png */; };
 		9E0C9C8D14EECECF00FF4C8D /* StixAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8C14EECECB00FF4C8D /* StixAnimation.m */; };
@@ -110,6 +108,9 @@
 		9E8092F5148CE45000AD5B02 /* graphic_rules_leaf.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8092EF148CE45000AD5B02 /* graphic_rules_leaf.png */; };
 		9E8092F8148CE45600AD5B02 /* txt_rewardstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8092F6148CE45600AD5B02 /* txt_rewardstix.png */; };
 		9E8092F9148CE45600AD5B02 /* txt_actionstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8092F7148CE45600AD5B02 /* txt_actionstix.png */; };
+		9E80C65C150554980051D64C /* AddStixViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E80C65A150554970051D64C /* AddStixViewController.m */; };
+		9E80C65D150554980051D64C /* AddStixViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E80C65B150554980051D64C /* AddStixViewController.xib */; };
+		9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E80C6681505896B0051D64C /* KumulosHelper.m */; };
 		9E88A470148A8D9500E67864 /* Foursquare2.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E88A42C148A8D9500E67864 /* Foursquare2.m */; };
 		9E88A471148A8D9500E67864 /* HRRequest+PhotoExt.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E88A42E148A8D9500E67864 /* HRRequest+PhotoExt.m */; };
 		9E88A472148A8D9500E67864 /* NSDictionary+ParamUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E88A432148A8D9500E67864 /* NSDictionary+ParamUtils.m */; };
@@ -181,17 +182,11 @@
 		9EB031E5142C01260019F2BD /* BadgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031B9142C01260019F2BD /* BadgeView.m */; };
 		9EB031E9142C01260019F2BD /* ProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031C0142C01260019F2BD /* ProfileViewController.m */; };
 		9EB031EA142C01260019F2BD /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031C1142C01260019F2BD /* ProfileViewController.xib */; };
-		9EB031EB142C01260019F2BD /* FeedItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031C3142C01260019F2BD /* FeedItemViewController.m */; };
-		9EB031EC142C01260019F2BD /* FeedItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031C4142C01260019F2BD /* FeedItemViewController.xib */; };
-		9EB031ED142C01260019F2BD /* FeedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031C6142C01260019F2BD /* FeedViewController.m */; };
-		9EB031EE142C01260019F2BD /* FeedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031C7142C01260019F2BD /* FeedViewController.xib */; };
 		9EB031F1142C01260019F2BD /* FileHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031CC142C01260019F2BD /* FileHelpers.m */; };
 		9EB031F4142C01260019F2BD /* ImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D1142C01260019F2BD /* ImageCache.m */; };
 		9EB031F5142C01260019F2BD /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D3142C01260019F2BD /* LoginViewController.m */; };
 		9EB031F6142C01260019F2BD /* LoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031D4142C01260019F2BD /* LoginViewController.xib */; };
 		9EB031F7142C01260019F2BD /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D6142C01260019F2BD /* Tag.m */; };
-		9EB031F8142C01260019F2BD /* TagDescriptorController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D8142C01260019F2BD /* TagDescriptorController.m */; };
-		9EB031F9142C01260019F2BD /* TagDescriptorController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031D9142C01260019F2BD /* TagDescriptorController.xib */; };
 		9EB031FB142C01260019F2BD /* TagViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031DD142C01260019F2BD /* TagViewController.m */; };
 		9EB031FC142C01260019F2BD /* TagViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031DE142C01260019F2BD /* TagViewController.xib */; };
 		9EB0321C142C01340019F2BD /* comment.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB03201142C01340019F2BD /* comment.png */; };
@@ -354,9 +349,6 @@
 		9E029BAF14F558B600D056C8 /* VerticalFeedController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VerticalFeedController.h; sourceTree = "<group>"; };
 		9E029BB014F558B700D056C8 /* VerticalFeedController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VerticalFeedController.m; sourceTree = "<group>"; };
 		9E029BB114F558B700D056C8 /* VerticalFeedController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VerticalFeedController.xib; sourceTree = "<group>"; };
-		9E06551D14B5699100A638AA /* AuxStixViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AuxStixViewController.h; sourceTree = "<group>"; };
-		9E06551E14B5699200A638AA /* AuxStixViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AuxStixViewController.m; sourceTree = "<group>"; };
-		9E06551F14B5699300A638AA /* AuxStixViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AuxStixViewController.xib; sourceTree = "<group>"; };
 		9E0C9B5C14ECA38200FF4C8D /* dot_boundingbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dot_boundingbox.png; sourceTree = "<group>"; };
 		9E0C9C8114EEADE100FF4C8D /* bux_coin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_coin.png; sourceTree = "<group>"; };
 		9E0C9C8B14EECEC800FF4C8D /* StixAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixAnimation.h; sourceTree = "<group>"; };
@@ -468,6 +460,11 @@
 		9E8092EF148CE45000AD5B02 /* graphic_rules_leaf.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_rules_leaf.png; sourceTree = "<group>"; };
 		9E8092F6148CE45600AD5B02 /* txt_rewardstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_rewardstix.png; sourceTree = "<group>"; };
 		9E8092F7148CE45600AD5B02 /* txt_actionstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_actionstix.png; sourceTree = "<group>"; };
+		9E80C659150554960051D64C /* AddStixViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddStixViewController.h; sourceTree = "<group>"; };
+		9E80C65A150554970051D64C /* AddStixViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddStixViewController.m; sourceTree = "<group>"; };
+		9E80C65B150554980051D64C /* AddStixViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AddStixViewController.xib; sourceTree = "<group>"; };
+		9E80C6671505896A0051D64C /* KumulosHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosHelper.h; sourceTree = "<group>"; };
+		9E80C6681505896B0051D64C /* KumulosHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosHelper.m; sourceTree = "<group>"; };
 		9E88A42B148A8D9500E67864 /* Foursquare2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare2.h; sourceTree = "<group>"; };
 		9E88A42C148A8D9500E67864 /* Foursquare2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Foursquare2.m; sourceTree = "<group>"; };
 		9E88A42D148A8D9500E67864 /* HRRequest+PhotoExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HRRequest+PhotoExt.h"; sourceTree = "<group>"; };
@@ -590,12 +587,6 @@
 		9EB031BF142C01260019F2BD /* ProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileViewController.h; sourceTree = "<group>"; };
 		9EB031C0142C01260019F2BD /* ProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileViewController.m; sourceTree = "<group>"; };
 		9EB031C1142C01260019F2BD /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
-		9EB031C2142C01260019F2BD /* FeedItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedItemViewController.h; sourceTree = "<group>"; };
-		9EB031C3142C01260019F2BD /* FeedItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeedItemViewController.m; sourceTree = "<group>"; };
-		9EB031C4142C01260019F2BD /* FeedItemViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FeedItemViewController.xib; sourceTree = "<group>"; };
-		9EB031C5142C01260019F2BD /* FeedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedViewController.h; sourceTree = "<group>"; };
-		9EB031C6142C01260019F2BD /* FeedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeedViewController.m; sourceTree = "<group>"; };
-		9EB031C7142C01260019F2BD /* FeedViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FeedViewController.xib; sourceTree = "<group>"; };
 		9EB031CB142C01260019F2BD /* FileHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHelpers.h; sourceTree = "<group>"; };
 		9EB031CC142C01260019F2BD /* FileHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileHelpers.m; sourceTree = "<group>"; };
 		9EB031D0142C01260019F2BD /* ImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCache.h; sourceTree = "<group>"; };
@@ -605,9 +596,6 @@
 		9EB031D4142C01260019F2BD /* LoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LoginViewController.xib; path = Stixx/Classes/LoginViewController.xib; sourceTree = SOURCE_ROOT; };
 		9EB031D5142C01260019F2BD /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
 		9EB031D6142C01260019F2BD /* Tag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tag.m; sourceTree = "<group>"; };
-		9EB031D7142C01260019F2BD /* TagDescriptorController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagDescriptorController.h; sourceTree = "<group>"; };
-		9EB031D8142C01260019F2BD /* TagDescriptorController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagDescriptorController.m; sourceTree = "<group>"; };
-		9EB031D9142C01260019F2BD /* TagDescriptorController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TagDescriptorController.xib; sourceTree = "<group>"; };
 		9EB031DC142C01260019F2BD /* TagViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagViewController.h; sourceTree = "<group>"; };
 		9EB031DD142C01260019F2BD /* TagViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagViewController.m; sourceTree = "<group>"; };
 		9EB031DE142C01260019F2BD /* TagViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TagViewController.xib; sourceTree = "<group>"; };
@@ -1253,9 +1241,6 @@
 				9EB031B3142C01260019F2BD /* ARCoordinate.m */,
 				9EB031B6142C01260019F2BD /* ARViewController.h */,
 				9EB031B7142C01260019F2BD /* ARViewController.m */,
-				9E06551D14B5699100A638AA /* AuxStixViewController.h */,
-				9E06551E14B5699200A638AA /* AuxStixViewController.m */,
-				9E06551F14B5699300A638AA /* AuxStixViewController.xib */,
 				9E8A29C614AF76B300CDCE76 /* StixView.h */,
 				9E8A29C714AF76B400CDCE76 /* StixView.m */,
 				9EB031B8142C01260019F2BD /* BadgeView.h */,
@@ -1278,12 +1263,6 @@
 				9EC7361714CE08D100AE5A6C /* FeedbackViewController.h */,
 				9EC7361814CE08D100AE5A6C /* FeedbackViewController.m */,
 				9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */,
-				9EB031C2142C01260019F2BD /* FeedItemViewController.h */,
-				9EB031C3142C01260019F2BD /* FeedItemViewController.m */,
-				9EB031C4142C01260019F2BD /* FeedItemViewController.xib */,
-				9EB031C5142C01260019F2BD /* FeedViewController.h */,
-				9EB031C6142C01260019F2BD /* FeedViewController.m */,
-				9EB031C7142C01260019F2BD /* FeedViewController.xib */,
 				9ECF1C5D145DD4DD00B7F7F1 /* PagedScrollView.h */,
 				9ECF1C5E145DD4DD00B7F7F1 /* PagedScrollView.m */,
 				9EA6424F14F5C01D00EAB9A4 /* VerticalFeedItemController.h */,
@@ -1308,8 +1287,6 @@
 				9EC1EBC714A0523800592DE7 /* GiftStixTableController.xib */,
 				9EB031D0142C01260019F2BD /* ImageCache.h */,
 				9EB031D1142C01260019F2BD /* ImageCache.m */,
-				9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */,
-				9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */,
 				9EF297741485BAEF00B1782C /* LoadingAnimationView.h */,
 				9EF297751485BAEF00B1782C /* LoadingAnimationView.m */,
 				9E8A29CA14AF94F500CDCE76 /* LoadingViewController.h */,
@@ -1363,9 +1340,9 @@
 				9E0C9C8C14EECECB00FF4C8D /* StixAnimation.m */,
 				9EB031D5142C01260019F2BD /* Tag.h */,
 				9EB031D6142C01260019F2BD /* Tag.m */,
-				9EB031D7142C01260019F2BD /* TagDescriptorController.h */,
-				9EB031D8142C01260019F2BD /* TagDescriptorController.m */,
-				9EB031D9142C01260019F2BD /* TagDescriptorController.xib */,
+				9E80C659150554960051D64C /* AddStixViewController.h */,
+				9E80C65A150554970051D64C /* AddStixViewController.m */,
+				9E80C65B150554980051D64C /* AddStixViewController.xib */,
 				9EB031DC142C01260019F2BD /* TagViewController.h */,
 				9EB031DD142C01260019F2BD /* TagViewController.m */,
 				9EB031DE142C01260019F2BD /* TagViewController.xib */,
@@ -1380,6 +1357,10 @@
 				9E91C603147EADDB003567ED /* ZoomViewController.h */,
 				9E91C604147EADDC003567ED /* ZoomViewController.m */,
 				9E91C605147EADDE003567ED /* ZoomViewController.xib */,
+				9E80C6671505896A0051D64C /* KumulosHelper.h */,
+				9E80C6681505896B0051D64C /* KumulosHelper.m */,
+				9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */,
+				9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */,
 				9E75E73D14E6EA190017DC3D /* AlertPrompt.h */,
 				9E75E73E14E6EA1A0017DC3D /* AlertPrompt.m */,
 			);
@@ -1616,10 +1597,7 @@
 				9EB0317D142C002E0019F2BD /* InfoPlist.strings in Resources */,
 				9EB03191142C002E0019F2BD /* MainWindow_iPad.xib in Resources */,
 				9EB031EA142C01260019F2BD /* ProfileViewController.xib in Resources */,
-				9EB031EC142C01260019F2BD /* FeedItemViewController.xib in Resources */,
-				9EB031EE142C01260019F2BD /* FeedViewController.xib in Resources */,
 				9EB031F6142C01260019F2BD /* LoginViewController.xib in Resources */,
-				9EB031F9142C01260019F2BD /* TagDescriptorController.xib in Resources */,
 				9EB031FC142C01260019F2BD /* TagViewController.xib in Resources */,
 				9EB0321C142C01340019F2BD /* comment.png in Resources */,
 				9EB0321E142C01340019F2BD /* empty.png in Resources */,
@@ -1715,7 +1693,6 @@
 				9E4A619C14AD1FB6000DCEF0 /* txt_giftstix.png in Resources */,
 				9E4A619E14AD1FC3000DCEF0 /* bkg_actionstix.png in Resources */,
 				9E8A29CE14AF94FA00CDCE76 /* LoadingViewController.xib in Resources */,
-				9E06552114B5699400A638AA /* AuxStixViewController.xib in Resources */,
 				9EE6334314B7C7CA0000AAFC /* flash_auto.png in Resources */,
 				9EE6334414B7C7CA0000AAFC /* flash_off.png in Resources */,
 				9EE6334514B7C7CA0000AAFC /* flash.png in Resources */,
@@ -1791,6 +1768,7 @@
 				9EF94F501500000600372970 /* import.png in Resources */,
 				9EF94F521500001800372970 /* camerabutton.png in Resources */,
 				9EF94F54150002F000372970 /* blackbar.png in Resources */,
+				9E80C65D150554980051D64C /* AddStixViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1833,13 +1811,10 @@
 				9EB031E4142C01260019F2BD /* ARViewController.m in Sources */,
 				9EB031E5142C01260019F2BD /* BadgeView.m in Sources */,
 				9EB031E9142C01260019F2BD /* ProfileViewController.m in Sources */,
-				9EB031EB142C01260019F2BD /* FeedItemViewController.m in Sources */,
-				9EB031ED142C01260019F2BD /* FeedViewController.m in Sources */,
 				9EB031F1142C01260019F2BD /* FileHelpers.m in Sources */,
 				9EB031F4142C01260019F2BD /* ImageCache.m in Sources */,
 				9EB031F5142C01260019F2BD /* LoginViewController.m in Sources */,
 				9EB031F7142C01260019F2BD /* Tag.m in Sources */,
-				9EB031F8142C01260019F2BD /* TagDescriptorController.m in Sources */,
 				9EB031FB142C01260019F2BD /* TagViewController.m in Sources */,
 				9EB03249142C05D20019F2BD /* BTLFullScreenCameraController.m in Sources */,
 				9EB5FA24144FE5E100B3B0BA /* FriendsViewController.m in Sources */,
@@ -1905,7 +1880,6 @@
 				9E8A29C814AF76B600CDCE76 /* StixView.m in Sources */,
 				9E8A29CD14AF94FA00CDCE76 /* LoadingViewController.m in Sources */,
 				9ECCBFEF14B26353003E122B /* NoClipModalView.m in Sources */,
-				9E06552014B5699400A638AA /* AuxStixViewController.m in Sources */,
 				9EC7361A14CE08D300AE5A6C /* FeedbackViewController.m in Sources */,
 				9E4F598514DDC524006469DF /* StoreViewController.m in Sources */,
 				9EBE40AD14DDC74B003103B8 /* StoreCategoriesController.m in Sources */,
@@ -1917,6 +1891,8 @@
 				9E029BB214F558B800D056C8 /* VerticalFeedController.m in Sources */,
 				9EA6425214F5C02000EAB9A4 /* VerticalFeedItemController.m in Sources */,
 				9E919A0C14F614AD00D03085 /* EGORefreshTableHeaderView.m in Sources */,
+				9E80C65C150554980051D64C /* AddStixViewController.m in Sources */,
+				9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2048,7 +2024,7 @@
 					"\"$(SDKROOT)/usr/include/libxml2\"",
 				);
 				INFOPLIST_FILE = "Stixx/Stixx-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Stixx\"",
@@ -2061,7 +2037,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
+				PROVISIONING_PROFILE = "1BB2A35E-5357-4113-BB6F-D8170C6B0FDA";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
@@ -2091,7 +2067,7 @@
 					"\"$(SDKROOT)/usr/include/libxml2\"",
 				);
 				INFOPLIST_FILE = "Stixx/Stixx-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Stixx\"",
@@ -2104,7 +2080,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "A7C506C0-D74A-48BF-9D17-087B059EF186";
+				PROVISIONING_PROFILE = "1BB2A35E-5357-4113-BB6F-D8170C6B0FDA";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

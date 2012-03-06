@@ -20,6 +20,7 @@
 @synthesize isPeelable;
 @synthesize delegate;
 @synthesize referenceTransform;
+@synthesize selectStixStringID;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -68,6 +69,7 @@
     //stixRotation = rotation;
     referenceTransform = CGAffineTransformIdentity;
     
+    [self setSelectStixStringID:stixStringID];
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
@@ -121,12 +123,15 @@
 }
 
 -(void)updateStixForManipulation:(NSString*)stixStringID {
-    CGRect frame = stix.frame;
+    CGPoint center = stix.center;
+    CGAffineTransform transform = stix.transform;
     [stix removeFromSuperview];
     [stix release];
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-    [stix setFrame:frame];
+    [stix setCenter:center];
+    [stix setTransform:transform];
     [self addSubview:stix];
+    [self setSelectStixStringID:stixStringID];
 }
 
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
@@ -144,9 +149,6 @@
         CGAffineTransform auxTransform;
         // hack: backwards compatibility 
         if ([auxTransforms count] == [auxStixStringIDs count]) {
-            //auxScale = [[tag.auxScales objectAtIndex:i] floatValue]; // deprecated
-            //auxRotation = [[auxRotations objectAtIndex:i] floatValue]; // deprecated
-            // HACK
             NSString * transformString = [auxTransforms objectAtIndex:i];
             auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         }

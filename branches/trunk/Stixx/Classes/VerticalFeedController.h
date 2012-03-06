@@ -13,7 +13,8 @@
 #import "CarouselView.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
-#import "AuxStixViewController.h"
+//#import "AuxStixViewController.h"
+#import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
 
 #define FEED_ITEM_WIDTH 275
@@ -44,7 +45,7 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AuxStixViewControllerDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
@@ -66,6 +67,8 @@
     FeedTableController *tableController;	
     int lastPageViewed;
     int lastContentOffset;
+    
+    CGPoint feedItemViewOffset;
     
     UIView * stixHeader;
     UIView * stixHeaderBody;

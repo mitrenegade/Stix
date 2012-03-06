@@ -367,7 +367,6 @@ static int addUserStage;
     [friendsList addObject:@"willh103"];
     [auxInfo setValue:friendsList forKey:@"friendsList"];
 
-    
     NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
     [kumulos updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
     [auxData release];

@@ -55,7 +55,6 @@
     tableController = [[FeedTableController alloc] init];
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
-
     tableController.delegate = self;
     [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
 }
@@ -209,13 +208,16 @@
     CGPoint center = self.view.center;
     center.y -= tableController.view.frame.origin.y; // remove tableController offset
     [badge setCenter:center];
+    
+    int section = [tableController getCurrentSectionAtPoint:center];
+    lastPageViewed = section;
     [self didDropStixByTap:badge ofType:stixStringID];
 #endif
 }
 
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
     // tap inside the feed to add a stix
-    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didClickAtLocation
+    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didTapStix
     [self addAuxStix:badge ofType:stixStringID toTag:tag];
 }
 
@@ -223,7 +225,8 @@
     CGPoint locationInSection = [tableController getContentPoint:badge.center inSection:lastPageViewed];
     locationInSection.y -= tableController.view.frame.origin.y; // remove tableController offset
     [badge setCenter:locationInSection];
-    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didClickAtLocation
+    NSLog(@"VerticalFeedController: didDropStixByDrag: section found %d locationInSection origin %f %f center %f %f size %f %f", lastPageViewed, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, badge.frame.size.width, badge.frame.size.height);
+    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didDropStix
     [self addAuxStix:badge ofType:stixStringID toTag:tag];
 }
 
@@ -234,47 +237,49 @@
     [self.carouselView carouselTabDismiss];
     
     CGPoint center = badge.center;
+    CGRect frame = badge.frame;
     // this was for drag and drop 
     //center.y -= tableController.view.frame.origin.y;
     int section = [tableController getCurrentSectionAtPoint:center];
     lastPageViewed = section;
+    NSLog(@"VerticalFeedController: didDropStix center %f %f size %f %f section %d", center.x,center.y, frame.size.width, frame.size.height, section);
     [self didDropStixByDrag:badge ofType:stixStringID];
 }
 
 -(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*) tag{ 
+    // HACK: will be changed soon if we have an addStix button
+    
     // input badge should have frame within the tag's frame
-    NSLog(@"Adding Aux Stix: Badge frame center: %f %f", badge.center.x, badge.center.y);
-    if ([allTags count] == 0) {
+    //if ([allTags count] == 0) {
+    if (tag == nil) {
         // nothing loaded yet
         [carouselView resetBadgeLocations];
         return;
     }
-    allTags = [self.delegate getTags];
-    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    //allTags = [self.delegate getTags];
+    //Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     
-    NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
+    //NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
     
     // scale stix frame back to full 300x275 size
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:t.tagID];
-	float imageScale = 300/feedItem.imageView.frame.size.width; // the user is using the badge size relative to the current view
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     
-    NSLog(@"FeedView: added stix of size %f %f at location %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
+    NSLog(@"VerticalFeedController: added stix of size %f %f at origin %f %f center %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
     
-	CGRect stixFrameScaled = badge.frame;
-    CGRect tableFrame = tableController.view.frame;
-    CGRect imageViewFrame = feedItem.imageView.frame;
-    float centerx = badge.center.x; //badge.center.x - (tableFrame.origin.x + imageViewFrame.origin.x);
-    float centery = badge.center.y;//badge.center.y - (tableFrame.origin.y + imageViewFrame.origin.y);
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    [badge setFrame:stixFrameScaled];
-    CGPoint location = CGPointMake(centerx * imageScale, centery * imageScale); 
+	//CGRect stixFrameScaled = badge.frame;
+    //CGRect tableFrame = tableController.view.frame;
+    //CGRect imageViewFrame = feedItem.imageView.frame;
+    float centerx = badge.center.x - feedItemViewOffset.x; // small mismatch between placement
+    float centery = badge.center.y - feedItemViewOffset.y;
+	//stixFrameScaled.size.width *= imageScale;
+	//stixFrameScaled.size.height *= imageScale;
+    //[badge setFrame:stixFrameScaled];
+    CGPoint location = CGPointMake(centerx, centery); 
     [badge setCenter:location];
-    NSLog(@"Offsetting center by %f %f to %f %f, then scaling to %f %f\n", tableFrame.origin.x + imageViewFrame.origin.x, tableFrame.origin.y + imageViewFrame.origin.y, centerx, centery, location.x, location.y);
+    //NSLog(@"Offsetting center by %f %f to %f %f, then scaling to %f %f\n", tableFrame.origin.x + imageViewFrame.origin.x, tableFrame.origin.y + imageViewFrame.origin.y, centerx, centery, location.x, location.y);
     
-    // at this point, location and badgeFrame are all relative to feedItem.frame, at full size (300px). NOT QUITE ACCURATE PLACEMENT
-    NSLog(@"FeedView: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
-    AuxStixViewController * auxView = [[AuxStixViewController alloc] init];
+    //NSLog(@"VerticalFeedController: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
+    AddStixViewController * auxView = [[AddStixViewController alloc] init];
     
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -282,27 +287,36 @@
     [self.camera setCameraOverlayView:auxView.view];
     
     auxView.delegate = self;
-    [auxView initStixView:t];
-    [auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];    
+    [auxView initStixView:tag];
+    //[auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
+    [auxView addStixToStixView:stixStringID atLocation:location];
+    [auxView toggleCarouselView:NO];
+    [auxView.locationField setHidden:YES];
     [carouselView resetBadgeLocations];
 }
 
--(void)didAddAuxStixWithStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform withComment:(NSString *)comment {
+-(void)didAddDescriptor:(NSString *)descriptor andComment:(NSString *)comment andLocation:(NSString *)location {
+    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    if ([descriptor length] > 0) {
+        NSString * name = [self.delegate getUsername];
+        [self.delegate didAddCommentWithTagID:[t.tagID intValue] andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
+        //        [self didAddNewComment:descriptor withTagID:[t.tagID intValue]];
+    }
+}
+
+-(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
     
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
-    if ([comment length] > 0)
-        [self didAddNewComment:comment withTagID:[t.tagID intValue]];
-    
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     
     [carouselView resetBadgeLocations];
-    [self reloadCurrentPage];
+    [self reloadCurrentPage];    
 }
 
--(void)didCancelAuxStix {
+-(void)didCancelAddStix {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
 }
@@ -455,6 +469,7 @@
             NSString * locationString = tag.locationString;
             
             [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
+            feedItemViewOffset = feedItem.view.frame.origin; // same offset
             [feedItem.view setBackgroundColor:[UIColor clearColor]];
             [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
             //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 

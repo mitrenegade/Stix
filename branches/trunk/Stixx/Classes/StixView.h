@@ -28,6 +28,7 @@
     // stix to be manipulated: new stix or new aux stix
     UIImageView * stix;
     OutlineLabel * stixCount;
+    NSString * selectStixStringID;
     bool canManipulate;
     NSMutableArray * auxCanManipulate;
     bool isDragging;
@@ -71,6 +72,7 @@
 @property (nonatomic, assign) bool isPeelable;
 @property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
 @property (nonatomic, assign) CGAffineTransform referenceTransform;
+@property (nonatomic, copy) NSString * selectStixStringID;
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;

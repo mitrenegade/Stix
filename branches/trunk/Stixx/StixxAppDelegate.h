@@ -12,10 +12,9 @@
 #import <UIKit/UIKit.h>
 
 #import "TagViewController.h"
-#import "FeedViewController.h"
 #import "ProfileViewController.h"
 #import "FriendsViewController.h"
-#import "TagDescriptorController.h"
+//#import "TagDescriptorController.h"
 #import "ExploreViewController.h"
 #import "Kumulos.h"
 #import "Tag.h"
@@ -31,6 +30,7 @@
 #import "StoreViewController.h"
 #import "StoreViewShell.h"
 #import "AlertPrompt.h"
+#import "KumulosHelper.h"
 
 #if USING_FACEBOOK
 #import "FBConnect.h"
@@ -69,7 +69,7 @@ struct UserInfo {
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, FeedViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate,
 
 #if USING_FACEBOOK
     FBSessionDelegate,
@@ -182,6 +182,7 @@ struct UserInfo {
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;
 -(void)adminSaveFeed;
+-(void)adminResetAllStixOrders;
 
 -(void)decrementStixCount:(NSString*)stixStringID;
 -(void)incrementStixCount:(NSString*)stixStringID;

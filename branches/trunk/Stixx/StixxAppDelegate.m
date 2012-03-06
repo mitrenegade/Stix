@@ -60,7 +60,7 @@ static int init=0;
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     versionStringStable = @"0.7.6";
-    versionStringBeta = @"0.7.7.4";
+    versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
     
     /*** Kumulos service ***/
     
@@ -1646,7 +1646,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
     NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo->username];
-    NSString * fullmessage = [NSString stringWithFormat:@"Stix version %@\n\n%@", versionStringStable, message];
+    NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@", versionStringStable, versionStringBeta, message];
 	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:fullmessage];
     [self didDismissSecondaryView];
 }

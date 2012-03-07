@@ -94,6 +94,8 @@
 		9E6404A51456DC680051EB4D /* dropshadow_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E6404A41456DC680051EB4D /* dropshadow_small.png */; };
 		9E65B02014E565270021DD96 /* StoreViewShell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E65B01E14E565270021DD96 /* StoreViewShell.m */; };
 		9E65B02114E565270021DD96 /* StoreViewShell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E65B01F14E565270021DD96 /* StoreViewShell.xib */; };
+		9E6B05DC150826EB00E3ADAD /* ProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */; };
+		9E6B05DD150826EB00E3ADAD /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */; };
 		9E7519F21488AB71008F4E2A /* fire_load_side1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519ED1488AB71008F4E2A /* fire_load_side1.png */; };
 		9E7519F31488AB71008F4E2A /* fire_load_side2.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519EE1488AB71008F4E2A /* fire_load_side2.png */; };
 		9E7519F41488AB71008F4E2A /* fire_load_side3.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E7519EF1488AB71008F4E2A /* fire_load_side3.png */; };
@@ -186,8 +188,6 @@
 		9EB031E2142C01260019F2BD /* ARCoordinate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031B3142C01260019F2BD /* ARCoordinate.m */; };
 		9EB031E4142C01260019F2BD /* ARViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031B7142C01260019F2BD /* ARViewController.m */; };
 		9EB031E5142C01260019F2BD /* BadgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031B9142C01260019F2BD /* BadgeView.m */; };
-		9EB031E9142C01260019F2BD /* ProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031C0142C01260019F2BD /* ProfileViewController.m */; };
-		9EB031EA142C01260019F2BD /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB031C1142C01260019F2BD /* ProfileViewController.xib */; };
 		9EB031F1142C01260019F2BD /* FileHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031CC142C01260019F2BD /* FileHelpers.m */; };
 		9EB031F4142C01260019F2BD /* ImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D1142C01260019F2BD /* ImageCache.m */; };
 		9EB031F5142C01260019F2BD /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB031D3142C01260019F2BD /* LoginViewController.m */; };
@@ -454,6 +454,9 @@
 		9E65B01D14E565270021DD96 /* StoreViewShell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StoreViewShell.h; path = ../StoreViewShell.h; sourceTree = "<group>"; };
 		9E65B01E14E565270021DD96 /* StoreViewShell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StoreViewShell.m; path = ../StoreViewShell.m; sourceTree = "<group>"; };
 		9E65B01F14E565270021DD96 /* StoreViewShell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = StoreViewShell.xib; path = ../StoreViewShell.xib; sourceTree = "<group>"; };
+		9E6B05D9150826EB00E3ADAD /* ProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileViewController.h; sourceTree = "<group>"; };
+		9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileViewController.m; sourceTree = "<group>"; };
+		9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
 		9E7519ED1488AB71008F4E2A /* fire_load_side1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side1.png; path = Stixx/images/fire_load_side1.png; sourceTree = SOURCE_ROOT; };
 		9E7519EE1488AB71008F4E2A /* fire_load_side2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side2.png; path = Stixx/images/fire_load_side2.png; sourceTree = SOURCE_ROOT; };
 		9E7519EF1488AB71008F4E2A /* fire_load_side3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = fire_load_side3.png; path = Stixx/images/fire_load_side3.png; sourceTree = SOURCE_ROOT; };
@@ -599,9 +602,6 @@
 		9EB031B7142C01260019F2BD /* ARViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARViewController.m; sourceTree = "<group>"; };
 		9EB031B8142C01260019F2BD /* BadgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BadgeView.h; sourceTree = "<group>"; };
 		9EB031B9142C01260019F2BD /* BadgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BadgeView.m; sourceTree = "<group>"; };
-		9EB031BF142C01260019F2BD /* ProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileViewController.h; sourceTree = "<group>"; };
-		9EB031C0142C01260019F2BD /* ProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileViewController.m; sourceTree = "<group>"; };
-		9EB031C1142C01260019F2BD /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
 		9EB031CB142C01260019F2BD /* FileHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHelpers.h; sourceTree = "<group>"; };
 		9EB031CC142C01260019F2BD /* FileHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileHelpers.m; sourceTree = "<group>"; };
 		9EB031D0142C01260019F2BD /* ImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCache.h; sourceTree = "<group>"; };
@@ -1350,9 +1350,9 @@
 				9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */,
 				9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */,
 				9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */,
-				9EB031BF142C01260019F2BD /* ProfileViewController.h */,
-				9EB031C0142C01260019F2BD /* ProfileViewController.m */,
-				9EB031C1142C01260019F2BD /* ProfileViewController.xib */,
+				9E6B05D9150826EB00E3ADAD /* ProfileViewController.h */,
+				9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */,
+				9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */,
 				9E2830EC14A2D992000707B8 /* UserProfileViewController.h */,
 				9E2830ED14A2D993000707B8 /* UserProfileViewController.m */,
 				9E2830EE14A2D996000707B8 /* UserProfileViewController.xib */,
@@ -1620,7 +1620,6 @@
 			files = (
 				9EB0317D142C002E0019F2BD /* InfoPlist.strings in Resources */,
 				9EB03191142C002E0019F2BD /* MainWindow_iPad.xib in Resources */,
-				9EB031EA142C01260019F2BD /* ProfileViewController.xib in Resources */,
 				9EB031F6142C01260019F2BD /* LoginViewController.xib in Resources */,
 				9EB031FC142C01260019F2BD /* TagViewController.xib in Resources */,
 				9EB0321C142C01340019F2BD /* comment.png in Resources */,
@@ -1796,6 +1795,7 @@
 				9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */,
 				3EFF72BB1508109700A672F9 /* FriendSearchViewController.xib in Resources */,
 				3EFF72C0150810C400A672F9 /* FriendSearchResultsController.xib in Resources */,
+				9E6B05DD150826EB00E3ADAD /* ProfileViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1837,7 +1837,6 @@
 				9EB031E2142C01260019F2BD /* ARCoordinate.m in Sources */,
 				9EB031E4142C01260019F2BD /* ARViewController.m in Sources */,
 				9EB031E5142C01260019F2BD /* BadgeView.m in Sources */,
-				9EB031E9142C01260019F2BD /* ProfileViewController.m in Sources */,
 				9EB031F1142C01260019F2BD /* FileHelpers.m in Sources */,
 				9EB031F4142C01260019F2BD /* ImageCache.m in Sources */,
 				9EB031F5142C01260019F2BD /* LoginViewController.m in Sources */,
@@ -1923,6 +1922,7 @@
 				9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */,
 				3EFF72BA1508109700A672F9 /* FriendSearchViewController.m in Sources */,
 				3EFF72BF150810C400A672F9 /* FriendSearchResultsController.m in Sources */,
+				9E6B05DC150826EB00E3ADAD /* ProfileViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

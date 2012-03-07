@@ -48,7 +48,7 @@
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, /*LoginViewDelegate, */FriendsViewDelegate, UITextFieldDelegate>{
-
+    
     IBOutlet UIButton * logoutScreenButton;
     IBOutlet UIButton * stixCountButton; // custom button but no clicking
     IBOutlet UIButton * friendCountButton; 
@@ -59,7 +59,7 @@
     
     //LoginViewController * loginController;
     FriendsViewController * friendController;
-
+    
     NSObject<ProfileViewDelegate> *delegate;
     Kumulos * k;
     bool friendViewIsDisplayed;
@@ -78,6 +78,7 @@
 @property (nonatomic, retain) FriendsViewController * friendController;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, assign) UIImagePickerController * camera;
+@property (nonatomic, retain) IBOutlet UIButton * findFriendsButton;
 
 -(IBAction)didClickLogoutButton:(id)sender;
 -(IBAction)changePhoto:(id)sender;
@@ -93,6 +94,8 @@
 -(IBAction)stixCountButtonClicked:(id)sender;
 // utils
 -(void)administratorModeResetAllStix;
+
+-(IBAction)findFriendsClicked:(id)sender;
 
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;

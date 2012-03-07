@@ -41,7 +41,7 @@
     [k setDelegate:self];    
     //isLoggedIn = NO;
     return self;
-
+    
 }
 
 -(void)viewDidLoad {
@@ -182,8 +182,8 @@
 }
 
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
-//    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
-//    [picker release];    
+    //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
+    //    [picker release];    
     [self dismissModalViewControllerAnimated:YES];
     [picker release];
 }
@@ -200,12 +200,12 @@
     
     NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
     [self dismissModalViewControllerAnimated:TRUE];
-
+    
     // scale down photo
 	CGSize targetSize = CGSizeMake(90, 90);		
     UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
     UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
-
+    
     // save to album
     UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
     
@@ -214,7 +214,7 @@
     NSLog(@"Adding photo of size %f %f to user %@", rounded.size.width, rounded.size.height, [delegate getUsername]);
     [photoButton setImage:rounded forState:UIControlStateNormal];
     [self.delegate didChangeUserphoto:rounded];
-
+    
     // add to kumulos
     [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
     [picker release];
@@ -223,7 +223,7 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
 {
     NSLog(@"Added photo to username %@", [delegate getUsername]);
-
+    
     // force friendView to update photo after we know it is in kumulos
     [self.delegate checkForUpdatePhotos];
 }
@@ -248,7 +248,7 @@
 
 // used only by administratorModeResetAllStix
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
-
+    
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
         NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];
@@ -257,7 +257,7 @@
         [data autorelease]; // MRC
         [stix autorelease]; 
     }
- }
+}
 
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addStixToUserDidCompleteWithResult:(NSArray *)theResults {
     NSMutableDictionary * d = [theResults objectAtIndex:0];
@@ -370,7 +370,7 @@
     photoButton = nil;
     [buttonInstructions release];
     buttonInstructions = nil;
-
+    
     [self setFindFriends:nil];
     [super viewDidUnload];
 }

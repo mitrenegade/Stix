@@ -266,8 +266,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1013"
          endingLineNumber = "1013"
-         landmarkName = "@implementation StixxAppDelegate"
-         landmarkType = "3">
+         landmarkName = "-getNewerTagsThanID:"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1609,9 +1609,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "106"
-         endingLineNumber = "106"
-         landmarkName = "-kumulosAPI:apiOperation:getUserDidCompleteWithResult:"
-         landmarkType = "5">
+         endingLineNumber = "106">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1666,7 +1664,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1316"
          endingLineNumber = "1316"
-         landmarkName = "-didLoginWithUsername:andPhoto:andStix:andTotalTags:andBuxCount:andStixOrder:andFriendsList:"
+         landmarkName = "-didLoginFromSplashScreenWithUsername:andPhoto:andStix:andTotalTags:andBuxCount:andStixOrder:andFriendsList:isFirstTimeUser:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1680,8 +1678,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1291"
          endingLineNumber = "1291"
-         landmarkName = "-didLoginFromSplashScreenWithUsername:andPhoto:andStix:andTotalTags:andBuxCount:andStixOrder:andFriendsList:isFirstTimeUser:"
-         landmarkType = "5">
+         landmarkName = "@implementation StixxAppDelegate"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"

@@ -702,7 +702,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     newestTag = [newTag retain];
     
     [k setDelegate:self];
-    NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); //UIImagePNGRepresentation([newTag image]);
+    NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
+    UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
     
     // this must match Tag.m:getTagFromDictionary
     NSMutableData *theCoordData;
@@ -1175,6 +1176,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     //NSLog(@"loaded %d new friends from kumulos", [theResults count]);
 }
+
+
 
 -(NSMutableDictionary * )getUserPhotos {
     return allUserPhotos;
@@ -1814,7 +1817,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self adminSaveTagUpdateInfo];
             break;
         case 5:
-            NSLog(@"button 5: Reset all stix orders");
+            //NSLog(@"button 5: Reset all stix orders");
             [self adminResetAllStixOrders];
             break;
         default:

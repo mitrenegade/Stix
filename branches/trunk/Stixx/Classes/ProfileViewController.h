@@ -15,6 +15,7 @@
 #import "BadgeView.h"
 #import "FriendsViewController.h"
 #import "KumulosData.h"
+#import "FriendSearchViewController.h"
 
 #define DEFAULT_STIX_COUNT 2
 
@@ -95,5 +96,4 @@
 
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
-
 @end

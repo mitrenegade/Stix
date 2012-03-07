@@ -38,10 +38,10 @@
 	// add an image
 	UIImage * i = [UIImage imageNamed:@"tab_friends.png"];
 	[tbi setImage:i];
-
-//    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
+    
+    //    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
-
+    
     return self;
 }
 
@@ -49,14 +49,14 @@
     [super viewDidLoad];
 	/****** init badge view ******/
     /*
-	carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-    carouselView.delegate = self;
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X, SHELF_STIX_Y, 320, SHELF_STIX_SIZE)];
-    */
+     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+     carouselView.delegate = self;
+     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X, SHELF_STIX_Y, 320, SHELF_STIX_SIZE)];
+     */
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
     //[delegate didCreateBadgeView:carouselView];
-  
+    
     // add badgeView and scrollView as subviews of feedview; set underlay
     // important: in the beginning, buttonInstructions is the underlay for badgeView which means
     // any touch events get fowarded to buttonInstructions, as long as it is above the view 
@@ -65,11 +65,11 @@
     //[self.view insertSubview:carouselView aboveSubview:scrollView];
     //[carouselView setUnderlay:buttonInstructions];
     //[carouselView setHidden:YES];
-
+    
     if (activityIndicator == nil)
         activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
     [self.view addSubview:activityIndicator];
-
+    
     userPhotoFrames = [[NSMutableDictionary alloc] init];
     friendPages = [[NSMutableArray alloc] init];
 }
@@ -111,7 +111,7 @@
 {
 	//[imageView setImage:[[ImageCache sharedImageCache] imageForKey:@"newImage"]];
 	[super viewWillAppear:animated];    
-
+    
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
     [self forceReloadAll];    
     //[carouselView resetBadgeLocations];    
@@ -201,7 +201,8 @@
     if ([friendPages count] < index+1 || [friendPages objectAtIndex:index] == nil)
     {
         UIView * friendPageView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 300)];
-
+        NSMutableSet * friendsList = [self.delegate getFriendsList];
+        
         int x = 0;
         int y = 0;
         //for (id key in userPhotos) {
@@ -214,37 +215,43 @@
         int ct = 0;
         while (key = [e nextObject]) {
             if (ct >= start_index && ct <= end_index) {
-                UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:key]];
-                UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
-                [friendView setBackgroundColor:[UIColor blackColor]];
-                NSString * name = key;
-                friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 90);
-                UILabel * namelabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20) + 85, 90, 20)];
-                [namelabel setText:name];
-                [namelabel setBackgroundColor:[UIColor blackColor]];
-                [namelabel setTextColor:[UIColor whiteColor]];
-                [namelabel setTextAlignment:UITextAlignmentCenter];
-                [friendPageView addSubview:friendView];
-                [friendPageView addSubview:namelabel];
-                [photo release];
-                [friendView release];
-                [namelabel release];
-                
-                NSLog(@"  Adding friend %d = %@ to position %d %d", ct, name, x, y);
-
-                // remember the frame
-                CGRect scrollFrame = friendView.frame;
-                scrollFrame.origin.x += index * friendPageView.frame.size.width;
-                [userPhotoFrames setObject:[NSValue valueWithCGRect:scrollFrame] forKey:key];
-
-                x = x + 1;
-                if (x==FRIENDS_COL)
-                {
-                    x = 0;
-                    y = y + 1;
+                if ([friendsList containsObject:key]) {  // filter for friends - comment this line for all
+                    UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:key]];
+                    UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
+                    [friendView setBackgroundColor:[UIColor blackColor]];
+                    NSString * name = key;
+                    friendView.frame = CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20), 90, 90);
+                    UILabel * namelabel = [[UILabel alloc] initWithFrame:CGRectMake(5 + x * (90 + 10), 80 + y * (90 + 10+20) + 85, 90, 20)];
+                    [namelabel setText:name];
+                    if ([friendsList containsObject:name]) { // green background if friend
+                        [namelabel setBackgroundColor:[UIColor greenColor]];
+                    } else { // else black
+                        [namelabel setBackgroundColor:[UIColor blackColor]];
+                    }
+                    [namelabel setTextColor:[UIColor whiteColor]];
+                    [namelabel setTextAlignment:UITextAlignmentCenter];
+                    [friendPageView addSubview:friendView];
+                    [friendPageView addSubview:namelabel];
+                    [photo release];
+                    [friendView release];
+                    [namelabel release];
+                    
+                    NSLog(@"  Adding friend %d = %@ to position %d %d", ct, name, x, y);
+                    
+                    // remember the frame
+                    CGRect scrollFrame = friendView.frame;
+                    scrollFrame.origin.x += index * friendPageView.frame.size.width;
+                    [userPhotoFrames setObject:[NSValue valueWithCGRect:scrollFrame] forKey:key];
+                    
+                    x = x + 1;
+                    if (x==FRIENDS_COL)
+                    {
+                        x = 0;
+                        y = y + 1;
+                    }
+                    if (y == FRIENDS_ROW)
+                        break;            
                 }
-                if (y == FRIENDS_ROW)
-                    break;            
             }
             ct++;
             if (ct > end_index)

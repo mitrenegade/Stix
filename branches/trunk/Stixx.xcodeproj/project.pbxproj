@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3EFF72BA1508109700A672F9 /* FriendSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EFF72B81508109500A672F9 /* FriendSearchViewController.m */; };
+		3EFF72BB1508109700A672F9 /* FriendSearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */; };
+		3EFF72BF150810C400A672F9 /* FriendSearchResultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */; };
+		3EFF72C0150810C400A672F9 /* FriendSearchResultsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */; };
 		444C3AA6148BF4C1005EB6DB /* Base64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */; };
 		444C3AA7148BF4C1005EB6DB /* Foursquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A97148BF4C1005EB6DB /* Foursquare.m */; };
 		444C3AA8148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A99148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m */; };
@@ -325,6 +329,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3EFF72B71508109500A672F9 /* FriendSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchViewController.h; sourceTree = "<group>"; };
+		3EFF72B81508109500A672F9 /* FriendSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchViewController.m; sourceTree = "<group>"; };
+		3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchViewController.xib; sourceTree = "<group>"; };
+		3EFF72BC150810C300A672F9 /* FriendSearchResultsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchResultsController.h; sourceTree = "<group>"; };
+		3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchResultsController.m; sourceTree = "<group>"; };
+		3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchResultsController.xib; sourceTree = "<group>"; };
 		444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64Transcoder.c; sourceTree = "<group>"; };
 		444C3A95148BF4C1005EB6DB /* Base64Transcoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64Transcoder.h; sourceTree = "<group>"; };
 		444C3A96148BF4C1005EB6DB /* Foursquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare.h; sourceTree = "<group>"; };
@@ -1331,6 +1341,12 @@
 				9EF173C2146D01F30073F83B /* OutlineLabel.m */,
 				9ECF1C5D145DD4DD00B7F7F1 /* PagedScrollView.h */,
 				9ECF1C5E145DD4DD00B7F7F1 /* PagedScrollView.m */,
+				3EFF72B71508109500A672F9 /* FriendSearchViewController.h */,
+				3EFF72B81508109500A672F9 /* FriendSearchViewController.m */,
+				3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */,
+				3EFF72BC150810C300A672F9 /* FriendSearchResultsController.h */,
+				3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */,
+				3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */,
 				9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */,
 				9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */,
 				9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */,
@@ -1778,6 +1794,8 @@
 				9EF94F54150002F000372970 /* blackbar.png in Resources */,
 				9E80C65D150554980051D64C /* AddStixViewController.xib in Resources */,
 				9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */,
+				3EFF72BB1508109700A672F9 /* FriendSearchViewController.xib in Resources */,
+				3EFF72C0150810C400A672F9 /* FriendSearchResultsController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1903,6 +1921,8 @@
 				9E80C65C150554980051D64C /* AddStixViewController.m in Sources */,
 				9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */,
 				9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */,
+				3EFF72BA1508109700A672F9 /* FriendSearchViewController.m in Sources */,
+				3EFF72BF150810C400A672F9 /* FriendSearchResultsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

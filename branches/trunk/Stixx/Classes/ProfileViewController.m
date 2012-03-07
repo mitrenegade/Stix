@@ -20,6 +20,7 @@
 @synthesize friendController;
 @synthesize k;
 @synthesize camera;
+@synthesize findFriends;
 
 -(id)init
 {
@@ -300,11 +301,17 @@
     [self.delegate didClickInviteButton];
 }
 
+- (IBAction)findFriendsClicked:(id)sender {
+    FriendSearchViewController * friendSearchViewController = [[FriendSearchViewController alloc] init];
+    [self.view addSubview:friendSearchViewController.view];
+}
+
 /**** friendsViewControllerDelegate ****/
 // badgeViewDelegate forwarded from friendsViewDelegate
 - (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
 -(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
-- (NSString*)getUsername {return [self.delegate getUsername];}
+-(NSMutableSet*)getFriendsList {return [self.delegate getFriendsList];}
+-(NSString*)getUsername {return [self.delegate getUsername];}
 
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
 -(int)getStixOrder:(NSString*)stixStringID;
@@ -364,6 +371,7 @@
     [buttonInstructions release];
     buttonInstructions = nil;
 
+    [self setFindFriends:nil];
     [super viewDidUnload];
 }
 
@@ -382,6 +390,7 @@
     photoButton = nil;
     [buttonInstructions release];
     buttonInstructions = nil;
+    [findFriends release];
     [super dealloc];
 }
 

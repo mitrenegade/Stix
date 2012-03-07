@@ -179,6 +179,10 @@
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 
+-(IBAction)didPressShareButton:(id)sender {
+    [self.delegate sharePix:tagID];
+}
+
 - (void)didReceiveMemoryWarning
 {
     // Releases the view if it doesn't have a superview.

@@ -16,6 +16,7 @@
 //#import "AuxStixViewController.h"
 #import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
+#import "KumulosHelper.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -45,7 +46,7 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;

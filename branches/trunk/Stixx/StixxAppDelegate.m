@@ -1717,10 +1717,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminResetAllStixOrders {
-    KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh setFunction:@"adminUpdateAllStixOrders"];
+//    KumulosHelper * kh = [[KumulosHelper alloc] init];
+//    [kh setFunction:@"adminUpdateAllStixOrders"];
     //[kh setFunction:@"adminUpdateAllFriendsLists"];
-    [kh execute];
+//    [kh execute];
+    [[KumulosHelper sharedKumulosHelper] execute:@"adminUpdateAllStixOrders"];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
@@ -1809,8 +1810,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self adminSetAllUsersBuxCounts];
             break;
         case 4:
-            NSLog(@"button 4: Save stix feed");
-            [self adminSaveFeed];
+            NSLog(@"button 4: Save all tag update info");
+            [self adminSaveTagUpdateInfo];
             break;
         case 5:
             NSLog(@"button 5: Reset all stix orders");
@@ -1844,8 +1845,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
 }
 
--(void)adminSaveFeed {
-    
+-(void)adminSaveTagUpdateInfo {
+    [[KumulosHelper sharedKumulosHelper] execute:@"adminSaveTagUpdateInfo"];
 }
 
 -(void)incrementStixCount:(NSString *)stixStringID{

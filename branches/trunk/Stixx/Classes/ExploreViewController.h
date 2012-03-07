@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
-#import "PagedScrollView.h"
+//#import "PagedScrollView.h"
+#import "ColumnTableController.h"
 #import "Kumulos.h"
 #import "Tag.h"
 #import "ZoomViewController.h"
@@ -24,15 +25,18 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
-@interface ExploreViewController : UIViewController <PagedScrollViewDelegate, KumulosDelegate, ZoomViewDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, ZoomViewDelegate> 
 {
     //CarouselView * carouselView; 
-    PagedScrollView *scrollView;	
+    //PagedScrollView *scrollView;	
+    ColumnTableController * tableController;
     NSObject<ExploreViewDelegate> * delegate;
     ZoomViewController * zoomViewController;
     CGRect zoomFrame;
     UIImageView * zoomView;
     bool isZooming; // prevent hits when zooming
+    
+    NSMutableDictionary * feedItems;
     
     IBOutlet UIButton * buttonFeedback;
     
@@ -49,7 +53,8 @@
 }
 
 //@property (nonatomic, retain) CarouselView * carouselView;
-@property (nonatomic, retain) PagedScrollView *scrollView;
+//@property (nonatomic, retain) PagedScrollView *scrollView;
+@property (nonatomic, retain) ColumnTableController * tableController;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) NSMutableArray * allTagIDs; 
@@ -61,5 +66,8 @@
 //-(void)createCarouselView;
 //-(void)reloadCarouselView;
 -(IBAction)feedbackButtonClicked:(id)sender;
+
+
+-(void)initializeTable;
 
 @end

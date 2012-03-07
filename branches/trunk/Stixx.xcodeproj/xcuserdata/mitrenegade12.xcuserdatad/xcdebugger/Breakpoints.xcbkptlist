@@ -1582,8 +1582,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "20"
          endingLineNumber = "20"
-         landmarkName = "-execute"
-         landmarkType = "5">
+         landmarkName = "@implementation KumulosHelper"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1624,7 +1624,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "35"
          endingLineNumber = "35"
-         landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
+         landmarkName = "+sharedKumulosHelper"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1638,7 +1638,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "40"
          endingLineNumber = "40"
-         landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
+         landmarkName = "-execute:withParams:withCallback:withDelegate:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1652,8 +1652,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "66"
          endingLineNumber = "66"
-         landmarkName = "-kumulosAPI:apiOperation:getAllUsersDidCompleteWithResult:"
-         landmarkType = "5">
+         landmarkName = "@implementation KumulosHelper"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"

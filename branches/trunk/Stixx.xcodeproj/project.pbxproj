@@ -65,6 +65,8 @@
 		9E2830F214A2E8FC000707B8 /* feed_bkg.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E2830F114A2E8FC000707B8 /* feed_bkg.png */; };
 		9E3BE07A1463673200F7B763 /* MainWindow_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3BE0761463673200F7B763 /* MainWindow_iPhone.xib */; };
 		9E3BE07B1463673200F7B763 /* StixxAppDelegate_iPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */; };
+		9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E47ED1915068C8F00F4E250 /* ColumnTableController.m */; };
+		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
 		9E4A619C14AD1FB6000DCEF0 /* txt_giftstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E4A619B14AD1FB6000DCEF0 /* txt_giftstix.png */; };
 		9E4A619E14AD1FC3000DCEF0 /* bkg_actionstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E4A619D14AD1FC3000DCEF0 /* bkg_actionstix.png */; };
 		9E4F598514DDC524006469DF /* StoreViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F598314DDC524006469DF /* StoreViewController.m */; };
@@ -410,6 +412,9 @@
 		9E3BE0771463673200F7B763 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow_iPhone.xib; sourceTree = "<group>"; };
 		9E3BE0781463673200F7B763 /* StixxAppDelegate_iPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixxAppDelegate_iPhone.h; sourceTree = "<group>"; };
 		9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixxAppDelegate_iPhone.m; sourceTree = "<group>"; };
+		9E47ED1815068C8F00F4E250 /* ColumnTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColumnTableController.h; sourceTree = "<group>"; };
+		9E47ED1915068C8F00F4E250 /* ColumnTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColumnTableController.m; sourceTree = "<group>"; };
+		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
 		9E4A619B14AD1FB6000DCEF0 /* txt_giftstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_giftstix.png; sourceTree = "<group>"; };
 		9E4A619D14AD1FC3000DCEF0 /* bkg_actionstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bkg_actionstix.png; sourceTree = "<group>"; };
 		9E4F598214DDC524006469DF /* StoreViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoreViewController.h; sourceTree = "<group>"; };
@@ -1260,6 +1265,9 @@
 				9ECD52301457BF32005CFDBB /* ExploreViewController.h */,
 				9ECD52311457BF32005CFDBB /* ExploreViewController.m */,
 				9ECD52321457BF33005CFDBB /* ExploreViewController.xib */,
+				9E47ED1815068C8F00F4E250 /* ColumnTableController.h */,
+				9E47ED1915068C8F00F4E250 /* ColumnTableController.m */,
+				9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */,
 				9EC7361714CE08D100AE5A6C /* FeedbackViewController.h */,
 				9EC7361814CE08D100AE5A6C /* FeedbackViewController.m */,
 				9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */,
@@ -1285,8 +1293,6 @@
 				9EC1EBC514A0523700592DE7 /* GiftStixTableController.h */,
 				9EC1EBC614A0523700592DE7 /* GiftStixTableController.m */,
 				9EC1EBC714A0523800592DE7 /* GiftStixTableController.xib */,
-				9EB031D0142C01260019F2BD /* ImageCache.h */,
-				9EB031D1142C01260019F2BD /* ImageCache.m */,
 				9EF297741485BAEF00B1782C /* LoadingAnimationView.h */,
 				9EF297751485BAEF00B1782C /* LoadingAnimationView.m */,
 				9E8A29CA14AF94F500CDCE76 /* LoadingViewController.h */,
@@ -1357,6 +1363,8 @@
 				9E91C603147EADDB003567ED /* ZoomViewController.h */,
 				9E91C604147EADDC003567ED /* ZoomViewController.m */,
 				9E91C605147EADDE003567ED /* ZoomViewController.xib */,
+				9EB031D0142C01260019F2BD /* ImageCache.h */,
+				9EB031D1142C01260019F2BD /* ImageCache.m */,
 				9E80C6671505896A0051D64C /* KumulosHelper.h */,
 				9E80C6681505896B0051D64C /* KumulosHelper.m */,
 				9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */,
@@ -1769,6 +1777,7 @@
 				9EF94F521500001800372970 /* camerabutton.png in Resources */,
 				9EF94F54150002F000372970 /* blackbar.png in Resources */,
 				9E80C65D150554980051D64C /* AddStixViewController.xib in Resources */,
+				9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1893,6 +1902,7 @@
 				9E919A0C14F614AD00D03085 /* EGORefreshTableHeaderView.m in Sources */,
 				9E80C65C150554980051D64C /* AddStixViewController.m in Sources */,
 				9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */,
+				9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

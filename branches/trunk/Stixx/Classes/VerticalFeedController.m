@@ -595,7 +595,7 @@
     }
 }
 
-/*** feedItemViewDelegate ****/
+/*** verticalfeedItemDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
@@ -609,6 +609,28 @@
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [commentView.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:commentView.view];
+}
+
+-(void)didSharePix:(NSMutableArray*)params {
+    int newID = [[params objectAtIndex:0] intValue];
+    NSLog(@"DidSharePix completed: id %d", newID);
+}
+
+-(void)sharePix:(int)tagID {
+#if 0
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
+    UIImage * feedImage = feedItem.imageData; // for now just store original image data
+	NSData *png = UIImagePNGRepresentation(feedImage);
+#else
+    UIImageView * stix = [BadgeView getLargeBadgeWithStixStringID:@"FIRE"];
+    NSData * png = UIImagePNGRepresentation(stix.image);
+#endif
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
+    [[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
+}
+
+-(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+    [self performSelector:callback withObject:params afterDelay:0];
 }
 
 // hack: forced display of comment page

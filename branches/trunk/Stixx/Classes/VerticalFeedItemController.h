@@ -31,6 +31,7 @@
 @protocol VerticalFeedItemDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
+-(void)sharePix:(int)tagID;
 
 // forward from StixView
 -(NSString*)getUsername;
@@ -51,6 +52,7 @@
     StixView * stixView;
     IBOutlet UIImageView * userPhotoView;
     IBOutlet UIButton * addCommentButton;
+    IBOutlet UIButton * shareButton;
     
     NSObject<VerticalFeedItemDelegate> * delegate;    
     
@@ -77,6 +79,7 @@
 @property (nonatomic, retain) NSString * commentString;
 @property (nonatomic, retain) UIImage * imageData;
 @property (nonatomic, retain) IBOutlet UIButton * addCommentButton;
+@property (nonatomic, retain) IBOutlet UIButton * shareButton;
 @property (nonatomic, assign) int tagID;
 @property (nonatomic, assign) int commentCount;
 @property (nonatomic, assign) NSObject<VerticalFeedItemDelegate> * delegate;   
@@ -85,11 +88,13 @@
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
-- (IBAction)didPressAddCommentButton:(id)sender;
 -(void)populateWithCommentCount:(int)count;
 
 -(void)initStixView:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
+
+-(IBAction)didPressAddCommentButton:(id)sender;
+-(IBAction)didPressShareButton:(id)sender;
 @end
 
 

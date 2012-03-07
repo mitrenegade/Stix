@@ -182,6 +182,7 @@ struct UserInfo {
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;
 -(void)adminSaveFeed;
+-(void)adminSaveTagUpdateInfo;
 -(void)adminResetAllStixOrders;
 
 -(void)decrementStixCount:(NSString*)stixStringID;

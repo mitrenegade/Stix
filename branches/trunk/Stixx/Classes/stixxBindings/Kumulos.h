@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Feb 15, 2012
+//  Created by Kumulos Bindings Compiler on Mar  6, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -21,11 +21,11 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewStixDidCompleteWithResult:(NSNumber*)newRecordID;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addScaleAndRotationToPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminDeleteTestDataDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createNewPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -47,17 +47,17 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfUserDidCompleteWithResult:(NSNumber*)aggregateResult;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation newPixDidCompleteWithResult:(NSNumber*)newRecordID;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithDescriptorDidCompleteWithResult:(NSNumber*)affectedRows;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithStixCountsDidCompleteWithResult:(NSNumber*)affectedRows;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixDidCompleteWithResult:(NSNumber*)affectedRows;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixOfPixDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createPixTimestampDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixTimestampDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addEmailToUserDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -111,6 +111,10 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricHitDidCompleteWithResult:(NSNumber*)newRecordID;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getSharedPixDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation savePixDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createStixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllStixViewsDidCompleteWithResult:(NSArray*)theResults;
@@ -143,13 +147,13 @@
 -(KSAPIOperation*) getAllHistoryWithTagID:(NSInteger)tagID;
     
    
--(KSAPIOperation*) addNewStixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andTagCoordinate:(NSData*)tagCoordinate andType:(NSInteger)type andScore:(NSInteger)score;
-    
-   
 -(KSAPIOperation*) addScaleAndRotationToPixWithAllTagID:(NSUInteger)allTagID andStixScale:(float)stixScale andStixRotation:(float)stixRotation;
     
    
 -(KSAPIOperation*) adminDeleteTestDataWithDescriptor:(NSString*)descriptor;
+    
+   
+-(KSAPIOperation*) createNewPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andAuxStix:(NSData*)auxStix andTimeUpdated:(NSDate*)timeUpdated;
     
    
 -(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andAuxStix:(NSData*)auxStix;
@@ -181,7 +185,7 @@
 -(KSAPIOperation*) getStixOfUserWithUsername:(NSString*)username;
     
    
--(KSAPIOperation*) newPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andBadge_x:(NSInteger)badge_x andBadge_y:(NSInteger)badge_y andScore:(NSInteger)score andStixStringID:(NSString*)stixStringID andTagCoordinate:(NSData*)tagCoordinate andAuxStix:(NSData*)auxStix;
+-(KSAPIOperation*) getUpdatedPixByTimeWithTimeUpdated:(NSDate*)timeUpdated andNumPix:(NSNumber*)numPix;
     
    
 -(KSAPIOperation*) updatePixWithAllTagID:(NSUInteger)allTagID andScore:(NSInteger)score andStixStringID:(NSString*)stixStringID andAuxStix:(NSData*)auxStix;
@@ -190,13 +194,13 @@
 -(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID andDescriptor:(NSString*)descriptor;
     
    
--(KSAPIOperation*) updatePixWithStixCountsWithAllTagID:(NSUInteger)allTagID andStixCounts:(NSData*)stixCounts;
-    
-   
--(KSAPIOperation*) updateStixWithAllTagID:(NSUInteger)allTagID andScore:(NSInteger)score andType:(NSInteger)type;
-    
-   
 -(KSAPIOperation*) updateStixOfPixWithAllTagID:(NSUInteger)allTagID andAuxStix:(NSData*)auxStix;
+    
+   
+-(KSAPIOperation*) createPixTimestampWithAllTagID:(NSUInteger)allTagID andLastUpdated:(NSDate*)lastUpdated;
+    
+   
+-(KSAPIOperation*) updatePixTimestampWithAllTagID:(NSUInteger)allTagID andLastUpdated:(NSDate*)lastUpdated;
     
    
 -(KSAPIOperation*) addEmailToUserWithUsername:(NSString*)username andEmail:(NSString*)email;
@@ -273,6 +277,12 @@
     
    
 -(KSAPIOperation*) addMetricHitWithDescription:(NSString*)description andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;
+    
+   
+-(KSAPIOperation*) getSharedPixWithSharedPixID:(NSUInteger)sharedPixID;
+    
+   
+-(KSAPIOperation*) savePixWithPixPNG:(NSData*)pixPNG;
     
    
 -(KSAPIOperation*) createStixWithStixStringID:(NSString*)stixStringID andDataPNG:(NSData*)dataPNG andStixDescriptor:(NSString*)stixDescriptor andLikelihood:(NSInteger)likelihood andOrder:(NSInteger)order andCategoryName:(NSString*)categoryName andTags:(NSString*)tags andDesignerName:(NSString*)designerName;

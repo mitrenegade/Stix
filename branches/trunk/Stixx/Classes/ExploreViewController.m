@@ -10,7 +10,8 @@
 
 @implementation ExploreViewController
 //@synthesize carouselView;
-@synthesize scrollView;
+//@synthesize scrollView;
+@synthesize tableController;
 @synthesize delegate;
 @synthesize buttonFeedback;
 @synthesize allTagIDs;
@@ -50,43 +51,15 @@
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableArray alloc] init];
         
-    [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
-    scrollView.isLazy = NO;
-    //[self.view addSubview:scrollView];
-    [self.view insertSubview:scrollView belowSubview:[self buttonFeedback]];
-
-    /*** create badgeView ***/
-    //[self createCarouselView];
-
+    [self initializeTable];
+    
     [self.view addSubview:activityIndicator];
     zoomViewController = [[ZoomViewController alloc] init];
-    //zoomView = [[UIImageView alloc] init];
     isZooming = NO;
     [self forceReloadAll];
 
-//	return self;
+    feedItems = [[NSMutableDictionary alloc] init]; 
 }
-/*
--(void)createCarouselView {
-    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
-        [carouselView clearAllViews];
-        [carouselView release];        
-    }
-    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-    carouselView.delegate = self;
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-
-    [self.view insertSubview:carouselView aboveSubview:scrollView];
-    [carouselView setUnderlay:scrollView];
-    [delegate didCreateBadgeView:carouselView];
-}
- 
--(void)reloadCarouselView {
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-    [[self carouselView] removeFromSuperview];
-    [self.view insertSubview:carouselView aboveSubview:scrollView];
-}
- */
 
 -(IBAction)refreshUpdates:(id)sender {
     [self forceReloadAll];
@@ -145,29 +118,24 @@
         //NSLog(@"Downloaded and added tag with id %d, name %@, comment %@ at index %d\n", new_id, name, comment, index);
     }
  
-    [scrollView populateScrollPagesAtPage:0];
+    //[scrollView populateScrollPagesAtPage:0];
     //[activityIndicator setHidden:YES];
     [activityIndicator stopCompleteAnimation];
 }
-/*********** PagedScrollViewDelegate functions *******/
 
--(void)initializeScrollWithPageSize:(CGSize) pageSize
+/*** table ***/
+-(void)initializeTable
 {
     // We need to do some setup once the view is visible. This will only be done once.
-    // Position and size the scrollview. It will be centered in the view.
-    CGRect scrollViewRect = CGRectMake(0, 0, pageSize.width, pageSize.height);
-    scrollViewRect.origin.x = ((self.view.frame.size.width - pageSize.width) / 2);
-    scrollViewRect.origin.y = ((self.view.frame.size.height - pageSize.height) / 2);
-    
-    scrollView = [[PagedScrollView alloc] initWithFrame:scrollViewRect];
-    [scrollView setBackgroundColor:[UIColor clearColor]];
-    scrollView.clipsToBounds = NO; // Important, this creates the "preview"
-    scrollView.pagingEnabled = YES;
-    scrollView.showsHorizontalScrollIndicator = NO;
-    scrollView.showsVerticalScrollIndicator = NO;
-    scrollView.myDelegate = self; // needs delegates for both scrolls
-    scrollView.delegate = self;
+    // Position and size the scrollview. It will be centered in the view.    
+    CGRect frame = CGRectMake(0,64, 320, 380);
+    tableController = [[ColumnTableController alloc] init];
+    [tableController.view setFrame:frame];
+    [tableController.view setBackgroundColor:[UIColor clearColor]];
+    tableController.delegate = self;
+    [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
 }
+
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
@@ -244,51 +212,12 @@
     return tot / per_page + 1;
 }
 
-// uiscrollview delegate - pass to PagedScrollViewDelegate
--(void)scrollViewDidScroll:(UIScrollView *)sv
-{
-    if (sv == scrollView) 
-    {
-        PagedScrollView * psv = (PagedScrollView *)sv;
-        int page = [psv currentPage];
-        
-#if 0
-        // Load the visible and neighbouring pages 
-#else
-        // determine direction, for indicators
-        //if (lastContentOffset < scrollView.contentOffset.x) { // right
-        //    if (page == [self itemCount] - 1)
-        //        [self.activityIndicator setHidden:NO];
-        //}
-        
-        // left scroll to reload
-        
-        if (lastContentOffset > scrollView.contentOffset.x) { // left 
-            if (page == 0)
-            {
-                //[self.activityIndicator setHidden:NO];   
-                [self.activityIndicator startCompleteAnimation];
-                [self forceReloadAll];
-            }
-        }
-
-        [psv loadPage:page-1];
-        [psv loadPage:page];
-        [psv loadPage:page+1];
-
-#endif
-    }
-}
 
 -(void)forceReloadAll {
-    //[k clearTagsByRecentUpdates];
-    //[k generateTagsByRecentUpdates];
-
+    
     [allTags removeAllObjects];
     [k getMostRecentlyUpdatedTagWithNumEls:[NSNumber numberWithInt:12]];
-    [scrollView clearAllPages];
-    //[activityIndicator startAnimating];
-    //[activityIndicator setHidden:NO];
+    //[scrollView clearAllPages];
     isZooming = NO;
     [activityIndicator startCompleteAnimation];
 }
@@ -300,12 +229,10 @@
     if (isZooming == YES)
         return;
     
-    NSLog(@"Click on page %d at position %f %f\n", [scrollView currentPage], location.x, location.y);
-   
     // dumb way to calculate which view we're looking at 
     // but this mirrors the way we populate this page
     int items_per_page = EXPLORE_COL * EXPLORE_ROW;
-    int start_index = [scrollView currentPage] * items_per_page;
+    int start_index = 0; //[scrollView currentPage] * items_per_page;
     int end_index = start_index + items_per_page - 1;
     int x=0;
     int y=0;
@@ -315,7 +242,7 @@
     int ct;
     int foundid=-1;
     if (start_index >= items_per_page) {
-        location.x -= [scrollView currentPage] * 300; // remove offset from scrollview 
+        //location.x -= [scrollView currentPage] * 300; // remove offset from scrollview 
     }
     for (ct=0; ct<[allTags count]; ct++) {
         if (ct >= start_index && ct <= end_index) {
@@ -415,10 +342,9 @@
      ];
      */
     [zoomViewController setDelegate:self];
-    [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
+    //[self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
     [zoomViewController setLabel:label];
     [zoomViewController setStixUsingTag:tag];
-    //[carouselView setUnderlay:zoomViewController.view];
     isZooming = NO;
     
 }
@@ -513,8 +439,6 @@
     
     //[carouselView release];
     //carouselView = nil;
-    [scrollView release];
-    scrollView = nil;
     [activityIndicator release];
     activityIndicator = nil;
 
@@ -523,7 +447,6 @@
 -(void)dealloc {
     [k release];
     //[carouselView release];
-    [scrollView release];
     [activityIndicator release];
     [super dealloc];
 }

@@ -14,9 +14,10 @@
 
 @protocol FriendsViewDelegate
 
-- (void)checkForUpdatePhotos;
+-(void)checkForUpdatePhotos;
 -(NSMutableDictionary *)getUserPhotos;
-- (NSString*)getUsername;
+-(NSMutableSet *)getFriendsList;
+-(NSString*)getUsername;
 -(void)didDismissFriendView;
 
 -(int)getStixCount:(NSString*)stixStringID;

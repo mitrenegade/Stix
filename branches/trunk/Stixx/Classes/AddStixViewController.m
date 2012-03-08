@@ -81,13 +81,15 @@
     //NSLog(@"AuxStix: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
     
     CGRect frame = [imageView frame];
+    if (stixView) {
+        [stixView removeFromSuperview];
+        [stixView release];
+    }
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
     [stixView initializeWithImage:imageData];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view addSubview:stixView];
-
-    [self createCarouselView];
 }
 
 -(void)addNewAuxStix:(UIImageView *)newStix ofType:(NSString *)newStixStringID atLocation:(CGPoint)location {
@@ -368,7 +370,6 @@
 }
 
 /**** Carousel ****/
-
 -(void)createCarouselView {
     if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
         [carouselView clearAllViews];
@@ -385,8 +386,9 @@
     // and touch interactions
     //    [carouselView setUnderlay:flashModeButton];
     [carouselView setDismissedTabY:400];
-    [carouselView setExpandedTabY:330];
-    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
+    [carouselView setExpandedTabY:30];
+    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.scrollOffsetFromTabTop,320,SHELF_HEIGHT)];
+    [carouselView toggleHideShelf:YES]; // always hide shelf
     [carouselView setAllowTap:YES];
     [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
     

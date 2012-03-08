@@ -142,7 +142,9 @@
     //tag.stixScale = stixScale; // no more main stix
     //tag.stixRotation = stixRotation;
     tag.tagID = [d valueForKey:@"allTagID"];
-    tag.timestamp = [d valueForKey:@"timeCreated"];
+    NSDate * timeCreated = [d valueForKey:@"timeCreated"];
+    NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
+    tag.timestamp = [timeCreated laterDate:timeUpdated];
     return [tag autorelease];
 }
 

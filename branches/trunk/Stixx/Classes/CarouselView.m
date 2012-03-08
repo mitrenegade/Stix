@@ -15,6 +15,8 @@
 @synthesize tapDefaultOffset;
 @synthesize buttonShowCarousel, carouselTab, stixSelected;
 @synthesize dismissedTabY, expandedTabY;
+@synthesize scrollOffsetFromTabTop;
+@synthesize buttonStixCategories;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -29,14 +31,17 @@
 #endif
     
     int total = [BadgeView totalStixTypes];
-    allCarouselStixFrames = [[NSMutableArray alloc] initWithCapacity:total];
-    allCarouselStixViews = [[NSMutableArray alloc] initWithCapacity:total];
+    allCarouselStixFrames = [[NSMutableDictionary alloc] initWithCapacity:total];
+    allCarouselStixViews = [[NSMutableDictionary alloc] initWithCapacity:total];
         
+    /*
     for (int i=0; i<[BadgeView totalStixTypes]; i++) {
         [allCarouselStixViews addObject:[NSNull null]];
     }
+     */
     showGiftStix = YES;
     sizeOfStixContext = 300; // default
+    self.scrollOffsetFromTabTop = 110; // default start of scrollView
     return self;
 }
 
@@ -46,15 +51,46 @@
     carouselHeight = scrollView.frame.size.height;
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.scrollEnabled = YES;
-    scrollView.directionalLockEnabled = YES; // only allow vertical or horizontal scroll
+    scrollView.directionalLockEnabled = NO; // only allow vertical or horizontal scroll
     [scrollView setDelegate:self];
     
     buttonShowCarousel = [[UIButton alloc] init];
     [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
-    carouselTab = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];
+    UIButton * button0 = [[UIButton alloc] init];
+    UIButton * button1 = [[UIButton alloc] init];
+    UIButton * button2 = [[UIButton alloc] init];
+    [button0 setImage:[UIImage imageNamed:@"txt_all.png"] forState:UIControlStateNormal];
+    [button0 setImage:[UIImage imageNamed:@"txt_all_selected.png"] forState:UIControlStateSelected];
+    [button0 setTag:SHELF_CATEGORY_ALL];
+    [button0 addTarget:self action:@selector(setShelfCategory:) forControlEvents: UIControlEventValueChanged];
+    [button0 setFrame:CGRectMake(20,50,80,50)];
+    [button1 setImage:[UIImage imageNamed:@"txt_cute.png"] forState:UIControlStateNormal];
+    [button1 setImage:[UIImage imageNamed:@"txt_cute_selected.png"] forState:UIControlStateSelected];
+    [button1 setTag:SHELF_CATEGORY_CUTE];
+    [button1 addTarget:self action:@selector(setShelfCategory:) forControlEvents: UIControlEventValueChanged];
+    [button1 setFrame:CGRectMake(120,50,80,50)];
+    [button2 setImage:[UIImage imageNamed:@"txt_facefun.png"] forState:UIControlStateNormal];
+    [button2 setImage:[UIImage imageNamed:@"txt_facefun_selected.png"] forState:UIControlStateSelected];
+    [button2 setTag:SHELF_CATEGORY_FACEFUN];
+    [button2 addTarget:self action:@selector(setShelfCategory:) forControlEvents: UIControlEventValueChanged];
+    [button2 setFrame:CGRectMake(220,50,80,50)];
+
+    buttonStixCategories = [[NSMutableArray alloc] initWithObjects:button0, button1, button2, nil];
+	[button0 release];
+	[button1 release];
+	[button2 release];
+                        
+    UIImageView * tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];    
+    carouselTab = [[UIView alloc] initWithFrame:tabImage.frame];
+    [carouselTab addSubview:tabImage];
+    [tabImage release];
+    [carouselTab addSubview:scrollView];
+    [carouselTab addSubview:buttonShowCarousel];
+    for (int i=0; i<[buttonStixCategories count]; i++) {
+        [carouselTab addSubview:[buttonStixCategories objectAtIndex:i]];
+    }
     [self addSubview:carouselTab];
-    [self addSubview:buttonShowCarousel];
-    [self carouselTabDismiss];
+    [self carouselTabDismiss:NO];
 
     shelf.frame = CGRectMake(scrollView.frame.origin.x, scrollView.frame.origin.y+50, 320, 30);
     
@@ -65,6 +101,7 @@
     }
     
     // add gesture recognizer
+#if USE_VERTICAL_GESTURE
     UIVerticalGestureRecognizer * myVerticalRecognizer = [[UIVerticalGestureRecognizer alloc] initWithTarget:self action:@selector(verticalGestureHandler:)];
     [myVerticalRecognizer setDelegate:self];
     for (UIGestureRecognizer *gestureRecognizer in scrollView.gestureRecognizers)
@@ -72,6 +109,7 @@
         [gestureRecognizer requireGestureRecognizerToFail:myVerticalRecognizer];
     } 
     [scrollView addGestureRecognizer:myVerticalRecognizer];
+#endif
 
     UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
     [myTapRecognizer setNumberOfTapsRequired:1];
@@ -81,61 +119,40 @@
     self.allowTap = NO;
 
 #if 0
-    [self reloadAllStixWithFrame:frame];
-#else
-    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"ICE"] retain];
-
-    int stixSize = carouselHeight;
+    int stixSize = SHELF_STIX_SIZE; //carouselHeight;
     int totalStix = [BadgeView totalStixTypes];
-    int ct = 0;
-    for (int i=0; i<totalStix; i++)
-    {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-        int count = [self.delegate getStixCount:stixStringID];
-        int order = [self.delegate getStixOrder:stixStringID];
-        if (order != -1 && (count > 0 || count == -1)) {
-            [basicStix setCenter:CGPointMake(stixSize*(order+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
-            //[basicStix setCenter:CGPointMake(stixSize*(ct+NUM_STIX_FOR_BORDER) + stixSize/2, stixSize/2)];
-            CGRect basicFrame = basicStix.frame;
-            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:basicFrame]];
-            ct++;
-        }
-        else
-        {
-            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
-            [allCarouselStixFrames addObject:[NSValue valueWithCGRect:stixFrame]];
-        }
-    }
-    [basicStix release];
-    
-    CGSize size = CGSizeMake(carouselHeight*(ct+2*NUM_STIX_FOR_BORDER), carouselHeight);
+    int maxX = STIX_PER_ROW;
+    int maxY = totalStix / maxX;
+    CGSize size = CGSizeMake(SHELF_STIX_SIZE * maxX, SHELF_STIX_SIZE * maxY);
     [scrollView setContentSize:size];
     for (int i=0; i<totalStix; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];    
+        if ([allCarouselStixViews objectForKey:stixStringID])
+            [[allCarouselStixViews objectForKey:stixStringID] removeFromSuperview];
+        
         int count = [self.delegate getStixCount:stixStringID];
         int order = [self.delegate getStixOrder:stixStringID];
-        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
-        if  ((count >= 0 || count == -1)&& order != -1) {
+        if (order != -1) {
+            int y = order / STIX_PER_ROW;
+            int x = order - y * STIX_PER_ROW;
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
-            [stix setFrame:fr];
+            CGPoint stixCenter = CGPointMake(stixSize*(x+NUM_STIX_FOR_BORDER) + stixSize / 2 + 10, stixSize*(y+NUM_STIX_FOR_BORDER) + stixSize/2);
+            [stix setCenter:stixCenter];
+            [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
+            if (count == 0)
+                [stix setAlpha:.25];
             [scrollView addSubview:stix];
-            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
-            [stix release];
-        }
-        // display numbered stix that have run out dimmer
-        if (count == 0 && order != -1) {
-            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
-            [stix setFrame:fr];
-            [stix setAlpha:.25];
-            [scrollView addSubview:stix];
-            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+            [allCarouselStixViews setObject:stix forKey:stixStringID];
             [stix release];
         }
     }
-    [self addSubview:scrollView];
+#else
+    [self reloadAllStix];
 #endif
+}
+
+-(void)setShelfCategory:(UIButton*)button {
+    NSLog(@"Button pressed: %d", button.tag);
 }
 
 -(void)reloadAllStix {
@@ -146,78 +163,49 @@
     [scrollView removeFromSuperview];
     scrollView.frame = frame;
     
-    if ([allCarouselStixViews count] != [BadgeView totalStixTypes]) {
-        [allCarouselStixViews release];
-        [allCarouselStixFrames release];
-        allCarouselStixViews = [[NSMutableArray alloc] initWithCapacity:[BadgeView totalStixTypes]];
-        allCarouselStixFrames = [[NSMutableArray alloc] initWithCapacity:[BadgeView totalStixTypes]];
-        for (int i=0; i<[BadgeView totalStixTypes]; i++) {
-            [allCarouselStixViews addObject:[NSNull null]];
-            [allCarouselStixFrames addObject:[NSNull null]];
-        }
-    }
-    
-    int stixSize = carouselHeight;
+    int stixSize = SHELF_STIX_SIZE;
     int totalStix = [BadgeView totalStixTypes];
-    int ct=0; //2;
-    UIImageView * basicStix = [[BadgeView getBadgeWithStixStringID:@"ICE"] retain];
-    for (int i=0; i<totalStix; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-        int count = [self.delegate getStixCount:stixStringID];
-        int order = [self.delegate getStixOrder:stixStringID];
-        if (order != -1) { //(count > 0 || count == -1) {
-            [basicStix setCenter:CGPointMake(stixSize*(order+NUM_STIX_FOR_BORDER) + stixSize / 2, stixSize/2)];
-            CGRect basicFrame = basicStix.frame;
-            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:basicFrame]];
-            NSLog(@"Repositioning CarouselView stix %d: stixStringID: %@ count: %d order %d frame %f %f", i, stixStringID, count, order, basicStix.frame.origin.x, basicStix.frame.origin.y);
-            ct++;
-        }
-        else
-        {
-            CGRect stixFrame = CGRectMake(0, 0, 0, 0);
-            [allCarouselStixFrames replaceObjectAtIndex:i withObject:[NSValue valueWithCGRect:stixFrame]];
-        }
-    }
-    [basicStix release];
-    
-    CGSize size = CGSizeMake(carouselHeight*(ct+2*NUM_STIX_FOR_BORDER), carouselHeight);
+    int maxX = STIX_PER_ROW;
+    int maxY = totalStix / maxX;
+    CGSize size = CGSizeMake(SHELF_STIX_SIZE * maxX, SHELF_STIX_SIZE * maxY);
     [scrollView setContentSize:size];
     for (int i=0; i<totalStix; i++) {
-        if ([NSNull null] != [allCarouselStixViews objectAtIndex:i])
-            [[allCarouselStixViews objectAtIndex:i] removeFromSuperview];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];    
+        if ([allCarouselStixViews objectForKey:stixStringID])
+            [[allCarouselStixViews objectForKey:stixStringID] removeFromSuperview];
         
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
         int count = [self.delegate getStixCount:stixStringID];
         int order = [self.delegate getStixOrder:stixStringID];
-        //NSLog(@"i: %d stixStringID: %@ count: %d", i, stixStringID, count);
-        if  ((count >= 0 || count == -1)&& order != -1) {
+        if (order != -1) {
+            int y = order / STIX_PER_ROW;
+            int x = order - y * STIX_PER_ROW;
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
-            [stix setFrame:fr];
+            CGPoint stixCenter = CGPointMake(stixSize*(x+NUM_STIX_FOR_BORDER) + stixSize / 2 + 10, stixSize*(y+NUM_STIX_FOR_BORDER) + stixSize/2);
+            [stix setCenter:stixCenter];
+            [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
+            if (count == 0)
+                [stix setAlpha:.25];
             [scrollView addSubview:stix];
-            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
-            [stix release];
-        }
-        // display numbered stix that have run out dimmer
-        if (count == 0 && order != -1) {
-            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            CGRect fr = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
-            [stix setFrame:fr];
-            [stix setAlpha:.25];
-            [scrollView addSubview:stix];
-            [allCarouselStixViews replaceObjectAtIndex:i withObject:stix];
+            [allCarouselStixViews setObject:stix forKey:stixStringID];
             [stix release];
         }
     }
-    [self addSubview:scrollView];
+    [carouselTab addSubview:scrollView];
 }
 
 -(void)clearAllViews {
+    NSEnumerator * e = [allCarouselStixViews keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        [[allCarouselStixViews objectForKey:key] removeFromSuperview];
+    }
+    /*
     for (int i=0; i<[allCarouselStixViews count]; i++)
     {
-        if ([allCarouselStixViews objectAtIndex:i] != [NSNull null])
+        if (allCarouselStixViews)
             [[allCarouselStixViews objectAtIndex:i] removeFromSuperview];
     }
+     */
     [scrollView removeFromSuperview];
     [self removeFromSuperview];
 }
@@ -239,7 +227,7 @@
 
 -(void)resetBadgeLocations{
     // center frame and adjust for size
-#if 1
+#if 0
     int totalStix = [BadgeView totalStixTypes];
     for (int i=0; i<totalStix; i++)
     {
@@ -252,8 +240,18 @@
 
         stix.frame = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
         [self.scrollView addSubview:stix];
-}
+    }
     drag = 0;
+#else
+    NSEnumerator * e = [allCarouselStixViews keyEnumerator];
+    id key;
+    while (key = [e nextObject]) {
+        UIImageView * stix = [allCarouselStixViews objectForKey:key];
+        [stix removeFromSuperview];
+        
+        stix.frame = [[allCarouselStixFrames objectForKey:key] CGRectValue];
+        [self.scrollView addSubview:stix];
+    }
 #endif
 }
 
@@ -284,10 +282,18 @@
     else 
         result = [super hitTest:point withEvent:event];
     
-    if (CGRectContainsPoint(scrollView.frame, point))
+    CGRect scrollViewFrame = scrollView.frame;
+    CGRect buttonFrame = buttonShowCarousel.frame;
+    CGPoint pointInCarouselFrame = point;
+    pointInCarouselFrame.y -= carouselTab.frame.origin.y;
+    if (CGRectContainsPoint(scrollViewFrame, pointInCarouselFrame))
         return self.scrollView;
-    if (CGRectContainsPoint(buttonShowCarousel.frame, point))
+    if (CGRectContainsPoint(buttonFrame, pointInCarouselFrame))
         return self.buttonShowCarousel;
+    for (int i=0; i<[buttonStixCategories count]; i++) {
+        if (CGRectContainsPoint([[buttonStixCategories objectAtIndex:i] frame], pointInCarouselFrame))
+            return [buttonStixCategories objectAtIndex:i];
+    }
     // catch the rest of the tab so what's behind it doesn't actually get hit
     CGRect tabMainFrame = carouselTab.frame;
     tabMainFrame.origin.y += 40;
@@ -340,11 +346,12 @@ static int lastContentOffsetY = 0;
         int totalStixTypes = [BadgeView totalStixTypes];
         for (int i=0; i<totalStixTypes; i++)
         {
+            NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
             if ([allCarouselStixViews count] < totalStixTypes)
                 continue;
-            if ([allCarouselStixViews objectAtIndex:i] == [NSNull null])
-                continue;
-            UIImageView * stix = [allCarouselStixViews objectAtIndex:i];
+            //if ([allCarouselStixViews objectForKey:stixStringID] == [NSNull null])
+              //  continue;
+            UIImageView * stix = [allCarouselStixViews objectForKey:stixStringID];
             CGRect frame = stix.frame;
             if (CGRectContainsPoint(frame, touch)) {
                 badgeTouched = stix;
@@ -469,11 +476,11 @@ static int lastContentOffsetY = 0;
             //NSLog(@"Double tap recognized!");
             CGPoint location = [sender locationInView:self.scrollView];
             for (int i=0; i<[allCarouselStixFrames count]; i++) {
-                CGRect stixFrame = [[allCarouselStixFrames objectAtIndex:i] CGRectValue];
+                NSString * stixStringID = [[BadgeView stixStringIDs] objectAtIndex:i];
+                CGRect stixFrame = [[allCarouselStixFrames objectForKey:stixStringID] CGRectValue];
                 if (CGRectContainsPoint(stixFrame, location)) {
-                    NSString * stixStringID = [[BadgeView stixStringIDs] objectAtIndex:i];
                     NSLog(@"Stix of type %@ touched", stixStringID);
-                    UIImageView * stixTouched = [allCarouselStixViews objectAtIndex:i];                    
+                    UIImageView * stixTouched = [allCarouselStixViews objectForKey:stixStringID];                    
 
 #if 0
                     // remove from scrollView and onto carouselView
@@ -513,11 +520,13 @@ static int lastContentOffsetY = 0;
 /**** Carousel Tab *****/
 
 -(void)carouselTabDismiss {
+    [self carouselTabDismiss:YES];
+}
+-(void)carouselTabDismiss:(BOOL)doAnimation {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
-    CGRect tabButtonHidden = CGRectMake(14, dismissedTabY+1, 80, 40);
-    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
+    CGRect tabButtonHidden = CGRectMake(14, 1, 80, 40);
     if (isShowingCarousel == 3) {
-        [buttonShowCarousel setCenter:CGPointMake(buttonShowCarousel.center.x, dismissedTabY+15)];
+        [buttonShowCarousel setCenter:CGPointMake(buttonShowCarousel.center.x, 15)];
         isShowingCarousel = 2;
     }
     else {
@@ -526,47 +535,48 @@ static int lastContentOffsetY = 0;
         isShowingCarousel = 0;
         [self setStixSelected:nil];
     }
-    [carouselTab setFrame:tabFrameHidden];
-    [scrollView setFrame:carouselFrameHidden];
-    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
-        [self.delegate didDismissCarouselTab];
+    if (doAnimation) {
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        tabAnimationIDDismiss = [animation doSlide:carouselTab inView:self toFrame:tabFrameHidden forTime:.75];
+    }
+    else {
+        // use this the first time to dismiss tab without animating it
+        [carouselTab setFrame:tabFrameHidden];
+    }
 }
 -(void)carouselTabDismissWithStix:(UIImageView*)stix {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
-    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
     CGRect imageFrame = buttonShowCarousel.imageView.frame;
     imageFrame.size.height = 55; // set a size for the tab icon
     imageFrame.size.width = imageFrame.size.height;
-    CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, dismissedTabY+15);
+    CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, 15);
     [buttonShowCarousel setFrame:imageFrame];
     [buttonShowCarousel setCenter:imageCenter];
     [buttonShowCarousel setImage:stix.image forState:UIControlStateNormal];
     isShowingCarousel = 2; // dismissed with stix already selected
     
-    [carouselTab setFrame:tabFrameHidden];
-    [scrollView setFrame:carouselFrameHidden];
-    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
-        [self.delegate didDismissCarouselTab];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    tabAnimationIDDismiss = [animation doSlide:carouselTab inView:self toFrame:tabFrameHidden forTime:.75];
 }
 -(void)carouselTabDismissRemoveStix {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
-    CGRect tabButtonHidden = CGRectMake(14, dismissedTabY+1, 80, 40);
-    CGRect carouselFrameHidden = CGRectMake(0, dismissedTabY+50, 320, SHELF_STIX_SIZE);
+    CGRect tabButtonHidden = CGRectMake(14, 1, 80, 40);
     [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
     [buttonShowCarousel setFrame:tabButtonHidden];
     isShowingCarousel = 0;
+    
     [self setStixSelected:nil];
-    [carouselTab setFrame:tabFrameHidden];
-    [scrollView setFrame:carouselFrameHidden];
-    if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
-        [self.delegate didDismissCarouselTab];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    tabAnimationIDDismiss = [animation doSlide:carouselTab inView:self toFrame:tabFrameHidden forTime:.75];
 }
 -(void)carouselTabExpand {
     CGRect tabFrameShow = CGRectMake(0, expandedTabY, 320, 400);
-    CGRect tabButtonShow = CGRectMake(14, expandedTabY + 1, 80, 40);
-    CGRect carouselFrameShow = CGRectMake(0, expandedTabY + 50, 320, SHELF_STIX_SIZE);    
+    CGRect tabButtonShow = CGRectMake(14, 1, 80, 40);
     if (isShowingCarousel == 2) {
-        CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, expandedTabY+15);
+        CGPoint imageCenter = CGPointMake(buttonShowCarousel.center.x, 15);
         [buttonShowCarousel setCenter:imageCenter];
         isShowingCarousel = 3;
     }
@@ -576,10 +586,26 @@ static int lastContentOffsetY = 0;
         isShowingCarousel = 1;
         [self setStixSelected:nil];
     }
-    [carouselTab setFrame:tabFrameShow];
-    [scrollView setFrame:carouselFrameShow];
-    if ([self.delegate respondsToSelector:@selector(didExpandCarouselTab)])
-        [self.delegate didExpandCarouselTab];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    tabAnimationIDExpand = [animation doSlide:carouselTab inView:self toFrame:tabFrameShow forTime:.75];
+}
+
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+    /*
+    CGRect carouselFrameHidden = CGRectMake(0, self.scrollOffsetFromTabTop, 320, SHELF_STIX_SIZE);
+    CGRect carouselFrameShow = CGRectMake(0, expandedTabY + self.scrollOffsetFromTabTop, 320, SHELF_STIX_SIZE);    
+    if (animationID == tabAnimationIDExpand) {
+        [scrollView setFrame:carouselFrameShow];
+        if ([self.delegate respondsToSelector:@selector(didExpandCarouselTab)])
+            [self.delegate didExpandCarouselTab];
+    }
+    if (animationID == tabAnimationIDDismiss) {
+        [scrollView setFrame:carouselFrameHidden];
+        if ([self.delegate respondsToSelector:@selector(didDismissCarouselTab)])
+            [self.delegate didDismissCarouselTab];
+    }
+     */
 }
 
 -(void)didClickShowCarousel:(id)sender {

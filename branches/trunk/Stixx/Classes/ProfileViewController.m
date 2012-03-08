@@ -20,7 +20,7 @@
 @synthesize friendController;
 @synthesize k;
 @synthesize camera;
-@synthesize findFriends;
+//@synthesize findFriends;
 
 -(id)init
 {
@@ -371,7 +371,6 @@
     [buttonInstructions release];
     buttonInstructions = nil;
     
-    [self setFindFriends:nil];
     [super viewDidUnload];
 }
 
@@ -390,7 +389,6 @@
     photoButton = nil;
     [buttonInstructions release];
     buttonInstructions = nil;
-    [findFriends release];
     [super dealloc];
 }
 

@@ -11,19 +11,22 @@
 #import "EGORefreshTableHeaderView.h"
 
 #define LAZY_LOAD_BOUNDARY 0
-#define HEADER_HEIGHT 40
-#define CONTENT_HEIGHT 320
+#define USE_PULL_TO_REFRESH 1
 
 @protocol ColumnTableControllerDelegate <NSObject>
 
--(Tag *) tagAtIndex:(int)index; // to get tagID
+-(int)numberOfRows;
+-(void)loadContentPastRow:(int)row;
 -(UIView*)viewForItemAtIndex:(int)index;
+
+-(Tag *) tagAtIndex:(int)index; // to get tagID
 -(UIView*)viewForItemWithTagID:(NSNumber*)tagID;
--(int)itemCount;
--(UIView*)headerForSection:(int)index;
+
+#if USE_PULL_TO_REFRESH
+-(void)didPullToRefresh;
+#endif
 
 @optional
--(void)updateScrollPagesAtPage:(int)page;
 -(void)didClickAtLocation:(CGPoint)location;
 
 @end
@@ -33,25 +36,26 @@
     NSObject<ColumnTableControllerDelegate> * delegate;
     NSMutableDictionary * cellDictionary;
 
-    NSMutableArray *contentPageIDs; 
-    int drag;
-
+#if USE_PULL_TO_REFRESH
 	EGORefreshTableHeaderView *refreshHeaderView;
 	BOOL _reloading;
+    int numColumns;
+    int borderWidth;
+    int columnPadding;
+    int columnWidth;
+#endif
 }
 
+@property (nonatomic, retain) NSObject<ColumnTableControllerDelegate> * delegate;
+#if USE_PULL_TO_REFRESH
 @property(assign,getter=isReloading) BOOL reloading;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
-@property (nonatomic, retain) NSObject<ColumnTableControllerDelegate> * delegate;
+#endif
 
+-(void)setNumberOfColumns:(int)columns andBorder:(int)border;
 - (void)reloadTableViewDataSource;
+-(int)getContentWidth;
+#if USE_PULL_TO_REFRESH
 - (void)dataSourceDidFinishLoadingNewData;
-
-//-(void)loadPage:(int)page;
-//-(void)populatePagesAtPage:(int)currentPage;
--(void)setContentPageIDs:(NSMutableArray *) tags;
--(int)getCurrentSectionAtPoint:(CGPoint) point;
-//-(CGPoint)getContentPointInCurrentSection:(CGPoint)point;
--(CGPoint)getContentPoint:(CGPoint)point inSection:(int)section;
--(CGPoint)getPointInTableViewFrame:(CGPoint)point fromPage:(int)section;
+#endif
 @end

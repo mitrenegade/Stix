@@ -14,9 +14,8 @@
 @synthesize tableController;
 @synthesize delegate;
 @synthesize buttonFeedback;
-@synthesize allTagIDs;
-@synthesize allTags;
 @synthesize activityIndicator;
+//@synthesize segmentedControl;
 
 #define EXPLORE_COL 2
 #define EXPLORE_ROW 2
@@ -49,8 +48,11 @@
     [super viewDidLoad];
     
     allTagIDs = [[NSMutableArray alloc] init];
-    allTags = [[NSMutableArray alloc] init];
-        
+    allTags = [[NSMutableDictionary alloc] init];
+    contentViews = [[NSMutableDictionary alloc] init];
+    
+    newRandomTags = [[NSMutableDictionary alloc] init];
+    
     [self initializeTable];
     
     [self.view addSubview:activityIndicator];
@@ -58,69 +60,39 @@
     isZooming = NO;
     [self forceReloadAll];
 
-    feedItems = [[NSMutableDictionary alloc] init]; 
+    NSArray *itemArray = [NSArray arrayWithObjects: @"Random", @"Recent", nil]; //, @"Popular", nil];
+    UISegmentedControl * segmentedControl = [[UISegmentedControl alloc] initWithItems:itemArray];
+    [segmentedControl setFrame:CGRectMake(20,50,280,30)];
+    segmentedControl.segmentedControlStyle = UISegmentedControlStyleBar;
+    segmentedControl.selectedSegmentIndex = EXPLORE_RANDOM;
+    [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RANDOM];
+    [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RECENT];
+    //[segmentedControl setEnabled:NO forSegmentAtIndex:EXPLORE_POPULAR];
+    [segmentedControl addTarget:self
+	                     action:@selector(setExploreMode:)
+	           forControlEvents:UIControlEventValueChanged];
+    [self.view addSubview:segmentedControl];
+	[segmentedControl release];
+    
+    UISlider * slider = [[UISlider alloc] init];
+    [slider setFrame:CGRectMake(20, 85, 280, 10)];
+    [slider setMinimumValue:2];
+    [slider setMaximumValue:6];
+    [slider setContinuous:NO];
+    [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+//    [self.view addSubview:slider];
+    [slider release];
 }
 
--(IBAction)refreshUpdates:(id)sender {
+- (void) setExploreMode:(UISegmentedControl *)sender{
+    exploreMode = [sender selectedSegmentIndex];
     [self forceReloadAll];
 }
 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation generateTagsByRecentUpdatesDidCompleteWithResult:(NSArray*)theResults {
-    [allTagIDs removeAllObjects];
-    [allTagIDs addObjectsFromArray:theResults];
-    [allTags removeAllObjects];
-    [allTags addObjectsFromArray:theResults];
-    NSLog(@"%d recently updated tags added\n", [allTagIDs count]);
-    
-    for (int i=0; i<4; i++)
-        [self getTagWithID:[[allTagIDs objectAtIndex:i] intValue]];
-}
-
--(void)getTagWithID:(int)id {
-    [k getAllTagsWithIDRangeWithId_min:id andId_max:id];
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray*)theResults {
-	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
-        id new_id = [d valueForKey:@"allTagID"];
-
-        int index = [allTagIDs indexOfObject:new_id];
-        if (index > [allTags count])
-        {
-            [allTags insertObject:tag atIndex:[new_id intValue]];
-        }
-        else
-        {
-            [allTags replaceObjectAtIndex:[new_id intValue] withObject:tag];
-        }
-        [tag release]; // MRC
-        //NSLog(@"Downloaded and added tag with id %d at index %d\n", [new_id intValue], index);
-    }
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getMostRecentlyUpdatedTagDidCompleteWithResult:(NSArray*)theResults {
-    int ct = 0;
-	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
-        
-        int index = ct;
-        if (index >= [allTags count])
-        {
-            [allTags insertObject:tag atIndex:ct];
-        }
-        else
-        {
-            [allTags replaceObjectAtIndex:ct withObject:tag];
-        }
-        ct++;
-        [tag release]; // MRC
-        //NSLog(@"Downloaded and added tag with id %d, name %@, comment %@ at index %d\n", new_id, name, comment, index);
-    }
- 
-    //[scrollView populateScrollPagesAtPage:0];
-    //[activityIndicator setHidden:YES];
-    [activityIndicator stopCompleteAnimation];
+- (void) sliderValueChanged:(UISlider *)sender {  
+    int value = [sender value];
+    [self.tableController setNumberOfColumns:value andBorder:4];
+    [self.tableController.tableView reloadData];
 }
 
 /*** table ***/
@@ -128,98 +100,143 @@
 {
     // We need to do some setup once the view is visible. This will only be done once.
     // Position and size the scrollview. It will be centered in the view.    
-    CGRect frame = CGRectMake(0,64, 320, 380);
+    CGRect frame = CGRectMake(0,85, 320, 340);
     tableController = [[ColumnTableController alloc] init];
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
     tableController.delegate = self;
+    numColumns = 2;
+    [tableController setNumberOfColumns:numColumns andBorder:4];
     [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
 }
 
+-(int)numberOfRows {
+    int total = [allTagIDs count];
+    NSLog(@"allTagIDs has %d items", total);
+    return total / numColumns;
+}
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
     // for now, display images of friends, six to a page
-    UIView * exploreItemView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 300)];
-    //[friendPageView setBackgroundColor:[UIColor redColor]];
-    int x = 0;
-    int y = 0;
-    int item_width = 140;
-    int item_height = 128;
-    //for (id key in userPhotos) {
-    int items_per_page = EXPLORE_COL * EXPLORE_ROW;
-    int start_index = index * items_per_page;
-    int end_index = start_index + items_per_page - 1;
-    //NSLog(@"Creating explore page %d with indices %d-%d", index, start_index, end_index);
-    int ct = 0;
-    for (int i=0; i<[allTags count]; i++) {
-        if (ct >= start_index && ct <= end_index) {
-            Tag * tag = [allTags objectAtIndex:i];
-            
-            UIImageView * shadow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dropshadow_140.png"]];
-            int w = shadow.frame.size.width;
-            int h = shadow.frame.size.height;
-            shadow.frame = CGRectMake(8 + x * (item_width + 10), 53 + y * (item_height + 20), w, h);
-#if 0
-            UIImageView * feedItem = [[UIImageView alloc] initWithImage:photo];
-            [feedItem setBackgroundColor:[UIColor blackColor]];
-            //NSString * name = tag.username;
-            feedItem.frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);            
-            UIImageView * stix = [[self populateWithBadge:tag.stixStringID withCount:tag.badgeCount atLocationX:tag.badge_x andLocationY:tag.badge_y] retain];
-            [feedItem addSubview:stix];
-            [stix release];
-            [shadow release];
-            [feedItem release];
-#else              
-            CGRect frame = CGRectMake(5 + x * (item_width + 10), 50 + y * (item_height + 20), item_width, item_height);
-            stixView = [[StixView alloc] initWithFrame:frame];
-            [stixView setInteractionAllowed:NO];
-            [stixView setIsPeelable:NO];
-            
-            [stixView initializeWithImage:tag.image];
-            [stixView populateWithAuxStixFromTag:tag];
-            [exploreItemView addSubview:shadow];
-            [exploreItemView addSubview:stixView];
-            [shadow release];
-            [stixView release];
-#endif
+    NSNumber * key = [NSNumber numberWithInt:index];
+    if ([contentViews objectForKey:key] == nil) {
+        NSNumber * tagID = [allTagIDs objectAtIndex:index];
+        Tag * tag = [allTags objectForKey:tagID];
+        
+        //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
+        
+        int contentWidth = [tableController getContentWidth];
+        CGRect frame = CGRectMake(0, 0, contentWidth, contentWidth);
+        StixView * cview = [[StixView alloc] initWithFrame:frame];
+        [cview setInteractionAllowed:NO];
+        [cview setIsPeelable:NO];
+        
+        [cview initializeWithImage:tag.image];
+        [cview populateWithAuxStixFromTag:tag];
+        [contentViews setObject:cview forKey:key];
+    }
+    return [contentViews objectForKey:key];
+}
 
-            //NSLog(@"  Adding feed item %d = %@ to position %d %d", ct, comment, x, y);
-            
-            x = x + 1;
-            if (x==EXPLORE_COL)
-            {
-                x = 0;
-                y = y + 1;
+-(void)loadContentPastRow:(int)row {
+    [activityIndicator startCompleteAnimation];
+    switch (exploreMode) {
+        case EXPLORE_RECENT:
+            if (row == -1) {
+                // load initial row(s)
+                NSDate * now = [NSDate date]; // now
+                [k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 2]];
             }
-            if (y == EXPLORE_ROW)
-                break;            
+            else {
+                NSNumber * tagID = [allTagIDs objectAtIndex:(row * numColumns + numColumns - 1)];
+                Tag * tag = [allTags objectForKey:tagID];
+                NSDate * lastUpdated = tag.timestamp;
+                [k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+            }
+            break;
+            
+        case EXPLORE_RANDOM: {
+            // load 3 rows at a time
+            [newRandomTags removeAllObjects];
+            int maxID = [delegate getNewestTagID];
+            newRandomTagsTargetCount = numColumns * 5;
+            for (int i=0; i<newRandomTagsTargetCount; i++) {
+                NSInteger num = arc4random() % maxID;
+                // kick off kumulos requests
+                [k getAllTagsWithIDRangeWithId_min:num-1 andId_max:num+1];
+            }
         }
-        ct++;
-        if (ct > end_index)
+        default:
             break;
     }
-    return [exploreItemView autorelease];
 }
 
--(int)itemCount
-{
-	// Return the number of pages we intend to display
-    int tot = [allTags count];
-    int per_page = EXPLORE_COL * EXPLORE_ROW;
-    if (tot % per_page == 0)
-        return tot / per_page;
-    return tot / per_page + 1;
-}
-
-
--(void)forceReloadAll {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+    if (exploreMode != EXPLORE_RECENT)
+        return;
     
+    for (int i=0; i<[theResults count]; i++) {
+        NSMutableDictionary * d = [theResults objectAtIndex:i];
+        Tag * newtag = [Tag getTagFromDictionary:d];
+        NSDate * newtime = [newtag timestamp];
+        [allTagIDs addObject:newtag.tagID]; // save in order 
+        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
+    }
+    [tableController dataSourceDidFinishLoadingNewData];
+    [activityIndicator stopCompleteAnimation];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults {
+    
+    if (exploreMode != EXPLORE_RANDOM)
+        return;
+    if ([newRandomTags count] >= newRandomTagsTargetCount)
+        return;
+    
+    NSInteger num = arc4random() % [delegate getNewestTagID];
+    if ([theResults count] == 0) {
+        // that tag doesn't exist in kumulos
+        // kick off kumulos requests
+        [k getAllTagsWithIDRangeWithId_min:num-1 andId_max:num+1];
+        return;
+    }
+    Tag * tag = [Tag getTagFromDictionary:[theResults objectAtIndex:0]];
+    NSNumber * tagID = tag.tagID;
+    if ([newRandomTags objectForKey:tagID] == nil) {
+        [newRandomTags setObject:tag forKey:tagID];
+    }
+    else {
+        // kick off request again because it already exists
+        [k getAllTagsWithIDRangeWithId_min:num-1 andId_max:num+1];
+        return;
+    }
+    
+    // populate tags
+    if ([newRandomTags count] == newRandomTagsTargetCount) {
+        NSEnumerator *e = [newRandomTags keyEnumerator];
+        id key;
+        while (key = [e nextObject]) {
+            Tag * newtag = [newRandomTags objectForKey:key];
+            [allTagIDs addObject:newtag.tagID]; // save in order 
+            [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
+        }
+        [tableController dataSourceDidFinishLoadingNewData];
+        [activityIndicator stopCompleteAnimation];
+    }
+}
+
+-(void)forceReloadAll {    
     [allTags removeAllObjects];
-    [k getMostRecentlyUpdatedTagWithNumEls:[NSNumber numberWithInt:12]];
-    //[scrollView clearAllPages];
+    [allTagIDs removeAllObjects];
+    [contentViews removeAllObjects];
+    [self loadContentPastRow:-1];
     isZooming = NO;
     [activityIndicator startCompleteAnimation];
+}
+
+-(void)didPullToRefresh {
+    [self forceReloadAll];
 }
 
 /************** FeedZoomView ***********/
@@ -271,76 +288,12 @@
     if (ct >= [allTags count] || foundid == -1)
         return; 
     
-    Tag * tag = [allTags objectAtIndex:ct];
+    NSNumber * tagID = [allTagIDs objectAtIndex:ct];
+    Tag * tag = [allTags objectForKey:tagID];
     NSString * label = tag.descriptor;
     NSString * locationString = tag.locationString;
     NSLog(@"Using tag of comment %@ and location %@", label, locationString);
-    /*
-#if 1
-    UIImage * image = tag.image;
-    UIImage * photo = tag.image;
-    
-    // animate
-    isZooming = YES;
-    [zoomViewController setStixUsingTag:tag];
-//    [zoomView setImage:photo];
-    int xoffset = 10; // from scrollView width
-    int yoffset = 3; // from ??
-    zoomView.frame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
-    [self.view insertSubview:zoomView aboveSubview:scrollView];
-    zoomFrame = zoomView.frame;
-#else
-    int xoffset = 10; // from scrollView width
-    int yoffset = 3; // from ??
-    zoomFrame = CGRectMake(xoffset+5 + x * (item_width + 10), yoffset+50 + y * (item_height + 10), item_width, item_height);
-    stixView = [[StixView alloc] initWithFrame:zoomFrame];
-    [stixView setInteractionAllowed:NO];
-    [stixView setIsPeelable:NO];
-    int centerX = tag.badge_x; // badgeFrame.origin.x + badgeFrame.size.width / 2;
-    int centerY = tag.badge_y; //badgeFrame.origin.y + badgeFrame.size.height / 2;
-    [stixView initializeWithImage:tag.image andStix:tag.stixStringID withCount:tag.badgeCount atLocationX:centerX andLocationY:centerY andScale:tag.stixScale andRotation:tag.stixRotation];
-    [stixView populateWithAuxStixFromTag:tag];
-    [self.view insertSubview:stixView aboveSubview:scrollView];
-#endif
-    CGRect frameBig = CGRectMake(10, 58, 300, 300); // hard coded from ZoomViewController.xib
-    // animate a scaling transition
-    NSLog(@"Stix frame before: %f %f %f %f", stixView.frame.origin.x, stixView.frame.origin.y, stixView.frame.size.width, stixView.frame.size.height);
-    [UIView 
-     animateWithDuration:5
-     delay:0 
-     options:UIViewAnimationCurveEaseOut
-     animations:^{
-#if 1
-         zoomView.frame = frameBig;
-#else
-         stixView.frame = frameBig;
-#endif
-     }
-     completion:^(BOOL finished){
-#if 1
-        zoomView.hidden = YES;
-         [zoomViewController setDelegate:self];
-         [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
-         //[zoomViewController forceImageAppear:image];
-         [zoomViewController setLabel:label];
-         //[zoomViewController setLocation:locationString];
-         [zoomViewController setStixUsingTag:tag];
-         [carouselView setUnderlay:zoomViewController.view];
-         isZooming = NO;
-#else
-         [stixView setHidden:YES];
-         [zoomViewController setDelegate:self];
-         [self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
-         [zoomViewController setLabel:label];
-         //[zoomViewController setLocation:locationString];
-         [zoomViewController setStixUsingTag:tag];
-         [carouselView setUnderlay:zoomViewController.view];
-         isZooming = NO;
-         NSLog(@"Stix frame after: %f %f %f %f", stixView.frame.origin.x, stixView.frame.origin.y, stixView.frame.size.width, stixView.frame.size.height);
-#endif
-     }
-     ];
-     */
+
     [zoomViewController setDelegate:self];
     //[self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
     [zoomViewController setLabel:label];
@@ -350,41 +303,6 @@
 }
 
 -(void)didDismissZoom {
-    // animate
-    /*
-#if 1
-    [zoomView setHidden:NO];
-#else
-    [stixView setHidden:NO];
-#endif
-    isZooming = YES;
-
-    // animate a scaling transition
-    [UIView 
-     animateWithDuration:5
-     delay:0 
-     options:UIViewAnimationCurveEaseOut
-     animations:^{
-#if 1
-         zoomView.frame = zoomFrame;
-#else
-         stixView.frame = zoomFrame;
-#endif
-     }
-     completion:^(BOOL finished){
-#if 1
-         [zoomView setHidden:YES];
-         [zoomView removeFromSuperview];
-#else
-         stixView.hidden = YES;
-         [stixView removeFromSuperview];
-         [stixView release];
-#endif
-         [carouselView setUnderlay:scrollView];
-         isZooming = NO;
-     }
-     ];
-     */
     isZooming = NO;
     //[carouselView setUnderlay:scrollView];
     [zoomViewController.view removeFromSuperview];
@@ -393,7 +311,6 @@
 -(IBAction)feedbackButtonClicked:(id)sender {
     [self.delegate didClickFeedbackButton:@"Explore view"];
 }
-
 
 - (void)didReceiveMemoryWarning
 {

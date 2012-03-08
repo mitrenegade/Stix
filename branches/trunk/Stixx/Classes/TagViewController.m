@@ -213,8 +213,13 @@
     [newTag addImage:tmp];
     
 	// prompt for label: use TagDescriptorController
-	descriptorController = [[AddStixViewController alloc] init];
-    [descriptorController setDelegate:self];
+    if (!descriptorController) {
+        descriptorController = [[AddStixViewController alloc] init];
+    }
+    else
+    {
+        [descriptorController.carouselView resetBadgeLocations];
+    }
 #if !TARGET_IPHONE_SIMULATOR
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -222,8 +227,10 @@
     [self.camera setCameraOverlayView:descriptorController.view];
 #endif
     
-    // populate
+    // populate after view has been created
+    [descriptorController setDelegate:self];
     [descriptorController initStixView:newTag];
+    [descriptorController createCarouselView];
 }
 
 - (void)clearTags {

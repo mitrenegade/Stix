@@ -703,7 +703,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     [k setDelegate:self];
     NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
-    UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
+    //UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
     
     // this must match Tag.m:getTagFromDictionary
     NSMutableData *theCoordData;
@@ -1526,6 +1526,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 // not used
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updatePixDidCompleteWithResult:(NSNumber *)affectedRows {
     [feedController reloadCurrentPage];
+}
+
+-(int)getNewestTagID {
+    return MAX(idOfNewestTagReceived, idOfNewestTagOnServer);
 }
 
 -(NSString *) getUsername {

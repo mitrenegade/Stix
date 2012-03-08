@@ -46,7 +46,7 @@
 						<string key="NSFrame">{{5, 49}, {0, 359}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="323067793"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -74,7 +74,7 @@
 						<string key="NSFrame">{{3, 101}, {314, 282}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="513310119"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -183,24 +183,6 @@
 						<reference key="IBUIFontDescription" ref="602822909"/>
 						<reference key="IBUIFont" ref="421115330"/>
 					</object>
-					<object class="IBUIImageView" id="513310119">
-						<reference key="NSNextResponder" ref="191373211"/>
-						<int key="NSvFlags">256</int>
-						<string key="NSFrame">{{0, 399}, {320, 360}}</string>
-						<reference key="NSSuperview" ref="191373211"/>
-						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="322399612"/>
-						<bool key="IBUIOpaque">NO</bool>
-						<bool key="IBUIClipsSubviews">YES</bool>
-						<float key="IBUIAlpha">0.25</float>
-						<int key="IBUIContentMode">4</int>
-						<bool key="IBUIMultipleTouchEnabled">YES</bool>
-						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<object class="NSCustomResource" key="IBUIImage">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_open.png</string>
-						</object>
-					</object>
 					<object class="IBUIImageView" id="4036587">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">256</int>
@@ -224,7 +206,6 @@
 						<string key="NSFrame">{{101, 435}, {118, 43}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -274,24 +255,6 @@
 						</object>
 						<reference key="IBUIFontDescription" ref="121135233"/>
 						<reference key="IBUIFont" ref="27303481"/>
-					</object>
-					<object class="IBUIImageView" id="323067793">
-						<reference key="NSNextResponder" ref="191373211"/>
-						<int key="NSvFlags">256</int>
-						<string key="NSFrame">{{45, 408}, {19, 19}}</string>
-						<reference key="NSSuperview" ref="191373211"/>
-						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="4036587"/>
-						<bool key="IBUIOpaque">NO</bool>
-						<bool key="IBUIClipsSubviews">YES</bool>
-						<float key="IBUIAlpha">0.25</float>
-						<int key="IBUIContentMode">4</int>
-						<bool key="IBUIMultipleTouchEnabled">YES</bool>
-						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<object class="NSCustomResource" key="IBUIImage">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_open_icon.png</string>
-						</object>
 					</object>
 				</object>
 				<string key="NSFrameSize">{320, 460}</string>
@@ -439,11 +402,9 @@
 							<reference ref="284605270"/>
 							<reference ref="835948143"/>
 							<reference ref="554802109"/>
-							<reference ref="513310119"/>
 							<reference ref="4036587"/>
 							<reference ref="164538889"/>
 							<reference ref="1023797282"/>
-							<reference ref="323067793"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -494,11 +455,6 @@
 						<reference key="parent" ref="191373211"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">113</int>
-						<reference key="object" ref="513310119"/>
-						<reference key="parent" ref="191373211"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">114</int>
 						<reference key="object" ref="4036587"/>
 						<reference key="parent" ref="191373211"/>
@@ -511,11 +467,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">116</int>
 						<reference key="object" ref="1023797282"/>
-						<reference key="parent" ref="191373211"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">117</int>
-						<reference key="object" ref="323067793"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
 				</object>
@@ -532,11 +483,9 @@
 					<string>101.IBPluginDependency</string>
 					<string>102.IBPluginDependency</string>
 					<string>103.IBPluginDependency</string>
-					<string>113.IBPluginDependency</string>
 					<string>114.IBPluginDependency</string>
 					<string>115.IBPluginDependency</string>
 					<string>116.IBPluginDependency</string>
-					<string>117.IBPluginDependency</string>
 					<string>12.IBPluginDependency</string>
 					<string>21.IBPluginDependency</string>
 					<string>22.IBPluginDependency</string>
@@ -547,8 +496,6 @@
 					<string>TagViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -751,8 +698,6 @@
 				<string>nav_bar.png</string>
 				<string>overlay.png</string>
 				<string>switch_camera.png</string>
-				<string>tab_open.png</string>
-				<string>tab_open_icon.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
@@ -764,8 +709,6 @@
 				<string>{320, 44}</string>
 				<string>{320, 480}</string>
 				<string>{51, 29}</string>
-				<string>{320, 360}</string>
-				<string>{19, 19}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">933</string>

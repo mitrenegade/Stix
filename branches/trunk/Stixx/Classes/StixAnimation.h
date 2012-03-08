@@ -21,4 +21,5 @@
 
 -(int)doDownwardFade:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time;
 -(int)doJump:(UIView *)canvas inView:(UIView*) view forDistance:(int)pixels forTime:(float)time;
+-(int)doSlide:(UIView *)canvas inView:(UIView*)view toFrame:(CGRect)frameEnd forTime:(float)time ;
 @end

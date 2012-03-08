@@ -93,8 +93,8 @@
     [carouselView toggleHideShelf:YES]; // always hide shelf
 #if 1
     [carouselView setDismissedTabY:373];
-    [carouselView setExpandedTabY:335];
-    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.dismissedTabY,320,SHELF_STIX_SIZE)];
+    [carouselView setExpandedTabY:5];
+    [carouselView initCarouselWithFrame:CGRectMake(0, carouselView.scrollOffsetFromTabTop,320,SHELF_HEIGHT)];
     [carouselView setFrame:CGRectMake(0, 0, 320, 480)];
     //[carouselTab addSubview:carouselView];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
@@ -290,8 +290,10 @@
     [auxView initStixView:tag];
     //[auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
     [auxView addStixToStixView:stixStringID atLocation:location];
-    [auxView toggleCarouselView:NO];
+    //[auxView toggleCarouselView:NO];
     [auxView.locationField setHidden:YES];
+    //[auxView createCarouselView];
+    auxView.carouselView = self.carouselView;
     [carouselView resetBadgeLocations];
 }
 

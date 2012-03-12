@@ -103,7 +103,7 @@
     }        
     
     /* auxiliary data */
-    NSMutableData * data = [d valueForKey:@"auxiliaryData"];
+    //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
     NSMutableDictionary * stixOrder = nil;
     NSMutableSet * friendsList = nil;

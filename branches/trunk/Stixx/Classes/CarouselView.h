@@ -19,6 +19,8 @@
 #define SHELF_HEIGHT 300
 #define USE_VERTICAL_GESTURE 0
 #define STIX_PER_ROW 4
+#define SHELF_SCROLL_OFFSET_FROM_TOP 108
+#define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
 
 enum {
     SHELF_CATEGORY_ALL = 0,
@@ -37,20 +39,17 @@ enum {
     // arrays of the stix that appear in the carousel
     NSMutableDictionary * allCarouselStixFrames;
     NSMutableDictionary * allCarouselStixViews;
+    NSMutableDictionary * allCarouselStixStringIDsAtFrame;
     
     bool allowTap;
-    CGPoint tapDefaultOffset; // offset of default location for tap  relative to carouselView frame
+    //CGPoint tapDefaultOffset; // offset of default location for tap  relative to carouselView frame
     
-    bool showGiftStix;
-    
-    float sizeOfStixContext; // optional ivar that determines stix scaling - normal stix ratio is a stix frame from [BadgeView getBadgeOfStixStringID] inside a 300x275 camera view. sizeOfStixContext replaces the 300 with a width in pixels
-
     UIButton * buttonShowCarousel;
     UIView * carouselTab;
-    int isShowingCarousel;
+    BOOL isShowingCarousel;
     NSString * stixSelected;
-    NSMutableArray * buttonCategories;
-    
+    int shelfCategory;
+
     int tabAnimationIDDismiss;
     int tabAnimationIDExpand;
 }
@@ -58,32 +57,33 @@ enum {
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, assign) int carouselHeight;
-@property (nonatomic, assign) bool showGiftStix;
-@property (nonatomic, assign) float sizeOfStixContext;
 @property (nonatomic, assign) bool allowTap;
-@property (nonatomic, assign) CGPoint tapDefaultOffset;
-
+//@property (nonatomic, assign) CGPoint tapDefaultOffset;
 @property (nonatomic, retain) UIButton * buttonShowCarousel;
-@property (nonatomic, retain) NSMutableArray * buttonStixCategories;
+@property (nonatomic, retain) NSMutableArray * buttonCategories;
+@property (nonatomic, retain) NSMutableArray * buttonCategoriesSelected;
+@property (nonatomic, retain) NSMutableArray * buttonCategoriesNotSelected;
 @property (nonatomic, retain) UIView * carouselTab;
 @property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, assign) int dismissedTabY;
 @property (nonatomic, assign) int expandedTabY;
-@property (nonatomic, assign) int scrollOffsetFromTabTop;
+@property (nonatomic, assign)     BOOL isShowingCarousel;
 
--(void)toggleHideShelf:(bool)isHidden;
--(void)initCarouselWithFrame:(CGRect)frame;
+
+-(void)initCarouselWithFrame:(CGRect)frame; // private function
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;
 -(void)clearAllViews;
 -(void)vibe:(id)sender;
 
--(void)carouselTabExpand;
--(void)carouselTabDismiss;
+-(void)carouselTabExpand:(BOOL)doAnimation;
 -(void)carouselTabDismiss:(BOOL)doAnimation;
 -(void)carouselTabDismissWithStix:(UIImageView*)stix;
 -(void)didClickShowCarousel:(id)sender;
 -(void)carouselTabDismissRemoveStix;
--(void)setShelfCategory:(UIButton*)button;
+-(void)didClickShelfCategory:(id)sender;
+
+/*** make a singleton class ***/
++(CarouselView*)sharedCarouselView;
 
 @end

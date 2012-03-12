@@ -20,7 +20,7 @@
 @synthesize friendController;
 @synthesize k;
 @synthesize camera;
-//@synthesize findFriends;
+@synthesize findFriendsButton;
 
 -(id)init
 {

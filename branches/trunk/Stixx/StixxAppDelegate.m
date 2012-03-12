@@ -51,6 +51,7 @@
 @synthesize camera;
 @synthesize storeViewController;
 @synthesize storeViewShell;
+@synthesize metricLogonTime;
 #if USING_FACEBOOK
 @synthesize facebook;
 #endif
@@ -61,6 +62,8 @@ static int init=0;
     
     versionStringStable = @"0.7.6";
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
+    
+    metricLogonTime = nil;
     
     /*** Kumulos service ***/
     
@@ -140,7 +143,11 @@ static int init=0;
 //    [self initializeBadges];
     [BadgeView InitializeGenericStixTypes];
 
-    [self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                             (unsigned long)NULL), ^(void) {
+        [self initializeBadges];        
+    });
+    //[self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
     //[self initializeBadges];
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
@@ -179,7 +186,7 @@ static int init=0;
     pageOfLastNewerTagsRequest = -1;
     pageOfLastOlderTagsRequest = -1;
     [self checkForUpdateTags];
-#if 1
+
 	/***** create feed view *****/
     //[loadingMessage setText:@"Loading feed..."];
     
@@ -189,9 +196,6 @@ static int init=0;
     feedController.allTags = allTags;
     feedController.tabBarController = tabBarController;
     feedController.camera = camera; // hack: in order to present modal controllers that respond 
-    
-#endif
-    
 #if 1
     /***** create explore view *****/
     exploreController = [[ExploreViewController alloc] init];
@@ -270,7 +274,10 @@ static int init=0;
     {
         NSLog(@"Loggin in as %@", myUserInfo->username);
         //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
-        [profileController loginWithUsername:myUserInfo->username];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
+            [profileController loginWithUsername:myUserInfo->username];
+        });
     }   
 	
     /* display versioning info */
@@ -401,7 +408,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"All %d Stix data initialized from kumulos!", [theResults count]);
     init++;
     if (init >= 2) {
-        [self reloadAllCarousels];
+        if ([self isLoggedIn])
+            [self reloadAllCarousels];
         //[self continueInit];
     }
 }
@@ -421,12 +429,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];
         NSMutableDictionary * stixLikelihoods = [BadgeView GetAllStixLikelihoodsForSave];
         NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
+        NSMutableDictionary * stixSubcategories = [BadgeView GetAllStixSubcategoriesForSave];
         
         [rootObject setValue:stixStringIDs forKey:@"stixStringIDs"];
         [rootObject setValue:stixViews forKey:@"stixViews"];
         [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
         [rootObject setValue:stixLikelihoods forKey:@"stixLikelihoods"];
         [rootObject setValue:stixCategories forKey:@"stixCategories"];
+        [rootObject setValue:stixSubcategories forKey:@"stixSubcategories"];
         
         [NSKeyedArchiver archiveRootObject: rootObject toFile: path];
     } 
@@ -459,6 +469,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         {
             NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
             [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:stixLikelihoods andStixCategories:stixCategories];
+            NSMutableDictionary * stixSubcategories = [rootObject valueForKey:@"stixSubcategories"];
+            if (stixSubcategories != nil && [stixSubcategories count] != 0) {
+                NSLog(@"%d StixSubcategories loaded from disk!", [stixSubcategories count]);
+                [BadgeView InitializeStixSubcategoriesFromDisk:stixSubcategories];
+            }
+            else
+            {
+                NSLog(@"StixSubcategories not loaded from disk! Loading from Kumulos...");
+                [[KumulosHelper sharedKumulosHelper] execute:@"getSubcategories" withParams:nil withCallback:@selector(didGetKumulosSubcategories:) withDelegate:self]; 
+                return 0;
+            }
             return 1;
         }
         else
@@ -471,6 +492,21 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
 }
 
+-(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+    [self performSelector:callback withObject:params afterDelay:0];
+}
+-(void)didGetKumulosSubcategories:(NSMutableArray*)theResults {
+    NSMutableArray * stixSubcategoriesFromKumulos = [theResults objectAtIndex:0];
+    [BadgeView InitializeStixSubcategoriesFromKumulos:stixSubcategoriesFromKumulos];
+    NSLog(@"%d StixSubcategories loaded from Kumulos!", [stixSubcategoriesFromKumulos count]);
+    [self reloadAllCarousels];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                             (unsigned long)NULL), ^(void) {
+        [self saveDataToDisk];
+    });
+    //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+    //[self saveDataToDisk];
+}
 
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
@@ -545,6 +581,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 -(void)didDismissSecondaryView {
     [tabBarController setButtonStateNormal]; // highlight button
+    [feedController configureCarouselView];
+    [feedController.carouselView carouselTabDismiss:YES];
     if (lastViewController == feedController) {
         [self.tabBarController setSelectedIndex:0];
     }
@@ -571,12 +609,30 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif
 }
 
+-(void)logMetricTimeInApp {
+    if (metricLogonTime) {
+        NSTimeInterval lastDiff = [metricLogonTime timeIntervalSinceNow];
+        NSString * description = @"TimeInAppInSeconds";
+        NSString * str = [self getUsername];
+        [k addMetricHitWithDescription:description andStringValue:str andIntegerValue:-lastDiff];
+        metricLogonTime = nil;
+    }
+}
+
 - (void)applicationWillTerminate:(UIApplication *)application
 {	// Get full path of possession archive 
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
-        [self saveDataToDisk];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
+            [self saveDataToDisk];
+        });
+        
+        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+        //[self saveDataToDisk];
+
+        [self logMetricTimeInApp];
     }
 
 #if USING_KIIP
@@ -593,7 +649,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
-        [self saveDataToDisk];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
+            [self saveDataToDisk];
+        });
+        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+        //[self saveDataToDisk];
+        
+        [self logMetricTimeInApp];
     }
     
 #if USING_KIIP
@@ -614,8 +677,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [camera setCameraOverlayView:tabBarController.view];
      */
     // force some updates to badgeview types
-    [self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                             (unsigned long)NULL), ^(void) {
+        [self initializeBadges];
+    });
+    //[self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
     //[self initializeBadges];
+    
+    [self setMetricLogonTime: [NSDate date]];
 }
 
 - (void)application:(UIApplication *)application 
@@ -697,6 +766,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
     [self didDismissSecondaryView];
     [tabBarController setSelectedIndex:0];
+    [feedController configureCarouselView];
+    [feedController.carouselView carouselTabDismiss:YES];
     
     // this function migrates toward not using the basic stix
     newestTag = [newTag retain];
@@ -771,6 +842,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 - (void) checkForUpdateTags {
     int numTags = 1;
+    NSLog(@"Checking for updated tag ids on kumulos");
     NSNumber * number = [[NSNumber alloc] initWithInt:numTags];
     //[k getLastTagTimestampWithNumEls:number];
     [k getLastTagIDWithNumEls:number];
@@ -790,6 +862,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // now download that tag
     if (idOfLastTagChecked < idOfNewestTagOnServer)
     {
+        NSLog(@"Requesting recent Pix with id %d from Kumulos", idOfNewestTagOnServer);
         [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
         idOfLastTagChecked = idOfNewestTagOnServer;
     }
@@ -912,7 +985,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // immediately notify
         // if adding to own pix, do not notify or broadcast
         if (![myUserInfo->username isEqualToString:tag.username]) {
-            NSString * message = [NSString stringWithFormat:@"%@ added a %@ to your Pix \"%@\"!", myUserInfo->username, [BadgeView getStixDescriptorForStixStringID:stixStringID], tag.descriptor];
+            NSString * stixStringDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            NSString * article = @"a";
+            if ([stixStringDesc characterAtIndex:0] == 'A' ||
+                [stixStringDesc characterAtIndex:0] == 'E' ||
+                [stixStringDesc characterAtIndex:0] == 'I' ||
+                [stixStringDesc characterAtIndex:0] == 'O' ||
+                [stixStringDesc characterAtIndex:0] == 'U'
+                ) {
+                article = @"an";
+            }
+            NSString * message = [NSString stringWithFormat:@"%@ added %@ %@ to your Pix!", myUserInfo->username, article, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
             [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
         }
         // replace old tag in allTags
@@ -1287,6 +1370,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (lastViewController == profileController)
         NSLog(@"Kumulos error in profileController: %@ - probably failed while trying to call userLogin", theError);
 #endif
+    [self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 }
 
 -(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime {
@@ -1317,10 +1401,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet *)friendsList {
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = [[BadgeView generateDefaultStix] retain];
+        stix = nil;
         [allStix removeAllObjects];
-        [allStix addEntriesFromDictionary:stix];
-        [stix release];
     }
     else {
         [stix retain];
@@ -1329,23 +1411,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [stix release];
     }
     if (![stixOrder isKindOfClass:[NSMutableDictionary class]]) {
-        stixOrder = [[NSMutableDictionary alloc] init];
-        [stixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
-        [stixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
-        NSLog(@"Generating stix order:");
-        NSEnumerator *e = [allStix keyEnumerator];
-        id key;
-        while (key = [e nextObject]) {
-            if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
-                int ct = [self getStixCount:key];
-                if (ct != 0)
-                    [stixOrder setObject:[NSNumber numberWithInt:[stixOrder count]] forKey:key];
-                NSLog(@"Stix: %@ count %d order %d", key, ct, [[stixOrder valueForKey:key] intValue]); 
-            }
-        }    
-        [allStixOrder removeAllObjects];
-        [allStixOrder addEntriesFromDictionary:stixOrder];
-        [stixOrder release];
+       
+        stixOrder = nil;
+        [stixOrder removeAllObjects];
     }
     else {
         [stixOrder retain];
@@ -1364,6 +1432,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
         }    
     }  
+    
+    // do consistency check on stix and stix order
+    [self checkConsistency];
+    
     if (![friendsList isKindOfClass:[NSMutableSet class]]) {
         [allFriends removeAllObjects];
         [allFriends addObject:@"bobo"];
@@ -1385,8 +1457,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
-    //if (lastBadgeView)
-    //    [lastBadgeView resetBadgeLocations];
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
@@ -1394,9 +1464,56 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [storeViewController updateBuxCount];
     [storeViewController reloadTableButtons];
     //[profileController updatePixCount];    
-
-    [self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                             (unsigned long)NULL), ^(void) {
+        [self saveDataToDisk];
+    });
+    
+    //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
     //[self saveDataToDisk];
+    
+    [self setMetricLogonTime:[NSDate date]];
+}
+
+-(void)checkConsistency { 
+    // if stix got messed up or stixOrders got messed up
+    for (int i=0; i<[BadgeView totalStixTypes]; i++) {
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        NSNumber * count = [allStix objectForKey:stixStringID];
+        NSNumber * order = [allStixOrder objectForKey:stixStringID];
+
+        if (count && !order) {
+            // create an order
+            if ([count intValue] != 0)
+            {
+                [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
+            }
+        }
+        if (order && !count) {
+            if ([order intValue] != -1)
+            {
+                [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
+            }
+        }
+    }
+    if ([allStix count] == 0 && [allStixOrder count] == 0) {
+        // generate defaults
+        [allStix addEntriesFromDictionary:[BadgeView generateDefaultStix] ];
+        
+        [allStixOrder setObject:[NSNumber numberWithInt:0] forKey:@"FIRE"];
+        [allStixOrder setObject:[NSNumber numberWithInt:1] forKey:@"ICE"];
+        NSLog(@"Generating stix order:");
+        NSEnumerator *e = [allStix keyEnumerator];
+        id key;
+        while (key = [e nextObject]) {
+            if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
+                int ct = [self getStixCount:key];
+                if (ct != 0)
+                    [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:key];
+            }
+        }    
+    }
 }
 
 -(void)didLogout {
@@ -1411,14 +1528,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         myUserInfo->usertagtotal = 0;
         myUserInfo->bux = 0;
-        [self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
+            [self saveDataToDisk];
+        });
+        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
         //[self saveDataToDisk];
         
         [allStix removeAllObjects];
         [profileController updatePixCount];
-        if (lastCarouselView)
-            [lastCarouselView resetBadgeLocations];
         
+        [self logMetricTimeInApp];
 #if !TARGET_IPHONE_SIMULATOR
         [self.camera setCameraOverlayView:loginSplashController.view];
 #endif
@@ -1467,10 +1587,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSString * name = [d valueForKey:@"username"];
         NSLog(@"Updated stix counts for user %@", name);
     }
-    [self reloadAllCarousels];
 }
 
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation*/ withTransform:(CGAffineTransform)transform{
+    
+    [feedController configureCarouselView];
+    [feedController.carouselView carouselTabDismiss:YES];
     
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
@@ -1495,11 +1617,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self updateUserTagTotal];        
     [self decrementStixCount:stixStringID];
     
+    /*
     if ([self getStixCount:stixStringID] == 0) {
         // ran out of a nonpermanent stix
         [feedController.carouselView carouselTabDismissRemoveStix];
         [tagViewController.descriptorController.carouselView carouselTabDismissRemoveStix];
     }
+     */
     
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
@@ -1594,6 +1718,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
     }
     [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
+    [self reloadAllCarousels];
     NSMutableData * data = [KumulosData dictionaryToData:allStix];
     [k addStixToUserWithUsername:myUserInfo->username andStix:data];
 }
@@ -1605,7 +1730,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ((myUserInfo->usertagtotal % 5) == 0) {
         //[self rewardStix];
         [self rewardBux];
-        [self reloadAllCarousels];
+        //[self reloadAllCarousels];
     }
 #if USING_KIIP
     [[KPManager sharedManager] updateScore:usertagtotal onLeaderboard:@"topDailyStixter"];
@@ -1702,6 +1827,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allStix setObject:[NSNumber numberWithInt:count+1] forKey:stixStringID];
         }
     }
+    [self reloadAllCarousels];
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
     [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data autorelease]; // MRC
@@ -1718,6 +1844,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (order != -1)
             [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
     }
+    [self reloadAllCarousels];
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
     [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data autorelease]; // MRC
@@ -1751,15 +1878,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self reloadAllCarousels];
 }
 -(void)reloadAllCarousels {
-#if 0
-    for (int i=0; i<[allCarouselViews count]; i++) {
-        [[allCarouselViews objectAtIndex:i] reloadAllStix];
-    }
-#else
-    [feedController reloadCarouselView];
-    //[exploreController reloadCarouselView];
-    [tagViewController.descriptorController reloadCarouselView];
-#endif
+    [[CarouselView sharedCarouselView] reloadAllStix];
 }
 
 -(void)didPressAdminEasterEgg:(NSString *)view {
@@ -1844,6 +1963,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [[allCarouselViews objectAtIndex:i] reloadAllStix];
         }
     }
+    [self reloadAllCarousels];
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
     
     // todo: when giftstx are used, we must check to sync with kumulos
@@ -1870,6 +1990,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [[allCarouselViews objectAtIndex:i] reloadAllStix];
         }
     }
+    [self reloadAllCarousels];
     NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
     [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data release];
@@ -2107,6 +2228,11 @@ static bool isShowingAlerts = NO;
     [nextAlert show];
     isShowingAlerts = YES;
     [nextAlert release];
+}
+
+-(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
+    [self didGetStixFromStore:stixStringID];
+    [tabBarController doPurchaseAnimation:stixStringID]; 
 }
 
 /**** StoreView delegate ****/

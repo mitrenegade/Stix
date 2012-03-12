@@ -311,6 +311,12 @@
     NSLog(@"Touch began at %f %f", location.x, location.y);
     
     CGRect frame = stix.frame;
+    // add an allowance of touch
+    int border = frame.size.width / 2;
+    frame.origin.x -= border;
+    frame.origin.y -= border;
+    frame.size.width *= 2;
+    frame.size.height *= 2;
     if (CGRectContainsPoint(frame, location))
     {
         isTap = 1;
@@ -343,6 +349,8 @@
         
         // filter out rogue touches, usually when people are using a pinch
         if (abs(centerX - stix.center.x) > 50 || abs(centerY - stix.center.y) > 50) 
+            return;
+        if (centerX < 0 || centerX > self.frame.size.width || centerY < 0 || centerY > self.frame.size.height)
             return;
         
         stix.center = CGPointMake(centerX, centerY);

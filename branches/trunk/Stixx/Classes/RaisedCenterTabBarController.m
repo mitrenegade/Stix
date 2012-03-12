@@ -122,6 +122,35 @@
     [animation release];
 }
 
+-(void)doPurchaseAnimation:(NSString*)stixStringID {
+    int width = 140;
+    CGRect canvasFrame = CGRectMake(0, 0, 320, 480);
+    UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
+    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+    [stix setFrame:CGRectMake(0,0,width,width)];
+    [stix setCenter:[rewardCanvas center]];
+    [rewardCanvas addSubview:stix];
+    CGRect rewardNameFrame = CGRectMake(0, 0, width*2, 40);
+    OutlineLabel * rewardName = [[OutlineLabel alloc] initWithFrame:rewardNameFrame];
+    [rewardName setFrame:rewardNameFrame];
+    CGPoint rewardNameCenter = rewardCanvas.center;
+    rewardNameCenter.y += width/2;
+    [rewardName setCenter:rewardNameCenter];
+    [rewardName setTextAttributesForBadgeType:0]; // generic red font
+    [rewardName setFontSize:20];
+    [rewardName setText:@"Purchased Stix"];
+    [rewardName setNumberOfLines:2];
+    [rewardName setTextAlignment:UITextAlignmentCenter];
+    [rewardCanvas addSubview:rewardName];
+
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    [rewardCanvas setAlpha:0];
+    animationIDsPurchase[0] = [animation doFade:rewardCanvas inView:self.view toAlpha:1 forTime:.1]; // not working
+    [rewardCanvas release];
+    [animation release];
+}
+
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
     NSLog(@"Animation %d finished!", animationID);
     [canvas retain]; // animations autorelease the canvas they are sent
@@ -160,6 +189,30 @@
         }
         [animation release];
     }
+    
+    /* purchase stix */
+    if (animationID == animationIDsPurchase[0]) { // fade in finished
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        animationIDsPurchase[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        [animation release];
+    }
+    else if (animationID == animationIDsPurchase[1]) { // first jump finished
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        animationIDsPurchase[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        [animation release];
+    }
+    else if (animationID == animationIDsPurchase[2]) { // second jump finished
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        animationIDsPurchase[3] = [animation doDownwardFade:canvas inView:self.view forDistance:300 forTime:1.5];
+        [animation release];
+    }
+    else if (animationID == animationIDsPurchase[3]) {
+        [canvas removeFromSuperview];
+    }
+
     [canvas release];
 }
 

@@ -24,6 +24,8 @@
 -(void)didCancelAddStix;
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+-(int)getBuxCount;
+-(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 
 @end
 
@@ -72,6 +74,8 @@
 @property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic, retain) StixView * stixView;
 @property (nonatomic, retain) CarouselView * carouselView;
+@property (nonatomic, retain) UIImageView * blackBarView;
+@property (nonatomic, retain) UILabel * priceView;
 
 -(void)toggleCarouselView:(BOOL)carouselEnabled;
 
@@ -88,8 +92,7 @@
 //-(UIImageView *)populateWithBadge:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y;
 -(IBAction)closeInstructions:(id)sender;
 
--(void)createCarouselView;
--(void)reloadCarouselView;
+-(void)configureCarouselView;
 
 -(void)didClickAtLocation:(CGPoint)location;
 -(void)didDropStixByTap:(NSString*)stixStringID atLocation:(CGPoint)location;

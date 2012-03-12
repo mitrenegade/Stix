@@ -249,6 +249,8 @@
 		9EC7361B14CE08D300AE5A6C /* FeedbackViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */; };
 		9EC7361E14CE0D4E00AE5A6C /* checkbox_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361C14CE0D4E00AE5A6C /* checkbox_selected.png */; };
 		9EC7361F14CE0D4E00AE5A6C /* checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361D14CE0D4E00AE5A6C /* checkbox.png */; };
+		9ECA30B1150AB062009E975D /* green_check.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ECA30AF150AB062009E975D /* green_check.png */; };
+		9ECA30B2150AB062009E975D /* red_x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ECA30B0150AB062009E975D /* red_x.png */; };
 		9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */; };
 		9ECB659214DDD1470067F3F3 /* CoverflowViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */; };
 		9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ECB659314DDD5770067F3F3 /* MapKit.framework */; };
@@ -681,6 +683,8 @@
 		9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FeedbackViewController.xib; sourceTree = "<group>"; };
 		9EC7361C14CE0D4E00AE5A6C /* checkbox_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_selected.png; sourceTree = "<group>"; };
 		9EC7361D14CE0D4E00AE5A6C /* checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox.png; sourceTree = "<group>"; };
+		9ECA30AF150AB062009E975D /* green_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green_check.png; sourceTree = "<group>"; };
+		9ECA30B0150AB062009E975D /* red_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red_x.png; sourceTree = "<group>"; };
 		9ECB658E14DDD1460067F3F3 /* CoverflowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverflowViewController.h; sourceTree = "<group>"; };
 		9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverflowViewController.m; sourceTree = "<group>"; };
 		9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CoverflowViewController.xib; sourceTree = "<group>"; };
@@ -1406,6 +1410,8 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9ECA30AF150AB062009E975D /* green_check.png */,
+				9ECA30B0150AB062009E975D /* red_x.png */,
 				9E6B05E4150961D300E3ADAD /* txt_all_selected.png */,
 				9E6B05E5150961D400E3ADAD /* txt_all.png */,
 				9E6B05E6150961D400E3ADAD /* txt_cute_selected.png */,
@@ -1820,6 +1826,8 @@
 				9E6B05ED150961D700E3ADAD /* txt_cute.png in Resources */,
 				9E6B05EE150961D700E3ADAD /* txt_facefun_selected.png in Resources */,
 				9E6B05EF150961D700E3ADAD /* txt_facefun.png in Resources */,
+				9ECA30B1150AB062009E975D /* green_check.png in Resources */,
+				9ECA30B2150AB062009E975D /* red_x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

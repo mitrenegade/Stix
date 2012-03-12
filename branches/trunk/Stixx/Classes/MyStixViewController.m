@@ -14,7 +14,6 @@
 @synthesize delegate;
 @synthesize buttonRules;
 @synthesize tableController;
-@synthesize carouselView;
 @synthesize buttonFeedback;
 
 #define BADGE_MYSTIX_PADDING 45 // how many pixels per side in mystix view
@@ -38,10 +37,7 @@
 
 -(void) viewDidLoad {
     [super viewDidLoad];
-    
-    /***** init carouselView *****/
-    [self createCarouselView];
-    
+        
     buttonRules = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 450)];
     [buttonRules addTarget:self
                action:@selector(didClickOnButtonRules:)
@@ -63,10 +59,8 @@
         [carouselView release];
     }
     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-    [carouselView setShowGiftStix:NO];
     carouselView.delegate = self;
     [carouselView initCarouselWithFrame:CGRectMake(15,90,305,75)];
-    [carouselView toggleHideShelf:YES];
 //    [self.view addSubview:carouselView];
     [self.view insertSubview:carouselView belowSubview:[self buttonFeedback]];
 
@@ -80,7 +74,6 @@
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
 
-    [carouselView resetBadgeLocations];
     [tableController reloadStixCounts];
 }
 

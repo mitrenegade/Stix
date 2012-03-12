@@ -65,11 +65,10 @@ struct UserInfo {
 };
 
 
-
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate,
 
 #if USING_FACEBOOK
     FBSessionDelegate,
@@ -91,6 +90,7 @@ struct UserInfo {
     MyStixViewController * myStixController;
     StoreViewController * storeViewController;
     StoreViewShell * storeViewShell;
+    CarouselView * carouselView;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
@@ -159,6 +159,7 @@ struct UserInfo {
     NSMutableArray * alertAction;
     NSMutableArray * alertQueue;
     int alertActionCurrent;
+        
 #if USING_FACEBOOK
     Facebook * facebook;
 #endif
@@ -181,7 +182,7 @@ struct UserInfo {
 -(void)adminEasterEggShowMenu:(NSString*)password;
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;
--(void)adminSaveFeed;
+//-(void)adminSaveFeed;
 -(void)adminSaveTagUpdateInfo;
 -(void)adminResetAllStixOrders;
 
@@ -198,6 +199,9 @@ struct UserInfo {
 -(void)rewardStix;
 -(void)rewardBux;
 -(void)rewardLocation;
+-(void)didGetKumulosSubcategories:(NSMutableArray*)theResults;
+-(void)logMetricTimeInApp;
+-(void)checkConsistency;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) RaisedCenterTabBarController *tabBarController;
@@ -226,6 +230,9 @@ struct UserInfo {
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) StoreViewController * storeViewController;
 @property (nonatomic, retain) StoreViewShell * storeViewShell;  
+@property (nonatomic, retain) NSDate * metricLogonTime;
+@property (nonatomic, retain) CarouselView * carouselView;
+
 #if USING_FACEBOOK
 @property (nonatomic, retain) Facebook *facebook;
 #endif

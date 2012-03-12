@@ -173,7 +173,6 @@
     view = [self.delegate viewForItemAtIndex:y];
     //[cell.contentView removeFromSuperview];
     [cell.contentView addSubview:view];
-    CGRect frame = cell.contentView.frame;
     [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
     
     if (y == [contentPageIDs count]-1) // last available row reached 

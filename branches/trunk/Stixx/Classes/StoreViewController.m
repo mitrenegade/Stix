@@ -82,12 +82,13 @@ static NSDate * timestampStixTypes;
 }
 
 -(int)addSubcategory:(NSString*)subcategoryName toCategory:(NSString*)categoryName {
+    /*
     NSEnumerator *e = [subcategories keyEnumerator];
     id key;
     while (key = [e nextObject]) {
         NSLog(@"Key: %@", key);
     }
-    
+    */
 
     NSMutableArray * subArray = [subcategories valueForKey:categoryName];
     if (subArray) {

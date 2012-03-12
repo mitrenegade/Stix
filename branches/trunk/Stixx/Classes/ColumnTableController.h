@@ -19,9 +19,6 @@
 -(void)loadContentPastRow:(int)row;
 -(UIView*)viewForItemAtIndex:(int)index;
 
--(Tag *) tagAtIndex:(int)index; // to get tagID
--(UIView*)viewForItemWithTagID:(NSNumber*)tagID;
-
 #if USE_PULL_TO_REFRESH
 -(void)didPullToRefresh;
 #endif

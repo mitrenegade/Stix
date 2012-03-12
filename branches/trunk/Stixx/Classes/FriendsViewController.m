@@ -47,12 +47,6 @@
 
 -(void)viewDidLoad {
     [super viewDidLoad];
-	/****** init badge view ******/
-    /*
-     carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-     carouselView.delegate = self;
-     [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X, SHELF_STIX_Y, 320, SHELF_STIX_SIZE)];
-     */
     [self initializeScrollWithPageSize:CGSizeMake(300, 400)];
     scrollView.isLazy = NO;
     //[delegate didCreateBadgeView:carouselView];
@@ -114,11 +108,9 @@
     
     // do not call checkForUpdatePhotos; it forces a viewWillAppear so we'd end in an infinite loop
     [self forceReloadAll];    
-    //[carouselView resetBadgeLocations];    
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    //[carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -164,7 +156,6 @@
     }
     if (friendName != nil)
         [self.delegate didSendGiftStix:stixStringID toUsername:friendName];
-    //[carouselView resetBadgeLocations];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

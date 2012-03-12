@@ -108,6 +108,27 @@ static int animationID = 1;
      ];
     return myAnimationID; // when we initialize the animation give it an id
 }
+
+-(int)doFade:(UIView *)canvas inView:(UIView*)view toAlpha:(float)opacityEnd forTime:(float)time {
+    [canvas retain];
+    // no need to add subview, assume already exists
+    //[view addSubview:canvas];
+    
+    //[canvas setAlpha:opacityStart];
+    int myAnimationID = animationID++;
+    [UIView animateWithDuration:time
+                          delay:0
+                        options: UIViewAnimationTransitionNone 
+                     animations: ^ { 
+                         [canvas setAlpha:opacityEnd];
+                     } 
+                     completion:^(BOOL finished) { 
+                         [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
+                         [canvas release];
+                     }
+     ];
+    return myAnimationID; // when we initialize the animation give it an id
+}
 /*
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.

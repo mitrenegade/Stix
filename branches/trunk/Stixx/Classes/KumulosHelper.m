@@ -20,7 +20,7 @@ static KumulosHelper *sharedKumulosHelper;
 
 -(id)init
 {
-	[super init];
+	self = [super init];
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
 	return self;
@@ -52,6 +52,9 @@ static KumulosHelper *sharedKumulosHelper;
         [k getAllTags];
         //[k getAllTagsWithIDGreaterThanWithAllTagID:490 andNumTags:[NSNumber numberWithInt:5]];
     }
+    else if ([function isEqualToString:@"getSubcategories"]) {
+        [k getAllCategories];
+    }
 }
 
 -(void)execute:(NSString*)_function {
@@ -71,9 +74,10 @@ static KumulosHelper *sharedKumulosHelper;
         // if stixOrder exists for a stix that is at 0 counts
         // if stixOrder does not exist for a user
         // we don't check for validity of stixOrder so we just reset everything
+        NSString * username = @"";
         NSLog(@"Total users: %d", [theResults count]);
         for (NSMutableDictionary * d in theResults) {
-            NSString * username = [d objectForKey:@"username"];
+            username = [d objectForKey:@"username"];
             NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d objectForKey:@"stix"]] retain];
             NSLog(@"User %@ has %d stix", username, [stix count]);
             NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
@@ -122,8 +126,9 @@ static KumulosHelper *sharedKumulosHelper;
         // if stixOrder does not exist for a user
         // we don't check for validity of stixOrder so we just reset everything
         NSLog(@"Total users: %d", [theResults count]);
+        NSString * username = @"";
         for (NSMutableDictionary * d in theResults) {
-            NSString * username = [d objectForKey:@"username"];
+            username = [d objectForKey:@"username"];
             NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d objectForKey:@"stix"]] retain];
             NSLog(@"User %@ has %d stix", username, [stix count]);
             NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
@@ -179,6 +184,14 @@ static KumulosHelper *sharedKumulosHelper;
 }
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixTimestampDidCompleteWithResult:(NSNumber *)affectedRows {
     NSLog(@"rows: %d", [affectedRows intValue]);
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllCategoriesDidCompleteWithResult:(NSArray *)theResults {
+    if ([sharedKumulosHelper.function isEqualToString:@"getSubcategories"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
+        if (sharedKumulosHelper.delegate)
+            [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+    }
 }
 
 @end

@@ -216,10 +216,6 @@
     if (!descriptorController) {
         descriptorController = [[AddStixViewController alloc] init];
     }
-    else
-    {
-        [descriptorController.carouselView resetBadgeLocations];
-    }
 #if !TARGET_IPHONE_SIMULATOR
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -230,7 +226,9 @@
     // populate after view has been created
     [descriptorController setDelegate:self];
     [descriptorController initStixView:newTag];
-    [descriptorController createCarouselView];
+    [descriptorController configureCarouselView];
+    [descriptorController.carouselView carouselTabDismiss:NO]; // start tab at bottom
+    [descriptorController.carouselView carouselTabExpand:YES]; // animate expansion
 }
 
 - (void)clearTags {
@@ -240,6 +238,7 @@
 -(void)didCancelAddStix {
     //[[UIApplication sharedApplication] setStatusBarHidden:YES];
     //[self.camera dismissModalViewControllerAnimated:YES];
+    [self.descriptorController.carouselView carouselTabDismiss:NO];
     [self.camera setCameraOverlayView:self.view];
     needToShowCamera = YES;
     descriptorIsOpen = NO;
@@ -318,6 +317,9 @@
     [self viewDidAppear:NO];
 }
 
+-(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
+    [self.delegate didPurchaseStixFromCarousel:stixStringID];
+}
 
 - (void)addCoordinateOfTag:(Tag*)tag {
     //if (tag.coordinate)
@@ -558,6 +560,10 @@
 -(int)getStixOrder:(NSString*)stixStringID;
 {
     return [self.delegate getStixOrder:stixStringID];
+}
+
+-(int)getBuxCount {
+    return [self.delegate getBuxCount];
 }
 
 

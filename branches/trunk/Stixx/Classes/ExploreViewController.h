@@ -74,8 +74,6 @@ enum {
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
 
 //-(void)getTagWithID:(int)id;
-//-(void)createCarouselView;
-//-(void)reloadCarouselView;
 -(IBAction)feedbackButtonClicked:(id)sender;
 
 

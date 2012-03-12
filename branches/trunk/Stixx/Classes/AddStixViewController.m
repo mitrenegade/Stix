@@ -22,7 +22,7 @@
 @synthesize buttonInstructions;
 @synthesize stixView;
 @synthesize carouselView;
-
+@synthesize blackBarView, priceView;
 
 /*** AUX STIX ***/
 
@@ -50,9 +50,22 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     drag = 0;
-    [commentField setPlaceholder:@"What's Here?"];
-    locationController = [[LocationHeaderViewController alloc] init];
-    [locationController setDelegate:self];
+    //[commentField setPlaceholder:@"What's Here?"];
+    //locationController = [[LocationHeaderViewController alloc] init];
+    //[locationController setDelegate:self];
+    
+    self.blackBarView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"blackbar.png"]];
+    [self.blackBarView setFrame:CGRectMake(0, 412, 320, 48)];
+    self.priceView = [[UILabel alloc] initWithFrame:CGRectMake(260, 420, 80, 30)];
+    [self.priceView setBackgroundColor:[UIColor clearColor]];
+    [self.priceView setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
+    [self.priceView setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
+    self.buttonOK = [[UIButton alloc] initWithFrame:CGRectMake(184, 420, 36, 36)];
+    [self.buttonOK setImage:[UIImage imageNamed:@"green_check.png"] forState:UIControlStateNormal];
+    self.buttonCancel = [[UIButton alloc] initWithFrame:CGRectMake(100, 420, 36, 36)];
+    [self.buttonCancel setImage:[UIImage imageNamed:@"red_x.png"] forState:UIControlStateNormal];    
+    [buttonOK addTarget:self action:@selector(buttonOKPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [buttonCancel addTarget:self action:@selector(buttonCancelPressed:) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)viewDidUnload {
@@ -260,22 +273,22 @@
 
 -(IBAction)buttonOKPressed:(id)sender
 {
-    /*
-	float imageScale = 1; // 300 / imageView.frame.size.width;
+    // check to see if this sticker requires a purchase
+    int cost = 5;
+    if ([self.delegate getBuxCount] < cost) {
+        UIAlertView* alert = [[UIAlertView alloc]init];
+        [alert addButtonWithTitle:@"Ok"];
+        [alert setTitle:@"Cannot use this Stix!"];
+        [alert setMessage:@"You don't own this Stix and have no Bux to buy it!"];
+        [alert show];
+        [alert release];
+        return;
+    }
+    if ((carouselView.stixSelected != nil) && [self.delegate getStixCount:carouselView.stixSelected] == 0) {
+        // purchase
+        [self.delegate didPurchaseStixFromCarousel:carouselView.stixSelected];
+    }
     
-	CGRect stixFrameScaled = stix.frame;
-    float centerX = stix.center.x - stixView.frame.origin.x;
-    float centerY = stix.center.y - stixView.frame.origin.y;
-    centerX *= imageScale;
-    centerY *= imageScale;
-	stixFrameScaled.size.width *= imageScale;
-	stixFrameScaled.size.height *= imageScale;
-    NSLog(@"AuxStix: set aux stix of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-    
-    // hack: debug to test display
-    //auxRotation = 0; //3.1415/4;
-    */
-
     // scale stix frame back
     float imageScale = 1;
     CGRect stixFrameScaled = stixView.stix.frame;
@@ -297,6 +310,7 @@
 
 -(IBAction)buttonCancelPressed:(id)sender
 {
+    didAddStixToStixView = NO;
 	[self.delegate didCancelAddStix];
 }
 
@@ -313,7 +327,6 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [carouselView resetBadgeLocations];
 }
 
 - (void)dealloc {
@@ -370,46 +383,42 @@
 }
 
 /**** Carousel ****/
--(void)createCarouselView {
-    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
-        [carouselView clearAllViews];
-        [carouselView release];
-    }
-    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
+-(void)configureCarouselView{
+    NSLog(@"ConfigureCarouselView by AddStixViewController");
+    // reserves the carousel for self
+    [self setCarouselView:[CarouselView sharedCarouselView]];
     carouselView.delegate = self;
-    // to set the correct underlay:
-    // if no underlay is set, the hittest order is carouselView->badgeView->self.view
-    // but badgeView will incorrectly toggle a hit because it contains badgeFrames
-    // so we make carouselView return its underlay to skip badgeView. If the underlay is
-    // another subview in self.view's subview, it will then cause hittest to traverse
-    // all of self.view's subviews after carouselView natually, thus enabling all other buttons
-    // and touch interactions
-    //    [carouselView setUnderlay:flashModeButton];
-    [carouselView setDismissedTabY:400];
-    [carouselView setExpandedTabY:30];
-    [carouselView initCarouselWithFrame:CGRectMake(0,carouselView.scrollOffsetFromTabTop,320,SHELF_HEIGHT)];
-    [carouselView toggleHideShelf:YES]; // always hide shelf
+//    [carouselView setDismissedTabY:400-44-20];
+//    [carouselView setExpandedTabY:30-44-20];
+    [carouselView setExpandedTabY:5-20]; // hack: a bit lower
+    [carouselView setDismissedTabY:373-20];
     [carouselView setAllowTap:YES];
-    [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
+//    [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
     
+    [carouselView removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:stixView];
     [carouselView setUnderlay:stixView];
-    //[delegate didCreateBadgeView:carouselView];
-}
-
--(void)reloadCarouselView {
-    // hack: if carouselView is not scrolling, it is being eclipsed by the tabbar
-    [[self carouselView] reloadAllStix]; //WithFrame:CGRectMake(0,carouselView.dismissedTabY+60,320,SHELF_STIX_SIZE)];
-    // HACK: make sure carouselView doesn't prevent other buttons from being touched
-    // this is different because of the weird camera layer that doesn't exist in others (feedView, exploreView)
-    [[self carouselView] removeFromSuperview];    
-    [self.view insertSubview:carouselView aboveSubview:stixView];
+    //[carouselView reloadAllStix];   
+    
+    // add others above carouselView
+    [blackBarView removeFromSuperview];
+    [priceView removeFromSuperview];
+    [buttonOK removeFromSuperview];
+    [buttonCancel removeFromSuperview];
+    
+    [self.view addSubview:blackBarView];
+    [self.view addSubview:priceView];
+    [self.view addSubview:buttonOK];
+    [self.view addSubview:buttonCancel];
+    
+    [carouselView resetBadgeLocations];
 }
 
 // BadgeViewDelegate function
 -(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
     // selection of a stix to use from the carousel
-    [self.carouselView carouselTabDismissWithStix:badge];
+    //[self.carouselView carouselTabDismissWithStix:badge];
+    [self.carouselView carouselTabDismiss:YES];
     [self.carouselView setStixSelected:stixStringID];
     if (didAddStixToStixView) {
         // we've already added a stix, so the only thing we can do is now change it
@@ -419,6 +428,13 @@
         CGPoint center = stixView.center;
         [self didDropStixByTap:stixStringID atLocation:center];
     }
+    
+    int count = [self.delegate getStixCount:stixStringID];
+    if (count == 0) {
+        [priceView setText:@"5 Bux"];
+    }
+    else
+        [priceView setText:@""];
 }
 
 -(void)didDropStixByTap:(NSString*)stixStringID atLocation:(CGPoint)location{
@@ -431,7 +447,7 @@
 
 -(void)didDropStixByDrag:(NSString*)stixStringID atLocation:(CGPoint)location {
     // location is in TagDescriptorController's view
-    [carouselView carouselTabDismiss];
+    [carouselView carouselTabDismiss:YES];
     [carouselView resetBadgeLocations];
     CGPoint locationInStixView = location;
     locationInStixView.x -= stixView.frame.origin.x;
@@ -464,7 +480,7 @@
 }
 
 -(void)didStartDrag {
-    [self.carouselView carouselTabDismiss];
+    [self.carouselView carouselTabDismiss:YES];
     [self.buttonInstructions setHidden:YES];
 }
 -(void)didClickAtLocation:(CGPoint)location {

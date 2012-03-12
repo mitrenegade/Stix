@@ -32,6 +32,10 @@
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didDismissSecondaryView;
+
+-(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
+-(int)getBuxCount;
+
 @end
 
 

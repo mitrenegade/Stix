@@ -179,7 +179,6 @@
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
-        NSDate * newtime = [newtag timestamp];
         [allTagIDs addObject:newtag.tagID]; // save in order 
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
     }
@@ -323,7 +322,6 @@
 #pragma mark - View lifecycle
 
 - (void)viewDidAppear:(BOOL)animated {
-    //[carouselView resetBadgeLocations];    
 	[super viewDidAppear:animated];
 }
 
@@ -341,7 +339,6 @@
     [alert setMessage:@"Adding Stix in the Explore view coming soon!"];
     [alert show];
     [alert release];
-    //[carouselView resetBadgeLocations];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

@@ -8,6 +8,7 @@
 
 #import "OutlineLabel.h"
 #import "StixAnimation.h"
+#import "BadgeView.h"
 
 @protocol RaisedCenterTabBarControllerDelegate 
 
@@ -30,6 +31,7 @@
     
     int allAnimationIDs[4];
     int mallPointerAnimationID;
+    int animationIDsPurchase[4];
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -49,4 +51,5 @@
 -(IBAction)closeInstructions:(id)sender;
 -(void)doRewardAnimation:(NSString *)title withAmount:(int)amount;
 -(void)doPointerAnimation;
+-(void)doPurchaseAnimation:(NSString*)stixStringID;
 @end

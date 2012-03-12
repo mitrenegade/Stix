@@ -17,6 +17,7 @@
 #import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
+#import "StixAnimation.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -44,9 +45,12 @@
 -(void)didDismissSecondaryView;
 
 -(void)didPressAdminEasterEgg:(NSString*)view;
+
+-(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
+-(int)getBuxCount;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, StixAnimationDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
@@ -83,7 +87,7 @@
 }
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) NSMutableDictionary * headerViews;
-@property (nonatomic, retain) CarouselView * carouselView;
+@property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) FeedTableController *tableController;
 @property (nonatomic, assign) NSObject<VerticalFeedDelegate> * delegate;
@@ -100,8 +104,7 @@
 
 
 -(void)forceUpdateCommentCount:(int)tagID;
--(void)createCarouselView;
--(void)reloadCarouselView;
+-(void)configureCarouselView;
 -(void)reloadCurrentPage;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickJumpButton:(id)sender;

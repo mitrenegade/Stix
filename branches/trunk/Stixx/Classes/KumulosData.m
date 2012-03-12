@@ -33,7 +33,8 @@
     }
     @catch (NSException *exception) {
         NSLog(@"ArrayToData failed with exception %@", [exception reason]);
-        @throw exception;
+        //@throw exception;
+        return nil;
     }
 }
 +(NSMutableArray *) dataToArray:(NSMutableData *) data{ 
@@ -47,7 +48,8 @@
     }
     @catch (NSException *exception) {
         NSLog(@"DataToArray failed with exception %@", [exception reason]);
-        @throw exception;
+        //@throw exception;
+        return nil;
     }
 }
 
@@ -63,7 +65,8 @@
     }
     @catch (NSException *exception) {
         NSLog(@"DataToDictionary failed with exception %@", [exception reason]);
-        @throw exception;
+        //@throw exception;
+        return nil;
     }
 }
 +(NSMutableData * ) dictionaryToData:(NSMutableDictionary *) dict {
@@ -78,7 +81,8 @@
     }
     @catch (NSException *exception) {
         NSLog(@"DictionaryToData failed with exception %@", [exception reason]);
-        @throw exception;
+        //@throw exception;
+        return nil;
     }
 }
 
@@ -138,11 +142,13 @@
             else {
                 [auxiliaryData addEntriesFromDictionary:auxData];
 
+                /*
                 NSEnumerator *e = [auxData keyEnumerator];
                 id key;
                 while (key = [e nextObject]) {
                     NSLog(@"Key: %@", key);
                 }
+                 */
                 
                 stixOrder = [auxData objectForKey:@"stixOrder"];
                 friendsList = [auxData objectForKey:@"friendsList"];

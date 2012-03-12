@@ -13,7 +13,8 @@ static NSMutableArray * stixStringIDs = nil;
 static NSMutableDictionary * stixViews = nil;
 static NSMutableDictionary * stixLikelihood = nil;
 static NSMutableArray * pool = nil;
-static NSMutableDictionary * stixCategories = nil;
+static NSMutableDictionary * stixCategories = nil; // key: category name value: array of stixStringIDs
+static NSMutableDictionary * stixSubcategories = nil; // key: category name value: array of subcategory names
 static int totalStixTypes = 0;
 
 @implementation BadgeView
@@ -22,7 +23,7 @@ static int totalStixTypes = 0;
 @synthesize underlay;
 @synthesize showStixCounts;
 @synthesize badgesLarge;
-@synthesize shelf;
+//@synthesize shelf;
 @synthesize selectedStixStringID;
 
 - (id)initWithFrame:(CGRect)frame 
@@ -32,9 +33,9 @@ static int totalStixTypes = 0;
     if (totalStixTypes == 0)
         NSLog(@"***** ERROR! BadgeView Stix Types not yet initialized! *****");
   
-    shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
-    shelf.frame = CGRectMake(0, 390, 320, 30);
-    [self addSubview:shelf];
+    //shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
+    //shelf.frame = CGRectMake(0, 390, 320, 30);
+    //[self addSubview:shelf];
     
     showStixCounts = YES;
     
@@ -187,6 +188,7 @@ static int totalStixTypes = 0;
             [stixCategories setObject:category forKey:categoryName];
         }
         [category addObject:stixStringID];
+
         //NSLog(@"Initializing stix %@ with category %@: total Stix types %d", stixStringID, categoryName, [stixStringIDs count]);
     }
     totalStixTypes = [stixStringIDs count]; //MIN([stixStringIDs count], [stixViews count]);
@@ -280,6 +282,36 @@ static int totalStixTypes = 0;
     [stixDescriptors addEntriesFromDictionary:savedStixDescriptors];
     [stixLikelihood addEntriesFromDictionary:savedStixLikelihoods];
     [stixCategories addEntriesFromDictionary:savedStixCategories];
+}
+
++(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults {
+    // creating list of subcategories
+    if (stixSubcategories)
+    {
+        [stixSubcategories release];
+        stixSubcategories = nil;
+    }
+    stixSubcategories = [[NSMutableDictionary alloc] init];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * categoryName = [d valueForKey:@"categoryName"];
+        NSString * subcategoryOf = [d valueForKey:@"subcategoryOf"];
+        if (subcategoryOf != nil) {
+            NSMutableArray * supercategory = [stixSubcategories objectForKey:subcategoryOf];
+            if (!supercategory) {
+                supercategory = [[[NSMutableArray alloc] init] autorelease];
+                [stixSubcategories setObject:supercategory forKey:subcategoryOf];
+            }
+            [supercategory addObject:categoryName];
+        }
+    }
+}
+
++(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories {
+    if (stixSubcategories) {
+        [stixSubcategories release];
+        stixSubcategories = nil;
+    }
+    [stixSubcategories addEntriesFromDictionary:subcategories];
 }
 
 +(void)AddStixView:(NSArray*)resultFromKumulos {
@@ -418,6 +450,13 @@ static int totalStixTypes = 0;
     }
     return nil;
 }
++(NSMutableArray *) getSubcategoriesForCategory:(NSString*)categoryName {
+    if (stixSubcategories) {
+        NSMutableArray * subcategories = [stixSubcategories objectForKey:categoryName];
+        return subcategories;
+    }
+    return nil;
+}
 
 +(NSMutableArray *)GetAllStixStringIDsForSave {
     // for saving to disk
@@ -439,12 +478,16 @@ static int totalStixTypes = 0;
     // for saving to disk
     return stixLikelihood;
 }
++(NSMutableDictionary *)GetAllStixSubcategoriesForSave {
+    // for saving to disk
+    return stixSubcategories;
+}
 
 - (void)dealloc {
 	[super dealloc];
     
-    [shelf release];
-    shelf = nil;
+    //[shelf release];
+    //shelf = nil;
     
     [badges release];
     badges = nil;

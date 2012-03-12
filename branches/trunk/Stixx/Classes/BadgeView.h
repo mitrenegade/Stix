@@ -64,7 +64,7 @@ enum {
 	
 	UIImageView * badgeTouched; // the stix on the carousel (at whatever size the carousel is)
 	UIImageView * badgeLifted; // what a stix looks like in the correct context
-    UIImageView * shelf;
+    //UIImageView * shelf;
     
 	int drag;
     int badgeSelect; // id into the badgesLarge and locations arrays
@@ -85,7 +85,7 @@ enum {
 @property (nonatomic, assign) UIView * underlay;
 @property (nonatomic, assign) bool showStixCounts;
 @property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
-@property (nonatomic, retain) UIImageView * shelf;
+//@property (nonatomic, retain) UIImageView * shelf;
 @property (nonatomic, assign) NSString * selectedStixStringID;
 
 -(void)resetBadgeLocations;
@@ -104,6 +104,8 @@ enum {
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
 +(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods andStixCategories:(NSMutableDictionary*)savedStixCategories;
++(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories;
++(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults;
 
 // returns stixStringID for given badge type. THIS IS DONE FOR BACKWARD COMPATIBILITY.
 // Type is still drawn from a static list by some old builds.
@@ -120,11 +122,14 @@ enum {
 +(NSString*) getStixStringIDAtIndex:(int)index;
 +(NSString*) getRandomStixStringID;
 +(NSMutableArray *) getStixForCategory:(NSString*)categoryName;
++(NSMutableArray *) getSubcategoriesForCategory:(NSString*)categoryName;
 +(NSMutableDictionary *)GetAllStixViewsForSave;
 +(NSMutableDictionary *)GetAllStixDescriptorsForSave;
 +(NSMutableDictionary *)GetAllStixLikelihoodsForSave;
 +(NSMutableArray *)GetAllStixStringIDsForSave;
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
++(NSMutableDictionary *)GetAllStixSubcategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
++(void)InitializeSubcategories:(NSArray*)theResults;
 
 @end

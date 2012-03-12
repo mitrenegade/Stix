@@ -66,10 +66,6 @@
     //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
     
-	/****** init badge view ******/
-    [self createCarouselView];
-    //[self toggleCarouselView:NO];
-    
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
     
@@ -81,54 +77,25 @@
     headerViews = [[NSMutableDictionary alloc] init];
     
     [activityIndicator startCompleteAnimation];
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [self configureCarouselView];
+    [self.carouselView carouselTabDismiss:NO];
 }
 
--(void)createCarouselView {
-    if (carouselView != nil && [carouselView isKindOfClass:[CarouselView class]]) {
-        [carouselView clearAllViews];
-        [carouselView release];
-    }
-    carouselView = [[CarouselView alloc] initWithFrame:self.view.frame];
-    carouselView.delegate = self;
-    [carouselView toggleHideShelf:YES]; // always hide shelf
-#if 1
-    [carouselView setDismissedTabY:373];
-    [carouselView setExpandedTabY:5];
-    [carouselView initCarouselWithFrame:CGRectMake(0, carouselView.scrollOffsetFromTabTop,320,SHELF_HEIGHT)];
-    [carouselView setFrame:CGRectMake(0, 0, 320, 480)];
-    //[carouselTab addSubview:carouselView];
+-(void)configureCarouselView {
+    // claim carousel for self
+    NSLog(@"ConfigureCarouselView by VerticalFeedController");
+    [self setCarouselView:[CarouselView sharedCarouselView]];
+    [carouselView setDelegate:self];
+    [carouselView setDismissedTabY:373-20];
+    [carouselView setExpandedTabY:5-20];
+    [carouselView setAllowTap:YES];
+    //[carouselView removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
-#else
-    [carouselView initCarouselWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-    [self.view insertSubview:carouselView aboveSubview:tableController.view];
-#endif
-    [carouselView setAllowTap:YES]; // allow single tap
     [carouselView setUnderlay:tableController.view];
-    [delegate didCreateBadgeView:carouselView];
-}
-
--(void)reloadCarouselView {
-#if 1
-    [[self carouselView] reloadAllStix];
-    //[[self carouselView] removeFromSuperview];
-    
-    //[carouselTab addSubview:carouselView];
-    //[carouselTab removeFromSuperview];
-    //[self.view insertSubview:carouselTab aboveSubview:tableController.view];
-
-    //[self.view insertSubview:carouselView aboveSubview:carouselTab];
-#else
-    [[self carouselView] reloadAllStixWithFrame:CGRectMake(SHELF_STIX_X,SHELF_STIX_Y,320,SHELF_STIX_SIZE)];
-    [[self carouselView] removeFromSuperview];
-    [self.view insertSubview:carouselView aboveSubview:tableController.view];
-#endif
-    
-    /*
-    if (isShowingCarousel)
-        [self carouselTabExpand];
-    else
-        [self carouselTabDismiss];
-     */
+    //[carouselView carouselTabDismiss:NO];
+    [carouselView resetBadgeLocations];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -144,13 +111,11 @@
     
     //[tableController populateScrollPagesAtPage:lastPageViewed];
     [tableController setContentPageIDs:allTags];
-    
-//    [self carouselTabDismiss];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-    [carouselView resetBadgeLocations];  
+    //[self configureCarouselView];
 	[super viewDidAppear:animated];
 }
 
@@ -198,21 +163,20 @@
 
 /******* badge view delegate ******/
 -(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
-#if 0
-    // selection of a stix to use from the carousel
-    [self.carouselView carouselTabDismissWithStix:badge];
-    [self.carouselView setStixSelected:stixStringID];
-#else
-    [self.carouselView carouselTabDismissWithStix:badge];
+    //[self.carouselView carouselTabDismissWithStix:badge];
+    if ([allTags count]==0) {
+        [carouselView resetBadgeLocations];
+        [carouselView carouselTabDismiss:YES];
+        return;        
+    }
+    //[self.carouselView carouselTabDismiss:NO];
     [self.carouselView setStixSelected:stixStringID];
     CGPoint center = self.view.center;
     center.y -= tableController.view.frame.origin.y; // remove tableController offset
     [badge setCenter:center];
-    
     int section = [tableController getCurrentSectionAtPoint:center];
     lastPageViewed = section;
     [self didDropStixByTap:badge ofType:stixStringID];
-#endif
 }
 
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
@@ -222,6 +186,11 @@
 }
 
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
+    if ([allTags count]==0) {
+        [carouselView resetBadgeLocations];
+        [carouselView carouselTabDismiss:YES];
+        return;
+    }
     CGPoint locationInSection = [tableController getContentPoint:badge.center inSection:lastPageViewed];
     locationInSection.y -= tableController.view.frame.origin.y; // remove tableController offset
     [badge setCenter:locationInSection];
@@ -234,7 +203,7 @@
     // comes here through carousel delegate
     // the frame of the badge is in the carousel frame
     // contains no information about which feedItem it was
-    [self.carouselView carouselTabDismiss];
+    [self.carouselView carouselTabDismiss:YES];
     
     CGPoint center = badge.center;
     CGRect frame = badge.frame;
@@ -271,14 +240,9 @@
     //CGRect imageViewFrame = feedItem.imageView.frame;
     float centerx = badge.center.x - feedItemViewOffset.x; // small mismatch between placement
     float centery = badge.center.y - feedItemViewOffset.y;
-	//stixFrameScaled.size.width *= imageScale;
-	//stixFrameScaled.size.height *= imageScale;
-    //[badge setFrame:stixFrameScaled];
     CGPoint location = CGPointMake(centerx, centery); 
     [badge setCenter:location];
-    //NSLog(@"Offsetting center by %f %f to %f %f, then scaling to %f %f\n", tableFrame.origin.x + imageViewFrame.origin.x, tableFrame.origin.y + imageViewFrame.origin.y, centerx, centery, location.x, location.y);
-    
-    //NSLog(@"VerticalFeedController: aux stix scaled to size %f %f at location %f %f in view %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width*imageScale, feedItem.imageView.frame.size.height*imageScale);
+
     AddStixViewController * auxView = [[AddStixViewController alloc] init];
     
     // hack a way to display view over camera; formerly presentModalViewController
@@ -291,10 +255,13 @@
     //[auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
     [auxView addStixToStixView:stixStringID atLocation:location];
     //[auxView toggleCarouselView:NO];
-    [auxView.locationField setHidden:YES];
-    //[auxView createCarouselView];
-    auxView.carouselView = self.carouselView;
-    [carouselView resetBadgeLocations];
+    [auxView configureCarouselView];
+    [carouselView setExpandedTabY:5-20]; // hack: a bit lower
+    [carouselView setDismissedTabY:373-STATUS_BAR_SHIFT];
+    //[auxView.carouselView carouselTabExpand:NO];
+    [auxView.carouselView carouselTabDismiss:YES];
+    //[auxView.carouselView.scrollView setContentOffset:carouselView.scrollView.contentOffset];
+    //[auxView didTapStix:badge ofType:stixStringID]; // simulate pressing of that stix
 }
 
 -(void)didAddDescriptor:(NSString *)descriptor andComment:(NSString *)comment andLocation:(NSString *)location {
@@ -309,6 +276,8 @@
 -(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
+    [self configureCarouselView];
+    [self.carouselView carouselTabDismiss:YES];
     
     Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
@@ -320,6 +289,10 @@
 
 -(void)didCancelAddStix {
     // hack a way to remove view over camera; formerly dismissModalViewController
+    [self configureCarouselView];
+    NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
+    //[carouselView carouselTabExpand:NO];
+    [carouselView carouselTabDismiss:YES];
     [self.delegate didDismissSecondaryView];
 }
 
@@ -329,9 +302,16 @@
 -(int)getStixOrder:(NSString*)stixStringID {
     return [self.delegate getStixOrder:stixStringID];
 }
+-(int)getBuxCount {
+    return [self.delegate getBuxCount];
+}
 
 -(void)didStartDrag {
-    [self.carouselView carouselTabDismiss];
+    [self.carouselView carouselTabDismiss:YES];
+}
+
+-(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
+    [self.delegate didPurchaseStixFromCarousel:stixStringID];
 }
 
 /*********** FeedTableView functions *******/
@@ -421,7 +401,7 @@
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
     //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-    [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+    //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
     if (photo)
     {
@@ -475,7 +455,7 @@
             [feedItem.view setBackgroundColor:[UIColor clearColor]];
             [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
             //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-            [carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+            //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
             if (photo)
             {
@@ -499,6 +479,16 @@
 }
 
 -(void)jumpToPageWithTagID:(int)tagID {
+    // find position of tag in allTags
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([t.tagID intValue] == tagID) {
+            [self reloadViewForItemAtIndex:i];
+            NSLog(@"TagID: %d Target row: %d", tagID, i);
+            NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
+            [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        }
+    }
 }
 
 -(IBAction)didClickJumpButton:(id)sender {
@@ -507,7 +497,7 @@
 
 
 -(void)updateScrollPagesAtPage:(int)page {
-    //NSLog(@"UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
+    NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
     if ([self itemCount] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTags objectAtIndex:0];
@@ -587,6 +577,8 @@
     
     // if just a tap, add aux stix
     if (peelableFound == -1) {
+        // do not add aux stix
+        /*
         if ([carouselView stixSelected] != nil && [self.delegate getStixCount:[carouselView stixSelected]] != 0) {
             UIImageView * stix = [BadgeView getBadgeWithStixStringID:[carouselView stixSelected]];
             //locationInStixView = [tableController getPointInTableViewFrame:locationInStixView fromPage:lastPageViewed];
@@ -594,6 +586,7 @@
             [stix setCenter:locationInStixView];
             [self didDropStixByTap:stix ofType:[carouselView stixSelected]];
         }
+         */
     }
 }
 

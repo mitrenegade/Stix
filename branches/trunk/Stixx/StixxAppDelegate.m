@@ -16,7 +16,7 @@
 
 
 #import "StixxAppDelegate.h"
-#import <MapKit/MapKit.h>
+//#import <MapKit/MapKit.h>
 #import "FileHelpers.h"
 #import "Kiip.h"
 
@@ -208,10 +208,6 @@ static int init=0;
 	friendController = [[FriendsViewController alloc] init];
     friendController.delegate = self;
     [self checkForUpdatePhotos];
-    
-    /***** create mystix view *****/
-    //myStixController = [[MyStixViewController alloc] init];
-    //myStixController.delegate = self;
     
     /***** create stixstore view ***/
     //coverflowController = [[CoverflowViewController alloc] init];

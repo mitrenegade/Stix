@@ -73,8 +73,6 @@
 		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
 		9E4A619C14AD1FB6000DCEF0 /* txt_giftstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E4A619B14AD1FB6000DCEF0 /* txt_giftstix.png */; };
 		9E4A619E14AD1FC3000DCEF0 /* bkg_actionstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E4A619D14AD1FC3000DCEF0 /* bkg_actionstix.png */; };
-		9E4F598514DDC524006469DF /* StoreViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F598314DDC524006469DF /* StoreViewController.m */; };
-		9E4F598614DDC524006469DF /* StoreViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E4F598414DDC524006469DF /* StoreViewController.xib */; };
 		9E5383761460C13D00C1D354 /* UIImage+Alpha.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5383711460C13D00C1D354 /* UIImage+Alpha.m */; };
 		9E5383771460C13D00C1D354 /* UIImage+Resize.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5383731460C13D00C1D354 /* UIImage+Resize.m */; };
 		9E5383781460C13D00C1D354 /* UIImage+RoundedCorner.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5383751460C13D00C1D354 /* UIImage+RoundedCorner.m */; };
@@ -92,8 +90,6 @@
 		9E64049D14566F840051EB4D /* instruction_box.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E64049C14566F840051EB4D /* instruction_box.png */; };
 		9E64049F14566F8B0051EB4D /* tab_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E64049E14566F8B0051EB4D /* tab_addstix.png */; };
 		9E6404A51456DC680051EB4D /* dropshadow_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E6404A41456DC680051EB4D /* dropshadow_small.png */; };
-		9E65B02014E565270021DD96 /* StoreViewShell.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E65B01E14E565270021DD96 /* StoreViewShell.m */; };
-		9E65B02114E565270021DD96 /* StoreViewShell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E65B01F14E565270021DD96 /* StoreViewShell.xib */; };
 		9E6B05DC150826EB00E3ADAD /* ProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */; };
 		9E6B05DD150826EB00E3ADAD /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */; };
 		9E6B05E31509239B00E3ADAD /* tab_open.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E6B05E21509239B00E3ADAD /* tab_open.png */; };
@@ -228,8 +224,6 @@
 		9EB03249142C05D20019F2BD /* BTLFullScreenCameraController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB03248142C05D10019F2BD /* BTLFullScreenCameraController.m */; };
 		9EB5F680148AA7C000F403D1 /* graphic_nopic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */; };
 		9EB5F682148AAD7A00F403D1 /* tab_mystix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F681148AAD7A00F403D1 /* tab_mystix.png */; };
-		9EB5F686148AADED00F403D1 /* MyStixViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5F684148AADED00F403D1 /* MyStixViewController.m */; };
-		9EB5F687148AADED00F403D1 /* MyStixViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F685148AADED00F403D1 /* MyStixViewController.xib */; };
 		9EB5F68D148ABBF000F403D1 /* heart_big.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F68C148ABBF000F403D1 /* heart_big.png */; };
 		9EB5F690148AC1CE00F403D1 /* empty_heart.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F68E148AC1CE00F403D1 /* empty_heart.png */; };
 		9EB5F691148AC1CE00F403D1 /* empty_leaf.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F68F148AC1CE00F403D1 /* empty_leaf.png */; };
@@ -237,8 +231,6 @@
 		9EB5FA25144FE5E100B3B0BA /* FriendsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */; };
 		9EB8B50514464D5C0066ADB2 /* nav_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB8B50414464D5C0066ADB2 /* nav_bar.png */; };
 		9EB8B52F144E43160066ADB2 /* overlay.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB8B52E144E43160066ADB2 /* overlay.png */; };
-		9EBE40AD14DDC74B003103B8 /* StoreCategoriesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBE40AB14DDC74B003103B8 /* StoreCategoriesController.m */; };
-		9EBE40AE14DDC74B003103B8 /* StoreCategoriesController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EBE40AC14DDC74B003103B8 /* StoreCategoriesController.xib */; };
 		9EC1EBB914A04E4700592DE7 /* 120_fire.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC1EBAA14A04E4700592DE7 /* 120_fire.png */; };
 		9EC1EBBC14A04E4700592DE7 /* 120_ice.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC1EBAD14A04E4700592DE7 /* 120_ice.png */; };
 		9EC1EBC814A0523A00592DE7 /* GiftStixTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EC1EBC614A0523700592DE7 /* GiftStixTableController.m */; };
@@ -251,8 +243,6 @@
 		9EC7361F14CE0D4E00AE5A6C /* checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC7361D14CE0D4E00AE5A6C /* checkbox.png */; };
 		9ECA30B1150AB062009E975D /* green_check.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ECA30AF150AB062009E975D /* green_check.png */; };
 		9ECA30B2150AB062009E975D /* red_x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ECA30B0150AB062009E975D /* red_x.png */; };
-		9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */; };
-		9ECB659214DDD1470067F3F3 /* CoverflowViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */; };
 		9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ECB659314DDD5770067F3F3 /* MapKit.framework */; };
 		9ECCBFEF14B26353003E122B /* NoClipModalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ECCBFEE14B26353003E122B /* NoClipModalView.m */; };
 		9ECD52331457BF33005CFDBB /* ExploreViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ECD52311457BF32005CFDBB /* ExploreViewController.m */; };
@@ -446,9 +436,6 @@
 		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
 		9E4A619B14AD1FB6000DCEF0 /* txt_giftstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_giftstix.png; sourceTree = "<group>"; };
 		9E4A619D14AD1FC3000DCEF0 /* bkg_actionstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bkg_actionstix.png; sourceTree = "<group>"; };
-		9E4F598214DDC524006469DF /* StoreViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoreViewController.h; sourceTree = "<group>"; };
-		9E4F598314DDC524006469DF /* StoreViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoreViewController.m; sourceTree = "<group>"; };
-		9E4F598414DDC524006469DF /* StoreViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StoreViewController.xib; sourceTree = "<group>"; };
 		9E5383701460C13D00C1D354 /* UIImage+Alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Alpha.h"; sourceTree = "<group>"; };
 		9E5383711460C13D00C1D354 /* UIImage+Alpha.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Alpha.m"; sourceTree = "<group>"; };
 		9E5383721460C13D00C1D354 /* UIImage+Resize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Resize.h"; sourceTree = "<group>"; };
@@ -470,9 +457,6 @@
 		9E64049C14566F840051EB4D /* instruction_box.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = instruction_box.png; sourceTree = "<group>"; };
 		9E64049E14566F8B0051EB4D /* tab_addstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_addstix.png; sourceTree = "<group>"; };
 		9E6404A41456DC680051EB4D /* dropshadow_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dropshadow_small.png; sourceTree = "<group>"; };
-		9E65B01D14E565270021DD96 /* StoreViewShell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StoreViewShell.h; path = ../StoreViewShell.h; sourceTree = "<group>"; };
-		9E65B01E14E565270021DD96 /* StoreViewShell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StoreViewShell.m; path = ../StoreViewShell.m; sourceTree = "<group>"; };
-		9E65B01F14E565270021DD96 /* StoreViewShell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = StoreViewShell.xib; path = ../StoreViewShell.xib; sourceTree = "<group>"; };
 		9E6B05D9150826EB00E3ADAD /* ProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileViewController.h; sourceTree = "<group>"; };
 		9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileViewController.m; sourceTree = "<group>"; };
 		9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
@@ -668,9 +652,6 @@
 		9EB03248142C05D10019F2BD /* BTLFullScreenCameraController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLFullScreenCameraController.m; sourceTree = "<group>"; };
 		9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_nopic.png; sourceTree = "<group>"; };
 		9EB5F681148AAD7A00F403D1 /* tab_mystix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_mystix.png; sourceTree = "<group>"; };
-		9EB5F683148AADED00F403D1 /* MyStixViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyStixViewController.h; sourceTree = "<group>"; };
-		9EB5F684148AADED00F403D1 /* MyStixViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyStixViewController.m; sourceTree = "<group>"; };
-		9EB5F685148AADED00F403D1 /* MyStixViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MyStixViewController.xib; sourceTree = "<group>"; };
 		9EB5F68C148ABBF000F403D1 /* heart_big.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = heart_big.png; sourceTree = "<group>"; };
 		9EB5F68E148AC1CE00F403D1 /* empty_heart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = empty_heart.png; sourceTree = "<group>"; };
 		9EB5F68F148AC1CE00F403D1 /* empty_leaf.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = empty_leaf.png; sourceTree = "<group>"; };
@@ -679,9 +660,6 @@
 		9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendsViewController.xib; sourceTree = "<group>"; };
 		9EB8B50414464D5C0066ADB2 /* nav_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_bar.png; sourceTree = "<group>"; };
 		9EB8B52E144E43160066ADB2 /* overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = overlay.png; sourceTree = "<group>"; };
-		9EBE40AA14DDC74B003103B8 /* StoreCategoriesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoreCategoriesController.h; sourceTree = "<group>"; };
-		9EBE40AB14DDC74B003103B8 /* StoreCategoriesController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoreCategoriesController.m; sourceTree = "<group>"; };
-		9EBE40AC14DDC74B003103B8 /* StoreCategoriesController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StoreCategoriesController.xib; sourceTree = "<group>"; };
 		9EC1EBAA14A04E4700592DE7 /* 120_fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 120_fire.png; sourceTree = "<group>"; };
 		9EC1EBAD14A04E4700592DE7 /* 120_ice.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 120_ice.png; sourceTree = "<group>"; };
 		9EC1EBC514A0523700592DE7 /* GiftStixTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiftStixTableController.h; sourceTree = "<group>"; };
@@ -696,9 +674,6 @@
 		9EC7361D14CE0D4E00AE5A6C /* checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox.png; sourceTree = "<group>"; };
 		9ECA30AF150AB062009E975D /* green_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green_check.png; sourceTree = "<group>"; };
 		9ECA30B0150AB062009E975D /* red_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red_x.png; sourceTree = "<group>"; };
-		9ECB658E14DDD1460067F3F3 /* CoverflowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverflowViewController.h; sourceTree = "<group>"; };
-		9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverflowViewController.m; sourceTree = "<group>"; };
-		9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CoverflowViewController.xib; sourceTree = "<group>"; };
 		9ECB659314DDD5770067F3F3 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		9ECCBFED14B26353003E122B /* NoClipModalView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoClipModalView.h; sourceTree = "<group>"; };
 		9ECCBFEE14B26353003E122B /* NoClipModalView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoClipModalView.m; sourceTree = "<group>"; };
@@ -1381,21 +1356,6 @@
 				9EB031D2142C01260019F2BD /* LoginViewController.h */,
 				9EB031D3142C01260019F2BD /* LoginViewController.m */,
 				9EB031D4142C01260019F2BD /* LoginViewController.xib */,
-				9EBE40AA14DDC74B003103B8 /* StoreCategoriesController.h */,
-				9EBE40AB14DDC74B003103B8 /* StoreCategoriesController.m */,
-				9EBE40AC14DDC74B003103B8 /* StoreCategoriesController.xib */,
-				9E4F598214DDC524006469DF /* StoreViewController.h */,
-				9E4F598314DDC524006469DF /* StoreViewController.m */,
-				9E4F598414DDC524006469DF /* StoreViewController.xib */,
-				9E65B01D14E565270021DD96 /* StoreViewShell.h */,
-				9E65B01E14E565270021DD96 /* StoreViewShell.m */,
-				9E65B01F14E565270021DD96 /* StoreViewShell.xib */,
-				9ECB658E14DDD1460067F3F3 /* CoverflowViewController.h */,
-				9ECB658F14DDD1470067F3F3 /* CoverflowViewController.m */,
-				9ECB659014DDD1470067F3F3 /* CoverflowViewController.xib */,
-				9EB5F683148AADED00F403D1 /* MyStixViewController.h */,
-				9EB5F684148AADED00F403D1 /* MyStixViewController.m */,
-				9EB5F685148AADED00F403D1 /* MyStixViewController.xib */,
 				9ECCBFED14B26353003E122B /* NoClipModalView.h */,
 				9ECCBFEE14B26353003E122B /* NoClipModalView.m */,
 				9EF173C1146D01F00073F83B /* OutlineLabel.h */,
@@ -1792,7 +1752,6 @@
 				9E88A4A4148A940900E67864 /* LocationViewController.xib in Resources */,
 				9EB5F680148AA7C000F403D1 /* graphic_nopic.png in Resources */,
 				9EB5F682148AAD7A00F403D1 /* tab_mystix.png in Resources */,
-				9EB5F687148AADED00F403D1 /* MyStixViewController.xib in Resources */,
 				9EB5F68D148ABBF000F403D1 /* heart_big.png in Resources */,
 				9EB5F690148AC1CE00F403D1 /* empty_heart.png in Resources */,
 				9EB5F691148AC1CE00F403D1 /* empty_leaf.png in Resources */,
@@ -1835,9 +1794,6 @@
 				9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */,
 				9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */,
 				9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */,
-				9E4F598614DDC524006469DF /* StoreViewController.xib in Resources */,
-				9EBE40AE14DDC74B003103B8 /* StoreCategoriesController.xib in Resources */,
-				9ECB659214DDD1470067F3F3 /* CoverflowViewController.xib in Resources */,
 				9E189FB314E0341B0082098C /* Kiip.html in Resources */,
 				9E189FB414E0341B0082098C /* index.html in Resources */,
 				9E189FB514E0341B0082098C /* toc.html in Resources */,
@@ -1862,7 +1818,6 @@
 				9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */,
 				9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */,
 				9E252C3F14E3010F0070ECB4 /* btn_invite.png in Resources */,
-				9E65B02114E565270021DD96 /* StoreViewShell.xib in Resources */,
 				9E75E73C14E581080017DC3D /* bux_bar_bg.png in Resources */,
 				9E75E74114E721D90017DC3D /* check.png in Resources */,
 				9E75E74314E721F80017DC3D /* graphic_bux.png in Resources */,
@@ -1994,7 +1949,6 @@
 				9E88A489148A8D9500E67864 /* NSStringAdditions.m in Sources */,
 				9E88A48A148A8D9500E67864 /* PhotoFormatter.m in Sources */,
 				9E88A4A3148A940900E67864 /* LocationViewController.m in Sources */,
-				9EB5F686148AADED00F403D1 /* MyStixViewController.m in Sources */,
 				44E3CA15148AC50E00554E82 /* FourSquareLocator.m in Sources */,
 				444C3AA6148BF4C1005EB6DB /* Base64Transcoder.c in Sources */,
 				444C3AA7148BF4C1005EB6DB /* Foursquare.m in Sources */,
@@ -2018,10 +1972,6 @@
 				9E8A29CD14AF94FA00CDCE76 /* LoadingViewController.m in Sources */,
 				9ECCBFEF14B26353003E122B /* NoClipModalView.m in Sources */,
 				9EC7361A14CE08D300AE5A6C /* FeedbackViewController.m in Sources */,
-				9E4F598514DDC524006469DF /* StoreViewController.m in Sources */,
-				9EBE40AD14DDC74B003103B8 /* StoreCategoriesController.m in Sources */,
-				9ECB659114DDD1470067F3F3 /* CoverflowViewController.m in Sources */,
-				9E65B02014E565270021DD96 /* StoreViewShell.m in Sources */,
 				9E75E73F14E6EA1B0017DC3D /* AlertPrompt.m in Sources */,
 				9E0C9C8D14EECECF00FF4C8D /* StixAnimation.m in Sources */,
 				9E029BAD14F548A900D056C8 /* FeedTableController.m in Sources */,

@@ -203,7 +203,6 @@
 }
 
 - (void)cameraDidTakePicture:(id)sender {
-	// called by BTLFullScreenCameraController
 	// set a title
     descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
     needToShowCamera = NO; // still not need to show camera

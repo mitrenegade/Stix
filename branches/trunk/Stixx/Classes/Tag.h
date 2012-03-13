@@ -24,6 +24,7 @@
 #import "ARCoordinate.h"
 #import "BadgeView.h" // for BADGE_TYPE_MAX
 #import "KumulosData.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface Tag : NSObject {
     // elements saved by Kumulos
@@ -69,6 +70,7 @@
 //-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
 -(NSString*)removeStixAtIndex:(int)index;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
+-(UIImage *)tagToUIImage;
 
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) NSString * descriptor;

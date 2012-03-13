@@ -90,7 +90,6 @@ struct UserInfo {
     MyStixViewController * myStixController;
     StoreViewController * storeViewController;
     StoreViewShell * storeViewShell;
-    CarouselView * carouselView;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
@@ -193,6 +192,7 @@ struct UserInfo {
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID;
+-(void) Parse_unsubscribeFromAll;
 -(void)handleNotificationBookmarks:(bool)doJump;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
@@ -231,7 +231,6 @@ struct UserInfo {
 @property (nonatomic, retain) StoreViewController * storeViewController;
 @property (nonatomic, retain) StoreViewShell * storeViewShell;  
 @property (nonatomic, retain) NSDate * metricLogonTime;
-@property (nonatomic, retain) CarouselView * carouselView;
 
 #if USING_FACEBOOK
 @property (nonatomic, retain) Facebook *facebook;

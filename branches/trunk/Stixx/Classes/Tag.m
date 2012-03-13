@@ -148,5 +148,65 @@
     return [tag autorelease];
 }
 
+-(UIImage *)tagToUIImage {
+    CGSize newSize = [self.image size];
+    CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);
+    UIGraphicsBeginImageContext(newSize);
+    [self.image drawInRect:fullFrame];	
+    UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();	
+    
+//    for (int i=0; i<[auxStixStringIDs count]; i++) {
+    int i = 0; {
+        NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
+        NSString * transformString = [auxTransforms objectAtIndex:i];
+        CGAffineTransform auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
+        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
+#if 0
+        [stix setCenter:location];
+        [stix setTransform:auxTransform];
+        UIGraphicsBeginImageContext(newSize);
+        [result drawInRect:fullFrame];
+        CGContextRef currentContext = UIGraphicsGetCurrentContext();
+        CGContextConcatCTM(currentContext, CGAffineTransformInvert(auxTransform));
+        //[stix.image drawInRect:stix.frame];
+        [stix.layer renderInContext:currentContext];
+        result = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+#else
+        UIGraphicsBeginImageContext(newSize);
+        [result drawInRect:fullFrame];
+        CGContextRef currentContext = UIGraphicsGetCurrentContext();
+        NSLog(@"AuxTransform: %@", NSStringFromCGAffineTransform(auxTransform) );
+
+        CGAffineTransform transform = CGAffineTransformIdentity;
+        
+        //transform = CGAffineTransformTranslate(transform, location.x, location.y);
+        
+        transform = CGAffineTransformConcat(transform, auxTransform);
+        NSLog(@"Transform: %@", NSStringFromCGAffineTransform(transform));
+        
+        //transform = CGAffineTransformTranslate(transform, location.x, location.y);
+        //NSLog(@"Transform: %@", NSStringFromCGAffineTransform(transform));
+
+        transform = CGAffineTransformScale(transform, 1.0,  -1.0);
+        NSLog(@"Transform: %@", NSStringFromCGAffineTransform(transform));
+        
+        CGContextConcatCTM(currentContext, transform);
+        
+        // Draw the image into the context
+        CGContextDrawImage(currentContext, CGRectMake(0, 0, stix.image.size.width, stix.image.size.height), stix.image.CGImage);
+        
+        // Get an image from the context
+        result = [UIImage imageWithCGImage: CGBitmapContextCreateImage(currentContext)];
+        UIGraphicsEndImageContext();
+  
+#endif
+    }
+    
+    // save edited image to photo album
+    return result;
+}
 
 @end

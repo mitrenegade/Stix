@@ -275,16 +275,16 @@
 {
     // check to see if this sticker requires a purchase
     int cost = 5;
-    if ([self.delegate getBuxCount] < cost) {
-        UIAlertView* alert = [[UIAlertView alloc]init];
-        [alert addButtonWithTitle:@"Ok"];
-        [alert setTitle:@"Cannot use this Stix!"];
-        [alert setMessage:@"You don't own this Stix and have no Bux to buy it!"];
-        [alert show];
-        [alert release];
-        return;
-    }
     if ((carouselView.stixSelected != nil) && [self.delegate getStixCount:carouselView.stixSelected] == 0) {
+        if ([self.delegate getBuxCount] < cost) {
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"Ok"];
+            [alert setTitle:@"Cannot use this Stix!"];
+            [alert setMessage:@"You don't own this Stix and have no Bux to buy it!"];
+            [alert show];
+            [alert release];
+            return;
+        }
         // purchase
         [self.delegate didPurchaseStixFromCarousel:carouselView.stixSelected];
     }

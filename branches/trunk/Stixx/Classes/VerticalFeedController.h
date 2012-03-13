@@ -18,6 +18,7 @@
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
 #import "StixAnimation.h"
+#import "BTBitlyHelper.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -50,7 +51,7 @@
 -(int)getBuxCount;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, StixAnimationDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, StixAnimationDelegate, BTBitlyHelperDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
@@ -101,7 +102,7 @@
 //@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
-
+@property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
 
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;
@@ -116,6 +117,8 @@
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*)tag;
+- (void) shortenBlastTextUrls:(NSString*)url;
+
 @end
 
 

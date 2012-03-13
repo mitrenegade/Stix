@@ -60,7 +60,7 @@ static int init=0;
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    versionStringStable = @"0.7.6";
+    versionStringStable = @"0.7.8";
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
     
     metricLogonTime = nil;
@@ -87,6 +87,8 @@ static int init=0;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|
      UIRemoteNotificationTypeAlert|
      UIRemoteNotificationTypeSound];    
+    
+    [self Parse_unsubscribeFromAll];
     
     /*** Kiip service ***/
 #if USING_KIIP
@@ -866,6 +868,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
         idOfLastTagChecked = idOfNewestTagOnServer;
     }
+    else
+        NSLog(@"Tag %d already downloaded. allTags count = %d", idOfNewestTagOnServer, [allTags count]);
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
@@ -1487,13 +1491,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             // create an order
             if ([count intValue] != 0)
             {
-                [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
+                int orderInt = [allStixOrder count];
+                [allStixOrder setObject:[NSNumber numberWithInt:orderInt] forKey:stixStringID];
+                NSLog(@"Consistency: count for %@ = %d, new order %d", [BadgeView getStixDescriptorForStixStringID:stixStringID], [count intValue], orderInt);
             }
         }
         if (order && !count) {
             if ([order intValue] != -1)
             {
                 [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
+                NSLog(@"Consistency: order for %@ = %d, new count %d", [BadgeView getStixDescriptorForStixStringID:stixStringID], [order intValue], -1);
             }
         }
     }
@@ -1517,6 +1524,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didLogout {
+    [self.tabBarController toggleStixMallPointer:NO]; // stop stix mall pointer
     if (loggedIn == YES) {
         // logging out from profile view controller
         
@@ -2006,9 +2014,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 /***** Parse Notifications ****/
+-(void) Parse_unsubscribeFromAll {
+    [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+        NSEnumerator * e = [channels objectEnumerator];
+        id element;
+        NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
+        while (element = [e nextObject]) {
+            [channelsString appendString:element];
+            [channelsString appendString:@" "];
+            [PFPush unsubscribeFromChannelInBackground:element];
+        }
+        NSLog(@"%@", channelsString);
+    }];
+}
 -(void) Parse_subscribeToChannel:(NSString*) channel {
     // Subscribe to the global broadcast channel.
     [PFPush subscribeToChannelInBackground:channel];
+    NSLog(@"Parse: subscribing to channel <%@>", channel);
 }
 
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID {

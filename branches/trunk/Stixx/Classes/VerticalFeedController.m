@@ -27,6 +27,7 @@
 //@synthesize carouselTab;
 @synthesize tabBarController;
 //@synthesize stixSelected;
+@synthesize bitlyHelper;
 
 -(id)init
 {
@@ -609,20 +610,65 @@
 -(void)didSharePix:(NSMutableArray*)params {
     int newID = [[params objectAtIndex:0] intValue];
     NSLog(@"DidSharePix completed: id %d", newID);
+    NSMutableString * encodedURL = [[NSMutableString alloc] init];
+    NSString * longURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d", newID];
+    [encodedURL appendString:longURL];
+    [encodedURL appendString:@"\%26submit=Submit!"];
+    //NSString * encodedURL = (NSString *) CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)longURL,NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[]",kCFStringEncodingUTF8 );
+    //NSString* encodedUrl =[longURL stringByAddingPercentEscapesUsingEncoding:NSHTTP];    
+    NSLog(@"longurl %@ encodedURL %@", longURL, encodedURL);
+    [self shortenBlastTextUrls:encodedURL];
+    
+    // todo: add a menu for facebook/twitter/email/save to disk
+    // todo: add timeout to provide long url if bitly helper fails
 }
 
 -(void)sharePix:(int)tagID {
-#if 0
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Sharing"];
+    [alert setMessage:@"Processing Pix for sharing..."];
+    [alert show];
+    [alert release];
+
     VerticalFeedItemController * feedItem = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
+#if 0
     UIImage * feedImage = feedItem.imageData; // for now just store original image data
 	NSData *png = UIImagePNGRepresentation(feedImage);
 #else
-    UIImageView * stix = [BadgeView getLargeBadgeWithStixStringID:@"FIRE"];
-    NSData * png = UIImagePNGRepresentation(stix.image);
+    Tag * tag = nil;
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([t.tagID intValue] == feedItem.tagID)
+            tag = [allTags objectAtIndex:i];
+    }
+    if (tag == nil) 
+        return;
+    UIImage * result = [tag tagToUIImage];
+	NSData *png = UIImagePNGRepresentation(result);
+    
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
 #endif
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
     [[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
+
 }
+
+- (void) shortenBlastTextUrls:(NSString*)url{
+    
+    // Create bit.ly helper if nil
+    if (self.bitlyHelper == nil) {
+        self.bitlyHelper = [[[BTBitlyHelper alloc] init] autorelease];
+        self.bitlyHelper.delegate = self;
+    }
+    
+    [self.bitlyHelper shortenURLSInText:url];
+}
+- (void) BTBitlyShortUrl: (NSString *) shortUrl receivedForOriginalUrl: (NSString *) originalUrl{
+    NSLog(@"URL %@ shortened to %@", originalUrl, shortUrl);
+}
+- (void) BTBitlyQueueStartedProcessing {}
+- (void) BTBitlyQueueFinishedProcessing {}
 
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];

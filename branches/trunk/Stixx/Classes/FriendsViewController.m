@@ -206,7 +206,7 @@
         int ct = 0;
         while (key = [e nextObject]) {
             if (ct >= start_index && ct <= end_index) {
-                if ([friendsList containsObject:key]) {  // filter for friends - comment this line for all
+                if (1) { //[friendsList containsObject:key]) {  // filter for friends - comment this line for all
                     UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:key]];
                     UIImageView * friendView = [[UIImageView alloc] initWithImage:photo];
                     [friendView setBackgroundColor:[UIColor blackColor]];

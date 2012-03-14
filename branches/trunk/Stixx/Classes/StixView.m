@@ -21,6 +21,7 @@
 @synthesize delegate;
 @synthesize referenceTransform;
 @synthesize selectStixStringID;
+@synthesize tagID;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -142,6 +143,7 @@
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
     //auxScales = [[NSMutableArray alloc] init];
+    tagID = tag.tagID;
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
@@ -231,7 +233,8 @@
                     animations: ^ { auxStix.frame = frameDisappear; } 
                     completion:^(BOOL finished) { 
                         [auxStix removeFromSuperview]; 
-                        [self.delegate peelAnimationDidCompleteForStix:index]; 
+                        if ([self.delegate respondsToSelector:@selector(peelAnimationDidCompleteForStix:)])
+                            [self.delegate peelAnimationDidCompleteForStix:index]; 
                     }
      ];
 }
@@ -302,14 +305,13 @@
         return;
     }
     
+    isTouch = 1;
     if (isDragging) // will come here if a second finger touches
         return;
     
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];
 	isDragging = 0;
-    NSLog(@"Touch began at %f %f", location.x, location.y);
-    
     CGRect frame = stix.frame;
     // add an allowance of touch
     int border = frame.size.width / 2;
@@ -326,7 +328,7 @@
     offset_x = (location.x - stix.center.x);
     offset_y = (location.y - stix.center.y);
     
-    NSLog(@"Touches began: center %f %f touch offset %f %f", stix.center.x, stix.center.y, location.x, location.y);
+    NSLog(@"Touches began: center %f %f touch location %f %f", stix.center.x, stix.center.y, location.x, location.y);
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -335,6 +337,7 @@
         return;
     }
 
+    isTouch = 0;
 	if (isTap == 1 || isDragging == 1)
 	{
         isDragging = 1;
@@ -376,9 +379,13 @@
         isDragging = 0;
         isTap = 0;
 	}
-    else if (isTap == 1) {
+    else if (isTap == 1 || isTouch == 1) {
         isTap = 0;
         isDragging = 0;
+        isTouch = 0;
+        
+        if ([self.delegate respondsToSelector:@selector(didTouchInStixView:)])
+            [self.delegate didTouchInStixView:self];
 #if 0
         if (stix) {
             if (showTransformCanvas) {
@@ -538,11 +545,13 @@
             // performing a peel action causes this StixView and its delegate FeedItemView to eventually be deleted/removed. Until that happens and the user interface is correctly populated, do not allow interaction anymore.
             self.isPeelable = NO;
             // remove from delegate's tag structure
-            [self.delegate didPeelStix:stixPeelSelected];
+            if ([self.delegate respondsToSelector:@selector(didPeelStix:)])
+                [self.delegate didPeelStix:stixPeelSelected];
             break;
         case 1: // Stick
             self.isPeelable = NO;
-            [self.delegate didAttachStix:stixPeelSelected]; // will cause new StixView to be created
+            if ([self.delegate respondsToSelector:@selector(didAttachStix:)])
+                [self.delegate didAttachStix:stixPeelSelected]; // will cause new StixView to be created
             break;
         case 2: // Cancel
             return;

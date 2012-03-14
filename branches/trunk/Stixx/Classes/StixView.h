@@ -13,6 +13,8 @@
 #import "OutlineLabel.h"
 #import "Tag.h"
 
+@class StixView;
+
 @protocol StixViewDelegate 
 //-(void)didFinishScalingMotionWithScale:(float)scale;
 @optional
@@ -20,7 +22,7 @@
 -(void)didAttachStix:(int)index;
 -(void)didPeelStix:(int)index;
 -(void)peelAnimationDidCompleteForStix:(int)index;
-@optional
+-(void)didTouchInStixView:(StixView*)stixViewTouched;
 @end
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
@@ -33,7 +35,8 @@
     NSMutableArray * auxCanManipulate;
     bool isDragging;
     bool isPinching;
-    bool isTap;
+    bool isTap; // tap on stix
+    bool isTouch; // touch on stixView
     float offset_x, offset_y;
     
     CGSize originalImageSize;
@@ -73,6 +76,8 @@
 @property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
 @property (nonatomic, assign) CGAffineTransform referenceTransform;
 @property (nonatomic, copy) NSString * selectStixStringID;
+@property (nonatomic, retain) NSNumber * tagID;
+
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;

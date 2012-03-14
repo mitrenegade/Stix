@@ -8,14 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
-//#import "PagedScrollView.h"
 #import "ColumnTableController.h"
 #import "Kumulos.h"
 #import "Tag.h"
-#import "ZoomViewController.h"
+#import "DetailViewController.h"
 #import "LoadingAnimationView.h"
 //#import "CarouselView.h"
 #import "StixView.h"
+#import "StixAnimation.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -34,7 +34,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, ZoomViewDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -56,17 +56,20 @@ enum {
     NSMutableDictionary * contentViews; // generated views: key: row/column index of table
 
     // zoom view...?
-    StixView * stixView; // the view that is clicked for zoom
-    ZoomViewController * zoomViewController;
-    CGRect zoomFrame;
-    UIImageView * zoomView;
+    //StixView * stixView; // the view that is clicked for zoom
+    //DetailViewController * DetailViewController;
+    //CGRect zoomFrame;
+    //UIImageView * DetailView;
     bool isZooming; // prevent hits when zooming
+    
+    DetailViewController * detailController;
+    
+    IBOutlet UIImageView * logo;
+    int animationID;
     
     Kumulos * k;
 }
 
-//@property (nonatomic, retain) CarouselView * carouselView;
-//@property (nonatomic, retain) PagedScrollView *scrollView;
 @property (nonatomic, retain) ColumnTableController * tableController;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
@@ -75,8 +78,8 @@ enum {
 
 //-(void)getTagWithID:(int)id;
 -(IBAction)feedbackButtonClicked:(id)sender;
-
-
+-(void)startActivityIndicator;
+-(void)stopActivityIndicator;
 -(void)initializeTable;
 -(void)forceReloadAll;
 

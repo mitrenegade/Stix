@@ -28,7 +28,7 @@
 	UITabBarItem *tbi = [self tabBarItem];
 	
 	// give it a label
-	[tbi setTitle:@"Explore"];
+	//[tbi setTitle:@"Explore"];
 	
 	// add an image
 	UIImage * i = [UIImage imageNamed:@"tab_find.png"];
@@ -39,7 +39,7 @@
     [k setDelegate:self];    
 
     //activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
 
     return self;
     
@@ -56,7 +56,7 @@
     [self initializeTable];
     
     [self.view addSubview:activityIndicator];
-    zoomViewController = [[ZoomViewController alloc] init];
+    //DetailViewController = [[DetailViewController alloc] init];
     isZooming = NO;
     [self forceReloadAll];
 
@@ -82,6 +82,15 @@
     [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
 //    [self.view addSubview:slider];
     [slider release];
+}
+-(void)startActivityIndicator {
+    [logo setHidden:YES];
+    [self.activityIndicator startCompleteAnimation];
+}
+-(void)stopActivityIndicator {
+    [self.activityIndicator stopCompleteAnimation];
+    [self.activityIndicator setHidden:YES];
+    [logo setHidden:NO];
 }
 
 - (void) setExploreMode:(UISegmentedControl *)sender{
@@ -129,18 +138,20 @@
         int contentWidth = [tableController getContentWidth];
         CGRect frame = CGRectMake(0, 0, contentWidth, contentWidth);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
-        [cview setInteractionAllowed:NO];
+        [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
-        
+        [cview setDelegate:self];
         [cview initializeWithImage:tag.image];
         [cview populateWithAuxStixFromTag:tag];
         [contentViews setObject:cview forKey:key];
+        [cview release];
     }
     return [contentViews objectForKey:key];
 }
 
 -(void)loadContentPastRow:(int)row {
-    [activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
+    //[activityIndicator startCompleteAnimation];
     switch (exploreMode) {
         case EXPLORE_RECENT:
             if (row == -1) {
@@ -183,7 +194,8 @@
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
     }
     [tableController dataSourceDidFinishLoadingNewData];
-    [activityIndicator stopCompleteAnimation];
+    [self stopActivityIndicator];
+    //[activityIndicator stopCompleteAnimation];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults {
@@ -221,7 +233,8 @@
             [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
         }
         [tableController dataSourceDidFinishLoadingNewData];
-        [activityIndicator stopCompleteAnimation];
+        [self stopActivityIndicator];
+        //[activityIndicator stopCompleteAnimation];
     }
 }
 
@@ -231,15 +244,35 @@
     [contentViews removeAllObjects];
     [self loadContentPastRow:-1];
     isZooming = NO;
-    [activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
+    //[activityIndicator startCompleteAnimation];
 }
 
 -(void)didPullToRefresh {
     [self forceReloadAll];
 }
 
-/************** FeedZoomView ***********/
+/************** DetailView ***********/
+-(void)didTouchInStixView:(StixView *)stixViewTouched {
+    NSNumber * tagID = stixViewTouched.tagID;
+    Tag * tag = [allTags objectForKey:tagID];
+    detailController = [[DetailViewController alloc] init];
+    [detailController initDetailViewWithTag:tag];
+    [detailController setDelegate:self];    
+    CGRect frameOffscreen = CGRectMake(320,0,320,480);
+    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
+    [self.view addSubview:detailController.view];
+    [detailController.view setFrame:frameOffscreen];
+    
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    animationID = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+}
 
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+    //[self.view addSubview:detailController.view];
+}
+/*
 -(void)didClickAtLocation:(CGPoint)location {
 
     if (isZooming == YES)
@@ -293,18 +326,19 @@
     NSString * locationString = tag.locationString;
     NSLog(@"Using tag of comment %@ and location %@", label, locationString);
 
-    [zoomViewController setDelegate:self];
-    //[self.view insertSubview:zoomViewController.view aboveSubview:scrollView];
-    [zoomViewController setLabel:label];
-    [zoomViewController setStixUsingTag:tag];
+    [DetailViewController setDelegate:self];
+    //[self.view insertSubview:DetailViewController.view aboveSubview:scrollView];
+    [DetailViewController setLabel:label];
+    [DetailViewController setStixUsingTag:tag];
     isZooming = NO;
     
 }
-
+*/
 -(void)didDismissZoom {
     isZooming = NO;
     //[carouselView setUnderlay:scrollView];
-    [zoomViewController.view removeFromSuperview];
+    [detailController.view removeFromSuperview];
+    [detailController release];
 }
 
 -(IBAction)feedbackButtonClicked:(id)sender {

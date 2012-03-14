@@ -84,17 +84,17 @@
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
     
-    CGRect labelFrame = CGRectMake(19, 3, 58, 38);
+    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
+    [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
+    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
+    [self.view insertSubview:buttonBux belowSubview:tableController.view];
+    CGRect labelFrame = CGRectMake(25, 5, 58, 38);
     labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [self.delegate getBuxCount]]];
+    [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
     [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
     
-    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 30, 30)];
-    [buttonBux setImage:[UIImage imageNamed:@"graphic_bux.png"] forState:UIControlStateNormal];
-    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
-    [self.view insertSubview:buttonBux belowSubview:tableController.view];
     
     // array to retain each FeedItemViewController as it is created so its callback
     // for the button can be used
@@ -143,6 +143,7 @@
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     //[self configureCarouselView];
 	[super viewDidAppear:animated];
+    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
 }
 
 #pragma mark -
@@ -382,7 +383,7 @@
         [timeLabel setBackgroundColor:[UIColor clearColor]];
         [timeLabel setTextColor:[UIColor whiteColor]];
         [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
-        [timeLabel setText:[VerticalFeedItemController getTimeLabelFromTimestamp:tag.timestamp]];
+        [timeLabel setText:[Tag getTimeLabelFromTimestamp:tag.timestamp]];
         [headerView addSubview:timeLabel];
         
         [headerViews setObject:headerView forKey:tag.tagID];

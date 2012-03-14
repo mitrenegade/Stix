@@ -16,15 +16,19 @@
 //#import "CarouselView.h"
 #import "StixView.h"
 #import "StixAnimation.h"
+#import "OutlineLabel.h"
+#import "ProfileViewController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+-(UIImage*)getUserPhotoForUsername:(NSString *)username;
 
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
--(void)didClickFeedbackButton:(NSString*)fromView;
+//-(void)didClickFeedbackButton:(NSString*)fromView;
 
 -(int)getNewestTagID;
+-(int)getBuxCount;
 @end
 
 enum {
@@ -42,7 +46,8 @@ enum {
     ColumnTableController * tableController;
     NSObject<ExploreViewDelegate> * delegate;
     
-    IBOutlet UIButton * buttonFeedback;
+//    IBOutlet UIButton * buttonFeedback;
+    IBOutlet UIButton * buttonProfile;
     LoadingAnimationView * activityIndicator;
     
     // Feed for EXPLORE_RANDOM
@@ -64,6 +69,7 @@ enum {
     
     DetailViewController * detailController;
     
+    OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
     int animationID;
     
@@ -72,15 +78,18 @@ enum {
 
 @property (nonatomic, retain) ColumnTableController * tableController;
 @property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
-@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
-
+@property (nonatomic, assign) ProfileViewController *profileController;
+@property (nonatomic, retain) OutlineLabel * labelBuxCount;
+@property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
 //-(void)getTagWithID:(int)id;
--(IBAction)feedbackButtonClicked:(id)sender;
+//-(IBAction)feedbackButtonClicked:(id)sender;
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
 -(void)initializeTable;
 -(void)forceReloadAll;
+-(IBAction)didClickProfileButton:(id)sender;
 
 @end

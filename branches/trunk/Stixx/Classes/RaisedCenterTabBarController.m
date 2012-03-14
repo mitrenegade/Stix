@@ -21,32 +21,35 @@
 }
 
 // Create a custom UIButton and add it to the center of our tab bar
--(void) addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage
+-(void) addButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage atPosition:(int)pos
 {
-    button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-    button.frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
-    bgNormal = [buttonImage retain];
-    bgSelected = [highlightImage retain];
-    [button setBackgroundImage:buttonImage forState:UIControlStateNormal];
-    [button setBackgroundImage:highlightImage forState:UIControlStateHighlighted];
+    if (pos>=TABBAR_BUTTON_MAX)
+        return;
     
-    CGFloat heightDifference = buttonImage.size.height - self.tabBar.frame.size.height;
-    if (heightDifference < 0)
-        button.center = self.tabBar.center;
-    else
-    {
-        CGPoint center = self.tabBar.center;
-        center.y = center.y - 6;
-        // debug - to reveal regular tab button too
-        //center.y = center.y - 30;
-        button.center = center;
+    button[pos] = [UIButton buttonWithType:UIButtonTypeCustom];
+    button[pos].autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
+    button[pos].frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
+    bgNormal[pos] = [buttonImage retain];
+    bgSelected[pos] = [highlightImage retain];
+    [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
+    if (highlightImage)
+        [button[pos] setBackgroundImage:bgSelected[pos] forState:UIControlStateHighlighted];
+    
+    CGPoint center = self.tabBar.center;
+    if (pos == TABBAR_BUTTON_FEED)
+        center.x = buttonImage.size.width/2;
+    else if (pos == TABBAR_BUTTON_EXPLORE)
+        center.x = 320 - buttonImage.size.width/2;    
+    else if (pos == TABBAR_BUTTON_TAG) {
+        center.y = center.y - 3;
     }
-    [button addTarget:self
-               action:@selector(didPressCenterButton:)
+    button[pos].center = center;
+    [button[pos] setTag:pos];
+    [button[pos] addTarget:self
+               action:@selector(didPressTabButton:)
      forControlEvents:UIControlEventTouchDown];
 
-    [self.view addSubview:button];
+    [self.view addSubview:button[pos]];
 }
 
 -(IBAction)closeInstructions:(id)sender {
@@ -223,16 +226,22 @@
     return NO;
 }
 */
--(IBAction)didPressCenterButton:(id)sender {
-    [self.myDelegate didPressCenterButton];
+-(IBAction)didPressTabButton:(id)sender {
+    UIButton * pressedButton = sender;
+    [self.myDelegate didPressTabButton:pressedButton.tag];
 }
 
 // these functions are called by the app delegate - when the tabbar state changes
--(void)setButtonStateSelected {
-    [button setBackgroundImage:bgSelected forState:UIControlStateNormal];
+-(void)setButtonStateSelected:(int)pos {
+    for (int i=0; i<3; i++){
+        if (pos == i)
+            [button[i] setBackgroundImage:bgSelected[i] forState:UIControlStateNormal];        
+        else
+            [button[i] setBackgroundImage:bgNormal[i] forState:UIControlStateNormal];
+    }
 }
--(void)setButtonStateNormal {
-    [button setBackgroundImage:bgNormal forState:UIControlStateNormal];
+-(void)setButtonStateNormal:(int)pos {
+    [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
 }
 
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {

@@ -12,17 +12,24 @@
 
 @protocol RaisedCenterTabBarControllerDelegate 
 
--(void)didPressCenterButton;
+-(void)didPressTabButton:(int)pos;
 //-(void)didCloseFirstTimeInstructions;
 @end
+
+enum {
+    TABBAR_BUTTON_FEED = 0,
+    TABBAR_BUTTON_TAG,
+    TABBAR_BUTTON_EXPLORE,
+    TABBAR_BUTTON_MAX
+};
 
 @interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
     
-    UIButton * button;
-    UIImage * bgNormal;
-    UIImage * bgSelected;
+    UIButton * button[3];
+    UIImage * bgNormal[3];
+    UIImage * bgSelected[3];
     
     UIImageView * firstTimeInstructions;
     UIImageView * firstTimeMallPointer;
@@ -41,11 +48,11 @@
 -(UIViewController*) viewControllerWithTabTitle:(NSString*)title image:(UIImage*)image;
 
 // Create a custom UIButton and add it to the center of our tab bar
--(void) addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage;
+-(void) addButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage atPosition:(int)pos;
 -(void) addFirstTimeInstructions;
--(IBAction)didPressCenterButton:(id)sender;
--(void)setButtonStateSelected;
--(void)setButtonStateNormal;
+-(IBAction)didPressTabButton:(id)sender;
+-(void)setButtonStateSelected:(int)pos;
+-(void)setButtonStateNormal:(int)pos;
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions;
 -(void)toggleStixMallPointer:(BOOL)showPointer;
 -(IBAction)closeInstructions:(id)sender;

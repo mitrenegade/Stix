@@ -125,7 +125,7 @@ static int totalStixTypes = 0;
     stixDescriptors = [[NSMutableDictionary alloc] init];
     stixLikelihood = [[NSMutableDictionary alloc] init];
     NSString * stixStringID = @"FIRE";
-    NSString * descriptor = @"Temporary Fire Stix";
+    NSString * descriptor = @"Fire Stix";
     UIImage * img = [UIImage imageNamed:@"120_fire.png"];
     UIImageView * stix = [[UIImageView alloc] initWithImage:img];
     if (![stixStringIDs containsObject:stixStringID])
@@ -137,7 +137,7 @@ static int totalStixTypes = 0;
     [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
     [stix release];
     stixStringID = @"ICE";
-    descriptor = @"Temporary Ice Stix";
+    descriptor = @"Ice Stix";
     img = [UIImage imageNamed:@"120_ice.png"];
     stix = [[UIImageView alloc] initWithImage:img];
     if (![stixStringIDs containsObject:stixStringID])

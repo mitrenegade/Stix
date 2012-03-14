@@ -85,7 +85,6 @@ struct UserInfo {
     LoginSplashController * loginSplashController;
     
     UIViewController * lastViewController;
-    CarouselView * lastCarouselView;
 
     bool loggedIn;
     bool isLoggingIn;
@@ -218,7 +217,6 @@ struct UserInfo {
 @property (nonatomic, retain) NSMutableDictionary * allStix;
 @property (nonatomic, retain) NSMutableDictionary * allStixOrder;
 @property (nonatomic, retain) NSMutableSet * allFriends;
-@property (nonatomic, assign) CarouselView * lastCarouselView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @property (nonatomic, retain) NSMutableArray * allCarouselViews;

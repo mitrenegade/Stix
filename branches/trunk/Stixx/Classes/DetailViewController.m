@@ -44,15 +44,18 @@
     [stixView setDelegate:self];
     //[self.view addSubview:stixView];    
     tagID = [tag.tagID intValue];
+    
+    [self headerFromTag:tag];
 }
 
 // StixViewDelegate
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
-    //[stixView removeFromSuperview];
+    /*
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = CGRectMake(3+320, 0, 320, 480);
     animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+     */
 }
 
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
@@ -114,7 +117,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46,320,380)];
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46 + headerView.frame.size.height,320,340)];
     [self.view addSubview:scrollView];
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.scrollEnabled = YES;
@@ -142,7 +145,8 @@
     [commentsTable.view setFrame:CGRectMake(0, 290, 320, 280)];
     [commentsTable setDelegate:self];
     
-    [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 10)];
+    [self.view addSubview:headerView];
+    [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 5)];
     [scrollView addSubview:stixView];
     [scrollView addSubview:commentsTable.view];
     
@@ -171,8 +175,41 @@
 
     // resize scrollview
     [commentsTable.view setFrame:CGRectMake(0, 290, 320, 70 * [names count])];
-    [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 10)];
+    [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 5)];
     [self stopActivityIndicator];
+}
+
+-(void)headerFromTag:(Tag*) tag{
+    
+    headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, 40)];
+    [headerView setBackgroundColor:[UIColor blackColor]];
+    [headerView setAlpha:.75];
+    
+    UIImage * photo = [self.delegate getUserPhotoForUsername:tag.username];
+    UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)];
+    [photoView setImage:photo];
+    [headerView addSubview:photoView];
+    
+    UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
+    [nameLabel setBackgroundColor:[UIColor clearColor]];
+    [nameLabel setTextColor:[UIColor whiteColor]];
+    [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
+    [nameLabel setText:tag.username];
+    [headerView addSubview:nameLabel];
+    
+    UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
+    [locLabel setBackgroundColor:[UIColor clearColor]];
+    [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
+    [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+    [locLabel setText:tag.locationString];
+    [headerView addSubview:locLabel];    
+    
+    UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
+    [timeLabel setBackgroundColor:[UIColor clearColor]];
+    [timeLabel setTextColor:[UIColor whiteColor]];
+    [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
+    [timeLabel setText:[Tag getTimeLabelFromTimestamp:tag.timestamp]];
+    [headerView addSubview:timeLabel];
 }
 
 - (void)viewDidUnload
@@ -187,6 +224,7 @@
     [scrollView release];
     [commentsTable release];
     [stixView release];
+    [headerView release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

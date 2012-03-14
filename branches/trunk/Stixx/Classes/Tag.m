@@ -148,6 +148,60 @@
     return [tag autorelease];
 }
 
++(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp {
+    // format timestring
+    // from 1 min - 1 hour, display # of minutes since tag
+    // from 1 hr to 24 hour, display # of hours since tag
+    // beyond that, display date of timestamp
+    // format is: 2011-10-27 06:09:28
+    
+    //NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    //[dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    //NSDate * timestamp = [dateFormatter dateFromString:tmp]; //timestring];
+    NSDate * now = [NSDate date];
+    NSTimeInterval interval = [now timeIntervalSinceDate:timestamp]; // interval is a float of total seconds
+    
+    int num;
+    NSString * unit;
+    if (interval < 60)
+    {
+        //num = (int) interval;
+        //unit = @"sec ago";
+        num = 0;
+        unit = @"Just now";
+    }
+    else if (interval < 3600)
+    {
+        num = interval / 60;
+        if (num == 1)
+            unit = @"min ago";
+        else
+            unit = @"mins ago";
+    }
+    else if (interval < 86400)
+    {
+        num = interval / 3600;
+        if (num == 1)
+            unit = @"hour ago";
+        else
+            unit = @"hours ago";
+    }
+    else //if (interval >= 86400)
+    {
+        NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+        [dateFormatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
+        unit = [dateFormatter stringFromDate:timestamp];
+        num = 0;
+    }
+    
+    NSString * timeLabel;
+    if (num > 0)
+        timeLabel = [NSString stringWithFormat:@"%d %@", num, unit];
+    else
+        timeLabel = [NSString stringWithFormat:@"%@", unit];
+    return timeLabel;
+}
+
 -(UIImage *)tagToUIImage {
     CGSize newSize = [self.image size];
     CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);

@@ -13,8 +13,11 @@
 //@synthesize scrollView;
 @synthesize tableController;
 @synthesize delegate;
-@synthesize buttonFeedback;
+//@synthesize buttonFeedback;
 @synthesize activityIndicator;
+@synthesize profileController;
+@synthesize labelBuxCount;
+@synthesize buttonProfile;
 //@synthesize segmentedControl;
 
 #define EXPLORE_COL 2
@@ -25,14 +28,14 @@
 	self = [super initWithNibName:@"ExploreViewController" bundle:nil];
 	
 	// create tab bar item to become a tab view
-	UITabBarItem *tbi = [self tabBarItem];
+	//UITabBarItem *tbi = [self tabBarItem];
 	
 	// give it a label
 	//[tbi setTitle:@"Explore"];
 	
 	// add an image
-	UIImage * i = [UIImage imageNamed:@"tab_find.png"];
-	[tbi setImage:i];
+	//UIImage * i = [UIImage imageNamed:@"tab_find.png"];
+	//[tbi setImage:i];
     
     k = nil;
     k = [[Kumulos alloc]init];
@@ -82,6 +85,17 @@
     [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
 //    [self.view addSubview:slider];
     [slider release];
+
+    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
+    [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
+    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
+    [self.view insertSubview:buttonBux belowSubview:tableController.view];
+    CGRect labelFrame = CGRectMake(25, 5, 58, 38);
+    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
+    [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+    [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
+    [self.view insertSubview:labelBuxCount belowSubview:buttonProfile];
 }
 -(void)startActivityIndicator {
     [logo setHidden:YES];
@@ -96,6 +110,10 @@
 - (void) setExploreMode:(UISegmentedControl *)sender{
     exploreMode = [sender selectedSegmentIndex];
     [self forceReloadAll];
+}
+
+-(IBAction)didClickProfileButton:(id)sender {
+    [self.view addSubview:profileController.view];
 }
 
 - (void) sliderValueChanged:(UISlider *)sender {  
@@ -116,7 +134,7 @@
     tableController.delegate = self;
     numColumns = 2;
     [tableController setNumberOfColumns:numColumns andBorder:4];
-    [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
+    [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
 }
 
 -(int)numberOfRows {
@@ -129,6 +147,7 @@
 {    
     // for now, display images of friends, six to a page
     NSNumber * key = [NSNumber numberWithInt:index];
+    
     if ([contentViews objectForKey:key] == nil) {
         NSNumber * tagID = [allTagIDs objectAtIndex:index];
         Tag * tag = [allTags objectForKey:tagID];
@@ -341,9 +360,9 @@
     [detailController release];
 }
 
--(IBAction)feedbackButtonClicked:(id)sender {
-    [self.delegate didClickFeedbackButton:@"Explore view"];
-}
+//-(IBAction)feedbackButtonClicked:(id)sender {
+//    [self.delegate didClickFeedbackButton:@"Explore view"];
+//}
 
 - (void)didReceiveMemoryWarning
 {
@@ -357,6 +376,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
+    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -381,6 +401,9 @@
 -(int)getStixOrder:(NSString*)stixStringID;
 {
     return [self.delegate getStixOrder:stixStringID];
+}
+-(UIImage*)getUserPhotoForUsername:(NSString *)username {
+    return [self.delegate getUserPhotoForUsername:username];
 }
 
 -(void)viewDidUnload {

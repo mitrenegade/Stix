@@ -15,11 +15,12 @@
 #import "CommentFeedTableController.h"
 #import "Kumulos.h"
 #import "LoadingAnimationView.h"
+#import "VerticalFeedItemController.h"
 
 @protocol DetailViewDelegate
 
 -(void)didDismissZoom;
-
+-(UIImage*)getUserPhotoForUsername:(NSString*)username;
 @end
 
 @interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate>
@@ -30,6 +31,7 @@
     CommentFeedTableController * commentsTable;
 	NSObject<DetailViewDelegate> *delegate;
     StixView * stixView;
+    UIView * headerView;
     IBOutlet UIImageView * logo;
     
     UIScrollView * scrollView;
@@ -51,5 +53,6 @@
 
 -(IBAction)didPressBackButton:(id)sender;
 -(void)initDetailViewWithTag:(Tag *)tag;
+-(void)headerFromTag:(Tag*) tag;
 
 @end

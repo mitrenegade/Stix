@@ -69,6 +69,7 @@
 //-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
 -(NSString*)removeStixAtIndex:(int)index;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
++(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
 
 @property (nonatomic, retain) NSString * username;

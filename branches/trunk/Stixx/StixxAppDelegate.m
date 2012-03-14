@@ -43,7 +43,6 @@
 @synthesize allStixOrder;
 @synthesize allFriends;
 @synthesize k;
-@synthesize lastCarouselView;
 @synthesize allCommentCounts;
 @synthesize allCarouselViews;
 @synthesize loadingMessage;
@@ -196,7 +195,7 @@ static int init=0;
     feedController.allTags = allTags;
     feedController.tabBarController = tabBarController;
     feedController.camera = camera; // hack: in order to present modal controllers that respond 
-#if 1
+
     /***** create explore view *****/
     exploreController = [[ExploreViewController alloc] init];
     exploreController.delegate = self;
@@ -213,13 +212,13 @@ static int init=0;
     [profileController setCamera:self.camera];
     [profileController setFriendController:friendController];
     [feedController setProfileController:profileController];
-#endif
+    [exploreController setProfileController:profileController];
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
-    UITabBarItem *tbi = [emptyViewController tabBarItem];
-	UIImage * i = [UIImage imageNamed:@"tab_camera.png"];
-	[tbi setImage:i];
+    //UITabBarItem *tbi = [emptyViewController tabBarItem];
+	//UIImage * i = [UIImage imageNamed:@"tab_camera.png"];
+	//[tbi setImage:i];
     //[tbi setTitle:@"Stix"];
 	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, emptyViewController, exploreController, nil];
     [tabBarController setViewControllers:viewControllers];
@@ -227,14 +226,18 @@ static int init=0;
     [emptyViewController release];
     
     lastViewController = feedController;
-    lastCarouselView = feedController.carouselView;
     
     //[tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
+    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_feed2.png"] highlightImage:[UIImage imageNamed:@"tab_feed2_on.png"] atPosition:TABBAR_BUTTON_FEED];
+    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_explore2.png"] highlightImage:[UIImage imageNamed:@"tab_explore2_on.png"] atPosition:TABBAR_BUTTON_EXPLORE];
+    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_camera2.png"] highlightImage:nil atPosition:TABBAR_BUTTON_TAG];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
 #endif
+    
+    [self didPressTabButton:TABBAR_BUTTON_FEED];
     
     loginSplashController = [[LoginSplashController alloc] init];
     [loginSplashController setDelegate:self];
@@ -494,15 +497,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     });
 }
 
+#if 0
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
-    [self.tabBarController toggleFirstTimeInstructions:NO];
-    [self.tabBarController toggleStixMallPointer:NO];
+    //[self.tabBarController toggleFirstTimeInstructions:NO];
+    //[self.tabBarController toggleStixMallPointer:NO];
 
     if (lastViewController == viewController)
         return;
     
-    if ([tabBarController selectedIndex] == 1) {
+    if ([self.tabBarController selectedIndex] == 1) {
         // selected center - must manually change to camera view
 #if !TARGET_IPHONE_SIMULATOR
         [self.camera setCameraOverlayView:tagViewController.view];
@@ -514,27 +518,23 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     {
         [self.tabBarController setButtonStateNormal]; // disable highlighted button
         [tagViewController dismissModalViewControllerAnimated:NO];
-        lastCarouselView = [tagViewController.descriptorController carouselView];
         [viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
     else if (lastViewController == friendController) // if we leave friend controller, start an update for next time
     {
         [self checkForUpdatePhotos];
-        //lastCarouselView = [friendController carouselView];
         [viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
      */
     if (lastViewController == feedController)
     {
-        lastCarouselView = [feedController carouselView];
         //[viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
     else if (lastViewController == exploreController)
     {
-        //lastCarouselView = [exploreController carouselView];
         //[viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
@@ -545,26 +545,37 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //if (viewController == tagViewController)
     //    [self.tabBarController setButtonStateSelected];
 }
+#endif
 
 // RaisedCenterTabBarController delegate 
--(void)didPressCenterButton {
+-(void)didPressTabButton:(int)pos {
     // when center button is pressed, programmatically send the tab bar that command
-    [tabBarController setSelectedIndex:2];
-    [tabBarController setButtonStateSelected]; // highlight button
+    [tabBarController setSelectedIndex:pos];
+    [tabBarController setButtonStateSelected:pos]; // highlight button
 #if !TARGET_IPHONE_SIMULATOR
-    [self.camera setCameraOverlayView:tagViewController.view];
+    if (pos == TABBAR_BUTTON_TAG) {
+        [self.camera setCameraOverlayView:tagViewController.view];
+    }
+    else if (pos == TABBAR_BUTTON_FEED) {
+        lastViewController = feedController;
+    }
+    else if (pos == TABBAR_BUTTON_EXPLORE) {
+        lastViewController = exploreController;
+    }
 #endif
 }
 
 -(void)didDismissSecondaryView {
-    [tabBarController setButtonStateNormal]; // highlight button
+    //[tabBarController setButtonStateNormal:TABBAR_BUTTON_TAG]; // highlight button
     [feedController configureCarouselView];
     [feedController.carouselView carouselTabDismiss:YES];
     if (lastViewController == feedController) {
-        [self.tabBarController setSelectedIndex:0];
+        [self didPressTabButton:TABBAR_BUTTON_FEED];
+        //[self.tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
     }
     else if (lastViewController == exploreController) {
-        [self.tabBarController setSelectedIndex:2];
+        [self didPressTabButton:TABBAR_BUTTON_EXPLORE];
+        //[self.tabBarController setSelectedIndex:2];
     }
     //else if (lastViewController == profileController) {
     //    [self.tabBarController setSelectedIndex:4];
@@ -1235,6 +1246,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(NSMutableDictionary * )getUserPhotos {
     return allUserPhotos;
 }
+-(UIImage*)getUserPhotoForUsername:(NSString *)username {
+    return [allUserPhotos objectForKey:username];
+}
 
 /**** LoginSplashController delegate ****/
 
@@ -1364,9 +1378,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList];
     [photo release];
     [stix release];
-    if (firstTime) {
-        [tabBarController addFirstTimeInstructions];
-    }
+    //if (firstTime) {
+    //    [tabBarController addFirstTimeInstructions];
+    //}
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet *)friendsList {
@@ -1719,7 +1733,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didCreateBadgeView:(UIView *)newBadgeView {
 //    if (lastViewController != nil) {
-//        lastCarouselView = (CarouselView*) newBadgeView;
 //    }
     [allCarouselViews addObject:newBadgeView];
 }
@@ -2221,6 +2234,7 @@ static bool isShowingAlerts = NO;
 -(void)updateBuxCount {
     // display bux on feed?
     [[feedController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
+    [[exploreController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
 }
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {

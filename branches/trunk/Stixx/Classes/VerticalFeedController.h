@@ -50,7 +50,6 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
--(int)getBuxCount;
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate> {

@@ -91,7 +91,6 @@
 -(void)populateWithCommentCount:(int)count;
 
 -(void)initStixView:(Tag*)tag;
-+(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;

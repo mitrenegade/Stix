@@ -7,13 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CommentTableCell.h"
+#import "BadgeView.h"
 
 @protocol CommentFeedTableDelegate 
 -(NSString *)getNameForIndex:(int)index;
 -(NSString *)getCommentForIndex:(int)index;
-//-(UIImageView *)getStixForIndex:(int)index;
-//-(int)getStixTypeForIndex:(int)index;
 -(NSString *)getStixStringIDForIndex:(int)index;
 -(int)getCount;
 @end
@@ -21,7 +19,9 @@
 @interface CommentFeedTableController : UITableViewController
 {
     NSObject<CommentFeedTableDelegate> * delegate;
+    //NSMutableDictionary * cellDictionary;
 }
 
 @property (nonatomic, assign) NSObject<CommentFeedTableDelegate> * delegate;
+-(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
 @end

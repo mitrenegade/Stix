@@ -36,6 +36,7 @@
     IBOutlet UIButton * backButton;
     IBOutlet UIButton * addButton;
     IBOutlet UITextField * commentField;
+    IBOutlet UIImageView * logo;
     
     NSObject<CommentViewDelegate> * delegate;
     

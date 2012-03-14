@@ -40,10 +40,21 @@
 
 #pragma mark - View lifecycle
 
+
+-(void)startActivityIndicator {
+    [logo setHidden:YES];
+    [self.activityIndicator startCompleteAnimation];
+}
+-(void)stopActivityIndicator {
+    [self.activityIndicator stopCompleteAnimation];
+    [self.activityIndicator setHidden:YES];
+    [logo setHidden:NO];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 300, 80, 80)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 1, 25, 25)];
     [self.view addSubview:activityIndicator];
 }
 
@@ -57,7 +68,7 @@
         [commentsTable release];
     }
     commentsTable = [[CommentFeedTableController alloc] init];
-    [commentsTable.view setFrame:CGRectMake(0, 150, 320, 330)];
+    [commentsTable.view setFrame:CGRectMake(0, 150, 320, 280)];
     [commentsTable setDelegate:self];
     [self.view addSubview:commentsTable.view];
     
@@ -78,7 +89,7 @@
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
     
     [k getAllHistoryWithTagID:tagID];
-    [activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
@@ -98,7 +109,7 @@
         [stixStringIDs addObject:stixStringID];
     }
     [commentsTable.tableView reloadData];
-    [activityIndicator stopCompleteAnimation];
+    [self stopActivityIndicator];
 }
 
 - (void)viewDidUnload

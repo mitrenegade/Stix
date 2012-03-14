@@ -42,6 +42,7 @@
 
     [self.tableView setBackgroundColor:[UIColor clearColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    //cellDictionary = [[NSMutableDictionary alloc] init];
 }
 
 - (void)viewDidUnload
@@ -99,21 +100,41 @@
 {
     static NSString *CellIdentifier = @"Cell";
     
-    CommentTableCell *cell = (CommentTableCell*) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    UITableViewCell * cell = (UITableViewCell *) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[CommentTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
         cell.textLabel.numberOfLines = 2;
+        [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+        [cell setBackgroundColor:[UIColor clearColor]];
+        [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
     }
     
     // Configure the cell...
-    [cell setBackgroundColor:[UIColor clearColor]];
     int index = [indexPath row];
-    if (index < [self.delegate getCount]) {
+    /*
+    UIView * cellOldView = [cellDictionary objectForKey:[NSNumber numberWithInt:cell.hash]];
+    if (cellOldView != nil)
+        [cellOldView removeFromSuperview];
+    
+    UIView * view;
+    [cell.contentView addSubview:view];
+    [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
+    */
+    
+    if (index < [self.delegate getCount])
+    {
         NSString * name = [self.delegate getNameForIndex:index];
         NSString * comment = [self.delegate getCommentForIndex:index];
         NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
-        
-        [cell populateWithName:name andComment:comment andStixType:stixStringID];
+        NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
+        [cell.textLabel setText:commentLabel];
+
+        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
+            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            [stix setFrame:CGRectMake(0,0,60,60)];
+            cell.accessoryView = stix;
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        }
     }
     return cell;
 }
@@ -170,5 +191,28 @@
      [detailViewController release];
      */
 }
+    
+-(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID {
+
+    NSString * str = @"";
+    if ([comment length] == 0) // add generic descriptor
+    {
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"%@ added a %@", name, desc];
+    }
+    else if ([comment isEqualToString:@"PEEL"]) {
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"%@ peeled off a %@ to add to their collection", name, desc];
+    }
+    else if ([comment isEqualToString:@"SHARE"]) {
+        str = [NSString stringWithFormat:@"%@ shared this Pix at %@", name, comment];
+    }
+    else
+    {
+        str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
+    }
+    return str;
+}
+
 
 @end

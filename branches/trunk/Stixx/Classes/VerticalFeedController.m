@@ -21,13 +21,16 @@
 @synthesize tableController;
 @synthesize lastPageViewed;
 @synthesize commentView;
-@synthesize buttonFeedback;
+//@synthesize buttonFeedback;
 @synthesize camera;
 //@synthesize buttonShowCarousel;
 //@synthesize carouselTab;
 @synthesize tabBarController;
 //@synthesize stixSelected;
+@synthesize buttonProfile;
+@synthesize labelBuxCount;
 @synthesize bitlyHelper;
+@synthesize profileController;
 
 -(id)init
 {
@@ -37,7 +40,7 @@
 	UITabBarItem *tbi = [self tabBarItem];
 	
 	// give it a label
-	[tbi setTitle:@"Feed"];
+	//[tbi setTitle:@"Feed"];
 	
 	// add an image
 	UIImage * i = [UIImage imageNamed:@"tab_feed.png"];
@@ -57,27 +60,49 @@
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
     tableController.delegate = self;
-    [self.view insertSubview:tableController.view belowSubview:self.buttonFeedback];
+    [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+}
+
+-(void)startActivityIndicator {
+    [logo setHidden:YES];
+    [self.activityIndicator startCompleteAnimation];
+}
+-(void)stopActivityIndicator {
+    [self.activityIndicator stopCompleteAnimation];
+    [self.activityIndicator setHidden:YES];
+    [logo setHidden:NO];
 }
 
 -(void) viewDidLoad {
     [super viewDidLoad];
     lastPageViewed = 0;
-    
+
     //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
     
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
+    //activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
     
-    //zoomViewController = [[ZoomViewController alloc] init];
+    CGRect labelFrame = CGRectMake(19, 3, 58, 38);
+    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
+    [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
+    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [self.delegate getBuxCount]]];
+    [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
+    
+    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 30, 30)];
+    [buttonBux setImage:[UIImage imageNamed:@"graphic_bux.png"] forState:UIControlStateNormal];
+    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
+    [self.view insertSubview:buttonBux belowSubview:tableController.view];
     
     // array to retain each FeedItemViewController as it is created so its callback
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
     headerViews = [[NSMutableDictionary alloc] init];
     
-    [activityIndicator startCompleteAnimation];
+    //[activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [self configureCarouselView];
@@ -89,8 +114,8 @@
     NSLog(@"ConfigureCarouselView by VerticalFeedController");
     [self setCarouselView:[CarouselView sharedCarouselView]];
     [carouselView setDelegate:self];
-    [carouselView setDismissedTabY:373-20];
-    [carouselView setExpandedTabY:5-20];
+    [carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
+    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT];
     [carouselView setAllowTap:YES];
     //[carouselView removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
@@ -257,8 +282,8 @@
     [auxView addStixToStixView:stixStringID atLocation:location];
     //[auxView toggleCarouselView:NO];
     [auxView configureCarouselView];
-    [carouselView setExpandedTabY:5-20]; // hack: a bit lower
-    [carouselView setDismissedTabY:373-STATUS_BAR_SHIFT];
+    //[carouselView setExpandedTabY:5-STATUS_BAR_SHIFT]; // hack: a bit lower
+    //[carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
     //[auxView.carouselView carouselTabExpand:NO];
     [auxView.carouselView carouselTabDismiss:YES];
     //[auxView.carouselView.scrollView setContentOffset:carouselView.scrollView.contentOffset];
@@ -326,66 +351,43 @@
 }
 
 -(UIView*)headerForSection:(int)index {
-    if (0) //index == 0) 
-    {
-        // return stix header
-        if (!stixHeader) {
-            stixHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-            UIImageView * bg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_bar.png"]];
-            [stixHeader addSubview:bg];
-            [bg release];
-            UIImageView * logo = [[UIImageView alloc] initWithFrame:CGRectMake(131, 3, 59, 38)];
-            [logo setImage:[UIImage imageNamed:@"logo.png"]];
-            [stixHeader addSubview:logo];
-            [logo release];
-            UIButton * feedbackBtn = [[UIButton alloc] initWithFrame:CGRectMake(230, 5, 80, 40)];
-            [feedbackBtn setImage:[UIImage imageNamed:@"nav_feedback.png"] forState:UIControlStateNormal];
-            [feedbackBtn addTarget:self action:@selector(didClickFeedbackButton:) forControlEvents:UIControlEventTouchUpInside];
-            [stixHeader addSubview:feedbackBtn];
-            [feedbackBtn release];
-        }
-        return stixHeader;
+    //index = index - 1;
+    Tag * tag = [allTags objectAtIndex:index];
+    UIView * headerView = [headerViews objectForKey:tag.tagID];
+    if (!headerView) {
+        headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
+        [headerView setBackgroundColor:[UIColor blackColor]];
+        [headerView setAlpha:.75];
+        
+        UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]];
+        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)];
+        [photoView setImage:photo];
+        [headerView addSubview:photoView];
+        
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
+        [nameLabel setBackgroundColor:[UIColor clearColor]];
+        [nameLabel setTextColor:[UIColor whiteColor]];
+        [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
+        [nameLabel setText:tag.username];
+        [headerView addSubview:nameLabel];
+        
+        UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
+        [locLabel setBackgroundColor:[UIColor clearColor]];
+        [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
+        [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+        [locLabel setText:tag.locationString];
+        [headerView addSubview:locLabel];    
+        
+        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
+        [timeLabel setBackgroundColor:[UIColor clearColor]];
+        [timeLabel setTextColor:[UIColor whiteColor]];
+        [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
+        [timeLabel setText:[VerticalFeedItemController getTimeLabelFromTimestamp:tag.timestamp]];
+        [headerView addSubview:timeLabel];
+        
+        [headerViews setObject:headerView forKey:tag.tagID];
     }
-    else
-    {
-        //index = index - 1;
-        Tag * tag = [allTags objectAtIndex:index];
-        UIView * headerView = [headerViews objectForKey:tag.tagID];
-        if (!headerView) {
-            headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
-            [headerView setBackgroundColor:[UIColor blackColor]];
-            [headerView setAlpha:.75];
-            
-            UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]];
-            UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)];
-            [photoView setImage:photo];
-            [headerView addSubview:photoView];
-            
-            UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
-            [nameLabel setBackgroundColor:[UIColor clearColor]];
-            [nameLabel setTextColor:[UIColor whiteColor]];
-            [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
-            [nameLabel setText:tag.username];
-            [headerView addSubview:nameLabel];
-            
-            UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
-            [locLabel setBackgroundColor:[UIColor clearColor]];
-            [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
-            [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
-            [locLabel setText:tag.locationString];
-            [headerView addSubview:locLabel];    
-            
-            UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
-            [timeLabel setBackgroundColor:[UIColor clearColor]];
-            [timeLabel setTextColor:[UIColor whiteColor]];
-            [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
-            [timeLabel setText:[VerticalFeedItemController getTimeLabelFromTimestamp:tag.timestamp]];
-            [headerView addSubview:timeLabel];
-            
-            [headerViews setObject:headerView forKey:tag.tagID];
-        }
-        return headerView;
-    }
+    return headerView;
 }
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
@@ -423,7 +425,8 @@
     
     [self.tableController.tableView reloadData];
     [tableController dataSourceDidFinishLoadingNewData];
-    [self.activityIndicator stopCompleteAnimation];
+    [self stopActivityIndicator];
+    //[self.activityIndicator stopCompleteAnimation];
     return feedItem.view;
 }
 
@@ -496,6 +499,9 @@
 //    [scrollView jumpToPage:0];
 }
 
+-(IBAction)didClickProfileButton:(id)sender {
+    [self.view addSubview:profileController.view];
+}
 
 -(void)updateScrollPagesAtPage:(int)page {
     NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
@@ -503,13 +509,15 @@
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTags objectAtIndex:0];
             int tagid = [t.tagID intValue];
-            [self.activityIndicator startCompleteAnimation];
+            //[activityIndicator startCompleteAnimation];
+            [self startActivityIndicator];
             [self.delegate getNewerTagsThanID:tagid];            
         }
         if (page >= [self itemCount] - LAZY_LOAD_BOUNDARY) { // trying to load an earlier tag
             Tag * t = (Tag*) [allTags objectAtIndex:[self itemCount]-1];
             int tagid = [t.tagID intValue];
-            [self.activityIndicator startCompleteAnimation];
+            //[activityIndicator startCompleteAnimation];
+            [self startActivityIndicator];
             [self.delegate getOlderTagsThanID:tagid];
         }
     }
@@ -520,7 +528,8 @@
         // should not come here!
         //NSLog(@"Error! allTags was never seeded!");
         [self.delegate checkForUpdateTags];
-        [self.activityIndicator startCompleteAnimation];
+        //[activityIndicator startCompleteAnimation];
+        [self startActivityIndicator];
     }
 }
 
@@ -528,7 +537,8 @@
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
     int section = [tableController getCurrentSectionAtPoint:CGPointMake(160, 240)];
     self.allTags = [self.delegate getTags];
-    [self.activityIndicator startCompleteAnimation];
+    //[activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
     [self reloadViewForItemAtIndex:section];
 }
 
@@ -537,7 +547,8 @@
     if (updated)
         [self reloadViewForItemAtIndex:0];
     [tableController setContentPageIDs:allTags];
-    [self.activityIndicator stopCompleteAnimation];
+    [self stopActivityIndicator];
+    //[self.activityIndicator stopCompleteAnimation];
 }
 
 -(int)itemCount
@@ -557,7 +568,7 @@
 //    [scrollView reloadPage:lastPageViewed];
 }
 
-/************** FeedZoomView ***********/
+/************** FeedItemDelegate ***********/
 // comes from feedItem instead of carousel
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController*)feedItem {
     // location is the click location inside feeditem's frame
@@ -697,9 +708,9 @@
     [self didCloseComments];
 }
 
--(IBAction)feedbackButtonClicked:(id)sender {
-    [self.delegate didClickFeedbackButton:@"Feed view"];
-}
+//-(IBAction)feedbackButtonClicked:(id)sender {
+//    [self.delegate didClickFeedbackButton:@"Feed view"];
+//}
 
 /*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/
 -(NSString*)getUsername {

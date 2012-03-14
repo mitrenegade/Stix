@@ -130,6 +130,5 @@ enum {
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(NSMutableDictionary *)GetAllStixSubcategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
-+(void)InitializeSubcategories:(NSArray*)theResults;
 
 @end

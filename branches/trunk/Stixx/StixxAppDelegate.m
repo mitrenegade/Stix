@@ -26,6 +26,7 @@
 @implementation StixxAppDelegate
 
 @synthesize window;
+@synthesize emptyViewController;
 @synthesize tagViewController;
 @synthesize exploreController;
 @synthesize tabBarController;
@@ -33,7 +34,6 @@
 @synthesize profileController;
 @synthesize friendController;
 @synthesize loginSplashController;
-@synthesize myStixController;
 @synthesize myUserInfo;
 @synthesize lastViewController;
 @synthesize allTags;
@@ -49,8 +49,6 @@
 @synthesize loadingMessage;
 @synthesize alertQueue;
 @synthesize camera;
-@synthesize storeViewController;
-@synthesize storeViewShell;
 @synthesize metricLogonTime;
 #if USING_FACEBOOK
 @synthesize facebook;
@@ -209,37 +207,29 @@ static int init=0;
     friendController.delegate = self;
     [self checkForUpdatePhotos];
     
-    /***** create stixstore view ***/
-    //coverflowController = [[CoverflowViewController alloc] init];
-    storeViewController = [[StoreViewController alloc] init];
-    storeViewController.delegate = self;
-    storeViewShell = [[StoreViewShell alloc] init];
-    [storeViewShell setCamera:self.camera];
-    [storeViewShell setStoreViewController:storeViewController];
-    
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
     [profileController setCamera:self.camera];
     [profileController setFriendController:friendController];
+    [feedController setProfileController:profileController];
 #endif
     
     /***** add view controllers to tab controller, and add tab to window *****/
-    UIViewController * emptyview = [[UIViewController alloc] init];
-    UITabBarItem *tbi = [emptyview tabBarItem];
-    [tbi setTitle:@"Stix"];
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, exploreController, emptyview, storeViewShell, profileController, nil];
+    emptyViewController = [[UIViewController alloc] init];
+    UITabBarItem *tbi = [emptyViewController tabBarItem];
+	UIImage * i = [UIImage imageNamed:@"tab_camera.png"];
+	[tbi setImage:i];
+    //[tbi setTitle:@"Stix"];
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, emptyViewController, exploreController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
-    [emptyview release];
+    [emptyViewController release];
     
     lastViewController = feedController;
     lastCarouselView = feedController.carouselView;
-    //[window addSubview:[tagViewController view]];
-    //[tagViewController.view addSubview:tabBarController.view];
-    //[window addSubview:[tabBarController view]];
     
-    [tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
+    //[tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
@@ -502,29 +492,24 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
                                              (unsigned long)NULL), ^(void) {
         [self saveDataToDisk];
     });
-    //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
-    //[self saveDataToDisk];
 }
 
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
+    [self.tabBarController toggleFirstTimeInstructions:NO];
+    [self.tabBarController toggleStixMallPointer:NO];
+
     if (lastViewController == viewController)
         return;
     
-    if (viewController == storeViewShell) {
-        [storeViewShell setLastController:lastViewController];
-            [self.tabBarController toggleFirstTimeInstructions:NO];
-            [self.tabBarController toggleStixMallPointer:NO];
-            
-            //NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
-            //NSNumber * isFirstTimeUser = [NSNumber numberWithBool:myUserInfo->isFirstTimeUser];
-            //NSNumber * hasAccessedStore = [NSNumber numberWithBool:myUserInfo->hasAccessedStore];
-            //[auxInfo setValue:isFirstTimeUser forKey:@"isFirstTimeUser"];
-            //[auxInfo setValue:hasAccessedStore forKey:@"hasAccessedStore"];
-            //NSData * auxData = [KumulosData dictionaryToData:auxInfo];
-            //[k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:auxData];
+    if ([tabBarController selectedIndex] == 1) {
+        // selected center - must manually change to camera view
+#if !TARGET_IPHONE_SIMULATOR
+        [self.camera setCameraOverlayView:tagViewController.view];
+#endif
+        return;
     }
-    
+    /*
     if (lastViewController == tagViewController)
     {
         [self.tabBarController setButtonStateNormal]; // disable highlighted button
@@ -540,7 +525,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
-    else if (lastViewController == feedController)
+     */
+    if (lastViewController == feedController)
     {
         lastCarouselView = [feedController carouselView];
         //[viewController viewWillAppear:TRUE];
@@ -552,15 +538,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         //[viewController viewWillAppear:TRUE];
         lastViewController = viewController;
     }
-    else if (lastViewController == storeViewShell)
-    {
-        // if we leave storeViewShell
-        lastViewController = viewController;
-    }
-    else if (lastViewController == profileController) 
-    {
-        lastViewController = viewController;
-    }
+
+    lastViewController = viewController;
         
     // enabled highlighted button - not done here
     //if (viewController == tagViewController)
@@ -585,23 +564,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [self.tabBarController setSelectedIndex:0];
     }
     else if (lastViewController == exploreController) {
-        [self.tabBarController setSelectedIndex:1];
+        [self.tabBarController setSelectedIndex:2];
     }
-    else if (lastViewController == storeViewShell) {
-        if (storeViewShell.lastController == feedController) {
-            [self.tabBarController setSelectedIndex:0];
-        }
-        else if (storeViewShell.lastController == exploreController) {
-            [self.tabBarController setSelectedIndex:1];
-        }
-        else if (storeViewShell.lastController == profileController) {
-            [self.tabBarController setSelectedIndex:4];
-        }
-        lastViewController = storeViewShell.lastController;
-    }
-    else if (lastViewController == profileController) {
-        [self.tabBarController setSelectedIndex:4];
-    }
+    //else if (lastViewController == profileController) {
+    //    [self.tabBarController setSelectedIndex:4];
+    //}
 #if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:tabBarController.view];
 #endif
@@ -779,7 +746,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSKeyedArchiver *encoder;
     theCoordData = [NSMutableData data];
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
-	[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
+	//[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
     [encoder release];
     
@@ -892,7 +859,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             didAddTag = [self addTagWithCheck:tag withID:new_id];
             [tag release];
         }
-        [feedController.activityIndicator stopCompleteAnimation];
+        [feedController stopActivityIndicator];
+        //[feedController.activityIndicator stopCompleteAnimation];
         if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
             [feedController viewWillAppear:TRUE];
         if (didAddTag)
@@ -1133,7 +1101,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     else {
         [feedController finishedCheckingForNewData:NO];
     }
-    [feedController.activityIndicator stopCompleteAnimation];
+    [feedController stopActivityIndicator];
+    //[feedController.activityIndicator stopCompleteAnimation];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDLessThanDidCompleteWithResult:(NSArray *)theResults {
@@ -1161,7 +1130,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     {
         [feedController finishedCheckingForNewData:NO];
     }
-    [feedController.activityIndicator stopCompleteAnimation];
+    [feedController stopActivityIndicator];
+    //[feedController.activityIndicator stopCompleteAnimation];
 }
 
 - (NSMutableArray *) getTags {
@@ -1461,8 +1431,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
     [self Parse_subscribeToChannel:myUserInfo->username];
-    [storeViewController updateBuxCount];
-    [storeViewController reloadTableButtons];
+    [self updateBuxCount];
     //[profileController updatePixCount];    
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
@@ -1554,6 +1523,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self.camera setCameraOverlayView:loginSplashController.view];        
 #endif
     }
+}
+
+-(void)closeProfileView {
+    [self.profileController.view removeFromSuperview];
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
@@ -1685,8 +1658,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)changeBuxCountByAmount:(int)change {
     myUserInfo->bux += change;
     [k changeUserBuxByAmountWithUsername:[self getUsername] andBuxChange:change];
-    [profileController updateBuxCount];
-    [storeViewController updateBuxCount];
+    [self updateBuxCount];
 }
 
 -(void)rewardBux {
@@ -2235,8 +2207,6 @@ static bool isShowingAlerts = NO;
         {
             // for now just go to the store
             [self.tabBarController setSelectedIndex:3];
-            [self.storeViewShell viewWillAppear:YES];
-            //[self.storeViewController displayBuxPricing];
         }
     }
     if ([alertQueue count] == 0)
@@ -2246,6 +2216,11 @@ static bool isShowingAlerts = NO;
     [nextAlert show];
     isShowingAlerts = YES;
     [nextAlert release];
+}
+
+-(void)updateBuxCount {
+    // display bux on feed?
+    [[feedController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
 }
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {

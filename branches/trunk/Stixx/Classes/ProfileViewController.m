@@ -118,10 +118,6 @@
     }
 }
 
--(void)updateBuxCount {
-    // do nothing
-}
-
 -(IBAction) didClickLogoutButton:(id)sender {
 #if 0
     UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:[NSString stringWithFormat:@"Do you want to log out of account %@?", [delegate getUsername]] delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Log me out!", nil];
@@ -136,6 +132,10 @@
     [alert show];
     [alert release];
 #endif
+}
+
+-(IBAction)didClickBackButton:(id)sender {
+    [self.delegate closeProfileView];
 }
 
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {

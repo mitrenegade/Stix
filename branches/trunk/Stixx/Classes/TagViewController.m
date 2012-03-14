@@ -6,7 +6,6 @@
 @implementation TagViewController
 
 @synthesize delegate;
-@synthesize cameraController;
 //@synthesize arViewController;
 @synthesize rectView;
 @synthesize buttonInstructions;
@@ -22,7 +21,7 @@
 @synthesize buttonClose;
 @synthesize buttonTakePicture;
 @synthesize buttonImport;
-@synthesize newTag;
+@synthesize cameraTag;
 
 - (id)init {
 	
@@ -79,46 +78,7 @@
 }
 
 -(void)loadView {
-#if 1
-    [super loadView];
-#else
-    // instead of calling [super loadView], which doesn’t account for a hidden status bar, create an unclipped view here
-    
-    CGSize screenSize = [UIScreen mainScreen].bounds.size;
-    
-    CGRect screenBounds = CGRectMake(0, 20, screenSize.width, screenSize.height);
-    
-    NoClipModalView *sView = [[NoClipModalView alloc] initWithFrame:screenBounds]; 
-    
-    self.view = sView; 
-    int shift = 20;
-    rectView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 74+shift, 300, 275)];
-    //[rectView setBackgroundColor:[UIColor redColor]];
-    aperture = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
-    [aperture setFrame:CGRectMake(0, shift, 320, 480)];
-    [self.view addSubview:buttonInstructions];
-    [self.view addSubview:rectView];
-    [self.view addSubview:aperture];
-    
-    flashModeButton = [[UIButton alloc] initWithFrame:CGRectMake(90, 3+shift, 60, 60)];
-    [flashModeButton addTarget:self action:@selector(toggleFlashMode:) forControlEvents:UIControlEventTouchUpInside];
-    [flashModeButton setBackgroundColor:[UIColor clearColor]];
-
-    cameraDeviceButton = [[UIButton alloc] initWithFrame:CGRectMake(170,3+shift, 60, 60)];
-    [cameraDeviceButton addTarget:self action:@selector(toggleCameraDevice:) forControlEvents:UIControlEventTouchUpInside];
-    [cameraDeviceButton setImage:[UIImage imageNamed:@"switch_camera.png"] forState:UIControlStateNormal];
-    [cameraDeviceButton setBackgroundColor:[UIColor clearColor]];
-    [self.view addSubview:cameraDeviceButton];
-    [self.view addSubview:flashModeButton];
-/*
-    buttonFeedback = [[UIButton alloc] init];
-    [buttonFeedback setFrame:CGRectMake(240,13+shift, 80, 40)];
-    [buttonFeedback setImage:[UIImage imageNamed:@"nav_feedback.png"] forState:UIControlStateNormal];
-    [buttonFeedback addTarget:self action:@selector(feedbackButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:buttonFeedback];
-*/    
-    [sView release];
-#endif
+    [super loadView];   
 }
 
 -(void) viewDidLoad {
@@ -208,8 +168,8 @@
     needToShowCamera = NO; // still not need to show camera
     
     UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
-    newTag = [[Tag alloc] init]; 
-    [newTag addImage:tmp];
+    cameraTag = [[Tag alloc] init]; 
+    [cameraTag addImage:tmp];
     
 	// prompt for label: use TagDescriptorController
     if (!descriptorController) {
@@ -224,7 +184,7 @@
     
     // populate after view has been created
     [descriptorController setDelegate:self];
-    [descriptorController initStixView:newTag];
+    [descriptorController initStixView:cameraTag];
     [descriptorController configureCarouselView];
     [descriptorController.carouselView carouselTabDismiss:NO]; // start tab at bottom
     [descriptorController.carouselView carouselTabExpand:YES]; // animate expansion
@@ -292,15 +252,15 @@
     {
         username = @"anonymous";
     }
-    [newTag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
+    [cameraTag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
     //UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
-    //[newTag addImage:image];
+    //[cameraTag addImage:image];
     //[tag addARCoordinate:newCoord];
 }
 
 -(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     if (stixStringID != nil)
-        [newTag addStix:stixStringID withLocation:location withTransform:transform withPeelable:NO];
+        [cameraTag addStix:stixStringID withLocation:location withTransform:transform withPeelable:NO];
     // backwards compatibility
     //[tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
     //[tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
@@ -308,9 +268,9 @@
     //    [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
     //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
     //}
-    [self.delegate didCreateNewPix:newTag];
-    [newTag release];
-    newTag = nil;
+    [self.delegate didCreateNewPix:cameraTag];
+    [cameraTag release];
+    cameraTag = nil;
     needToShowCamera = YES;
     descriptorIsOpen = NO;
     [self viewDidAppear:NO];

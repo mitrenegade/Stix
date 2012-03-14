@@ -18,17 +18,13 @@
 #import "ExploreViewController.h"
 #import "Kumulos.h"
 #import "Tag.h"
-#import "ARCoordinate.h"
+//#import "ARCoordinate.h"
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
 #import "LoginSplashController.h"
-#import "MyStixViewController.h"
 #import "LoadingViewController.h"
 #import "FeedbackViewController.h"
 #import <Parse/Parse.h>
-#import "CoverflowViewController.h"
-#import "StoreViewController.h"
-#import "StoreViewShell.h"
 #import "AlertPrompt.h"
 #import "KumulosHelper.h"
 
@@ -68,7 +64,7 @@ struct UserInfo {
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, MyStixViewDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, StoreViewDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate,
 
 #if USING_FACEBOOK
     FBSessionDelegate,
@@ -87,9 +83,6 @@ struct UserInfo {
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
     LoginSplashController * loginSplashController;
-    MyStixViewController * myStixController;
-    StoreViewController * storeViewController;
-    StoreViewShell * storeViewShell;
     
     UIViewController * lastViewController;
     CarouselView * lastCarouselView;
@@ -203,7 +196,12 @@ struct UserInfo {
 -(void)logMetricTimeInApp;
 -(void)checkConsistency;
 
+// former store methods
+-(void)updateBuxCount;
+-(void)didGetStixFromStore:(NSString*)stixStringID;
+
 @property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (nonatomic, retain) UIViewController * emptyViewController;
 @property (nonatomic, retain) RaisedCenterTabBarController *tabBarController;
 @property (nonatomic, retain) TagViewController *tagViewController;
 //@property (nonatomic, retain) FeedViewController *feedController;
@@ -212,7 +210,6 @@ struct UserInfo {
 @property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) LoginSplashController * loginSplashController;
-@property (nonatomic, retain) MyStixViewController * myStixController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
@@ -228,8 +225,6 @@ struct UserInfo {
 @property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
 @property (nonatomic, retain) NSMutableArray * alertQueue;
 @property (nonatomic, retain) UIImagePickerController * camera;
-@property (nonatomic, retain) StoreViewController * storeViewController;
-@property (nonatomic, retain) StoreViewShell * storeViewShell;  
 @property (nonatomic, retain) NSDate * metricLogonTime;
 
 #if USING_FACEBOOK

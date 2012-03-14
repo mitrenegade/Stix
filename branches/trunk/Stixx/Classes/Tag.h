@@ -21,7 +21,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ARCoordinate.h"
 #import "BadgeView.h" // for BADGE_TYPE_MAX
 #import "KumulosData.h"
 #import <QuartzCore/QuartzCore.h>
@@ -53,7 +52,7 @@
     NSMutableArray * auxTransforms; // rotation and scale combined
     
     // data blob saved by Kumulos
-    ARCoordinate * coordinate;
+    //ARCoordinate * coordinate;
     
     // unique kumulos id number for each object added
     NSNumber * tagID;
@@ -63,7 +62,7 @@
 }
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
-- (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
+//- (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
 -(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation /*withScale:(float)newScale withRotation:(float)newRotation*/ withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable;
 //-(void)addMainStixOfType:(NSString*)stixStringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y;
@@ -77,7 +76,7 @@
 @property (nonatomic, retain) NSString * comment;
 @property (nonatomic, retain) NSString * locationString;
 @property (nonatomic, retain) UIImage * image;
-@property (nonatomic, retain) ARCoordinate * coordinate;
+//@property (nonatomic, retain) ARCoordinate * coordinate;
 @property (nonatomic, retain) NSNumber * tagID;
 @property (nonatomic, retain) NSString * timestring;
 @property (nonatomic, retain) NSDate * timestamp;

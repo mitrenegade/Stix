@@ -32,6 +32,7 @@
 @synthesize commentCount;
 @synthesize stixView;
 @synthesize locationIcon;
+@synthesize shareButton;
 /*
  - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
  {

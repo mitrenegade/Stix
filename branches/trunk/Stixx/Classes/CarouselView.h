@@ -78,9 +78,7 @@ enum {
 
 -(void)carouselTabExpand:(BOOL)doAnimation;
 -(void)carouselTabDismiss:(BOOL)doAnimation;
--(void)carouselTabDismissWithStix:(UIImageView*)stix;
 -(void)didClickShowCarousel:(id)sender;
--(void)carouselTabDismissRemoveStix;
 -(void)didClickShelfCategory:(id)sender;
 
 /*** make a singleton class ***/

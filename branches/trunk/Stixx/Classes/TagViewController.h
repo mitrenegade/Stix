@@ -11,17 +11,18 @@
 #import "ImageCache.h"
 #import "BadgeView.h"
 #import "Tag.h"
-#import "ARCoordinate.h"
-#import "NoClipModalView.h"
+//#import "ARCoordinate.h"
 #import "AddStixViewController.h"
+#import "UIImage+Alpha.h"
+#import "UIImage+Resize.h"
+#import "UIImage+RoundedCorner.h"
 
 #define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
 
 @protocol TagViewDelegate
 
 - (NSString *)getUsername;
-//- (void) tagViewDidAddTag:(Tag*)newTag;
--(void)didCreateNewPix:(Tag*)newTag;
+-(void)didCreateNewPix:(Tag*)cameraTag;
 - (bool) isLoggedIn;
 
 -(int)getStixCount:(NSString*)stixStringID;
@@ -61,7 +62,7 @@
     IBOutlet UIButton * buttonTakePicture;
     IBOutlet UIButton * buttonImport;
     
-    Tag * newTag;
+    Tag * cameraTag;
     
     //TagDescriptorController * descriptorController;
     AddStixViewController * descriptorController;
@@ -84,7 +85,7 @@
 @property (nonatomic, retain) IBOutlet UIButton * buttonClose;
 @property (nonatomic, retain) IBOutlet UIButton * buttonTakePicture;
 @property (nonatomic, retain) IBOutlet UIButton * buttonImport;
-@property (nonatomic, retain) Tag * newTag;
+@property (nonatomic, retain) Tag * cameraTag;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;

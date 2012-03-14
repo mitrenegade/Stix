@@ -10,7 +10,7 @@
 
 @implementation Tag
 
-@synthesize username, image, coordinate, tagID, timestring, timestamp;
+@synthesize username, image, tagID, timestring, timestamp;
 @synthesize comment;
 @synthesize descriptor;
 @synthesize locationString;
@@ -35,10 +35,10 @@
     //NSLog(@"Added username %@ and comment %@ to tag", newUsername, newComment);
 }
 
-- (void)addARCoordinate:(ARCoordinate*)newARCoordinate {
+//- (void)addARCoordinate:(ARCoordinate*)newARCoordinate {
     //[self setCoordinate:newARCoordinate];
     //NSLog(@"Added coordinate %@ to tag", newARCoordinate);
-}
+//}
 
 - (void) addImage:(UIImage*)newImage {
     [self setImage:newImage]; // MRC: setter should call retain automatically
@@ -162,8 +162,8 @@
         NSString * transformString = [auxTransforms objectAtIndex:i];
         CGAffineTransform auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
-        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
 #if 0
+        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
         [stix setCenter:location];
         [stix setTransform:auxTransform];
         UIGraphicsBeginImageContext(newSize);

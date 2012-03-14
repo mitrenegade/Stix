@@ -44,6 +44,7 @@
 
 -(void)didClickInviteButton;
 -(void)didDismissSecondaryView;
+-(void)closeProfileView;
 
 @end
 
@@ -87,7 +88,6 @@
 -(void)loginWithUsername:(NSString *)name;
 -(void)updateFriendCount;
 -(void)updatePixCount;
--(void)updateBuxCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 -(IBAction)showLogoutScreen:(id)sender;
 -(IBAction)friendCountButtonClicked:(id)sender;
@@ -96,7 +96,7 @@
 -(void)administratorModeResetAllStix;
 
 -(IBAction)findFriendsClicked:(id)sender;
-
+-(IBAction)didClickBackButton:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
 @end

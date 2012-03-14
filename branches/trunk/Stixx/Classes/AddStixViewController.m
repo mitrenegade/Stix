@@ -198,78 +198,6 @@
     [dot3 release];
     [dot4 release];
 }
-/*** dragging and resizing badge ***/
-/** touch messages **/
-// a single click on the camera should take a picture
-// single click will trigger at the end of a drag motion
-// unlike in VerticalFeedItemController because the table
-// is not present here.
-#if 0
-
--(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-	UITouch *touch = [[event allTouches] anyObject];	
-	CGPoint location = [touch locationInView:self.view];
-	drag = 0;
-    tap = 0;
-    
-    [self closeInstructions:nil];
-    
-    if (CGRectContainsPoint(stix.frame, location))
-    {
-        tap = 1;
-    }
-    
-    // point where finger clicked badge
-    offset_x = (location.x - stix.center.x);
-    offset_y = (location.y - stix.center.y);
-}
-
--(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (tap == 1 || drag == 1)
-	{
-        drag = 1;
-        tap = 0;
-		UITouch *touch = [[event allTouches] anyObject];
-		CGPoint location = [touch locationInView:self.view];
-		// update frame of dragged badge, also scale
-		//float scale = 1; // do not change scale while dragging
-		if (!drag)
-			return;
-        
-        float centerX = location.x - offset_x;
-		float centerY = location.y - offset_y;
-        
-        // filter out rogue touches, usually when people are using a pinch
-        if (abs(centerX - stix.center.x) > 50 || abs(centerY - stix.center.y) > 50) 
-            return;
-        
-		stix.center = CGPointMake(centerX, centerY);
-        
-        if (transformCanvas) {
-            [transformCanvas setCenter:stix.center];
-        }
-	}
-}
-
--(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if (drag == 1)
-	{
-        tap = 0;
-        drag = 0;
-	}
-    else if (tap == 1)
-    {
-        drag = 0;
-        tap = 0;
-        // single tap is equivalent to done
-        //[self buttonOKPressed:self];
-        
-        UITouch *touch = [[event allTouches] anyObject];	
-        CGPoint location = [touch locationInView:self.view];
-        [self didClickAtLocation:location];
-    }
-}
-#endif
 
 -(IBAction)buttonOKPressed:(id)sender
 {
@@ -388,10 +316,8 @@
     // reserves the carousel for self
     [self setCarouselView:[CarouselView sharedCarouselView]];
     carouselView.delegate = self;
-//    [carouselView setDismissedTabY:400-44-20];
-//    [carouselView setExpandedTabY:30-44-20];
     [carouselView setExpandedTabY:5-20]; // hack: a bit lower
-    [carouselView setDismissedTabY:373-20];
+    [carouselView setDismissedTabY:375-20];
     [carouselView setAllowTap:YES];
 //    [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
     

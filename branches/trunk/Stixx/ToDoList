@@ -59,7 +59,7 @@ stixView should always manipulate one stix and always display all aux stix
 when auxstix added, need to check kumulos for updated auxstix for this tag first
 didAddStixToPix: add to old tag and reload immediately then replace tag in alltags with new stix from kumulos
 peel giftstix to add to collection
-use stixview for zoomview
+use stixview for DetailView
 explore doesn't use stixview
 use stixView for exploreViewController
 *

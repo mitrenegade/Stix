@@ -17,8 +17,9 @@
 #import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
-#import "StixAnimation.h"
 #import "BTBitlyHelper.h"
+#import "ProfileViewController.h"
+#import "OutlineLabel.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -37,6 +38,7 @@
 - (bool) isLoggedIn;
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+-(int)getBuxCount;
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
@@ -51,7 +53,7 @@
 -(int)getBuxCount;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, StixAnimationDelegate, BTBitlyHelperDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
@@ -62,8 +64,6 @@
     UIImagePickerController * camera;
     
     LoadingAnimationView * activityIndicator;
-    
-    IBOutlet UIButton * buttonFeedback;
     
     NSObject<VerticalFeedDelegate> * delegate;
     
@@ -79,6 +79,8 @@
     UIView * stixHeader;
     UIView * stixHeaderBody;
     
+    IBOutlet UIButton * logo;
+    
 //    IBOutlet UIButton * buttonShowCarousel;
 //    IBOutlet UIImageView * carouselTab;
 //    int isShowingCarousel;
@@ -93,7 +95,10 @@
 @property (nonatomic, retain) FeedTableController *tableController;
 @property (nonatomic, assign) NSObject<VerticalFeedDelegate> * delegate;
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
-@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+@property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
+//@property (nonatomic, retain) IBOutlet UILabel * labelBuxCount;
+@property (nonatomic, retain) OutlineLabel * labelBuxCount;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) CommentViewController * commentView;
@@ -103,11 +108,12 @@
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
+@property (nonatomic, assign) ProfileViewController *profileController;
 
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;
 -(void)reloadCurrentPage;
--(IBAction)feedbackButtonClicked:(id)sender;
+//-(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickJumpButton:(id)sender;
 -(void)jumpToPageWithTagID:(int)tagID;
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID;
@@ -118,7 +124,9 @@
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*)tag;
 - (void) shortenBlastTextUrls:(NSString*)url;
-
+-(IBAction)didClickProfileButton:(id)sender;
+-(void)startActivityIndicator;
+-(void)stopActivityIndicator;
 @end
 
 

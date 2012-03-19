@@ -9,10 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "Tag.h"
 #import "EGORefreshTableHeaderView.h"
+#import "VerticalFeedItemController.h"
 
 #define LAZY_LOAD_BOUNDARY 0
 #define HEADER_HEIGHT 40
-#define CONTENT_HEIGHT 320
 
 @protocol FeedTableControllerDelegate <NSObject>
 
@@ -21,6 +21,7 @@
 -(UIView*)viewForItemWithTagID:(NSNumber*)tagID;
 -(int)itemCount;
 -(UIView*)headerForSection:(int)index;
+-(int)getHeightForSection:(int)index;
 
 @optional
 -(void)updateScrollPagesAtPage:(int)page;

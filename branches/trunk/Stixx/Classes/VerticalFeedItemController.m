@@ -33,6 +33,8 @@
 @synthesize stixView;
 @synthesize locationIcon;
 @synthesize shareButton;
+@synthesize isExpanded;
+@synthesize seeAllCommentsButton;
 /*
  - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
  {
@@ -109,13 +111,115 @@
 
 -(void)populateWithCommentCount:(int)count {
     self.commentCount = count;
+    if (count > 0)
+        [addCommentButton setTitle:[NSString stringWithFormat:@"%d", commentCount] forState:UIControlStateNormal];
+    /*
     if (count == 0)
         [addCommentButton setTitle:[NSString stringWithFormat:@"Add comment", commentCount] forState:UIControlStateNormal];
     else if (count == 1)
         [addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", commentCount] forState:UIControlStateNormal];
     else        
         [addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", commentCount] forState:UIControlStateNormal];
+     */
 }
+
+-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs {
+    [names removeAllObjects];
+    [names addObjectsFromArray:allNames];
+    [comments removeAllObjects];
+    [comments addObjectsFromArray:allComments];
+    [stixStringIDs removeAllObjects];
+    [stixStringIDs addObjectsFromArray:allStixStringIDs];
+    
+    if (commentsTable)
+    {
+        [commentsTable.view removeFromSuperview];
+        [commentsTable release];
+    }
+    commentsTable = [[CommentFeedTableController alloc] init];
+    [commentsTable setDelegate:self];
+    [self.view addSubview:commentsTable.view];
+
+    [commentsTable configureRowsWithHeight:18 dividerVisible:NO fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
+    [commentsTable.tableView reloadData];
+    
+    // resize view
+    const int buttonHeight = 25; // height of "see all comments" button
+    const int noButtonBorder = 10;
+    int commentTableHeight = 0;
+    int commentContentHeight = 0;
+    BOOL showAllCommentsButton = NO;
+    if ([names count] == 0) {
+        commentTableHeight = 0;
+    }
+    else if ([names count] <= 3) {
+        commentTableHeight = commentsTable.rowHeight * [names count];
+        commentContentHeight = commentTableHeight + noButtonBorder;
+    }
+    else {
+        commentTableHeight = commentsTable.rowHeight * 3;
+        commentContentHeight = commentTableHeight + buttonHeight;
+        showAllCommentsButton = YES;
+    }
+    [commentsTable.view setFrame:CGRectMake(0, CONTENT_HEIGHT, 320, commentTableHeight)];
+    
+    NSLog(@"Number of comments for feedItem %d: %d old frame height: %f new frame height: %d", self.tagID, [names count], self.view.frame.size.height, CONTENT_HEIGHT + commentContentHeight);
+    
+    CGRect frame = self.view.frame;
+    int newHeight = CONTENT_HEIGHT + commentContentHeight;
+    frame.size.height = MAX(newHeight, frame.size.height);
+    [self.view setFrame:frame];
+    NSLog(@"Setting frame size to %f", frame.size.height);
+    if (showAllCommentsButton) {
+        [seeAllCommentsButton setFrame:CGRectMake(130, commentTableHeight + 2, 60, 20)];
+        [seeAllCommentsButton setHidden:NO];
+    }
+}
+/*
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
+    
+    for (NSMutableDictionary * d in theResults) {        
+        NSString * name = [d valueForKey:@"username"];
+        NSString * comment = [d valueForKey:@"comment"];
+        NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        if ([stixStringID length] == 0)
+        {
+            // backwards compatibility
+            stixStringID = @"COMMENT";
+        }
+        
+        [names addObject:name];
+        [comments addObject:comment];
+        [stixStringIDs addObject:stixStringID];
+    }
+    NSLog(@"GetHistory for feedItem %d completed: %d comments", self.tagID, [names count]);
+    
+    // do automatically
+    //[self.delegate didExpandFeedItem:self];
+}
+*/
+/** commentTable controller delegate ***/
+/*** commentFeedTableDelegate ***/
+
+-(NSString* )getNameForIndex:(int)index {
+    return [names objectAtIndex:index];
+}
+
+-(NSString *)getCommentForIndex:(int)index {
+    return [comments objectAtIndex:index];
+}
+
+-(NSString*)getStixStringIDForIndex:(int)index {
+    NSString* type = [stixStringIDs objectAtIndex:index];
+    if ([type length] == 0) 
+        type = @"COMMENT";
+    return type;
+}
+
+-(int)getCount {
+    return [names count];
+}
+
 
 - (void)dealloc
 {
@@ -123,13 +227,25 @@
 }
 
 -(IBAction)didPressAddCommentButton:(id)sender {
+    NSLog(@"Self: %x tagID %d name %@", self, tagID, self.nameString);
+    isExpanded = YES;
+    [self.delegate displayCommentsOfTag:tagID andName:nameString];
+}
+-(void)didPressSeeAllCommentsButton:(id)sender {
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 
 -(IBAction)didPressShareButton:(id)sender {
-    [self.delegate sharePix:tagID];
+    //[self.delegate sharePix:tagID];
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version"];
+    [alert setMessage:@"Share coming soon!"];
+    [alert show];
+    [alert release];
+    return;
 }
-
+	
 - (void)didReceiveMemoryWarning
 {
     // Releases the view if it doesn't have a superview.
@@ -166,6 +282,26 @@
     if ([locationString length] == 0)
         [locationIcon setHidden:YES];
     //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelDescriptor.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
+
+    if (names)
+        [names release];
+    if (comments)
+        [comments release];
+    if (stixStringIDs)
+        [stixStringIDs release];
+    names = [[NSMutableArray alloc] init];
+    comments = [[NSMutableArray alloc] init];
+    stixStringIDs = [[NSMutableArray alloc] init];
+    
+    isExpanded = NO;
+    /*
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+    [k getAllHistoryWithTagID:tagID];
+     */
+    
+    [shareButton setHidden:YES];
+    [seeAllCommentsButton setHidden:YES];
 }
 
 - (void)viewDidUnload

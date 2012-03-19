@@ -103,11 +103,15 @@
             // backwards compatibility
             stixStringID = @"COMMENT";
         }
-        
+#if SHOW_COMMENTS_ONLY
+        if (![stixStringID isEqualToString:@"COMMENT"])
+            continue;
+#endif
         [names addObject:name];
         [comments addObject:comment];
         [stixStringIDs addObject:stixStringID];
     }
+    [commentsTable configureRowsWithHeight:70 dividerVisible:YES fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     [commentsTable.tableView reloadData];
     [self stopActivityIndicator];
 }

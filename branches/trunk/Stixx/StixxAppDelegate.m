@@ -49,6 +49,7 @@
 @synthesize alertQueue;
 @synthesize camera;
 @synthesize metricLogonTime;
+@synthesize lastKumulosErrorTimestamp;
 #if USING_FACEBOOK
 @synthesize facebook;
 #endif
@@ -66,6 +67,7 @@ static int init=0;
     
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
+    [self setLastKumulosErrorTimestamp: [NSDate dateWithTimeIntervalSinceReferenceDate:0]];
     
     // Override point for customization after application launch
     [loadingMessage setText:@"Connecting to Stix Server..."];
@@ -365,7 +367,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
     if ([theResults count] == 0)
         NSLog(@"Could not find a stix data! May be missing in Kumulos.");
-    [BadgeView AddStixView:theResults];
+    else
+        [BadgeView AddStixView:theResults];
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
@@ -604,9 +607,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
                                                  (unsigned long)NULL), ^(void) {
             [self saveDataToDisk];
         });
-        
-        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
-        //[self saveDataToDisk];
 
         [self logMetricTimeInApp];
     }
@@ -629,9 +629,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
                                                  (unsigned long)NULL), ^(void) {
             [self saveDataToDisk];
         });
-        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
-        //[self saveDataToDisk];
-        
         [self logMetricTimeInApp];
     }
     
@@ -1354,7 +1351,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (lastViewController == profileController)
         NSLog(@"Kumulos error in profileController: %@ - probably failed while trying to call userLogin", theError);
 #endif
-    [self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    NSDate * now = [NSDate date];
+    NSLog(@"Last error timestamp: %@ now: %@", lastKumulosErrorTimestamp, now);
+    if ( [[lastKumulosErrorTimestamp dateByAddingTimeInterval:30] earlierDate:now] )
+    {
+        [self setLastKumulosErrorTimestamp:now];
+        [self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    }
 }
 
 -(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime {
@@ -1680,6 +1683,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     int amount = 5;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
     //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    //[self changeBuxCountByAmount:amount];
+}
+-(void)didFinishRewardAnimation:(int)amount {
     [self changeBuxCountByAmount:amount];
 }
 -(void)rewardLocation {
@@ -1687,7 +1693,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     int amount = 1;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
     //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-    [self changeBuxCountByAmount:amount];
+    //[self changeBuxCountByAmount:amount];
 }
 -(void)rewardStix {
     NSString * newStixStringID = [BadgeView getRandomStixStringID];

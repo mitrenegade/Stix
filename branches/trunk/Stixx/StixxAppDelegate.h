@@ -142,6 +142,8 @@ struct UserInfo {
     UIImagePickerController * camera;
 
     Kumulos* k;
+    NSDate * lastKumulosErrorTimestamp;
+        
     NSString * versionStringStable;
     NSString * versionStringBeta;
     NSString * currVersion;
@@ -224,6 +226,7 @@ struct UserInfo {
 @property (nonatomic, retain) NSMutableArray * alertQueue;
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) NSDate * metricLogonTime;
+@property (nonatomic, retain) NSDate * lastKumulosErrorTimestamp;
 
 #if USING_FACEBOOK
 @property (nonatomic, retain) Facebook *facebook;

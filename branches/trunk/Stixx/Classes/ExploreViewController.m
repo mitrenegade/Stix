@@ -76,7 +76,7 @@
 	           forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:segmentedControl];
 	[segmentedControl release];
-    
+    /*
     UISlider * slider = [[UISlider alloc] init];
     [slider setFrame:CGRectMake(20, 85, 280, 10)];
     [slider setMinimumValue:2];
@@ -85,7 +85,7 @@
     [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
 //    [self.view addSubview:slider];
     [slider release];
-
+*/
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
@@ -155,7 +155,11 @@
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
         
         int contentWidth = [tableController getContentWidth];
-        CGRect frame = CGRectMake(0, 0, contentWidth, contentWidth);
+        CGSize tagImageSize = tag.image.size;
+        float scale = contentWidth / tagImageSize.width;
+        int targetWidth = contentWidth;
+        int targetHeight = tagImageSize.height * scale;
+        CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
@@ -176,12 +180,12 @@
             if (row == -1) {
                 // load initial row(s)
                 NSDate * now = [NSDate date]; // now
-                [k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 2]];
+                [k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 5]];
             }
             else {
-                NSNumber * tagID = [allTagIDs objectAtIndex:(row * numColumns + numColumns - 1)];
+                NSNumber * tagID = [allTagIDs lastObject];
                 Tag * tag = [allTags objectForKey:tagID];
-                NSDate * lastUpdated = tag.timestamp;
+                NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
                 [k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
             }
             break;
@@ -210,6 +214,7 @@
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
         [allTagIDs addObject:newtag.tagID]; // save in order 
+        NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
     }
     [tableController dataSourceDidFinishLoadingNewData];
@@ -290,6 +295,14 @@
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
     //[self.view addSubview:detailController.view];
+    //[detailController release];
+}
+-(void)didDismissZoom {
+    isZooming = NO;
+    //[carouselView setUnderlay:scrollView];
+    [detailController.view removeFromSuperview];
+    [detailController release];
+    detailController = nil;
 }
 /*
 -(void)didClickAtLocation:(CGPoint)location {
@@ -353,13 +366,6 @@
     
 }
 */
--(void)didDismissZoom {
-    isZooming = NO;
-    //[carouselView setUnderlay:scrollView];
-    [detailController.view removeFromSuperview];
-    [detailController release];
-}
-
 //-(IBAction)feedbackButtonClicked:(id)sender {
 //    [self.delegate didClickFeedbackButton:@"Explore view"];
 //}
@@ -410,6 +416,7 @@
     
     //[carouselView release];
     //carouselView = nil;
+    [k release];
     [activityIndicator release];
     activityIndicator = nil;
 

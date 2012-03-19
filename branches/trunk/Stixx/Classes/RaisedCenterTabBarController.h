@@ -13,6 +13,7 @@
 @protocol RaisedCenterTabBarControllerDelegate 
 
 -(void)didPressTabButton:(int)pos;
+-(void)didFinishRewardAnimation:(int)amount;
 //-(void)didCloseFirstTimeInstructions;
 @end
 
@@ -39,6 +40,8 @@ enum {
     int allAnimationIDs[4];
     int mallPointerAnimationID;
     int animationIDsPurchase[4];
+    
+    int rewardValue;
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;

@@ -13,6 +13,7 @@
 
 @synthesize feedItems;
 @synthesize headerViews;
+@synthesize commentHistories;
 @synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
@@ -93,13 +94,15 @@
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
+    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
     [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
-    
     
     // array to retain each FeedItemViewController as it is created so its callback
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
     headerViews = [[NSMutableDictionary alloc] init];
+    commentHistories = [[NSMutableDictionary alloc] init];
+    feedSectionHeights = [[NSMutableDictionary alloc] init];
     
     //[activityIndicator startCompleteAnimation];
     [self startActivityIndicator];
@@ -343,6 +346,13 @@
 
 /*********** FeedTableView functions *******/
 
+-(int)getHeightForSection:(int)index {
+    Tag * tag = [allTags objectAtIndex:index];
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
+    return MAX(CONTENT_HEIGHT, feedItem.view.frame.size.height);
+}
+
 -(Tag *) tagAtIndex:(int)index {
     return [allTags objectAtIndex:index];
 }
@@ -393,7 +403,14 @@
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     Tag * tag = [allTags objectAtIndex:index];
-    VerticalFeedItemController * feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
+    VerticalFeedItemController * oldFeedItem = [feedItems objectForKey:tag.tagID];
+    BOOL shouldExpand = NO;
+    NSLog(@"ReloadViewForItemAtIndex %d: oldFeedItem tagID %d oldFeedItem %x", index, [tag.tagID intValue], oldFeedItem);
+    if (oldFeedItem != nil) {
+        NSLog(@"OldFeedItem frame: %f %f %f %f", oldFeedItem.view.frame.origin.x, oldFeedItem.view.frame.origin.y, oldFeedItem.view.frame.size.width, oldFeedItem.view.frame.size.height);
+        shouldExpand = [oldFeedItem isExpanded];
+    }
+    VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init];
     [feedItem setDelegate:self];
     
     NSString * name = tag.username;
@@ -420,66 +437,125 @@
     feedItem.tagID = [tag.tagID intValue];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];
+    if (0) { //shouldExpand) {
+        NSMutableDictionary * theResults = [commentHistories objectForKey:tag.tagID];
+        if (theResults != nil) {
+            NSMutableArray * names = [[NSMutableArray alloc] init];
+            NSMutableArray * comments = [[NSMutableArray alloc] init];
+            NSMutableArray * stixStringIDs = [[NSMutableArray alloc] init];
+            NSLog(@"Comment histories for feed item with tagID %d has %d elements", [tag.tagID intValue], [theResults count]);
+            int ct = 0;
+            for (NSMutableDictionary * d in theResults) {
+                NSString * name = [d valueForKey:@"username"];
+                NSString * comment = [d valueForKey:@"comment"];
+                NSString * stixStringID = [d valueForKey:@"stixStringID"];
+                if ([stixStringID length] == 0)
+                {
+                    // backwards compatibility
+                    stixStringID = @"COMMENT";
+                }
+#if SHOW_COMMENTS_ONLY
+                if (![stixStringID isEqualToString:@"COMMENT"])
+                    continue;
+#endif
+                [names addObject:name];
+                [comments addObject:comment];
+                [stixStringIDs addObject:stixStringID];
+            }
+            //[feedItem populateCommentsWithNames:names andComments:comments andStixStringIDs:stixStringIDs];
+            [names release];
+            [comments release];
+            [stixStringIDs release];
+        }
+    }
     
     // this object must be retained so that the button actions can be used
     [feedItems setObject:feedItem forKey:tag.tagID];
     
-    [self.tableController.tableView reloadData];
+    //[self.tableController.tableView reloadData];
     [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
+    NSLog(@"ReloadViewForItemAtIndex: %d newfeedItem %x ID %d size %f %f %f %f", index, feedItem, feedItem.tagID, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
+    [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
+//    [feedItem autorelease];
     return feedItem.view;
 }
 
 -(UIView*)viewForItemAtIndex:(int)index
 {	        
-    if (0) //index == 0)
-    {
-        if (!stixHeaderBody) {
-            stixHeaderBody = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 10)];
-            [stixHeaderBody setBackgroundColor:[UIColor greenColor]];
-        }
-        return stixHeaderBody;
-    }
-    else {
-        //index = index - 1;
-        Tag * tag = [allTags objectAtIndex:index];
-        VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    //index = index - 1;
+    Tag * tag = [allTags objectAtIndex:index];
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    
+    if (!feedItem) {
+        feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
+        [feedItem setDelegate:self];
         
-        if (!feedItem) {
-            feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
-            [feedItem setDelegate:self];
-            
-            NSString * name = tag.username;
-            NSString * descriptor = tag.descriptor;
-            NSString * comment = tag.comment;
-            NSString * locationString = tag.locationString;
-            
-            [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
-            feedItemViewOffset = feedItem.view.frame.origin; // same offset
-            [feedItem.view setBackgroundColor:[UIColor clearColor]];
-            [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
-            //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-            //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-            UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
-            if (photo)
-            {
-                //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
-                [feedItem populateWithUserPhoto:photo];
-                [photo autorelease]; // MRC
-            }
-            // add timestamp
-            [feedItem populateWithTimestamp:tag.timestamp];
-            // add badge and counts
-            [feedItem initStixView:tag];
-            feedItem.tagID = [tag.tagID intValue];
-            int count = [self.delegate getCommentCount:feedItem.tagID];
-            [feedItem populateWithCommentCount:count];
-            
-            // this object must be retained so that the button actions can be used
-            [feedItems setObject:feedItem forKey:tag.tagID];
+        NSString * name = tag.username;
+        NSString * descriptor = tag.descriptor;
+        NSString * comment = tag.comment;
+        NSString * locationString = tag.locationString;
+        
+        [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
+        feedItemViewOffset = feedItem.view.frame.origin; // same offset
+        [feedItem.view setBackgroundColor:[UIColor clearColor]];
+        [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
+        //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+        //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+        UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
+        if (photo)
+        {
+            //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
+            [feedItem populateWithUserPhoto:photo];
+            [photo autorelease]; // MRC
         }
-        return feedItem.view;
+        NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
+        // add timestamp
+        [feedItem populateWithTimestamp:tag.timestamp];
+        // add badge and counts
+        [feedItem initStixView:tag];
+        feedItem.tagID = [tag.tagID intValue];
+        int count = [self.delegate getCommentCount:feedItem.tagID];
+        [feedItem populateWithCommentCount:count];
+        
+        // populate comments for this tag
+        NSMutableArray * param = [[NSMutableArray alloc] init];
+        [param addObject:tag.tagID];
+        //[[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+        
+        // this object must be retained so that the button actions can be used
+        [feedItems setObject:feedItem forKey:tag.tagID];
+    } 
+    else {
+        // see what the dimensions were saved previously
+        NSLog(@"ViewForItem EXISTS:  feedItem ID %d index %d view %x height: %f ", feedItem.tagID, index, feedItem.view, feedItem.view.frame.size.height);
+    }
+    NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
+    [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
+    return feedItem.view;
+}
+
+-(void)didGetCommentHistoryWithResults:(NSMutableArray*)theResults {
+    if ([theResults count] == 0)
+        return;
+    NSMutableArray * kumulosResults = [theResults objectAtIndex:0];
+    if ([kumulosResults count] == 0)
+        return;
+    NSMutableDictionary * d = [kumulosResults objectAtIndex:0];
+    NSNumber * tagID = [d objectForKey:@"tagID"];
+    NSLog(@"Adding comment history from kumulos: %d results for tag %d", [kumulosResults count], [tagID intValue]);
+    [commentHistories setObject:kumulosResults forKey:tagID];
+    // expand feedview to display all comments
+    // hack: to test expanding comments
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == [tagID intValue]) {
+            lastPageViewed = i;
+            NSLog(@"Displaying comments of tagID %d lastPageViewed %d", [tag.tagID intValue], lastPageViewed);
+            [self reloadViewForItemAtIndex:lastPageViewed];
+            return;
+        }
     }
 }
 
@@ -605,6 +681,8 @@
 
 /*** verticalfeedItemDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
+#if 1
+    // display a CommentViewController to also add comments
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
         [commentView setDelegate:self];
@@ -617,6 +695,35 @@
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [commentView.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:commentView.view];
+#else
+    // expand feedview to display all comments
+    // hack: to test expanding comments
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            lastPageViewed = i;
+            NSLog(@"Displaying comments of tagID %d lastPageViewed %d", [tag.tagID intValue], lastPageViewed);
+            [self reloadViewForItemAtIndex:lastPageViewed];
+            return;
+        }
+    }
+#endif
+}
+
+-(void)didExpandFeedItem:(VerticalFeedItemController *) feedItem {
+    // not a reload feedview because reloading causes the comments to disappear
+    // rather replace the feedItems array with an expanded feedItem and reload the table
+    //[feedItems setObject:feedItem forKey:[NSNumber numberWithInt:feedItem.tagID]];
+    //[self.tableController.tableView reloadData];
+    int tagID = feedItem.tagID;
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            lastPageViewed = i;
+            [self reloadViewForItemAtIndex:lastPageViewed];
+            return;
+        }
+    }
 }
 
 -(void)didSharePix:(NSMutableArray*)params {
@@ -689,8 +796,15 @@
 // hack: forced display of comment page
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID {
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
-    if (feedItem != nil)
+    if (feedItem != nil) {
         [feedItem didPressAddCommentButton:self];
+        for (int i=0; i<[allTags count]; i++) {
+            Tag * tag = [allTags objectAtIndex:i];
+            if ([tag.tagID intValue] == [tagID intValue]) {
+                lastPageViewed = i;
+            }
+        }
+    }
 }
 
 /*** CommentViewDelegate ***/

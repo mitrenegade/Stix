@@ -60,7 +60,7 @@
 
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
     if (animID == animationID[1]) {
-        [stixView release];
+        //[stixView release];
         [delegate didDismissZoom];
     }
 }
@@ -117,7 +117,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46 + headerView.frame.size.height,320,340)];
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46 + headerView.frame.size.height,320,320)];
     [self.view addSubview:scrollView];
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.scrollEnabled = YES;
@@ -144,6 +144,7 @@
     commentsTable = [[CommentFeedTableController alloc] init];
     [commentsTable.view setFrame:CGRectMake(0, 290, 320, 280)];
     [commentsTable setDelegate:self];
+    [commentsTable configureRowsWithHeight:18 dividerVisible:NO fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     
     [self.view addSubview:headerView];
     [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 5)];
@@ -167,6 +168,10 @@
             stixStringID = @"COMMENT";
         }
         
+#if SHOW_COMMENTS_ONLY
+        if (![stixStringID isEqualToString:@"COMMENT"])
+            continue;
+#endif
         [names addObject:name];
         [comments addObject:comment];
         [stixStringIDs addObject:stixStringID];
@@ -174,7 +179,7 @@
     [commentsTable.tableView reloadData];
 
     // resize scrollview
-    [commentsTable.view setFrame:CGRectMake(0, 290, 320, 70 * [names count])];
+    [commentsTable.view setFrame:CGRectMake(0, 290, 320, commentsTable.rowHeight * [names count])];
     [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 5)];
     [self stopActivityIndicator];
 }

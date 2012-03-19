@@ -7,10 +7,14 @@
 //
 
 #import "CommentFeedTableController.h"
+#define LEFT_LABEL_TAG 1001
+#define RIGHT_LABEL_TAG 1002
 
 @implementation CommentFeedTableController
 
 @synthesize delegate;
+@synthesize rowHeight;
+@synthesize fontTextColor, fontNameColor;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -43,6 +47,11 @@
     [self.tableView setBackgroundColor:[UIColor clearColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
     //cellDictionary = [[NSMutableDictionary alloc] init];
+    rowHeight = 70;
+    showDivider = YES;
+    fontSize = 12;
+    fontNameColor = [UIColor blackColor];
+    fontTextColor = [UIColor blackColor];
 }
 
 - (void)viewDidUnload
@@ -93,7 +102,7 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 70;
+    return rowHeight;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -104,9 +113,30 @@
     if (cell == nil) {
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
         cell.textLabel.numberOfLines = 2;
-        [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+        [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize]];
         [cell setBackgroundColor:[UIColor clearColor]];
-        [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
+        if (showDivider)
+            [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
+        [cell.textLabel setTextColor:fontTextColor];
+        UILabel * leftLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, 0, 30, rowHeight)];
+        UILabel * rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 170, rowHeight)];
+		leftLabel.textColor = fontNameColor; //[UIColor colorWithRed:102/255.0 green:0.0 blue:0.0 alpha:1.0];
+		leftLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize]];
+		rightLabel.textColor = fontTextColor; //[UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
+        //NSArray * fonts = [UIFont fontNamesForFamilyName:@"Helvetica"];
+        //for (int i=0; i<[fonts count]; i++){ 
+        //    NSLog(@"Font %d = %@", i, [fonts objectAtIndex:i]);
+        //}
+		rightLabel.font = [UIFont fontWithName:@"Helvetica-Oblique" size:[UIFont labelFontSize] - 2];
+        [leftLabel setBackgroundColor:[UIColor clearColor]];
+        [rightLabel setBackgroundColor:[UIColor clearColor]];
+        leftLabel.tag = LEFT_LABEL_TAG;
+        rightLabel.tag = RIGHT_LABEL_TAG;
+        [cell.contentView addSubview:leftLabel];
+        [cell.contentView addSubview:rightLabel];
+        [cell addSubview:cell.contentView];
+        [leftLabel release];
+        [rightLabel release];
     }
     
     // Configure the cell...
@@ -127,7 +157,20 @@
         NSString * comment = [self.delegate getCommentForIndex:index];
         NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
         NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
-        [cell.textLabel setText:commentLabel];
+        // to set one line of text:
+        // [cell.textLabel setText:commentLabel];
+        // to set multiple lines or different fonts/colors
+        UILabel * leftLabel = (UILabel *)[cell viewWithTag:LEFT_LABEL_TAG];
+        UILabel * rightLabel = (UILabel *)[cell viewWithTag:RIGHT_LABEL_TAG];
+        CGRect frame = leftLabel.frame;
+        frame.size.width = [name length] * fontSize;
+        [leftLabel setFrame:frame];
+        [leftLabel setText:name];
+        frame = rightLabel.frame;
+        frame.size.width = [comment length] * fontSize;
+        frame.origin.x = leftLabel.frame.origin.x + leftLabel.frame.size.width;
+        [rightLabel setFrame:frame];
+        [rightLabel setText:comment];
 
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
@@ -214,5 +257,13 @@
     return str;
 }
 
+-(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor  {
+    rowHeight = height;
+    showDivider = visible;
+    fontSize = size;
+    [self setFontNameColor:nameColor];
+    [self setFontTextColor:textColor];
+    //[self.tableView reloadData];
+}
 
 @end

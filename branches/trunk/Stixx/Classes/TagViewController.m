@@ -285,7 +285,7 @@
     //    [arViewController addCoordinate:[tag coordinate]];
     // this error is handled right now by adding a default ARCoordinate
     //else
-        NSLog(@"Added invalid coordinate for tag: %i", [tag.tagID intValue]);
+    //    NSLog(@"Added invalid coordinate for tag: %i", [tag.tagID intValue]);
     //else
     //    [self.delegate failedToAddCoordinateOfTag:tag];
 }

@@ -137,7 +137,7 @@
 
 -(void)populateWithAuxStixFromTag:(Tag *)tag {
     auxStixStringIDs = tag.auxStixStringIDs;
-    NSMutableArray * auxLocations = tag.auxLocations; // deprecated
+    NSMutableArray * auxLocations = tag.auxLocations;
     //NSMutableArray * auxRotations = tag.auxRotations; // deprecated
     NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
@@ -175,7 +175,7 @@
         stixFrameScaled.size.height *= imageScale;// * auxScale;
         centerX *= imageScale;
         centerY *= imageScale;
-        //NSLog(@"FeedItemView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", stix.frame.size.width, stix.frame.size.height, centerX / imageScale, centerY / imageScale, imageData.size.width, imageData.size.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, imageView.frame.size.width, imageView.frame.size.height); 
+        //NSLog(@"StixView: Scaling badge of %f %f at %f %f in image %f %f down to %f %f at %f %f in image %f %f", auxStix.frame.size.width, auxStix.frame.size.height, location.x, location.y, originalImageSize.width, originalImageSize.height, stixFrameScaled.size.width, stixFrameScaled.size.height, centerX, centerY, targetSize.width, targetSize.height); 
         [auxStix setFrame:stixFrameScaled];
         [auxStix setCenter:CGPointMake(centerX, centerY)];
         auxStix.transform = auxTransform;
@@ -328,7 +328,7 @@
     offset_x = (location.x - stix.center.x);
     offset_y = (location.y - stix.center.y);
     
-    NSLog(@"Touches began: center %f %f touch location %f %f", stix.center.x, stix.center.y, location.x, location.y);
+    //NSLog(@"Touches began: center %f %f touch location %f %f", stix.center.x, stix.center.y, location.x, location.y);
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -362,7 +362,7 @@
         if (transformCanvas) {
             [transformCanvas setCenter:stix.center];
         }
-        NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
+        //NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
 	}
 }
 
@@ -372,7 +372,7 @@
         return;
     }
     
-    NSLog(@"Touches ended: new center %f %f", stix.center.x, stix.center.y);
+    //NSLog(@"Touches ended: new center %f %f", stix.center.x, stix.center.y);
 
 	if (isDragging == 1)
 	{
@@ -443,7 +443,7 @@
         case UIGestureRecognizerStateBegan:
             if ([recognizer respondsToSelector:@selector(scale)]) {
                 // scaling transform
-                NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [(UIPinchGestureRecognizer*)recognizer scale], [(UIPinchGestureRecognizer*)recognizer velocity]);
+                //NSLog(@"AuxView: Pinch motion started! scale %f velocity %f", [(UIPinchGestureRecognizer*)recognizer scale], [(UIPinchGestureRecognizer*)recognizer velocity]);
             }
             if (_activeRecognizers.count == 0)
                 referenceTransform = stix.transform;

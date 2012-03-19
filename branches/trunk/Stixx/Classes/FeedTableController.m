@@ -47,7 +47,7 @@
     self.tableView.backgroundColor = [UIColor clearColor];    
 
     if (refreshHeaderView == nil) {
-        refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];
+        refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height+1, 320.0f, self.tableView.bounds.size.height)];
         refreshHeaderView.backgroundColor = [UIColor colorWithWhite:0 alpha:.85]; //[UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
         refreshHeaderView.bottomBorderThickness = 1.0;
         [self.tableView addSubview:refreshHeaderView];
@@ -118,7 +118,7 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    NSLog(@"Number of sections: %d", [contentPageIDs count]);
+    //NSLog(@"Number of sections: %d", [contentPageIDs count]);
     return [contentPageIDs count];
 }
 
@@ -130,7 +130,9 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return CONTENT_HEIGHT;
+    int height = [self.delegate getHeightForSection:([indexPath section])];
+   // NSLog(@"GetHeightForSection %d returned %d", [indexPath section], height);
+    return height; //CONTENT_HEIGHT;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -167,7 +169,7 @@
         [cellOldView removeFromSuperview];
     
     int y = [indexPath section];
-    NSLog(@"Vertical Feed Table: Loading row %d", y);
+    //NSLog(@"Vertical Feed Table: Loading row %d", y);
     //NSNumber * tagID = [contentPageIDs objectAtIndex:y];
     UIView * view;
     view = [self.delegate viewForItemAtIndex:y];
@@ -308,14 +310,16 @@
 
 - (void)dataSourceDidFinishLoadingNewData{
 	
-	_reloading = NO;
-	
-	[UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDuration:.3];
-	[self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-	[UIView commitAnimations];
-	
-	[refreshHeaderView setState:EGOOPullRefreshNormal];
+    if (_reloading) {
+        _reloading = NO;
+        
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:.3];
+        [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+        [UIView commitAnimations];
+        
+        [refreshHeaderView setState:EGOOPullRefreshNormal];
+    }
 }
 - (void) reloadTableViewDataSource
 {

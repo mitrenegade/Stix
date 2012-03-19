@@ -20,6 +20,7 @@
 #import "BTBitlyHelper.h"
 #import "ProfileViewController.h"
 #import "OutlineLabel.h"
+#import "KumulosHelper.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -52,10 +53,12 @@
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
+    NSMutableDictionary * commentHistories;
+    NSMutableDictionary * feedSectionHeights;
     //BadgeView * badgeView;
     CarouselView * carouselView;
     CommentViewController * commentView;
@@ -89,6 +92,7 @@
 }
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) NSMutableDictionary * headerViews;
+@property (nonatomic, retain) NSMutableDictionary * commentHistories;
 @property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) FeedTableController *tableController;

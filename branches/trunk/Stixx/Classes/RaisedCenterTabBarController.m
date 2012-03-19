@@ -90,8 +90,10 @@
 
 -(void)doRewardAnimation:(NSString*)title withAmount:(int)amount {
     int width = 100;
+    rewardValue = amount;
     UIImage * coinImage = [UIImage imageNamed:@"bux_coin.png"];
-    CGRect canvasFrame = CGRectMake(190, 275, width, 100);
+    //CGRect canvasFrame = CGRectMake(190, 275, width, 100);
+    CGRect canvasFrame = CGRectMake(5, 60, width, 100);
     UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
     UIImageView * coinView = [[UIImageView alloc] initWithImage:coinImage];
     CGRect rewardNameFrame = CGRectMake(0, 60, width, 15);
@@ -176,8 +178,9 @@
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        allAnimationIDs[3] = [animation doDownwardFade:canvas inView:self.view forDistance:100 forTime:1];
+        allAnimationIDs[3] = [animation doDownwardFade:canvas inView:self.view forDistance:-100 forTime:1];
         [animation release];
+        [self.myDelegate didFinishRewardAnimation:rewardValue];
     }
     
     /* first time mall pointer */

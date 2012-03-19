@@ -25,6 +25,10 @@
 #import "BadgeView.h"
 #import "OutlineLabel.h"
 #import "StixView.h"
+#import "Kumulos.h"
+#import "CommentFeedTableController.h"
+
+#define CONTENT_HEIGHT 320
 
 @class VerticalFeedItemController;
 
@@ -32,14 +36,17 @@
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
 -(void)sharePix:(int)tagID;
+-(void)didExpandFeedItem:(VerticalFeedItemController *) feedItem;
 
 // forward from StixView
 -(NSString*)getUsername;
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
+
+// get comment histories stored in feedcontroller
 @end
 
-@interface VerticalFeedItemController : UIViewController <StixViewDelegate>{
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate,CommentFeedTableDelegate, KumulosDelegate>{
     
 	IBOutlet UILabel * labelName;
     //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
@@ -53,6 +60,7 @@
     IBOutlet UIImageView * userPhotoView;
     IBOutlet UIButton * addCommentButton;
     IBOutlet UIButton * shareButton;
+    IBOutlet UIButton * seeAllCommentsButton;
     
     NSObject<VerticalFeedItemDelegate> * delegate;    
     
@@ -65,6 +73,13 @@
     int commentCount;
     int tagID;
     
+    BOOL isExpanded; // whether or not to show comments
+    CommentFeedTableController * commentsTable;
+    NSMutableArray * names;
+    NSMutableArray * comments;
+    NSMutableArray * stixStringIDs;
+    Kumulos * k;
+
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
@@ -84,16 +99,20 @@
 @property (nonatomic, assign) int commentCount;
 @property (nonatomic, assign) NSObject<VerticalFeedItemDelegate> * delegate;   
 @property (nonatomic, retain) StixView * stixView;
+@property (nonatomic, assign) BOOL isExpanded;
+@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
 -(void)populateWithCommentCount:(int)count;
+-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;
 
 -(void)initStixView:(Tag*)tag;
 
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;
+-(IBAction)didPressSeeAllCommentsButton:(id)sender;
 @end
 
 

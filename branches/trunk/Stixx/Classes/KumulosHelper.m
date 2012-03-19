@@ -55,6 +55,10 @@ static KumulosHelper *sharedKumulosHelper;
     else if ([function isEqualToString:@"getSubcategories"]) {
         [k getAllCategories];
     }
+    else if ([function isEqualToString:@"getCommentHistory"]) {
+        NSNumber * tagID = [params objectAtIndex:0];
+        [k getAllHistoryWithTagID:[tagID intValue]];
+    }
 }
 
 -(void)execute:(NSString*)_function {
@@ -191,6 +195,15 @@ static KumulosHelper *sharedKumulosHelper;
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
         if (sharedKumulosHelper.delegate)
             [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+    }
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllHistoryDidCompleteWithResult:(NSArray *)theResults {
+    if ([sharedKumulosHelper.function isEqualToString:@"getCommentHistory"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
+        if (sharedKumulosHelper.delegate) {
+            [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+        }
     }
 }
 

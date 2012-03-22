@@ -27,7 +27,7 @@
 #define HOSTNAME @"stix.herokuapp.com"
 //#define HOSTNAME @"localhost:3000"
 
-#define DEBUGX 0
+#define DEBUGX 1
 
 @implementation StixxAppDelegate
 
@@ -62,6 +62,7 @@
 #endif
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
+static NSString * uniqueDeviceID = nil;
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #if DEBUGX==1
@@ -78,6 +79,25 @@ static int init=0;
     [k setDelegate:self];
     [self setLastKumulosErrorTimestamp: [NSDate dateWithTimeIntervalSinceReferenceDate:0]];
     
+    /*** device id on pasteboard ***/
+	UIPasteboard *appPasteBoard = [UIPasteboard pasteboardWithName:@"StixAppPasteboard" create:YES];
+	appPasteBoard.persistent = YES;
+	uniqueDeviceID = [appPasteBoard string];    
+    if (uniqueDeviceID == nil) {
+        CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+        uniqueDeviceID = (NSString *)CFUUIDCreateString(NULL,uuidRef);
+        CFRelease(uuidRef);
+        [appPasteBoard setString:uniqueDeviceID];
+        NSLog(@"Unique device created and set to pasteboard: %@", uniqueDeviceID);
+    }
+    else {
+        NSLog(@"Unique device retrieved from pasteboard: %@", uniqueDeviceID);
+    }
+    [uniqueDeviceID retain];
+    NSString * description = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
+    NSString * string = @"Application started";
+    [k addMetricHitWithDescription:description andStringValue:string andIntegerValue:0];
+    
     // Override point for customization after application launch
     [loadingMessage setText:@"Connecting to Stix Server..."];
     
@@ -92,15 +112,10 @@ static int init=0;
     [testObject save];
     */
     
+    notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|
      UIRemoteNotificationTypeAlert|
      UIRemoteNotificationTypeSound];    
-    
-    [self Parse_unsubscribeFromAll];
-    // register for notifications on update channel
-    [self Parse_subscribeToChannel:@"StixUpdates"];
-    [self Parse_subscribeToChannel:@""];
-    
     /*** Kiip service ***/
 #if USING_KIIP
     // Start and initialize when application starts
@@ -128,6 +143,7 @@ static int init=0;
 	/***** create first view controller: the TagViewController *****/
     [loadingMessage setText:@"Initializing camera..."];
     
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     camera = [[UIImagePickerController alloc] init];
     camera.navigationBarHidden = YES;
@@ -226,8 +242,6 @@ static int init=0;
     profileController.delegate = self;
     [profileController setCamera:self.camera];
     [profileController setFriendController:friendController];
-    [feedController setProfileController:profileController];
-    [exploreController setProfileController:profileController];
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
@@ -239,6 +253,7 @@ static int init=0;
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
     [emptyViewController release];
+    [exploreController setTabBarController:tabBarController];
     
     lastViewController = feedController;
     
@@ -280,10 +295,10 @@ static int init=0;
     {
         NSLog(@"Loggin in as %@", myUserInfo->username);
         //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+          //                                       (unsigned long)NULL), ^(void) {
             [profileController loginWithUsername:myUserInfo->username];
-        });
+        //});
     }   
 	
     /* display versioning info */
@@ -370,7 +385,15 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // Tell Parse about the device token.
     [PFPush storeDeviceToken:newDeviceToken];
     // Subscribe to the global broadcast channel.
-    [PFPush subscribeToChannelInBackground:@""];
+
+    [self Parse_unsubscribeFromAll];
+    // register for notifications on update channel
+    [self Parse_subscribeToChannel:@"StixUpdates"];
+    [self Parse_subscribeToChannel:@""];
+    if ([self getUsername] != nil)
+        [self Parse_subscribeToChannel:[self getUsername]];
+    
+    notificationDeviceToken = [newDeviceToken retain];
 }
 
 -(void)initializeBadges {
@@ -1428,6 +1451,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 /**** LoginSplashController delegate ****/
 
 /**** ProfileViewController and login functions ****/
+-(void)didOpenProfileView {
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [profileController.view setFrame:frameShifted];
+#if !TARGET_IPHONE_SIMULATOR
+    //[self.camera setCameraOverlayView:profileController.view];
+#endif
+    [tabBarController.view addSubview:profileController.view];
+    [profileController viewWillAppear:YES]; // force updates -> hack: this doesn't automatically happen??
+}
+
+-(void)closeProfileView {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    [self.profileController.view removeFromSuperview];
+    [self.camera setCameraOverlayView:self.tabBarController.view];
+}
 
 -(void)didClickChangePhoto {
 #if DEBUGX==1
@@ -1451,8 +1492,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     picker.delegate = self;
     
     // because a modal camera already exists, we must present a modal view over that camera
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    [camera presentModalViewController:picker animated:YES];
+    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
+    //[camera presentModalViewController:picker animated:YES];
+    [profileController presentModalViewController:picker animated:YES];
 }
 
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
@@ -1462,9 +1504,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
     //    [picker release];    
     
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    [camera dismissModalViewControllerAnimated:TRUE];
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
+    [profileController dismissModalViewControllerAnimated:TRUE];
+    //[[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
 #endif
@@ -1487,13 +1529,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         newPhoto = originalPhoto; 
     
     NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-    [camera dismissModalViewControllerAnimated:TRUE];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [profileController dismissModalViewControllerAnimated:TRUE];
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
 #endif
-    [tabBarController setSelectedIndex:0];
     [profileController viewWillAppear:YES];
     
     // scale down photo
@@ -1511,6 +1551,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // add to kumulos
     [k addPhotoWithUsername:myUserInfo->username andPhoto:img];
+    //if (lastViewController == feedController)
+    //    [self didPressTabButton:0];
+    //else if (lastViewController == exploreController)
+    //    [self didPressTabButton:2];
+    //[self closeProfileView];
     [picker release];
 }
 
@@ -1567,7 +1612,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"DidLoginFromSplashScreen: username %@ stix %d, stixOrder %d", username, [stix count], [stixOrder count]);
     
     /***** if we used splash screen *****/
-    [self didDismissSecondaryView];
+    @try {
+        [self didDismissSecondaryView];
+    }
+    @catch (NSException * e) {
+        NSLog(@"Login from splash screen: dismiss secondary view broken! %@", [e reason]);
+    }
     //[loginSplashController.view removeFromSuperview];
     //[loginSplashController release];
     
@@ -1591,6 +1641,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    NSString * description = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
+    NSString * string = [NSString stringWithFormat:@"User login: %@", name];
+    [k addMetricHitWithDescription:description andStringValue:string andIntegerValue:0];
+
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
         [allStix removeAllObjects];
@@ -1653,7 +1707,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
-    [self Parse_subscribeToChannel:myUserInfo->username];
+    if (notificationDeviceToken)
+        [self Parse_subscribeToChannel:myUserInfo->username];
+    else
+        // try registering again
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+
     [self updateBuxCount];
     //[profileController updatePixCount];    
     
@@ -1754,13 +1813,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self.camera setCameraOverlayView:loginSplashController.view];        
 #endif
     }
-}
-
--(void)closeProfileView {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    [self.profileController.view removeFromSuperview];
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
@@ -2092,35 +2144,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)sharePix:(int)tagID {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    /*
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Processing for Sharing"];
-    [alert setMessage:@"This Pix has been saved to your Photo Library! For now please share it from there."];
-    [alert show];
-    [alert release];
-    */
-    Tag * tag = nil;
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * t = [allTags objectAtIndex:i];
-        if ([t.tagID intValue] == tagID)
-            tag = [allTags objectAtIndex:i];
-    }
-    if (tag == nil) {
-        return;
-    }
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-    
-    [self uploadImage:png];
-    
-    //NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
-    //[[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
+    //[self.delegate sharePix:tagID];
+    shareActionSheetTagID = tagID;
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", /*@"Move", */nil];
+    [actionSheet setTag:ACTIONSHEET_TAG_SHAREPIX];
+    [actionSheet showFromTabBar:tabBarController.tabBar ];
+    [actionSheet release];
 }
 
 -(void)didSharePixWithURL:(NSString *)url {
@@ -2286,7 +2315,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     if ([[self getUsername] isEqualToString:@"bobo"] || [password isEqualToString:@"admin"]) {
 //        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Ye ol' Admin Menu" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users' Stix", @"Get me one of each", "Set all Users' bux", nil];
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set my stix to unlimited", @"Set all Users bux", @"Save Stix Feed", @"Reset all stix orders", nil];
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix (disabled)", @"Get me one of each (disabled)", @"Set my stix to unlimited (disabled)", @"Increment all Users' Bux by 5", @"Reset all stix orders (disabled)", nil];
+        [actionSheet setTag:ACTIONSHEET_TAG_ADMIN];
         [actionSheet showFromTabBar:tabBarController.tabBar ];
         [actionSheet release];
     }
@@ -2298,42 +2328,91 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    // button index: 
-    // 0 = "Reset all Users' Stix"
-    // 1 = "Get me one of each"
-    // 2 = "Set my stix to unlimited"
-    // 3 = "Set all Users' bux"
-    // 4 = "Save stix feed"
-    // 5 = "Reset all Stix Orders"
-    // 6 = "Cancel"
-    switch (buttonIndex) {
-        case 0:
-            NSLog(@"button 0");
-            //[self adminUpdateAllStixCountsToOne];
-            break;
-        case 1:
-            NSLog(@"button 1");
-            //[self adminIncrementAllStixCounts];
-            break;
-        case 2:
-            NSLog(@"button 2 set my stix to unlimited");
-            //[self adminSetUnlimitedStix];
-            break;
-        case 3:
-            NSLog(@"button 3");
-            [self adminSetAllUsersBuxCounts];
-            break;
-        case 4:
-            NSLog(@"button 4: Save all tag update info");
-            [self adminSaveTagUpdateInfo];
-            break;
-        case 5:
-            //NSLog(@"button 5: Reset all stix orders");
-            [self adminResetAllStixOrders];
-            break;
-        default:
-            return;
-            break;
+    if (actionSheet.tag == ACTIONSHEET_TAG_ADMIN) {
+        // button index: 
+        // 0 = "Reset all Users' Stix"
+        // 1 = "Get me one of each"
+        // 2 = "Set my stix to unlimited"
+        // 3 = "Set all Users' bux"
+        // 4 = "Save stix feed"
+        // 5 = "Reset all Stix Orders"
+        // 6 = "Cancel"
+        switch (buttonIndex) {
+            case 0:
+                NSLog(@"button 0");
+                //[self adminUpdateAllStixCountsToOne];
+                break;
+            case 1:
+                NSLog(@"button 1");
+                //[self adminIncrementAllStixCounts];
+                break;
+            case 2:
+                NSLog(@"button 2 set my stix to unlimited");
+                //[self adminSetUnlimitedStix];
+                break;
+            case 3:
+                NSLog(@"button 3 increment all user bux by 5");
+                //[self adminSetAllUsersBuxCounts];
+                [self adminIncrementAllUsersBuxCounts];
+                break;
+            case 4:
+                NSLog(@"button 5: Reset all stix orders");
+                //[self adminResetAllStixOrders];
+                break;
+            default:
+                return;
+                break;
+        }        
+    }
+    else if (actionSheet.tag == ACTIONSHEET_TAG_SHAREPIX) {
+        // button index: 0 = "Facebook", 1 = "Email", 2 = "Cancel"
+        switch (buttonIndex) {
+            case 0: // Facebook
+            {
+                UIAlertView* alert = [[UIAlertView alloc]init];
+                [alert addButtonWithTitle:@"Ok"];
+                [alert setTitle:@"Beta Version"];
+                [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
+                [alert show];
+                [alert release];
+                NSString * metricName = @"SharePixActionsheet";
+                NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
+                [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+            }
+                break;
+            case 1: // Email
+            {
+                Tag * tag = nil;
+                for (int i=0; i<[allTags count]; i++) {
+                    Tag * t = [allTags objectAtIndex:i];
+                    if ([t.tagID intValue] == shareActionSheetTagID) {
+                        tag = t;
+                        break;
+                    }
+                }
+                if (tag == nil) {
+                    NSLog(@"Error in sharing pix! Tag doesn't exist!");
+                    return;
+                }
+                UIImage * result = [tag tagToUIImage];
+                NSData *png = UIImagePNGRepresentation(result);
+                
+                UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+                
+                [self uploadImage:png];
+                
+                NSString * metricName = @"SharePixActionsheet";
+                NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
+                [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+            }
+                break;
+            case 2: // Cancel
+                return;
+                break;
+            default:
+                return;
+                break;
+        }
     }
 }
 
@@ -2342,6 +2421,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     [k adminSetAllUserBuxWithBux:25];
+}
+
+-(void) adminIncrementAllUsersBuxCounts {
+    int buxIncrement = 5;
+    [k adminIncrementAllUserBuxWithBux:buxIncrement];
+    
+    [self Parse_sendBadgedNotification:[NSString stringWithFormat:@"Your Bux have been incremented by %d", buxIncrement] OfType:NB_INCREMENTBUX toChannel:@"" withTag:nil orGiftStix:nil];
 }
 
 -(void)decrementStixCount:(NSString *)stixStringID {
@@ -2364,13 +2450,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k addStixToUserWithUsername:myUserInfo->username andStix:data];
     [data release];
     
-}
-
--(void)adminSaveTagUpdateInfo {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    [[KumulosHelper sharedKumulosHelper] execute:@"adminSaveTagUpdateInfo"];
 }
 
 -(void)incrementStixCount:(NSString *)stixStringID{
@@ -2415,8 +2494,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void) Parse_unsubscribeFromAll {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
-#endif  
-   [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+#endif
+    NSError * error;
+    NSSet * channels = [PFPush getSubscribedChannels:&error];
+   //[PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
         NSEnumerator * e = [channels objectEnumerator];
         id element;
         NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
@@ -2426,15 +2507,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [PFPush unsubscribeFromChannelInBackground:element];
         }
         NSLog(@"%@", channelsString);
-    }];
+//    }]; // perform in foreground
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     // Subscribe to the global broadcast channel.
-    [PFPush subscribeToChannelInBackground:channel];
+    //[PFPush subscribeToChannelInBackground:channel];
     NSLog(@"Parse: subscribing to channel <%@>", channel);
+    [PFPush subscribeToChannelInBackground:channel block:^(BOOL succeeded, NSError *error) {
+        if (succeeded) 
+            NSLog(@"Subscribed to channel <%@>", channel);
+        else
+            NSLog(@"Could not subscribe to <%@>: error %@", channel, [error localizedDescription]);
+    }];
 }
 
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID {
@@ -2442,7 +2529,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX)
+    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX)
         [data setObject:message forKey:@"alert"];
     [data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
     [data setObject:[NSNumber numberWithInt:type] forKey:@"notificationBookmarkType"];
@@ -2455,12 +2542,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [PFPush sendPushDataToChannelInBackground:channel withData:data];
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+- (void)application:(UIApplication *)application 
+didReceiveRemoteNotification:(NSDictionary *)userInfo {
+#if 0
+    [PFPush handlePush:userInfo];
+#else
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-            
-    notificationBookmarkType = [[userInfo objectForKey:@"notificationBookmarkType"] intValue    ];
+    // debug - display userInfo
+    NSLog(@"%@", userInfo);
+    //NSDictionary * aps = [userInfo objectForKey:@"aps"]; 
+    notificationBookmarkType = [[userInfo objectForKey:@"notificationBookmarkType"] intValue];
     // todo: client should track badge counts and set them this way:
     //[UIApplication sharedApplication].applicationIconBadgeNumber = badgeCount;
 
@@ -2503,8 +2596,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         {
             notificationTagID = -1;
             notificationGiftStixStringID = nil;
-            break;
         }
+            break;
+            
+        case NB_INCREMENTBUX: 
+        {
+            notificationTagID = -1;
+            notificationGiftStixStringID = nil;
+            doAlert = NO; // do not show general alert - go to bookmark jump
+        }
+            break;
             
         default:
             break;
@@ -2521,16 +2622,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     else {
         // app was just brought from background to foreground due to clicking
         // because the user clicked, we treat the behavior same as "View" 
-       [self handleNotificationBookmarks:YES];
+        [self handleNotificationBookmarks:YES withMessage:message];
     }
+#endif
 }
 
--(void)handleNotificationBookmarks:(bool)doJump {
+-(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message{
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    // message is only used for NB_GENERAL - if coming from offline
     if (notificationTagID == -1) {
         // gift stix only - no need to jump to or update feed
+        if (notificationBookmarkType == NB_INCREMENTBUX) {
+            // only display message
+            [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+            [self updateBuxCountFromKumulos];
+        }
         if (notificationBookmarkType == NB_UPDATECAROUSEL) {
             [k getUserStixWithUsername:myUserInfo->username];
             doJump = NO;
@@ -2635,10 +2743,10 @@ static bool isShowingAlerts = NO;
     isShowingAlerts = NO;
     if (alertActionCurrent == ALERTVIEW_NOTIFICATION) {
         if (buttonIndex == 0) {
-            [self handleNotificationBookmarks:NO];
+            [self handleNotificationBookmarks:NO withMessage:nil];
         }
         if (buttonIndex == 1) {
-            [self handleNotificationBookmarks:YES];
+            [self handleNotificationBookmarks:YES withMessage:nil];
         }
     }
     else if (alertActionCurrent == ALERTVIEW_UPGRADE) {
@@ -2670,6 +2778,19 @@ static bool isShowingAlerts = NO;
     [nextAlert show];
     isShowingAlerts = YES;
     [nextAlert release];
+}
+
+-(void)updateBuxCountFromKumulos {
+    [k getBuxForUserWithUsername:[self getUsername]];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getBuxForUserDidCompleteWithResult:(NSArray *)theResults {
+    if ([theResults count] == 0)
+        return;
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+    int bux = [[d valueForKey:@"bux"] intValue];
+    myUserInfo->bux = bux;
+    [self updateBuxCount];
 }
 
 -(void)updateBuxCount {

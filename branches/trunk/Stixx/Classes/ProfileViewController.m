@@ -217,6 +217,7 @@
     
     // add to kumulos
     [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [picker release];
 }
 
@@ -278,7 +279,6 @@
 }
 
 -(void)friendCountButtonClicked:(id)sender {
-    //[self presentModalViewController:friendController animated:NO];
     [self.view addSubview:friendController.view];
     [friendController viewWillAppear:YES];
     friendViewIsDisplayed = YES;

@@ -7,7 +7,7 @@
 //
 
 #define USING_KIIP 0
-#define USING_FACEBOOK 0
+#define USING_FACEBOOK 1
 
 #import <UIKit/UIKit.h>
 
@@ -40,7 +40,8 @@ enum notification_bookmarks {
     NB_NEWCOMMENT,
     NB_NEWGIFT,
     NB_PEELACTION,
-    NB_UPDATECAROUSEL
+    NB_UPDATECAROUSEL,
+    NB_INCREMENTBUX
 };
 
 enum alertview_actions {
@@ -49,6 +50,12 @@ enum alertview_actions {
     ALERTVIEW_NOTIFICATION,
     ALERTVIEW_PROMPT,
     ALERTVIEW_GOTOSTORE
+};
+
+enum actionsheet_tags {
+    ACTIONSHEET_TAG_ADMIN = 1000,
+    ACTIONSHEET_TAG_SHAREPIX,
+    ACTIONSHEET_TAG_MAX
 };
 
 struct UserInfo {
@@ -61,10 +68,6 @@ struct UserInfo {
 //    bool isFirstTimeUser;
 //    bool hasAccessedStore;
 };
-
-
-#define USING_KIIP 0
-#define USING_FACEBOOK 0
 
 @interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
 
@@ -128,12 +131,14 @@ struct UserInfo {
     int updatingPeelableTagID;
     int updatingPeelableAuxStixIndex;
     int updatingPeelableAction;
+    int shareActionSheetTagID;
     
     NSMutableDictionary * allUserPhotos;
     int idOfMostRecentUser;
     
     IBOutlet UITextField * loadingMessage;
-    
+
+    NSData * notificationDeviceToken; // if nil, not ready to register yet
     int notificationBookmarkType;
     int notificationTagID;
     NSString * notificationTargetChannel;
@@ -171,6 +176,7 @@ struct UserInfo {
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 -(void)updateCommentCount:(int)tagID;
 -(void)adminUpdateAllStixCountsToZero;
+-(void)adminIncrementAllUsersBuxCounts;
 -(void)adminIncrementAllStixCounts;
 -(void) adminSetAllUsersBuxCounts;
 -(void)adminSetUnlimitedStix;
@@ -189,7 +195,7 @@ struct UserInfo {
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID;
 -(void) Parse_unsubscribeFromAll;
--(void)handleNotificationBookmarks:(bool)doJump;
+-(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
 -(void)rewardStix;
@@ -198,6 +204,7 @@ struct UserInfo {
 -(void)didGetKumulosSubcategories:(NSMutableArray*)theResults;
 -(void)logMetricTimeInApp;
 -(void)checkConsistency;
+-(void)updateBuxCountFromKumulos;
 
 // former store methods
 -(void)updateBuxCount;

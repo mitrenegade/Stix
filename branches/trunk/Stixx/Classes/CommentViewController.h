@@ -30,7 +30,7 @@
     NSMutableArray * comments;
     NSMutableArray * stixStringIDs;
     NSMutableArray * timestamps;
-    NSMutableDictionary * photos;
+    NSMutableArray * rowHeights;
     
     Kumulos * k;
     

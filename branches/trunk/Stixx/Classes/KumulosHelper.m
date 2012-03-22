@@ -50,10 +50,6 @@ static KumulosHelper *sharedKumulosHelper = nil;
         assert([params count] == 1);
         [k savePixWithPixPNG:[params objectAtIndex:0]];
     }
-    else if ([function isEqualToString:@"adminSaveTagUpdateInfo"]) {
-        [k getAllTags];
-        //[k getAllTagsWithIDGreaterThanWithAllTagID:490 andNumTags:[NSNumber numberWithInt:5]];
-    }
     else if ([function isEqualToString:@"getSubcategories"]) {
         [k getAllCategories];
     }
@@ -171,25 +167,6 @@ static KumulosHelper *sharedKumulosHelper = nil;
             NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
             NSLog(@"User %@ now has %d stix and %d stixOrders and %d friends", username, [stix count], [stixOrder count], [friendsList count]);
             [sharedKumulosHelper.k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
-        }
-    }
-}
-
-//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDGreaterThanDidCompleteWithResult:(NSArray *)theResults {
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsDidCompleteWithResult:(NSArray *)theResults {
-    /*
-     * update all tag info
-     * extract time last updated or time created
-     * save it to allTagsInfos table
-     */
-    if ([sharedKumulosHelper.function isEqualToString:@"adminSaveTagUpdateInfo"]) {
-        for (NSMutableDictionary * d in theResults) {
-            NSDate * timeUpdated = [d objectForKey:@"timeUpdated"];
-            NSDate * timeCreated = [d objectForKey:@"timeCreated"];
-            NSNumber * allTagID = [d objectForKey:@"allTagID"];
-            NSLog(@"Most recent timestamp for id %d: %@", [allTagID intValue], [timeUpdated laterDate:timeCreated]);
-            //[kumulos createPixTimestampWithAllTagID:[allTagID intValue] andLastUpdated:[timeUpdated laterDate:timeCreated]];
-//            [kumulos updatePixTimestampWithAllTagID:[allTagID intValue] andLastUpdated:[timeUpdated laterDate:timeCreated]];
         }
     }
 }

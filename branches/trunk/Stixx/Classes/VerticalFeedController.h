@@ -55,6 +55,8 @@
 -(void)didPurchaseBux:(int)bux;
 -(void)sharePix:(int)tagID;
 
+-(void)didOpenProfileView;
+
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 @end
 
@@ -116,7 +118,6 @@
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
-@property (nonatomic, assign) ProfileViewController *profileController;
 
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;

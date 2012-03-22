@@ -18,6 +18,7 @@
 #import "StixAnimation.h"
 #import "OutlineLabel.h"
 #import "ProfileViewController.h"
+#import "RaisedCenterTabBarController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -26,6 +27,7 @@
 -(void)sharePix:(int)tagID;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)uploadImage:(NSData*)dataPNG;
+-(void)didOpenProfileView;
 
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 //-(void)didClickFeedbackButton:(NSString*)fromView;
@@ -42,7 +44,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -72,10 +74,12 @@ enum {
     bool isZooming; // prevent hits when zooming
     
     DetailViewController * detailController;
-    
+        
     OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
     int animationID;
+    
+    int shareActionSheetTagID;
     
     Kumulos * k;
 }
@@ -85,9 +89,9 @@ enum {
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
-@property (nonatomic, assign) ProfileViewController *profileController;
 @property (nonatomic, retain) OutlineLabel * labelBuxCount;
 @property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
+@property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(void)startActivityIndicator;

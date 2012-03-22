@@ -105,7 +105,17 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return rowHeight;
+    //NSLog(@"row height for comment index %d: %d", [indexPath row], rowHeight);
+    return [self.delegate getRowHeightForRow:[indexPath row]];
+}
+
+-(float)getHeightForComment:(NSString*)comment forStixStringID:(NSString*)stixStringID {
+    // determine the size of the frame that includes multiline comments, taking into account the user name and the timestamp
+    NSString * simpleComment = [self simpleCommentString:comment andStixType:stixStringID];
+    CGSize commentSize = [simpleComment sizeWithFont:[UIFont fontWithName:@"Helvetica-BoldOblique" size:14] constrainedToSize:CGSizeMake(230, 14*4) lineBreakMode:UILineBreakModeWordWrap];
+    CGSize minSize = CGSizeMake(230, 24 + commentSize.height + 4 + 12 + 2);
+    float minHeight = minSize.height;
+    return MAX(minHeight, rowHeight);
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -121,14 +131,15 @@
         if (showDivider)
             [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
         [cell.textLabel setTextColor:fontTextColor];
-        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 250, 12)];
-        UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 250, 14)];
-        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 42, 250, 12)];
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 230, 12)];
+        UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 230, 14)];
+        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 42, 230, 12)];
         UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
 		nameLabel.textColor = fontNameColor;
 		nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
 		commentTextLabel.textColor = fontTextColor;
 		commentTextLabel.font = [UIFont fontWithName:@"Helvetica-BoldOblique" size:14];
+        [commentTextLabel setNumberOfLines:3];
 		timeLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
 		timeLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
@@ -178,10 +189,17 @@
         UILabel * commentTextLabel = (UILabel *)[cell viewWithTag:RIGHT_LABEL_TAG];
         UILabel * timeLabel = (UILabel*)[cell viewWithTag:TIME_LABEL_TAG];
         NSString * simpleComment = [self simpleCommentString:comment andStixType:stixStringID];
+        CGSize commentSize = [simpleComment sizeWithFont:[commentTextLabel font] constrainedToSize:CGSizeMake(commentTextLabel.frame.size.width, commentTextLabel.frame.size.height*4) lineBreakMode:UILineBreakModeWordWrap];
+        float commentHeight = [self getHeightForComment:comment forStixStringID:stixStringID];
+        [commentTextLabel setFrame:CGRectMake(commentTextLabel.frame.origin.x, commentTextLabel.frame.origin.y, 230, commentSize.height)];
+        [timeLabel setFrame:CGRectMake(timeLabel.frame.origin.x, commentTextLabel.frame.origin.y + commentTextLabel.frame.size.height + 4, timeLabel.frame.size.width, timeLabel.frame.size.height)];
         //NSLog(@"adding comment: %@", simpleComment);
         [nameLabel setText:name];
         [commentTextLabel setText:simpleComment];
         [timeLabel setText:timeStampString];
+        
+        //float minHeight = [self getHeightForComment:comment forStixStringID:stixStringID];//timeLabel.frame.origin.y + timeLabel.frame.size.height + 2;
+        //NSLog(@"Row %d needs to be at least this big: %f", [indexPath row], minHeight);
 
         UIImageView * photoView = (UIImageView*)[cell viewWithTag:PHOTO_TAG];
         [photoView setImage:photo];
@@ -189,9 +207,11 @@
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             [stix setFrame:CGRectMake(10,10,40,40)];
-            cell.accessoryView = stix;
+            cell.accessoryView = [stix autorelease];
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
+        else
+            cell.accessoryView = nil;
     }
     return cell;
 }

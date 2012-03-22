@@ -31,7 +31,6 @@
 @synthesize buttonProfile;
 @synthesize labelBuxCount;
 @synthesize bitlyHelper;
-@synthesize profileController;
 
 -(id)init
 {
@@ -618,7 +617,7 @@
 }
 
 -(IBAction)didClickProfileButton:(id)sender {
-    [self.view addSubview:profileController.view];
+    [self.delegate didOpenProfileView];
 }
 
 -(void)updateScrollPagesAtPage:(int)page {

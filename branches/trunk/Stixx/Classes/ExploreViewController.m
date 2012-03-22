@@ -15,9 +15,9 @@
 @synthesize delegate;
 //@synthesize buttonFeedback;
 @synthesize activityIndicator;
-@synthesize profileController;
 @synthesize labelBuxCount;
 @synthesize buttonProfile;
+@synthesize tabBarController;
 //@synthesize segmentedControl;
 
 #define EXPLORE_COL 2
@@ -114,7 +114,7 @@
 }
 
 -(IBAction)didClickProfileButton:(id)sender {
-    [self.view addSubview:profileController.view];
+    [self.delegate didOpenProfileView];
 }
 
 - (void) sliderValueChanged:(UISlider *)sender {  
@@ -153,6 +153,9 @@
     // for now, display images of friends, six to a page
     NSNumber * key = [NSNumber numberWithInt:index];
     
+    if (index >= [allTagIDs count])
+        return nil;
+    
     if ([contentViews objectForKey:key] == nil) {
         NSNumber * tagID = [allTagIDs objectAtIndex:index];
         Tag * tag = [allTags objectForKey:tagID];
@@ -163,7 +166,7 @@
         CGSize tagImageSize = tag.image.size;
         float scale = contentWidth / tagImageSize.width;
         int targetWidth = contentWidth;
-        int targetHeight = tagImageSize.height * scale;
+        int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
@@ -300,18 +303,55 @@
 
 -(void)sharePix:(int)tagID {
     //[self.delegate sharePix:tagID];
-    Tag * tag = nil;
-    tag = [allTags objectForKey:[NSNumber numberWithInt:tagID]];
-    if (tag == nil) {
-        NSLog(@"Error in sharing pix! Tag doesn't exist!");
-        return;
+    shareActionSheetTagID = tagID;
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", /*@"Move", */nil];
+    [actionSheet showFromTabBar:self.tabBarController.tabBar];
+    [actionSheet release];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    // button index: 0 = "Facebook", 1 = "Email", 2 = "Cancel"
+    switch (buttonIndex) {
+        case 0: // Facebook
+        {
+            UIAlertView* alert = [[UIAlertView alloc]init];
+            [alert addButtonWithTitle:@"Ok"];
+            [alert setTitle:@"Beta Version"];
+            [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
+            [alert show];
+            [alert release];
+            NSString * metricName = @"SharePixActionsheet";
+            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
+            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+        }
+            break;
+        case 1: // Email
+        {
+            Tag * tag = nil;
+            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
+            if (tag == nil) {
+                NSLog(@"Error in sharing pix! Tag doesn't exist!");
+                return;
+            }
+            UIImage * result = [tag tagToUIImage];
+            NSData *png = UIImagePNGRepresentation(result);
+            
+            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+            
+            [self.delegate uploadImage:png];
+
+            NSString * metricName = @"SharePixActionsheet";
+            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
+            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+        }
+            break;
+        case 2: // Cancel
+            return;
+            break;
+        default:
+            return;
+            break;
     }
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-    
-    [self.delegate uploadImage:png];
 }
 
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {

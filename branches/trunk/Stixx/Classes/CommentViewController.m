@@ -90,10 +90,13 @@
         [stixStringIDs release];
     if (timestamps)
         [timestamps release];
+    if (rowHeights)
+        [rowHeights release];
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
     stixStringIDs = [[NSMutableArray alloc] init];
     timestamps = [[NSMutableArray alloc] init];
+    rowHeights = [[NSMutableArray alloc] init];
     
     [nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
@@ -109,6 +112,7 @@
         NSString * comment = [d valueForKey:@"comment"];
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         NSDate * timestamp = [d valueForKey:@"timeCreated"];
+        float height = [commentsTable getHeightForComment:comment forStixStringID:stixStringID];
         
         if ([stixStringID length] == 0)
         {
@@ -123,7 +127,7 @@
         [comments addObject:comment];
         [stixStringIDs addObject:stixStringID];
         [timestamps addObject:timestamp];
-        //[photos setObject:[self.delegate getUserPhotoForUsername:name] forKey:name];        
+        [rowHeights addObject:[NSNumber numberWithFloat:height]];
     }
     //[commentsTable configureRowsWithHeight:70 dividerVisible:YES fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     [commentsTable.tableView reloadData];
@@ -168,6 +172,12 @@
     NSDate * date = [timestamps objectAtIndex:index];
     NSString * timeStampString = [Tag getTimeLabelFromTimestamp:date];
     return timeStampString;
+}
+
+-(float)getRowHeightForRow:(int)index {
+    if (index > [rowHeights count])
+        return 0;
+    return [[rowHeights objectAtIndex:index] floatValue];
 }
 
 -(UIImage*)getPhotoForIndex:(int)index {

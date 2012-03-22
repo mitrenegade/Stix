@@ -40,7 +40,7 @@
 					<object class="IBUIImageView" id="255610879">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">319</int>
-						<string key="NSFrameSize">{320, 480}</string>
+						<string key="NSFrame">{{0, -10}, {320, 480}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="667661457"/>
@@ -369,7 +369,9 @@
 						<int key="NSID">2</int>
 					</object>
 				</object>
-				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
+				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
+					<int key="IBUIStatusBarStyle">2</int>
+				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
 		</array>
@@ -525,7 +527,6 @@
 						<int key="objectID">1</int>
 						<reference key="object" ref="191373211"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="255610879"/>
 							<reference ref="667661457"/>
 							<reference ref="444152018"/>
 							<reference ref="675077517"/>
@@ -537,6 +538,7 @@
 							<reference ref="457358436"/>
 							<reference ref="616851926"/>
 							<reference ref="13809435"/>
+							<reference ref="255610879"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>

@@ -103,8 +103,14 @@
     return timeStampString;
 }
 
+-(float)getRowHeightForRow:(int)index {
+    if (index > [rowHeights count])
+        return 0;
+    return [[rowHeights objectAtIndex:index] floatValue];
+}
+
 -(UIImage *)getPhotoForIndex:(int)index {
-    return [self.delegate getUserPhotoForUsername:[names objectAtIndex:index]]; //[photos objectForKey:[names objectAtIndex:index]];
+    return [self.delegate getUserPhotoForUsername:[names objectAtIndex:index]];
 }
 
 -(UIImage *)getUserPhotoForUsername:(NSString *)username {
@@ -153,14 +159,14 @@
         [stixStringIDs release];
     if (timestamps)
         [timestamps release];
-    //if (photos)
-        //[photos release];
+    if (rowHeights)
+        [rowHeights release];
     
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
     stixStringIDs = [[NSMutableArray alloc] init];
     timestamps = [[NSMutableArray alloc] init];
-    //photos = [[NSMutableDictionary alloc] init];
+    rowHeights = [[NSMutableArray alloc] init];
     
     [self.view addSubview:headerView];
 
@@ -202,6 +208,7 @@
         NSString * comment = [d valueForKey:@"comment"];
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         NSDate * timestamp = [d valueForKey:@"timeCreated"];
+        float height = [commentsTable getHeightForComment:comment forStixStringID:        stixStringID];
         if ([stixStringID length] == 0)
         {
             // backwards compatibility
@@ -218,7 +225,7 @@
         [comments addObject:comment];
         [stixStringIDs addObject:stixStringID];
         [timestamps addObject:timestamp];
-        //[photos setObject:[self.delegate getUserPhotoForUsername:name] forKey:name];
+        [rowHeights addObject:[NSNumber numberWithFloat:height]];
     }
     [commentsTable.tableView reloadData];
     
@@ -364,6 +371,7 @@
         [comments removeAllObjects];
         [stixStringIDs removeAllObjects];
         [timestamps removeAllObjects];
+        [rowHeights removeAllObjects];
         [k getAllHistoryWithTagID:feedItem.tagID];
     }
     [self didCloseComments];

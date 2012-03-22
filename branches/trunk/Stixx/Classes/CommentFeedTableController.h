@@ -16,6 +16,7 @@
 -(NSString *)getTimestampStringForIndex:(int)index;
 -(UIImage *)getPhotoForIndex:(int)index;
 -(int)getCount;
+-(float)getRowHeightForRow:(int)index;
 @end
 
 #define SHOW_COMMENTS_ONLY 0
@@ -40,4 +41,5 @@
 -(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor;
+-(float)getHeightForComment:(NSString*)comment forStixStringID:(NSString*)stixStringID;
 @end

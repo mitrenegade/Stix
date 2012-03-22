@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Mar 20, 2012
+//  Created by Kumulos Bindings Compiler on Mar 22, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -55,10 +55,6 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixOfPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createPixTimestampDidCompleteWithResult:(NSNumber*)newRecordID;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixTimestampDidCompleteWithResult:(NSNumber*)affectedRows;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addEmailToUserDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
@@ -70,6 +66,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminDeleteAllTestUsersDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminIncrementAllUserBuxDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminLoginDidCompleteWithResult:(NSArray*)theResults;
  
@@ -84,6 +82,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAuxiliaryDataDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getBuxForUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults;
  
@@ -197,12 +197,6 @@
 -(KSAPIOperation*) updateStixOfPixWithAllTagID:(NSUInteger)allTagID andAuxStix:(NSData*)auxStix;
     
    
--(KSAPIOperation*) createPixTimestampWithAllTagID:(NSUInteger)allTagID andLastUpdated:(NSDate*)lastUpdated;
-    
-   
--(KSAPIOperation*) updatePixTimestampWithAllTagID:(NSUInteger)allTagID andLastUpdated:(NSDate*)lastUpdated;
-    
-   
 -(KSAPIOperation*) addEmailToUserWithUsername:(NSString*)username andEmail:(NSString*)email;
     
    
@@ -219,6 +213,9 @@
     
    
 -(KSAPIOperation*) adminDeleteAllTestUsersWithEmail:(NSString*)email;
+    
+   
+-(KSAPIOperation*) adminIncrementAllUserBuxWithBux:(NSInteger)bux;
     
    
 -(KSAPIOperation*) adminLoginWithUsername:(NSString*)username;
@@ -239,6 +236,9 @@
  -(KSAPIOperation*) getAllUsers;
    
 -(KSAPIOperation*) getAuxiliaryDataWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) getBuxForUserWithUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) getUserWithUsername:(NSString*)username;

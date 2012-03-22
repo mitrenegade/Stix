@@ -40,6 +40,7 @@
     int borderWidth;
     int columnPadding;
     int columnWidth;
+    int columnHeight;
 #endif
 }
 

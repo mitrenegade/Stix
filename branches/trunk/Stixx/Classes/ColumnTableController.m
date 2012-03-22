@@ -73,6 +73,7 @@
         columnPadding = 3;
         columnWidth = (frameWidth - 2 * borderWidth - columnPadding * 2) / 3;
     }
+    columnHeight = 282 / 314.0 * columnWidth;
 }
 -(int)getContentWidth {
     return columnWidth;
@@ -125,7 +126,7 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return columnWidth + columnPadding;
+    return columnHeight + columnPadding;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -160,7 +161,7 @@
     int row = [indexPath row];
     //NSLog(@"Column table: populating row %d", row);
     for (int col=0; col<numColumns; col++) {
-        CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnWidth);
+        CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
         NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
         UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
         if (cellOldView != nil) 

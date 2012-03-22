@@ -45,6 +45,7 @@
     NSMutableArray * stixStringIDs;
     NSMutableArray * timestamps;
     NSMutableDictionary * photos;
+    NSMutableArray * rowHeights;
     int trueCommentCount;
     
     VerticalFeedItemController * feedItem;

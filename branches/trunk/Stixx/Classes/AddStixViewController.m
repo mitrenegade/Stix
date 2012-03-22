@@ -208,7 +208,7 @@
             UIAlertView* alert = [[UIAlertView alloc]init];
             [alert addButtonWithTitle:@"Ok"];
             [alert setTitle:@"Cannot use this Stix!"];
-            [alert setMessage:@"You don't own this Stix and have no Bux to buy it!"];
+            [alert setMessage:@"You don't own this Stix and have no Bux to buy it! Please click on the Bux counter to 'purchase' more Bux."];
             [alert show];
             [alert release];
             return;

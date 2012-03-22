@@ -16,14 +16,18 @@
 #import "Kumulos.h"
 #import "LoadingAnimationView.h"
 #import "VerticalFeedItemController.h"
+#import "CommentViewController.h"
 
 @protocol DetailViewDelegate
 
 -(void)didDismissZoom;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
+-(void)sharePix:(int)tagID;
+-(NSString*)getUsername;
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;
@@ -39,7 +43,13 @@
     NSMutableArray * names;
     NSMutableArray * comments;
     NSMutableArray * stixStringIDs;
+    NSMutableArray * timestamps;
+    NSMutableDictionary * photos;
+    int trueCommentCount;
+    
+    VerticalFeedItemController * feedItem;
     int tagID;
+    NSString * tagUsername;
     Kumulos * k;
     
     int animationID[2];
@@ -50,9 +60,12 @@
 @property (nonatomic, retain) StixView * stixView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 @property (nonatomic, retain) IBOutlet UIImageView * logo;
+@property (nonatomic, retain) NSString * tagUsername;
+@property (nonatomic, retain) CommentViewController * commentView;
 
 -(IBAction)didPressBackButton:(id)sender;
 -(void)initDetailViewWithTag:(Tag *)tag;
 -(void)headerFromTag:(Tag*) tag;
+-(void)initFeedItemWithTag:(Tag*)tag;
 
 @end

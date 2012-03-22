@@ -18,6 +18,7 @@
 - (void)didDismissUserProfileView;
 - (NSMutableDictionary *)getUserPhotos;
 - (NSString*)getUsername;
+- (void)didClickAddFriendButton:(NSString*)username;
 
 @end
 
@@ -50,4 +51,5 @@
 -(void)setUsername:(NSString*)username;
 -(void)setPhoto:(UIImage*)photo;
 -(void)initializeProfile:(NSString*)username withPhoto:(UIImage*)photo;
+-(void)configureAddFriendButton:(BOOL)isFriend;
 @end

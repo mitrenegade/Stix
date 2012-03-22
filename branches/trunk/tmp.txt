@@ -1,0 +1,1 @@
+<html><body>You are being <a href="http://stix.herokuapp.com/users/mason/pictures">redirected</a>.</body></html>

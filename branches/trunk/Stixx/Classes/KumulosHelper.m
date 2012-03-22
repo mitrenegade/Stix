@@ -16,13 +16,15 @@
 @synthesize callback;
 @synthesize delegate;
 
-static KumulosHelper *sharedKumulosHelper;
+static KumulosHelper *sharedKumulosHelper = nil;
 
 -(id)init
 {
 	self = [super init];
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
+    
+    savedInfo = [[NSMutableDictionary alloc] init];
 	return self;
 }
 
@@ -58,6 +60,15 @@ static KumulosHelper *sharedKumulosHelper;
     else if ([function isEqualToString:@"getCommentHistory"]) {
         NSNumber * tagID = [params objectAtIndex:0];
         [k getAllHistoryWithTagID:[tagID intValue]];
+    }
+    else if ([function isEqualToString:@"addCommentToPix"]) {
+        NSNumber * tagID = [params objectAtIndex:0];
+        NSString * name = [params objectAtIndex:1];
+        NSString * comment = [params objectAtIndex:2];
+        NSString * stixStringID = [params objectAtIndex:3];
+        [k addCommentToPixWithTagID:[tagID intValue] andUsername:name andComment:comment andStixStringID:stixStringID];
+        
+        [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
     }
 }
 
@@ -204,6 +215,14 @@ static KumulosHelper *sharedKumulosHelper;
         if (sharedKumulosHelper.delegate) {
             [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
         }
+    }
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addCommentToPixDidCompleteWithResult:(NSNumber *)newRecordID {
+    NSNumber * tagID = [savedInfo objectForKey:@"addCommentToPix_tagID"];
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, nil];
+    if (sharedKumulosHelper.delegate) {
+        [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
     }
 }
 

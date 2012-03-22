@@ -158,7 +158,7 @@
      }
      */
     int row = [indexPath row];
-    NSLog(@"Column table: populating row %d", row);
+    //NSLog(@"Column table: populating row %d", row);
     for (int col=0; col<numColumns; col++) {
         CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnWidth);
         NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell

@@ -36,14 +36,12 @@
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
 -(void)sharePix:(int)tagID;
--(void)didExpandFeedItem:(VerticalFeedItemController *) feedItem;
 
 // forward from StixView
 -(NSString*)getUsername;
+@optional
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
-
-// get comment histories stored in feedcontroller
 @end
 
 @interface VerticalFeedItemController : UIViewController <StixViewDelegate,CommentFeedTableDelegate, KumulosDelegate>{
@@ -55,12 +53,13 @@
     IBOutlet UILabel * labelComment;
 	IBOutlet UILabel * labelTime;
     IBOutlet UILabel * labelLocationString;
+    IBOutlet UILabel * labelCommentCount;
 	IBOutlet UIImageView * imageView;
     StixView * stixView;
     IBOutlet UIImageView * userPhotoView;
     IBOutlet UIButton * addCommentButton;
     IBOutlet UIButton * shareButton;
-    IBOutlet UIButton * seeAllCommentsButton;
+    //IBOutlet UIButton * seeAllCommentsButton;
     
     NSObject<VerticalFeedItemDelegate> * delegate;    
     
@@ -75,14 +74,15 @@
     
     BOOL isExpanded; // whether or not to show comments
     CommentFeedTableController * commentsTable;
-    NSMutableArray * names;
-    NSMutableArray * comments;
-    NSMutableArray * stixStringIDs;
+//    NSMutableArray * names;
+//    NSMutableArray * comments;
+//    NSMutableArray * stixStringIDs;
     Kumulos * k;
 
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
+@property (retain, nonatomic) IBOutlet UILabel * labelCommentCount;
 @property (retain, nonatomic) IBOutlet UILabel * labelDescriptor;
 @property (retain, nonatomic) IBOutlet UIImageView * labelDescriptorBG;
 @property (retain, nonatomic) IBOutlet UILabel * labelTime;
@@ -99,14 +99,13 @@
 @property (nonatomic, assign) int commentCount;
 @property (nonatomic, assign) NSObject<VerticalFeedItemDelegate> * delegate;   
 @property (nonatomic, retain) StixView * stixView;
-@property (nonatomic, assign) BOOL isExpanded;
-@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
+//@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
 -(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
 -(void)populateWithCommentCount:(int)count;
--(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;
+//-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;
 
 -(void)initStixView:(Tag*)tag;
 

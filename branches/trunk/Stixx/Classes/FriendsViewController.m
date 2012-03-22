@@ -56,6 +56,7 @@
     // any touch events get fowarded to buttonInstructions, as long as it is above the view 
     // for the scrollview
     [self.view insertSubview:scrollView belowSubview:buttonInstructions];
+    [buttonInstructions setHidden:YES];
     //[self.view insertSubview:carouselView aboveSubview:scrollView];
     //[carouselView setUnderlay:buttonInstructions];
     //[carouselView setHidden:YES];
@@ -285,9 +286,13 @@
 }
 
 -(void)forceReloadAll {
+    [friendPages removeAllObjects];
     [scrollView clearAllPages];
     self.userPhotos = [self.delegate getUserPhotos]; 
-    [scrollView populateScrollPagesAtPage:0];
+    //[scrollView populateScrollPagesAtPage:0];
+    //[scrollView populateScrollPagesAtPage:[scrollView currentPage]-1];
+    [scrollView populateScrollPagesAtPage:[scrollView currentPage]];
+    //[scrollView populateScrollPagesAtPage:[scrollView currentPage]+1];
 }
 
 -(void)didClickAtLocation:(CGPoint)location {
@@ -305,7 +310,13 @@
             // must add to subview before changing name/photo
             UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:currentProfile]];
             [userProfileController initializeProfile:currentProfile withPhoto:[photo autorelease]];
-            //friendName = key;
+            
+            BOOL isFriend = NO;
+            NSMutableSet * friendsList = [self.delegate getFriendsList];
+            if ([friendsList containsObject:key]) {
+                isFriend = YES;
+            }
+            [userProfileController configureAddFriendButton:isFriend];
             break;
         }
     }
@@ -326,5 +337,20 @@
 
 -(NSString *)getUsername {
     return [self.delegate getUsername];
+}
+
+-(void)didClickAddFriendButton:(NSString *)username {
+    NSMutableSet * friendsList = [self.delegate getFriendsList];
+    if ([friendsList containsObject:username]) {
+        [friendsList removeObject:username];
+        [userProfileController configureAddFriendButton:NO];
+    }
+    else
+    {
+        [friendsList addObject:username];
+        [userProfileController configureAddFriendButton:YES];
+    }
+    [self forceReloadAll];
+    [self.delegate didUpdateFriendsList];
 }
 @end

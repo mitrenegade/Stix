@@ -304,6 +304,7 @@ static int totalStixTypes = 0;
             [supercategory addObject:categoryName];
         }
     }
+    //NSLog(@"Subcategories initialized from kumulos: %d", [stixSubcategories count]);
 }
 
 +(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories {
@@ -311,6 +312,7 @@ static int totalStixTypes = 0;
         [stixSubcategories release];
         stixSubcategories = nil;
     }
+    stixSubcategories = [[NSMutableDictionary alloc] init];
     [stixSubcategories addEntriesFromDictionary:subcategories];
 }
 
@@ -374,7 +376,7 @@ static int totalStixTypes = 0;
 
 +(NSMutableDictionary *)generateDefaultStix {
     NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
-    const int TOTAL_RANDOM_BADGES = 8;
+    const int TOTAL_RANDOM_BADGES = 48;
     NSMutableSet * randomBadges = [[NSMutableSet alloc] initWithCapacity:TOTAL_RANDOM_BADGES];
     for (int i=0; i<TOTAL_RANDOM_BADGES; i++) {
         NSString * randomBadge = [BadgeView getRandomStixStringID];

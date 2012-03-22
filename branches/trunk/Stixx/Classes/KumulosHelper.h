@@ -22,6 +22,7 @@
     Kumulos * k;
     NSString * function;
     SEL callback; 
+    NSMutableDictionary * savedInfo;
 }
 
 @property (nonatomic, retain) Kumulos * k;

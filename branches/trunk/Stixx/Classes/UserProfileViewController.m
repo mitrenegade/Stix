@@ -112,8 +112,27 @@
     [k getUserWithUsername:username];
 }
 
+-(void)configureAddFriendButton:(BOOL)isFriend {
+    if (!isFriend) {
+        [addFriendButton setTitle:@"Add Friend" forState:UIControlStateNormal];
+    }
+    else {
+        [addFriendButton setTitle:@"Remove as Friend" forState:UIControlStateNormal];
+    }
+    [addFriendButton removeFromSuperview];
+    [self.view addSubview:addFriendButton];
+}
 -(void)addFriendButtonClicked:(id)sender {
-    
+#if 0
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Beta Version!"];
+    [alert setMessage:@"Adding friends to your Friend List coming soon!"];
+    [alert show];
+    [alert release];
+#else
+    [self.delegate didClickAddFriendButton:[nameLabel text]];
+#endif
 }
 
 -(void)navBackButtonClicked:(id)sender {

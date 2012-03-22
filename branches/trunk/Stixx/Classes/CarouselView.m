@@ -333,10 +333,10 @@ static int lastContentOffsetY = 0;
 -(void)scrollViewDidScroll:(UIScrollView *)sv {
     if (lastContentOffsetX == sv.contentOffset.x) {
         if (lastContentOffsetY > sv.contentOffset.y) {
-            NSLog(@"Scrolling down!");
+            //NSLog(@"Scrolling down!");
         }
         else if (lastContentOffsetY < sv.contentOffset.y) {
-            NSLog(@"Scrolling up!");
+            //NSLog(@"Scrolling up!");
         }
     }
     lastContentOffsetX = sv.contentOffset.x;

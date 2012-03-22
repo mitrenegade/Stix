@@ -27,6 +27,8 @@
 #import <Parse/Parse.h>
 #import "AlertPrompt.h"
 #import "KumulosHelper.h"
+#import "SMWebRequest.h"
+#import "ASIHTTPRequest.h"
 
 #if USING_FACEBOOK
 #import "FBConnect.h"
@@ -64,7 +66,7 @@ struct UserInfo {
 #define USING_KIIP 0
 #define USING_FACEBOOK 0
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
 
 #if USING_FACEBOOK
     FBSessionDelegate,
@@ -221,6 +223,7 @@ struct UserInfo {
 @property (nonatomic, retain) NSMutableSet * allFriends;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
+@property (nonatomic, retain) NSMutableDictionary * allCommentHistories;
 @property (nonatomic, retain) NSMutableArray * allCarouselViews;
 @property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
 @property (nonatomic, retain) NSMutableArray * alertQueue;

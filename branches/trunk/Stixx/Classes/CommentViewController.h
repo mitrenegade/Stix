@@ -16,7 +16,7 @@
 
 -(void)didCloseComments;
 -(void)didAddNewComment:(NSString*)newComment withTagID:(int)tagID;
-
+-(UIImage*)getUserPhotoForUsername:(NSString*)username;
 @end
 
 @interface CommentViewController : UIViewController <KumulosDelegate, CommentFeedTableDelegate, UITextFieldDelegate>
@@ -29,6 +29,8 @@
     NSMutableArray * names;
     NSMutableArray * comments;
     NSMutableArray * stixStringIDs;
+    NSMutableArray * timestamps;
+    NSMutableDictionary * photos;
     
     Kumulos * k;
     

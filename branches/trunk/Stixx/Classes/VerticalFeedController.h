@@ -51,13 +51,17 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
+-(void)didSharePixWithURL:(NSString*)url;
+-(void)didPurchaseBux:(int)bux;
+-(void)sharePix:(int)tagID;
+
+-(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate> {
     
 	NSMutableDictionary * feedItems;
     NSMutableDictionary * headerViews;
-    NSMutableDictionary * commentHistories;
     NSMutableDictionary * feedSectionHeights;
     //BadgeView * badgeView;
     CarouselView * carouselView;
@@ -81,6 +85,8 @@
     UIView * stixHeader;
     UIView * stixHeaderBody;
     
+    int currentBuxPurchase;
+    
     IBOutlet UIButton * logo;
     
 //    IBOutlet UIButton * buttonShowCarousel;
@@ -92,7 +98,6 @@
 }
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) NSMutableDictionary * headerViews;
-@property (nonatomic, retain) NSMutableDictionary * commentHistories;
 @property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) FeedTableController *tableController;

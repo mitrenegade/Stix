@@ -7,8 +7,11 @@
 //
 
 #import "CommentFeedTableController.h"
+#import <QuartzCore/QuartzCore.h>
 #define LEFT_LABEL_TAG 1001
 #define RIGHT_LABEL_TAG 1002
+#define TIME_LABEL_TAG 1003
+#define PHOTO_TAG 1004
 
 @implementation CommentFeedTableController
 
@@ -47,10 +50,10 @@
     [self.tableView setBackgroundColor:[UIColor clearColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
     //cellDictionary = [[NSMutableDictionary alloc] init];
-    rowHeight = 70;
+    rowHeight = 60;
     showDivider = YES;
     fontSize = 12;
-    fontNameColor = [UIColor blackColor];
+    [self setFontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0]];
     fontTextColor = [UIColor blackColor];
 }
 
@@ -118,25 +121,34 @@
         if (showDivider)
             [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
         [cell.textLabel setTextColor:fontTextColor];
-        UILabel * leftLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, 0, 30, rowHeight)];
-        UILabel * rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 170, rowHeight)];
-		leftLabel.textColor = fontNameColor; //[UIColor colorWithRed:102/255.0 green:0.0 blue:0.0 alpha:1.0];
-		leftLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize]];
-		rightLabel.textColor = fontTextColor; //[UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
-        //NSArray * fonts = [UIFont fontNamesForFamilyName:@"Helvetica"];
-        //for (int i=0; i<[fonts count]; i++){ 
-        //    NSLog(@"Font %d = %@", i, [fonts objectAtIndex:i]);
-        //}
-		rightLabel.font = [UIFont fontWithName:@"Helvetica-Oblique" size:[UIFont labelFontSize] - 2];
-        [leftLabel setBackgroundColor:[UIColor clearColor]];
-        [rightLabel setBackgroundColor:[UIColor clearColor]];
-        leftLabel.tag = LEFT_LABEL_TAG;
-        rightLabel.tag = RIGHT_LABEL_TAG;
-        [cell.contentView addSubview:leftLabel];
-        [cell.contentView addSubview:rightLabel];
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 250, 12)];
+        UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 250, 14)];
+        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 42, 250, 12)];
+        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
+		nameLabel.textColor = fontNameColor;
+		nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+		commentTextLabel.textColor = fontTextColor;
+		commentTextLabel.font = [UIFont fontWithName:@"Helvetica-BoldOblique" size:14];
+		timeLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
+		timeLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
+        [nameLabel setBackgroundColor:[UIColor clearColor]];
+        [commentTextLabel setBackgroundColor:[UIColor clearColor]];
+        [timeLabel setBackgroundColor:[UIColor clearColor]];
+        [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        [photoView.layer setBorderWidth: 2.0];
+        nameLabel.tag = LEFT_LABEL_TAG;
+        commentTextLabel.tag = RIGHT_LABEL_TAG;
+        timeLabel.tag = TIME_LABEL_TAG;
+        photoView.tag = PHOTO_TAG;
+        [cell.contentView addSubview:nameLabel];
+        [cell.contentView addSubview:commentTextLabel];
+        [cell.contentView addSubview:timeLabel];
+        [cell.contentView addSubview:photoView];
         [cell addSubview:cell.contentView];
-        [leftLabel release];
-        [rightLabel release];
+        [nameLabel release];
+        [commentTextLabel release];
+        [timeLabel release];
+        [photoView release];
     }
     
     // Configure the cell...
@@ -156,25 +168,27 @@
         NSString * name = [self.delegate getNameForIndex:index];
         NSString * comment = [self.delegate getCommentForIndex:index];
         NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
-        NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
+        NSString * timeStampString = [self.delegate getTimestampStringForIndex:index];
+        UIImage * photo = [self.delegate getPhotoForIndex:index];
+        //NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
         // to set one line of text:
         // [cell.textLabel setText:commentLabel];
         // to set multiple lines or different fonts/colors
-        UILabel * leftLabel = (UILabel *)[cell viewWithTag:LEFT_LABEL_TAG];
-        UILabel * rightLabel = (UILabel *)[cell viewWithTag:RIGHT_LABEL_TAG];
-        CGRect frame = leftLabel.frame;
-        frame.size.width = [name length] * fontSize;
-        [leftLabel setFrame:frame];
-        [leftLabel setText:name];
-        frame = rightLabel.frame;
-        frame.size.width = [comment length] * fontSize;
-        frame.origin.x = leftLabel.frame.origin.x + leftLabel.frame.size.width;
-        [rightLabel setFrame:frame];
-        [rightLabel setText:comment];
+        UILabel * nameLabel = (UILabel *)[cell viewWithTag:LEFT_LABEL_TAG];
+        UILabel * commentTextLabel = (UILabel *)[cell viewWithTag:RIGHT_LABEL_TAG];
+        UILabel * timeLabel = (UILabel*)[cell viewWithTag:TIME_LABEL_TAG];
+        NSString * simpleComment = [self simpleCommentString:comment andStixType:stixStringID];
+        //NSLog(@"adding comment: %@", simpleComment);
+        [nameLabel setText:name];
+        [commentTextLabel setText:simpleComment];
+        [timeLabel setText:timeStampString];
 
+        UIImageView * photoView = (UIImageView*)[cell viewWithTag:PHOTO_TAG];
+        [photoView setImage:photo];
+        
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            [stix setFrame:CGRectMake(0,0,60,60)];
+            [stix setFrame:CGRectMake(10,10,40,40)];
             cell.accessoryView = stix;
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
@@ -252,11 +266,35 @@
     }
     else
     {
-        str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
+        //str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
+        str = [NSString stringWithFormat:@"%@", comment];
     }
     return str;
 }
 
+-(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID {
+    
+    NSString * str = @"";
+    if ([comment length] == 0) // add generic descriptor
+    {
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"added a %@", desc];
+    }
+    else if ([comment isEqualToString:@"PEEL"]) {
+        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+        str = [NSString stringWithFormat:@"peeled off a %@ to add to their collection", desc];
+    }
+    else if ([comment isEqualToString:@"SHARE"]) {
+        str = [NSString stringWithFormat:@"shared this Pix at %@", comment];
+    }
+    else
+    {
+        //str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
+        str = [NSString stringWithFormat:@"%@", comment];
+    }
+    return str;
+}
+         
 -(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor  {
     rowHeight = height;
     showDivider = visible;

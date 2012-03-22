@@ -45,7 +45,6 @@
 -(void)didClickInviteButton;
 -(void)didDismissSecondaryView;
 -(void)closeProfileView;
-
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, /*LoginViewDelegate, */FriendsViewDelegate, UITextFieldDelegate>{

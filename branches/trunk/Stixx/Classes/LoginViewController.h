@@ -14,6 +14,8 @@
 #import "LoadingAnimationView.h"
 #import "KumulosData.h"
 
+#define NEW_USER_BUX 50
+
 @protocol LoginViewDelegate
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;

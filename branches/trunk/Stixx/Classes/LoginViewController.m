@@ -374,7 +374,7 @@ static int addUserStage;
     NSData * auxData = nil;
 #endif
     int totalTags = 0;
-    int bux = 25;
+    int bux = NEW_USER_BUX;
     
     //[kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
     [k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];

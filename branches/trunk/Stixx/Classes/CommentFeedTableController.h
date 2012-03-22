@@ -13,10 +13,12 @@
 -(NSString *)getNameForIndex:(int)index;
 -(NSString *)getCommentForIndex:(int)index;
 -(NSString *)getStixStringIDForIndex:(int)index;
+-(NSString *)getTimestampStringForIndex:(int)index;
+-(UIImage *)getPhotoForIndex:(int)index;
 -(int)getCount;
 @end
 
-#define SHOW_COMMENTS_ONLY 1
+#define SHOW_COMMENTS_ONLY 0
 
 @interface CommentFeedTableController : UITableViewController
 {
@@ -36,5 +38,6 @@
 @property (nonatomic, retain) UIColor * fontNameColor;
 @property (nonatomic, retain) UIColor * fontTextColor;
 -(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
+-(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor;
 @end

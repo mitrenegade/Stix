@@ -19,6 +19,7 @@
 
 @synthesize labelName;
 @synthesize labelComment;
+@synthesize labelCommentCount;
 @synthesize labelDescriptor;
 @synthesize labelTime;
 @synthesize labelDescriptorBG;
@@ -33,8 +34,7 @@
 @synthesize stixView;
 @synthesize locationIcon;
 @synthesize shareButton;
-@synthesize isExpanded;
-@synthesize seeAllCommentsButton;
+//@synthesize seeAllCommentsButton;
 /*
  - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
  {
@@ -111,18 +111,20 @@
 
 -(void)populateWithCommentCount:(int)count {
     self.commentCount = count;
-    if (count > 0)
-        [addCommentButton setTitle:[NSString stringWithFormat:@"%d", commentCount] forState:UIControlStateNormal];
-    /*
-    if (count == 0)
-        [addCommentButton setTitle:[NSString stringWithFormat:@"Add comment", commentCount] forState:UIControlStateNormal];
-    else if (count == 1)
-        [addCommentButton setTitle:[NSString stringWithFormat:@"%d comment", commentCount] forState:UIControlStateNormal];
-    else        
-        [addCommentButton setTitle:[NSString stringWithFormat:@"%d comments", commentCount] forState:UIControlStateNormal];
-     */
+    //if (count > 0)
+    //    [addCommentButton setTitle:[NSString stringWithFormat:@"%d", commentCount] forState:UIControlStateNormal];
+    if (count == 0) {
+        [addCommentButton setImage:[UIImage imageNamed:@"btn_comment.png"] forState:UIControlStateNormal];
+        [labelCommentCount setHidden:YES];
+    }
+    else {
+        [addCommentButton setImage:[UIImage imageNamed:@"btn_comment2.png"] forState:UIControlStateNormal];
+        [labelCommentCount setHidden:NO];
+        [labelCommentCount setText:[NSString stringWithFormat:@"%d", commentCount]];
+    }
 }
 
+#if 0
 -(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs {
     [names removeAllObjects];
     [names addObjectsFromArray:allNames];
@@ -171,36 +173,39 @@
     [self.view setFrame:frame];
     NSLog(@"Setting frame size to %f", frame.size.height);
     if (showAllCommentsButton) {
-        [seeAllCommentsButton setFrame:CGRectMake(130, commentTableHeight + 2, 60, 20)];
-        [seeAllCommentsButton setHidden:NO];
+        //[seeAllCommentsButton setFrame:CGRectMake(130, commentTableHeight + 2, 60, 20)];
+        //[seeAllCommentsButton setHidden:NO];
     }
 }
+#endif
+
 /*
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
-    
-    for (NSMutableDictionary * d in theResults) {        
-        NSString * name = [d valueForKey:@"username"];
-        NSString * comment = [d valueForKey:@"comment"];
-        NSString * stixStringID = [d valueForKey:@"stixStringID"];
-        if ([stixStringID length] == 0)
-        {
-            // backwards compatibility
-            stixStringID = @"COMMENT";
-        }
-        
-        [names addObject:name];
-        [comments addObject:comment];
-        [stixStringIDs addObject:stixStringID];
-    }
-    NSLog(@"GetHistory for feedItem %d completed: %d comments", self.tagID, [names count]);
-    
-    // do automatically
-    //[self.delegate didExpandFeedItem:self];
-}
-*/
+ - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
+ 
+ for (NSMutableDictionary * d in theResults) {        
+ NSString * name = [d valueForKey:@"username"];
+ NSString * comment = [d valueForKey:@"comment"];
+ NSString * stixStringID = [d valueForKey:@"stixStringID"];
+ if ([stixStringID length] == 0)
+ {
+ // backwards compatibility
+ stixStringID = @"COMMENT";
+ }
+ 
+ [names addObject:name];
+ [comments addObject:comment];
+ [stixStringIDs addObject:stixStringID];
+ }
+ NSLog(@"GetHistory for feedItem %d completed: %d comments", self.tagID, [names count]);
+ 
+ // do automatically
+ //[self.delegate didExpandFeedItem:self];
+ }
+ */
 /** commentTable controller delegate ***/
 /*** commentFeedTableDelegate ***/
 
+/*
 -(NSString* )getNameForIndex:(int)index {
     return [names objectAtIndex:index];
 }
@@ -216,10 +221,16 @@
     return type;
 }
 
+-(NSString*)getTimestampStringForIndex:(int)index {
+    NSDate * date = [timestamps objectAtIndex:index];
+    NSString * timeStampString = [Tag getTimeLabelFromTimestamp:date];
+    return timeStampString;
+}
+
 -(int)getCount {
     return [names count];
 }
-
+*/
 
 - (void)dealloc
 {
@@ -228,7 +239,6 @@
 
 -(IBAction)didPressAddCommentButton:(id)sender {
     NSLog(@"Self: %x tagID %d name %@", self, tagID, self.nameString);
-    isExpanded = YES;
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 -(void)didPressSeeAllCommentsButton:(id)sender {
@@ -236,16 +246,18 @@
 }
 
 -(IBAction)didPressShareButton:(id)sender {
-    //[self.delegate sharePix:tagID];
+    [self.delegate sharePix:tagID];
+    /*
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
     [alert setTitle:@"Beta Version"];
     [alert setMessage:@"Share coming soon!"];
     [alert show];
     [alert release];
+     */
     return;
 }
-	
+
 - (void)didReceiveMemoryWarning
 {
     // Releases the view if it doesn't have a superview.
@@ -283,6 +295,9 @@
         [locationIcon setHidden:YES];
     //NSLog(@"Loading feed item with name %@ comment %@ and imageView %f %f with image Data size %f %f", labelName.text, labelDescriptor.text, imageView.frame.size.width, imageView.frame.size.height, imageData.size.width, imageData.size.height);
 
+    [labelCommentCount setText:@""];
+    
+#if 0
     if (names)
         [names release];
     if (comments)
@@ -299,9 +314,10 @@
     [k setDelegate:self];
     [k getAllHistoryWithTagID:tagID];
      */
+#endif
     
-    [shareButton setHidden:YES];
-    [seeAllCommentsButton setHidden:YES];
+    //[shareButton setHidden:YES];
+    //[seeAllCommentsButton setHidden:YES];
 }
 
 - (void)viewDidUnload
@@ -352,6 +368,7 @@
 	{
         UITouch *touch = [[event allTouches] anyObject];	
         CGPoint location = [touch locationInView:self.view];
+        if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:withFeedItem:)])
         [self.delegate didClickAtLocation:location withFeedItem:self];
     }
 }

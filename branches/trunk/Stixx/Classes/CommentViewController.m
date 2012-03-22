@@ -7,6 +7,7 @@
 //
 
 #import "CommentViewController.h"
+#import "Tag.h" // just for gettimelabel
 
 @implementation CommentViewController
 
@@ -54,8 +55,14 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 1, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 10, 25, 25)];
     [self.view addSubview:activityIndicator];
+    [commentField setText:@""]; // clear text
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [commentField setText:@""]; // clear text
 }
 
 -(void)initCommentViewWithTagID:(int)_tagID andNameString:(NSString*)_nameString {
@@ -81,9 +88,12 @@
         [comments release];
     if (stixStringIDs)
         [stixStringIDs release];
+    if (timestamps)
+        [timestamps release];
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
     stixStringIDs = [[NSMutableArray alloc] init];
+    timestamps = [[NSMutableArray alloc] init];
     
     [nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
@@ -98,6 +108,8 @@
         NSString * name = [d valueForKey:@"username"];
         NSString * comment = [d valueForKey:@"comment"];
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
+        NSDate * timestamp = [d valueForKey:@"timeCreated"];
+        
         if ([stixStringID length] == 0)
         {
             // backwards compatibility
@@ -110,8 +122,10 @@
         [names addObject:name];
         [comments addObject:comment];
         [stixStringIDs addObject:stixStringID];
+        [timestamps addObject:timestamp];
+        //[photos setObject:[self.delegate getUserPhotoForUsername:name] forKey:name];        
     }
-    [commentsTable configureRowsWithHeight:70 dividerVisible:YES fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
+    //[commentsTable configureRowsWithHeight:70 dividerVisible:YES fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     [commentsTable.tableView reloadData];
     [self stopActivityIndicator];
 }
@@ -132,10 +146,14 @@
 /*** commentFeedTableDelegate ***/
 
 -(NSString* )getNameForIndex:(int)index {
+    if (index > [names count])
+        return nil;
     return [names objectAtIndex:index];
 }
 
 -(NSString *)getCommentForIndex:(int)index {
+    if (index > [comments count])
+        return nil;
     return [comments objectAtIndex:index];
 }
 
@@ -144,6 +162,16 @@
     if ([type length] == 0) 
         type = @"COMMENT";
     return type;
+}
+
+-(NSString*)getTimestampStringForIndex:(int)index {
+    NSDate * date = [timestamps objectAtIndex:index];
+    NSString * timeStampString = [Tag getTimeLabelFromTimestamp:date];
+    return timeStampString;
+}
+
+-(UIImage*)getPhotoForIndex:(int)index {
+    return [self.delegate getUserPhotoForUsername:[names objectAtIndex:index]];//[photos objectForKey:[names objectAtIndex:index]];
 }
 
 -(int)getCount {

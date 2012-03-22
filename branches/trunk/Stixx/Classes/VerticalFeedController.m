@@ -13,7 +13,7 @@
 
 @synthesize feedItems;
 @synthesize headerViews;
-@synthesize commentHistories;
+//@synthesize commentHistories;
 @synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
@@ -87,7 +87,7 @@
     
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
-    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
+    [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
     CGRect labelFrame = CGRectMake(25, 5, 58, 38);
     labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
@@ -101,7 +101,6 @@
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
     headerViews = [[NSMutableDictionary alloc] init];
-    commentHistories = [[NSMutableDictionary alloc] init];
     feedSectionHeights = [[NSMutableDictionary alloc] init];
     
     //[activityIndicator startCompleteAnimation];
@@ -110,6 +109,50 @@
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [self configureCarouselView];
     [self.carouselView carouselTabDismiss:NO];
+}
+
+
+-(void)didClickMoreBuxButton:(id)sender {
+    //[self.delegate didPurchaseBux:0];
+    
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Buy more Bux" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"5 Bux for $0.99", @"15 Bux for $2.99", @"40 Bux for $4.99", @"80 Bux for $8.99", @"170 Bux for $19.99", @"475 Bux for $49.99", nil];
+    [actionSheet showInView:self.view];
+    [actionSheet release];
+    
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    // button index: 
+    // 0 @"5 Bux for $0.99"
+    // 1 @"15 Bux for $2.99"
+    // 2 @"40 Bux for $4.99"
+    // 3 @"80 Bux for $8.99"
+    // 4 @"170 Bux for $19.99"
+    // 5 @"475 Bux for $49.99"
+    // 6 cancel
+    int values[6] = {5,15,40,80,170,475};
+    if (buttonIndex != [actionSheet cancelButtonIndex]) {
+        currentBuxPurchase = values[buttonIndex];
+        NSString * title = @"Bux Purchase";
+        NSString * message = [NSString stringWithFormat:@"Are you sure you want to purchase %d Bux?", currentBuxPurchase];
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:title
+                                                         message:message
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                               otherButtonTitles:@"Make Purchase", nil];
+        [alert show];
+        [alert release];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    NSLog(@"Button index: %d", buttonIndex);    
+    // 0 = close
+    // 1 = view
+    
+    if (buttonIndex != [alertView cancelButtonIndex]) {
+        [self.delegate didPurchaseBux:currentBuxPurchase];
+    }
 }
 
 -(void)configureCarouselView {
@@ -136,7 +179,7 @@
     
     self.allTags = [self.delegate getTags];
     self.userPhotos = [self.delegate getUserPhotos]; 
-    NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
+    //NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
     
     //[tableController populateScrollPagesAtPage:lastPageViewed];
     [tableController setContentPageIDs:allTags];
@@ -349,7 +392,7 @@
 -(int)getHeightForSection:(int)index {
     Tag * tag = [allTags objectAtIndex:index];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
-    NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
+    //NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
     return MAX(CONTENT_HEIGHT, feedItem.view.frame.size.height);
 }
 
@@ -371,7 +414,7 @@
         [headerView setAlpha:.75];
         
         UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]];
-        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)];
+        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
         [photoView setImage:photo];
         [headerView addSubview:photoView];
         
@@ -403,14 +446,7 @@
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     Tag * tag = [allTags objectAtIndex:index];
-    VerticalFeedItemController * oldFeedItem = [feedItems objectForKey:tag.tagID];
-    BOOL shouldExpand = NO;
-    NSLog(@"ReloadViewForItemAtIndex %d: oldFeedItem tagID %d oldFeedItem %x", index, [tag.tagID intValue], oldFeedItem);
-    if (oldFeedItem != nil) {
-        NSLog(@"OldFeedItem frame: %f %f %f %f", oldFeedItem.view.frame.origin.x, oldFeedItem.view.frame.origin.y, oldFeedItem.view.frame.size.width, oldFeedItem.view.frame.size.height);
-        shouldExpand = [oldFeedItem isExpanded];
-    }
-    VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init];
+    VerticalFeedItemController * feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
     [feedItem setDelegate:self];
     
     NSString * name = tag.username;
@@ -438,7 +474,8 @@
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];
     if (0) { //shouldExpand) {
-        NSMutableDictionary * theResults = [commentHistories objectForKey:tag.tagID];
+        NSMutableDictionary * theResults = [self.delegate getCommentHistoriesForTag:tag];
+        //NSMutableDictionary * theResults = [commentHistories objectForKey:tag.tagID];
         if (theResults != nil) {
             NSMutableArray * names = [[NSMutableArray alloc] init];
             NSMutableArray * comments = [[NSMutableArray alloc] init];
@@ -472,7 +509,7 @@
     // this object must be retained so that the button actions can be used
     [feedItems setObject:feedItem forKey:tag.tagID];
     
-    //[self.tableController.tableView reloadData];
+    [self.tableController.tableView reloadData];
     [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
@@ -510,7 +547,7 @@
             [feedItem populateWithUserPhoto:photo];
             [photo autorelease]; // MRC
         }
-        NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
+        //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
         // add timestamp
         [feedItem populateWithTimestamp:tag.timestamp];
         // add badge and counts
@@ -522,18 +559,23 @@
         // populate comments for this tag
         NSMutableArray * param = [[NSMutableArray alloc] init];
         [param addObject:tag.tagID];
-        //[[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+        [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
         
         // this object must be retained so that the button actions can be used
         [feedItems setObject:feedItem forKey:tag.tagID];
     } 
     else {
         // see what the dimensions were saved previously
-        NSLog(@"ViewForItem EXISTS:  feedItem ID %d index %d view %x height: %f ", feedItem.tagID, index, feedItem.view, feedItem.view.frame.size.height);
+        //NSLog(@"ViewForItem EXISTS:  feedItem ID %d index %d view %x height: %f ", feedItem.tagID, index, feedItem.view, feedItem.view.frame.size.height);
     }
-    NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
+    //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
+}
+
+-(UIImage*)getUserPhotoForUsername:(NSString *)username {
+    UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:username]];
+    return photo;
 }
 
 -(void)didGetCommentHistoryWithResults:(NSMutableArray*)theResults {
@@ -544,16 +586,15 @@
         return;
     NSMutableDictionary * d = [kumulosResults objectAtIndex:0];
     NSNumber * tagID = [d objectForKey:@"tagID"];
-    NSLog(@"Adding comment history from kumulos: %d results for tag %d", [kumulosResults count], [tagID intValue]);
-    [commentHistories setObject:kumulosResults forKey:tagID];
+    //NSLog(@"Adding comment history from kumulos: %d results for tag %d", [kumulosResults count], [tagID intValue]);
+    //[commentHistories setObject:kumulosResults forKey:tagID];
     // expand feedview to display all comments
     // hack: to test expanding comments
     for (int i=0; i<[allTags count]; i++) {
         Tag * tag = [allTags objectAtIndex:i];
         if ([tag.tagID intValue] == [tagID intValue]) {
-            lastPageViewed = i;
-            NSLog(@"Displaying comments of tagID %d lastPageViewed %d", [tag.tagID intValue], lastPageViewed);
-            [self reloadViewForItemAtIndex:lastPageViewed];
+            //NSLog(@"Displaying comments of tagID %d on page %d", [tag.tagID intValue], i);
+            //[self reloadViewForItemAtIndex:i];
             return;
         }
     }
@@ -565,7 +606,7 @@
         Tag * t = [allTags objectAtIndex:i];
         if ([t.tagID intValue] == tagID) {
             [self reloadViewForItemAtIndex:i];
-            NSLog(@"TagID: %d Target row: %d", tagID, i);
+            //NSLog(@"TagID: %d Target row: %d", tagID, i);
             NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
             [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
         }
@@ -581,7 +622,7 @@
 }
 
 -(void)updateScrollPagesAtPage:(int)page {
-    NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
+    //NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
     if ([self itemCount] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTags objectAtIndex:0];
@@ -650,7 +691,7 @@
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController*)feedItem {
     // location is the click location inside feeditem's frame
     
-    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
+    //NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
 
     CGPoint locationInStixView = location;
     //locationInStixView.x -= feedItem.stixView.frame.origin.x;
@@ -681,8 +722,6 @@
 
 /*** verticalfeedItemDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
-#if 1
-    // display a CommentViewController to also add comments
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
         [commentView setDelegate:self];
@@ -695,66 +734,45 @@
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [commentView.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:commentView.view];
-#else
-    // expand feedview to display all comments
-    // hack: to test expanding comments
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
-        if ([tag.tagID intValue] == tagID) {
-            lastPageViewed = i;
-            NSLog(@"Displaying comments of tagID %d lastPageViewed %d", [tag.tagID intValue], lastPageViewed);
-            [self reloadViewForItemAtIndex:lastPageViewed];
-            return;
-        }
-    }
-#endif
 }
-
--(void)didExpandFeedItem:(VerticalFeedItemController *) feedItem {
-    // not a reload feedview because reloading causes the comments to disappear
-    // rather replace the feedItems array with an expanded feedItem and reload the table
-    //[feedItems setObject:feedItem forKey:[NSNumber numberWithInt:feedItem.tagID]];
-    //[self.tableController.tableView reloadData];
-    int tagID = feedItem.tagID;
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
-        if ([tag.tagID intValue] == tagID) {
-            lastPageViewed = i;
-            [self reloadViewForItemAtIndex:lastPageViewed];
-            return;
-        }
-    }
+-(NSString *)urlEncodeString:(NSString*)raw usingEncoding:(NSStringEncoding)encoding {
+	return (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                               (CFStringRef)raw,
+                                                               NULL,
+                                                               (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
+                                                               CFStringConvertNSStringEncodingToEncoding(encoding));
 }
 
 -(void)didSharePix:(NSMutableArray*)params {
     int newID = [[params objectAtIndex:0] intValue];
     NSLog(@"DidSharePix completed: id %d", newID);
-    NSMutableString * encodedURL = [[NSMutableString alloc] init];
-    NSString * longURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d", newID];
-    [encodedURL appendString:longURL];
-    [encodedURL appendString:@"\%26submit=Submit!"];
+    NSString * longURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d&submit=Submit!", newID];
+    //NSMutableString * encodedURL = [[NSMutableString alloc] init];
+    //[encodedURL appendString:longURL];
+    //[encodedURL appendString:@"&submit=Submit!"];
     //NSString * encodedURL = (NSString *) CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)longURL,NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[]",kCFStringEncodingUTF8 );
-    //NSString* encodedUrl =[longURL stringByAddingPercentEscapesUsingEncoding:NSHTTP];    
+    NSString * raw = @"&submit=Submit!";
+    NSString * encodedURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d%@", newID,
+                             [self urlEncodeString:raw usingEncoding:NSUTF8StringEncoding]];
     NSLog(@"longurl %@ encodedURL %@", longURL, encodedURL);
-    [self shortenBlastTextUrls:encodedURL];
+    [self.delegate didSharePixWithURL:longURL];
+    //[self shortenBlastTextUrls:encodedURL];
     
     // todo: add a menu for facebook/twitter/email/save to disk
     // todo: add timeout to provide long url if bitly helper fails
 }
 
 -(void)sharePix:(int)tagID {
+    [self.delegate sharePix:tagID];
+    /*
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Sharing"];
-    [alert setMessage:@"Processing Pix for sharing..."];
+    [alert setTitle:@"Processing for Sharing"];
+    [alert setMessage:@"This Pix has been saved to your Photo Library! For now please share it from there."];
     [alert show];
     [alert release];
 
     VerticalFeedItemController * feedItem = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
-#if 0
-    UIImage * feedImage = feedItem.imageData; // for now just store original image data
-	NSData *png = UIImagePNGRepresentation(feedImage);
-#else
     Tag * tag = nil;
     for (int i=0; i<[allTags count]; i++) {
         Tag * t = [allTags objectAtIndex:i];
@@ -767,10 +785,10 @@
 	NSData *png = UIImagePNGRepresentation(result);
     
     UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-#endif
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
-    [[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
 
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
+    //[[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
+     */
 }
 
 - (void) shortenBlastTextUrls:(NSString*)url{

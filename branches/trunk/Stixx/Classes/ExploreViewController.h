@@ -23,12 +23,16 @@
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
+-(void)sharePix:(int)tagID;
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)uploadImage:(NSData*)dataPNG;
 
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 //-(void)didClickFeedbackButton:(NSString*)fromView;
 
 -(int)getNewestTagID;
 -(int)getBuxCount;
+-(NSString*)getUsername;
 @end
 
 enum {

@@ -19,9 +19,15 @@
 //#import <MapKit/MapKit.h>
 #import "FileHelpers.h"
 #import "Kiip.h"
+#import "ASIHTTPRequest.h"
+#import "ASIFormDataRequest.h"
 
 #define START_ID 100
 #define TAG_LOAD_WINDOW 3 // load this many tags before or after current tag
+#define HOSTNAME @"stix.herokuapp.com"
+//#define HOSTNAME @"localhost:3000"
+
+#define DEBUGX 0
 
 @implementation StixxAppDelegate
 
@@ -50,6 +56,7 @@
 @synthesize camera;
 @synthesize metricLogonTime;
 @synthesize lastKumulosErrorTimestamp;
+@synthesize allCommentHistories;
 #if USING_FACEBOOK
 @synthesize facebook;
 #endif
@@ -57,7 +64,9 @@ static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     versionStringStable = @"0.7.8";
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
     
@@ -88,6 +97,9 @@ static int init=0;
      UIRemoteNotificationTypeSound];    
     
     [self Parse_unsubscribeFromAll];
+    // register for notifications on update channel
+    [self Parse_subscribeToChannel:@"StixUpdates"];
+    [self Parse_subscribeToChannel:@""];
     
     /*** Kiip service ***/
 #if USING_KIIP
@@ -161,7 +173,8 @@ static int init=0;
     allFriends = [[NSMutableSet alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
-    
+    allCommentHistories = [[NSMutableDictionary alloc] init];
+
 #if !TARGET_IPHONE_SIMULATOR
     [mainController presentModalViewController:camera animated:YES];
 #else
@@ -277,9 +290,6 @@ static int init=0;
     if (versionIsOutdated)
     {
         [self showAlertWithTitle:@"Update Available" andMessage:[NSString stringWithFormat:@"This version of Stix (v%@) is out of date. Version %@ is available through TestFlight.", versionStringStable, currVersion] andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_UPGRADE];
-        
-        // register for notifications on update channel
-        [self Parse_subscribeToChannel:@"StixUpdates"];
     }
     
     /* add administration calls here */
@@ -312,11 +322,17 @@ static int init=0;
 /*** Versioning ***/
 
 -(void)checkVersion {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     versionIsOutdated = 0;
     [k getAppInfoWithInfoType:@"version"];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAppInfoDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([theResults count] == 0)
     {
         [k createAppInfoWithInfoType:@"version" andStringInfo:versionStringStable andIntegerInfo:0];
@@ -348,6 +364,9 @@ static int init=0;
 - (void)application:(UIApplication *)application
 didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // Tell Parse about the device token.
     [PFPush storeDeviceToken:newDeviceToken];
     // Subscribe to the global broadcast channel.
@@ -355,6 +374,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)initializeBadges {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //[BadgeView InitializeGenericStixTypes];
     //[self showAlertWithTitle:@"Initializing badges" andMessage:@"We are checking for new badges. Please be patient" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 
@@ -365,6 +387,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([theResults count] == 0)
         NSLog(@"Could not find a stix data! May be missing in Kumulos.");
     else
@@ -372,6 +397,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // initialize stix types for all badge views
     [BadgeView InitializeStixTypes:theResults];
     NSLog(@"All %d Stix types initialized from kumulos!", [BadgeView totalStixTypes]);
@@ -398,6 +426,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [BadgeView InitializeStixViews:theResults];
     NSLog(@"All %d Stix data initialized from kumulos!", [theResults count]);
     init++;
@@ -409,6 +440,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
     
 - (void) saveDataToDisk {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSString * path = [self coordinateArrayPath];
  	
     NSMutableDictionary * rootObject;
@@ -427,10 +461,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         
         [rootObject setValue:stixStringIDs forKey:@"stixStringIDs"];
         [rootObject setValue:stixViews forKey:@"stixViews"];
+        NSLog(@"Saving %d stix views to disk", [stixViews count]);
         [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
         [rootObject setValue:stixLikelihoods forKey:@"stixLikelihoods"];
         [rootObject setValue:stixCategories forKey:@"stixCategories"];
         [rootObject setValue:stixSubcategories forKey:@"stixSubcategories"];
+        NSLog(@"Saving %d stix subcategories to disk", [stixSubcategories count]);
         
         [NSKeyedArchiver archiveRootObject: rootObject toFile: path];
     } 
@@ -440,6 +476,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 - (int) loadDataFromDisk {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // returns 0 if no stixViews loaded, 1 if stixViews were loaded from disk
     NSString     * path         = [self coordinateArrayPath];
     NSDictionary * rootObject;
@@ -458,6 +497,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         NSMutableDictionary * stixDescriptors = [rootObject valueForKey:@"stixDescriptors"];
         NSMutableDictionary * stixLikelihoods = [rootObject valueForKey:@"stixLikelihoods"];
         NSMutableDictionary * stixCategories = [rootObject valueForKey:@"stixCategories"];
+        
+        NSLog(@"LoadDataFromDisk: %d stixViews %d stixCategories", [stixViews count], [stixCategories count]);
         
         if (stixViews != nil)
         {
@@ -487,9 +528,15 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self performSelector:callback withObject:params afterDelay:0];
 }
 -(void)didGetKumulosSubcategories:(NSMutableArray*)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSMutableArray * stixSubcategoriesFromKumulos = [theResults objectAtIndex:0];
     [BadgeView InitializeStixSubcategoriesFromKumulos:stixSubcategoriesFromKumulos];
     NSLog(@"%d StixSubcategories loaded from Kumulos!", [stixSubcategoriesFromKumulos count]);
@@ -503,6 +550,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if 0
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //[self.tabBarController toggleFirstTimeInstructions:NO];
     //[self.tabBarController toggleStixMallPointer:NO];
 
@@ -552,6 +602,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 // RaisedCenterTabBarController delegate 
 -(void)didPressTabButton:(int)pos {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setSelectedIndex:pos];
     [tabBarController setButtonStateSelected:pos]; // highlight button
@@ -569,6 +622,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)didDismissSecondaryView {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //[tabBarController setButtonStateNormal:TABBAR_BUTTON_TAG]; // highlight button
     [feedController configureCarouselView];
     [feedController.carouselView carouselTabDismiss:YES];
@@ -589,6 +645,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)logMetricTimeInApp {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (metricLogonTime) {
         NSTimeInterval lastDiff = [metricLogonTime timeIntervalSinceNow];
         NSString * description = @"TimeInAppInSeconds";
@@ -600,13 +659,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {	// Get full path of possession archive 
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+          //                                       (unsigned long)NULL), ^(void) {
             [self saveDataToDisk];
-        });
+        //});
 
         [self logMetricTimeInApp];
     }
@@ -620,15 +682,18 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {	// Get full path of possession archive 
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     
     // archive username
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
-            [self saveDataToDisk];
-        });
+        [self saveDataToDisk];
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+  //                                               (unsigned long)NULL), ^(void) {
+    //    });
         [self logMetricTimeInApp];
     }
     
@@ -663,6 +728,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 - (void)application:(UIApplication *)application 
 didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([error code] == 3010) {
         NSLog(@"Push notifications don't work in the simulator!");
     } else {
@@ -681,10 +749,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 /**** loading and adding of stix from kumulos ****/
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     return [self addTagWithCheck:tag withID:newID overwrite:NO];
 }
 
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // adds a tag to allTags, if its id doesn't already exist
     // add Tag to the correct position in allTags - used if we have delayed loading
     // newID is needed if tag.ID doesn't exist yet
@@ -706,34 +780,45 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         else if (newID>tagID) // allTags should start at a high tagID (most recent) and go to a lower tagID (oldest)
         {
-            [tagViewController addCoordinateOfTag:tag];
-            [allTags insertObject:tag atIndex:i];
-            [self getCommentCount:newID]; // store comment count for this tag
-            //[tag release];
-            added = YES;
+            // update IDs so we know this content has been received
             if (newID > idOfNewestTagReceived)
                 idOfNewestTagReceived = newID;
             if (newID < idOfOldestTagReceived)
                 idOfOldestTagReceived = newID;
+
+            // add into feed if it meets criteria
+            if (1) { // [allFriends containsObject:tag.username]) {
+                [allTags insertObject:tag atIndex:i];
+                [self getCommentCount:newID]; // store comment count for this tag
+                added = YES;
+            }
+            else 
+                added = NO;
             break;
         }
     }
     if (!added && !alreadyExists)
     {
-        [tagViewController addCoordinateOfTag:tag];
-        [allTags insertObject:tag atIndex:i];
-        //[tag release];
         if (newID > idOfNewestTagReceived)
             idOfNewestTagReceived = newID;
         if (newID < idOfOldestTagReceived)
             idOfOldestTagReceived = newID;
-        added = YES;
+        if (1) { //[allFriends containsObject:tag.username]) {
+            [allTags insertObject:tag atIndex:i];
+            [self getCommentCount:newID]; // store comment count for this tag
+            added = YES;
+        }
+        else 
+            added = NO;
     }
     [tag release];
     return added;
 }
 
 -(void)didCreateNewPix:(Tag *)newTag {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
     //[allTags addObject:newTag];
 
@@ -772,7 +857,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [encoder release];
     
     [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
-    
+        
     NSString * loc = newTag.locationString;
     //NSLog(@"Location: %@", newTag.locationString);
     if ([loc length] > 0)
@@ -781,6 +866,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixDidCompleteWithResult:(NSNumber *)newRecordID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [newestTag setTagID:newRecordID];
     [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
     //[allTags addObject:newestTag];
@@ -795,16 +883,34 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
 
+    // if we added a stix, save stix as comment history
+    NSString * stixStringID = [newestTag.auxStixStringIDs objectAtIndex:0];
+    if (stixStringID != nil) {
+        NSLog(@"New pix has a new stix also: %@", [BadgeView getStixDescriptorForStixStringID:stixStringID]);
+        //[self didAddCommentWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID];
+        [k addCommentToPixWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID];
+    }
+
     // do not add scale and rotation - all saved in aux stix
     [self updateUserTagTotal];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Updated user tag totals: affect rows %d\n", [affectedRows intValue]);
-    [profileController updatePixCount];
+    @try {
+        [profileController updatePixCount];
+    } @catch (NSException * e) {
+        NSLog(@"exception: %@", [e reason]);
+    }
 }
 
 - (void)clearTags {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [allTags removeAllObjects];
     [tagViewController clearTags];
 }
@@ -814,6 +920,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 // Checking for new items at the beginning of the list
 
 - (void) checkForUpdateTags {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     int numTags = 1;
     NSLog(@"Checking for updated tag ids on kumulos");
     NSNumber * number = [[NSNumber alloc] initWithInt:numTags];
@@ -823,6 +932,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getLastTagIDDidCompleteWithResult:(NSArray*)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // NSArray contains one element which is the most recently created element in the database
 	for (NSMutableDictionary * d in theResults) {        
         int idnum = [[d valueForKey:@"allTagID"] intValue];
@@ -839,12 +951,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
         idOfLastTagChecked = idOfNewestTagOnServer;
     }
-    else
+    else {
         NSLog(@"Tag %d already downloaded. allTags count = %d", idOfNewestTagOnServer, [allTags count]);
+        if ([allTags count] == 0) { // try again
+            [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
+        }
+    }
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // first, update from kumulos in case other people have added stix
     // to the same pix we are modifying
     {
@@ -1054,11 +1173,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateStixOfPixDidCompleteWithResult:(NSNumber *)affectedRows {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Update finally completed");
     isUpdatingPeelableStix = NO;
 }
 
 -(void)getNewerTagsThanID:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // because this gets called multiple times during scrollViewDidScroll, we have to save
     // the last request to try to minimize making duplicate requests
     if (tagID == idOfNewestTagReceived || // we always want to make this request
@@ -1072,6 +1197,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)getOlderTagsThanID:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (1) { //pageOfLastOlderTagsRequest != tagID) {
         pageOfLastOlderTagsRequest = tagID;
         [k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
@@ -1082,6 +1210,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDGreaterThanDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     bool didAddTag = NO;
     int totalAdded = 0;
     // tags with IDs greater than idOfCurrentTag should go to the head of the array allTags
@@ -1114,6 +1245,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDLessThanDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     bool didAddTag = NO;
     int totalAdded = 0;
 	for (NSMutableDictionary * d in theResults) {
@@ -1146,9 +1280,28 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return allTags;
 }
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
-    [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+-(void)addCommentToPixCompleted:(NSMutableArray*)params {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSNumber * tagID = [params objectAtIndex:0];
+    if (tagID) {
+        //[self getCommentCount:[tagID intValue]];
+        [k getAllHistoryWithTagID:[tagID intValue]];
+    }
+}
 
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+#if 1
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
+    [[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+    NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
+#else
+    [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+#endif
     if (![comment isEqualToString:@""]) {
         // actual comment
 
@@ -1157,13 +1310,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         Tag * tag = [self getTagWithID:tagID];
         if (![tag.username isEqualToString:[self getUsername]])
             [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
-        // update comment count
-        [self updateCommentCount:tagID];
         [self updateUserTagTotal];
+        // don't updateCommentCount;
+        // touch tag to indicate it was updated
+        [k touchPixToUpdateWithAllTagID:tagID];
     }
 }
 
 -(int)getCommentCount:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSNumber * commentCount = [allCommentCounts objectForKey:[NSNumber numberWithInt:tagID]];
     if (commentCount == nil)
         [k getAllHistoryWithTagID:tagID];
@@ -1174,17 +1331,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)updateCommentCount:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // get most recent comment count from kumulos
     [k getAllHistoryWithTagID:tagID];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray *)theResults{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     
     if ([theResults count] == 0)
         return;
     
     NSMutableDictionary * d = [theResults objectAtIndex:0];        
     NSNumber * tagID = [d valueForKey:@"tagID"]; 
+    [allCommentHistories setObject:d forKey:tagID];
     int commentCount = 0;
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];        
@@ -1202,9 +1366,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [feedController forceUpdateCommentCount:[tagID intValue]];
 }
 
+-(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    return [allCommentHistories objectForKey:tag.tagID];
+}
+
 /***** FriendsViewDelegate ********/
 -(void)didDismissFriendView {}; // only used in profileView
 -(void) checkForUpdatePhotos {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (1) // todo: check for updated users by id
     {
         [friendController setIndicator:YES];
@@ -1213,11 +1387,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 -(void)didSendGiftStix:(NSString *)stixStringID toUsername:(NSString *)friendName {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo->username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
     [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [allUserPhotos removeAllObjects];
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
@@ -1238,13 +1418,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //NSLog(@"loaded %d new friends from kumulos", [theResults count]);
 }
 
-
-
 -(NSMutableDictionary * )getUserPhotos {
     return allUserPhotos;
 }
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
-    return [allUserPhotos objectForKey:username];
+    return [[UIImage alloc] initWithData:[allUserPhotos objectForKey:username]];
 }
 
 /**** LoginSplashController delegate ****/
@@ -1252,6 +1430,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 /**** ProfileViewController and login functions ****/
 
 -(void)didClickChangePhoto {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // we want to open another camera source
     // we have to do it over the existing camera because touch controls don't work if
     // we add a modal view to profileViewController
@@ -1275,6 +1456,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
     //    [picker release];    
     
@@ -1290,6 +1474,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
     UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
     UIImage * newPhoto; 
@@ -1329,6 +1516,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Added photo to username %@",  myUserInfo->username);
     
     // force friendView to update photo after we know it is in kumulos
@@ -1337,10 +1527,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 - (NSString *)coordinateArrayPath
 {	
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     return pathInDocumentDirectory(@"StixxUserData.data");
 }
 
 -(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Kumulos error: %@", theError);
 #if 0
     if (lastViewController == feedController) { // currently on feed controller
@@ -1361,9 +1557,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     
     [photo retain];
     [stix retain];
+    
+    NSLog(@"DidLoginFromSplashScreen: username %@ stix %d, stixOrder %d", username, [stix count], [stixOrder count]);
     
     /***** if we used splash screen *****/
     [self didDismissSecondaryView];
@@ -1387,6 +1588,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet *)friendsList {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
         [allStix removeAllObjects];
@@ -1407,6 +1611,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allStixOrder removeAllObjects];
         [allStixOrder addEntriesFromDictionary:stixOrder];
         [stixOrder release];
+        
+        NSLog(@"DidLoginWithUsername: %@ allStix: %d stixOrder: %d", name, [allStix count], [stixOrder count]);
 
         // debug
         NSEnumerator *e = [allStixOrder keyEnumerator];
@@ -1460,9 +1666,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self saveDataToDisk];
     
     [self setMetricLogonTime:[NSDate date]];
+    
+    [self closeProfileView];
 }
 
 -(void)checkConsistency { 
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // if stix got messed up or stixOrders got messed up
     for (int i=0; i<[BadgeView totalStixTypes]; i++) {
         NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
@@ -1506,6 +1717,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didLogout {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self.tabBarController toggleStixMallPointer:NO]; // stop stix mall pointer
     if (loggedIn == YES) {
         // logging out from profile view controller
@@ -1543,14 +1757,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)closeProfileView {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self.profileController.view removeFromSuperview];
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     myUserInfo->userphoto = photo;
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //if (loggedIn)
     if ([stixStringID isEqualToString:@"FIRE"] || [stixStringID isEqualToString:@"ICE"] || [[BadgeView getStixDescriptorForStixStringID:stixStringID] isEqualToString:@"Generic"])
         return -1;
@@ -1560,6 +1783,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(int)getStixOrder:(NSString*)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([allStixOrder objectForKey:stixStringID] == nil) {
         //int pos = -1;
         //[allStixOrder setValue:[NSNumber numberWithInt:ct] forKey:stixStringID];
@@ -1570,21 +1796,43 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(NSMutableSet*)getFriendsList {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     return allFriends;
 }
-
+-(void)didUpdateFriendsList {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"Updated friends list: total friends %d", [allFriends count]);
+    [self.profileController updateFriendCount];
+    // todo: save friends List to kumulos
+    NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
+    [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
+    [auxiliaryDict setObject:allFriends forKey:@"friendsList"];
+    NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
+    //[auxiliaryDict release];    
+    [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
+}
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // all debug
     for (NSMutableDictionary * d in theResults)
     {
         NSString * name = [d valueForKey:@"username"];
-        NSLog(@"Updated stix counts for user %@", name);
+        NSLog(@"Updated stix counts for user %@: %d stix", name, [allStix count]);
     }
 }
 
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation*/ withTransform:(CGAffineTransform)transform{
-    
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   
     [feedController configureCarouselView];
     [feedController.carouselView carouselTabDismiss:YES];
     
@@ -1632,6 +1880,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     Tag * tag = [allTags objectAtIndex:tagIndex];
     isUpdatingPeelableStix = YES;
     updatingPeelableAction = action;
@@ -1643,14 +1894,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 // not used
 -(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updatePixDidCompleteWithResult:(NSNumber *)affectedRows {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [feedController reloadCurrentPage];
 }
 
 -(int)getNewestTagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     return MAX(idOfNewestTagReceived, idOfNewestTagOnServer);
 }
 
 -(NSString *) getUsername {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (loggedIn == YES)
     {
         //NSLog(@"[delegate getUsername] returning %@", username);
@@ -1661,6 +1921,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(UIImage *) getUserPhoto {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([self isLoggedIn] == NO)
         return [UIImage imageNamed:@"graphic_nouser.png"];
     return myUserInfo->userphoto;
@@ -1673,12 +1936,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 
 -(void)changeBuxCountByAmount:(int)change {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     myUserInfo->bux += change;
     [k changeUserBuxByAmountWithUsername:[self getUsername] andBuxChange:change];
     [self updateBuxCount];
 }
 
 -(void)rewardBux {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSString * title = @"Active Stix User";
     int amount = 5;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
@@ -1686,9 +1955,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self changeBuxCountByAmount:amount];
 }
 -(void)didFinishRewardAnimation:(int)amount {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self changeBuxCountByAmount:amount];
 }
 -(void)rewardLocation {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSString * title = @"Location Added";
     int amount = 1;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
@@ -1696,6 +1971,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self changeBuxCountByAmount:amount];
 }
 -(void)rewardStix {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSString * newStixStringID = [BadgeView getRandomStixStringID];
     int count = [[allStix objectForKey:newStixStringID] intValue];
     if (count == 0) {
@@ -1720,6 +1998,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)updateUserTagTotal {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // update usertagtotal
     myUserInfo->usertagtotal += 1;
     [k updateTotalTagsWithUsername:myUserInfo->username andTotalTags:myUserInfo->usertagtotal];
@@ -1734,16 +2015,25 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(bool)isLoggedIn {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     return loggedIn;
 }
 
 -(void)didCreateBadgeView:(UIView *)newBadgeView {
 //    if (lastViewController != nil) {
 //    }
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [allCarouselViews addObject:newBadgeView];
 }
 
 -(void)didClickFeedbackButton:(NSString *)fromView {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Feedback button clicked from %@", fromView);
     FeedbackViewController * feedbackController = [[FeedbackViewController alloc] init];
     [feedbackController setDelegate:self];
@@ -1756,21 +2046,31 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didCancelFeedback {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // formerly dismissModalViewController
     [self didDismissSecondaryView];
 }
 
 - (void) sendEmailTo:(NSString *)to withCC:(NSString*)cc withSubject:(NSString *) subject withBody:(NSString *)body {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
 	NSString *mailString = [NSString stringWithFormat:@"mailto:?to=%@&bcc=%@&subject=%@&body=%@",
 							[to stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
                             [cc stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
 							[subject stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
-							[body  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+                            [body  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
 	
+    NSLog(@"Sending mail: mailstring %@", mailString);
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:mailString]];
 }
 
 -(void)didSubmitFeedbackOfType:(NSString *)type withMessage:(NSString *)message {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
     NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo->username];
     NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@", versionStringStable, versionStringBeta, message];
@@ -1778,7 +2078,67 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didDismissSecondaryView];
 }
 
+-(void)uploadImage:(NSData *)dataPNG {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   NSData *imageData = dataPNG;
+    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, [self getUsername]];
+    NSURL *url=[[NSURL alloc] initWithString:serverString];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
+    [request setDelegate:self];
+    [request setData:imageData forKey:@"picture[data]"];
+    [request startSynchronous];
+}
+
+-(void)sharePix:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    /*
+    UIAlertView* alert = [[UIAlertView alloc]init];
+    [alert addButtonWithTitle:@"Ok"];
+    [alert setTitle:@"Processing for Sharing"];
+    [alert setMessage:@"This Pix has been saved to your Photo Library! For now please share it from there."];
+    [alert show];
+    [alert release];
+    */
+    Tag * tag = nil;
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([t.tagID intValue] == tagID)
+            tag = [allTags objectAtIndex:i];
+    }
+    if (tag == nil) {
+        return;
+    }
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+    
+    [self uploadImage:png];
+    
+    //NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
+    //[[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
+}
+
+-(void)didSharePixWithURL:(NSString *)url {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
+    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", myUserInfo->username];
+    NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@ has shared a Pix with you! See it here: %@", versionStringStable, versionStringBeta, [self getUsername], url];
+	[self sendEmailTo:@"" withCC:@"" withSubject:subject withBody:fullmessage];
+    [self didDismissSecondaryView];
+    
+}
+
 -(void)didClickInviteButton {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSLog(@"Invite button submitted by %@", [self getUsername]);
     NSString * subject = [NSString stringWithFormat:@"Become a Stixster!"];
     NSString * body = [NSString stringWithFormat:@"I'm playing Stix on my iPhone and I think you'd enjoy it too! Just click <a href=\"http://bit.ly/sjvbNE\">here</a> to get started!"];
@@ -1790,6 +2150,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 // debug
 -(void)adminUpdateAllStixCountsToZero {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
     [k adminAddStixToAllUsersWithStix:data];
@@ -1798,7 +2161,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminUpdateAllStixCountsToOne {
-    NSMutableDictionary * stix = [[BadgeView generateOneOfEachStix] retain]; 
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   NSMutableDictionary * stix = [[BadgeView generateOneOfEachStix] retain]; 
     int ct = [[stix objectForKey:@"HEART"] intValue];
     NSLog(@"Heart: %d", ct);
     NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
@@ -1808,10 +2174,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber *)affectedRows {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self Parse_sendBadgedNotification:@"Ninja admin stix update" OfType:NB_UPDATECAROUSEL toChannel:@"" withTag:nil orGiftStix:nil];
 }
 
 -(void)adminIncrementAllStixCounts {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     int totalStixTypes = [BadgeView totalStixTypes];
     NSLog(@"Total stix: %d", totalStixTypes);
     for (int i=0; i<totalStixTypes; i++) {
@@ -1829,6 +2201,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminSetUnlimitedStix {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     int totalStixTypes = [BadgeView totalStixTypes];
     NSLog(@"Total stix: %d", totalStixTypes);
     for (int i=0; i<totalStixTypes; i++) {
@@ -1846,6 +2221,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminResetAllStixOrders {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
 //    KumulosHelper * kh = [[KumulosHelper alloc] init];
 //    [kh setFunction:@"adminUpdateAllStixOrders"];
     //[kh setFunction:@"adminUpdateAllFriendsLists"];
@@ -1854,6 +2232,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // called by NB_UPDATECAROUSEL notification
     if ([theResults count] == 0)
         return;
@@ -1873,10 +2254,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self reloadAllCarousels];
 }
 -(void)reloadAllCarousels {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [[CarouselView sharedCarouselView] reloadAllStix];
 }
 
 -(void)didPressAdminEasterEgg:(NSString *)view {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //if ([[self getUsername] isEqualToString:@"bobo"]) {
     //    [self adminEasterEggShowMenu:@""];
     //}
@@ -1894,6 +2281,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminEasterEggShowMenu:(NSString *)password {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if ([[self getUsername] isEqualToString:@"bobo"] || [password isEqualToString:@"admin"]) {
 //        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Ye ol' Admin Menu" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users' Stix", @"Get me one of each", "Set all Users' bux", nil];
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix", @"Get me one of each", @"Set my stix to unlimited", @"Set all Users bux", @"Save Stix Feed", @"Reset all stix orders", nil];
@@ -1905,6 +2295,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // button index: 
     // 0 = "Reset all Users' Stix"
     // 1 = "Get me one of each"
@@ -1945,10 +2338,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void) adminSetAllUsersBuxCounts {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [k adminSetAllUserBuxWithBux:25];
 }
 
 -(void)decrementStixCount:(NSString *)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     int count = [[allStix objectForKey:stixStringID] intValue];
     if (count > 0) {
         count--;
@@ -1968,14 +2367,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)adminSaveTagUpdateInfo {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [[KumulosHelper sharedKumulosHelper] execute:@"adminSaveTagUpdateInfo"];
 }
 
 -(void)incrementStixCount:(NSString *)stixStringID{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self incrementStixCount:stixStringID byNumber:1];
 }
 
 -(void)incrementStixCount:(NSString *)stixStringID byNumber:(int)increment{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     int count = [[allStix objectForKey:stixStringID] intValue];
     if (![stixStringID isEqualToString:@"FIRE"] && ![stixStringID isEqualToString:@"ICE"]) {
         count+=increment;
@@ -1992,6 +2400,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(Tag*) getTagWithID:(int)tagID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     for (int i=0; i<[allTags count]; i++) {
         Tag * t = [allTags objectAtIndex:i];
         if ([[t tagID] intValue] == tagID)
@@ -2002,7 +2413,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 /***** Parse Notifications ****/
 -(void) Parse_unsubscribeFromAll {
-    [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
         NSEnumerator * e = [channels objectEnumerator];
         id element;
         NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
@@ -2015,12 +2429,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // Subscribe to the global broadcast channel.
     [PFPush subscribeToChannelInBackground:channel];
     NSLog(@"Parse: subscribing to channel <%@>", channel);
 }
 
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX)
         [data setObject:message forKey:@"alert"];
@@ -2036,6 +2456,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
             
     notificationBookmarkType = [[userInfo objectForKey:@"notificationBookmarkType"] intValue    ];
     // todo: client should track badge counts and set them this way:
@@ -2103,6 +2526,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)handleNotificationBookmarks:(bool)doJump {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (notificationTagID == -1) {
         // gift stix only - no need to jump to or update feed
         if (notificationBookmarkType == NB_UPDATECAROUSEL) {
@@ -2140,6 +2566,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString *)otherButtonTitle andAlertType:(int)alertType {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     /*
      UIAlertView* alert = [[UIAlertView alloc]init];
      [alert addButtonWithTitle:buttonTitle];
@@ -2181,6 +2610,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 static bool isShowingAlerts = NO;
 -(void)showAllAlerts {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     if (isShowingAlerts == YES)
         return;
     UIAlertView * firstAlert = [[alertQueue objectAtIndex:0] retain];
@@ -2193,7 +2625,10 @@ static bool isShowingAlerts = NO;
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    NSLog(@"Button index: %d", buttonIndex);    
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+   NSLog(@"Button index: %d", buttonIndex);    
     // 0 = close
     // 1 = view
     
@@ -2238,18 +2673,27 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)updateBuxCount {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     // display bux on feed?
     [[feedController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
     [[exploreController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
 }
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self didGetStixFromStore:stixStringID];
     [tabBarController doPurchaseAnimation:stixStringID]; 
 }
 
 /**** StoreView delegate ****/
 -(void)didGetStixFromStore:(NSString *)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
     //[self showAlertWithTitle:@"Stix Attained" andMessage:[NSString stringWithFormat:@"You have added the %@ Stix to your carousel!", stixDescriptor] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     //[self incrementStixCount:stixStringID];
@@ -2295,6 +2739,9 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)showNoMoreMoneyMessage {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self showAlertWithTitle:@"No More Bux" 
                   andMessage:@"You can't get any more stickers without any Bux!" 
                    andButton:@"OK"
@@ -2305,6 +2752,9 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)didPurchaseBux:(int)buxPurchased {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
     [self showAlertWithTitle:@"Thank you!" andMessage:[NSString stringWithFormat:@"You have received %d Bux. Have fun buying stickers!", buxPurchased] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     [self changeBuxCountByAmount:buxPurchased];
     if  (buxPurchased == 25) {
@@ -2318,4 +2768,42 @@ static bool isShowingAlerts = NO;
         [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:buxPurchased];
     }
 }
+
+/*** ASIhttp request delegate functions ***/
+- (void) requestFinished:(ASIHTTPRequest *)request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"Response %d : %@", request.responseStatusCode, [request responseString]);
+    // the response is an HTML file of the redirect to the image page
+    // in this image page there is a meta tag: <meta shared_id='<ID>'>
+    // also the webURL: <meta web_url='/users/<USERNAME>/pictures/<ID>'>
+    
+    NSString * responseString = [request responseString];
+    NSRange range0 = [responseString rangeOfString:@"<meta web_url"];
+    NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
+    range0.location = range0.location + 15;
+    range0.length = range1.location - range0.location-3; // this could change based on how we output web
+    NSString * substring = [responseString substringWithRange:range0];
+    NSLog(@"substring for weburl: <%@>", substring);
+    
+    NSString * weburl = [NSString stringWithFormat:@"http://%@%@", HOSTNAME,substring];
+    [self didSharePixWithURL:weburl];
+}
+
+- (void) requestStarted:(ASIHTTPRequest *) request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"request started...");
+}
+
+- (void) requestFailed:(ASIHTTPRequest *) request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSError *error = [request error];
+    NSLog(@"%@", error);
+}
+
 @end

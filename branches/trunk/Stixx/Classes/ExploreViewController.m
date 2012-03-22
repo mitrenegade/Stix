@@ -42,7 +42,7 @@
     [k setDelegate:self];    
 
     //activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 9, 25, 25)];
 
     return self;
     
@@ -63,10 +63,11 @@
     isZooming = NO;
     [self forceReloadAll];
 
-    NSArray *itemArray = [NSArray arrayWithObjects: @"Random", @"Recent", nil]; //, @"Popular", nil];
+    //NSArray *itemArray = [NSArray arrayWithObjects: @"Random", @"Recent", nil]; //, @"Popular", nil];
+    NSArray * itemArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"random.png"], [UIImage imageNamed:@"recent.png"], nil];
     UISegmentedControl * segmentedControl = [[UISegmentedControl alloc] initWithItems:itemArray];
     [segmentedControl setFrame:CGRectMake(20,50,280,30)];
-    segmentedControl.segmentedControlStyle = UISegmentedControlStyleBar;
+    segmentedControl.segmentedControlStyle = UISegmentedControlStylePlain;
     segmentedControl.selectedSegmentIndex = EXPLORE_RANDOM;
     [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RANDOM];
     [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RECENT];
@@ -122,6 +123,10 @@
     [self.tableController.tableView reloadData];
 }
 
+-(NSString*)getUsername {
+    return [self.delegate getUsername];
+}
+
 /*** table ***/
 -(void)initializeTable
 {
@@ -139,7 +144,7 @@
 
 -(int)numberOfRows {
     int total = [allTagIDs count];
-    NSLog(@"allTagIDs has %d items", total);
+    //NSLog(@"allTagIDs has %d items", total);
     return total / numColumns;
 }
 
@@ -214,7 +219,7 @@
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
         [allTagIDs addObject:newtag.tagID]; // save in order 
-        NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
+        //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
     }
     [tableController dataSourceDidFinishLoadingNewData];
@@ -281,8 +286,8 @@
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
     detailController = [[DetailViewController alloc] init];
-    [detailController initDetailViewWithTag:tag];
     [detailController setDelegate:self];    
+    [detailController initDetailViewWithTag:tag];
     CGRect frameOffscreen = CGRectMake(320,0,320,480);
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     [self.view addSubview:detailController.view];
@@ -291,6 +296,26 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     animationID = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+}
+
+-(void)sharePix:(int)tagID {
+    //[self.delegate sharePix:tagID];
+    Tag * tag = nil;
+    tag = [allTags objectForKey:[NSNumber numberWithInt:tagID]];
+    if (tag == nil) {
+        NSLog(@"Error in sharing pix! Tag doesn't exist!");
+        return;
+    }
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+    
+    [self.delegate uploadImage:png];
+}
+
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
+    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {

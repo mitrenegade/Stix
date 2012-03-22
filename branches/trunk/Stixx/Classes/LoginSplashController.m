@@ -89,7 +89,7 @@
         totalTags = [[d valueForKey:@"totalTags"] intValue];
     }
     else { // join
-        bux = 25; // should be set in kumulos but go ahead and set it here
+        bux = NEW_USER_BUX; // should be set in kumulos but go ahead and set it here
         totalTags = 0;
     }
 

@@ -95,7 +95,7 @@
             NSLog(@"Error! Exception caught while trying to load stix! Error %@", [exception reason]);
             stix = [[BadgeView generateDefaultStix] retain];
         }
-        NSLog(@"DidLoginWithUsername: %@", name);
+        NSLog(@"ProfileViewController: DidLoginWithUsername: %@", name);
         // total Pix count
         int totalTags = [[d valueForKey:@"totalTags"] intValue];
         int bux = [[d valueForKey:@"bux"] intValue];
@@ -312,7 +312,6 @@
 -(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
 -(NSMutableSet*)getFriendsList {return [self.delegate getFriendsList];}
 -(NSString*)getUsername {return [self.delegate getUsername];}
-
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
 -(int)getStixOrder:(NSString*)stixStringID;
 {

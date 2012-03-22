@@ -182,7 +182,10 @@
         
         bool isPeelableByUser = NO;
         if (isPeelable) {
-            if ([[tag.auxPeelable objectAtIndex:i] boolValue] == YES && [tag.username isEqualToString:[self.delegate getUsername]]) {
+            BOOL stixIsPeelable = [[tag.auxPeelable objectAtIndex:i] boolValue];
+            NSString * tagUsername = tag.username;
+            NSString * delegateUsername = [self.delegate getUsername];
+            if (stixIsPeelable == YES && [tagUsername isEqualToString:delegateUsername]) {
 
                 isPeelableByUser = YES;
                 // turn this stix into an animated one

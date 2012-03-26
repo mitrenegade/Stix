@@ -207,7 +207,7 @@ static CarouselView * sharedCarouselView;
             int neworder = (totalStix - stixToPurchase - 1);
             int y = neworder / STIX_PER_ROW;
             int x = neworder - y*STIX_PER_ROW;
-            //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             //NSLog(@"Adding nonowned stix %@ = %@ to %d %d index %d, totalStix-stixToPurchase-1 %d", stixStringID, stixDescriptor, x, y, stixToPurchase, neworder);
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);

@@ -101,8 +101,6 @@
     [stixView initializeWithImage:imageData];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view insertSubview:stixView belowSubview:imageView];
-    //[stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
-    
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    

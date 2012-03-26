@@ -2985,7 +2985,7 @@ static bool isShowingAlerts = NO;
         int ct = [[allStixOrder objectForKey:key] intValue];
         if (ct != 0) {
             int order = [[allStixOrder objectForKey:key] intValue];
-            NSLog(@"Stix: %@ order %d", key, order); 
+            NSLog(@"Stix: %@ order %d", [BadgeView getStixDescriptorForStixStringID:key], order); 
         }
     }    
     

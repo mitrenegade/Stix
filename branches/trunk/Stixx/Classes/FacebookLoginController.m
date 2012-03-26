@@ -7,6 +7,7 @@
 //
 
 #import "FacebookLoginController.h"
+#import "UIImage+Resize.h"
 
 @implementation FacebookLoginController
 
@@ -78,8 +79,13 @@
     NSString* username = facebookName;
     NSString* password = [NSString stringWithFormat:@"%d", facebookID];
     NSString * email = facebookEmail;
+#if 0
     UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
-    
+#else
+    NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
+    CGSize newSize = CGSizeMake(90, 90);
+    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
+#endif
     NSData * photo = UIImageJPEGRepresentation(img, .8);
     
     //[kumulos addEmailToUserWithUsername:username andEmail:email];
@@ -144,7 +150,12 @@
 
 -(void)updateExistingUser:(NSString*)username withFacebookID:(int)newFacebookID {
     NSString* password = [NSString stringWithFormat:@"%d", newFacebookID];
-    [k updateUserWithEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5:password] andFacebookID:newFacebookID];
+    NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
+    CGSize newSize = CGSizeMake(90, 90);
+    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
+    NSData * photo = UIImageJPEGRepresentation(img, .8);
+//    [k updateUserWithEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5:password] andFacebookID:newFacebookID];
+    [k updateUserByEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5: password] andPhoto:photo andFacebookID:newFacebookID];
 }
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
@@ -306,7 +317,7 @@
     }
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateUserWithEmailDidCompleteWithResult:(NSNumber *)affectedRows {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateUserByEmailDidCompleteWithResult:(NSNumber *)affectedRows {
     [self loginUser];
 }
 

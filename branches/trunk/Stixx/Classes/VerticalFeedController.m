@@ -265,7 +265,6 @@
     
     // scale stix frame back to full 300x275 size
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
-    [feedItem setDelegate:self];
     
     NSLog(@"VerticalFeedController: added stix of size %f %f at origin %f %f center %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
     
@@ -324,6 +323,7 @@
 -(void)didCancelAddStix {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self configureCarouselView];
+    //
     NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
     //[carouselView carouselTabExpand:NO];
     [carouselView carouselTabDismiss:YES];

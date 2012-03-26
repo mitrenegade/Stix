@@ -214,6 +214,7 @@ struct UserInfo {
 // former store methods
 -(void)updateBuxCount;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
+-(void)didPurchaseBux:(int)buxPurchased;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) UIViewController * emptyViewController;

@@ -368,8 +368,8 @@
 	{
         UITouch *touch = [[event allTouches] anyObject];	
         CGPoint location = [touch locationInView:self.view];
-        if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:withFeedItem:)])
-        [self.delegate didClickAtLocation:location withFeedItem:self];
+        if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
+            [self.delegate didClickAtLocation:location withFeedItem:self];
     }
 }
 

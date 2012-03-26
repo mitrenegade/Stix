@@ -7,11 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "LoginViewController.h"
+//#import "LoginViewController.h"
 #import "Kumulos.h"
 #import "UIImage+RoundedCorner.h"
 #import "UIImage+Resize.h"
-#import "LoginViewController.h"
 #import "BadgeView.h"
 #import "FriendsViewController.h"
 #import "KumulosData.h"

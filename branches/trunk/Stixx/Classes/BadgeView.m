@@ -275,12 +275,12 @@ static int totalStixTypes = 0;
     stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[savedStixStringIDs count]];
     stixViews = [[NSMutableDictionary alloc] initWithCapacity:[savedStixViews count]];
     stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[savedStixDescriptors count]];
-    stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[savedStixLikelihoods count]];
+    //stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[savedStixLikelihoods count]];
     stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[savedStixCategories count]];
     [stixStringIDs addObjectsFromArray:savedStixStringIDs];
     [stixViews addEntriesFromDictionary:savedStixViews];
     [stixDescriptors addEntriesFromDictionary:savedStixDescriptors];
-    [stixLikelihood addEntriesFromDictionary:savedStixLikelihoods];
+    //[stixLikelihood addEntriesFromDictionary:savedStixLikelihoods];
     [stixCategories addEntriesFromDictionary:savedStixCategories];
 }
 
@@ -478,7 +478,7 @@ static int totalStixTypes = 0;
 }
 +(NSMutableDictionary *)GetAllStixLikelihoodsForSave {
     // for saving to disk
-    return stixLikelihood;
+    return nil; //stixLikelihood;
 }
 +(NSMutableDictionary *)GetAllStixSubcategoriesForSave {
     // for saving to disk

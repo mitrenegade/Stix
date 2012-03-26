@@ -147,13 +147,14 @@
 }
 
 -(IBAction) showLogoutScreen:(id)sender {
+    /*
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"Ok"];
     [alert setTitle:@"Logout successful"];
     [alert setMessage:[NSString stringWithFormat:@"You have been logged out from %@.", [delegate getUsername]]];
     [alert show];
     [alert release];
-    
+    */
     [delegate didLogout];
 }
 

@@ -17,7 +17,6 @@
 @synthesize delegate;
 @synthesize searchResults;
 @synthesize needSearch;
-
 - (id)init {
 	
     self = [super init]; // initWithNibName:@"LocationViewController" bundle:nil];

@@ -24,13 +24,11 @@
     bool searching;
     bool letUserSelectRow;
     bool needSearch; // used to cancel a search if cancel button is hit in delegate
-
 }
 
 @property (nonatomic, assign) NSObject<LocationViewControllerDelegate> *delegate;
 @property (nonatomic, retain) NSMutableArray *searchResults;
 @property (nonatomic, assign) bool needSearch;
-
 -(void)getFoursquareVenues:(NSString*)text;
 -(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong;
 -(void)clearSearchResults;

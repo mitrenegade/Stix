@@ -27,7 +27,7 @@
 #define HOSTNAME @"stix.herokuapp.com"
 //#define HOSTNAME @"localhost:3000"
 
-#define DEBUGX 1
+#define DEBUGX 0
 
 @implementation StixxAppDelegate
 
@@ -58,7 +58,7 @@
 @synthesize lastKumulosErrorTimestamp;
 @synthesize allCommentHistories;
 #if USING_FACEBOOK
-@synthesize facebook;
+@synthesize fbHelper;
 #endif
 static const int levels[6] = {0,0,5,10,15,20};
 static int init=0;
@@ -127,18 +127,9 @@ static NSString * uniqueDeviceID = nil;
 #endif
     
     /*** Facebook service ***/
-#if USING_FACEBOOK
-    facebook = [[Facebook alloc] initWithAppId:@"191699640937330" andDelegate:self];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:@"FBAccessTokenKey"] 
-        && [defaults objectForKey:@"FBExpirationDateKey"]) {
-        facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-        facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-    }
-    if (![facebook isSessionValid]) {
-        [facebook authorize:nil];
-    }
-#endif
+    fbHelper = [[FacebookHelper alloc] init];
+    [fbHelper setDelegate:self];
+    [fbHelper initFacebook];
     
 	/***** create first view controller: the TagViewController *****/
     [loadingMessage setText:@"Initializing camera..."];
@@ -269,20 +260,21 @@ static NSString * uniqueDeviceID = nil;
     
     [self didPressTabButton:TABBAR_BUTTON_FEED];
     
-    loginSplashController = [[LoginSplashController alloc] init];
-    [loginSplashController setDelegate:self];
     myUserInfo->userphoto = nil;
     myUserInfo->bux = 0;
     myUserInfo->usertagtotal = 0;
     loggedIn = NO;
     isLoggingIn = NO;
-    if (!myUserInfo->username || [myUserInfo->username length] == 0)
+    loginSplashController = [[FacebookLoginController alloc] init];
+    [loginSplashController setDelegate:self];
+    if (![fbHelper facebookHasSession]) // !myUserInfo->username || [myUserInfo->username length] == 0)
     {
         NSLog(@"Could not log in: forcing new login screen!");
-        // force login
-        //        loginSplashController = [[LoginSplashController alloc] init];
-        //        [loginSplashController setDelegate:self];
+#if 0
+        loginSplashController = [[LoginSplashController alloc] init];
+        [loginSplashController setDelegate:self];
         [loginSplashController setCamera:self.camera];
+#endif
         isLoggingIn = YES;
         loggedIn = NO;
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
@@ -297,8 +289,9 @@ static NSString * uniqueDeviceID = nil;
         //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
           //                                       (unsigned long)NULL), ^(void) {
-            [profileController loginWithUsername:myUserInfo->username];
+        //[profileController loginWithUsername:myUserInfo->username];
         //});
+        [self doFacebookLogin];
     }   
 	
     /* display versioning info */
@@ -311,28 +304,6 @@ static NSString * uniqueDeviceID = nil;
     
     return YES;
 }
-
-/*** Facebook api calls ***/
-// Pre 4.2 support
-#if USING_FACEBOOK
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    return [facebook handleOpenURL:url]; 
-}
-
-// For 4.2+ support
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
-  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    return [facebook handleOpenURL:url]; 
-}
-
-- (void)fbDidLogin {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
-    [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
-    [defaults synchronize];
-    
-}
-#endif
 
 /*** Versioning ***/
 
@@ -390,10 +361,89 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // register for notifications on update channel
     [self Parse_subscribeToChannel:@"StixUpdates"];
     [self Parse_subscribeToChannel:@""];
-    if ([self getUsername] != nil)
+    if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
+    {
         [self Parse_subscribeToChannel:[self getUsername]];
+    }
     
     notificationDeviceToken = [newDeviceToken retain];
+}
+
+/*** facebook delegates ***/
+
+#pragma mark - facebook helper delegates
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    [loginSplashController startActivityIndicator];
+    return [self.fbHelper handleOpenURL:url]; 
+}
+
+-(void)didGetFacebookInfo:(NSDictionary *)results {
+    NSLog(@"Did get facebook info!");
+    NSEnumerator *e = [results keyEnumerator];
+    NSString * name = @"";
+    NSString * email;
+    int facebookID;
+    id key;
+    while (key = [e nextObject]) {
+        NSLog(@"Key: %@ %@", key, [results valueForKey:key]);
+        /*
+        if ([key isEqualToString:@"last_name"]) {
+            str = [results valueForKey:key];
+            name = [NSString stringWithFormat:@"%@ %@", name, str];
+        }
+        if ([key isEqualToString:@"first_name"]) {
+            str = [results valueForKey:key];
+            name = [NSString stringWithFormat:@"%@ %@", str, name];
+        }
+         */
+        if ([key isEqualToString:@"name"]) {
+            name = [results valueForKey:key];
+        }
+        if ([key isEqualToString:@"email"]) {
+            email = [results valueForKey:key];
+        }
+        if ([key isEqualToString:@"id"]){
+            facebookID = [[results valueForKey:key] intValue];
+        }
+    }
+    
+    [loginSplashController didGetFacebookName:name andEmail:email andID:facebookID];
+}
+
+-(FacebookHelper*)getFacebookHelper {
+    return fbHelper;
+}
+
+-(void)doFacebookLogin {
+    NSLog(@"Do facebook login");
+    int ret = [self.fbHelper facebookLogin];
+
+    // if ret == 0, then we were already logged in
+    if (ret == 0)
+        [fbHelper getFacebookInfo];
+}
+
+// functions called by fbHelper
+-(void)didLoginToFacebook {
+    NSLog(@"Did login to facebook");
+    /*
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Success" message:@"You have been logged into facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alertView show];
+    [alertView release];
+    */
+    [fbHelper getFacebookInfo];
+}
+
+-(void)didLogoutFromFacebook {
+    NSLog(@"Did logout from facebook");
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Logout Success" message:@"You have been logged out of facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alertView show];
+    [alertView release];
+}
+
+-(void)didCancelFacebookLogin {
+    [loginSplashController stopActivityIndicator];
 }
 
 -(void)initializeBadges {
@@ -472,13 +522,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     rootObject = [NSMutableDictionary dictionary];
     
     [rootObject setValue: myUserInfo->username forKey:@"username"];
+    [rootObject setValue: [NSNumber numberWithInt:myUserInfo->bux] forKey:@"bux"];
 
     @try {
         // save stix types that we know about
         NSMutableArray * stixStringIDs = [BadgeView GetAllStixStringIDsForSave];
         NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
         NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];
-        NSMutableDictionary * stixLikelihoods = [BadgeView GetAllStixLikelihoodsForSave];
         NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
         NSMutableDictionary * stixSubcategories = [BadgeView GetAllStixSubcategoriesForSave];
         
@@ -486,7 +536,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [rootObject setValue:stixViews forKey:@"stixViews"];
         NSLog(@"Saving %d stix views to disk", [stixViews count]);
         [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
-        [rootObject setValue:stixLikelihoods forKey:@"stixLikelihoods"];
         [rootObject setValue:stixCategories forKey:@"stixCategories"];
         [rootObject setValue:stixSubcategories forKey:@"stixSubcategories"];
         NSLog(@"Saving %d stix subcategories to disk", [stixSubcategories count]);
@@ -513,12 +562,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         return 0;
     }
     myUserInfo->username = [[rootObject valueForKey:@"username"] copy];
+    myUserInfo->bux = [[rootObject valueForKey:@"bux"] intValue];
     
     @try {
         NSMutableArray * stixStringIDs = [rootObject valueForKey:@"stixStringIDs"];
         NSMutableDictionary * stixViews = [rootObject valueForKey:@"stixViews"];
         NSMutableDictionary * stixDescriptors = [rootObject valueForKey:@"stixDescriptors"];
-        NSMutableDictionary * stixLikelihoods = [rootObject valueForKey:@"stixLikelihoods"];
         NSMutableDictionary * stixCategories = [rootObject valueForKey:@"stixCategories"];
         
         NSLog(@"LoadDataFromDisk: %d stixViews %d stixCategories", [stixViews count], [stixCategories count]);
@@ -526,7 +575,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         if (stixViews != nil)
         {
             NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
-            [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:stixLikelihoods andStixCategories:stixCategories];
+            [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:nil andStixCategories:stixCategories];
             NSMutableDictionary * stixSubcategories = [rootObject valueForKey:@"stixSubcategories"];
             if (stixSubcategories != nil && [stixSubcategories count] != 0) {
                 NSLog(@"%d StixSubcategories loaded from disk!", [stixSubcategories count]);
@@ -674,7 +723,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (metricLogonTime) {
         NSTimeInterval lastDiff = [metricLogonTime timeIntervalSinceNow];
         NSString * description = @"TimeInAppInSeconds";
-        NSString * str = [self getUsername];
+        NSString * str = [NSString stringWithFormat:@"Username: %@ UID: %@", [self getUsername], uniqueDeviceID];
         [k addMetricHitWithDescription:description andStringValue:str andIntegerValue:-lastDiff];
         metricLogonTime = nil;
     }
@@ -713,10 +762,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
         [self saveDataToDisk];
-//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-  //                                               (unsigned long)NULL), ^(void) {
-    //    });
+        });
         [self logMetricTimeInApp];
     }
     
@@ -1594,7 +1643,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
     NSDate * now = [NSDate date];
     NSLog(@"Last error timestamp: %@ now: %@", lastKumulosErrorTimestamp, now);
-    if ( [[lastKumulosErrorTimestamp dateByAddingTimeInterval:30] earlierDate:now] )
+    NSDate * thirtyMore = [lastKumulosErrorTimestamp dateByAddingTimeInterval:30];
+    NSComparisonResult compared = [thirtyMore compare:now];//[thirtyMore earlierDate:now];
+    NSString * compareSymbol = @"=";
+    if (compared == NSOrderedAscending)
+        compareSymbol = @"<";
+    else if (compared == NSOrderedDescending)
+        compareSymbol = @">";
+    NSLog(@"%@ %@ %@", thirtyMore, compareSymbol, now);
+    if ( compared == NSOrderedAscending )
     {
         [self setLastKumulosErrorTimestamp:now];
         [self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
@@ -1707,8 +1764,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
-    if (notificationDeviceToken)
-        [self Parse_subscribeToChannel:myUserInfo->username];
+    if (notificationDeviceToken) {
+        [self Parse_subscribeToChannel:[self getUsername]];
+    }
     else
         // try registering again
         [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
@@ -1779,6 +1837,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    loggedIn = NO;
+    myUserInfo->username = @"";
+    if (myUserInfo->userphoto) {
+        [myUserInfo->userphoto release];
+        myUserInfo->userphoto = nil;
+    }
+    myUserInfo->usertagtotal = 0;
+    myUserInfo->bux = 0;
+    [allStix removeAllObjects];
+    [allStixOrder removeAllObjects];
+    [self logMetricTimeInApp];
+    
+    [fbHelper facebookLogout];
+    [self didDismissSecondaryView];
+#if !TARGET_IPHONE_SIMULATOR
+    [self.camera setCameraOverlayView:loginSplashController.view];
+#endif
+    /*
     [self.tabBarController toggleStixMallPointer:NO]; // stop stix mall pointer
     if (loggedIn == YES) {
         // logging out from profile view controller
@@ -1795,8 +1871,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                                                  (unsigned long)NULL), ^(void) {
             [self saveDataToDisk];
         });
-        //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
-        //[self saveDataToDisk];
         
         [allStix removeAllObjects];
         [profileController updatePixCount];
@@ -1813,6 +1887,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self.camera setCameraOverlayView:loginSplashController.view];        
 #endif
     }
+     */
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
@@ -2130,17 +2205,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didDismissSecondaryView];
 }
 
--(void)uploadImage:(NSData *)dataPNG {
+-(void)uploadImage:(NSData *)dataPNG withShareMethod:(int)method{
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
    NSData *imageData = dataPNG;
-    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, [self getUsername]];
+    NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, username];
     NSURL *url=[[NSURL alloc] initWithString:serverString];
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
     [request setDelegate:self];
     [request setData:imageData forKey:@"picture[data]"];
     [request startSynchronous];
+    shareMethod = method;
 }
 
 -(void)sharePix:(int)tagID {
@@ -2152,14 +2229,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [actionSheet release];
 }
 
--(void)didSharePixWithURL:(NSString *)url {
+-(void)didSharePixWithURL:(NSString *)url andImageURL:(NSString*)imageURL{
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
    NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
     NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", myUserInfo->username];
     NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@ has shared a Pix with you! See it here: %@", versionStringStable, versionStringBeta, [self getUsername], url];
-	[self sendEmailTo:@"" withCC:@"" withSubject:subject withBody:fullmessage];
+    if (shareMethod == 0) {
+        // facebook
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"View my Stix collection" andDescription:@"Remix your photos with Stix! Click here to see my Pix."];
+    }
+    else if (shareMethod == 1) {
+        // email
+        [self sendEmailTo:@"" withCC:@"" withSubject:subject withBody:fullmessage];        
+    }
     [self didDismissSecondaryView];
     
 }
@@ -2324,6 +2408,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self showAlertWithTitle:@"Wrong Password!" andMessage:@"You cannot access the super secret club." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 }
 
+-(void)didClickPurchaseBuxButton {
+    NSString * metricName = @"MoreBuxMenuPressed";
+    NSString * metricData = [NSString stringWithFormat:@"User: %@ UID: %@", [self getUsername], uniqueDeviceID];
+    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+    
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Buy more Bux" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"5 Bux for $0.99", @"15 Bux for $2.99", @"40 Bux for $4.99", @"80 Bux for $8.99", @"170 Bux for $19.99", @"475 Bux for $49.99", nil];
+    actionSheet.tag = ACTIONSHEET_TAG_BUYBUX;
+    [actionSheet showFromTabBar:tabBarController.tabBar];
+    [actionSheet release];
+}
+
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -2369,12 +2464,33 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         switch (buttonIndex) {
             case 0: // Facebook
             {
+                /*
                 UIAlertView* alert = [[UIAlertView alloc]init];
                 [alert addButtonWithTitle:@"Ok"];
                 [alert setTitle:@"Beta Version"];
                 [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
                 [alert show];
                 [alert release];
+                 */
+                Tag * tag = nil;
+                for (int i=0; i<[allTags count]; i++) {
+                    Tag * t = [allTags objectAtIndex:i];
+                    if ([t.tagID intValue] == shareActionSheetTagID) {
+                        tag = t;
+                        break;
+                    }
+                }
+                if (tag == nil) {
+                    NSLog(@"Error in sharing pix! Tag doesn't exist!");
+                    return;
+                }
+                UIImage * result = [tag tagToUIImage];
+                NSData *png = UIImagePNGRepresentation(result);
+                
+                UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+                
+                [self uploadImage:png withShareMethod:buttonIndex];
+                
                 NSString * metricName = @"SharePixActionsheet";
                 NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
                 [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
@@ -2399,7 +2515,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 
                 UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
                 
-                [self uploadImage:png];
+                [self uploadImage:png withShareMethod:buttonIndex];
                 
                 NSString * metricName = @"SharePixActionsheet";
                 NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
@@ -2412,6 +2528,32 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             default:
                 return;
                 break;
+        }
+    }
+    else if (actionSheet.tag == ACTIONSHEET_TAG_BUYBUX) {
+        // button index: 
+        // 0 @"5 Bux for $0.99"
+        // 1 @"15 Bux for $2.99"
+        // 2 @"40 Bux for $4.99"
+        // 3 @"80 Bux for $8.99"
+        // 4 @"170 Bux for $19.99"
+        // 5 @"475 Bux for $49.99"
+        // 6 cancel
+        int values[6] = {5,15,40,80,170,475};
+        if (buttonIndex != [actionSheet cancelButtonIndex]) {
+            buyBuxPurchaseAmount = values[buttonIndex];
+            NSString * title = @"Bux Purchase";
+            NSString * message = [NSString stringWithFormat:@"Are you sure you want to purchase %d Bux?", buyBuxPurchaseAmount];
+            /*
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:title
+                                                             message:message
+                                                            delegate:self
+                                                   cancelButtonTitle:@"Cancel"
+                                                   otherButtonTitles:@"Make Purchase", nil];
+            [alert show];
+            [alert release];
+             */
+            [self showAlertWithTitle:title andMessage:message andButton:@"Cancel" andOtherButton:@"Make Purchase" andAlertType:ALERTVIEW_BUYBUX];
         }
     }
 }
@@ -2495,9 +2637,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
-    NSError * error;
-    NSSet * channels = [PFPush getSubscribedChannels:&error];
-   //[PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+    //NSError * error;
+    //NSSet * channels = [PFPush getSubscribedChannels:&error];
+   [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
         NSEnumerator * e = [channels objectEnumerator];
         id element;
         NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
@@ -2507,20 +2649,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [PFPush unsubscribeFromChannelInBackground:element];
         }
         NSLog(@"%@", channelsString);
-//    }]; // perform in foreground
+    }]; // perform in background
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    // Subscribe to the global broadcast channel.
-    //[PFPush subscribeToChannelInBackground:channel];
-    NSLog(@"Parse: subscribing to channel <%@>", channel);
-    [PFPush subscribeToChannelInBackground:channel block:^(BOOL succeeded, NSError *error) {
+    NSString * channel_ = [channel stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    NSLog(@"Parse: subscribing to channel <%@>", channel_);
+    [PFPush subscribeToChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
         if (succeeded) 
-            NSLog(@"Subscribed to channel <%@>", channel);
+            NSLog(@"Subscribed to channel <%@>", channel_);
         else
-            NSLog(@"Could not subscribe to <%@>: error %@", channel, [error localizedDescription]);
+            NSLog(@"Could not subscribe to <%@>: error %@", channel_, [error localizedDescription]);
     }];
 }
 
@@ -2771,6 +2912,11 @@ static bool isShowingAlerts = NO;
             [self.tabBarController setSelectedIndex:3];
         }
     }
+    else if (alertActionCurrent == ALERTVIEW_BUYBUX) {
+        if (buttonIndex != [alertView cancelButtonIndex]) {
+            [self didPurchaseBux:buyBuxPurchaseAmount];
+        }
+    }
     if ([alertQueue count] == 0)
         return;
     UIAlertView * nextAlert = [[alertQueue objectAtIndex:0] retain];
@@ -2880,12 +3026,12 @@ static bool isShowingAlerts = NO;
     [self changeBuxCountByAmount:buxPurchased];
     if  (buxPurchased == 25) {
         NSString * metricName = @"ExpressBux";
-        NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
+        NSString * metricData = [NSString stringWithFormat:@"User: %@ UID: %@", [self getUsername], uniqueDeviceID];
         [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:buxPurchased];
     }
     else { 
         NSString * metricName = @"MoreBux";
-        NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
+        NSString * metricData = [NSString stringWithFormat:@"User: %@ UID: %@", [self getUsername], uniqueDeviceID];
         [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:buxPurchased];
     }
 }
@@ -2908,8 +3054,15 @@ static bool isShowingAlerts = NO;
     NSString * substring = [responseString substringWithRange:range0];
     NSLog(@"substring for weburl: <%@>", substring);
     
+    NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
+    imgRange.length = 60;
+    NSString * imgSubstring = [responseString substringWithRange:imgRange];
+    NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
+    imgRange.length = imgRangeEnd.location;
+    imgSubstring = [responseString substringWithRange:imgRange];
+
     NSString * weburl = [NSString stringWithFormat:@"http://%@%@", HOSTNAME,substring];
-    [self didSharePixWithURL:weburl];
+    [self didSharePixWithURL:weburl andImageURL:imgSubstring];
 }
 
 - (void) requestStarted:(ASIHTTPRequest *) request {

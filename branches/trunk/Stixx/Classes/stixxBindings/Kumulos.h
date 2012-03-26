@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Mar 22, 2012
+//  Created by Kumulos Bindings Compiler on Mar 26, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -61,7 +61,7 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSNumber*)newRecordID;
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -85,7 +85,11 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getBuxForUserDidCompleteWithResult:(NSArray*)theResults;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getFacebookUserDidCompleteWithResult:(NSArray*)theResults;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByEmailDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByIDDidCompleteWithResult:(NSArray*)theResults;
  
@@ -94,6 +98,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateAuxiliaryDataDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateUserWithEmailDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults;
  
@@ -206,7 +212,7 @@
 -(KSAPIOperation*) addStixToUserWithUsername:(NSString*)username andStix:(NSData*)stix;
     
    
--(KSAPIOperation*) addUserWithUsername:(NSString*)username andPassword:(NSString*)password andPhoto:(NSData*)photo;
+-(KSAPIOperation*) addUserWithUsername:(NSString*)username andPassword:(NSString*)password andEmail:(NSString*)email andPhoto:(NSData*)photo andStix:(NSData*)stix andAuxiliaryData:(NSData*)auxiliaryData andTotalTags:(NSInteger)totalTags andBux:(NSInteger)bux andFacebookID:(NSInteger)facebookID;
     
    
 -(KSAPIOperation*) adminAddStixToAllUsersWithStix:(NSData*)stix;
@@ -241,7 +247,13 @@
 -(KSAPIOperation*) getBuxForUserWithUsername:(NSString*)username;
     
    
+-(KSAPIOperation*) getFacebookUserWithFacebookID:(NSInteger)facebookID;
+    
+   
 -(KSAPIOperation*) getUserWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) getUserByEmailWithEmail:(NSString*)email;
     
    
 -(KSAPIOperation*) getUserByIDWithAllUserID:(NSUInteger)allUserID;
@@ -254,6 +266,9 @@
     
    
 -(KSAPIOperation*) updateTotalTagsWithUsername:(NSString*)username andTotalTags:(NSInteger)totalTags;
+    
+   
+-(KSAPIOperation*) updateUserWithEmailWithEmail:(NSString*)email andUsername:(NSString*)username andPassword:(NSString*)password andFacebookID:(NSInteger)facebookID;
     
    
 -(KSAPIOperation*) userLoginWithUsername:(NSString*)username andPassword:(NSString*)password;

@@ -16,7 +16,10 @@
 @synthesize addPhoto;
 @synthesize userImage;
 @synthesize loginEmail;
-@synthesize loginEmailBG;
+//@synthesize loginEmailBG;
+@synthesize fbHelper;
+@synthesize facebookButton;
+@synthesize facebookID;
 
 static bool usernameExists;
 
@@ -82,14 +85,21 @@ static bool usernameExists;
         [loginEmail setHidden:NO];
         [loginEmailBG setHidden:NO];
         [addPhoto setHidden:YES];
+        [facebookButton setTitle:@"Join With Facebook" forState:UIControlStateNormal];
+        
+        [facebookButton setHidden:YES];
     }
     else // login as existing user
     {
         [joinButton setHidden:YES];
         [loginButton setHidden:NO];
+        [loginButton setFrame:CGRectMake(247, 17, 72, 53)];
         [loginEmail setHidden:YES];
         [loginEmailBG setHidden:YES];
         [addPhoto setHidden:YES];
+        [facebookButton setTitle:@"Login With Facebook" forState:UIControlStateNormal];
+
+        [facebookButton setHidden:YES];
     }
     [activityIndicator stopCompleteAnimation];
     [loginName setText:@""];
@@ -376,14 +386,14 @@ static int addUserStage;
     int totalTags = 0;
     int bux = NEW_USER_BUX;
     
-    //[kumulos addUserWithUsername:username andPassword:[kumulos md5:password] andPhoto:photo];
-    [k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
+    //[k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
+    [k addUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux andFacebookID:facebookID];
     // MRC
     [stixData release];
     [stix release];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createUserDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addUserDidCompleteWithResult:(NSArray *)theResults {
     NSString* username = [loginName text];
 
     UIAlertView* alert = [[UIAlertView alloc]init];
@@ -395,6 +405,68 @@ static int addUserStage;
     [activityIndicator stopCompleteAnimation];
     
     [self.delegate didSelectUsername:username withResults:theResults];
+}
+
+#pragma mark - facebook
+
+/* To do facebook login this procedure should be followed:
+ 1. either join, or login, or use facebook
+ 2. if using facebook, check to see if returned ID exists in database
+ 3. if no id exists, then prompt to join by creating a username (JOIN)
+ 4. if id exists, go ahead and login (LOGIN)
+ 5. add facebookID to kumulos if JOIN
+*/
+-(IBAction)didClickFacebookButton:(id)sender {
+    // response will get sent to delegate which is appdelegate
+    [self.delegate doFacebookLoginOrJoin:bJoinOrLogin];
+}
+
+-(void)didGetFacebookName:(NSString *)name andEmail:(NSString *)email andID:(int)fbID {
+    NSLog(@"Facebook info: name %@ email %@ id %d", name, email, fbID);
+
+    [self setFacebookID:fbID];
+    
+    if (bJoinOrLogin == 0) // join
+    {
+#if 0
+        UIView * createHandleView = [[UIView alloc] init];
+        [createHandleView addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"textured_background.png"]] autorelease]];
+        UIImageView * headerView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_bar.png"]] autorelease];
+        [headerView setFrame:CGRectMake(0, 0, 320, 44)];
+        [createHandleView addSubview:headerView];
+        UIImageView * logoView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo.png"]] autorelease];
+        [logoView setFrame:CGRectMake(134, 5, 53, 33)];
+        [createHandleView addSubview:logoView];
+        
+        [createHandleView addSubview:inputView];
+        [createHandleView addSubview:loginName];
+        
+        UIButton * loginFBButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [loginFBButton setFrame:CGRectMake(219, 0, 93, 91)];
+        [loginFBButton addTarget:self action:@selector(didCreateHandle:) forControlEvents:UIControlEventTouchUpInside];
+        [createHandleView addSubview:loginFBButton];
+        [loginFBButton release];
+        
+        [createHandleView addSubview:cancelButton];
+        
+        //[self.view addSubview:createHandleView];
+        [self presentModalViewController:createHandleView animated:YES];
+#else
+        [loginEmail setHidden:YES];
+        [loginEmailBG setHidden:YES];
+        [loginPassword setHidden:YES];
+        [loginPasswordBG setHidden:YES];
+        [loginName setPlaceholder:@"Create a Stix username"];
+        
+        // set to facebook info
+        [loginEmail setText:email];
+        [loginPassword setText:[NSString stringWithFormat:@"%d", facebookID]]; // set password to facebook ID
+#endif
+    }
+}
+
+-(void)didCreateHandle:(UIButton*)sender {
+    NSLog(@"Handle created: %@", [loginName text]);
 }
 
 @end

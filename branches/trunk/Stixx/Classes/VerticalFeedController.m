@@ -112,46 +112,7 @@
 
 
 -(void)didClickMoreBuxButton:(id)sender {
-    //[self.delegate didPurchaseBux:0];
-    
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Buy more Bux" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"5 Bux for $0.99", @"15 Bux for $2.99", @"40 Bux for $4.99", @"80 Bux for $8.99", @"170 Bux for $19.99", @"475 Bux for $49.99", nil];
-    [actionSheet showInView:self.view];
-    [actionSheet release];
-    
-}
-
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    // button index: 
-    // 0 @"5 Bux for $0.99"
-    // 1 @"15 Bux for $2.99"
-    // 2 @"40 Bux for $4.99"
-    // 3 @"80 Bux for $8.99"
-    // 4 @"170 Bux for $19.99"
-    // 5 @"475 Bux for $49.99"
-    // 6 cancel
-    int values[6] = {5,15,40,80,170,475};
-    if (buttonIndex != [actionSheet cancelButtonIndex]) {
-        currentBuxPurchase = values[buttonIndex];
-        NSString * title = @"Bux Purchase";
-        NSString * message = [NSString stringWithFormat:@"Are you sure you want to purchase %d Bux?", currentBuxPurchase];
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:title
-                                                         message:message
-                                                        delegate:self
-                                               cancelButtonTitle:@"Cancel"
-                                               otherButtonTitles:@"Make Purchase", nil];
-        [alert show];
-        [alert release];
-    }
-}
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    NSLog(@"Button index: %d", buttonIndex);    
-    // 0 = close
-    // 1 = view
-    
-    if (buttonIndex != [alertView cancelButtonIndex]) {
-        [self.delegate didPurchaseBux:currentBuxPurchase];
-    }
+    [self.delegate didClickPurchaseBuxButton];
 }
 
 -(void)configureCarouselView {
@@ -304,6 +265,7 @@
     
     // scale stix frame back to full 300x275 size
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    [feedItem setDelegate:self];
     
     NSLog(@"VerticalFeedController: added stix of size %f %f at origin %f %f center %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
     
@@ -687,7 +649,7 @@
 
 /************** FeedItemDelegate ***********/
 // comes from feedItem instead of carousel
--(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController*)feedItem {
+-(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
     // location is the click location inside feeditem's frame
     
     //NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);

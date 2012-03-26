@@ -17,6 +17,8 @@
 //- (void) doAddUser;
 -(void)didLogout; // if cancel is pressed - goes back to splash screen
 -(void)didDismissSecondaryView;
+-(FacebookLoginHelper*)getFacebookHelper;
+//-(void)doFacebookLoginOrJoin:(BOOL)bJoin;
 
 - (void)didLoginFromSplashScreenWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime;
 
@@ -41,5 +43,5 @@
 
 -(IBAction)didClickJoinButton:(id)sender;
 -(IBAction)didClickLoginButton:(id)sender;
-
+-(void)didGetFacebookName:(NSString*)name andEmail:(NSString*)email andID:(id)facebookID;
 @end

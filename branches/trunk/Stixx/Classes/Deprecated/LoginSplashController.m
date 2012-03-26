@@ -162,4 +162,16 @@
     [self.delegate didLogout];
 }
 
+-(FacebookLoginHelper* )getFacebookHelper {
+    return [self.delegate getFacebookHelper];
+}
+
+-(void)doFacebookLoginOrJoin:(BOOL)bJoin {
+    //[self.delegate doFacebookLoginOrJoin:bJoin];
+}
+
+-(void)didGetFacebookName:(NSString *)name andEmail:(NSString *)email andID:(id)facebookID {
+    [loginController didGetFacebookName:name andEmail:email andID:facebookID];
+}
+
 @end

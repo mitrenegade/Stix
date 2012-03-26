@@ -52,10 +52,11 @@
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 -(void)didSharePixWithURL:(NSString*)url;
--(void)didPurchaseBux:(int)bux;
+//-(void)didPurchaseBux:(int)bux;
 -(void)sharePix:(int)tagID;
-
 -(void)didOpenProfileView;
+
+-(void)didClickPurchaseBuxButton;
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 @end

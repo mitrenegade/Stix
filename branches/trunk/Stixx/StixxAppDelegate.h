@@ -21,7 +21,7 @@
 //#import "ARCoordinate.h"
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
-#import "LoginSplashController.h"
+//#import "LoginSplashController.h"
 #import "LoadingViewController.h"
 #import "FeedbackViewController.h"
 #import <Parse/Parse.h>
@@ -29,9 +29,11 @@
 #import "KumulosHelper.h"
 #import "SMWebRequest.h"
 #import "ASIHTTPRequest.h"
+#import "FacebookLoginController.h"
 
 #if USING_FACEBOOK
-#import "FBConnect.h"
+//#import "FBConnect.h"
+#import "FacebookHelper.h"
 #endif
 #import "VerticalFeedController.h"
 
@@ -49,12 +51,14 @@ enum alertview_actions {
     ALERTVIEW_UPGRADE,
     ALERTVIEW_NOTIFICATION,
     ALERTVIEW_PROMPT,
-    ALERTVIEW_GOTOSTORE
+    ALERTVIEW_GOTOSTORE,
+    ALERTVIEW_BUYBUX
 };
 
 enum actionsheet_tags {
     ACTIONSHEET_TAG_ADMIN = 1000,
     ACTIONSHEET_TAG_SHAREPIX,
+    ACTIONSHEET_TAG_BUYBUX,
     ACTIONSHEET_TAG_MAX
 };
 
@@ -69,11 +73,11 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, LoginSplashDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, /*LoginSplashDelegate, */FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
 
-#if USING_FACEBOOK
-    FBSessionDelegate,
-#endif
+//#if USING_FACEBOOK
+    FacebookHelperDelegate, FacebookLoginDelegate,
+//#endif
     UIApplicationDelegate> {
     UIWindow *window;
     
@@ -87,7 +91,7 @@ struct UserInfo {
 	FriendsViewController *friendController;
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
-    LoginSplashController * loginSplashController;
+    FacebookLoginController * loginSplashController;
     
     UIViewController * lastViewController;
 
@@ -95,6 +99,7 @@ struct UserInfo {
     bool isLoggingIn;
     struct UserInfo * myUserInfo;
     bool stixViewsLoadedFromDisk;
+    bool fbLoginIsJoin;
     
     NSMutableDictionary * allStix;
     NSMutableDictionary * allStixOrder;
@@ -132,6 +137,8 @@ struct UserInfo {
     int updatingPeelableAuxStixIndex;
     int updatingPeelableAction;
     int shareActionSheetTagID;
+    int shareMethod; // 0 = facebook, 1 = email
+    int buyBuxPurchaseAmount;
     
     NSMutableDictionary * allUserPhotos;
     int idOfMostRecentUser;
@@ -160,9 +167,7 @@ struct UserInfo {
     NSMutableArray * alertQueue;
     int alertActionCurrent;
         
-#if USING_FACEBOOK
-    Facebook * facebook;
-#endif
+    FacebookHelper * fbHelper;
 }
 
 -(void)initializeBadges;
@@ -205,7 +210,7 @@ struct UserInfo {
 -(void)logMetricTimeInApp;
 -(void)checkConsistency;
 -(void)updateBuxCountFromKumulos;
-
+-(void)didDismissSecondaryView;
 // former store methods
 -(void)updateBuxCount;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
@@ -219,7 +224,7 @@ struct UserInfo {
 @property (nonatomic, retain) ProfileViewController *profileController;
 @property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
-@property (nonatomic, retain) LoginSplashController * loginSplashController;
+@property (nonatomic, retain) FacebookLoginController * loginSplashController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
@@ -237,9 +242,7 @@ struct UserInfo {
 @property (nonatomic, retain) UIImagePickerController * camera;
 @property (nonatomic, retain) NSDate * metricLogonTime;
 @property (nonatomic, retain) NSDate * lastKumulosErrorTimestamp;
+@property (nonatomic, retain) FacebookHelper * fbHelper;
 
-#if USING_FACEBOOK
-@property (nonatomic, retain) Facebook *facebook;
-#endif
 @end
 

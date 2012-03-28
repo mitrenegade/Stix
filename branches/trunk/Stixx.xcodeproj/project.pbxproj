@@ -71,7 +71,6 @@
 		9E252B1014E1BFD60070ECB4 /* bux_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0C14E1BFD60070ECB4 /* bux_bar.png */; };
 		9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1114E1C08F0070ECB4 /* btn_addstix.png */; };
 		9E252C2214E2F6F80070ECB4 /* TapkuLibrary.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */; };
-		9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */; };
 		9E252C3F14E3010F0070ECB4 /* btn_invite.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252C3E14E3010F0070ECB4 /* btn_invite.png */; };
 		9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C4014E301EE0070ECB4 /* Parse.framework */; };
 		9E2830EB14A2BAF8000707B8 /* CarouselView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2830EA14A2BAF6000707B8 /* CarouselView.m */; };
@@ -362,20 +361,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E252C1D14E2F6E00070ECB4 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC07E0554694100DB518D;
-			remoteInfo = TapkuLibrary;
-		};
-		9E252C1F14E2F6E00070ECB4 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3B45DDF1134C736600D24C1A;
-			remoteInfo = LogicTests;
-		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9EB03165142C002E0019F2BD /* Project object */;
@@ -474,7 +459,6 @@
 		9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_morebux.png; sourceTree = "<group>"; };
 		9E252B0C14E1BFD60070ECB4 /* bux_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_bar.png; sourceTree = "<group>"; };
 		9E252B1114E1C08F0070ECB4 /* btn_addstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_addstix.png; sourceTree = "<group>"; };
-		9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TapkuLibrary.xcodeproj; path = tapkulibrary/src/TapkuLibrary.xcodeproj; sourceTree = "<group>"; };
 		9E252C2114E2F6F80070ECB4 /* TapkuLibrary.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TapkuLibrary.bundle; path = ../tapkulibrary/src/TapkuLibrary.bundle; sourceTree = "<group>"; };
 		9E252C3E14E3010F0070ECB4 /* btn_invite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_invite.png; sourceTree = "<group>"; };
 		9E252C4014E301EE0070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
@@ -866,7 +850,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */,
-				9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */,
 				9EE8D95D14D1C5FE001F36D1 /* Security.framework in Frameworks */,
 				9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */,
 				9EE8D95914D1C5DA001F36D1 /* MobileCoreServices.framework in Frameworks */,
@@ -1094,15 +1077,6 @@
 			path = universal;
 			sourceTree = "<group>";
 		};
-		9E252C1614E2F6E00070ECB4 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */,
-				9E252C2014E2F6E00070ECB4 /* LogicTests.octest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		9E3BE0751463673200F7B763 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -1297,7 +1271,6 @@
 			children = (
 				9EA572D51523712800D79BE6 /* AddressBook.framework */,
 				9E252C4014E301EE0070ECB4 /* Parse.framework */,
-				9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */,
 				9EB03243142C01640019F2BD /* QuartzCore.framework */,
 				9EB03241142C015A0019F2BD /* CoreLocation.framework */,
 				9EE8D95C14D1C5FE001F36D1 /* Security.framework */,
@@ -1792,12 +1765,6 @@
 			mainGroup = 9EB03163142C002E0019F2BD;
 			productRefGroup = 9EB0316F142C002E0019F2BD /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 9E252C1614E2F6E00070ECB4 /* Products */;
-					ProjectRef = 9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				9EB0316D142C002E0019F2BD /* Stixx */,
@@ -1805,23 +1772,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		9E252C1E14E2F6E00070ECB4 /* libTapkuLibrary.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libTapkuLibrary.a;
-			remoteRef = 9E252C1D14E2F6E00070ECB4 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9E252C2014E2F6E00070ECB4 /* LogicTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = LogicTests.octest;
-			remoteRef = 9E252C1F14E2F6E00070ECB4 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9EB0316C142C002E0019F2BD /* Resources */ = {

@@ -130,7 +130,7 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    int height = [self.delegate getHeightForSection:([indexPath section])];
+    //int height = [self.delegate getHeightForSection:([indexPath section])];
     // NSLog(@"GetHeightForSection %d returned %d", [indexPath section], height);
     return CONTENT_HEIGHT;
 }

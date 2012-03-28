@@ -82,11 +82,13 @@
 #if 0
     UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
 #else
-    NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
+    NSURL * url = [[[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]] autorelease];
     CGSize newSize = CGSizeMake(90, 90);
-    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
+    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] autorelease];
+    UIImage * resized = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
 #endif
-    NSData * photo = UIImageJPEGRepresentation(img, .8);
+    NSData * photo = UIImageJPEGRepresentation(resized, .8);
+    //[img release];
     
     //[kumulos addEmailToUserWithUsername:username andEmail:email];
     NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
@@ -113,15 +115,18 @@
     }
     [auxInfo setValue:stixOrder forKey:@"stixOrder"];
     
+    /*
     NSMutableSet * friendsList = [[NSMutableSet alloc] init];
     [friendsList addObject:@"bobo"];
     [friendsList addObject:@"willh103"];
     [auxInfo setValue:friendsList forKey:@"friendsList"];
-    
+    */
     NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
     [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
+    // MRC
+    [auxInfo release];
     [auxData release];
-    
+    [stixOrder release];
     int totalTags = 0;
     int bux = NEW_USER_BUX;
     
@@ -132,6 +137,7 @@
     // MRC
     [stixData release];
     [stix release];
+    [photo release];
     
 }
 
@@ -152,10 +158,13 @@
     NSString* password = [NSString stringWithFormat:@"%d", newFacebookID];
     NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
     CGSize newSize = CGSizeMake(90, 90);
-    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
-    NSData * photo = UIImageJPEGRepresentation(img, .8);
+    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] autorelease];
+    UIImage * resized = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
+    NSData * photo = UIImageJPEGRepresentation(resized, .8);
 //    [k updateUserWithEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5:password] andFacebookID:newFacebookID];
     [k updateUserByEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5: password] andPhoto:photo andFacebookID:newFacebookID];
+    [url release];
+    [photo release]; // MRC
 }
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
@@ -193,27 +202,30 @@
     //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
     NSMutableDictionary * stixOrder = nil;
-    NSMutableSet * friendsList = nil;
+    //NSMutableSet * friendsList = nil;
     auxiliaryData = [[NSMutableDictionary alloc] init];
     int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
-    if (ret == 0) {
+    if (ret == 1) {
         stixOrder = [auxiliaryData objectForKey:@"stixOrder"];
-        friendsList = [auxiliaryData objectForKey:@"friendsList"];
+        //friendsList = [auxiliaryData objectForKey:@"friendsList"];
     }
-    else if (ret == 1) {
+    else if (ret == 0) {
         stixOrder = nil;
     }
+    /*
     else if (ret == 2) {
-        friendsList = nil;
+        //friendsList = nil;
     }
     else {
         stixOrder = nil;
-        friendsList = nil;
+        //friendsList = nil;
     }
+     */
 //    [loginController.view removeFromSuperview];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList isFirstTimeUser:firstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:firstTimeUser];
     [stix release]; // MRC
     [newPhoto release]; // MRC
+    [auxiliaryData release];
 }
 
 

@@ -24,8 +24,24 @@
 
 enum {
     SHELF_CATEGORY_ALL = 0,
+    SHELF_CATEGORY_ANIMALS,
+    SHELF_CATEGORY_ANIME,
+    SHELF_CATEGORY_ART,
+    SHELF_CATEGORY_COMICS,
+    SHELF_CATEGORY_COSTUMES,
     SHELF_CATEGORY_CUTE,
+    SHELF_CATEGORY_DECORATIONS,
+    SHELF_CATEGORY_EVENTS,
     SHELF_CATEGORY_FACEFUN,
+    SHELF_CATEGORY_FASHION,
+    SHELF_CATEGORY_FOODANDDRINK,
+    SHELF_CATEGORY_GEEKY,
+    SHELF_CATEGORY_HOLLYWOOD,
+    SHELF_CATEGORY_NATURE,
+    SHELF_CATEGORY_PRANKS,
+    SHELF_CATEGORY_SPORTS,
+    SHELF_CATEGORY_SYMBOLS,
+    SHELF_CATEGORY_VIDEOGAMES,
     SHELF_CATEGORY_MAX
 };
 
@@ -34,7 +50,8 @@ enum {
     int carouselHeight;
     //NSObject<CarouselViewDelegate> *delegate;
     
-    UIScrollView * scrollView;
+    UIScrollView * stixScroll;
+    UIScrollView * categoryScroll;
     
     // arrays of the stix that appear in the carousel
     NSMutableDictionary * allCarouselStixFrames;
@@ -55,7 +72,8 @@ enum {
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
-@property (nonatomic, retain) UIScrollView * scrollView;
+@property (nonatomic, retain) UIScrollView * stixScroll;
+@property (nonatomic, retain) UIScrollView * categoryScroll;
 @property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) bool allowTap;
 //@property (nonatomic, assign) CGPoint tapDefaultOffset;
@@ -67,7 +85,7 @@ enum {
 @property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, assign) int dismissedTabY;
 @property (nonatomic, assign) int expandedTabY;
-@property (nonatomic, assign)     BOOL isShowingCarousel;
+@property (nonatomic, assign) BOOL isShowingCarousel;
 
 
 -(void)initCarouselWithFrame:(CGRect)frame; // private function

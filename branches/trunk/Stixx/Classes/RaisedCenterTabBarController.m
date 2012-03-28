@@ -147,6 +147,7 @@
     [rewardName setNumberOfLines:2];
     [rewardName setTextAlignment:UITextAlignmentCenter];
     [rewardCanvas addSubview:rewardName];
+    [rewardName release];
 
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;

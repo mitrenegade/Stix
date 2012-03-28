@@ -7,21 +7,23 @@
 //
 
 #import <UIKit/UIKit.h>
-//#import "LoginViewController.h"
 #import "Kumulos.h"
 #import "UIImage+RoundedCorner.h"
 #import "UIImage+Resize.h"
 #import "BadgeView.h"
-#import "FriendsViewController.h"
 #import "KumulosData.h"
-#import "FriendSearchViewController.h"
+#import "FriendSearchResultsController.h"
+#import "SMWebRequest.h"
+#import "SMXMLDocument.h"
+#import "LoadingAnimationView.h"
+#import <AddressBook/AddressBook.h>
 
 #define DEFAULT_STIX_COUNT 2
 
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet*)friendsList;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
@@ -29,10 +31,15 @@
 - (int)getUserTagTotal;
 - (bool)isLoggedIn;
 - (void)didChangeUserphoto:(UIImage*)photo;
-
+-(NSMutableDictionary*)getAllUsers;
+-(NSMutableArray*)getAllUserFacebookIDs;
+-(NSMutableArray*)getAllUserEmails;
+-(NSMutableArray*)getAllUserNames;
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
--(NSMutableSet*)getFriendsList;
+//-(NSMutableSet*)getFriendsList;
+-(NSMutableSet*)getFollowingList;
+-(NSMutableSet*)getFollowerList;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
 
 -(void)didClickFeedbackButton:(NSString*)fromView;
@@ -44,57 +51,102 @@
 -(void)didClickInviteButton;
 -(void)didDismissSecondaryView;
 -(void)closeProfileView;
+-(void)needFacebookLogin;
+
+-(void)searchFriendsByFacebook;
+
+-(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 @end
 
-@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, /*LoginViewDelegate, */FriendsViewDelegate, UITextFieldDelegate>{
+@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, /*LoginViewDelegate, FriendsViewDelegate,*/ UITextFieldDelegate>{
     
-    IBOutlet UIButton * logoutScreenButton;
-    IBOutlet UIButton * stixCountButton; // custom button but no clicking
-    IBOutlet UIButton * friendCountButton; 
+    //IBOutlet UIButton * logoutScreenButton;
+    //IBOutlet UIButton * stixCountButton; // custom button but no clicking
+    //IBOutlet UIButton * friendCountButton; 
     
     IBOutlet UIButton * photoButton;
     IBOutlet UILabel * nameLabel;
-    IBOutlet UIButton * buttonInstructions;
+    //IBOutlet UIButton * buttonInstructions;
     
     //LoginViewController * loginController;
-    FriendsViewController * friendController;
+    //FriendsViewController * friendController;
     
     NSObject<ProfileViewDelegate> *delegate;
     Kumulos * k;
-    bool friendViewIsDisplayed;
+//    bool friendViewIsDisplayed;
+    IBOutlet UIButton * logo;
     
-    UIImagePickerController * camera;
+//    UIImagePickerController * camera;
+
+    // myButtons - displayed for current user's profile
+    bool showMyButtons;
+    UIButton * discoverLabel;
+    UIButton * buttonContacts;
+    UIButton * buttonFacebook;
+    UIButton * buttonName;
+    UIButton * buttonMyPix;
+    UIButton * buttonStixAdded;
+    UIImageView * myPixBG;
+    
+    int userHistoryCount;
+    int userCommentCount;
+    
+    NSMutableArray * searchFriendName;
+    NSMutableArray * searchFriendEmail;
+    NSMutableArray * searchFriendFacebookID;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
-@property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
-@property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
 @property (nonatomic, retain) IBOutlet UIButton * photoButton;
-@property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-//@property (nonatomic, retain) LoginViewController * loginController;
-@property (nonatomic, retain) FriendsViewController * friendController;
 @property (nonatomic, retain) Kumulos * k;
-@property (nonatomic, assign) UIImagePickerController * camera;
-@property (nonatomic, retain) IBOutlet UIButton * findFriendsButton;
+@property (nonatomic, retain) IBOutlet UIImageView * bottomBackground;
+@property (nonatomic, retain) OutlineLabel * myFollowersCount;
+@property (nonatomic, retain) OutlineLabel * myFollowingCount;
+@property (nonatomic, retain) OutlineLabel * myFollowersLabel;
+@property (nonatomic, retain) OutlineLabel * myFollowingLabel;
+@property (nonatomic, retain) OutlineLabel * myPixCount;
+@property (nonatomic, retain) OutlineLabel * myStixCount;
+@property (nonatomic, retain) OutlineLabel * myPixLabel;
+@property (nonatomic, retain) OutlineLabel * myStixLabel;
+@property (nonatomic, retain) FriendSearchResultsController * searchResultsController;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 
--(IBAction)didClickLogoutButton:(id)sender;
+//@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
+//@property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
+//@property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
+//@property (nonatomic, retain) LoginViewController * loginController;
+//@property (nonatomic, retain) FriendsViewController * friendController;
+//@property (nonatomic, assign) UIImagePickerController * camera;
+
 -(IBAction)changePhoto:(id)sender;
 -(void)takeProfilePicture;
--(IBAction)closeInstructions:(id)sender;
--(void)loginWithUsername:(NSString *)name;
--(void)updateFriendCount;
+-(void)updateFollowCount;
 -(void)updatePixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
--(IBAction)showLogoutScreen:(id)sender;
--(IBAction)friendCountButtonClicked:(id)sender;
--(IBAction)stixCountButtonClicked:(id)sender;
 // utils
--(void)administratorModeResetAllStix;
-
--(IBAction)findFriendsClicked:(id)sender;
 -(IBAction)didClickBackButton:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
+
+-(void)populateWithMyButtons;
+-(void)toggleMyButtons:(BOOL)show;
+
+-(void)populateFollowCounts;
+-(void)updateFollowCounts;
+-(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray;
+-(void)populateContactSearchResults;
+-(NSMutableArray*)collectFriendsFromContactList;
+
+// deprecated
+/*
+ -(IBAction)showLogoutScreen:(id)sender;
+-(IBAction)didClickLogoutButton:(id)sender;
+-(IBAction)closeInstructions:(id)sender;
+-(void)loginWithUsername:(NSString *)name;
+-(IBAction)friendCountButtonClicked:(id)sender;
+-(IBAction)stixCountButtonClicked:(id)sender;
+-(IBAction)findFriendsClicked:(id)sender;
+ */
 @end

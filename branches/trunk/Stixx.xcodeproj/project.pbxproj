@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3EFF72BA1508109700A672F9 /* FriendSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EFF72B81508109500A672F9 /* FriendSearchViewController.m */; };
-		3EFF72BB1508109700A672F9 /* FriendSearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */; };
-		3EFF72BF150810C400A672F9 /* FriendSearchResultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */; };
-		3EFF72C0150810C400A672F9 /* FriendSearchResultsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */; };
 		444C3AA6148BF4C1005EB6DB /* Base64Transcoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */; };
 		444C3AA7148BF4C1005EB6DB /* Foursquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A97148BF4C1005EB6DB /* Foursquare.m */; };
 		444C3AA8148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 444C3A99148BF4C1005EB6DB /* Foursquare_APIAppDelegate.m */; };
@@ -61,6 +57,15 @@
 		9E1EB79C14A4871100FC6E1A /* CommentFeedTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79A14A4871000FC6E1A /* CommentFeedTableController.xib */; };
 		9E1EB7A014A48D9200FC6E1A /* CommentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */; };
 		9E1EB7A114A48D9200FC6E1A /* CommentViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */; };
+		9E210C0F152278E1002057F1 /* btn_pixadded.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C08152278DD002057F1 /* btn_pixadded.png */; };
+		9E210C10152278E1002057F1 /* graphic_findbyname.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C09152278DD002057F1 /* graphic_findbyname.png */; };
+		9E210C11152278E1002057F1 /* graphic_facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0A152278DE002057F1 /* graphic_facebook.png */; };
+		9E210C12152278E1002057F1 /* graphic_contacts.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0B152278DE002057F1 /* graphic_contacts.png */; };
+		9E210C13152278E1002057F1 /* txt_discover.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0C152278DF002057F1 /* txt_discover.png */; };
+		9E210C14152278E1002057F1 /* btn_follow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0D152278DF002057F1 /* btn_follow.png */; };
+		9E210C15152278E1002057F1 /* dark_cell.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0E152278E0002057F1 /* dark_cell.png */; };
+		9E2390AD1522D22B0060D0AE /* FriendSearchResultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2390AB1522D22B0060D0AE /* FriendSearchResultsController.m */; };
+		9E2390AE1522D22B0060D0AE /* FriendSearchResultsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E2390AC1522D22B0060D0AE /* FriendSearchResultsController.xib */; };
 		9E252B0D14E1BFD60070ECB4 /* btn_25bux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0914E1BFD60070ECB4 /* btn_25bux.png */; };
 		9E252B0F14E1BFD60070ECB4 /* btn_morebux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */; };
 		9E252B1014E1BFD60070ECB4 /* bux_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B0C14E1BFD60070ECB4 /* bux_bar.png */; };
@@ -220,6 +225,7 @@
 		9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9C5E00151CCBF90048CDED /* FacebookLoginController.m */; };
 		9E9C5E03151CCBF90048CDED /* FacebookLoginController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9C5E01151CCBF90048CDED /* FacebookLoginController.xib */; };
 		9E9C5E05151CCCDA0048CDED /* fb_login.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9C5E04151CCCDA0048CDED /* fb_login.png */; };
+		9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EA572D51523712800D79BE6 /* AddressBook.framework */; };
 		9EA6425214F5C02000EAB9A4 /* VerticalFeedItemController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA6425014F5C01E00EAB9A4 /* VerticalFeedItemController.m */; };
 		9EA6425314F5C02000EAB9A4 /* VerticalFeedItemController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EA6425114F5C01F00EAB9A4 /* VerticalFeedItemController.xib */; };
 		9EAF6180145B58BE00CBAC8D /* emptyuser.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EAF617F145B58BE00CBAC8D /* emptyuser.png */; };
@@ -271,8 +277,6 @@
 		9EB5F680148AA7C000F403D1 /* graphic_nopic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */; };
 		9EB5F682148AAD7A00F403D1 /* tab_mystix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F681148AAD7A00F403D1 /* tab_mystix.png */; };
 		9EB5F68D148ABBF000F403D1 /* heart_big.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F68C148ABBF000F403D1 /* heart_big.png */; };
-		9EB5FA24144FE5E100B3B0BA /* FriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */; };
-		9EB5FA25144FE5E100B3B0BA /* FriendsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */; };
 		9EB8B50514464D5C0066ADB2 /* nav_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB8B50414464D5C0066ADB2 /* nav_bar.png */; };
 		9EB8B52F144E43160066ADB2 /* overlay.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB8B52E144E43160066ADB2 /* overlay.png */; };
 		9EC1EBB914A04E4700592DE7 /* 120_fire.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC1EBAA14A04E4700592DE7 /* 120_fire.png */; };
@@ -382,12 +386,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3EFF72B71508109500A672F9 /* FriendSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchViewController.h; sourceTree = "<group>"; };
-		3EFF72B81508109500A672F9 /* FriendSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchViewController.m; sourceTree = "<group>"; };
-		3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchViewController.xib; sourceTree = "<group>"; };
-		3EFF72BC150810C300A672F9 /* FriendSearchResultsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchResultsController.h; sourceTree = "<group>"; };
-		3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchResultsController.m; sourceTree = "<group>"; };
-		3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchResultsController.xib; sourceTree = "<group>"; };
 		444C3A94148BF4C1005EB6DB /* Base64Transcoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64Transcoder.c; sourceTree = "<group>"; };
 		444C3A95148BF4C1005EB6DB /* Base64Transcoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64Transcoder.h; sourceTree = "<group>"; };
 		444C3A96148BF4C1005EB6DB /* Foursquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Foursquare.h; sourceTree = "<group>"; };
@@ -462,6 +460,16 @@
 		9E1EB79D14A48D9000FC6E1A /* CommentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentViewController.h; sourceTree = "<group>"; };
 		9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentViewController.m; sourceTree = "<group>"; };
 		9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CommentViewController.xib; sourceTree = "<group>"; };
+		9E210C08152278DD002057F1 /* btn_pixadded.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_pixadded.png; sourceTree = "<group>"; };
+		9E210C09152278DD002057F1 /* graphic_findbyname.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_findbyname.png; sourceTree = "<group>"; };
+		9E210C0A152278DE002057F1 /* graphic_facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_facebook.png; sourceTree = "<group>"; };
+		9E210C0B152278DE002057F1 /* graphic_contacts.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_contacts.png; sourceTree = "<group>"; };
+		9E210C0C152278DF002057F1 /* txt_discover.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_discover.png; sourceTree = "<group>"; };
+		9E210C0D152278DF002057F1 /* btn_follow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_follow.png; sourceTree = "<group>"; };
+		9E210C0E152278E0002057F1 /* dark_cell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_cell.png; sourceTree = "<group>"; };
+		9E2390AA1522D22A0060D0AE /* FriendSearchResultsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchResultsController.h; sourceTree = "<group>"; };
+		9E2390AB1522D22B0060D0AE /* FriendSearchResultsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchResultsController.m; sourceTree = "<group>"; };
+		9E2390AC1522D22B0060D0AE /* FriendSearchResultsController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchResultsController.xib; sourceTree = "<group>"; };
 		9E252B0914E1BFD60070ECB4 /* btn_25bux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_25bux.png; sourceTree = "<group>"; };
 		9E252B0B14E1BFD60070ECB4 /* btn_morebux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_morebux.png; sourceTree = "<group>"; };
 		9E252B0C14E1BFD60070ECB4 /* bux_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_bar.png; sourceTree = "<group>"; };
@@ -677,6 +685,7 @@
 		9E9C5E00151CCBF90048CDED /* FacebookLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookLoginController.m; sourceTree = "<group>"; };
 		9E9C5E01151CCBF90048CDED /* FacebookLoginController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FacebookLoginController.xib; sourceTree = "<group>"; };
 		9E9C5E04151CCCDA0048CDED /* fb_login.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fb_login.png; sourceTree = "<group>"; };
+		9EA572D51523712800D79BE6 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		9EA6424F14F5C01D00EAB9A4 /* VerticalFeedItemController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VerticalFeedItemController.h; sourceTree = "<group>"; };
 		9EA6425014F5C01E00EAB9A4 /* VerticalFeedItemController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VerticalFeedItemController.m; sourceTree = "<group>"; };
 		9EA6425114F5C01F00EAB9A4 /* VerticalFeedItemController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VerticalFeedItemController.xib; sourceTree = "<group>"; };
@@ -739,9 +748,6 @@
 		9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_nopic.png; sourceTree = "<group>"; };
 		9EB5F681148AAD7A00F403D1 /* tab_mystix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_mystix.png; sourceTree = "<group>"; };
 		9EB5F68C148ABBF000F403D1 /* heart_big.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = heart_big.png; sourceTree = "<group>"; };
-		9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendsViewController.h; sourceTree = "<group>"; };
-		9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendsViewController.m; sourceTree = "<group>"; };
-		9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendsViewController.xib; sourceTree = "<group>"; };
 		9EB8B50414464D5C0066ADB2 /* nav_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_bar.png; sourceTree = "<group>"; };
 		9EB8B52E144E43160066ADB2 /* overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = overlay.png; sourceTree = "<group>"; };
 		9EC1EBAA14A04E4700592DE7 /* 120_fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 120_fire.png; sourceTree = "<group>"; };
@@ -859,6 +865,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */,
 				9E252C2314E2F7810070ECB4 /* libTapkuLibrary.a in Frameworks */,
 				9EE8D95D14D1C5FE001F36D1 /* Security.framework in Frameworks */,
 				9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */,
@@ -1288,6 +1295,7 @@
 		9EB03171142C002E0019F2BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9EA572D51523712800D79BE6 /* AddressBook.framework */,
 				9E252C4014E301EE0070ECB4 /* Parse.framework */,
 				9E252C1514E2F6E00070ECB4 /* TapkuLibrary.xcodeproj */,
 				9EB03243142C01640019F2BD /* QuartzCore.framework */,
@@ -1395,12 +1403,6 @@
 				9EC7361914CE08D200AE5A6C /* FeedbackViewController.xib */,
 				9ECF1C5D145DD4DD00B7F7F1 /* PagedScrollView.h */,
 				9ECF1C5E145DD4DD00B7F7F1 /* PagedScrollView.m */,
-				3EFF72B71508109500A672F9 /* FriendSearchViewController.h */,
-				3EFF72B81508109500A672F9 /* FriendSearchViewController.m */,
-				3EFF72B91508109600A672F9 /* FriendSearchViewController.xib */,
-				3EFF72BC150810C300A672F9 /* FriendSearchResultsController.h */,
-				3EFF72BD150810C400A672F9 /* FriendSearchResultsController.m */,
-				3EFF72BE150810C400A672F9 /* FriendSearchResultsController.xib */,
 				9EA6424F14F5C01D00EAB9A4 /* VerticalFeedItemController.h */,
 				9EA6425014F5C01E00EAB9A4 /* VerticalFeedItemController.m */,
 				9EA6425114F5C01F00EAB9A4 /* VerticalFeedItemController.xib */,
@@ -1434,9 +1436,9 @@
 				9EF173C2146D01F30073F83B /* OutlineLabel.m */,
 				9ECF1C5D145DD4DD00B7F7F1 /* PagedScrollView.h */,
 				9ECF1C5E145DD4DD00B7F7F1 /* PagedScrollView.m */,
-				9EB5FA21144FE5E100B3B0BA /* FriendsViewController.h */,
-				9EB5FA22144FE5E100B3B0BA /* FriendsViewController.m */,
-				9EB5FA23144FE5E100B3B0BA /* FriendsViewController.xib */,
+				9E2390AA1522D22A0060D0AE /* FriendSearchResultsController.h */,
+				9E2390AB1522D22B0060D0AE /* FriendSearchResultsController.m */,
+				9E2390AC1522D22B0060D0AE /* FriendSearchResultsController.xib */,
 				9E6B05D9150826EB00E3ADAD /* ProfileViewController.h */,
 				9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */,
 				9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */,
@@ -1483,6 +1485,13 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9E210C08152278DD002057F1 /* btn_pixadded.png */,
+				9E210C09152278DD002057F1 /* graphic_findbyname.png */,
+				9E210C0A152278DE002057F1 /* graphic_facebook.png */,
+				9E210C0B152278DE002057F1 /* graphic_contacts.png */,
+				9E210C0C152278DF002057F1 /* txt_discover.png */,
+				9E210C0D152278DF002057F1 /* btn_follow.png */,
+				9E210C0E152278E0002057F1 /* dark_cell.png */,
 				9E9C5E04151CCCDA0048CDED /* fb_login.png */,
 				9E84F7131519057100A57D0C /* random.png */,
 				9E84F7141519057200A57D0C /* random_on.png */,
@@ -1847,7 +1856,6 @@
 				9EC4337B14392C3B002D095B /* logo.png in Resources */,
 				9EB8B50514464D5C0066ADB2 /* nav_bar.png in Resources */,
 				9EB8B52F144E43160066ADB2 /* overlay.png in Resources */,
-				9EB5FA25144FE5E100B3B0BA /* FriendsViewController.xib in Resources */,
 				9E64049B14566F7A0051EB4D /* dropshadow.png in Resources */,
 				9E64049D14566F840051EB4D /* instruction_box.png in Resources */,
 				9E64049F14566F8B0051EB4D /* tab_addstix.png in Resources */,
@@ -1979,8 +1987,6 @@
 				9EF94F54150002F000372970 /* blackbar.png in Resources */,
 				9E80C65D150554980051D64C /* AddStixViewController.xib in Resources */,
 				9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */,
-				3EFF72BB1508109700A672F9 /* FriendSearchViewController.xib in Resources */,
-				3EFF72C0150810C400A672F9 /* FriendSearchResultsController.xib in Resources */,
 				9E6B05DD150826EB00E3ADAD /* ProfileViewController.xib in Resources */,
 				9E6B05E31509239B00E3ADAD /* tab_open.png in Resources */,
 				9E6B05EA150961D700E3ADAD /* txt_all_selected.png in Resources */,
@@ -2046,6 +2052,14 @@
 				9EC914EE151BC193005415E2 /* FBDialog.bundle in Resources */,
 				9E9C5E03151CCBF90048CDED /* FacebookLoginController.xib in Resources */,
 				9E9C5E05151CCCDA0048CDED /* fb_login.png in Resources */,
+				9E210C0F152278E1002057F1 /* btn_pixadded.png in Resources */,
+				9E210C10152278E1002057F1 /* graphic_findbyname.png in Resources */,
+				9E210C11152278E1002057F1 /* graphic_facebook.png in Resources */,
+				9E210C12152278E1002057F1 /* graphic_contacts.png in Resources */,
+				9E210C13152278E1002057F1 /* txt_discover.png in Resources */,
+				9E210C14152278E1002057F1 /* btn_follow.png in Resources */,
+				9E210C15152278E1002057F1 /* dark_cell.png in Resources */,
+				9E2390AE1522D22B0060D0AE /* FriendSearchResultsController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2089,7 +2103,6 @@
 				9EB031F4142C01260019F2BD /* ImageCache.m in Sources */,
 				9EB031F7142C01260019F2BD /* Tag.m in Sources */,
 				9EB031FB142C01260019F2BD /* TagViewController.m in Sources */,
-				9EB5FA24144FE5E100B3B0BA /* FriendsViewController.m in Sources */,
 				9ECD52331457BF33005CFDBB /* ExploreViewController.m in Sources */,
 				9ECF1C5F145DD4DD00B7F7F1 /* PagedScrollView.m in Sources */,
 				9E5383761460C13D00C1D354 /* UIImage+Alpha.m in Sources */,
@@ -2154,8 +2167,6 @@
 				9E80C65C150554980051D64C /* AddStixViewController.m in Sources */,
 				9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */,
 				9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */,
-				3EFF72BA1508109700A672F9 /* FriendSearchViewController.m in Sources */,
-				3EFF72BF150810C400A672F9 /* FriendSearchResultsController.m in Sources */,
 				9E6B05DC150826EB00E3ADAD /* ProfileViewController.m in Sources */,
 				9EDFC485150E839C00BA0C24 /* ASIAuthenticationDialog.m in Sources */,
 				9EDFC486150E839C00BA0C24 /* ASIDataCompressor.m in Sources */,
@@ -2177,6 +2188,7 @@
 				9EC91501151BC526005415E2 /* FacebookHelper.m in Sources */,
 				9E9C5DFD151BF0640048CDED /* Kumulos.m in Sources */,
 				9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */,
+				9E2390AD1522D22B0060D0AE /* FriendSearchResultsController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2321,7 +2333,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "C1493626-B8F5-4FF8-B046-0DF48F28D3E6";
+				PROVISIONING_PROFILE = "D2F214F7-1840-41D3-948F-002A6B4257FF";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
@@ -2364,7 +2376,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "C1493626-B8F5-4FF8-B046-0DF48F28D3E6";
+				PROVISIONING_PROFILE = "D2F214F7-1840-41D3-948F-002A6B4257FF";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

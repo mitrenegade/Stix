@@ -12,6 +12,7 @@
 
 @synthesize facebook;
 @synthesize delegate;
+@synthesize getRequest;
 
 /* in the Application delegate, you must have this:
  
@@ -68,8 +69,10 @@
                                 //@"publish_stream",
                                 @"email",
                                 nil];
-        if ([permissions count] == 0)
+        if ([permissions count] == 0) {
             [facebook authorize:nil];
+            [permissions release];
+        }
         else {
             [facebook authorize:permissions];
             [permissions release];
@@ -82,6 +85,7 @@
 }
 -(void)getFacebookInfo {
     [facebook requestWithGraphPath:@"me" andDelegate:self];  
+    currentRequest = @"requestGraphPathMe";
 }
 
 /*** Facebook delegate functions ***/
@@ -128,13 +132,6 @@
     return [facebook handleOpenURL:url];
 }
 
-// response for requestWithGraphPath
-- (void)request:(FBRequest *)request didLoad:(id)result {
-    NSDictionary * dictionary = result;
-    //NSLog(@"Result: %@", result);
-    [self.delegate didGetFacebookInfo:dictionary];
-}
-
 -(NSString*)getAccessToken {
     return [facebook accessToken];
 }
@@ -151,7 +148,7 @@
     [facebook dialog:@"feed" andParams:params andDelegate:self];
 }
 
-#pragma FBDialogDelegate functions
+#pragma mark FBDialogDelegate functions
 - (void)dialogDidComplete:(FBDialog *)dialog {
     NSLog(@"Facebook dialog completed!");
 }
@@ -162,6 +159,71 @@
     NSLog(@"Facebook dialog failed: %@", [error description]);
 }
 
+#pragma mark friend request
+
+-(void)requestFacebookFriends {
+#if 0
+    NSString * urlString = [NSString stringWithFormat: @"https://graph.facebook.com/me/friends?access_token=%@", [facebook accessToken]];
+    
+    NSString * fullURL = [NSString stringWithFormat:@"%@", urlString];
+    getRequest = [[SMWebRequest requestWithURL:[NSURL URLWithString:fullURL]] retain];
+    [getRequest addTarget:self action:@selector(requestFacebookFriendsFinished:) forRequestEvents:SMWebRequestEventComplete];
+    [getRequest start];
+    NSLog(@"Get request: %@", fullURL);
+#else
+    [facebook requestWithGraphPath:@"me/friends" andDelegate:self];
+    currentRequest = @"requestGraphPathFriends";
+#endif
+}
+
+// response from SMWebRequest
+-(void)requestFacebookFriendsFinished:(NSMutableDictionary*)responseData {   
+#if 0
+    NSString *responseText = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+    NSLog(@"Returned URL response: %@", responseText);
+    
+    // parse JSON
+    NSString *responseString = [NSString stringWithUTF8String:[responseData bytes]];
+    
+    // Clean up json data.
+    responseString = [responseString substringToIndex:[responseString rangeOfString:@"}" options:NSBackwardsSearch].location + 1];
+    
+    NSDictionary *jsonDict = [responseString JSONValue];
+    // facebook JSON Data has two elements: data and paging
+    // data is an array containing key-value pairs of fbID and name
+    NSArray *friendsArray = [jsonDict objectForKey:@"data"];
+#else
+    NSArray * friendsArray = [responseData objectForKey:@"data"];
+#endif
+    /*
+     for (int i=0; i<[friendsArray count]; i++) {
+     NSDictionary * d = [friendsArray objectAtIndex:i];
+     NSString * fbID = [d objectForKey:@"id"];
+     NSString * name = [d objectForKey:@"name"];
+     NSLog(@"Friend %d id %@ name %@", i, fbID, name);
+     }
+     */
+    [self.delegate receivedFacebookFriends:friendsArray];
+}
+
+#pragma mark FBRequestDelegate
+
+/**
+ * Called when an error prevents the request from completing successfully.
+ */
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"FacebookHelper FBRequest failed with error: %@", [error description]);
+}
+
+// response for requestWithGraphPath
+- (void)request:(FBRequest *)request didLoad:(id)result {
+    NSDictionary * dictionary = result;
+    //NSLog(@"Result: %@", result);
+    if ([currentRequest isEqualToString:@"requestGraphPathMe"])
+        [self.delegate didGetFacebookInfo:dictionary];
+    else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])
+        [self requestFacebookFriendsFinished:result];
+}
 
 
 @end

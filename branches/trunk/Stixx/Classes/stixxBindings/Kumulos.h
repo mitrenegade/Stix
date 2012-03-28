@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Mar 26, 2012
+//  Created by Kumulos Bindings Compiler on Mar 28, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -20,6 +20,10 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHistoryToPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getCommentCountForUserDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getHistoryCountForUserDidCompleteWithResult:(NSNumber*)aggregateResult;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addScaleAndRotationToPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -43,9 +47,9 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getMostRecentlyUpdatedTagDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getStixOfUserDidCompleteWithResult:(NSNumber*)aggregateResult;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixCountDidCompleteWithResult:(NSNumber*)aggregateResult;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation touchPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -115,6 +119,14 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation lastUpdatedCategoriesDidCompleteWithResult:(NSArray*)theResults;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addFollowerDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getFollowersOfUserDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getFollowListDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation removeFollowerDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricHitDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getSharedPixDidCompleteWithResult:(NSArray*)theResults;
@@ -153,6 +165,12 @@
 -(KSAPIOperation*) getAllHistoryWithTagID:(NSInteger)tagID;
     
    
+-(KSAPIOperation*) getCommentCountForUserWithUsername:(NSString*)username andStixStringID:(NSString*)stixStringID;
+    
+   
+-(KSAPIOperation*) getHistoryCountForUserWithUsername:(NSString*)username;
+    
+   
 -(KSAPIOperation*) addScaleAndRotationToPixWithAllTagID:(NSUInteger)allTagID;
     
    
@@ -185,10 +203,10 @@
 -(KSAPIOperation*) getMostRecentlyUpdatedTagWithNumEls:(NSNumber*)numEls;
     
    
--(KSAPIOperation*) getStixOfUserWithUsername:(NSString*)username;
+-(KSAPIOperation*) getUpdatedPixByTimeWithTimeUpdated:(NSDate*)timeUpdated andNumPix:(NSNumber*)numPix;
     
    
--(KSAPIOperation*) getUpdatedPixByTimeWithTimeUpdated:(NSDate*)timeUpdated andNumPix:(NSNumber*)numPix;
+-(KSAPIOperation*) getUserPixCountWithUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) touchPixWithAllTagID:(NSUInteger)allTagID andUsername:(NSString*)username;
@@ -289,6 +307,18 @@
     
    
 -(KSAPIOperation*) lastUpdatedCategoriesWithTimeUpdated:(NSDate*)timeUpdated;
+    
+   
+-(KSAPIOperation*) addFollowerWithUsername:(NSString*)username andFollowsUser:(NSString*)followsUser;
+    
+   
+-(KSAPIOperation*) getFollowersOfUserWithFollowsUser:(NSString*)followsUser;
+    
+   
+-(KSAPIOperation*) getFollowListWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) removeFollowerWithUsername:(NSString*)username andFollowsUser:(NSString*)followsUser;
     
    
 -(KSAPIOperation*) addMetricHitWithDescription:(NSString*)description andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;

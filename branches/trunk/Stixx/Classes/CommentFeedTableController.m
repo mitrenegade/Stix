@@ -180,7 +180,7 @@
         NSString * comment = [self.delegate getCommentForIndex:index];
         NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
         NSString * timeStampString = [self.delegate getTimestampStringForIndex:index];
-        UIImage * photo = [self.delegate getPhotoForIndex:index];
+        UIImage * photo = [[self.delegate getPhotoForIndex:index] retain];
         //NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
         // to set one line of text:
         // [cell.textLabel setText:commentLabel];
@@ -190,7 +190,7 @@
         UILabel * timeLabel = (UILabel*)[cell viewWithTag:TIME_LABEL_TAG];
         NSString * simpleComment = [self simpleCommentString:comment andStixType:stixStringID];
         CGSize commentSize = [simpleComment sizeWithFont:[commentTextLabel font] constrainedToSize:CGSizeMake(commentTextLabel.frame.size.width, commentTextLabel.frame.size.height*4) lineBreakMode:UILineBreakModeWordWrap];
-        float commentHeight = [self getHeightForComment:comment forStixStringID:stixStringID];
+        //float commentHeight = [self getHeightForComment:comment forStixStringID:stixStringID];
         [commentTextLabel setFrame:CGRectMake(commentTextLabel.frame.origin.x, commentTextLabel.frame.origin.y, 230, commentSize.height)];
         [timeLabel setFrame:CGRectMake(timeLabel.frame.origin.x, commentTextLabel.frame.origin.y + commentTextLabel.frame.size.height + 4, timeLabel.frame.size.width, timeLabel.frame.size.height)];
         //NSLog(@"adding comment: %@", simpleComment);
@@ -203,6 +203,7 @@
 
         UIImageView * photoView = (UIImageView*)[cell viewWithTag:PHOTO_TAG];
         [photoView setImage:photo];
+        [photo release]; // MRC
         
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];

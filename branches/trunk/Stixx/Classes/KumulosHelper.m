@@ -37,6 +37,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
 }
 
 -(void)execute:(NSString*)_function withParams:(NSMutableArray*)params withCallback:(SEL)_callback withDelegate:(NSObject<KumulosHelperDelegate>*)helperDelegate{
+    [params retain];
     [self setFunction:_function];
     [self setCallback:_callback];
     delegate = helperDelegate;
@@ -66,6 +67,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         
         [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
     }
+    [params autorelease];
 }
 
 -(void)execute:(NSString*)_function {
@@ -92,6 +94,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
             NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d objectForKey:@"stix"]] retain];
             NSLog(@"User %@ has %d stix", username, [stix count]);
             NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
+            /*
             int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
             NSMutableSet * friendsList;
             if (ret == 0) { // all are present
@@ -106,6 +109,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
             else if (ret == -1) { // all are missing
                 friendsList = [[NSMutableSet alloc] init];
             }
+             */
             NSMutableDictionary * stixOrder = [[NSMutableDictionary alloc] init];
             NSEnumerator *e = [stix keyEnumerator];
             id key;
@@ -124,9 +128,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
 
             NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
             [auxiliaryDict setObject:stixOrder forKey:@"stixOrder"];
-            [auxiliaryDict setObject:friendsList forKey:@"friendsList"];
+            //[auxiliaryDict setObject:friendsList forKey:@"friendsList"];
             NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
-            NSLog(@"User %@ now has %d stix and %d stixOrders and %d friends", username, [stix count], [stixOrder count], [friendsList count]);
+            NSLog(@"User %@ now has %d stix and %d stixOrders", username, [stix count], [stixOrder count]);
             [sharedKumulosHelper.k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
         }
     }
@@ -136,6 +140,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         // if stixOrder exists for a stix that is at 0 counts
         // if stixOrder does not exist for a user
         // we don't check for validity of stixOrder so we just reset everything
+        /*
         NSLog(@"Total users: %d", [theResults count]);
         NSString * username = @"";
         for (NSMutableDictionary * d in theResults) {
@@ -168,6 +173,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
             NSLog(@"User %@ now has %d stix and %d stixOrders and %d friends", username, [stix count], [stixOrder count], [friendsList count]);
             [sharedKumulosHelper.k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
         }
+         */
     }
 }
 

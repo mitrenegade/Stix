@@ -13,7 +13,7 @@
 
 @implementation FriendSearchResultsController
 
-@synthesize userPhotos, usernames, userEmails, userButtons;
+@synthesize userButtons;
 @synthesize delegate;
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -44,6 +44,10 @@
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [self.tableView setBackgroundColor:[UIColor clearColor]];
+    [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    
+    userButtons = [[NSMutableDictionary alloc] init];
 }
 
 - (void)viewDidUnload
@@ -84,14 +88,19 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [self.delegate getNumOfUsers];
+    int numRows = [self.delegate getNumOfUsers];
+    NSLog(@"FriendSearchResults: numRows %d", numRows);
+    return numRows;;
 }
 
+-(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 70;
+}
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
@@ -154,6 +163,8 @@
     
     int y = [indexPath row];
     
+    NSLog(@"Cell for row %d", y);
+    
     //UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(80,0,180,60)];
     //label.textColor = [UIColor colorWithRed:0.25 green:0.0 blue:0.0 alpha:1.0];
     //label.highlightedTextColor = label.textColor;//[UIColor colorWithRed:1.0 green:1.0 blue:0.9 alpha:1.0];
@@ -179,14 +190,25 @@
     
     if ([userButtons objectForKey:username] == nil) {
         UIButton * addFriendButton = [[UIButton alloc] init]; 
-        [addFriendButton setImage:[UIImage imageNamed:@"btn_addstix.png"] forState:normal];             
+        [addFriendButton setFrame:CGRectMake(0, 0, 70, 70)];
+        [addFriendButton setImage:[UIImage imageNamed:@"btn_addstix.png"] forState:UIControlStateNormal];             
+        [addFriendButton setTag:y];
+        [addFriendButton addTarget:self action:@selector(didAddFriend:) forControlEvents:UIControlEventTouchUpInside];
+        
         UIButton * alreadyFriendedButton = [[UIButton alloc] init];
-        [alreadyFriendedButton setImage:[UIImage imageNamed:@"check.png"] forState:normal];
+        [alreadyFriendedButton setImage:[UIImage imageNamed:@"check.png"] forState:UIControlStateNormal];
+        [alreadyFriendedButton setFrame:CGRectMake(0, 0, 70, 70)];
+        [alreadyFriendedButton setTag:y];
+        [alreadyFriendedButton addTarget:self action:@selector(didRemoveFriend:) forControlEvents:UIControlEventTouchUpInside];
+
         NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, nil];
         [userButtons setObject:buttonArray forKey:username];
+        [buttonArray release];
+        [addFriendButton release];
+        [alreadyFriendedButton release];
     }
     
-    if ([self.delegate isFriendOfUser: y]) {
+    if (![self.delegate isFollowingUser:y]) {
         NSMutableArray * buttonArray = [userButtons objectForKey:username];
         cell.accessoryView = [buttonArray objectAtIndex:0];
         cell.accessoryType = UITableViewCellAccessoryNone;
@@ -200,6 +222,15 @@
     //[cell.contentView addSubview:label];
     return cell;
     
+}
+
+-(void)didAddFriend:(UIButton*)sender {
+    NSLog(@"Clicked add friend button %d!", sender.tag);
+    [self.delegate didClickAddFriendButton:sender.tag];
+}
+-(void)didRemoveFriend:(UIButton*)sender {
+    NSLog(@"Clicked remove friend button %d!", sender.tag);
+    [self.delegate didClickAddFriendButton:sender.tag];
 }
 
 /*

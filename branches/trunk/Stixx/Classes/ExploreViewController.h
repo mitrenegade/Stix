@@ -26,7 +26,7 @@
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 -(void)sharePix:(int)tagID;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
--(void)uploadImage:(NSData*)dataPNG;
+-(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didOpenProfileView;
 
 -(void)didCreateBadgeView:(UIView*)newBadgeView;

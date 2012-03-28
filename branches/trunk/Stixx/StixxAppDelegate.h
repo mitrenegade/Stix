@@ -13,7 +13,7 @@
 
 #import "TagViewController.h"
 #import "ProfileViewController.h"
-#import "FriendsViewController.h"
+//#import "FriendsViewController.h"
 //#import "TagDescriptorController.h"
 #import "ExploreViewController.h"
 #import "Kumulos.h"
@@ -73,7 +73,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, FriendsViewDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, /*LoginSplashDelegate, */FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, /*FriendsViewDelegate,*/ ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, /*LoginSplashDelegate, */FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
 
 //#if USING_FACEBOOK
     FacebookHelperDelegate, FacebookLoginDelegate,
@@ -88,7 +88,7 @@ struct UserInfo {
     TagViewController * tagViewController;
 	//FeedViewController *feedController;
     VerticalFeedController *feedController;
-	FriendsViewController *friendController;
+	//FriendsViewController *friendController;
 	ProfileViewController *profileController;
     ExploreViewController * exploreController;
     FacebookLoginController * loginSplashController;
@@ -103,7 +103,9 @@ struct UserInfo {
     
     NSMutableDictionary * allStix;
     NSMutableDictionary * allStixOrder;
-    NSMutableSet * allFriends;
+    //NSMutableSet * allFriends;
+    NSMutableSet * allFollowers;
+    NSMutableSet * allFollowing;
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
@@ -140,7 +142,7 @@ struct UserInfo {
     int shareMethod; // 0 = facebook, 1 = email
     int buyBuxPurchaseAmount;
     
-    NSMutableDictionary * allUserPhotos;
+    NSMutableDictionary * allUsers;
     int idOfMostRecentUser;
     
     IBOutlet UITextField * loadingMessage;
@@ -189,7 +191,6 @@ struct UserInfo {
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;
 //-(void)adminSaveFeed;
--(void)adminSaveTagUpdateInfo;
 -(void)adminResetAllStixOrders;
 
 -(void)decrementStixCount:(NSString*)stixStringID;
@@ -223,17 +224,23 @@ struct UserInfo {
 //@property (nonatomic, retain) FeedViewController *feedController;
 @property (nonatomic, retain) VerticalFeedController *feedController;
 @property (nonatomic, retain) ProfileViewController *profileController;
-@property (nonatomic, retain) FriendsViewController *friendController;
+//@property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) FacebookLoginController * loginSplashController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
+@property (nonatomic, retain) NSMutableDictionary * allUsers;
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
 @property (nonatomic, retain) NSMutableDictionary * allStix;
 @property (nonatomic, retain) NSMutableDictionary * allStixOrder;
-@property (nonatomic, retain) NSMutableSet * allFriends;
+//@property (nonatomic, retain) NSMutableSet * allFriends;
+@property (nonatomic, retain) NSMutableSet * allFollowers;
+@property (nonatomic, retain) NSMutableSet * allFollowing;
+@property (nonatomic, retain) NSMutableArray * allUserFacebookIDs;
+@property (nonatomic, retain) NSMutableArray * allUserEmails;
+@property (nonatomic, retain) NSMutableArray * allUserNames;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
 @property (nonatomic, retain) NSMutableDictionary * allCommentHistories;

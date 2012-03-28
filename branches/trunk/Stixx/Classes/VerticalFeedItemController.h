@@ -44,7 +44,7 @@
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
 @end
 
-@interface VerticalFeedItemController : UIViewController <StixViewDelegate,CommentFeedTableDelegate, KumulosDelegate>{
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate>{
     
 	IBOutlet UILabel * labelName;
     //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick

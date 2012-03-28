@@ -46,8 +46,8 @@
         NSMutableDictionary * d = [theResults objectAtIndex:0];
         
         // update friend count
-        NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
-        int ct = [allUserPhotos count];
+        NSMutableDictionary * allUsers = [self.delegate getUserPhotos];
+        int ct = [allUsers count];
         [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
 
         // total Pix count
@@ -62,21 +62,6 @@
         NSLog(@"user doesn't exist!"); // force logout
     }
 }
-
-
-
-
-#if 0
--(void)updateFriendCount {
-    NSMutableDictionary * allUserPhotos = [self.delegate getUserPhotos];
-    int ct = [allUserPhotos count];
-    [friendCountButton setTitle:[NSString stringWithFormat:@"%d Friends", ct] forState:UIControlStateNormal];
-}
-
--(void)updatePixCount {
-    //int ct = [delegate getStixCount:BADGE_TYPE_FIRE] + [delegate getStixCount:BADGE_TYPE_ICE];
-}
-#endif
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];

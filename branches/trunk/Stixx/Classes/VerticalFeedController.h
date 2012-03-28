@@ -51,7 +51,7 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
--(void)didSharePixWithURL:(NSString*)url;
+//-(void)didSharePixWithURL:(NSString*)url;
 //-(void)didPurchaseBux:(int)bux;
 -(void)sharePix:(int)tagID;
 -(void)didOpenProfileView;

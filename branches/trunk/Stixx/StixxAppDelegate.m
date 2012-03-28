@@ -38,16 +38,18 @@
 @synthesize tabBarController;
 @synthesize feedController;
 @synthesize profileController;
-@synthesize friendController;
+//@synthesize friendController;
 @synthesize loginSplashController;
 @synthesize myUserInfo;
 @synthesize lastViewController;
 @synthesize allTags;
 @synthesize timeStampOfMostRecentTag;
+@synthesize allUsers;
 @synthesize allUserPhotos;
+@synthesize allUserFacebookIDs, allUserEmails, allUserNames;
 @synthesize allStix;
 @synthesize allStixOrder;
-@synthesize allFriends;
+@synthesize allFollowers, allFollowing;
 @synthesize k;
 @synthesize allCommentCounts;
 @synthesize allCarouselViews;
@@ -68,7 +70,7 @@ static NSString * uniqueDeviceID = nil;
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    versionStringStable = @"0.7.8";
+    versionStringStable = @"0.9";
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
     
     metricLogonTime = nil;
@@ -174,10 +176,16 @@ static NSString * uniqueDeviceID = nil;
     tabBarController.myDelegate = self;
     
     allTags = [[NSMutableArray alloc] init];
+    allUsers = [[NSMutableDictionary alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
     allStixOrder = [[NSMutableDictionary alloc] init];
-    allFriends = [[NSMutableSet alloc] init];
+    //allFriends = [[NSMutableSet alloc] init];
+    allFollowing = [[NSMutableSet alloc] init];
+    allFollowers = [[NSMutableSet alloc] init];
+    allUserFacebookIDs = [[NSMutableArray alloc] init];
+    allUserEmails = [[NSMutableArray alloc] init];
+    allUserNames = [[NSMutableArray alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
     allCommentHistories = [[NSMutableDictionary alloc] init];
@@ -224,15 +232,15 @@ static NSString * uniqueDeviceID = nil;
 	
 	/***** create friends feed *****/
     //[loadingMessage setText:@"Networking with friends..."];
-	friendController = [[FriendsViewController alloc] init];
-    friendController.delegate = self;
+	//friendController = [[FriendsViewController alloc] init];
+    //friendController.delegate = self;
     [self checkForUpdatePhotos];
     
 	/***** create config view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
-    [profileController setCamera:self.camera];
-    [profileController setFriendController:friendController];
+    //[profileController setCamera:self.camera];
+    //[profileController setFriendController:friendController];
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
@@ -382,8 +390,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Did get facebook info!");
     NSEnumerator *e = [results keyEnumerator];
     NSString * name = @"";
-    NSString * email;
-    int facebookID;
+    NSString * email = @"";
+    int facebookID = 0;
     id key;
     while (key = [e nextObject]) {
         NSLog(@"Key: %@ %@", key, [results valueForKey:key]);
@@ -413,6 +421,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 -(FacebookHelper*)getFacebookHelper {
     return fbHelper;
+}
+
+-(void)needFacebookLogin {
+    [self doFacebookLogin];
 }
 
 -(void)doFacebookLogin {
@@ -859,7 +871,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 idOfOldestTagReceived = newID;
 
             // add into feed if it meets criteria
-            if (1) { // [allFriends containsObject:tag.username]) {
+            if (1) { 
                 [allTags insertObject:tag atIndex:i];
                 [self getCommentCount:newID]; // store comment count for this tag
                 added = YES;
@@ -875,7 +887,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             idOfNewestTagReceived = newID;
         if (newID < idOfOldestTagReceived)
             idOfOldestTagReceived = newID;
-        if (1) { //[allFriends containsObject:tag.username]) {
+        if (1) { 
             [allTags insertObject:tag atIndex:i];
             [self getCommentCount:newID]; // store comment count for this tag
             added = YES;
@@ -1368,7 +1380,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
 #if 1
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
+    NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil] autorelease];
     [[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
     NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
 #else
@@ -1446,14 +1458,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 /***** FriendsViewDelegate ********/
--(void)didDismissFriendView {}; // only used in profileView
+//-(void)didDismissFriendView {}; // only used in profileView
 -(void) checkForUpdatePhotos {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     if (1) // todo: check for updated users by id
     {
-        [friendController setIndicator:YES];
+        //[friendController setIndicator:YES];
         
         [k getAllUsers];
     }
@@ -1470,23 +1482,32 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    [allUsers removeAllObjects];
     [allUserPhotos removeAllObjects];
+    [allUserFacebookIDs removeAllObjects];
+    [allUserEmails removeAllObjects];
+    [allUserNames removeAllObjects];
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
         UIImage * photo = [d valueForKey:@"photo"];
+        NSNumber * facebookID = [d valueForKey:@"facebookID"];
+        [allUsers setObject:d forKey:name];
         [allUserPhotos setObject:photo forKey:name];
+        [allUserFacebookIDs addObject:[NSString stringWithFormat:@"%d", [facebookID intValue]]];
+        [allUserEmails addObject:[d valueForKey:@"email"]];
+        [allUserNames addObject:name];
     }
     
-    [friendController setIndicator:NO];
+    //[friendController setIndicator:NO];
     //if (lastViewController == profileController) // if currently viewing friends, force reload
     //{
     //    [lastViewController viewWillAppear:TRUE];
     //}    
-    if (lastViewController == profileController)
-    {
-        [profileController.friendController viewWillAppear:YES];
-        [profileController updateFriendCount];
-    }
+    //if (lastViewController == profileController)
+    //{
+        //[profileController.friendController viewWillAppear:YES];
+        //[profileController updateFriendCount];
+    //}
     //NSLog(@"loaded %d new friends from kumulos", [theResults count]);
 }
 
@@ -1494,7 +1515,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return allUserPhotos;
 }
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
-    return [[UIImage alloc] initWithData:[allUserPhotos objectForKey:username]];
+    return [[[UIImage alloc] initWithData:[allUserPhotos objectForKey:username]] autorelease];
 }
 
 /**** LoginSplashController delegate ****/
@@ -1504,10 +1525,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [profileController.view setFrame:frameShifted];
+#if 0
 #if !TARGET_IPHONE_SIMULATOR
-    //[self.camera setCameraOverlayView:profileController.view];
+    [self.camera setCameraOverlayView:profileController.view];
 #endif
+#else
     [tabBarController.view addSubview:profileController.view];
+#endif    
     [profileController viewWillAppear:YES]; // force updates -> hack: this doesn't automatically happen??
 }
 
@@ -1619,6 +1643,28 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self checkForUpdatePhotos];
 }
 
+-(void)searchFriendsByFacebook {
+    [fbHelper requestFacebookFriends];
+}
+
+-(void)receivedFacebookFriends:(NSArray*)friendsArray {
+    [profileController populateFacebookSearchResults:friendsArray];
+}
+
+-(NSMutableDictionary*)getAllUsers {
+    return allUsers;
+}
+
+-(NSMutableArray*)getAllUserFacebookIDs {
+    return allUserFacebookIDs;
+}
+-(NSMutableArray*)getAllUserEmails {
+    return allUserEmails;
+}
+-(NSMutableArray*)getAllUserNames {
+    return allUserNames;
+}
+
 - (NSString *)coordinateArrayPath
 {	
 #if DEBUGX==1
@@ -1658,7 +1704,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder andFriendsList:(NSMutableSet*)friendsList isFirstTimeUser:(BOOL)firstTime {
+-(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -1686,7 +1732,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self.tabBarController didPressCenterButton:self];
     [self.tabBarController setSelectedIndex:0];
 
-    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder andFriendsList:friendsList];
+    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
     [photo release];
     [stix release];
     //if (firstTime) {
@@ -1694,7 +1740,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //}
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder andFriendsList:(NSMutableSet *)friendsList {
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -1740,6 +1786,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // do consistency check on stix and stix order
     [self checkConsistency];
     
+    /*
     if (![friendsList isKindOfClass:[NSMutableSet class]]) {
         [allFriends removeAllObjects];
         [allFriends addObject:@"bobo"];
@@ -1751,6 +1798,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allFriends unionSet:friendsList];
         [friendsList release];
     }
+     */
+    // get friends/follow relationships
+    [k getFollowListWithUsername:name];
+    [k getFollowersOfUserWithFollowsUser:name];
+    
     loggedIn = YES;
     myUserInfo->username = [name retain];
     myUserInfo->userphoto = [photo retain];
@@ -1922,25 +1974,29 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         return [[allStixOrder objectForKey:stixStringID] intValue];
 }
 
--(NSMutableSet*)getFriendsList {
+-(NSMutableSet*)getFollowerList {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    return allFriends;
+    return allFollowers;
 }
--(void)didUpdateFriendsList {
+-(NSMutableSet*)getFollowingList {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSLog(@"Updated friends list: total friends %d", [allFriends count]);
-    [self.profileController updateFriendCount];
-    // todo: save friends List to kumulos
-    NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
-    [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
-    [auxiliaryDict setObject:allFriends forKey:@"friendsList"];
-    NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
-    //[auxiliaryDict release];    
-    [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
+    return allFollowing;
+}
+
+-(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow {
+    if (shouldFollow) {
+        [allFollowing addObject:friendName];
+        [k addFollowerWithUsername:[self getUsername] andFollowsUser:friendName];
+    }
+    else {
+        [allFollowing removeObject:friendName];
+        [k removeFollowerWithUsername:[self getUsername] andFollowsUser:friendName];
+    }
+    [profileController updateFollowCount];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
@@ -2209,7 +2265,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-   NSData *imageData = dataPNG;
+    shareMethod = method;
+    NSLog(@"Uploading data for share method: %d", shareMethod);
+
+    NSData *imageData = dataPNG;
     NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
     NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, username];
     NSURL *url=[[NSURL alloc] initWithString:serverString];
@@ -2217,7 +2276,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [request setDelegate:self];
     [request setData:imageData forKey:@"picture[data]"];
     [request startSynchronous];
-    shareMethod = method;
+    [url autorelease];
 }
 
 -(void)sharePix:(int)tagID {
@@ -2649,6 +2708,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [PFPush unsubscribeFromChannelInBackground:element];
         }
         NSLog(@"%@", channelsString);
+       [channelsString autorelease];
     }]; // perform in background
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
@@ -2991,9 +3051,9 @@ static bool isShowingAlerts = NO;
     
     NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
     [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
-    [auxiliaryDict setObject:allFriends forKey:@"friendsList"];
+    //[auxiliaryDict setObject:allFriends forKey:@"friendsList"];
     NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
-    //[auxiliaryDict release];    
+    [auxiliaryDict release];   // MRC  
     [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
     
     [self changeBuxCountByAmount:-5];
@@ -3078,6 +3138,28 @@ static bool isShowingAlerts = NO;
 #endif  
     NSError *error = [request error];
     NSLog(@"%@", error);
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
+    // list of people who follow this user
+    // key: friendName value: username
+    [allFollowers removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"username"];
+        [allFollowers addObject:friendName];
+    }
+    NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
+    // list of people this user is following
+    // key: username value: friendName
+    [allFollowing removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"followsUser"];
+        [allFollowing addObject:friendName];
+    }
+    NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
 }
 
 @end

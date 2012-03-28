@@ -24,14 +24,14 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        feedItem = nil;
     }
-    feedItem = nil;
     return self;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.view setFrame:CGRectMake(160, 0, 320, 480)];
+    //[self.view setFrame:CGRectMake(160, 0, 320, 480)];
 }
 
 -(void)initDetailViewWithTag:(Tag*)tag {
@@ -141,6 +141,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     // Do any additional setup after loading the view from its nib.
     scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46 + headerView.frame.size.height,320,320)];
     [self.view addSubview:scrollView];
@@ -208,7 +209,7 @@
         NSString * comment = [d valueForKey:@"comment"];
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         NSDate * timestamp = [d valueForKey:@"timeCreated"];
-        float height = [commentsTable getHeightForComment:comment forStixStringID:        stixStringID];
+        float height = [commentsTable getHeightForComment:comment forStixStringID: stixStringID];
         if ([stixStringID length] == 0)
         {
             // backwards compatibility
@@ -252,25 +253,25 @@
     [headerView setAlpha:.75];
     
     UIImage * photo = [self.delegate getUserPhotoForUsername:tag.username];
-    UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)];
+    UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)] autorelease]; // MRC
     [photoView setImage:photo];
     [headerView addSubview:photoView];
     
-    UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
+    UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
     [nameLabel setBackgroundColor:[UIColor clearColor]];
     [nameLabel setTextColor:[UIColor whiteColor]];
     [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
     [nameLabel setText:tag.username];
     [headerView addSubview:nameLabel];
     
-    UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
+    UILabel * locLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)] autorelease];
     [locLabel setBackgroundColor:[UIColor clearColor]];
     [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
     [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
     [locLabel setText:tag.locationString];
     [headerView addSubview:locLabel];    
     
-    UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
+    UILabel * timeLabel = [[[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)] autorelease];
     [timeLabel setBackgroundColor:[UIColor clearColor]];
     [timeLabel setTextColor:[UIColor whiteColor]];
     [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
@@ -328,6 +329,7 @@
     // populate comments for this tag
     NSMutableArray * param = [[NSMutableArray alloc] init];
     [param addObject:tag.tagID];
+    [param autorelease];
     [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
 #else
     k = [[Kumulos alloc] init];

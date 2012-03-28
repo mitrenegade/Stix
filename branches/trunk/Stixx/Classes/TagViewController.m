@@ -365,7 +365,7 @@
     // baseImage should be 320x428 - crop the middle 314x282
     int target_width = self.rectView.frame.size.width;
     int target_height = self.rectView.frame.size.height;
-    UIImage * cropped;
+    UIImage * cropped = nil;
     int minHeight = self.rectView.frame.origin.y + self.rectView.frame.size.height;
     int minWidth = self.rectView.frame.origin.x + self.rectView.frame.size.width;
         
@@ -391,7 +391,7 @@
         CGSize resultSize = [cropped size];
         NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
     }
-    else if (result.size.height < target_height) {
+    else { // (result.size.height < target_height) {
         // if the picture is not tall enough (a wide image from library), crop from left and right evenly
         int new_width = baseImage.size.width/baseImage.size.height*target_height;
         CGRect scaledFrameImage = CGRectMake(0, 0, new_width, target_height);
@@ -409,10 +409,13 @@
     //UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album    
     
 	// hack: use the image cache in the easy way - just cache one image each time
+    CGSize fullSize = CGSizeMake(314, 282);
+    if (cropped)
+        cropped = [cropped resizedImage:fullSize interpolationQuality:kCGInterpolationHigh];
 	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
 		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
 	[[ImageCache sharedImageCache] setImage:cropped forKey:@"newImage"];
-    
+    NSLog(@"Image dims: %f %f", cropped.size.width, cropped.size.height);
 	if ([self respondsToSelector:@selector(cameraDidTakePicture:)]) {
 		[self performSelector:@selector(cameraDidTakePicture:) withObject:self];
 	}

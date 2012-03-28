@@ -153,6 +153,7 @@
         if ([auxTransforms count] == [auxStixStringIDs count]) {
             NSString * transformString = [auxTransforms objectAtIndex:i];
             auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
+            //aNSLog(@"AuxTransform: %@", NSStringFromCGAffineTransform(auxTransform));
         }
         else
         {
@@ -168,7 +169,7 @@
         // scale stix and label down to 270x270 which is the size of the feedViewItem
         CGSize originalSize = originalImageSize;
         CGSize targetSize = self.frame.size;
-        imageScale =  targetSize.width / originalSize.width;
+        imageScale = targetSize.width / originalSize.width;
 
         CGRect stixFrameScaled = auxStix.frame;
         stixFrameScaled.size.width *= imageScale;// * auxScale;

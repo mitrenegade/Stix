@@ -54,17 +54,20 @@
     //locationController = [[LocationHeaderViewController alloc] init];
     //[locationController setDelegate:self];
     
-    self.blackBarView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"blackbar.png"]];
-    [self.blackBarView setFrame:CGRectMake(0, 412, 320, 48)];
-    self.priceView = [[UILabel alloc] initWithFrame:CGRectMake(260, 420, 80, 30)];
-    [self.priceView setBackgroundColor:[UIColor clearColor]];
-    [self.priceView setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
-    [self.priceView setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
-    self.buttonOK = [[UIButton alloc] initWithFrame:CGRectMake(184, 420, 36, 36)];
-    [self.buttonOK setImage:[UIImage imageNamed:@"green_check.png"] forState:UIControlStateNormal];
-    self.buttonCancel = [[UIButton alloc] initWithFrame:CGRectMake(100, 420, 36, 36)];
-    [self.buttonCancel setImage:[UIImage imageNamed:@"red_x.png"] forState:UIControlStateNormal];    
+    blackBarView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"blackbar.png"]];
+    [blackBarView setFrame:CGRectMake(0, 412, 320, 48)];
+    
+    priceView = [[UILabel alloc] initWithFrame:CGRectMake(260, 420, 80, 30)];
+    [priceView setBackgroundColor:[UIColor clearColor]];
+    [priceView setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
+    [priceView setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
+    
+    buttonOK = [[UIButton alloc] initWithFrame:CGRectMake(184, 420, 36, 36)];
+    [buttonOK setImage:[UIImage imageNamed:@"green_check.png"] forState:UIControlStateNormal];
     [buttonOK addTarget:self action:@selector(buttonOKPressed:) forControlEvents:UIControlEventTouchUpInside];
+    
+    buttonCancel = [[UIButton alloc] initWithFrame:CGRectMake(100, 420, 36, 36)];
+    [buttonCancel setImage:[UIImage imageNamed:@"red_x.png"] forState:UIControlStateNormal];    
     [buttonCancel addTarget:self action:@selector(buttonCancelPressed:) forControlEvents:UIControlEventTouchUpInside];
 }
 
@@ -74,6 +77,14 @@
     // e.g. self.myOutlet = nil;
 	[imageView release];
 	imageView = nil;
+    [blackBarView release];
+    blackBarView = nil;
+    [priceView release];
+    priceView = nil;
+    [buttonOK release];
+    buttonOK = nil;
+    [buttonCancel release];
+    buttonCancel = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

@@ -236,7 +236,6 @@
 }
 
 -(IBAction)didPressAddCommentButton:(id)sender {
-    NSLog(@"Self: %x tagID %d name %@", self, tagID, self.nameString);
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 -(void)didPressSeeAllCommentsButton:(id)sender {

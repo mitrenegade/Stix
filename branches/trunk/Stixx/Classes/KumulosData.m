@@ -120,12 +120,10 @@
 +(int) extractAuxiliaryDataFromUserData:(NSMutableDictionary *) dict intoAuxiliaryData:(NSMutableDictionary *)auxiliaryData{
     // d is output from getAllUsers or getUser
     // return values: 
-    // -1 if nothing exists
-    // 0 if everything is present
-    // 1 if stixOrder is missing
-    // 2 if friendsList is missing
+    // 0 if failed
+    // 1 if stixOrder exists and is valid
     NSMutableDictionary * stixOrder;
-    NSMutableSet * friendsList;
+    //NSMutableSet * friendsList;
     NSString * username = [dict valueForKey:@"username"];
     NSMutableData * data = [dict valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxData = nil;
@@ -136,41 +134,28 @@
                 NSLog(@"%@ has empty auxiliary data", username);
                 // set to nil to make delegate generate default one
                 stixOrder = nil;
-                friendsList = nil;
-                return -1;
+                return 0;
             } 
             else {
                 [auxiliaryData addEntriesFromDictionary:auxData];
 
-                /*
-                NSEnumerator *e = [auxData keyEnumerator];
-                id key;
-                while (key = [e nextObject]) {
-                    NSLog(@"Key: %@", key);
-                }
-                 */
-                
                 stixOrder = [auxData objectForKey:@"stixOrder"];
-                friendsList = [auxData objectForKey:@"friendsList"];
+                //friendsList = [auxData objectForKey:@"friendsList"];
                 NSLog(@"stixOrder count: %d", [stixOrder count]);
-                NSLog(@"friendsList count: %d", [friendsList count]);
-                if (stixOrder == nil && friendsList == nil)
-                    return -1;
-                else if (stixOrder == nil)
-                    return 1;
-                else if (friendsList == nil)
-                    return 2;
-                return 0;
+                //NSLog(@"friendsList count: %d", [friendsList count]);
+                if (stixOrder == nil)
+                    return 0;
+                return 1;
             }
         } @catch (NSException * exception) {
             NSLog(@"Error! Exception caught while trying to load aux data! Error %@", [exception reason]);
-            return -1;
+            return 0;
         }
     }
     else {
         NSLog(@"%@ does not have auxiliary data", [dict valueForKey:@"username"]);
-        return -1;
+        return 0;
     }
-    return -1;
+    return 0;
 }
 @end

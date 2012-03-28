@@ -7,7 +7,7 @@
 @implementation CarouselView
 
 //@synthesize delegate;
-@synthesize scrollView;
+@synthesize stixScroll, categoryScroll;
 @synthesize carouselHeight;
 @synthesize allowTap;
 //@synthesize tapDefaultOffset;
@@ -40,62 +40,75 @@ static CarouselView * sharedCarouselView;
 }
 
 -(void)initCarouselWithFrame:(CGRect)frame{
-    scrollView = [[UIScrollView alloc] initWithFrame:frame];
-    carouselHeight = scrollView.frame.size.height;
-    scrollView.showsHorizontalScrollIndicator = NO;
-    scrollView.scrollEnabled = YES;
-    scrollView.directionalLockEnabled = NO; // only allow vertical or horizontal scroll
-    [scrollView setDelegate:self];
+    stixScroll = [[UIScrollView alloc] initWithFrame:frame];
+    carouselHeight = stixScroll.frame.size.height;
+    stixScroll.showsHorizontalScrollIndicator = NO;
+    stixScroll.scrollEnabled = YES;
+    stixScroll.directionalLockEnabled = NO; // only allow vertical or horizontal scroll
+    [stixScroll setDelegate:self];
     
     buttonShowCarousel = [[UIButton alloc] init];
     [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
 
     buttonCategories = [[NSMutableArray alloc] init];
-    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all.png", @"txt_cute.png", @"txt_facefun.png", nil];
-    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all_selected.png", @"txt_cute_selected.png", @"txt_facefun_selected.png", nil];
+    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all.png", @"txt_animals.png", @"txt_anime.png", @"txt_art.png", @"txt_comics.png", @"txt_costumes.png", @"txt_cute.png", @"txt_decorations.png", @"txt_events.png", @"txt_facefun.png", @"txt_fashion.png", @"txt_foodanddrink.png", @"txt_geeky.png", @"txt_hollywood.png", @"txt_nature.png", @"txt_pranks.png", @"txt_sports.png", @"txt_symbols.png", @"txt_videogames.png", nil];
+    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all_selected.png", @"txt_animals_selected.png", @"txt_anime_selected.png", @"txt_art_selected.png", @"txt_comics_selected.png", @"txt_costumes_selected.png", @"txt_cute_selected.png", @"txt_decorations_selected.png", @"txt_events_selected.png", @"txt_facefun_selected.png", @"txt_fashion_selected.png", @"txt_foodanddrink_selected.png", @"txt_geeky_selected.png", @"txt_hollywood_selected.png", @"txt_nature_selected.png", @"txt_pranks_selected.png", @"txt_sports_selected.png", @"txt_symbols_selected.png", @"txt_videogames_selected.png", nil];
+    float currentContentOrigin = 20;
     for (int i=0; i<[buttonCategoriesSelected count]; i++) {
         UIButton * button0 = [[UIButton alloc] init];
         [button0 setTag:SHELF_CATEGORY_ALL + i];
         [button0 addTarget:self action:@selector(didClickShelfCategory:) forControlEvents: UIControlEventTouchUpInside];
-        [button0 setFrame:CGRectMake(20+100*i,50,80,50)];
+        int letters = [[buttonCategoriesNotSelected objectAtIndex:i] length] - 8;
+        float width = 20 + letters * 10 + 20;
+        [button0 setFrame:CGRectMake(currentContentOrigin,10,width,50)];
+        currentContentOrigin = currentContentOrigin + width;
         [buttonCategories addObject:button0];
         [button0 release];
     }
+    
+    categoryScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(5, 40, 300, 70)];
+    categoryScroll.scrollEnabled = YES;
+    categoryScroll.directionalLockEnabled = YES; // only allow horizontal scroll
+    [categoryScroll setContentSize:CGSizeMake(currentContentOrigin+20, 70)];
+    [categoryScroll setDelegate:self];    
                         
     UIImageView * tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];    
     carouselTab = [[UIView alloc] initWithFrame:tabImage.frame];
     [carouselTab addSubview:tabImage];
     [tabImage release];
-    [carouselTab addSubview:scrollView];
+    [carouselTab addSubview:stixScroll];
     [carouselTab addSubview:buttonShowCarousel];
+    [carouselTab addSubview:categoryScroll];
     for (int i=0; i<[buttonCategories count]; i++) {
-        [carouselTab addSubview:[buttonCategories objectAtIndex:i]];
+        //[carouselTab addSubview:[buttonCategories objectAtIndex:i]];
+        [categoryScroll addSubview:[buttonCategories objectAtIndex:i]];
     }
     [self addSubview:carouselTab];
     [self didClickShelfCategory:[buttonCategories objectAtIndex:SHELF_CATEGORY_ALL]];
 
     // for debug
     if (0) {
-        [scrollView setBackgroundColor:[UIColor blackColor]];
+        [stixScroll setBackgroundColor:[UIColor blackColor]];
         [self setBackgroundColor:[UIColor redColor]];
+        [categoryScroll setBackgroundColor:[UIColor blueColor]];
     }
     
     // add gesture recognizer
 #if USE_VERTICAL_GESTURE
     UIVerticalGestureRecognizer * myVerticalRecognizer = [[UIVerticalGestureRecognizer alloc] initWithTarget:self action:@selector(verticalGestureHandler:)];
     [myVerticalRecognizer setDelegate:self];
-    for (UIGestureRecognizer *gestureRecognizer in scrollView.gestureRecognizers)
+    for (UIGestureRecognizer *gestureRecognizer in stixScroll.gestureRecognizers)
     {
         [gestureRecognizer requireGestureRecognizerToFail:myVerticalRecognizer];
     } 
-    [scrollView addGestureRecognizer:myVerticalRecognizer];
+    [stixScroll addGestureRecognizer:myVerticalRecognizer];
 #endif
 
     UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
     [myTapRecognizer setNumberOfTapsRequired:1];
     [myTapRecognizer setNumberOfTouchesRequired:1];
     [myTapRecognizer setDelegate:self];
-    [scrollView addGestureRecognizer:myTapRecognizer];
+    [stixScroll addGestureRecognizer:myTapRecognizer];
     self.allowTap = NO;
 
     //[self reloadAllStix];
@@ -107,7 +120,7 @@ static CarouselView * sharedCarouselView;
     for (int i=0; i<[buttonCategories count]; i++) {
         UIButton * button = [buttonCategories objectAtIndex:i];
         if (senderButton.tag == button.tag) {
-            [button setImage:[UIImage imageNamed:[buttonCategoriesSelected objectAtIndex:i]]  forState:UIControlStateNormal];
+            [button setImage:[UIImage imageNamed:[buttonCategoriesSelected objectAtIndex:i]] forState:UIControlStateNormal];
             if (shelfCategory != i) {
                 // force reload
                 shelfCategory = i;
@@ -117,19 +130,20 @@ static CarouselView * sharedCarouselView;
         }
         else {
             [button setSelected:NO];
-            [button setImage:[UIImage imageNamed:[buttonCategoriesNotSelected objectAtIndex:i]]  forState:UIControlStateNormal];
+            [button setImage:[UIImage imageNamed:[buttonCategoriesNotSelected objectAtIndex:i]] forState:UIControlStateNormal];
         }            
     }
 }
 
 
 -(void)reloadAllStix {
-    [self reloadAllStixWithFrame:scrollView.frame];
+    [self reloadAllStixWithFrame:stixScroll.frame];
 }
 -(void)reloadAllStixWithFrame:(CGRect)frame {
+    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"All", @"Animals", @"Anime", @"Art", @"Comics", @"Costumes", @"Cuddly and Cute", @"Decorations", @"Events", @"Face Fun", @"Fashion", @"Food and Drink", @"Geeky", @"Hollywood", @"Nature", @"Pranks", @"Sports", @"Symbols", @"Video Games", nil]; 
 
-    [scrollView removeFromSuperview];
-    scrollView.frame = frame;
+    [stixScroll removeFromSuperview];
+    stixScroll.frame = frame;
     
     int stixWidth = SHELF_STIX_SIZE + 10;
     int stixHeight = SHELF_STIX_SIZE + 20;
@@ -138,20 +152,23 @@ static CarouselView * sharedCarouselView;
     int stixToPurchase = 0; // count the nonordered stix - display backwards
     // create sets of all the categories to see if user has them requested stix
     NSMutableArray * categoryStix;
-    NSMutableSet * categorySet;
+    NSMutableSet * categorySet = [[NSMutableSet alloc] init];
     NSMutableArray * subcategories;
-    if (shelfCategory == SHELF_CATEGORY_CUTE) {
-        categoryStix = [BadgeView getStixForCategory:@"Cuddly and Cute"];
-        categorySet = [[NSMutableSet alloc] initWithArray:categoryStix];
-        subcategories = [BadgeView getSubcategoriesForCategory:@"Cuddly and Cute"];
+    if (shelfCategory != SHELF_CATEGORY_ALL) {
+        NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
+        categoryStix = [BadgeView getStixForCategory:categoryName];
+        [categorySet addObjectsFromArray:categoryStix];
+        subcategories = [BadgeView getSubcategoriesForCategory:categoryName];
         for (int i=0; i<[subcategories count]; i++) {
             NSString * subcategory = [subcategories objectAtIndex:i];
-            NSLog(@"Subcategory %d of cuddly and cute: %@",i, subcategory);
+            NSLog(@"Subcategory %d of %@: %@",i, categoryName, subcategory);
             NSMutableArray * stixForSubcategory = [BadgeView getStixForCategory:subcategory];
             [categorySet addObjectsFromArray:stixForSubcategory];
         }
         stixToShow = [categorySet count];
     }
+    [stixCategoryNames release];
+    /*
     else if (shelfCategory == SHELF_CATEGORY_FACEFUN) {
         categoryStix = [BadgeView getStixForCategory:@"Face Fun"];
         categorySet = [[NSMutableSet alloc] initWithArray:categoryStix];
@@ -164,11 +181,12 @@ static CarouselView * sharedCarouselView;
         }
         stixToShow = [categorySet count];
     }
+     */
     int maxX = STIX_PER_ROW;
     double rows = (double) stixToShow / (double)maxX;
     int maxY = ceil(rows);
     CGSize size = CGSizeMake(stixWidth * maxX, stixHeight * maxY);
-    [scrollView setContentSize:size];
+    [stixScroll setContentSize:size];
     NSLog(@"Contentsize; x %d y %d stixToShow %d", maxX, maxY, stixToShow);
 
     int orderCtForFilters = 0;
@@ -182,7 +200,7 @@ static CarouselView * sharedCarouselView;
         if (shelfCategory == SHELF_CATEGORY_ALL) {
             order = [self.delegate getStixOrder:stixStringID];
         }
-        else if (shelfCategory == SHELF_CATEGORY_CUTE || shelfCategory == SHELF_CATEGORY_FACEFUN) {
+        else { //if (shelfCategory == SHELF_CATEGORY_CUTE || shelfCategory == SHELF_CATEGORY_FACEFUN) {
             if ([categorySet containsObject:stixStringID]) {
                 order = orderCtForFilters++;
             }
@@ -197,7 +215,7 @@ static CarouselView * sharedCarouselView;
             [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
             if (count == 0)
                 [stix setAlpha:.25];
-            [scrollView addSubview:stix];
+            [stixScroll addSubview:stix];
             [allCarouselStixViews setObject:stix forKey:stixStringID];
             [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
             [stix release];
@@ -207,7 +225,7 @@ static CarouselView * sharedCarouselView;
             int neworder = (totalStix - stixToPurchase - 1);
             int y = neworder / STIX_PER_ROW;
             int x = neworder - y*STIX_PER_ROW;
-            NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             //NSLog(@"Adding nonowned stix %@ = %@ to %d %d index %d, totalStix-stixToPurchase-1 %d", stixStringID, stixDescriptor, x, y, stixToPurchase, neworder);
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
@@ -218,14 +236,15 @@ static CarouselView * sharedCarouselView;
             UIImageView * buxImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"5bux.png"]];
             [buxImg setFrame:CGRectMake(0,stix.frame.size.height+5,stix.frame.size.width, 18)];
             [stix addSubview:buxImg];
-            [scrollView addSubview:stix];
+            [stixScroll addSubview:stix];
             [allCarouselStixViews setObject:stix forKey:stixStringID];
             [stix release];
             [buxImg release];
             stixToPurchase++;
         }
     }
-    [carouselTab addSubview:scrollView];
+    [categorySet release];
+    [carouselTab addSubview:stixScroll];
 }
 
 -(void)clearAllViews {
@@ -241,7 +260,7 @@ static CarouselView * sharedCarouselView;
             [[allCarouselStixViews objectAtIndex:i] removeFromSuperview];
     }
      */
-    [scrollView removeFromSuperview];
+    [stixScroll removeFromSuperview];
     [self removeFromSuperview];
 }
 
@@ -252,8 +271,8 @@ static CarouselView * sharedCarouselView;
     [allCarouselStixFrames release];
     [allCarouselStixViews release];
 
-    [scrollView release];
-    scrollView = nil;
+    [stixScroll release];
+    stixScroll = nil;
 }
 
 -(void)resetBadgeLocations{
@@ -269,7 +288,7 @@ static CarouselView * sharedCarouselView;
         [stix removeFromSuperview];
         
         stix.frame = frame;
-        [self.scrollView addSubview:stix];
+        [self.stixScroll addSubview:stix];
     }
 
 }
@@ -284,11 +303,11 @@ static CarouselView * sharedCarouselView;
     //
     // for example:
     // badgeView
-    //   ^                  scrollView
+    //   ^                  stixScroll
     //   |                      ^
     //   |                      |
     //    ---- feedView --------
-    // this specifically makes badgeView call hitTest on scrollView; scrollView must be set
+    // this specifically makes badgeView call hitTest on stixScroll; stixScroll must be set
     // as an underlay of badgeController by feedView when the subviews are laid out
     
     UIView * result;
@@ -301,23 +320,29 @@ static CarouselView * sharedCarouselView;
     else 
         result = [super hitTest:point withEvent:event];
     
-    CGRect scrollViewFrame = scrollView.frame;
+    CGRect stixScrollFrame = stixScroll.frame;
+    //CGRect categoryScrollFrame = categoryScroll.frame;
     CGRect buttonFrame = buttonShowCarousel.frame;
     CGPoint pointInCarouselFrame = point;
     pointInCarouselFrame.y -= carouselTab.frame.origin.y;
-    if (CGRectContainsPoint(scrollViewFrame, pointInCarouselFrame))
-        return self.scrollView;
+    if (CGRectContainsPoint(stixScrollFrame, pointInCarouselFrame))
+        return self.stixScroll;
     if (CGRectContainsPoint(buttonFrame, pointInCarouselFrame))
         return self.buttonShowCarousel;
+    //if (CGRectContainsPoint(categoryScrollFrame, pointInCarouselFrame))
+    //    return self.categoryScroll;
     for (int i=0; i<[buttonCategories count]; i++) {
-        if (CGRectContainsPoint([[buttonCategories objectAtIndex:i] frame], pointInCarouselFrame))
+        CGRect buttonFrame = [[buttonCategories objectAtIndex:i] frame];
+        buttonFrame.origin.y += categoryScroll.frame.origin.y;
+        buttonFrame.origin.x -= categoryScroll.contentOffset.x;
+        if (CGRectContainsPoint(buttonFrame, pointInCarouselFrame))
             return [buttonCategories objectAtIndex:i];
     }
     // catch the rest of the tab so what's behind it doesn't actually get hit
     CGRect tabMainFrame = carouselTab.frame;
     tabMainFrame.origin.y += 40;
     if (CGRectContainsPoint(tabMainFrame, point))
-        return self.scrollView;
+        return self.stixScroll;
     
     // if the touch was not on one of the badges, either return the known underlay or just
     // return self which means the hit is not passed downwards to anything else
@@ -390,8 +415,8 @@ static int lastContentOffsetY = 0;
             // first, move off of scrollview and onto carousel base
             [badgeTouched removeFromSuperview];
             CGRect frameOutsideCarousel = badgeTouched.frame;
-            frameOutsideCarousel.origin.x += scrollView.frame.origin.x - scrollView.contentOffset.x;
-            frameOutsideCarousel.origin.y += scrollView.frame.origin.y;
+            frameOutsideCarousel.origin.x += stixScroll.frame.origin.x - stixScroll.contentOffset.x;
+            frameOutsideCarousel.origin.y += stixScroll.frame.origin.y;
             [badgeTouched setFrame:frameOutsideCarousel];
             [self addSubview:badgeTouched];
 
@@ -429,13 +454,13 @@ static int lastContentOffsetY = 0;
         NSLog(@"Gesture translation: %f %f\n", translation.x, translation.y);
         if (drag == 1)
         {
-            CGPoint location = vgr.currTouch; // location of touch in scrollview
+            CGPoint location = vgr.currTouch; // location of touch in stixScroll
             
             // update frame of dragged badge, also scale
             if (badgeTouched == nil)
                 return;
-            float centerX = location.x - offset_from_center_X;// + scrollView.frame.origin.x;
-            float centerY = location.y - offset_from_center_Y;// + scrollView.frame.origin.y;
+            float centerX = location.x - offset_from_center_X;// + stixScroll.frame.origin.x;
+            float centerY = location.y - offset_from_center_Y;// + stixScroll.frame.origin.y;
             badgeTouched.center = CGPointMake(centerX, centerY);
 
             NSLog(@"Dragging to %f %f: new center %f %f", location.x, location.y, centerX, centerY);
@@ -493,7 +518,7 @@ static int lastContentOffsetY = 0;
         // so tap is not continuously sent
         if (allowTap) {
             //NSLog(@"Double tap recognized!");
-            CGPoint location = [sender locationInView:self.scrollView];
+            CGPoint location = [sender locationInView:self.stixScroll];
             NSEnumerator * e = [allCarouselStixStringIDsAtFrame keyEnumerator];
             id key; // key is the frame
             while (key = [e nextObject]) {

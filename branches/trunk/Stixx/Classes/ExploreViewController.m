@@ -87,12 +87,13 @@
 //    [self.view addSubview:slider];
     [slider release];
 */
-    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
+    UIButton * buttonBux = [[[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)] autorelease];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
+    
     CGRect labelFrame = CGRectMake(25, 5, 58, 38);
-    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    labelBuxCount = [[[OutlineLabel alloc] initWithFrame:labelFrame] autorelease];
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
@@ -163,8 +164,6 @@
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
         
         int contentWidth = [tableController getContentWidth];
-        CGSize tagImageSize = tag.image.size;
-        float scale = contentWidth / tagImageSize.width;
         int targetWidth = contentWidth;
         int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
@@ -314,12 +313,27 @@
     switch (buttonIndex) {
         case 0: // Facebook
         {
+            /*
             UIAlertView* alert = [[UIAlertView alloc]init];
             [alert addButtonWithTitle:@"Ok"];
             [alert setTitle:@"Beta Version"];
             [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
             [alert show];
             [alert release];
+             */
+            Tag * tag = nil;
+            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
+            if (tag == nil) {
+                NSLog(@"Error in sharing pix! Tag doesn't exist!");
+                return;
+            }
+            UIImage * result = [tag tagToUIImage];
+            NSData *png = UIImagePNGRepresentation(result);
+            
+            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+            
+            [self.delegate uploadImage:png withShareMethod:buttonIndex];
+
             NSString * metricName = @"SharePixActionsheet";
             NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
             [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
@@ -338,7 +352,7 @@
             
             UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
             
-            [self.delegate uploadImage:png];
+            [self.delegate uploadImage:png withShareMethod:buttonIndex];
 
             NSString * metricName = @"SharePixActionsheet";
             NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];

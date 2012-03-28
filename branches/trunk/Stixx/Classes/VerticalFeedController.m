@@ -87,7 +87,9 @@
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
+    
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
+    
     CGRect labelFrame = CGRectMake(25, 5, 58, 38);
     labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
@@ -108,6 +110,9 @@
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [self configureCarouselView];
     [self.carouselView carouselTabDismiss:NO];
+
+    [buttonBux release];
+    [labelBuxCount release];
 }
 
 
@@ -374,26 +379,26 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]];
-        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
+        UIImage * photo = [[[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]] autorelease];
+        UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
         [photoView setImage:photo];
         [headerView addSubview:photoView];
         
-        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
+        UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
         [nameLabel setTextColor:[UIColor whiteColor]];
         [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
         [nameLabel setText:tag.username];
         [headerView addSubview:nameLabel];
         
-        UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
+        UILabel * locLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)] autorelease];
         [locLabel setBackgroundColor:[UIColor clearColor]];
         [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
         [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
         [locLabel setText:tag.locationString];
         [headerView addSubview:locLabel];    
         
-        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
+        UILabel * timeLabel = [[[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)] autorelease];
         [timeLabel setBackgroundColor:[UIColor clearColor]];
         [timeLabel setTextColor:[UIColor whiteColor]];
         [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
@@ -401,8 +406,9 @@
         [headerView addSubview:timeLabel];
         
         [headerViews setObject:headerView forKey:tag.tagID];
+        [headerView autorelease];
     }
-    return headerView;
+    return [headerViews objectForKey:tag.tagID]; // MRC
 }
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
@@ -442,7 +448,7 @@
             NSMutableArray * comments = [[NSMutableArray alloc] init];
             NSMutableArray * stixStringIDs = [[NSMutableArray alloc] init];
             NSLog(@"Comment histories for feed item with tagID %d has %d elements", [tag.tagID intValue], [theResults count]);
-            int ct = 0;
+            //int ct = 0;
             for (NSMutableDictionary * d in theResults) {
                 NSString * name = [d valueForKey:@"username"];
                 NSString * comment = [d valueForKey:@"comment"];
@@ -474,7 +480,7 @@
     [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
-    NSLog(@"ReloadViewForItemAtIndex: %d newfeedItem %x ID %d size %f %f %f %f", index, feedItem, feedItem.tagID, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
+    //NSLog(@"ReloadViewForItemAtIndex: %d newfeedItem %x ID %d size %f %f %f %f", index, feedItem, feedItem.tagID, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
 //    [feedItem autorelease];
     return feedItem.view;
@@ -520,6 +526,7 @@
         // populate comments for this tag
         NSMutableArray * param = [[NSMutableArray alloc] init];
         [param addObject:tag.tagID];
+        [param autorelease];
         [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
         
         // this object must be retained so that the button actions can be used
@@ -535,7 +542,7 @@
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
-    UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:username]];
+    UIImage * photo = [[[UIImage alloc] initWithData:[userPhotos objectForKey:username]] autorelease];
     return photo;
 }
 
@@ -696,60 +703,9 @@
     [commentView.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:commentView.view];
 }
--(NSString *)urlEncodeString:(NSString*)raw usingEncoding:(NSStringEncoding)encoding {
-	return (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
-                                                               (CFStringRef)raw,
-                                                               NULL,
-                                                               (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                               CFStringConvertNSStringEncodingToEncoding(encoding));
-}
-
--(void)didSharePix:(NSMutableArray*)params {
-    int newID = [[params objectAtIndex:0] intValue];
-    NSLog(@"DidSharePix completed: id %d", newID);
-    NSString * longURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d&submit=Submit!", newID];
-    //NSMutableString * encodedURL = [[NSMutableString alloc] init];
-    //[encodedURL appendString:longURL];
-    //[encodedURL appendString:@"&submit=Submit!"];
-    //NSString * encodedURL = (NSString *) CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)longURL,NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[]",kCFStringEncodingUTF8 );
-    NSString * raw = @"&submit=Submit!";
-    NSString * encodedURL = [NSString stringWithFormat:@"http://dzy.mit.edu/Stix/Webshared.php?form[sharedPixID]=%d%@", newID,
-                             [self urlEncodeString:raw usingEncoding:NSUTF8StringEncoding]];
-    NSLog(@"longurl %@ encodedURL %@", longURL, encodedURL);
-    [self.delegate didSharePixWithURL:longURL];
-    //[self shortenBlastTextUrls:encodedURL];
-    
-    // todo: add a menu for facebook/twitter/email/save to disk
-    // todo: add timeout to provide long url if bitly helper fails
-}
 
 -(void)sharePix:(int)tagID {
     [self.delegate sharePix:tagID];
-    /*
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Processing for Sharing"];
-    [alert setMessage:@"This Pix has been saved to your Photo Library! For now please share it from there."];
-    [alert show];
-    [alert release];
-
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
-    Tag * tag = nil;
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * t = [allTags objectAtIndex:i];
-        if ([t.tagID intValue] == feedItem.tagID)
-            tag = [allTags objectAtIndex:i];
-    }
-    if (tag == nil) 
-        return;
-    UIImage * result = [tag tagToUIImage];
-	NSData *png = UIImagePNGRepresentation(result);
-    
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:png, nil];
-    //[[KumulosHelper sharedKumulosHelper] execute:@"sharePix" withParams:params withCallback:@selector(didSharePix:) withDelegate:self];
-     */
 }
 
 - (void) shortenBlastTextUrls:(NSString*)url{

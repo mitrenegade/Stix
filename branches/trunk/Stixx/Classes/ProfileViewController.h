@@ -17,6 +17,7 @@
 #import "SMXMLDocument.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
+#import "UserGalleryController.h"
 
 #define DEFAULT_STIX_COUNT 2
 
@@ -56,9 +57,11 @@
 -(void)searchFriendsByFacebook;
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
+-(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 @end
 
-@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, /*LoginViewDelegate, FriendsViewDelegate,*/ UITextFieldDelegate>{
+@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate>{
     
     //IBOutlet UIButton * logoutScreenButton;
     //IBOutlet UIButton * stixCountButton; // custom button but no clicking
@@ -80,6 +83,7 @@
 
     // myButtons - displayed for current user's profile
     bool showMyButtons;
+    bool isSearching;
     UIButton * discoverLabel;
     UIButton * buttonContacts;
     UIButton * buttonFacebook;
@@ -99,8 +103,10 @@
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
 @property (nonatomic, retain) IBOutlet UILabel * nameLabel;
 @property (nonatomic, retain) IBOutlet UIButton * photoButton;
+@property (nonatomic, retain) IBOutlet UIButton * bgFollowers;
+@property (nonatomic, retain) IBOutlet UIButton * bgFollowing;
 @property (nonatomic, retain) Kumulos * k;
-@property (nonatomic, retain) IBOutlet UIImageView * bottomBackground;
+@property (nonatomic, retain) UIImageView * bottomBackground;
 @property (nonatomic, retain) OutlineLabel * myFollowersCount;
 @property (nonatomic, retain) OutlineLabel * myFollowingCount;
 @property (nonatomic, retain) OutlineLabel * myFollowersLabel;
@@ -110,7 +116,10 @@
 @property (nonatomic, retain) OutlineLabel * myPixLabel;
 @property (nonatomic, retain) OutlineLabel * myStixLabel;
 @property (nonatomic, retain) FriendSearchResultsController * searchResultsController;
+@property (nonatomic, retain) UISearchBar * searchBar;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+
+@property (nonatomic, retain) NSMutableArray * currentFollowsNames;
 
 //@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 //@property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
@@ -129,15 +138,19 @@
 -(IBAction)didClickBackButton:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
+-(IBAction)buttonFollowingClicked:(id)sender;
 
 -(void)populateWithMyButtons;
 -(void)toggleMyButtons:(BOOL)show;
-
+-(void)toggleMyInfo:(BOOL)show;
 -(void)populateFollowCounts;
 -(void)updateFollowCounts;
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray;
 -(void)populateContactSearchResults;
 -(NSMutableArray*)collectFriendsFromContactList;
+-(void)populateNameSearchResults;
+-(void)initFollowsList;
+-(void)populateFollowsList;
 
 // deprecated
 /*

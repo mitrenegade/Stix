@@ -218,6 +218,9 @@
 		9E91C616147FA1A7003567ED /* dropshadow_140.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E91C615147FA1A7003567ED /* dropshadow_140.png */; };
 		9E91C619148044A2003567ED /* RaisedCenterTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E91C618148044A0003567ED /* RaisedCenterTabBarController.m */; };
 		9E91C61F14817820003567ED /* textured_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E91C61E14817820003567ED /* textured_background.png */; };
+		9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D21524DD8500BEA5D1 /* btn_mypix.png */; };
+		9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */; };
+		9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */; };
 		9E98220F14E0FEB1008612D1 /* nav_next.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E98220E14E0FEB1008612D1 /* nav_next.png */; };
 		9E9C5DFD151BF0640048CDED /* Kumulos.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9C5DFA151BF0640048CDED /* Kumulos.m */; };
 		9E9C5DFE151BF0640048CDED /* libKumulos_iOS_.0.7.4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9C5DFB151BF0640048CDED /* libKumulos_iOS_.0.7.4.a */; };
@@ -660,6 +663,10 @@
 		9E91C6171480449E003567ED /* RaisedCenterTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaisedCenterTabBarController.h; sourceTree = "<group>"; };
 		9E91C618148044A0003567ED /* RaisedCenterTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RaisedCenterTabBarController.m; sourceTree = "<group>"; };
 		9E91C61E14817820003567ED /* textured_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = textured_background.png; sourceTree = "<group>"; };
+		9E9649D21524DD8500BEA5D1 /* btn_mypix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_mypix.png; sourceTree = "<group>"; };
+		9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserGalleryController.h; sourceTree = "<group>"; };
+		9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserGalleryController.m; sourceTree = "<group>"; };
+		9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserGalleryController.xib; sourceTree = "<group>"; };
 		9E98220E14E0FEB1008612D1 /* nav_next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_next.png; sourceTree = "<group>"; };
 		9E9C5DF9151BF0640048CDED /* Kumulos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Kumulos.h; sourceTree = "<group>"; };
 		9E9C5DFA151BF0640048CDED /* Kumulos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Kumulos.m; sourceTree = "<group>"; };
@@ -1415,6 +1422,9 @@
 				9E6B05D9150826EB00E3ADAD /* ProfileViewController.h */,
 				9E6B05DA150826EB00E3ADAD /* ProfileViewController.m */,
 				9E6B05DB150826EB00E3ADAD /* ProfileViewController.xib */,
+				9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */,
+				9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */,
+				9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */,
 				9E2830EC14A2D992000707B8 /* UserProfileViewController.h */,
 				9E2830ED14A2D993000707B8 /* UserProfileViewController.m */,
 				9E2830EE14A2D996000707B8 /* UserProfileViewController.xib */,
@@ -1458,6 +1468,7 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9E9649D21524DD8500BEA5D1 /* btn_mypix.png */,
 				9E210C08152278DD002057F1 /* btn_pixadded.png */,
 				9E210C09152278DD002057F1 /* graphic_findbyname.png */,
 				9E210C0A152278DE002057F1 /* graphic_facebook.png */,
@@ -2010,6 +2021,8 @@
 				9E210C14152278E1002057F1 /* btn_follow.png in Resources */,
 				9E210C15152278E1002057F1 /* dark_cell.png in Resources */,
 				9E2390AE1522D22B0060D0AE /* FriendSearchResultsController.xib in Resources */,
+				9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */,
+				9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2139,6 +2152,7 @@
 				9E9C5DFD151BF0640048CDED /* Kumulos.m in Sources */,
 				9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */,
 				9E2390AD1522D22B0060D0AE /* FriendSearchResultsController.m in Sources */,
+				9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2283,7 +2297,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "D2F214F7-1840-41D3-948F-002A6B4257FF";
+				PROVISIONING_PROFILE = "8969862D-0DDD-4C63-A798-9BE4609B745D";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
@@ -2326,7 +2340,7 @@
 					"-lKiip",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "D2F214F7-1840-41D3-948F-002A6B4257FF";
+				PROVISIONING_PROFILE = "8969862D-0DDD-4C63-A798-9BE4609B745D";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Kiip-v.1.0.13/Headers $(SRCROOT)/tapkulibrary/src \"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

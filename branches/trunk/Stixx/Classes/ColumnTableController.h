@@ -25,7 +25,8 @@
 
 @optional
 -(void)didClickAtLocation:(CGPoint)location;
-
+-(UIView*)headerForSection:(NSInteger)section;
+-(int)heightForHeader;
 @end
 
 @interface ColumnTableController : UITableViewController <UITableViewDelegate, UITableViewDataSource>

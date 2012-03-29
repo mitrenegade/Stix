@@ -178,6 +178,7 @@
     }
     commentsTable = [[CommentFeedTableController alloc] init];
     [commentsTable.view setFrame:CGRectMake(0, feedItem.view.frame.size.height, 320, 0)];
+    commentsTable.tableView.scrollEnabled = NO;
     [commentsTable setDelegate:self];
     //[commentsTable configureRowsWithHeight:18 dividerVisible:NO fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     
@@ -197,6 +198,17 @@
     [scrollView addSubview:feedItem.view];
     [scrollView addSubview:commentsTable.view];
 #endif
+}
+
+-(void)setScrollHeight:(int)height {
+    //NSLog(@"Before setScrollHeight, feedItem height: %f", feedItem.view.frame.size.height);
+    // if we are resizing the scroll, any subviews must be removed or they will resize with it?
+    [feedItem.view removeFromSuperview];
+    CGRect frame = scrollView.frame;
+    frame.size.height = height;
+    [scrollView setFrame:frame];
+    [scrollView addSubview:feedItem.view];
+    //NSLog(@"After setScrollHeight, feedItem height: %f", feedItem.view.frame.size.height);
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {

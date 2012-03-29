@@ -180,6 +180,7 @@
 }
 
 -(void)loadContentPastRow:(int)row {
+    NSLog(@"Loading row %d of total %d for gallery", row, [self numberOfRows]); 
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     switch (exploreMode) {
@@ -224,7 +225,8 @@
         //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
     }
-    [tableController dataSourceDidFinishLoadingNewData];
+    if ([theResults count]>0)
+        [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
     //[activityIndicator stopCompleteAnimation];
 }
@@ -263,7 +265,8 @@
             [allTagIDs addObject:newtag.tagID]; // save in order 
             [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
         }
-        [tableController dataSourceDidFinishLoadingNewData];
+        if ([newRandomTags count]>0)
+            [tableController dataSourceDidFinishLoadingNewData];
         [self stopActivityIndicator];
         //[activityIndicator stopCompleteAnimation];
     }

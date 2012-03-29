@@ -125,6 +125,19 @@
     return [delegate numberOfRows];
 }
 
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    if ([self.delegate respondsToSelector:@selector(headerForSection:)])
+        return [self.delegate headerForSection:section];
+    else 
+        return nil;
+}
+- (float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    if ([self.delegate respondsToSelector:@selector(heightForHeader)])
+        return [self.delegate heightForHeader];
+    else
+        return 0;
+}
+
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     return columnHeight + columnPadding;
 }
@@ -159,7 +172,7 @@
      }
      */
     int row = [indexPath row];
-    //NSLog(@"Column table: populating row %d", row);
+    NSLog(@"Column table: populating row %d", row);
     for (int col=0; col<numColumns; col++) {
         CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
         NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
@@ -174,8 +187,8 @@
         }
     }
 
-    if (row == [self.delegate numberOfRows] - 3)
-        [self.delegate loadContentPastRow:row];
+    if (row == [self.delegate numberOfRows] - 3 || row == [self.delegate numberOfRows]-1)
+        [self.delegate loadContentPastRow:[self.delegate numberOfRows]];
 
     return cell;
 }

@@ -424,6 +424,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)needFacebookLogin {
+    NSLog(@"Need facebook login");
     [self doFacebookLogin];
 }
 
@@ -1392,8 +1393,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // notify
         NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo->username, comment];
         Tag * tag = [self getTagWithID:tagID];
-        if (![tag.username isEqualToString:[self getUsername]])
-            [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
+        if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
+        {
+            if (![tag.username isEqualToString:[self getUsername]])
+                [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
+        }
         [self updateUserTagTotal];
         // don't updateCommentCount;
         // touch tag to indicate it was updated
@@ -1525,14 +1529,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [profileController.view setFrame:frameShifted];
-#if 0
+#if 1
 #if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:profileController.view];
 #endif
 #else
     [tabBarController.view addSubview:profileController.view];
 #endif    
-    [profileController viewWillAppear:YES]; // force updates -> hack: this doesn't automatically happen??
+//    [profileController viewWillAppear:YES]; // force updates -> hack: this doesn't automatically happen??
 }
 
 -(void)closeProfileView {
@@ -1584,7 +1588,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [camera setCameraOverlayView:tabBarController.view];
 #endif
     [tabBarController setSelectedIndex:0];
-    [profileController viewWillAppear:YES];
+    //[profileController viewWillAppear:YES];
     [picker release];
 }
 
@@ -1607,7 +1611,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
 #endif
-    [profileController viewWillAppear:YES];
+    //[profileController viewWillAppear:YES];
     
     // scale down photo
 	CGSize targetSize = CGSizeMake(90, 90);		

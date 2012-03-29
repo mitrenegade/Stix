@@ -68,5 +68,5 @@
 -(void)initDetailViewWithTag:(Tag *)tag;
 -(void)headerFromTag:(Tag*) tag;
 -(void)initFeedItemWithTag:(Tag*)tag;
-
+-(void)setScrollHeight:(int)height;
 @end

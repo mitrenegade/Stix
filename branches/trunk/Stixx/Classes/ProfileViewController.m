@@ -20,9 +20,11 @@
 @synthesize k;
 @synthesize activityIndicator;
 @synthesize searchResultsController;
-
+@synthesize bgFollowers, bgFollowing;
+@synthesize searchBar;
 @synthesize bottomBackground;
 @synthesize myFollowersCount, myFollowersLabel, myFollowingCount, myFollowingLabel;
+@synthesize currentFollowsNames;
 @synthesize myPixCount, myPixLabel, myStixCount, myStixLabel;
 //@synthesize followersCount, followingCount;
 
@@ -67,6 +69,7 @@
     [self populateWithMyButtons];
     
     searchResultsController = nil;
+    currentFollowsNames = [[NSMutableArray alloc] init];
 }
 
 -(void)startActivityIndicator {
@@ -82,47 +85,54 @@
 #pragma mark initialization functions
 
 -(void)populateWithMyButtons {
+    bottomBackground = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"textured_background.png"]];
+    [bottomBackground setFrame:CGRectMake(0, 160, 320, 320)];
+    [self.view addSubview:bottomBackground];
+    
     discoverLabel = [UIButton buttonWithType:UIButtonTypeCustom];
     [discoverLabel setImage:[UIImage imageNamed:@"txt_discover.png"] forState:UIControlStateNormal];
-    [discoverLabel setFrame:CGRectMake(0, 20, 320, 25)];
-    [bottomBackground addSubview:discoverLabel];
+    [discoverLabel setFrame:CGRectMake(0, 20+160, 320, 25)];
+    [self.view addSubview:discoverLabel];
     
     buttonContacts = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonContacts setFrame:CGRectMake(20, 60, 85, 100)];
+    [buttonContacts setFrame:CGRectMake(20, 60+160, 85, 100)];
     [buttonContacts setImage:[UIImage imageNamed:@"graphic_contacts.png"] forState:UIControlStateNormal];
     [buttonContacts addTarget:self action:@selector(didClickButtonContacts) forControlEvents:UIControlEventTouchUpInside];
-    [bottomBackground addSubview:buttonContacts];
+    [self.view addSubview:buttonContacts];
 //    [buttonContacts release];
 
     buttonFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonFacebook setFrame:CGRectMake(120, 60, 85, 100)];
+    [buttonFacebook setFrame:CGRectMake(120, 60+160, 85, 100)];
     [buttonFacebook setImage:[UIImage imageNamed:@"graphic_facebook.png"] forState:UIControlStateNormal];
     [buttonFacebook addTarget:self action:@selector(didClickButtonFacebook) forControlEvents:UIControlEventTouchUpInside];
-    [bottomBackground addSubview:buttonFacebook];
+    [self.view addSubview:buttonFacebook];
 //    [buttonFacebook release];
 
     buttonName = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonName setFrame:CGRectMake(220, 60, 85, 100)];
+    [buttonName setFrame:CGRectMake(220, 60+160, 85, 100)];
     [buttonName setImage:[UIImage imageNamed:@"graphic_findbyname.png"] forState:UIControlStateNormal];
     [buttonName addTarget:self action:@selector(didClickButtonByName) forControlEvents:UIControlEventTouchUpInside];
-    [bottomBackground addSubview:buttonName];
+    [self.view addSubview:buttonName];
 //    [buttonName release];
     
-    myPixBG = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"btn_pixadded.png"]];
-    [myPixBG setFrame:CGRectMake(16, 170, 285, 106)];
-    [bottomBackground addSubview:myPixBG];
+    //myPixBG = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"btn_mypix.png"]];
+    //[myPixBG setFrame:CGRectMake(0, 170+200, 320, 60)];
+    //[self.view addSubview:myPixBG];
     
     buttonMyPix = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonMyPix setFrame:CGRectMake(20, 170, 280, 50)];
+    [buttonMyPix setFrame:CGRectMake(15, 170+180, 288, 60)];
+    [buttonMyPix setImage:[UIImage imageNamed:@"btn_mypix.png"] forState:UIControlStateNormal];
     [buttonMyPix addTarget:self action:@selector(didClickButtonMyPix) forControlEvents:UIControlEventTouchUpInside];
-    [bottomBackground addSubview:buttonMyPix];
+    [self.view addSubview:buttonMyPix];
 //    [buttonMyPix release];
 
+    /*
     buttonStixAdded = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonStixAdded setFrame:CGRectMake(20, 225, 280, 50)];
+    [buttonStixAdded setFrame:CGRectMake(20, 225+160, 280, 50)];
     [buttonStixAdded addTarget:self action:@selector(didClickButtonStixAdded) forControlEvents:UIControlEventTouchUpInside];
-    [bottomBackground addSubview:buttonStixAdded];
+    [self.view addSubview:buttonStixAdded];
 //    [buttonStixAdded release];
+     */
     showMyButtons = YES;
 }
 
@@ -132,55 +142,104 @@
     [buttonContacts setHidden:!showMyButtons];
     [buttonFacebook setHidden:!showMyButtons];
     [buttonName setHidden:!showMyButtons];
-    [myPixBG setHidden:!showMyButtons];
+    //[myPixBG setHidden:!showMyButtons];
     [buttonMyPix setHidden:!showMyButtons];
-    [buttonStixAdded setHidden:!showMyButtons];
+    //[buttonStixAdded setHidden:!showMyButtons];
+    [bottomBackground setHidden:!showMyButtons];
     
     if (show) {
         // showing main view, so dismiss any other views
+        //[bottomBackground setFrame:CGRectMake(0, 160, 320, 320)];
         [searchResultsController.view removeFromSuperview];
+        if (searchBar) {
+            [searchBar removeFromSuperview];
+            [searchBar release];
+            searchBar = nil;
+        }
     }
+}
+-(void)toggleMyInfo:(BOOL)show {
+    [photoButton setHidden:!show];
+    [nameLabel setHidden:!show];
+    [myFollowersCount setHidden:!show];
+    [myFollowersLabel setHidden:!show];
+    [myFollowingCount setHidden:!show];
+    [myFollowingLabel setHidden:!show];
+    [bgFollowers setHidden:!show];
+    [bgFollowing setHidden:!show];
+}
+
+-(IBAction)buttonFollowingClicked:(id)sender {
+    if (isSearching)
+        return;
+    
+    NSLog(@"Following clicked!");
+    
+    isSearching = YES;
+    [self startActivityIndicator];
+    [self toggleMyButtons:NO];
+    [self toggleMyInfo:NO];
+ 
+    [self initFollowsList];
 }
 
 #pragma mark myProfile button responders
 
 -(void)didClickButtonFacebook {
+    if (isSearching)
+        return;
+    
     NSLog(@"Button find friends by Facebook!");
-    [self.delegate searchFriendsByFacebook];
+    isSearching = YES;
     [self startActivityIndicator];
+    [self toggleMyButtons:NO];
+    [self toggleMyInfo:NO];
+
+    [self.delegate searchFriendsByFacebook];
 }
 -(void)didClickButtonContacts {
+    if (isSearching)
+        return;
+    
     NSLog(@"Button find friends by Contacts!");
-    /*
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Search by Contacts"];
-    [alert setMessage:@"Search for friends by contact list coming soon."];
-    [alert show];
-    [alert release];
-     */
+    isSearching = YES;
+    [self startActivityIndicator];
+    [self toggleMyButtons:NO];
+    [self toggleMyInfo:NO];
+
     [self populateContactSearchResults];
 }
 -(void)didClickButtonByName {
+    if (isSearching) 
+        return;
+    
     NSLog(@"Button find friends by Name!");
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Search by Name"];
-    [alert setMessage:@"Search for friends by name coming soon."];
-    [alert show];
-    [alert release];
+    [self toggleMyButtons:NO];
+    [self toggleMyInfo:NO];
+    
+    [self populateNameSearchResults];
 }
 -(void)didClickButtonMyPix {
-    NSLog(@"Button show my pix!");    
+    NSLog(@"Button show my pix!");
+    UserGalleryController * myGalleryController = [[UserGalleryController alloc] init];
+    [myGalleryController setDelegate:self];
+    [myGalleryController setUsername:[delegate getUsername]];
+    [self.view addSubview:myGalleryController.view];
+    [myGalleryController release];
 }
+
 -(void)didClickButtonStixAdded {
     NSLog(@"Button stix added!");
 }
 -(IBAction)didClickBackButton:(id)sender {
-    [self.delegate closeProfileView];
-    
-    // reset views
-    [self toggleMyButtons:YES];
+    if (showMyButtons) { // myButtons are showing so we are in basic profile view
+        [self.delegate closeProfileView];
+    }
+    else {
+        // reset views
+        [self toggleMyButtons:YES];
+        [self toggleMyInfo:YES];
+    }
 }
 
 /***** modifying user photo *******/
@@ -267,17 +326,11 @@
     [self.delegate didClickInviteButton];
 }
 
-/*
-- (IBAction)findFriendsClicked:(id)sender {
-    FriendSearchViewController * friendSearchViewController = [[FriendSearchViewController alloc] init];
-    [self.view addSubview:friendSearchViewController.view];
-}
- */
-
 /**** friendsViewControllerDelegate ****/
 // badgeViewDelegate forwarded from friendsViewDelegate
 - (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
 -(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
+-(UIImage*)getUserPhoto {return [self.delegate getUserPhoto];}
 //-(NSMutableSet*)getFriendsList {return [self.delegate getFriendsList];}
 -(NSString*)getUsername {return [self.delegate getUsername];}
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
@@ -297,12 +350,6 @@
         // needs to try logging in again
         [delegate needFacebookLogin];
     }
-}
-
--(void)viewWillAppear:(BOOL)animated{
-    [super viewWillAppear:animated];
-    //NSLog(@"Set config namelabel as %@", username);
-    
     if (1) //[delegate isLoggedIn])
     {
         NSLog(@"Profile view appearing with username: %@", [delegate getUsername]);
@@ -313,8 +360,12 @@
     }    
     
     [self updateFollowCounts];
-    //[self updatePixCount];
     [self updateFollowCount];
+    isSearching = NO;
+
+    //[searchResultsController.view removeFromSuperview];
+    [self toggleMyButtons:YES];
+    [self toggleMyInfo:YES];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -367,7 +418,7 @@
 
 -(void)populateFollowCounts {
     myFollowingCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(110, 100, 99, 40)];
-    [myFollowingCount setTextColor:[UIColor yellowColor]];
+    [myFollowingCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
     [myFollowingCount setOutlineColor:[UIColor blackColor]];    
     [myFollowingCount setTextAlignment:UITextAlignmentCenter];
     [myFollowingCount setFontSize:25];
@@ -377,10 +428,10 @@
     [myFollowingLabel setOutlineColor:[UIColor blackColor]];  
     [myFollowingLabel setText:@"FOLLOWING"];
     [myFollowingLabel setTextAlignment:UITextAlignmentCenter];
-    [myFollowingLabel setFontSize:8];
+    [myFollowingLabel setFontSize:10];
 
     myFollowersCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(212, 100, 99, 40)];
-    [myFollowersCount setTextColor:[UIColor yellowColor]];
+    [myFollowersCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
     [myFollowersCount setOutlineColor:[UIColor blackColor]];        
     [myFollowersCount setTextAlignment:UITextAlignmentCenter];
     [myFollowersCount setFontSize:25];
@@ -390,7 +441,7 @@
     [myFollowersLabel setOutlineColor:[UIColor blackColor]];    
     [myFollowersLabel setText:@"FOLLOWERS"];
     [myFollowersLabel setTextAlignment:UITextAlignmentCenter];
-    [myFollowersLabel setFontSize:8];
+    [myFollowersLabel setFontSize:10];
     
     [self.view addSubview:myFollowingLabel];
     [self.view addSubview:myFollowersLabel];
@@ -401,6 +452,7 @@
 }
 
 -(void)updateFollowCounts {
+    NSLog(@"UpdateFollowCounts: username %@", [delegate getUsername]);
     [k getFollowListWithUsername:[delegate getUsername]];
     [k getFollowersOfUserWithFollowsUser:[delegate getUsername]];
 }
@@ -413,6 +465,12 @@
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", [theResults count]]];
     NSLog(@"Updating following count to %d", [theResults count]);
+    
+    [currentFollowsNames removeAllObjects];
+    [currentFollowsNames addObjectsFromArray:theResults];
+    if ([searchFriendName count] == 0) { // has been reset so friends list can be populated
+        [self populateFollowsList];
+    }
 }
 
 -(void)updatePixCount {
@@ -497,31 +555,31 @@
         }        
     }
 
-    if (searchResultsController)
+    if (searchResultsController) {
+        [searchResultsController.view removeFromSuperview];
         [searchResultsController release];
+    }
     searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 10, 320, 300)];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
     [searchResultsController setDelegate:self];
-    [bottomBackground addSubview:searchResultsController.view];
-    [self toggleMyButtons:NO];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:searchResultsController.view];
     [self stopActivityIndicator];
+    isSearching = NO;
 }
 
 -(void)populateContactSearchResults {
     NSMutableArray * contactResults = [[self collectFriendsFromContactList] retain];
     
-    if (searchFriendName) {
-        [searchFriendName release];
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
     }
-    if (searchFriendEmail) {
-        [searchFriendEmail release];
-    }
-    if (searchFriendFacebookID) {
-        [searchFriendFacebookID release];
-    }
-    searchFriendName = [[NSMutableArray alloc] init];
-    searchFriendEmail = [[NSMutableArray alloc] init];
-    searchFriendFacebookID = [[NSMutableArray alloc] init];
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+
     
     NSMutableDictionary * allUsers = [self.delegate getAllUsers];
     NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
@@ -558,14 +616,17 @@
     }
     [contactResults release];
     
-    if (searchResultsController != nil)
-        [searchResultsController release];
+    if (searchResultsController != nil) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];        
+    }
     searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 10, 320, 300)];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
     [searchResultsController setDelegate:self];
-    [bottomBackground addSubview:searchResultsController.view];
-    [self toggleMyButtons:NO];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:searchResultsController.view];
     [self stopActivityIndicator];
+    isSearching = NO;
 }
 
 #pragma mark FriendSearchResultsDelegate
@@ -579,8 +640,8 @@
     return userPhoto;
 }
 -(NSString*)getUserEmailForUser:(int)index {
-    NSString * friendName = [searchFriendName objectAtIndex:index];
-    return [[[delegate getAllUsers] objectForKey:friendName] objectForKey:@"email"];
+    //NSString * friendName = [searchFriendName objectAtIndex:index];
+    return @""; //[[[delegate getAllUsers] objectForKey:friendName] objectForKey:@"email"];
 }
 -(NSString*)getFacebookIDForUser:(int)index {
     return [searchFriendFacebookID objectAtIndex:index];
@@ -664,6 +725,127 @@
     return [myAddressBook autorelease];;
 }
 
+#pragma mark search by name
+-(void)populateNameSearchResults {
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
+    }
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+
+    searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 44, 320, 44)];
+    [searchBar setDelegate:self];
+    [searchBar setBarStyle:UIBarStyleBlack];
+    //[bottomBackground addSubview:searchBar];
+    [self.view addSubview:searchBar];
+    if (searchResultsController != nil) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];        
+    }
+    searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, 88, 320, 480-108)];
+    [searchResultsController setDelegate:self];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:searchResultsController.view];
+}
+
+-(void)searchBarSearchButtonClicked:(UISearchBar *)_searchBar {
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
+    }
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+    [searchBar resignFirstResponder];
+    
+    [searchResultsController.tableView reloadData];
+    isSearching = YES;
+    [self startActivityIndicator];
+    NSLog(@"Query: %@", [_searchBar text]);
+    NSArray *query = [[_searchBar text] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
+    NSMutableArray * allUserNames = [self.delegate getAllUserNames];
+    NSMutableArray * allUserFacebookIDs = [self.delegate getAllUserFacebookIDs];
+
+    NSLog(@"Searching for facebookID");
+    // see if searching for facebook ID - yea right
+    BOOL isFacebookID = [allUserFacebookIDs containsObject:[_searchBar text]];
+    if (isFacebookID) {
+        int index = [allUserFacebookIDs indexOfObject:[_searchBar text]];
+        [searchFriendName addObject:[allUserNames objectAtIndex:index]];
+        [searchResultsController.tableView reloadData];
+        return;
+    }
+    
+    NSMutableSet * namesResults = [[NSMutableSet alloc] init];
+    for (int i=0; i<[query count]; i++) {
+        NSString * term = [[query objectAtIndex:i] lowercaseString];
+        if (term == nil)
+            continue;
+        
+        NSLog(@"Searching query element: %@", term);
+        for (int j=0; j<[allUserNames count]; j++) {
+            NSRange namePos = [[[allUserNames objectAtIndex:j] lowercaseString] rangeOfString:term];
+            NSRange emailPos = [[[allUserEmails objectAtIndex:j] lowercaseString] rangeOfString:term];
+            if (emailPos.location != NSNotFound || namePos.location != NSNotFound) {
+                [namesResults addObject:[allUserNames objectAtIndex:j]];
+            }
+        }
+    }
+    NSLog(@"Populating search results: %d names", [namesResults count]);
+    for (NSString * name in namesResults) {
+        [searchFriendName addObject:name];
+    }
+    [searchResultsController.tableView reloadData];
+    [self stopActivityIndicator];
+    isSearching = NO;
+    return;
+}
+-(void)initFollowsList {
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
+    }
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+    
+    [k getFollowListWithUsername:[self.delegate getUsername]];
+    
+    if (searchResultsController) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];
+    }
+    searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    [searchResultsController setDelegate:self];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:searchResultsController.view];
+}
+-(void)populateFollowsList {
+    for (NSMutableDictionary * d in currentFollowsNames) {
+        NSString * following = [d objectForKey:@"followsUser"];
+        [searchFriendName addObject:following];
+    }
+    [searchResultsController.tableView reloadData];
+    [self stopActivityIndicator];
+    isSearching = NO;
+}
+
+#pragma UserGalleryDelegate
+-(void)uploadImage:(NSData*)png withShareMethod:(int)buttonIndex
+{
+    [self.delegate uploadImage:png withShareMethod:buttonIndex];
+}
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
+    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+}
 /*** deprecated functions for old profile view ***/
 /*
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {

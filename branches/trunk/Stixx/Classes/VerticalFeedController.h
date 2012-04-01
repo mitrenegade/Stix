@@ -29,7 +29,7 @@
 
 -(NSMutableArray *)getTags;
 - (NSString*)getUsername;
--(void)checkForUpdateTags;
+//-(void)checkForUpdateTags;
 -(void)checkForUpdatePhotos;
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
@@ -59,15 +59,14 @@
 -(void)didClickPurchaseBuxButton;
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
+-(BOOL)isFollowing:(NSString*)name;
+
+-(void)checkAggregatorStatus; // debug
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate> {
     
-	NSMutableDictionary * feedItems;
-    NSMutableDictionary * headerViews;
     NSMutableDictionary * feedSectionHeights;
-    //BadgeView * badgeView;
-    CarouselView * carouselView;
     CommentViewController * commentView;
     
     UIImagePickerController * camera;
@@ -78,7 +77,6 @@
     
     NSMutableDictionary *userPhotos;
     
-    NSMutableArray * allTags;
     FeedTableController *tableController;	
     int lastPageViewed;
     int lastContentOffset;
@@ -99,10 +97,11 @@
     
     RaisedCenterTabBarController * tabBarController;
 }
+@property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) NSMutableDictionary * headerViews;
-@property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableArray *allTags;
+@property (nonatomic, retain) NSMutableArray *allTagsDisplayed;
 @property (nonatomic, retain) FeedTableController *tableController;
 @property (nonatomic, assign) NSObject<VerticalFeedDelegate> * delegate;
 @property (nonatomic, retain) NSMutableDictionary * userPhotos;
@@ -120,6 +119,8 @@
 //@property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
 
+-(void)populateAllTagsDisplayed;
+-(void)addTagForDisplay:(Tag*)tag;
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;
 -(void)reloadCurrentPage;
@@ -137,6 +138,8 @@
 -(IBAction)didClickProfileButton:(id)sender;
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
+-(void)didUnfollowUser;
+-(void)didFollowUser;
 @end
 
 

@@ -11,14 +11,14 @@
 
 @implementation VerticalFeedController
 
-@synthesize feedItems;
-@synthesize headerViews;
-//@synthesize commentHistories;
 @synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
 @synthesize userPhotos;
+@synthesize feedItems;
+@synthesize headerViews;
 @synthesize allTags;
+@synthesize allTagsDisplayed;
 @synthesize tableController;
 @synthesize lastPageViewed;
 @synthesize commentView;
@@ -146,8 +146,8 @@
     self.userPhotos = [self.delegate getUserPhotos]; 
     //NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
     
-    //[tableController populateScrollPagesAtPage:lastPageViewed];
-    [tableController setContentPageIDs:allTags];
+    [self populateAllTagsDisplayed];
+    [tableController.tableView reloadData];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -202,7 +202,7 @@
 /******* badge view delegate ******/
 -(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
     //[self.carouselView carouselTabDismissWithStix:badge];
-    if ([allTags count]==0) {
+    if ([allTagsDisplayed count]==0) {
         [carouselView resetBadgeLocations];
         [carouselView carouselTabDismiss:YES];
         return;        
@@ -219,12 +219,12 @@
 
 -(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
     // tap inside the feed to add a stix
-    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didTapStix
+    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didTapStix
     [self addAuxStix:badge ofType:stixStringID toTag:tag];
 }
 
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
-    if ([allTags count]==0) {
+    if ([allTagsDisplayed count]==0) {
         [carouselView resetBadgeLocations];
         [carouselView carouselTabDismiss:YES];
         return;
@@ -233,7 +233,7 @@
     locationInSection.y -= tableController.view.frame.origin.y; // remove tableController offset
     [badge setCenter:locationInSection];
     NSLog(@"VerticalFeedController: didDropStixByDrag: section found %d locationInSection origin %f %f center %f %f size %f %f", lastPageViewed, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, badge.frame.size.width, badge.frame.size.height);
-    Tag * tag = [allTags objectAtIndex:lastPageViewed]; // lastPageViewed set by didDropStix
+    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didDropStix
     [self addAuxStix:badge ofType:stixStringID toTag:tag];
 }
 
@@ -303,7 +303,7 @@
 }
 
 -(void)didAddDescriptor:(NSString *)descriptor andComment:(NSString *)comment andLocation:(NSString *)location {
-    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     if ([descriptor length] > 0) {
         NSString * name = [self.delegate getUsername];
         [self.delegate didAddCommentWithTagID:[t.tagID intValue] andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
@@ -317,7 +317,7 @@
     [self configureCarouselView];
     [self.carouselView carouselTabDismiss:YES];
     
-    Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
+    Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     
@@ -356,14 +356,36 @@
 /*********** FeedTableView functions *******/
 
 -(int)getHeightForSection:(int)index {
-    Tag * tag = [allTags objectAtIndex:index];
+    Tag * tag = [allTagsDisplayed objectAtIndex:index];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     //NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
-    return MAX(CONTENT_HEIGHT, feedItem.view.frame.size.height);
+    int feedItemHeight = feedItem.view.frame.size.height;
+    /*
+    if (![delegate isFollowing:tag.username]) {
+        NSLog(@"Unfollowing %@ means removing feed item at section %d", tag.username, index);
+        feedItemHeight = 0;
+    }
+     */
+    // HACK: feedItem should not be dynamically changing
+    if (feedItemHeight != CONTENT_HEIGHT)
+        feedItemHeight = CONTENT_HEIGHT;
+    return feedItemHeight;
+}
+
+-(int)heightForHeaderInSection:(int)index {
+    Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    int headerHeight = HEADER_HEIGHT;
+    /*
+    if (![delegate isFollowing:tag.username]) {
+        NSLog(@"Unfollowing %@ means removing feed item at section %d", tag.username, index);
+        headerHeight = 0;
+    }
+     */
+    return headerHeight;
 }
 
 -(Tag *) tagAtIndex:(int)index {
-    return [allTags objectAtIndex:index];
+    return [allTagsDisplayed objectAtIndex:index];
 }
 
 -(UIView*)viewForItemWithTagID:(NSNumber*)tagID {
@@ -372,7 +394,7 @@
 
 -(UIView*)headerForSection:(int)index {
     //index = index - 1;
-    Tag * tag = [allTags objectAtIndex:index];
+    Tag * tag = [allTagsDisplayed objectAtIndex:index];
     UIView * headerView = [headerViews objectForKey:tag.tagID];
     if (!headerView) {
         headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
@@ -412,7 +434,9 @@
 }
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
-    Tag * tag = [allTags objectAtIndex:index];
+    // todo: reloadData only once for a batch of reloadViewForItem - maybe after requesting content from aggregator
+    NSLog(@"ReloadViewForItemAtIndex: %d", index);
+    Tag * tag = [allTagsDisplayed objectAtIndex:index];
     VerticalFeedItemController * feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
     [feedItem setDelegate:self];
     
@@ -421,6 +445,17 @@
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
     
+    // if no longer following but still in feed
+    /*
+    if (![delegate isFollowing:name]) {
+        [feedItem.view setFrame:CGRectMake(0, 0, 320, 0)];
+        [feedItems setObject:feedItem forKey:tag.tagID];
+        [self.tableController.tableView reloadData];
+        [tableController dataSourceDidFinishLoadingNewData];
+        [self stopActivityIndicator];
+        return feedItem.view;
+    }
+     */
     [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
@@ -488,8 +523,9 @@
 
 -(UIView*)viewForItemAtIndex:(int)index
 {	        
+    //NSLog(@"ViewForItemAtIndex: %d", index);
     //index = index - 1;
-    Tag * tag = [allTags objectAtIndex:index];
+    Tag * tag = [allTagsDisplayed objectAtIndex:index];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     
     if (!feedItem) {
@@ -527,7 +563,8 @@
         NSMutableArray * param = [[NSMutableArray alloc] init];
         [param addObject:tag.tagID];
         [param autorelease];
-        [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
         
         // this object must be retained so that the button actions can be used
         [feedItems setObject:feedItem forKey:tag.tagID];
@@ -558,8 +595,8 @@
     //[commentHistories setObject:kumulosResults forKey:tagID];
     // expand feedview to display all comments
     // hack: to test expanding comments
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == [tagID intValue]) {
             //NSLog(@"Displaying comments of tagID %d on page %d", [tag.tagID intValue], i);
             //[self reloadViewForItemAtIndex:i];
@@ -569,11 +606,11 @@
 }
 
 -(void)jumpToPageWithTagID:(int)tagID {
-    // find position of tag in allTags
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * t = [allTags objectAtIndex:i];
+    // find position of tag in allTagsDisplayed
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * t = [allTagsDisplayed objectAtIndex:i];
         if ([t.tagID intValue] == tagID) {
-            [self reloadViewForItemAtIndex:i];
+            //[self reloadViewForItemAtIndex:i];
             //NSLog(@"TagID: %d Target row: %d", tagID, i);
             NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
             [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
@@ -589,18 +626,23 @@
     [self.delegate didOpenProfileView];
 }
 
+-(void)pullToRefresh {
+    [self updateScrollPagesAtPage:-1];
+    [delegate checkAggregatorStatus];
+}
+
 -(void)updateScrollPagesAtPage:(int)page {
-    //NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTags count]);
-    if ([self itemCount] > 0) {
+    NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTagsDisplayed count]);
+    if ([self numberOfSections] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
-            Tag * t = (Tag*) [allTags objectAtIndex:0];
+            Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:0];
             int tagid = [t.tagID intValue];
             //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
             [self.delegate getNewerTagsThanID:tagid];            
         }
-        if (page >= [self itemCount] - LAZY_LOAD_BOUNDARY) { // trying to load an earlier tag
-            Tag * t = (Tag*) [allTags objectAtIndex:[self itemCount]-1];
+        if (page >= [self numberOfSections] - LAZY_LOAD_BOUNDARY) { // trying to load an earlier tag
+            Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:[self numberOfSections]-1];
             int tagid = [t.tagID intValue];
             //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
@@ -609,13 +651,15 @@
     }
     else
     {
+        NSLog(@"what's taking so long? sections %d tags %d feedItems %d", [self numberOfSections], [self itemCount], [feedItems count]);
         // no tags are loaded, just get the first few
-        //[self.delegate getMostRecentTags];        
+        [delegate checkAggregatorStatus];
+        [delegate getNewerTagsThanID:-1];        
         // should not come here!
         //NSLog(@"Error! allTags was never seeded!");
-        [self.delegate checkForUpdateTags];
+        //[self.delegate checkForUpdateTags];
         //[activityIndicator startCompleteAnimation];
-        [self startActivityIndicator];
+        //[self startActivityIndicator];
     }
 }
 
@@ -623,24 +667,111 @@
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
     int section = [tableController getCurrentSectionAtPoint:CGPointMake(160, 240)];
     self.allTags = [self.delegate getTags];
+    [self populateAllTagsDisplayed];
     //[activityIndicator startCompleteAnimation];
     [self startActivityIndicator];
     [self reloadViewForItemAtIndex:section];
+}
+
+-(void)didUnfollowUser {
+    
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        NSNumber * tagID = tag.tagID;
+        NSString * name = tag.username;
+        if (![delegate isFollowing:name]) {
+            [feedItems removeObjectForKey:tagID];
+//            [tableController.tableView deleteSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationTop];
+        }
+    }
+    
+    [self populateAllTagsDisplayed];
+    //[tableController setContentPageIDs:allTags];
+    // just force call of heightForHeader and heightForSection
+    /*
+    [tableController.tableView reloadData];
+    for (int i=0; i<[allTags count]; i++) {
+        [tableController.tableView reloadSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationNone];
+    }
+     */
+    int index = 0;
+    for (int i=0; i<[[self.view subviews] count]; i++) {
+        if ([[self.view subviews] objectAtIndex:i] == tableController.view) {
+            index = i;
+        }
+    }
+    [tableController.view removeFromSuperview];
+    [tableController.tableView reloadData];
+    [self.view insertSubview:tableController.view atIndex:index];
+    
+    NSLog(@"After unfollowing user, there are %d tags on display.", [allTagsDisplayed count]);
+}
+-(void)didFollowUser {
+    /*
+    for (int i=0; i<[allTags count]; i++) {
+        [self reloadViewForItemAtIndex:i];
+    }
+     */
+    [self populateAllTagsDisplayed];
+    //[tableController setContentPageIDs:allTags];
+    // just force call of heightForHeader and heightForSection
+    int index = 0;
+    for (int i=0; i<[[self.view subviews] count]; i++) {
+        if ([[self.view subviews] objectAtIndex:i] == tableController.view) {
+            index = i;
+        }
+    }
+    [tableController.view removeFromSuperview];
+    [tableController.tableView reloadData];
+    [self.view insertSubview:tableController.view atIndex:index];
+}
+
+-(void)populateAllTagsDisplayed {
+    // allTags contains all tags that have been downloaded from the server
+    // allTagsDisplayed contains only the tags that belong to the following list
+    if (!allTagsDisplayed)
+        allTagsDisplayed = [[NSMutableArray alloc] init];
+    [allTagsDisplayed removeAllObjects];
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        NSString * name = tag.username;
+        if ([delegate isFollowing:name])
+            [allTagsDisplayed addObject:tag];
+        else 
+            NSLog(@"Skipping tag %d with username %@", [tag.tagID intValue], tag.username);
+    }
+    NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
+}
+
+-(void)addTagForDisplay:(Tag *)tag {
+    // todo: like addTagWithCheck 
+    self.allTags = [self.delegate getTags];
+    self.userPhotos = [self.delegate getUserPhotos]; 
+    //NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
+    
+    [self populateAllTagsDisplayed];
+    // do not reload table data - this only called after allTags has one tag added
+    if ([allTagsDisplayed count] > 0)
+        [self reloadCurrentPage];
 }
 
 -(void)finishedCheckingForNewData:(bool)updated {
     [tableController dataSourceDidFinishLoadingNewData];
     if (updated)
         [self reloadViewForItemAtIndex:0];
-    [tableController setContentPageIDs:allTags];
+    //[tableController setContentPageIDs:allTags];
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
 }
 
 -(int)itemCount
 {
-	// Return the number of pages we intend to display
+	// Return the total number of pages that exist, including unfollowed pages
 	return [self.allTags count];
+}
+
+-(int)numberOfSections {
+    return [self.allTagsDisplayed count];
 }
 
 -(void)forceUpdateCommentCount:(int)tagID {
@@ -665,8 +796,8 @@
     //locationInStixView.x -= feedItem.stixView.frame.origin.x;
     //locationInStixView.y -= feedItem.stixView.frame.origin.y;
     int peelableFound = [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == feedItem.tagID) {
             lastPageViewed = i;
             break;            
@@ -733,8 +864,8 @@
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
     if (feedItem != nil) {
         [feedItem didPressAddCommentButton:self];
-        for (int i=0; i<[allTags count]; i++) {
-            Tag * tag = [allTags objectAtIndex:i];
+        for (int i=0; i<[allTagsDisplayed count]; i++) {
+            Tag * tag = [allTagsDisplayed objectAtIndex:i];
             if ([tag.tagID intValue] == [tagID intValue]) {
                 lastPageViewed = i;
             }
@@ -769,7 +900,7 @@
 
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index {
     // change local tag structure for immediate display
-    Tag * tag = [allTags objectAtIndex:lastPageViewed];
+    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed];
     if (action == 0) {
         // peel stix
         [tag removeStixAtIndex:index];
@@ -777,7 +908,7 @@
     else if (action == 1) {
         // attach stix
         [[tag auxPeelable] replaceObjectAtIndex:index withObject:[NSNumber numberWithBool:NO]];
-        [allTags replaceObjectAtIndex:lastPageViewed withObject:tag];
+        [allTagsDisplayed replaceObjectAtIndex:lastPageViewed withObject:tag];
     }
     //[self reloadCurrentPage];
     

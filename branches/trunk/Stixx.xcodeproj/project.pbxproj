@@ -91,6 +91,7 @@
 		9E54BAC714874D0D006F24B6 /* btn_login_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC314874D0C006F24B6 /* btn_login_small.png */; };
 		9E54BAC814874D0D006F24B6 /* graphic_addpic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC414874D0C006F24B6 /* graphic_addpic.png */; };
 		9E54BAC914874D0D006F24B6 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E54BAC514874D0C006F24B6 /* settings.png */; };
+		9E59908015256B8700CFFEB2 /* UserTagAggregator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E59907F15256B8700CFFEB2 /* UserTagAggregator.m */; };
 		9E5ACD9014A94BB400B2E8DD /* KumulosData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */; };
 		9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626414DC61D80008E806 /* feedback_cartoon.png */; };
 		9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626614DC61ED0008E806 /* radio_button_off.png */; };
@@ -491,6 +492,8 @@
 		9E54BAC314874D0C006F24B6 /* btn_login_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_login_small.png; sourceTree = "<group>"; };
 		9E54BAC414874D0C006F24B6 /* graphic_addpic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_addpic.png; sourceTree = "<group>"; };
 		9E54BAC514874D0C006F24B6 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
+		9E59907E15256B8700CFFEB2 /* UserTagAggregator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserTagAggregator.h; sourceTree = "<group>"; };
+		9E59907F15256B8700CFFEB2 /* UserTagAggregator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserTagAggregator.m; sourceTree = "<group>"; };
 		9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosData.h; sourceTree = "<group>"; };
 		9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosData.m; sourceTree = "<group>"; };
 		9E63626414DC61D80008E806 /* feedback_cartoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = feedback_cartoon.png; sourceTree = "<group>"; };
@@ -537,7 +540,7 @@
 		9E80C65A150554970051D64C /* AddStixViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddStixViewController.m; sourceTree = "<group>"; };
 		9E80C65B150554980051D64C /* AddStixViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AddStixViewController.xib; sourceTree = "<group>"; };
 		9E80C6671505896A0051D64C /* KumulosHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosHelper.h; sourceTree = "<group>"; };
-		9E80C6681505896B0051D64C /* KumulosHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosHelper.m; sourceTree = "<group>"; };
+		9E80C6681505896B0051D64C /* KumulosHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = KumulosHelper.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		9E84F6BA15181D1500A57D0C /* btn_comment.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_comment.png; sourceTree = "<group>"; };
 		9E84F6BC15181D1D00A57D0C /* btn_share.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_share.png; sourceTree = "<group>"; };
 		9E84F6C7151904DC00A57D0C /* txt_animals_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_animals_selected.png; sourceTree = "<group>"; };
@@ -1305,6 +1308,8 @@
 				9EB031B1142C01260019F2BD /* Classes */,
 				9EB03181142C002E0019F2BD /* StixxAppDelegate.h */,
 				9EB03182142C002E0019F2BD /* StixxAppDelegate.m */,
+				9E59907E15256B8700CFFEB2 /* UserTagAggregator.h */,
+				9E59907F15256B8700CFFEB2 /* UserTagAggregator.m */,
 				9E7E9BEA14C650860009A2E3 /* MainWindow.xib */,
 				9ECD5240145A3651005CFDBB /* ToDoList */,
 				9E3BE0751463673200F7B763 /* iPhone */,
@@ -2153,6 +2158,7 @@
 				9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */,
 				9E2390AD1522D22B0060D0AE /* FriendSearchResultsController.m in Sources */,
 				9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */,
+				9E59908015256B8700CFFEB2 /* UserTagAggregator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

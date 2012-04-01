@@ -84,6 +84,7 @@
     }
 }
 -(void)getFacebookInfo {
+    NSLog(@"FacebookHelper getFacebookInfo: requesting graph path: ME");
     [facebook requestWithGraphPath:@"me" andDelegate:self];  
     currentRequest = @"requestGraphPathMe";
 }
@@ -212,7 +213,11 @@
  * Called when an error prevents the request from completing successfully.
  */
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"FacebookHelper FBRequest failed with error: %@", [error description]);
+    NSLog(@"FacebookHelper FBRequest failed with error: %@ currentRequest: %@", [error description], currentRequest);
+    if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
+        NSLog(@"Repeating getFacebookInfo request");
+        [self getFacebookInfo];
+    }
 }
 
 // response for requestWithGraphPath

@@ -92,47 +92,31 @@
 }
 
 #pragma mark - Table view data source
-/*
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
-{
-    NSLog(@"Title for section header %d", section);
-    if (section > [contentPageIDs count])
-        return nil;
-    Tag * tag = [contentPageIDs objectAtIndex:section];
-    return [NSString stringWithFormat:@"%d: %@", tag.username, section];
-}
- */
-/*
-- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
-    //return [[self.sections allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    return [NSArray arrayWithObjects:@"One", @"Two", @"Three", @"Four", @"Five", @"Six", nil];
-}
-*/
+
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     return [self.delegate headerForSection:section];
 }
 - (float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return HEADER_HEIGHT;
+    return [delegate heightForHeaderInSection:section]; //HEADER_HEIGHT;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    //NSLog(@"Number of sections: %d", [contentPageIDs count]);
-    return [contentPageIDs count];
+    //return [contentPageIDs count];
+    return [delegate numberOfSections];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
     return 1;
-//    return [contentPageIDs count];
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    //int height = [self.delegate getHeightForSection:([indexPath section])];
-    // NSLog(@"GetHeightForSection %d returned %d", [indexPath section], height);
-    return CONTENT_HEIGHT;
+    int height = [self.delegate getHeightForSection:([indexPath section])];
+    //NSLog(@"GetHeightForSection %d returned %d", [indexPath section], height);
+    return height; //CONTENT_HEIGHT;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -169,22 +153,18 @@
         [cellOldView removeFromSuperview];
     
     int y = [indexPath section];
-    //NSLog(@"Vertical Feed Table: Loading row %d", y);
-    //NSNumber * tagID = [contentPageIDs objectAtIndex:y];
+    //NSLog(@"Vertical Feed Table: Loading row %d total rows %d", y, [delegate numberOfSections]);
     UIView * view;
     view = [self.delegate viewForItemAtIndex:y];
     //[cell.contentView removeFromSuperview];
     [cell.contentView addSubview:view];
     [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
     
-    if (y == [contentPageIDs count]-1) // last available row reached 
+    if (y == [delegate numberOfSections]-1) // last available row reached 
     {
-        [self.delegate updateScrollPagesAtPage:[contentPageIDs count]];
+        NSLog(@"Reached last row in feed");
+        [self.delegate updateScrollPagesAtPage:[delegate numberOfSections]];
     }
-    else if (y == 0) // first row reached - pull for update
-    {
-        //[self.delegate updateScrollPagesAtPage:-1];
-    }    
     return cell;
 }
 
@@ -202,60 +182,19 @@
      */
 }
 /*
--(void)populatePagesAtPage:(int)currentPage {
-    int pageCount = [self.delegate itemCount];
-    if (contentPageIDs == nil) {
-        contentPageIDs = [[NSMutableArray alloc] initWithCapacity:pageCount];
-    }
-
-    // Load the first two pages
-    if (currentPage>0)
-        [self loadPage:currentPage-1];
-    [self loadPage:currentPage];
-    if (currentPage<pageCount || pageCount == 1)
-        [self loadPage:currentPage+1];
-}
-
--(void)loadPage:(int)page
-{
-	// loading pages that do not exist - request from delegate
-    // populates contentPages with FeedItemViews if they do not already exist
-    if ([contentPageIDs count] == 0 || page < LAZY_LOAD_BOUNDARY || page>=[contentPageIDs count]-LAZY_LOAD_BOUNDARY)
-    { 
-        // page = -1: look for newer data on server
-        // page > total pages: look for older data on server - only for delayed load
-        [self.delegate updateScrollPagesAtPage:page]; 
-    }
-	else {
-        // Check if the page is already loaded
-        NSNumber * tagID = [contentPageIDs objectAtIndex:page];
-        UIView *view = [self.delegate viewForItemWithTagID:tagID];
-        
-        if (view == nil) {
-            view = [[self.delegate viewForItemAtIndex:page] retain];
-            // does nothing with it
-            [view release];
-        }
-    }
-}
-*/
--(void)setContentPageIDs:(NSMutableArray *) tags {
+-(void)setContentPageIDs:(NSMutableDictionary *) tags {
     // delegate tells the table what views are available
     if (contentPageIDs) {
         [contentPageIDs release];
         contentPageIDs = nil;
     }
-    contentPageIDs = [[NSMutableArray alloc] init];
-    /*
-    for (int i=0; i<[tags count]; i++) {
-        Tag * tag = [tags objectAtIndex:i];
-        [contentPageIDs insertObject:tag.tagID atIndex:[contentPageIDs count]];
-    }
-    */
-    [contentPageIDs addObjectsFromArray:tags];
+    contentPageIDs = [[NSMutableDictionary alloc] init];
+    //[contentPageIDs addObjectsFromArray:tags];
+    [contentPageIDs addEntriesFromDictionary:tags];
     
     [self.tableView reloadData];
 }
+ */
 
 -(int)getCurrentSectionAtPoint:(CGPoint) point {
     float offset = self.tableView.contentOffset.y;
@@ -286,10 +225,21 @@
 	
 	if (scrollView.isDragging) {
 		if (refreshHeaderView.state == EGOOPullRefreshPulling && scrollView.contentOffset.y > -65.0f && scrollView.contentOffset.y < 0.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to normal");
 			[refreshHeaderView setState:EGOOPullRefreshNormal];
 		} else if (refreshHeaderView.state == EGOOPullRefreshNormal && scrollView.contentOffset.y < -65.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to pulling");
 			[refreshHeaderView setState:EGOOPullRefreshPulling];
-		}
+		} else if (refreshHeaderView.state == EGOOPullRefreshLoading && _reloading) {
+            NSLog(@"ScrollView: dragging while reloading: contentOffset %f", scrollView.contentOffset.y);
+            // cancel reloading status (reset the position of the refresh header and allow future pulls to initiate a refresh
+            if (scrollView.contentOffset.y > 0) {
+                _reloading = NO;
+                [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                [refreshHeaderView setState:EGOOPullRefreshNormal];
+                
+            }
+        }
 	}
 }
 
@@ -323,13 +273,14 @@
 }
 - (void) reloadTableViewDataSource
 {
-    int pages = [contentPageIDs count];
-    int totalPages = [self.delegate itemCount];
-    NSLog(@"Table pages: %d tags available: %d", pages, totalPages);
-    [self.delegate updateScrollPagesAtPage:-1];
-    if ([self.delegate itemCount] == 1) {
+    int pages = [delegate numberOfSections];
+    int total = [delegate itemCount];
+    NSLog(@"Table pages: %d total tags: %d", pages, total);
+    // [self.delegate updateScrollPagesAtPage:-1];
+    [self.delegate pullToRefresh];
+    if ([self.delegate numberOfSections] == 1) {
         NSLog(@"Only one page so far, we should load more!");
-        [self.delegate updateScrollPagesAtPage:[self.delegate itemCount]];
+        [self.delegate updateScrollPagesAtPage:[self.delegate numberOfSections]];
     }
 }
 

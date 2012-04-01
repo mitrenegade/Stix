@@ -20,8 +20,11 @@
 -(UIView*)viewForItemAtIndex:(int)index;
 -(UIView*)viewForItemWithTagID:(NSNumber*)tagID;
 -(int)itemCount;
+-(int)numberOfSections;
 -(UIView*)headerForSection:(int)index;
 -(int)getHeightForSection:(int)index;
+-(int)heightForHeaderInSection:(int)index;
+-(void)pullToRefresh;
 
 @optional
 -(void)updateScrollPagesAtPage:(int)page;
@@ -34,7 +37,7 @@
     NSObject<FeedTableControllerDelegate> * delegate;
     NSMutableDictionary * cellDictionary;
 
-    NSMutableArray *contentPageIDs; 
+//    NSMutableArray *contentPageIDs; 
     int drag;
 
 	EGORefreshTableHeaderView *refreshHeaderView;
@@ -48,11 +51,8 @@
 - (void)reloadTableViewDataSource;
 - (void)dataSourceDidFinishLoadingNewData;
 
-//-(void)loadPage:(int)page;
-//-(void)populatePagesAtPage:(int)currentPage;
--(void)setContentPageIDs:(NSMutableArray *) tags;
+//-(void)setContentPageIDs:(NSMutableArray *) tags;
 -(int)getCurrentSectionAtPoint:(CGPoint) point;
-//-(CGPoint)getContentPointInCurrentSection:(CGPoint)point;
 -(CGPoint)getContentPoint:(CGPoint)point inSection:(int)section;
 -(CGPoint)getPointInTableViewFrame:(CGPoint)point fromPage:(int)section;
 @end

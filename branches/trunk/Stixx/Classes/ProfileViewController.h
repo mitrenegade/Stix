@@ -21,6 +21,14 @@
 
 #define DEFAULT_STIX_COUNT 2
 
+enum {
+    RESULTS_SEARCH_CONTACTS = 0,
+    RESULTS_SEARCH_FACEBOOK,
+    RESULTS_SEARCH_NAME,
+    RESULTS_FOLLOWING_LIST,
+    RESULTS_FOLLOWERS_LIST
+};
+
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
@@ -84,6 +92,7 @@
     // myButtons - displayed for current user's profile
     bool showMyButtons;
     bool isSearching;
+    int resultType;
     UIButton * discoverLabel;
     UIButton * buttonContacts;
     UIButton * buttonFacebook;
@@ -98,6 +107,7 @@
     NSMutableArray * searchFriendName;
     NSMutableArray * searchFriendEmail;
     NSMutableArray * searchFriendFacebookID;
+    NSMutableArray * searchFriendIsStix;
 }
 
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
@@ -119,8 +129,6 @@
 @property (nonatomic, retain) UISearchBar * searchBar;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 
-@property (nonatomic, retain) NSMutableArray * currentFollowsNames;
-
 //@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 //@property (nonatomic, retain) IBOutlet UIButton * stixCountButton;
 //@property (nonatomic, retain) IBOutlet UIButton * friendCountButton;
@@ -139,6 +147,7 @@
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
 -(IBAction)buttonFollowingClicked:(id)sender;
+-(IBAction)buttonFollowersClicked:(id)sender;
 
 -(void)populateWithMyButtons;
 -(void)toggleMyButtons:(BOOL)show;
@@ -149,8 +158,8 @@
 -(void)populateContactSearchResults;
 -(NSMutableArray*)collectFriendsFromContactList;
 -(void)populateNameSearchResults;
--(void)initFollowsList;
--(void)populateFollowsList;
+-(void)populateFollowingList;
+-(void)populateFollowersList;
 
 // deprecated
 /*

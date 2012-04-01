@@ -14,7 +14,8 @@
 -(UIImage*)getUserPhotoForUser:(int)index;
 -(NSString*)getUserEmailForUser:(int)index;
 -(NSString*)getFacebookIDForUser:(int)index;
--(BOOL)isFollowingUser:(int)index;
+//-(BOOL)isFollowingUser:(int)index;
+-(int)getFollowingUserStatus:(int)index;
 -(int)getNumOfUsers;
 -(void)didClickAddFriendButton:(int)index;
 @end

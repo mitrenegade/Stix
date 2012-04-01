@@ -12,6 +12,7 @@
 #import "KumulosData.h"
 #import "Kumulos.h"
 #import "BadgeView.h"
+#import "KumulosHelper.h"
 
 #define NEW_USER_BUX 50
 
@@ -22,8 +23,10 @@
 
 @end
 
-@interface FacebookLoginController : UIViewController <KumulosDelegate>
-
+@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate>
+{
+    BOOL isFirstTimeUser;
+}
 
 @property (nonatomic, retain) IBOutlet UIButton * loginButton;
 //@property (nonatomic, retain) LoginViewController * loginController;

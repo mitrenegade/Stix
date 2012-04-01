@@ -24,7 +24,6 @@
 @synthesize searchBar;
 @synthesize bottomBackground;
 @synthesize myFollowersCount, myFollowersLabel, myFollowingCount, myFollowingLabel;
-@synthesize currentFollowsNames;
 @synthesize myPixCount, myPixLabel, myStixCount, myStixLabel;
 //@synthesize followersCount, followingCount;
 
@@ -69,7 +68,6 @@
     [self populateWithMyButtons];
     
     searchResultsController = nil;
-    currentFollowsNames = [[NSMutableArray alloc] init];
 }
 
 -(void)startActivityIndicator {
@@ -176,11 +174,27 @@
     NSLog(@"Following clicked!");
     
     isSearching = YES;
+    resultType = RESULTS_FOLLOWING_LIST;
     [self startActivityIndicator];
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
  
-    [self initFollowsList];
+    [self populateFollowingList];
+}
+
+-(IBAction)buttonFollowersClicked:(id)sender {
+    if (isSearching)
+        return;
+    
+    NSLog(@"Followers clicked!");
+    
+    isSearching = YES;
+    resultType = RESULTS_FOLLOWERS_LIST;
+    [self startActivityIndicator];
+    [self toggleMyButtons:NO];
+    [self toggleMyInfo:NO];
+    
+    [self populateFollowersList];
 }
 
 #pragma mark myProfile button responders
@@ -191,6 +205,7 @@
     
     NSLog(@"Button find friends by Facebook!");
     isSearching = YES;
+    resultType = RESULTS_SEARCH_FACEBOOK;
     [self startActivityIndicator];
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
@@ -203,6 +218,7 @@
     
     NSLog(@"Button find friends by Contacts!");
     isSearching = YES;
+    resultType = RESULTS_SEARCH_CONTACTS;
     [self startActivityIndicator];
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
@@ -214,6 +230,8 @@
         return;
     
     NSLog(@"Button find friends by Name!");
+    isSearching = YES; 
+    resultType = RESULTS_SEARCH_NAME;
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
     
@@ -239,6 +257,7 @@
         // reset views
         [self toggleMyButtons:YES];
         [self toggleMyInfo:YES];
+        isSearching = NO;
     }
 }
 
@@ -452,25 +471,14 @@
 }
 
 -(void)updateFollowCounts {
+    // uses delegate functions
     NSLog(@"UpdateFollowCounts: username %@", [delegate getUsername]);
-    [k getFollowListWithUsername:[delegate getUsername]];
-    [k getFollowersOfUserWithFollowsUser:[delegate getUsername]];
-}
-
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
-    [myFollowersCount setText:[NSString stringWithFormat:@"%d", [theResults count]]];
-    NSLog(@"Updating followers count to %d", [theResults count]);
-}
-
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
-    [myFollowingCount setText:[NSString stringWithFormat:@"%d", [theResults count]]];
-    NSLog(@"Updating following count to %d", [theResults count]);
-    
-    [currentFollowsNames removeAllObjects];
-    [currentFollowsNames addObjectsFromArray:theResults];
-    if ([searchFriendName count] == 0) { // has been reset so friends list can be populated
-        [self populateFollowsList];
-    }
+    NSMutableSet * followerList = [delegate getFollowerList];
+    NSMutableSet * followingList = [delegate getFollowingList];
+    [myFollowersCount setText:[NSString stringWithFormat:@"%d", [followerList count]]];
+    NSLog(@"Updating followers count to %d", [followerList count]);
+    [myFollowingCount setText:[NSString stringWithFormat:@"%d", [followingList count]]];
+    NSLog(@"Updating following count to %d", [followingList count]);
 }
 
 -(void)updatePixCount {
@@ -493,9 +501,13 @@
     NSMutableSet * followingList = [self.delegate getFollowingList];
     int followingCount = [followingList count];
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
+    //NSLog(@"FollowingList: %@", followingList);
+
     NSMutableSet * followerList = [self.delegate getFollowerList];
     int followerCount = [followerList count];
     [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
+    NSLog(@"FollowerList: %@", followerList);
+    //NSLog(@"UpdateFollowCount: updating following count to %d followercount to %d", followingCount, followerCount);
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getHistoryCountForUserDidCompleteWithResult:(NSNumber *)aggregateResult {
@@ -515,71 +527,78 @@
 
 }
 
+-(void) initSearchResultLists {
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
+        searchFriendIsStix = [[NSMutableArray alloc] init]; // whether they are using Stix already
+    }
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+    [searchFriendIsStix removeAllObjects];
+}
+
 /*** results of facebook search from delegate ***/
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray {
+    if (resultType != RESULTS_SEARCH_FACEBOOK)
+        return;
+    
     [facebookFriendArray retain];
+
+    [self initSearchResultLists];
+
+    NSMutableArray * searchFriendNotStixName = [[NSMutableArray alloc] init];
+    NSMutableArray * searchFriendNotStixID = [[NSMutableArray alloc] init];
+    NSMutableArray * searchFriendNotStix = [[NSMutableArray alloc] init];
     
-    if (searchFriendName) {
-        [searchFriendName release];
-    }
-    if (searchFriendEmail) {
-        [searchFriendEmail release];
-    }
-    if (searchFriendFacebookID) {
-        [searchFriendFacebookID release];
-    }
-    searchFriendName = [[NSMutableArray alloc] init];
-    searchFriendEmail = [[NSMutableArray alloc] init];
-    searchFriendFacebookID = [[NSMutableArray alloc] init];
-    
-    //NSMutableDictionary * allUsers = [self.delegate getAllUsers];
     NSMutableArray * allFacebookIDs = [self.delegate getAllUserFacebookIDs];
     for (NSMutableDictionary * d in facebookFriendArray) {
         NSString * fbID = [d valueForKey:@"id"];
         NSString * fbName = [d valueForKey:@"name"];
         //NSLog(@"fbID: %@ fbName: %@", fbID, fbName);
-        /*
-        if ([fbID intValue] == 705531)
-        {
-            NSLog(@"Here!");
-            for (NSNumber * n in allFacebookIDs) {
-                NSLog(@"Number: %d", [n intValue]);
-            }
-        }
-         */
         if ([allFacebookIDs containsObject:fbID]) {
-            //NSLog(@"Friends from facebook found as users: id %@ name %@", fbID, fbName);
             [searchFriendName addObject:fbName];
-//            [searchFriendEmail addObject:fbEmail]; 
             [searchFriendFacebookID addObject:fbID];
-        }        
+            [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+        } else {
+            [searchFriendNotStixName addObject:fbName];
+            [searchFriendNotStixID addObject:fbID];
+            [searchFriendNotStix addObject:[NSNumber numberWithBool:NO]];
+        }
     }
 
-    if (searchResultsController) {
-        [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];
-    }
-    searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
-    [searchResultsController setDelegate:self];
-    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
-    [self.view addSubview:searchResultsController.view];
+    [searchFriendName addObjectsFromArray:searchFriendNotStixName];
+    [searchFriendFacebookID addObjectsFromArray:searchFriendNotStixID];
+    [searchFriendIsStix addObjectsFromArray:searchFriendNotStix];
+    [searchFriendNotStix release];
+    [searchFriendNotStixID release];
+    
     [self stopActivityIndicator];
-    isSearching = NO;
+    if (isSearching) { 
+        // still searching - display results
+        // if not searching, we've returned to the previous page so we don't want to display results
+        if (searchResultsController) {
+            [searchResultsController.view removeFromSuperview];
+            [searchResultsController release];
+        }
+        searchResultsController = [[FriendSearchResultsController alloc] init];
+        [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+        [searchResultsController setDelegate:self];
+        searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+        [self.view addSubview:searchResultsController.view];
+        isSearching = NO;
+    }
 }
 
 -(void)populateContactSearchResults {
+    if (resultType != RESULTS_SEARCH_CONTACTS)
+        return;
+
     NSMutableArray * contactResults = [[self collectFriendsFromContactList] retain];
     
-    if (!searchFriendName) {
-        searchFriendName = [[NSMutableArray alloc] init];
-        searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
-    }
-    [searchFriendName removeAllObjects];
-    [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
-
+    [self initSearchResultLists];
     
     NSMutableDictionary * allUsers = [self.delegate getAllUsers];
     NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
@@ -597,6 +616,7 @@
             [searchFriendName addObject:cName];
             [searchFriendEmail addObject:cEmail]; 
             [searchFriendFacebookID addObject:cID];
+            [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookID to contact them
         }
         else {
             // search by email(s)
@@ -609,6 +629,7 @@
                     [searchFriendName addObject:cName];
                     [searchFriendEmail addObject:cEmail]; 
                     [searchFriendFacebookID addObject:cID];
+                    [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookID to contact them
                     break;
                 }        
             }
@@ -616,17 +637,21 @@
     }
     [contactResults release];
     
-    if (searchResultsController != nil) {
-        [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];        
-    }
-    searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
-    [searchResultsController setDelegate:self];
-    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
-    [self.view addSubview:searchResultsController.view];
     [self stopActivityIndicator];
-    isSearching = NO;
+    if (isSearching) { 
+        // still searching - display results
+        // if not searching, we've returned to the previous page so we don't want to display results
+        if (searchResultsController != nil) {
+            [searchResultsController.view removeFromSuperview];
+            [searchResultsController release];        
+        }
+        searchResultsController = [[FriendSearchResultsController alloc] init];
+        [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+        [searchResultsController setDelegate:self];
+        searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+        [self.view addSubview:searchResultsController.view];
+        isSearching = NO;
+    }
 }
 
 #pragma mark FriendSearchResultsDelegate
@@ -646,7 +671,13 @@
 -(NSString*)getFacebookIDForUser:(int)index {
     return [searchFriendFacebookID objectAtIndex:index];
 }
--(BOOL)isFollowingUser:(int)index {
+-(int)getFollowingUserStatus:(int)index {
+    // if Facebook friend is not on Stix, return -1
+    //NSMutableArray * allFacebookIDs = [self.delegate getAllUserFacebookIDs];
+    //if (![allFacebookIDs containsObject:[searchFriendFacebookID objectAtIndex:index]])
+    if (![[searchFriendIsStix objectAtIndex:index] boolValue])
+        return -1;
+    
     NSString * friendName = [searchFriendName objectAtIndex:index];
     return [[delegate getFollowingList] containsObject:friendName];
 }
@@ -658,7 +689,7 @@
 -(void)didClickAddFriendButton:(int)index {
     NSString * username = [self getUsernameForUser:index];
     //NSMutableSet * friendsList = [self.delegate getFriendsList];
-    if ([self isFollowingUser:index]) { 
+    if ([self getFollowingUserStatus:index] == 1) { 
         [delegate setFollowing:username toState:NO];
     }
     else
@@ -727,14 +758,10 @@
 
 #pragma mark search by name
 -(void)populateNameSearchResults {
-    if (!searchFriendName) {
-        searchFriendName = [[NSMutableArray alloc] init];
-        searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
-    }
-    [searchFriendName removeAllObjects];
-    [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
+    if (resultType != RESULTS_SEARCH_NAME)
+        return;
+
+    [self initSearchResultLists];
 
     searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 44, 320, 44)];
     [searchBar setDelegate:self];
@@ -753,14 +780,10 @@
 }
 
 -(void)searchBarSearchButtonClicked:(UISearchBar *)_searchBar {
-    if (!searchFriendName) {
-        searchFriendName = [[NSMutableArray alloc] init];
-        searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
-    }
-    [searchFriendName removeAllObjects];
-    [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
+    if (resultType != RESULTS_SEARCH_NAME)
+        return;
+    [self initSearchResultLists];
+
     [searchBar resignFirstResponder];
     
     [searchResultsController.tableView reloadData];
@@ -768,7 +791,7 @@
     [self startActivityIndicator];
     NSLog(@"Query: %@", [_searchBar text]);
     NSArray *query = [[_searchBar text] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
+   // NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
     NSMutableArray * allUserNames = [self.delegate getAllUserNames];
     NSMutableArray * allUserFacebookIDs = [self.delegate getAllUserFacebookIDs];
 
@@ -778,6 +801,7 @@
     if (isFacebookID) {
         int index = [allUserFacebookIDs indexOfObject:[_searchBar text]];
         [searchFriendName addObject:[allUserNames objectAtIndex:index]];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
         [searchResultsController.tableView reloadData];
         return;
     }
@@ -791,8 +815,8 @@
         NSLog(@"Searching query element: %@", term);
         for (int j=0; j<[allUserNames count]; j++) {
             NSRange namePos = [[[allUserNames objectAtIndex:j] lowercaseString] rangeOfString:term];
-            NSRange emailPos = [[[allUserEmails objectAtIndex:j] lowercaseString] rangeOfString:term];
-            if (emailPos.location != NSNotFound || namePos.location != NSNotFound) {
+            //NSRange emailPos = [[[allUserEmails objectAtIndex:j] lowercaseString] rangeOfString:term];
+            if (namePos.location != NSNotFound) {
                 [namesResults addObject:[allUserNames objectAtIndex:j]];
             }
         }
@@ -800,24 +824,18 @@
     NSLog(@"Populating search results: %d names", [namesResults count]);
     for (NSString * name in namesResults) {
         [searchFriendName addObject:name];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];
     isSearching = NO;
     return;
 }
--(void)initFollowsList {
-    if (!searchFriendName) {
-        searchFriendName = [[NSMutableArray alloc] init];
-        searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
-    }
-    [searchFriendName removeAllObjects];
-    [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
+
+-(void)populateFollowingList {
+    [self initSearchResultLists];
     
-    [k getFollowListWithUsername:[self.delegate getUsername]];
-    
+    NSLog(@"Getting follows list from kumulos for username: %@", [delegate getUsername]);
     if (searchResultsController) {
         [searchResultsController.view removeFromSuperview];
         [searchResultsController release];
@@ -827,11 +845,42 @@
     [searchResultsController setDelegate:self];
     searchResultsController.tableView.showsVerticalScrollIndicator = NO;
     [self.view addSubview:searchResultsController.view];
-}
--(void)populateFollowsList {
-    for (NSMutableDictionary * d in currentFollowsNames) {
-        NSString * following = [d objectForKey:@"followsUser"];
+    
+    if (resultType != RESULTS_FOLLOWING_LIST)
+        return;
+    
+    NSMutableSet * followingSet = [delegate getFollowingList];
+    for (NSString * following in followingSet) {
         [searchFriendName addObject:following];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+    }
+    [searchResultsController.tableView reloadData];
+    [self stopActivityIndicator];
+    isSearching = NO;
+}
+
+-(void)populateFollowersList {
+    NSLog(@"Getting follower list from kumulos for username: %@", [delegate getUsername]);
+    
+    [self initSearchResultLists];
+
+    if (searchResultsController) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];
+    }
+    searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    [searchResultsController setDelegate:self];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:searchResultsController.view];
+    
+    if (resultType != RESULTS_FOLLOWERS_LIST)
+        return;
+    
+    NSMutableSet * followersSet = [delegate getFollowerList];
+    for (NSString * follower in followersSet) {
+        [searchFriendName addObject:follower];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];

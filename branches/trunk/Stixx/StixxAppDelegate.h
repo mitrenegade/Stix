@@ -30,6 +30,7 @@
 #import "SMWebRequest.h"
 #import "ASIHTTPRequest.h"
 #import "FacebookLoginController.h"
+#import "UserTagAggregator.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -73,7 +74,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, /*FriendsViewDelegate,*/ ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, /*LoginSplashDelegate, */FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate,
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate,
 
 //#if USING_FACEBOOK
     FacebookHelperDelegate, FacebookLoginDelegate,
@@ -170,6 +171,7 @@ struct UserInfo {
     int alertActionCurrent;
         
     FacebookHelper * fbHelper;
+    UserTagAggregator * aggregator;
 }
 
 -(void)initializeBadges;
@@ -230,6 +232,7 @@ struct UserInfo {
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, assign) UIViewController * lastViewController;
 @property (nonatomic, retain) NSMutableArray * allTags;
+@property (nonatomic, retain) NSMutableDictionary * allTagIDs; // fast check for existence of allTags
 @property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
 @property (nonatomic, retain) NSMutableDictionary * allUsers;
 @property (nonatomic, retain) NSMutableDictionary * allUserPhotos;

@@ -42,7 +42,7 @@
 @synthesize loginSplashController;
 @synthesize myUserInfo;
 @synthesize lastViewController;
-@synthesize allTags;
+@synthesize allTags, allTagIDs;
 @synthesize timeStampOfMostRecentTag;
 @synthesize allUsers;
 @synthesize allUserPhotos;
@@ -81,6 +81,9 @@ static NSString * uniqueDeviceID = nil;
     [k setDelegate:self];
     [self setLastKumulosErrorTimestamp: [NSDate dateWithTimeIntervalSinceReferenceDate:0]];
     
+    aggregator = [[UserTagAggregator alloc] init];
+    [aggregator setDelegate:self];
+
     /*** device id on pasteboard ***/
 	UIPasteboard *appPasteBoard = [UIPasteboard pasteboardWithName:@"StixAppPasteboard" create:YES];
 	appPasteBoard.persistent = YES;
@@ -176,6 +179,7 @@ static NSString * uniqueDeviceID = nil;
     tabBarController.myDelegate = self;
     
     allTags = [[NSMutableArray alloc] init];
+    allTagIDs = [[NSMutableDictionary alloc] init];
     allUsers = [[NSMutableDictionary alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
@@ -210,11 +214,16 @@ static NSString * uniqueDeviceID = nil;
     idOfNewestTagReceived = -1; // nothing received yet
     idOfOldestTagReceived = 99999;
     idOfCurrentTag = -1;
-    idOfLastTagChecked = -1;
     idOfMostRecentUser = -1;
     pageOfLastNewerTagsRequest = -1;
     pageOfLastOlderTagsRequest = -1;
-    [self checkForUpdateTags];
+    // don't get tags until login completes, and first time aggregation is triggered
+    // or, download all tags and when first time aggregation is triggered, filter by followingList
+    //[self getNewerTagsThanID:idOfNewestTagReceived];
+    
+    // get newest tag on server regardless of who is logged in
+    // when login completes, feed will filter 
+    [k getLastTagIDWithNumEls:[NSNumber numberWithInt:3]];
 
 	/***** create feed view *****/
     //[loadingMessage setText:@"Loading feed..."];
@@ -267,7 +276,7 @@ static NSString * uniqueDeviceID = nil;
 #endif
     
     [self didPressTabButton:TABBAR_BUTTON_FEED];
-    
+        
     myUserInfo->userphoto = nil;
     myUserInfo->bux = 0;
     myUserInfo->usertagtotal = 0;
@@ -479,7 +488,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if ([theResults count] == 0)
         NSLog(@"Could not find a stix data! May be missing in Kumulos.");
     else
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
         [BadgeView AddStixView:theResults];
+        });
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
@@ -495,19 +507,28 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         // consolidate all stix types with stix views and load any stixViews that weren't loaded
         NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
         NSLog(@"%d views loaded from disk; %d types loaded from Kumulos", [stixViews count], [theResults count]);
-        for (int i=0; i<[BadgeView totalStixTypes]; i++) {
-            NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-            UIImageView * stixView = [stixViews objectForKey:stixStringID];
-            
-            if (stixView == nil) {
-                [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                 (unsigned long)NULL), ^(void) {
+            int newStixCount = 0;
+            for (int i=0; i<[BadgeView totalStixTypes]; i++) {
+                NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+                UIImageView * stixView = [stixViews objectForKey:stixStringID];
+                
+                if (stixView == nil) {
+                    [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+                    newStixCount++;
+                }
             }
-        }
+            NSLog(@"Loading %d new stixViews in background...", newStixCount);
+        });
     }
 
     if (init >= 2) {
         //[self continueInit];
         [self reloadAllCarousels];
+    }
+    else {
+        NSLog(@"getAllStixTypes still waiting for init=2");
     }
 }
 
@@ -522,6 +543,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         if ([self isLoggedIn])
             [self reloadAllCarousels];
         //[self continueInit];
+    }
+    else {
+        NSLog(@"getAllStixViews still waiting for init=2");
     }
 }
     
@@ -597,7 +621,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             else
             {
                 NSLog(@"StixSubcategories not loaded from disk! Loading from Kumulos...");
-                [[KumulosHelper sharedKumulosHelper] execute:@"getSubcategories" withParams:nil withCallback:@selector(didGetKumulosSubcategories:) withDelegate:self]; 
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                [kh execute:@"getSubcategories" withParams:nil withCallback:@selector(khCallback_didGetKumulosSubcategories:) withDelegate:self];
                 return 0;
             }
             return 1;
@@ -616,9 +641,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    //NSLog(@"KumulosHelperDidCompleteWithCallback: params %@ size %d", params, [params count]);
     [self performSelector:callback withObject:params afterDelay:0];
 }
--(void)didGetKumulosSubcategories:(NSMutableArray*)theResults {
+-(void)khCallback_didGetKumulosSubcategories:(NSMutableArray*)theResults {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -651,21 +677,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif
         return;
     }
-    /*
-    if (lastViewController == tagViewController)
-    {
-        [self.tabBarController setButtonStateNormal]; // disable highlighted button
-        [tagViewController dismissModalViewControllerAnimated:NO];
-        [viewController viewWillAppear:TRUE];
-        lastViewController = viewController;
-    }
-    else if (lastViewController == friendController) // if we leave friend controller, start an update for next time
-    {
-        [self checkForUpdatePhotos];
-        [viewController viewWillAppear:TRUE];
-        lastViewController = viewController;
-    }
-     */
     if (lastViewController == feedController)
     {
         //[viewController viewWillAppear:TRUE];
@@ -866,19 +877,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         else if (newID>tagID) // allTags should start at a high tagID (most recent) and go to a lower tagID (oldest)
         {
             // update IDs so we know this content has been received
-            if (newID > idOfNewestTagReceived)
+            if (newID > idOfNewestTagReceived) {
+                NSLog(@"Changing id of Newest Tag Received from %d to %d", idOfNewestTagReceived, newID);
                 idOfNewestTagReceived = newID;
-            if (newID < idOfOldestTagReceived)
+            }
+            if (newID < idOfOldestTagReceived) {
+                NSLog(@"Changing id of Oldest Tag Received from %d to %d", idOfOldestTagReceived, newID);
                 idOfOldestTagReceived = newID;
+            }
 
             // add into feed if it meets criteria
-            if (1) { 
-                [allTags insertObject:tag atIndex:i];
-                [self getCommentCount:newID]; // store comment count for this tag
-                added = YES;
-            }
-            else 
-                added = NO;
+            [allTags insertObject:tag atIndex:i];
+            [allTagIDs setObject:tag forKey:tag.tagID];
+            [self getCommentCount:newID]; // store comment count for this tag
+            added = YES;
             break;
         }
     }
@@ -968,6 +980,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
 
+    [k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
+    
     // if we added a stix, save stix as comment history
     NSString * stixStringID = [newestTag.auxStixStringIDs objectAtIndex:0];
     if (stixStringID != nil) {
@@ -1004,23 +1018,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 // Checking for new items at the beginning of the list
 
-- (void) checkForUpdateTags {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    int numTags = 1;
-    NSLog(@"Checking for updated tag ids on kumulos");
-    NSNumber * number = [[NSNumber alloc] initWithInt:numTags];
-    //[k getLastTagTimestampWithNumEls:number];
-    [k getLastTagIDWithNumEls:number];
-    [number release];
-}
-
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getLastTagIDDidCompleteWithResult:(NSArray*)theResults {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    // NSArray contains one element which is the most recently created element in the database
+    // NSArray contains a number of elements which is the most recently created element in the database
 	for (NSMutableDictionary * d in theResults) {        
         int idnum = [[d valueForKey:@"allTagID"] intValue];
         if (idnum > idOfNewestTagOnServer)//idOfMostRecentTagReceived)
@@ -1029,26 +1031,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
     
-    // now download that tag
-    if (idOfLastTagChecked < idOfNewestTagOnServer)
-    {
-        NSLog(@"Requesting recent Pix with id %d from Kumulos", idOfNewestTagOnServer);
-        [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
-        idOfLastTagChecked = idOfNewestTagOnServer;
-    }
-    else {
-        NSLog(@"Tag %d already downloaded. allTags count = %d", idOfNewestTagOnServer, [allTags count]);
-        if ([allTags count] == 0) { // try again
-            [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-1 andId_max:idOfNewestTagOnServer+1];
-        }
-    }
+    // now download those tags
+    NSLog(@"Requesting recent Pix with id %d from Kumulos", idOfNewestTagOnServer);
+    [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-[theResults count] andId_max:idOfNewestTagOnServer+1];
 }
 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
-{
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
+-(void)processTagsWithIDRange:(NSArray*)theResults {
     // first, update from kumulos in case other people have added stix
     // to the same pix we are modifying
     {
@@ -1058,27 +1046,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         for (NSMutableDictionary * d in theResults) {
             Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
             int new_id = [tag.tagID intValue];
-            if (new_id > idOfNewestTagReceived)
-            {
-                NSLog(@"Changing id of Newest Tag Received from %d to %d", idOfNewestTagReceived, new_id);
-                idOfNewestTagReceived = new_id;
-            }
-            if (new_id < idOfOldestTagReceived)
-            {
-                NSLog(@"Changing id of Oldest Tag Received from %d to %d", idOfOldestTagReceived, new_id);
-                idOfOldestTagReceived = new_id;
-            }
             didAddTag = [self addTagWithCheck:tag withID:new_id];
+            if (didAddTag)
+                [feedController addTagForDisplay:tag];
             [tag release];
         }
         [feedController stopActivityIndicator];
-        //[feedController.activityIndicator stopCompleteAnimation];
-        if (lastViewController == feedController && didAddTag) // if currently viewing feed, force reload
-            [feedController viewWillAppear:TRUE];
-        if (didAddTag)
-            [feedController reloadCurrentPage];
-        //NSLog(@"loaded %d tags from kumulos", [theResults count]);
-        
     }    
     
     // we get here from handleNotificationBookmarks
@@ -1190,7 +1163,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // we get here from didPerformPeelableAction
     // so that we can modify the new peelable stix status to the correct tag structure
-
+    // we have to call getTag to download the most recent auxStix
     if (isUpdatingPeelableStix) {
         
         // find the correct tag in allTags;
@@ -1257,6 +1230,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
+{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    [self processTagsWithIDRange:theResults];
+}
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateStixOfPixDidCompleteWithResult:(NSNumber *)affectedRows {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -1265,20 +1246,76 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     isUpdatingPeelableStix = NO;
 }
 
+-(void)checkAggregatorStatus {
+    [aggregator displayState];
+    NSLog(@"idOfNewestTagReceived: %d", idOfNewestTagReceived);
+    NSLog(@"idOfOldestTagReceived: %d", idOfOldestTagReceived);
+    NSLog(@"allTags: %d allTagsDisplayed: %d", [allTags count], [[feedController allTagsDisplayed] count]);
+}
+
 -(void)getNewerTagsThanID:(int)tagID {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     // because this gets called multiple times during scrollViewDidScroll, we have to save
     // the last request to try to minimize making duplicate requests
+
     if (tagID == idOfNewestTagReceived || // we always want to make this request
         pageOfLastNewerTagsRequest != tagID){
         pageOfLastNewerTagsRequest = tagID;
-        [k getAllTagsWithIDGreaterThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
+        //[k getAllTagsWithIDGreaterThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
+        NSLog(@"Calling getNewerTagsThanID to get newer tags than %d", tagID);
+        if (idOfNewestTagReceived < [aggregator getNewestTag]) {
+            // manually renew
+            NSLog(@"Newer tag already aggregated: %d is newer than last received %d", [aggregator getNewestTag], idOfNewestTagReceived);
+            [self didFinishAggregation:NO];
+        }
+        // kick off process to download new tags
+        [aggregator aggregateNewTagIDs];
     }
     else{
         //NSLog(@"Duplicate call to getNewerTagsThanID: id %d", tagID);
     }
+}
+
+-(void)didFinishAggregation:(BOOL)isFirstTime {
+    if (isFirstTime) {
+        NSLog(@"didFinishAggregation: isFirstTime after aggregateTrigger");
+        // load from the newest tags, not from the last tag received which could be -1
+        int newestTagOnServer = [aggregator getNewestTag];
+        NSArray * newerTagsToGet = [aggregator getTagIDsGreaterThanTagID:newestTagOnServer-1 totalTags:-1];
+        NSLog(@"didFinishAggregation newestTagOnServer %d tagIDs aggregated %d", newestTagOnServer, [newerTagsToGet count]);
+        for (NSNumber * tagID in newerTagsToGet) {
+            NSLog(@"First time requesting aggregated tags: newer tags %d", [tagID intValue]);
+            [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+        }
+        NSArray * olderTagsToGet = [aggregator getTagIDsLessThanTagID:newestTagOnServer totalTags:5];
+        for (NSNumber * tagID in olderTagsToGet) {
+            NSLog(@"First time requesting aggregated tags: older tags %d", [tagID intValue]);
+            [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+        }
+    }
+    else {
+        NSArray * newerTagsToGet = [aggregator getTagIDsGreaterThanTagID:idOfNewestTagReceived totalTags:-1];
+        NSLog(@"didFinishAggregation: aggregateTagId list after id %d", idOfNewestTagReceived);
+        if (!newerTagsToGet)
+            return;
+        NSLog(@"didFinishAggregation list count: %d", [newerTagsToGet count]);
+        
+        for (int i=0; i<[newerTagsToGet count]; i++) {
+            int tID = [[newerTagsToGet objectAtIndex:i] intValue];
+            NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
+            [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
+        }
+    }
+}
+
+-(void)dismissAggregateIndicator {
+    // if pulldown was used to refresh feed, indicate that aggregator has completed
+    // the requests and dismiss the pulldown.
+    // if there's actually any new tagIDs, [self didAggregateNewerTagID] will be called
+    // and the feedView will be updated accordingly
+    [feedController finishedCheckingForNewData:NO];    
 }
 
 -(void)getOlderTagsThanID:(int)tagID {
@@ -1287,7 +1324,27 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     if (1) { //pageOfLastOlderTagsRequest != tagID) {
         pageOfLastOlderTagsRequest = tagID;
-        [k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
+        //[k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
+        NSArray * oldTagsToGet = [aggregator getTagIDsLessThanTagID:tagID totalTags:TAG_LOAD_WINDOW];
+        if (!oldTagsToGet)
+            return;
+        
+        NSLog(@"Calling getOlderTagsThanID to get %d older tags than %d", [oldTagsToGet count], tagID);
+        for (int i=0; i<[oldTagsToGet count]; i++) {
+            Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]];
+            if (tag) {
+                NSLog(@"Older tag with id %d already exists in allTags structure", tagID);
+                //bool didAddTag = [self addTagWithCheck:tag withID:tagID];
+                //if (didAddTag)
+                //    [feedController addTagForDisplay:tag];
+                //[feedController stopActivityIndicator];
+            }
+            else {
+                int tID = [[oldTagsToGet objectAtIndex:i] intValue];
+                NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
+                [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
+            }
+        }
     }
     else{
         //NSLog(@"Duplicate call to getOlderTagsThanID: id %d", tagID);
@@ -1382,7 +1439,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
 #if 1
     NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil] autorelease];
-    [[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+    //[[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
     NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
 #else
     [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
@@ -1467,11 +1526,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    NSLog(@"Checking for update photos");
     if (1) // todo: check for updated users by id
     {
         //[friendController setIndicator:YES];
-        
-        [k getAllUsers];
+        //[k getAllUsers];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"getAllUsersForUpdatePhotos" withParams:nil withCallback:@selector(khCallback_getAllUsersDidComplete:) withDelegate:self];
     }
 }
 -(void)didSendGiftStix:(NSString *)stixStringID toUsername:(NSString *)friendName {
@@ -1482,10 +1543,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
 }
 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
+//- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
+-(void)khCallback_getAllUsersDidComplete:(NSArray *) returnParams {
+    NSMutableArray * theResults = [returnParams objectAtIndex:0];
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    NSLog(@"kumulosHelper getAllUsers did complete with %d users", [theResults count]);
     [allUsers removeAllObjects];
     [allUserPhotos removeAllObjects];
     [allUserFacebookIDs removeAllObjects];
@@ -1739,9 +1803,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
     [photo release];
     [stix release];
-    //if (firstTime) {
-    //    [tabBarController addFirstTimeInstructions];
-    //}
+    if (firstTime) {
+        //[tabBarController addFirstTimeInstructions];
+        [k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
+        [k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
+    }
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
@@ -1834,13 +1900,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                                              (unsigned long)NULL), ^(void) {
         [self saveDataToDisk];
     });
-    
-    //[self performSelectorInBackground:@selector(saveDataToDisk) withObject:self];
-    //[self saveDataToDisk];
-    
+        
     [self setMetricLogonTime:[NSDate date]];
-    
     [self closeProfileView];
+    
+    [aggregator aggregateNewTagIDs];
 }
 
 -(void)checkConsistency { 
@@ -1991,15 +2055,40 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return allFollowing;
 }
 
+-(BOOL)isFollowing:(NSString*)name {
+    if ([allFollowing count] == 0)
+        return YES;
+    return [allFollowing containsObject:name];
+}
+
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow {
     if (shouldFollow) {
         [allFollowing addObject:friendName];
+        NSLog(@"SetFollowing: you are now following %@ currentList %@", friendName, allFollowing );
         [k addFollowerWithUsername:[self getUsername] andFollowsUser:friendName];
+        [aggregator aggregateNewTagIDs];
+        [feedController didFollowUser]; // tell feedController to redisplay all users that are in the feed but were unfriended
     }
     else {
         [allFollowing removeObject:friendName];
         [k removeFollowerWithUsername:[self getUsername] andFollowsUser:friendName];
+        NSLog(@"You are no longer following %@ - reloading view", friendName);
+        [feedController didUnfollowUser]; // tell feedController to hide all users that were followed but were unfriended
+        
+        // corner case - if all tags removed from this friend causes feed to be empty
+        // we have to reset aggregator first time state
+        /*
+        if ([[feedController allTagsDisplayed] count] == 0)
+        {
+            NSLog(@"Unfollowing a user cleared our view! must reset aggregator");
+            [aggregator resetFirstTimeState];
+        }
+         */
     }
+    idOfOldestTagReceived = idOfNewestTagReceived;
+    idOfNewestTagReceived = -1;
+    [aggregator resetFirstTimeState];
+    [aggregator reaggregateTagIDs];
     [profileController updateFollowCount];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
@@ -2400,11 +2489,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-//    KumulosHelper * kh = [[KumulosHelper alloc] init];
-//    [kh setFunction:@"adminUpdateAllStixOrders"];
-    //[kh setFunction:@"adminUpdateAllFriendsLists"];
-//    [kh execute];
-    [[KumulosHelper sharedKumulosHelper] execute:@"adminUpdateAllStixOrders"];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"adminUpdateAllStixOrders" withParams:nil withCallback:nil withDelegate:self];
+    //[[KumulosHelper sharedKumulosHelper] execute:@"adminUpdateAllStixOrders"];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
@@ -2733,18 +2820,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    NSString * channel_ = [channel stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    NSLog(@"Parse: sending notification to channel <%@>", channel_);
+
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX)
         [data setObject:message forKey:@"alert"];
     [data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
     [data setObject:[NSNumber numberWithInt:type] forKey:@"notificationBookmarkType"];
     [data setObject:message forKey:@"message"];
-    [data setObject:channel forKey:@"channel"];
+    [data setObject:channel_ forKey:@"channel"];
     if (tagID != nil)
         [data setObject:tagID forKey:@"tagID"];
     if (giftStixStringID != nil)
         [data setObject:giftStixStringID forKey:@"giftStixStringID"];
-    [PFPush sendPushDataToChannelInBackground:channel withData:data];
+    [PFPush sendPushDataToChannelInBackground:channel_ withData:data];
 }
 
 - (void)application:(UIApplication *)application 
@@ -3150,7 +3240,8 @@ static bool isShowingAlerts = NO;
     [allFollowers removeAllObjects];
     for (NSMutableDictionary * d in theResults) {
         NSString * friendName = [d valueForKey:@"username"];
-        [allFollowers addObject:friendName];
+        if (![allFollowers containsObject:friendName])
+            [allFollowers addObject:friendName];
     }
     NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);
 }
@@ -3161,9 +3252,13 @@ static bool isShowingAlerts = NO;
     [allFollowing removeAllObjects];
     for (NSMutableDictionary * d in theResults) {
         NSString * friendName = [d valueForKey:@"followsUser"];
-        [allFollowing addObject:friendName];
+        if (![allFollowing containsObject:friendName])
+            [allFollowing addObject:friendName];
     }
     NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
+
+    //[aggregator startAggregatingTagIDs];
+    [aggregator aggregateNewTagIDs];
 }
 
 @end

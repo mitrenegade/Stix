@@ -14,6 +14,7 @@
 
 @optional
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray*)params;
+-(void)kumulosHelperGetFacebookUserDidFail;
 
 @end
 
@@ -29,8 +30,10 @@
 @property (nonatomic, assign) NSString * function;
 @property (nonatomic, assign) SEL callback;
 @property (nonatomic, assign) NSObject<KumulosHelperDelegate> * delegate;
+@property (nonatomic, retain) NSMutableArray * inputParams;
 
 -(void)execute:(NSString*)_function withParams:(NSMutableArray*)params withCallback:(SEL)_callback withDelegate:(NSObject<KumulosHelperDelegate>*)helperDelegate;
 -(void)execute:(NSString*)_function;
-+(KumulosHelper*)sharedKumulosHelper;
+//+(KumulosHelper*)sharedKumulosHelper;
+-(void)cleanup;
 @end

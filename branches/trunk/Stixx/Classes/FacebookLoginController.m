@@ -190,14 +190,6 @@
     //}
     
     // set First time user flags
-    bool firstTimeUser = NO; 
-    //if (loginController.bJoinOrLogin == 0) { // join 
-    //    firstTimeUser = YES;
-    //}        
-    //else {
-    //    firstTimeUser = NO;
-    //}        
-    
     /* auxiliary data */
     //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
@@ -222,7 +214,7 @@
     }
      */
 //    [loginController.view removeFromSuperview];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:firstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
     [stix release]; // MRC
     [newPhoto release]; // MRC
     [auxiliaryData release];
@@ -234,6 +226,10 @@
     [self.delegate doFacebookLogin];
     NSLog(@"Did click Facebook Login button");
     [self startActivityIndicator];
+}
+
+-(void)didCreateHandle:(UIButton*)sender {
+    //NSLog(@"Handle created: %@", [loginName text]);
 }
 
 #pragma mark - facebook
@@ -254,17 +250,21 @@
     [self setFacebookEmail:email];
     
     // check Kumulos for facebook id existence
-    [k getFacebookUserWithFacebookID:fbID];
-}
-
--(void)didCreateHandle:(UIButton*)sender {
-    //NSLog(@"Handle created: %@", [loginName text]);
+#if 1
+    //[k getFacebookUserWithFacebookID:fbID];
+    [self loginUser]; // ignore facebook and just login
+#else
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:fbID], nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"getFacebookUser" withParams:params withCallback:@selector(khCallback_didGetFacebookUser:) withDelegate:self];
+    [params release];
+#endif
 }
 
 #pragma mark KumulosDelegate functions
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFacebookUserDidCompleteWithResult:(NSArray *)theResults {
-    
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFacebookUserDidCompleteWithResult:(NSArray *)theResults {
+-(void)khCallback_didGetFacebookUser:(NSMutableArray*)theResults {
     if ([theResults count] == 0) {
         // new user - JOIN
         //NSLog(@"Facebook ID does not exist in user database - creating new user");
@@ -276,6 +276,7 @@
     else {
         // existing user - LOGIN
         NSLog(@"Facebook ID found! Logging in existing user.");
+        isFirstTimeUser = NO;
         [self loginUser];
     }
 }
@@ -291,7 +292,9 @@
     [alert release];
     
     [self stopActivityIndicator];
+    isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:theResults];
+    
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{
@@ -306,8 +309,11 @@
         [alert setMessage:@"You are now logged in"];
         [self didSelectUsername:username withResults:theResults];
     }else {
-        [alert setTitle:@"Whoops"];
-        [alert setMessage:@"Sorry we could not log you in: invalid password."];
+        //[alert setTitle:@"Whoops"];
+        //[alert setMessage:@"Sorry we could not log you in: invalid password."];
+        // could not login with given facebook id and username; check facebook for that id
+        NSLog(@"Could not login with username %@ and facebookID %@, checking facebook", facebookName, facebookID);
+        [k getFacebookUserWithFacebookID:facebookID];
     }
     
     [self stopActivityIndicator];
@@ -325,6 +331,7 @@
         // existing user - LOGIN
         NSLog(@"Email found! Logging in existing user.");
         NSLog(@"changing username to %@", facebookName);
+        isFirstTimeUser = YES;
         [self updateExistingUser:facebookName withFacebookID:facebookID];
     }
 }
@@ -332,5 +339,20 @@
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateUserByEmailDidCompleteWithResult:(NSNumber *)affectedRows {
     [self loginUser];
 }
+
+#pragma mark KumulosHelperDelegate functions
+
+-(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+    NSLog(@"KumulosHelper completed in FacebookLoginController");
+    [self performSelector:callback withObject:params afterDelay:0];
+}
+
+// the only didFail function in kumulos helper delegate
+-(void)kumulosHelperGetFacebookUserDidFail {
+    NSLog(@"Facebook login failed! Kumulos had some error. trying to login again");
+    [self didGetFacebookName:facebookName andEmail:facebookEmail andID:facebookID];
+}
+
+
 
 @end

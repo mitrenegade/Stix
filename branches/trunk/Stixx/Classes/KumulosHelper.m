@@ -15,8 +15,20 @@
 @synthesize function;
 @synthesize callback;
 @synthesize delegate;
+@synthesize inputParams;
 
+/*
 static KumulosHelper *sharedKumulosHelper = nil;
++(KumulosHelper*)sharedKumulosHelper 
+{
+	if (!sharedKumulosHelper){
+		sharedKumulosHelper = [[KumulosHelper alloc] init];
+	}
+	return sharedKumulosHelper;
+}
+*/
+
+// KumulosHelper should not be a singleton!
 
 -(id)init
 {
@@ -28,16 +40,8 @@ static KumulosHelper *sharedKumulosHelper = nil;
 	return self;
 }
 
-+(KumulosHelper*)sharedKumulosHelper 
-{
-	if (!sharedKumulosHelper){
-		sharedKumulosHelper = [[KumulosHelper alloc] init];
-	}
-	return sharedKumulosHelper;
-}
-
 -(void)execute:(NSString*)_function withParams:(NSMutableArray*)params withCallback:(SEL)_callback withDelegate:(NSObject<KumulosHelperDelegate>*)helperDelegate{
-    [params retain];
+    [self setInputParams:params];
     [self setFunction:_function];
     [self setCallback:_callback];
     delegate = helperDelegate;
@@ -47,27 +51,34 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"adminUpdateAllFriendsLists"]) {
         [k getAllUsers];
     }
+    else if ([function isEqualToString:@"getAllUsersForUpdatePhotos"]) {
+        [k getAllUsers];
+    }
     else if ([function isEqualToString:@"sharePix"]) {
-        assert([params count] == 1);
-        [k savePixWithPixPNG:[params objectAtIndex:0]];
+        assert([inputParams count] == 1);
+        [k savePixWithPixPNG:[inputParams objectAtIndex:0]];
     }
     else if ([function isEqualToString:@"getSubcategories"]) {
         [k getAllCategories];
     }
     else if ([function isEqualToString:@"getCommentHistory"]) {
-        NSNumber * tagID = [params objectAtIndex:0];
+        NSNumber * tagID = [inputParams objectAtIndex:0];
         [k getAllHistoryWithTagID:[tagID intValue]];
     }
     else if ([function isEqualToString:@"addCommentToPix"]) {
-        NSNumber * tagID = [params objectAtIndex:0];
-        NSString * name = [params objectAtIndex:1];
-        NSString * comment = [params objectAtIndex:2];
-        NSString * stixStringID = [params objectAtIndex:3];
+        NSNumber * tagID = [inputParams objectAtIndex:0];
+        NSString * name = [inputParams objectAtIndex:1];
+        NSString * comment = [inputParams objectAtIndex:2];
+        NSString * stixStringID = [inputParams objectAtIndex:3];
         [k addCommentToPixWithTagID:[tagID intValue] andUsername:name andComment:comment andStixStringID:stixStringID];
         
         [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
     }
-    [params autorelease];
+    else if ([function isEqualToString:@"getFacebookUser"]) {
+        NSNumber * fbID = [inputParams objectAtIndex:0];
+        NSLog(@"Calling kumulos getFaceBookUser with id %d", [fbID intValue]);
+        [k getFacebookUserWithFacebookID:[fbID intValue]];
+    }
 }
 
 -(void)execute:(NSString*)_function {
@@ -76,12 +87,12 @@ static KumulosHelper *sharedKumulosHelper = nil;
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation savePixDidCompleteWithResult:(NSNumber *)newRecordID {
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
-    if (sharedKumulosHelper.delegate)
-        [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+    if (self.delegate)
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
-    if ([sharedKumulosHelper.function isEqualToString:@"adminUpdateAllStixOrders"]) {
+    if ([self.function isEqualToString:@"adminUpdateAllStixOrders"]) {
         // recreates stixOrder completely. this fixes several problems:
         // if stixOrder is repeated
         // if stixOrder exists for a stix that is at 0 counts
@@ -131,10 +142,10 @@ static KumulosHelper *sharedKumulosHelper = nil;
             //[auxiliaryDict setObject:friendsList forKey:@"friendsList"];
             NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
             NSLog(@"User %@ now has %d stix and %d stixOrders", username, [stix count], [stixOrder count]);
-            [sharedKumulosHelper.k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
+            [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
         }
     }
-    else if ([sharedKumulosHelper.function isEqualToString:@"adminUpdateAllFriendsLists"]) {
+    else if ([self.function isEqualToString:@"adminUpdateAllFriendsLists"]) {
         // recreates stixOrder completely. this fixes several problems:
         // if stixOrder is repeated
         // if stixOrder exists for a stix that is at 0 counts
@@ -175,38 +186,77 @@ static KumulosHelper *sharedKumulosHelper = nil;
         }
          */
     }
+    else if (self.delegate && [function isEqualToString:@"getAllUsersForUpdatePhotos"]) {
+        //NSLog(@"KumulosHelper finished getting all users photos: %d photos", [theResults count]);
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];         
+//        [theResults release];
+        //NSLog(@"return params: %@", returnParams);
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
+    }
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updatePixTimestampDidCompleteWithResult:(NSNumber *)affectedRows {
     NSLog(@"rows: %d", [affectedRows intValue]);
+    [self cleanup];
 }
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixTimestampDidCompleteWithResult:(NSNumber *)affectedRows {
     NSLog(@"rows: %d", [affectedRows intValue]);
+    [self cleanup];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllCategoriesDidCompleteWithResult:(NSArray *)theResults {
-    if ([sharedKumulosHelper.function isEqualToString:@"getSubcategories"]) {
+    if ([self.function isEqualToString:@"getSubcategories"]) {
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
-        if (sharedKumulosHelper.delegate)
-            [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+        if (self.delegate)
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }
+    [self cleanup];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllHistoryDidCompleteWithResult:(NSArray *)theResults {
-    if ([sharedKumulosHelper.function isEqualToString:@"getCommentHistory"]) {
+    if ([self.function isEqualToString:@"getCommentHistory"]) {
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
-        if (sharedKumulosHelper.delegate) {
-            [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+        if (self.delegate) {
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
         }
     }
+    [self cleanup];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addCommentToPixDidCompleteWithResult:(NSNumber *)newRecordID {
     NSNumber * tagID = [savedInfo objectForKey:@"addCommentToPix_tagID"];
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, nil];
-    if (sharedKumulosHelper.delegate) {
-        [sharedKumulosHelper.delegate kumulosHelperDidCompleteWithCallback:sharedKumulosHelper.callback andParams:returnParams];
+    if (self.delegate) {
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFacebookUserDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithArray:theResults];
+    if (self.delegate) {
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    }
+    [self cleanup];
+}
+
+#pragma mark error handling for kumulos helper
+-(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
+    NSLog(@"KumulosHelper failed during function: %@", function);
+    
+    // retry if desired
+    if ([function isEqualToString:@"getFacebookUser"]) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(kumulosHelperGetFacebookUserDidFail)])
+            [self.delegate kumulosHelperGetFacebookUserDidFail];
+    }
+    else if ([function isEqualToString:@"getAllUsersForUpdatePhotos"]) {
+        [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
+    }
+    [self cleanup];
+}
+
+-(void)cleanup {
+    [inputParams release];
 }
 
 @end

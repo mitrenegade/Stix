@@ -342,7 +342,7 @@
     NSMutableArray * param = [[NSMutableArray alloc] init];
     [param addObject:tag.tagID];
     [param autorelease];
-    [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+    [[KumulosHelper sharedKumulosHelper] execute:@"getCommentHistory" withParams:param withCallback:@selector(khCallback_didGetCommentHistoryWithResults:) withDelegate:self];
 #else
     k = [[Kumulos alloc] init];
     [k setDelegate:self];

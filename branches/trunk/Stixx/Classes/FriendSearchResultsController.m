@@ -208,13 +208,21 @@
         [alreadyFriendedButton release];
     }
     
-    if (![self.delegate isFollowingUser:y]) {
+    int userStatus = [self.delegate getFollowingUserStatus:y];
+    if (userStatus == 0) {
+        // not following a user that is already on Stix
         NSMutableArray * buttonArray = [userButtons objectForKey:username];
         cell.accessoryView = [buttonArray objectAtIndex:0];
         cell.accessoryType = UITableViewCellAccessoryNone;
-    } else {  
+    } else if (userStatus == 1) {
+        // already following a user
         NSMutableArray * buttonArray = [userButtons objectForKey:username];
         cell.accessoryView = [buttonArray objectAtIndex:1];
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    } else if (userStatus == -1) {
+        // user is not a Stix user - invite button
+        //NSMutableArray * buttonArray = [userButtons objectForKey:username];
+        cell.accessoryView = nil; //cell.accessoryView = [buttonArray objectAtIndex:1];
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
 

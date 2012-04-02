@@ -732,10 +732,12 @@
     if (!allTagsDisplayed)
         allTagsDisplayed = [[NSMutableArray alloc] init];
     [allTagsDisplayed removeAllObjects];
+    NSMutableSet * followingSet = [delegate getFollowingList];
+    [followingSet addObject:[self getUsername]];
     for (int i=0; i<[allTags count]; i++) {
         Tag * tag = [allTags objectAtIndex:i];
         NSString * name = tag.username;
-        if ([delegate isFollowing:name])
+        if ([followingSet containsObject:name])
             [allTagsDisplayed addObject:tag];
         else 
             NSLog(@"Skipping tag %d with username %@", [tag.tagID intValue], tag.username);

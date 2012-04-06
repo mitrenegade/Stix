@@ -37,7 +37,7 @@
 @synthesize exploreController;
 @synthesize tabBarController;
 @synthesize feedController;
-@synthesize profileController;
+@synthesize profileController, userProfileController;
 //@synthesize friendController;
 @synthesize loginSplashController;
 @synthesize myUserInfo;
@@ -76,15 +76,19 @@ static NSString * uniqueDeviceID = nil;
     metricLogonTime = nil;
     
     /*** Kumulos service ***/
-    
+    NSLog(@"Creating kumulos");
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
     [self setLastKumulosErrorTimestamp: [NSDate dateWithTimeIntervalSinceReferenceDate:0]];
+    backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL);
     
+    //backgroundQueue = dispatch_queue_create("com.Neroh.Stix.bgqueue", NULL); 
+    NSLog(@"Creating aggregator");
     aggregator = [[UserTagAggregator alloc] init];
     [aggregator setDelegate:self];
 
     /*** device id on pasteboard ***/
+    NSLog(@"Loading pasteboard for UID");
 	UIPasteboard *appPasteBoard = [UIPasteboard pasteboardWithName:@"StixAppPasteboard" create:YES];
 	appPasteBoard.persistent = YES;
 	uniqueDeviceID = [appPasteBoard string];    
@@ -109,6 +113,12 @@ static NSString * uniqueDeviceID = nil;
     [window makeKeyAndVisible];
     
     myUserInfo = malloc(sizeof(struct UserInfo));
+    myUserInfo->username = nil;
+    myUserInfo->userphoto = nil;
+    myUserInfo->bux = 0;
+    myUserInfo->usertagtotal = 0;
+    myUserInfo->email = nil;
+    myUserInfo->facebookID = 0;
 
     /*** Parse service ***/
     /*
@@ -160,20 +170,9 @@ static NSString * uniqueDeviceID = nil;
     /* load stix types, stix views, user info, and check for version */
     
     [self checkVersion];
-    stixViewsLoadedFromDisk = [self loadDataFromDisk];
-    // to force loading stix data from kumulos, set stixViewsLoadedFromDisk to 0
-    //stixViewsLoadedFromDisk = 0;
-    if (stixViewsLoadedFromDisk)
-        init++;
-//    [self initializeBadges];
-    [BadgeView InitializeGenericStixTypes];
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                             (unsigned long)NULL), ^(void) {
-        [self initializeBadges];        
-    });
-    //[self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
-    //[self initializeBadges];
+    
+    [self loadUserInfoFromDefaults];
+    stixViewsLoadedFromDisk = 0; //[self loadStixDataFromDefaults];
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
@@ -223,8 +222,9 @@ static NSString * uniqueDeviceID = nil;
     
     // get newest tag on server regardless of who is logged in
     // when login completes, feed will filter 
-    [k getLastTagIDWithNumEls:[NSNumber numberWithInt:3]];
-
+    KSAPIOperation * kop = [k getLastTagIDWithNumEls:[NSNumber numberWithInt:3]];
+    //[kop setDebugMode:YES];
+    
 	/***** create feed view *****/
     //[loadingMessage setText:@"Loading feed..."];
     
@@ -245,11 +245,11 @@ static NSString * uniqueDeviceID = nil;
     //friendController.delegate = self;
     [self checkForUpdatePhotos];
     
-	/***** create config view *****/
+	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
-    //[profileController setCamera:self.camera];
-    //[profileController setFriendController:friendController];
+    userProfileController = [[UserProfileViewController alloc] init];
+    userProfileController.delegate = self;
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
@@ -277,21 +277,13 @@ static NSString * uniqueDeviceID = nil;
     
     [self didPressTabButton:TABBAR_BUTTON_FEED];
         
-    myUserInfo->userphoto = nil;
-    myUserInfo->bux = 0;
-    myUserInfo->usertagtotal = 0;
     loggedIn = NO;
     isLoggingIn = NO;
     loginSplashController = [[FacebookLoginController alloc] init];
     [loginSplashController setDelegate:self];
-    if (![fbHelper facebookHasSession]) // !myUserInfo->username || [myUserInfo->username length] == 0)
+    if (![fbHelper facebookHasSession] || myUserInfo->username == nil) // !myUserInfo->username || [myUserInfo->username length] == 0)
     {
         NSLog(@"Could not log in: forcing new login screen!");
-#if 0
-        loginSplashController = [[LoginSplashController alloc] init];
-        [loginSplashController setDelegate:self];
-        [loginSplashController setCamera:self.camera];
-#endif
         isLoggingIn = YES;
         loggedIn = NO;
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
@@ -477,8 +469,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
     // load all stix types from Kumulos - doesn't take much
     [k getAllStixTypes];
-    if (!stixViewsLoadedFromDisk)
-        [k getAllStixViews];
+    //if (!stixViewsLoadedFromDisk)
+    //[k getAllStixViews];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
@@ -487,11 +479,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif  
     if ([theResults count] == 0)
         NSLog(@"Could not find a stix data! May be missing in Kumulos.");
-    else
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
+    else {
+        NSMutableDictionary * d = [theResults objectAtIndex:0]; 
+        NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+        NSLog(@"getStixData completed for stix string: %@", descriptor); 
+        //dispatch_async(backgroundQueue, ^(void) {
         [BadgeView AddStixView:theResults];
-        });
+        //});
+    }
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixTypesDidCompleteWithResult:(NSArray *)theResults {     
@@ -500,15 +495,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif  
     // initialize stix types for all badge views
     [BadgeView InitializeStixTypes:theResults];
-    NSLog(@"All %d Stix types initialized from kumulos!", [BadgeView totalStixTypes]);
-    init++;
-    if (stixViewsLoadedFromDisk)
+    [self saveStixDataToDefaults];
+
+    NSLog(@"***** InitializeBadges Done: All %d Stix types initialized from kumulos! *****", [BadgeView totalStixTypes]);
+    //init++;
+    if (0) //(stixViewsLoadedFromDisk)
     {
         // consolidate all stix types with stix views and load any stixViews that weren't loaded
         NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
         NSLog(@"%d views loaded from disk; %d types loaded from Kumulos", [stixViews count], [theResults count]);
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+        //                                         (unsigned long)NULL), ^(void) {
             int newStixCount = 0;
             for (int i=0; i<[BadgeView totalStixTypes]; i++) {
                 NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
@@ -520,9 +517,19 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
                 }
             }
             NSLog(@"Loading %d new stixViews in background...", newStixCount);
-        });
+        //});
     }
+    else {
+        //NSLog(@"InitializeBadges starting to download stix views");
+        //[k getAllStixViews];
+    }
+    
+    NSLog(@"Initializing carousel view after stix types have been determined");
+//    dispatch_async(backgroundQueue, ^(void) {
+//        [[CarouselView sharedCarouselView] reloadAllStix];
+//    });
 
+    /*
     if (init >= 2) {
         //[self continueInit];
         [self reloadAllCarousels];
@@ -530,6 +537,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else {
         NSLog(@"getAllStixTypes still waiting for init=2");
     }
+     */
 }
 
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllStixViewsDidCompleteWithResult:(NSArray *)theResults {
@@ -537,98 +545,127 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
     [BadgeView InitializeStixViews:theResults];
-    NSLog(@"All %d Stix data initialized from kumulos!", [theResults count]);
-    init++;
-    if (init >= 2) {
-        if ([self isLoggedIn])
-            [self reloadAllCarousels];
+    NSLog(@"***** InitializeBadges done: All %d Stix data initialized from kumulos! *****", [theResults count]);
         //[self continueInit];
-    }
-    else {
-        NSLog(@"getAllStixViews still waiting for init=2");
-    }
-}
-    
-- (void) saveDataToDisk {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSString * path = [self coordinateArrayPath];
- 	
-    NSMutableDictionary * rootObject;
-    rootObject = [NSMutableDictionary dictionary];
-    
-    [rootObject setValue: myUserInfo->username forKey:@"username"];
-    [rootObject setValue: [NSNumber numberWithInt:myUserInfo->bux] forKey:@"bux"];
-
-    @try {
-        // save stix types that we know about
-        NSMutableArray * stixStringIDs = [BadgeView GetAllStixStringIDsForSave];
-        NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
-        NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];
-        NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
-        NSMutableDictionary * stixSubcategories = [BadgeView GetAllStixSubcategoriesForSave];
-        
-        [rootObject setValue:stixStringIDs forKey:@"stixStringIDs"];
-        [rootObject setValue:stixViews forKey:@"stixViews"];
-        NSLog(@"Saving %d stix views to disk", [stixViews count]);
-        [rootObject setValue:stixDescriptors forKey:@"stixDescriptors"];
-        [rootObject setValue:stixCategories forKey:@"stixCategories"];
-        [rootObject setValue:stixSubcategories forKey:@"stixSubcategories"];
-        NSLog(@"Saving %d stix subcategories to disk", [stixSubcategories count]);
-        
-        [NSKeyedArchiver archiveRootObject: rootObject toFile: path];
-    } 
-    @catch (NSException *exception) {
-        NSLog(@"SaveDataToDisk encountered an exception! %@", [exception reason]);
-    }
 }
 
-- (int) loadDataFromDisk {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // returns 0 if no stixViews loaded, 1 if stixViews were loaded from disk
-    NSString     * path         = [self coordinateArrayPath];
-    NSDictionary * rootObject;
+-(void)saveUserInfoToDefaults {
+    // Store the data
+    NSLog(@"Saving data to user defaults");
+    if (isLoggingIn)
+        return;
     
-    rootObject = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
-    // backwards compatibility
-    if (![rootObject isKindOfClass:[NSDictionary class]]) {
-        myUserInfo->username = nil;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    [defaults setObject:versionStringStable forKey:@"stixVersion"];
+    [defaults setObject:myUserInfo->username forKey:@"username"];
+    [defaults setObject:myUserInfo->email forKey:@"email"];
+    [defaults setInteger:myUserInfo->facebookID forKey:@"facebookID"];
+    [defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
+    [defaults setInteger:myUserInfo->bux forKey:@"bux"];
+    NSData *userphoto = UIImageJPEGRepresentation(myUserInfo->userphoto, 100);
+    [defaults setObject:userphoto forKey:@"userphoto"];
+
+    //[defaults setObject:stixSubcategories forKey:@"stixSubcategories"];
+    //NSLog(@"Saving %d stix subcategories to disk", [stixSubcategories count]);
+    
+    [defaults synchronize];
+}
+
+-(void)saveStixDataToDefaults {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSMutableArray * stixStringIDs = [[BadgeView GetAllStixStringIDsForSave] retain];
+    //NSMutableDictionary * stixViews = [[BadgeView GetAllStixViewsForSave] retain];
+    NSMutableDictionary * stixDescriptors = [[BadgeView GetAllStixDescriptorsForSave] retain];   
+    NSMutableDictionary * stixCategories = [[BadgeView GetAllStixCategoriesForSave] retain];
+    //NSMutableDictionary * stixSubcategories = [BadgeView GetAllStixSubcategoriesForSave];
+    [defaults setObject:stixDescriptors forKey:@"stixDescriptors"];
+    [defaults setObject:stixCategories forKey:@"stixCategories"];
+    NSMutableDictionary * stixViews = [[BadgeView GetAllStixViewsForSave] retain];
+    [defaults setObject:stixStringIDs forKey:@"stixStringIDs"];
+    NSLog(@"Saved %d stixStringIDs", [stixStringIDs count]);
+    int total=0;
+    for (NSString * stixStringID in stixStringIDs) {
+        total += [self saveStixDataToDefaultsForStixStringID:stixStringID];
+    }
+    NSLog(@"Saved %d stixViews", total);
+    [stixStringIDs release];
+    [stixViews release];
+    [stixDescriptors release];
+    [stixCategories release];
+    
+    [defaults synchronize];
+}
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    [self saveStixDataToDefaultsForStixStringID:stixStringID];
+}
+
+-(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    UIImageView * stixView = [[BadgeView GetAllStixViewsForSave] objectForKey:stixStringID];
+    NSString * stixDescriptor = [[BadgeView GetAllStixDescriptorsForSave] objectForKey:stixStringID];   
+    if (!stixView)
+        return 0;
+    NSData * stixPhoto = UIImagePNGRepresentation([stixView image]);
+        [defaults setObject:stixPhoto forKey:stixStringID];
+    NSLog(@"Saving stix data to disk for %@", stixDescriptor);
+    // defaults synchronize will happen periodically
+    return 1;
+}
+
+-(int)loadUserInfoFromDefaults {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSString * versionString = [defaults objectForKey:@"stixVersion"];
+    if (!versionString || [versionString compare:@"0.9"] == NSOrderedAscending) {
+        NSLog(@"LoadUserFromDefaults: no version");
         return 0;
     }
-    myUserInfo->username = [[rootObject valueForKey:@"username"] copy];
-    myUserInfo->bux = [[rootObject valueForKey:@"bux"] intValue];
     
+    // if there's a version string > 0.9, then we must have also saved username sometime
+    myUserInfo->username = [defaults objectForKey:@"username"];
+    myUserInfo->email = [defaults objectForKey:@"email"];
+    myUserInfo->facebookID = [defaults integerForKey:@"facebookID"];
+    myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
+    myUserInfo->bux = [defaults integerForKey:@"bux"];
+    NSData * userphoto = [defaults objectForKey:@"userphoto"];
+    myUserInfo->userphoto = [UIImage imageWithData:userphoto];
+    
+    return 1;
+}
+-(int)loadStixDataFromDefaults {
+    NSLog(@"Trying to LoadStixDataFromDefaults");
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    NSString * versionString = [defaults objectForKey:@"stixVersion"];
+    if (!versionString || [versionString compare:@"0.9"] == NSOrderedAscending) {
+        
+        return 0;
+    }
     @try {
-        NSMutableArray * stixStringIDs = [rootObject valueForKey:@"stixStringIDs"];
-        NSMutableDictionary * stixViews = [rootObject valueForKey:@"stixViews"];
-        NSMutableDictionary * stixDescriptors = [rootObject valueForKey:@"stixDescriptors"];
-        NSMutableDictionary * stixCategories = [rootObject valueForKey:@"stixCategories"];
         
-        NSLog(@"LoadDataFromDisk: %d stixViews %d stixCategories", [stixViews count], [stixCategories count]);
-        
-        if (stixViews != nil)
+        NSMutableArray * stixStringIDs = [defaults objectForKey:@"stixStringIDs"];
+        NSMutableDictionary * stixDescriptors = [defaults objectForKey:@"stixDescriptors"];
+        NSMutableDictionary * stixCategories = [defaults objectForKey:@"stixCategories"];
+        NSMutableDictionary * stixViews = [[NSMutableDictionary alloc] init];
+        for (NSString * stixStringID in stixStringIDs) {
+            NSData * stixPhoto = [defaults objectForKey:stixStringID];
+            if (stixPhoto)
+                [stixViews setObject:[[UIImageView alloc] initWithImage:[UIImage imageWithData:stixPhoto]] forKey:stixStringID];
+        }
+        if (stixStringIDs != nil)
         {
             NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
-            [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixLikelihoods:nil andStixCategories:stixCategories];
-            NSMutableDictionary * stixSubcategories = [rootObject valueForKey:@"stixSubcategories"];
-            if (stixSubcategories != nil && [stixSubcategories count] != 0) {
-                NSLog(@"%d StixSubcategories loaded from disk!", [stixSubcategories count]);
-                [BadgeView InitializeStixSubcategoriesFromDisk:stixSubcategories];
-            }
-            else
-            {
-                NSLog(@"StixSubcategories not loaded from disk! Loading from Kumulos...");
-                KumulosHelper * kh = [[KumulosHelper alloc] init];
-                [kh execute:@"getSubcategories" withParams:nil withCallback:@selector(khCallback_didGetKumulosSubcategories:) withDelegate:self];
-                return 0;
-            }
+            [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixCategories:stixCategories];
+            [stixViews release];
             return 1;
         }
         else
             NSLog(@"No Stix were saved to disk!");
+        [stixViews release];
         return 0;
     }
     @catch (NSException * exception) {
@@ -652,8 +689,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [BadgeView InitializeStixSubcategoriesFromKumulos:stixSubcategoriesFromKumulos];
     NSLog(@"%d StixSubcategories loaded from Kumulos!", [stixSubcategoriesFromKumulos count]);
     [self reloadAllCarousels];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                             (unsigned long)NULL), ^(void) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
         [self saveDataToDisk];
     });
 }
@@ -763,7 +799,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
           //                                       (unsigned long)NULL), ^(void) {
-            [self saveDataToDisk];
+            //[self saveDataToDisk];
         //});
 
         [self logMetricTimeInApp];
@@ -786,10 +822,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
         NSLog(@"Logging out and saving username %@", myUserInfo->username);
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                 (unsigned long)NULL), ^(void) {
-        [self saveDataToDisk];
-        });
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+        //[self saveDataToDisk];
+        //});
         [self logMetricTimeInApp];
     }
     
@@ -811,12 +846,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [camera setCameraOverlayView:tabBarController.view];
      */
     // force some updates to badgeview types
+    /*
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
                                              (unsigned long)NULL), ^(void) {
         [self initializeBadges];
     });
-    //[self performSelectorInBackground:@selector(initializeBadges) withObject:nil];
-    //[self initializeBadges];
+     */
     
     [self setMetricLogonTime: [NSDate date]];
 }
@@ -840,6 +875,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k release];
     [window release];
     free(myUserInfo);
+    dispatch_release(backgroundQueue);
+    [aggregator release];
     [super dealloc];
 }
 
@@ -1033,7 +1070,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // now download those tags
     NSLog(@"Requesting recent Pix with id %d from Kumulos", idOfNewestTagOnServer);
-    [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-[theResults count] andId_max:idOfNewestTagOnServer+1];
+    KSAPIOperation * kop = [k getAllTagsWithIDRangeWithId_min:idOfNewestTagOnServer-[theResults count] andId_max:idOfNewestTagOnServer+1];
+    //[kop setDebugMode:YES];
 }
 
 -(void)processTagsWithIDRange:(NSArray*)theResults {
@@ -1047,10 +1085,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
             int new_id = [tag.tagID intValue];
             didAddTag = [self addTagWithCheck:tag withID:new_id];
-            if (didAddTag)
-                [feedController addTagForDisplay:tag];
+            //if (didAddTag)
+            //    [feedController addTagForDisplay:tag];
             [tag release];
         }
+        if (didAddTag)
+            [feedController reloadCurrentPage];
         [feedController stopActivityIndicator];
     }    
     
@@ -1235,7 +1275,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    if ([theResults count]>0) {
+        Tag * tag = [Tag getTagFromDictionary:[theResults objectAtIndex:0]] ;
+        NSLog(@"Processing tags with id: %d",[[tag tagID] intValue]);
     [self processTagsWithIDRange:theResults];
+    }
+    else {
+        NSLog(@"Processing results: none exist!");
+    }
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updateStixOfPixDidCompleteWithResult:(NSNumber *)affectedRows {
@@ -1271,7 +1318,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self didFinishAggregation:NO];
         }
         // kick off process to download new tags
-        [aggregator aggregateNewTagIDs];
+        @try {
+            [aggregator aggregateNewTagIDs];
+        } @catch (NSException * error) {
+            NSLog(@"Aggregate new tags failed! error %@", [error reason]);
+        }
     }
     else{
         //NSLog(@"Duplicate call to getNewerTagsThanID: id %d", tagID);
@@ -1326,8 +1377,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         pageOfLastOlderTagsRequest = tagID;
         //[k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
         NSArray * oldTagsToGet = [aggregator getTagIDsLessThanTagID:tagID totalTags:TAG_LOAD_WINDOW];
-        if (!oldTagsToGet)
-            return;
+        if (!oldTagsToGet) {
+            NSLog(@"getOlderTagsThanID: no more older tags! You are out of content!");
+            [feedController stopActivityIndicator];
+            return;            
+        }
         
         NSLog(@"Calling getOlderTagsThanID to get %d older tags than %d", [oldTagsToGet count], tagID);
         for (int i=0; i<[oldTagsToGet count]; i++) {
@@ -1565,18 +1619,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allUserEmails addObject:[d valueForKey:@"email"]];
         [allUserNames addObject:name];
     }
-    
-    //[friendController setIndicator:NO];
-    //if (lastViewController == profileController) // if currently viewing friends, force reload
-    //{
-    //    [lastViewController viewWillAppear:TRUE];
-    //}    
-    //if (lastViewController == profileController)
-    //{
-        //[profileController.friendController viewWillAppear:YES];
-        //[profileController updateFriendCount];
-    //}
-    //NSLog(@"loaded %d new friends from kumulos", [theResults count]);
 }
 
 -(NSMutableDictionary * )getUserPhotos {
@@ -1591,24 +1633,41 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 /**** ProfileViewController and login functions ****/
 -(void)didOpenProfileView {
     // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    [profileController.view setFrame:frameShifted];
-#if 1
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:profileController.view];
+    [profileController.view setFrame:frameOffscreen];
+
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
 #if !TARGET_IPHONE_SIMULATOR
-    [self.camera setCameraOverlayView:profileController.view];
-#endif
-#else
-    [tabBarController.view addSubview:profileController.view];
+        //[profileController.view removeFromSuperview];
+        //[self.camera setCameraOverlayView:profileController.view];
 #endif    
-//    [profileController viewWillAppear:YES]; // force updates -> hack: this doesn't automatically happen??
+        //[self.tabBarController.view addSubview:userProfileController.view];
+    }];
+    
+    // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [profileController viewDidAppear:YES]; 
 }
 
 -(void)closeProfileView {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    [self.profileController.view removeFromSuperview];
-    [self.camera setCameraOverlayView:self.tabBarController.view];
+//    [self.profileController.view removeFromSuperview];
+//    [self.camera setCameraOverlayView:self.tabBarController.view];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    //animation.delegate = self;
+    CGRect frameOffscreen = profileController.view.frame;
+    //[self.window addSubview:profileController.view];
+    //[self.camera setCameraOverlayView:self.tabBarController.view];
+    
+    frameOffscreen.origin.x -= 330;
+    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [profileController.view removeFromSuperview];
+//        [self.camera setCameraOverlayView:self.tabBarController.view];
+    }];
 }
 
 -(void)didClickChangePhoto {
@@ -1772,7 +1831,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
+-(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -1799,18 +1858,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
     //[self.tabBarController didPressCenterButton:self];
     [self.tabBarController setSelectedIndex:0];
-
-    [self didLoginWithUsername:username andPhoto:photo andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
+    
+    [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
     [photo release];
     [stix release];
     if (firstTime) {
         //[tabBarController addFirstTimeInstructions];
         [k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
         [k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
+        [k addFollowerWithUsername:@"William Ho" andFollowsUser:username];
+        [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:username];
     }
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -1842,6 +1903,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSLog(@"DidLoginWithUsername: %@ allStix: %d stixOrder: %d", name, [allStix count], [stixOrder count]);
 
         // debug
+        /*
         NSEnumerator *e = [allStixOrder keyEnumerator];
         id key;
         while (key = [e nextObject]) {
@@ -1850,7 +1912,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 int order = [[allStixOrder objectForKey:key] intValue];
                 NSLog(@"Stix: %@ order %d", key, order); 
             }
-        }    
+        } 
+         */
     }  
     
     // do consistency check on stix and stix order
@@ -1878,8 +1941,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     myUserInfo->userphoto = [photo retain];
     myUserInfo->usertagtotal = total;
     myUserInfo->bux = bux;
+    myUserInfo->email = email;
+    myUserInfo->facebookID = [facebookID intValue];
+    [profileController viewDidAppear:YES]; // force reload of view if we logged into facebook from here - really only happens in simulator
     
-    NSLog(@"Username %@ with %d pix and image of %f %f", myUserInfo->username, myUserInfo->usertagtotal, myUserInfo->userphoto.size.width, myUserInfo->userphoto.size.height);
+    NSLog(@"Username %@ with email %@ and facebookID %d", myUserInfo->username, email, [facebookID intValue]);
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
@@ -1896,15 +1962,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self updateBuxCount];
     //[profileController updatePixCount];    
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                             (unsigned long)NULL), ^(void) {
-        [self saveDataToDisk];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+        // save username, facebookid, email to disk
+        [self saveUserInfoToDefaults]; // saves user name
     });
         
     [self setMetricLogonTime:[NSDate date]];
-    [self closeProfileView];
+    //[self closeProfileView];
     
     [aggregator aggregateNewTagIDs];
+    
+    // only download badges after login is over
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+        NSLog(@"Login complete: starting initializeBadges");
+        [self initializeBadges];
+    });
 }
 
 -(void)checkConsistency { 
@@ -2089,7 +2161,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     idOfNewestTagReceived = -1;
     [aggregator resetFirstTimeState];
     [aggregator reaggregateTagIDs];
-    [profileController updateFollowCount];
+    [profileController updateFollowCounts];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
@@ -2409,6 +2481,50 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSString * body = [NSString stringWithFormat:@"I'm playing Stix on my iPhone and I think you'd enjoy it too! Just click <a href=\"http://bit.ly/sjvbNE\">here</a> to get started!"];
     [self sendEmailTo:@"" withCC:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:body];
     [self rewardBux];
+}
+-(void)didClickInviteButtonByFacebook:(NSString *)username withFacebookID:(NSString *)fbID{
+    NSString * metricString = [NSString stringWithFormat:@"%@ invited %@", [self getUsername], username];
+    [k addMetricHitWithDescription:@"facebookInvite" andStringValue:metricString andIntegerValue:0];
+    NSLog(@"Facebook invite: %@", metricString);
+
+    [fbHelper sendInvite:username withFacebookID:fbID];
+}
+
+-(void)shouldDisplayUserPage:(NSString *)name {
+    NSLog(@"ShouldDisplayUserPage: %@", name);
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-330, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:userProfileController.view];
+    [userProfileController.view setFrame:frameOffscreen];
+    [userProfileController setUsername:name];
+
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:userProfileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+#if !TARGET_IPHONE_SIMULATOR
+        //[userProfileController.view removeFromSuperview];
+        //[self.camera setCameraOverlayView:userProfileController.view];
+#endif    
+        //[self.tabBarController.view addSubview:userProfileController.view];
+    }];    // does not need delegate function
+    // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [userProfileController viewDidAppear:YES]; 
+}
+
+-(void)shouldCloseUserPage {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = userProfileController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    //[self.tabBarController.view addSubview:userProfileController.view];
+    //[self.camera setCameraOverlayView:self.tabBarController.view];
+    
+    [animation doViewTransition:userProfileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [userProfileController.view removeFromSuperview];
+    }];
 }
 
 /*** processing stix counts ***/

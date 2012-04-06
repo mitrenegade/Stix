@@ -63,13 +63,6 @@
      */
 }
 
--(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
-    if (animID == animationID[1]) {
-        //[stixView release];
-        [delegate didDismissZoom];
-    }
-}
-
 -(void)startActivityIndicator {
     [logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
@@ -121,12 +114,19 @@
     return [names count];
 }
 
--(IBAction)didPressBackButton:(id)sender {    
+-(IBAction)didClickBackButton:(id)sender {    
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    CGRect frameOffscreen = CGRectMake(3+320, 0, 320, 480);
+    CGRect frameOffscreen = CGRectMake(-3-320, 0, 320, 480);
     animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
 }
+-(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
+    if (animID == animationID[1]) {
+        //[stixView release];
+        [delegate didDismissZoom];
+    }
+}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -265,8 +265,11 @@
     [headerView setAlpha:.75];
     
     UIImage * photo = [self.delegate getUserPhotoForUsername:tag.username];
-    UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(5, 5, 30, 30)] autorelease]; // MRC
-    [photoView setImage:photo];
+    UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+    [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+    [photoView.layer setBorderWidth: 2.0];
+    [photoView setImage:photo forState:UIControlStateNormal];
+    [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
     [headerView addSubview:photoView];
     
     UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
@@ -397,6 +400,25 @@
 
 -(void)sharePix:(int)tag_id {
     [self.delegate sharePix:tag_id];
+}
+
+-(void)didClickUserPhoto:(UIButton*)button {
+    NSLog(@"DetailViewController: Clicked user photo for tag: user %@", tagUsername);
+    [self.delegate shouldDisplayUserPage:tagUsername];
+}
+
+-(void)shouldDisplayUserPage:(NSString *)username {
+    NSLog(@"Multilayered display of profile view about to happen from DetailViewController!");
+    // close comments table first - click came from here
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = commentView.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [commentView.view removeFromSuperview];
+        [delegate shouldDisplayUserPage:username];
+    }];
 }
 
 @end

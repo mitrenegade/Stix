@@ -11,15 +11,18 @@
 #import "Kumulos.h"
 #import "BadgeView.h"
 #import "LoadingAnimationView.h"
+#import "StixAnimation.h"
 
 @protocol CommentViewDelegate <NSObject>
 
 -(void)didCloseComments;
 -(void)didAddNewComment:(NSString*)newComment withTagID:(int)tagID;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
+-(void)shouldDisplayUserPage:(NSString*)username;
+-(void)shouldCloseUserPage;
 @end
 
-@interface CommentViewController : UIViewController <KumulosDelegate, CommentFeedTableDelegate, UITextFieldDelegate>
+@interface CommentViewController : UIViewController <KumulosDelegate, CommentFeedTableDelegate, UITextFieldDelegate, StixAnimationDelegate>
 {
     CommentFeedTableController * commentsTable;
 

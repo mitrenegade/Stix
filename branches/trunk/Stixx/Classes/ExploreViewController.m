@@ -18,6 +18,7 @@
 @synthesize labelBuxCount;
 @synthesize buttonProfile;
 @synthesize tabBarController;
+@synthesize galleryUsername;
 //@synthesize segmentedControl;
 
 #define EXPLORE_COL 2
@@ -293,7 +294,7 @@
     detailController = [[DetailViewController alloc] init];
     [detailController setDelegate:self];    
     [detailController initDetailViewWithTag:tag];
-    CGRect frameOffscreen = CGRectMake(320,0,320,480);
+    CGRect frameOffscreen = CGRectMake(-320,0,320,480);
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     [self.view addSubview:detailController.view];
     [detailController.view setFrame:frameOffscreen];
@@ -386,6 +387,33 @@
     [detailController release];
     detailController = nil;
 }
+
+#pragma mark UserGalleryDelegate
+
+-(void)shouldDisplayUserPage:(NSString *)username {
+    // close detailView first - click came from here
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = detailController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [detailController.view removeFromSuperview];
+        [delegate shouldDisplayUserPage:username];
+    }];
+}
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
+}
+/*
+-(UIImage*)getUserPhotoForGallery {
+    return [self.delegate getUserPhotoForUsername:galleryUsername];
+}
+-(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method {
+    [delegate uploadImage:dataPNG withShareMethod:method];
+}
+ */
+
 /*
 -(void)didClickAtLocation:(CGPoint)location {
 

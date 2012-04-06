@@ -16,13 +16,13 @@
 
 @protocol UserGalleryDelegate <NSObject>
 
--(UIImage*)getUserPhoto;
+-(UIImage*)getUserPhotoForGallery;
 -(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 
 @end
 
-@interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate>
+@interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate, StixAnimationDelegate>
 {
     NSMutableArray * allTagIDs; // ordered in descending order
     NSMutableDictionary * allTags; // key: allTagID
@@ -32,15 +32,16 @@
     IBOutlet UIImageView * logo;
     
     int shareActionSheetTagID;
+    
+    int dismissAnimation;
 }
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, assign) NSObject<UserGalleryDelegate> * delegate;
-@property (nonatomic, retain) ColumnTableController * pixTableController;
-@property (nonatomic, retain) UIView * headerView;
 @property (nonatomic, retain) Kumulos * k;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic, retain) ColumnTableController * pixTableController;
+@property (nonatomic, retain) UIView * headerView;
 @property (nonatomic, retain) DetailViewController * detailController;
-
 
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;

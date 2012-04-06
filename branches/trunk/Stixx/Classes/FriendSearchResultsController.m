@@ -201,29 +201,36 @@
         [alreadyFriendedButton setTag:y];
         [alreadyFriendedButton addTarget:self action:@selector(didRemoveFriend:) forControlEvents:UIControlEventTouchUpInside];
 
-        NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, nil];
+        UIButton * inviteButton = [[UIButton alloc] init]; 
+        [inviteButton setFrame:CGRectMake(0, 0, 70, 70)];
+        [inviteButton setImage:[UIImage imageNamed:@"graphic_invite.png"] forState:UIControlStateNormal];             
+        [inviteButton setTag:y];
+        [inviteButton addTarget:self action:@selector(didInviteFriend:) forControlEvents:UIControlEventTouchUpInside];
+
+        NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, inviteButton, nil];
         [userButtons setObject:buttonArray forKey:username];
         [buttonArray release];
         [addFriendButton release];
         [alreadyFriendedButton release];
     }
     
+    NSMutableArray * buttonArray = [userButtons objectForKey:username];
     int userStatus = [self.delegate getFollowingUserStatus:y];
     if (userStatus == 0) {
         // not following a user that is already on Stix
-        NSMutableArray * buttonArray = [userButtons objectForKey:username];
         cell.accessoryView = [buttonArray objectAtIndex:0];
         cell.accessoryType = UITableViewCellAccessoryNone;
     } else if (userStatus == 1) {
         // already following a user
-        NSMutableArray * buttonArray = [userButtons objectForKey:username];
         cell.accessoryView = [buttonArray objectAtIndex:1];
         cell.accessoryType = UITableViewCellAccessoryNone;
     } else if (userStatus == -1) {
         // user is not a Stix user - invite button
         //NSMutableArray * buttonArray = [userButtons objectForKey:username];
-        cell.accessoryView = nil; //cell.accessoryView = [buttonArray objectAtIndex:1];
+        [cell.imageView setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
+        cell.accessoryView = [buttonArray objectAtIndex:2];
         cell.accessoryType = UITableViewCellAccessoryNone;
+        [bottomLabel setText:@"Invite friend to Stix"];
     }
 
     // Create the label for the top row of text
@@ -234,11 +241,15 @@
 
 -(void)didAddFriend:(UIButton*)sender {
     NSLog(@"Clicked add friend button %d!", sender.tag);
-    [self.delegate didClickAddFriendButton:sender.tag];
+    [delegate didClickAddFriendButton:sender.tag];
 }
 -(void)didRemoveFriend:(UIButton*)sender {
     NSLog(@"Clicked remove friend button %d!", sender.tag);
-    [self.delegate didClickAddFriendButton:sender.tag];
+    [delegate didClickAddFriendButton:sender.tag];
+}
+-(void)didInviteFriend:(UIButton*)sender {
+    NSLog(@"Clicked invite friend button %d!", sender.tag);
+    [delegate didClickAddFriendButton:sender.tag];
 }
 
 /*

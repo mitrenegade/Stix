@@ -23,4 +23,7 @@
 -(int)doJump:(UIView *)canvas inView:(UIView*) view forDistance:(int)pixels forTime:(float)time;
 -(int)doSlide:(UIView *)canvas inView:(UIView*)view toFrame:(CGRect)frameEnd forTime:(float)time ;
 -(int)doFade:(UIView *)canvas inView:(UIView*)view toAlpha:(float)opacityEnd forTime:(float)time;
+
+-(void)doViewTransition:(UIView *)canvas toFrame:(CGRect)frameEnd forTime:(float)time withCompletion:(void (^)(BOOL finished))_completion;
+-(void)doFadeIn:(UIView*)canvas forTime:(float)time withCompletion:(void (^)(BOOL finished))_completion;
 @end

@@ -206,6 +206,12 @@
 	return YES;
 }
 
-
+/*** CommentFeedTableDelegate for user page ***/
+-(void)shouldDisplayUserPage:(NSString *)username {
+    [delegate shouldDisplayUserPage:username];
+}
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
+}
 
 @end

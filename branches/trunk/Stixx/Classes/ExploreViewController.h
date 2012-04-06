@@ -19,6 +19,7 @@
 #import "OutlineLabel.h"
 #import "ProfileViewController.h"
 #import "RaisedCenterTabBarController.h"
+#import "UserGalleryController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -35,6 +36,9 @@
 -(int)getNewestTagID;
 -(int)getBuxCount;
 -(NSString*)getUsername;
+
+-(void)shouldDisplayUserPage:(NSString*)username;
+-(void)shouldCloseUserPage;
 @end
 
 enum {
@@ -44,7 +48,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -68,12 +72,13 @@ enum {
 
     // zoom view...?
     //StixView * stixView; // the view that is clicked for zoom
-    //DetailViewController * DetailViewController;
     //CGRect zoomFrame;
     //UIImageView * DetailView;
     bool isZooming; // prevent hits when zooming
     
     DetailViewController * detailController;
+    UserGalleryController * galleryController;
+    NSString * galleryUsername;
         
     OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
@@ -92,6 +97,7 @@ enum {
 @property (nonatomic, retain) OutlineLabel * labelBuxCount;
 @property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
+@property (nonatomic, copy) NSString * galleryUsername;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(void)startActivityIndicator;

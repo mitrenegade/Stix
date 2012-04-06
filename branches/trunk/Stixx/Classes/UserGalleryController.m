@@ -11,11 +11,11 @@
 @implementation UserGalleryController
 
 @synthesize username;
-@synthesize pixTableController;
 @synthesize delegate;
-@synthesize headerView;
 @synthesize k;
 @synthesize activityIndicator;
+@synthesize pixTableController;
+@synthesize headerView;
 @synthesize detailController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -90,7 +90,7 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [delegate getUserPhoto];
+        UIImage * photo = [delegate getUserPhotoForGallery];
         UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
         [photoView setImage:photo];
         [headerView addSubview:photoView];
@@ -203,9 +203,17 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [self.view removeFromSuperview];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = self.view.frame;
+    frameOffscreen.origin.x -= 330;
+    dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
 }
-
+-(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
+    if (animID == dismissAnimation) {
+        [self.view removeFromSuperview];
+    }
+}
 #pragma mark DetailView 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
@@ -214,7 +222,7 @@
     detailController = [[DetailViewController alloc] init];
     [detailController setDelegate:self];    
     [detailController initDetailViewWithTag:tag];
-    CGRect frameOffscreen = CGRectMake(320,0,320,480);
+    CGRect frameOffscreen = CGRectMake(-320,0,320,480);
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     [self.view addSubview:detailController.view];
     [detailController setScrollHeight:370];
@@ -292,6 +300,10 @@
     }
 }
 
+-(void)shouldDisplayUserGallery:(NSString*)username {
+    NSLog(@"Usergallery trying to be displayed from a detailview from a usergallery. FORGET IT");
+}
+
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
     [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
@@ -309,6 +321,6 @@
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name {
-    return [delegate getUserPhoto];
+    return [delegate getUserPhotoForGallery];
 }
 @end

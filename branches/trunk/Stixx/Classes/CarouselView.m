@@ -17,17 +17,25 @@
 @synthesize isShowingCarousel;
 
 static CarouselView * sharedCarouselView;
+static int carouselRequests = 0;
 
 - (id)initWithFrame:(CGRect)frame 
 {
     self = [super initWithFrame:frame];
 
+    shelfCategory = -1;
     int total = [BadgeView totalStixTypes];
     allCarouselStixFrames = [[NSMutableDictionary alloc] initWithCapacity:total];
     allCarouselStixViews = [[NSMutableDictionary alloc] initWithCapacity:total];
     allCarouselStixStringIDsAtFrame = [[NSMutableDictionary alloc] initWithCapacity:total];
+    allCarouselMissingStixStringIDs = [[NSMutableSet alloc] initWithCapacity:total];
+    allCarouselMissingStixStringOpacity = [[NSMutableDictionary alloc] initWithCapacity:total];
     [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT)];
-        
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+    backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
+                                                (unsigned long)NULL);
+    //backgroundQueue = dispatch_queue_create("com.Neroh.Stix.carouselView.bgQueue", NULL);
     return self;
 }
 
@@ -56,7 +64,7 @@ static CarouselView * sharedCarouselView;
     float currentContentOrigin = 20;
     for (int i=0; i<[buttonCategoriesSelected count]; i++) {
         UIButton * button0 = [[UIButton alloc] init];
-        [button0 setTag:SHELF_CATEGORY_ALL + i];
+        [button0 setTag:SHELF_CATEGORY_FIRST + i];
         [button0 addTarget:self action:@selector(didClickShelfCategory:) forControlEvents: UIControlEventTouchUpInside];
         int letters = [[buttonCategoriesNotSelected objectAtIndex:i] length] - 8;
         float width = 20 + letters * 10 + 20;
@@ -84,7 +92,8 @@ static CarouselView * sharedCarouselView;
         [categoryScroll addSubview:[buttonCategories objectAtIndex:i]];
     }
     [self addSubview:carouselTab];
-    [self didClickShelfCategory:[buttonCategories objectAtIndex:SHELF_CATEGORY_ALL]];
+    NSLog(@"current shelf category; %d", shelfCategory);
+    [self didClickShelfCategory:[buttonCategories objectAtIndex:SHELF_CATEGORY_FIRST]];
 
     // for debug
     if (0) {
@@ -154,7 +163,7 @@ static CarouselView * sharedCarouselView;
     NSMutableArray * categoryStix;
     NSMutableSet * categorySet = [[NSMutableSet alloc] init];
     NSMutableArray * subcategories;
-    if (shelfCategory != SHELF_CATEGORY_ALL) {
+    if (shelfCategory != SHELF_CATEGORY_FIRST) {
         NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
         categoryStix = [BadgeView getStixForCategory:categoryName];
         [categorySet addObjectsFromArray:categoryStix];
@@ -188,16 +197,21 @@ static CarouselView * sharedCarouselView;
     CGSize size = CGSizeMake(stixWidth * maxX, stixHeight * maxY);
     [stixScroll setContentSize:size];
     NSLog(@"Contentsize; x %d y %d stixToShow %d", maxX, maxY, stixToShow);
+    
+    [allCarouselMissingStixStringIDs removeAllObjects];
+    [allCarouselMissingStixStringOpacity removeAllObjects];
 
     int orderCtForFilters = 0;
     for (int i=0; i<totalStix; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];    
-        if ([allCarouselStixViews objectForKey:stixStringID])
-            [[allCarouselStixViews objectForKey:stixStringID] removeFromSuperview];
+        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
+        //NSLog(@"Removing stixView %@", stixStringID);
+        UIImageView * stixView = [allCarouselStixViews objectForKey:stixStringID];
+        if (stixView)
+            [stixView removeFromSuperview];
         
         int count = [self.delegate getStixCount:stixStringID];
         int order = -1;
-        if (shelfCategory == SHELF_CATEGORY_ALL) {
+        if (shelfCategory == SHELF_CATEGORY_FIRST) {
             order = [self.delegate getStixOrder:stixStringID];
         }
         else { //if (shelfCategory == SHELF_CATEGORY_CUTE || shelfCategory == SHELF_CATEGORY_FACEFUN) {
@@ -210,9 +224,26 @@ static CarouselView * sharedCarouselView;
             int y = order / STIX_PER_ROW;
             int x = order - y * STIX_PER_ROW;
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            if (stix.alpha == 0) {
+                // debug
+                if (1) {
+                    stix.alpha = 1;
+                    float r = order/orderCtForFilters;
+                    float g = 0;
+                    float b = 1 - r;
+                    NSLog(@"CarouselView: Stix %@ order %d needs to be loaded! rgb %f %f %f", stixStringID, order, r, g, b);
+                    [stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
+                }
+                // add stix to own list
+                [allCarouselMissingStixStringIDs addObject:stixStringID];
+                [allCarouselMissingStixStringOpacity setObject:[NSNumber numberWithDouble:1] forKey:stixStringID];
+                [self requestStixFromKumulos:stixStringID];
+            }
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
             [stix setCenter:stixCenter];
             [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
+            //NSLog(@"Creating stixFrame for stixStringID: %@ = %f %f %f %f", stixStringID, stix.frame.origin.x, stix.frame.origin.y, stix.frame.size.width, stix.frame.size.height);
             if (count == 0)
                 [stix setAlpha:.25];
             [stixScroll addSubview:stix];
@@ -220,7 +251,7 @@ static CarouselView * sharedCarouselView;
             [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
             [stix release];
         }
-        else if (shelfCategory == SHELF_CATEGORY_ALL) {
+        else if (shelfCategory == SHELF_CATEGORY_FIRST) {
             // display nonowned stix, only on this category
             int neworder = (totalStix - stixToPurchase - 1);
             int y = neworder / STIX_PER_ROW;
@@ -228,6 +259,22 @@ static CarouselView * sharedCarouselView;
             //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             //NSLog(@"Adding nonowned stix %@ = %@ to %d %d index %d, totalStix-stixToPurchase-1 %d", stixStringID, stixDescriptor, x, y, stixToPurchase, neworder);
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            if (stix.alpha == 0) {
+                // debug
+                if (1) {
+                    stix.alpha = 1;
+                    float r = order/orderCtForFilters;
+                    float g = 0;
+                    float b = 1 - r;
+                    //NSLog(@"CarouselView: Stix %@ order %d needs to be loaded! rgb %f %f %f", stixStringID, order, r, g, b);
+                    [stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
+                }
+                // add stix to own list
+                [allCarouselMissingStixStringIDs addObject:stixStringID];
+                [allCarouselMissingStixStringOpacity setObject:[NSNumber numberWithDouble:.5] forKey:stixStringID];
+                [self requestStixFromKumulos:stixStringID];
+            }
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
             [stix setCenter:stixCenter];
             [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
@@ -273,6 +320,7 @@ static CarouselView * sharedCarouselView;
 
     [stixScroll release];
     stixScroll = nil;
+    dispatch_release(backgroundQueue);
 }
 
 -(void)resetBadgeLocations{
@@ -633,5 +681,56 @@ static int lastContentOffsetY = 0;
     }
 #endif
 }
+
+/*** stix requests ***/
+-(void)requestStixFromKumulos:(NSString *)stixStringID { // forStix:(UIImageView *)auxStix { // andDelegate:(NSObject<StixViewDelegate> *)_delegate {
+    
+    [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+    
+    carouselRequests++;
+    NSLog(@"CarouselView: requesting missing stix %@ total requests %d total missing in this tab %d", stixStringID, carouselRequests, [allCarouselMissingStixStringIDs count]);
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
+    
+    if ([theResults count] == 0) {
+        NSLog(@"CarouselView: GetStixDataByStixString returned no stix!");
+        return;        
+    }
+    
+    //dispatch_async(backgroundQueue, ^(void) {
+
+    // populate all stix
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+    NSString * stixStringID = [d objectForKey:@"stixStringID"];
+    
+//    NSLog(@"CarouselView: GetStixDataByStixString for %@ = %@ returned", descriptor, stixStringID);
+    [BadgeView AddStixView:theResults];
+    // in case carousel has changed
+    NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+    if ([allCarouselMissingStixStringIDs containsObject:stixStringID]) {
+        
+        // remove old, invisible stixView
+        UIImageView * stixOld = [allCarouselStixViews objectForKey:stixStringID];
+        [stixOld removeFromSuperview];
+        UIImageView * stixNew = [BadgeView getBadgeWithStixStringID:stixStringID];
+        CGRect frame = [[allCarouselStixFrames objectForKey:stixStringID] CGRectValue];
+        double opacity = [[allCarouselMissingStixStringOpacity objectForKey:stixStringID] doubleValue];
+        [stixNew setFrame:frame];
+        [stixNew setAlpha:opacity];
+        [stixScroll addSubview:stixNew];
+        [allCarouselStixViews setObject:stixNew forKey:stixStringID];
+        [allCarouselMissingStixStringIDs removeObject:stixStringID];
+        
+        carouselRequests--;
+        NSLog(@"Received requested stix %@: carousel Requests left %d missing stix left %d", descriptor, carouselRequests, [allCarouselMissingStixStringIDs count]);
+        //[stixNew release];
+//        NSLog(@"Filling stixFrame for stixStringID: %@ = %f %f %f %f", stixStringID, stixNew.frame.origin.x, stixNew.frame.origin.y, stixNew.frame.size.width, stixNew.frame.size.height);
+    };
+    //[stixView didReceiveRequestedStix:stixStringID withResults:theResults fromStixView:stixViewID];
+        
+    //}); // end dispatch
+}
+
 
 @end

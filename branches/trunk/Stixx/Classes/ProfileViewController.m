@@ -349,7 +349,6 @@
 // badgeViewDelegate forwarded from friendsViewDelegate
 - (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
 -(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
--(UIImage*)getUserPhoto {return [self.delegate getUserPhoto];}
 //-(NSMutableSet*)getFriendsList {return [self.delegate getFriendsList];}
 -(NSString*)getUsername {return [self.delegate getUsername];}
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
@@ -379,7 +378,6 @@
     }    
     
     [self updateFollowCounts];
-    [self updateFollowCount];
     isSearching = NO;
 
     //[searchResultsController.view removeFromSuperview];
@@ -472,6 +470,7 @@
 
 -(void)updateFollowCounts {
     // uses delegate functions
+#if 0
     NSLog(@"UpdateFollowCounts: username %@", [delegate getUsername]);
     NSMutableSet * followerList = [delegate getFollowerList];
     NSMutableSet * followingList = [delegate getFollowingList];
@@ -479,6 +478,18 @@
     NSLog(@"Updating followers count to %d", [followerList count]);
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", [followingList count]]];
     NSLog(@"Updating following count to %d", [followingList count]);
+#else
+    NSMutableSet * followingList = [self.delegate getFollowingList];
+    int followingCount = [followingList count];
+    [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
+    //NSLog(@"FollowingList: %@", followingList);
+    
+    NSMutableSet * followerList = [self.delegate getFollowerList];
+    int followerCount = [followerList count];
+    [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
+    NSLog(@"FollowerList: %@", followerList);
+    //NSLog(@"UpdateFollowCount: updating following count to %d followercount to %d", followingCount, followerCount);
+#endif
 }
 
 -(void)updatePixCount {
@@ -495,19 +506,6 @@
     userCommentCount = -1;
     [k getHistoryCountForUserWithUsername:[delegate getUsername]];
     [k getCommentCountForUserWithUsername:[delegate getUsername] andStixStringID:@"COMMENT"];
-}
-
--(void)updateFollowCount {
-    NSMutableSet * followingList = [self.delegate getFollowingList];
-    int followingCount = [followingList count];
-    [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
-    //NSLog(@"FollowingList: %@", followingList);
-
-    NSMutableSet * followerList = [self.delegate getFollowerList];
-    int followerCount = [followerList count];
-    [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
-    NSLog(@"FollowerList: %@", followerList);
-    //NSLog(@"UpdateFollowCount: updating following count to %d followercount to %d", followingCount, followerCount);
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getHistoryCountForUserDidCompleteWithResult:(NSNumber *)aggregateResult {
@@ -692,9 +690,14 @@
     if ([self getFollowingUserStatus:index] == 1) { 
         [delegate setFollowing:username toState:NO];
     }
-    else
+    else if ([self getFollowingUserStatus:index] == 0)
     {
         [delegate setFollowing:username toState:YES];
+    }
+    else {
+        // invite
+        NSString * fbID = [self getFacebookIDForUser:index];
+        [delegate didClickInviteButtonByFacebook:username withFacebookID:fbID];
     }
     [[searchResultsController tableView] reloadData];
 }
@@ -895,6 +898,8 @@
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
     [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
+-(UIImage*)getUserPhotoForGallery {return [self.delegate getUserPhoto];}
+
 /*** deprecated functions for old profile view ***/
 /*
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {

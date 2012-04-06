@@ -214,7 +214,7 @@
     }
      */
 //    [loginController.view removeFromSuperview];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
     [stix release]; // MRC
     [newPhoto release]; // MRC
     [auxiliaryData release];
@@ -317,7 +317,7 @@
     }
     
     [self stopActivityIndicator];
-    [alert show];
+    //[alert show];
     [alert release];
 }
 

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @protocol FriendSearchResultsDelegate 
-
+@optional
 -(NSString*)getUsernameForUser:(int)index;
 -(UIImage*)getUserPhotoForUser:(int)index;
 -(NSString*)getUserEmailForUser:(int)index;

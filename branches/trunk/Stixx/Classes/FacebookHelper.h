@@ -47,4 +47,5 @@
 -(int)facebookHasSession;
 -(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description;
 -(void)requestFacebookFriends;
+-(void)sendInvite:(NSString*)name withFacebookID:(NSString*)facebookID;
 @end

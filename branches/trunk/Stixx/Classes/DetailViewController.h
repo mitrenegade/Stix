@@ -25,6 +25,7 @@
 -(void)sharePix:(int)tagID;
 -(NSString*)getUsername;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)shouldDisplayUserPage:(NSString*)username;
 @end
 
 @interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate>
@@ -64,7 +65,7 @@
 @property (nonatomic, retain) NSString * tagUsername;
 @property (nonatomic, retain) CommentViewController * commentView;
 
--(IBAction)didPressBackButton:(id)sender;
+-(IBAction)didClickBackButton:(id)sender;
 -(void)initDetailViewWithTag:(Tag *)tag;
 -(void)headerFromTag:(Tag*) tag;
 -(void)initFeedItemWithTag:(Tag*)tag;

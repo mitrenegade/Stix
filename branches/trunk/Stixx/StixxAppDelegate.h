@@ -31,6 +31,9 @@
 #import "ASIHTTPRequest.h"
 #import "FacebookLoginController.h"
 #import "UserTagAggregator.h"
+#import "UserProfileViewController.h"
+#import "StixAnimation.h"
+#import <dispatch/dispatch.h>
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -66,6 +69,8 @@ enum actionsheet_tags {
 struct UserInfo {
     NSString * username;
     UIImage * userphoto;
+    NSString * email;
+    int facebookID;
     int usertagtotal;
     int bux;
 
@@ -74,12 +79,8 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate,
-
-//#if USING_FACEBOOK
-    FacebookHelperDelegate, FacebookLoginDelegate,
-//#endif
-    UIApplicationDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate> {
+    
     UIWindow *window;
     
     UIViewController * mainController;
@@ -91,6 +92,7 @@ struct UserInfo {
     VerticalFeedController *feedController;
 	//FriendsViewController *friendController;
 	ProfileViewController *profileController;
+    UserProfileViewController * userProfileController;
     ExploreViewController * exploreController;
     FacebookLoginController * loginSplashController;
     
@@ -172,12 +174,21 @@ struct UserInfo {
         
     FacebookHelper * fbHelper;
     UserTagAggregator * aggregator;
+    dispatch_queue_t backgroundQueue;
+
 }
 
 -(void)initializeBadges;
 -(void)checkVersion;
 -(int)loadDataFromDisk;
 -(void)saveDataToDisk;
+// saving and loading
+-(void)saveDataToDefaults;
+-(void)saveStixDataToDefaults;
+-(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
+-(int)loadUserInfoFromDefaults;
+-(int)loadStixFromDefaults;
+
 
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle andAlertType:(int)alertType;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
@@ -226,6 +237,7 @@ struct UserInfo {
 //@property (nonatomic, retain) FeedViewController *feedController;
 @property (nonatomic, retain) VerticalFeedController *feedController;
 @property (nonatomic, retain) ProfileViewController *profileController;
+@property (nonatomic, retain) UserProfileViewController *userProfileController;
 //@property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic, retain) ExploreViewController *exploreController;
 @property (nonatomic, retain) FacebookLoginController * loginSplashController;

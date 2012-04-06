@@ -11,7 +11,6 @@
 static NSMutableDictionary * stixDescriptors = nil;
 static NSMutableArray * stixStringIDs = nil;
 static NSMutableDictionary * stixViews = nil;
-static NSMutableDictionary * stixLikelihood = nil;
 static NSMutableArray * pool = nil;
 static NSMutableDictionary * stixCategories = nil; // key: category name value: array of stixStringIDs
 static NSMutableDictionary * stixSubcategories = nil; // key: category name value: array of subcategory names
@@ -22,7 +21,6 @@ static int totalStixTypes = 0;
 @synthesize delegate;
 @synthesize underlay;
 @synthesize showStixCounts;
-@synthesize badgesLarge;
 //@synthesize shelf;
 @synthesize selectedStixStringID;
 
@@ -30,7 +28,7 @@ static int totalStixTypes = 0;
 {
     self = [super initWithFrame:frame];
     
-    if (totalStixTypes == 0)
+    if ([BadgeView totalStixTypes] == 0)
         NSLog(@"***** ERROR! BadgeView Stix Types not yet initialized! *****");
   
     //shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
@@ -42,12 +40,9 @@ static int totalStixTypes = 0;
     // Populate all stix structures - used by BadgeView, CarouselView
     badges = [[NSMutableArray alloc] init];
     badgeLocations = [[NSMutableArray alloc] init];
-    badgesLarge = [[NSMutableArray alloc] init];
     for (int i=0; i<totalStixTypes; i++)
     {
         NSString * stixStringID = [stixStringIDs objectAtIndex:i];
-        UIImageView * badgeLarge = [[BadgeView getLargeBadgeWithStixStringID:stixStringID] retain];
-        [badgesLarge addObject:badgeLarge];
         UIImageView * badge = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
@@ -62,7 +57,6 @@ static int totalStixTypes = 0;
         [label release];
          */
         [badge release];
-        [badgeLarge release];
     }
     
  	return self;
@@ -122,8 +116,7 @@ static int totalStixTypes = 0;
     if (!stixViews)
         stixViews = [[NSMutableDictionary alloc] init];
     if (!stixDescriptors)
-    stixDescriptors = [[NSMutableDictionary alloc] init];
-    stixLikelihood = [[NSMutableDictionary alloc] init];
+        stixDescriptors = [[NSMutableDictionary alloc] init];
     NSString * stixStringID = @"FIRE";
     NSString * descriptor = @"Fire Stix";
     UIImage * img = [UIImage imageNamed:@"120_fire.png"];
@@ -134,7 +127,6 @@ static int totalStixTypes = 0;
         [stixViews setObject:stix forKey:stixStringID];
     //if ([stixDescriptors objectForKey:stixStringID] != nil)
         [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
     [stix release];
     stixStringID = @"ICE";
     descriptor = @"Ice Stix";
@@ -144,7 +136,6 @@ static int totalStixTypes = 0;
         [stixStringIDs addObject:stixStringID];
     [stixViews setObject:stix forKey:stixStringID];
     [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
     [stix release];
 #if TARGET_IPHONE_SIMULATOR
     // debug: add temporary repeat stix to make carousel work
@@ -157,7 +148,6 @@ static int totalStixTypes = 0;
             [stixStringIDs addObject:stixStringID];
         [stixViews setObject:stix forKey:stixStringID];
         [stixDescriptors setObject:descriptor forKey:stixStringID];
-        [stixLikelihood setObject:[NSNumber numberWithInt:10] forKey:stixStringID];
         [stix release];
     }
 #endif
@@ -203,10 +193,6 @@ static int totalStixTypes = 0;
     if (!stixDescriptors) {
         stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
     }
-    if (stixLikelihood)
-    {
-        stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[stixViewsFromKumulos count]];
-    }
     if (pool)
     {
         [pool release];
@@ -218,13 +204,11 @@ static int totalStixTypes = 0;
     for (NSMutableDictionary * d in stixViewsFromKumulos) {
         NSString * stixStringID = [d valueForKey:@"stixStringID"];
         NSString * descriptor = [d valueForKey:@"stixDescriptor"];
-        NSNumber * likelihood = [d valueForKey:@"likelihood"];
         NSData * dataPNG = [d valueForKey:@"dataPNG"];
         UIImage * img = [[UIImage alloc] initWithData:dataPNG];
         UIImageView * stix = [[UIImageView alloc] initWithImage:img];
         [stixViews setObject:stix forKey:stixStringID];
         [stixDescriptors setObject:descriptor forKey:stixStringID];
-        [stixLikelihood setObject:likelihood forKey:stixStringID];
         [img release];
         [stix release];
         /*
@@ -241,7 +225,7 @@ static int totalStixTypes = 0;
 //    [stixRepeat release];
 }
 
-+(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods andStixCategories:(NSMutableDictionary*)savedStixCategories {
++(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixCategories:(NSMutableDictionary*)savedStixCategories {
     // load from saved data on disk.
     // this should be done first upon loading the app so all stix dictionaries should be reset
     // this saves from having to download the PNG file for each stix, but we should still
@@ -258,11 +242,6 @@ static int totalStixTypes = 0;
         [stixDescriptors release];
         stixDescriptors = nil;
     }
-    if (stixLikelihood)
-    {
-        [stixLikelihood release];
-        stixLikelihood = nil;
-    }
     if (stixCategories) {
         [stixCategories release];
         stixCategories = nil;
@@ -275,13 +254,13 @@ static int totalStixTypes = 0;
     stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[savedStixStringIDs count]];
     stixViews = [[NSMutableDictionary alloc] initWithCapacity:[savedStixViews count]];
     stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[savedStixDescriptors count]];
-    //stixLikelihood = [[NSMutableDictionary alloc] initWithCapacity:[savedStixLikelihoods count]];
     stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[savedStixCategories count]];
     [stixStringIDs addObjectsFromArray:savedStixStringIDs];
     [stixViews addEntriesFromDictionary:savedStixViews];
     [stixDescriptors addEntriesFromDictionary:savedStixDescriptors];
-    //[stixLikelihood addEntriesFromDictionary:savedStixLikelihoods];
     [stixCategories addEntriesFromDictionary:savedStixCategories];
+    
+    totalStixTypes = [stixStringIDs count];
 }
 
 +(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults {
@@ -317,20 +296,26 @@ static int totalStixTypes = 0;
 }
 
 +(void)AddStixView:(NSArray*)resultFromKumulos {
+    // must initialize first or we will get infinite requests because nothing is there to store them
+    if (!stixStringIDs)
+        stixStringIDs = [[NSMutableArray alloc] init];
+    if (!stixViews)
+        stixViews = [[NSMutableDictionary alloc] init];
+    if (!stixDescriptors)
+        stixDescriptors = [[NSMutableDictionary alloc] init];
+
     // takes a result from getStixDataForStixStringID
     NSMutableDictionary * d = [resultFromKumulos objectAtIndex:0]; 
     NSString * stixStringID = [d valueForKey:@"stixStringID"];
     NSString * descriptor = [d valueForKey:@"stixDescriptor"];
-    NSNumber * likelihood = [d valueForKey:@"likelihood"];
     NSData * dataPNG = [d valueForKey:@"dataPNG"];
     UIImage * img = [[UIImage alloc] initWithData:dataPNG];
     UIImageView * stix = [[UIImageView alloc] initWithImage:img];
     [stixViews setObject:stix forKey:stixStringID];
     [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [stixLikelihood setObject:likelihood forKey:stixStringID];
     [img release];
     [stix release];
-    NSLog(@"Adding a new Stix view downloaded from Kumulos: %@", stixStringID);
+    //NSLog(@"Adding a new Stix view downloaded from Kumulos: %@ stixStringID %@", descriptor, stixStringID);
 }
 
 +(int)totalStixTypes {
@@ -349,24 +334,20 @@ static int totalStixTypes = 0;
 
 +(UIImageView *) getBadgeWithStixStringID:(NSString*)stixStringID {
     // returns a half size image view
-    UIImageView * stix = [[BadgeView getLargeBadgeWithStixStringID:stixStringID] retain];
-    if (stix == nil)
-        return nil;
+    UIImageView * stixView = [stixViews objectForKey:stixStringID];
+    if (stixView == nil) { 
+        // return an empty stix view
+        stixView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120*.65, 120*.65)];
+        [stixView setAlpha:0]; // alpha set to 0 as a check for missing stix
+        return stixView;
+    }
     // create smaller size for actual badgeView
-    stix.frame = CGRectMake(0, 0, stix.frame.size.width * .65, stix.frame.size.height*.65); // resize badges to "small size"
-    return [stix autorelease];
-}
-
-+(UIImageView *) getLargeBadgeWithStixStringID:(NSString*)stixStringID {
-    // returns a half size image view
-    //NSLog(@"Loading large badge with string ID %@\n", stixStringID);
-    UIImageView * stix = [[UIImageView alloc] initWithImage:[[stixViews objectForKey:stixStringID] image]];
+    UIImageView * stix = [[UIImageView alloc] initWithImage:[stixView image]]; // copy
     CGRect frame = stix.frame;
-    frame.size.width = 120;
-    frame.size.height = 120;
-    [stix setFrame:frame]; // hack: for different resolution badges, start them off at 120x120
-    //NSLog(@"StixViews: %d objects", [stixViews count]);
-    //NSLog(@"Frame of stix: %f %f %f %f", stix.frame.origin.x, stix.frame.origin.y, stix.frame.size.width, stix.frame.size.height);
+    // hack: for different resolution badges, start them off at 120x120
+    frame.size.width = 120*.65;
+    frame.size.height = 120*.65;
+    [stix setFrame:frame];    
     return [stix autorelease];
 }
 
@@ -421,7 +402,7 @@ static int totalStixTypes = 0;
         pool = [[NSMutableArray alloc] init];
         for (int i=0; i<[self totalStixTypes]; i++) {
             NSString * stixStringID = [self getStixStringIDAtIndex:i];
-            int likelihood = MAX(1, [[stixLikelihood objectForKey:stixStringID] intValue]);
+            int likelihood = 1; //
             for (int j=0; j<likelihood; j++) {
                 [pool addObject:stixStringID];
             }
@@ -476,10 +457,6 @@ static int totalStixTypes = 0;
     // for saving to disk
     return stixDescriptors;
 }
-+(NSMutableDictionary *)GetAllStixLikelihoodsForSave {
-    // for saving to disk
-    return nil; //stixLikelihood;
-}
 +(NSMutableDictionary *)GetAllStixSubcategoriesForSave {
     // for saving to disk
     return stixSubcategories;
@@ -493,8 +470,6 @@ static int totalStixTypes = 0;
     
     [badges release];
     badges = nil;
-    [badgesLarge release];
-    badgesLarge = nil;
     [badgeLocations release];
     badgeLocations = nil;
     //[labels release];

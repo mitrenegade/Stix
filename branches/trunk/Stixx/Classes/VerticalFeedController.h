@@ -21,6 +21,9 @@
 #import "ProfileViewController.h"
 #import "OutlineLabel.h"
 #import "KumulosHelper.h"
+//#import "UserGalleryController.h"
+#import "UserProfileViewController.h"
+#import "StixAnimation.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -55,16 +58,21 @@
 //-(void)didPurchaseBux:(int)bux;
 -(void)sharePix:(int)tagID;
 -(void)didOpenProfileView;
+-(NSMutableSet*)getFollowingList;
 
 -(void)didClickPurchaseBuxButton;
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 -(BOOL)isFollowing:(NSString*)name;
 
+-(void)shouldDisplayUserPage:(NSString*)name;
+-(void)shouldCloseUserPage;
+
 -(void)checkAggregatorStatus; // debug
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserProfileViewDelegate, ProfileViewDelegate, StixAnimationDelegate> {
     
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
@@ -74,8 +82,6 @@
     LoadingAnimationView * activityIndicator;
     
     NSObject<VerticalFeedDelegate> * delegate;
-    
-    NSMutableDictionary *userPhotos;
     
     FeedTableController *tableController;	
     int lastPageViewed;
@@ -89,6 +95,12 @@
     int currentBuxPurchase;
     
     IBOutlet UIButton * logo;
+    
+    IBOutlet UITextField * statusMessage;
+    
+    //UserGalleryController * galleryController;
+    //UserProfileViewController * userPageController;
+    //NSString * galleryUsername;
     
 //    IBOutlet UIButton * buttonShowCarousel;
 //    IBOutlet UIImageView * carouselTab;
@@ -104,7 +116,6 @@
 @property (nonatomic, retain) NSMutableArray *allTagsDisplayed;
 @property (nonatomic, retain) FeedTableController *tableController;
 @property (nonatomic, assign) NSObject<VerticalFeedDelegate> * delegate;
-@property (nonatomic, retain) NSMutableDictionary * userPhotos;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
 //@property (nonatomic, retain) IBOutlet UILabel * labelBuxCount;
@@ -118,6 +129,8 @@
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 @property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
+//@property (nonatomic, copy) NSString * galleryUsername;
+@property (nonatomic, retain) IBOutlet UITextField * statusMessage;
 
 -(void)populateAllTagsDisplayed;
 -(void)addTagForDisplay:(Tag*)tag;
@@ -140,6 +153,8 @@
 -(void)stopActivityIndicator;
 -(void)didUnfollowUser;
 -(void)didFollowUser;
+-(void)shouldDisplayUserPage:(NSString*)galleryUsername;
+-(void)forceReloadWholeTableZOMG;
 @end
 
 

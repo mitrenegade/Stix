@@ -198,7 +198,7 @@
 
 -(int)getCurrentSectionAtPoint:(CGPoint) point {
     float offset = self.tableView.contentOffset.y;
-    NSLog(@"Point: %f %f Offset: %f", point.x, point.y, offset);
+    NSLog(@"GetCurrentSectionAtPoint: %f %f Offset: %f", point.x, point.y, offset);
     point.y += offset;
     NSIndexPath * indexPath = [self.tableView indexPathForRowAtPoint: point];
     return [indexPath section];

@@ -55,6 +55,8 @@
     //commentString = [NSString alloc];
     //imageData = [UIImage alloc];
     
+    isShowingPlaceholder = YES;
+    
     return self;
 }
 
@@ -88,7 +90,8 @@
     }
 }
 
--(void)initStixView:(Tag*)tag {
+-(void)initStixView:(Tag*)_tag {
+    tag = [_tag retain];
     imageData = tag.image;
     
     //NSLog(@"VerticalFeedItem: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
@@ -99,8 +102,18 @@
     [stixView setIsPeelable:YES];
     [stixView setDelegate:self];
     [stixView initializeWithImage:imageData];
-    [stixView populateWithAuxStixFromTag:tag];
-    [self.view insertSubview:stixView belowSubview:imageView];
+    int canShow = [stixView populateWithAuxStixFromTag:tag];
+    if (canShow) {
+        [self.view insertSubview:stixView belowSubview:imageView];
+        isShowingPlaceholder = NO;
+    }
+    else {
+        placeholderView = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0,0,60,60)];
+        [placeholderView setCenter:stixView.center];
+        [placeholderView startCompleteAnimation];
+        [self.view insertSubview:placeholderView belowSubview:imageView];
+        isShowingPlaceholder = YES;
+    }
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    
@@ -348,6 +361,40 @@
 
 -(void)peelAnimationDidCompleteForStix:(int)index {
     [self.delegate didPerformPeelableAction:0 forAuxStix:index];
+}
+
+-(void)didRequestStixFromKumulos:(NSString *)stixStringID {
+    //[delegate didRequestStixFromKumulos:stixStringID forFeedItem:self];
+}
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+-(void)didReceiveAllRequestedStixViews {
+    if (!isShowingPlaceholder)
+        return;
+    
+    [placeholderView stopCompleteAnimation];
+    [placeholderView removeFromSuperview];
+    
+    NSLog(@"VerticalFeedItemController removing placeholder for StixView %d tagID %d", stixView.stixViewID, tagID);
+    [stixView populateWithAuxStixFromTag:tag];
+    [self.view insertSubview:stixView belowSubview:imageView];
+#if 1
+    // fade in
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){}];
+    //[animation doJump:stixView inView:self.view forDistance:50 forTime:.5];
+#endif
+}
+
+//[k getStixDataByStixStringIDWithStixStringID:stixStringID];
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableDictionary * d = [theResults objectAtIndex:0]; 
+    NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+    NSLog(@"StixView requested stix data for %@", descriptor);
+    [BadgeView AddStixView:theResults];
 }
 
 

@@ -43,12 +43,14 @@
     int columnWidth;
     int columnHeight;
 #endif
+    
 }
 
 @property (nonatomic, retain) NSObject<ColumnTableControllerDelegate> * delegate;
 #if USE_PULL_TO_REFRESH
 @property(assign,getter=isReloading) BOOL reloading;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
+@property (nonatomic, assign) BOOL hasHeaderRow;
 #endif
 
 -(void)setNumberOfColumns:(int)columns andBorder:(int)border;

@@ -14,7 +14,6 @@
 @synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
-@synthesize userPhotos;
 @synthesize feedItems;
 @synthesize headerViews;
 @synthesize allTags;
@@ -31,6 +30,7 @@
 @synthesize buttonProfile;
 @synthesize labelBuxCount;
 @synthesize bitlyHelper;
+@synthesize statusMessage;
 
 -(id)init
 {
@@ -113,6 +113,8 @@
 
     [buttonBux release];
     [labelBuxCount release];
+    
+    [statusMessage setHidden:YES];
 }
 
 
@@ -139,12 +141,6 @@
 {
 	//[imageView setImage:[[ImageCache sharedImageCache] imageForKey:@"newImage"]];
 	[super viewWillAppear:animated];
-    
-    //[self.delegate checkForUpdateTags];
-    
-    self.allTags = [self.delegate getTags];
-    self.userPhotos = [self.delegate getUserPhotos]; 
-    //NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
     
     [self populateAllTagsDisplayed];
     [tableController.tableView reloadData];
@@ -392,6 +388,12 @@
     return [feedItems objectForKey:tagID];
 }
 
+-(void)didClickUserPhoto:(UIButton*)button {
+    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
+    NSLog(@"Clicked on user photo %d in feed for user %@", button.tag, tag.username);
+    [self shouldDisplayUserPage:tag.username];
+}
+
 -(UIView*)headerForSection:(int)index {
     //index = index - 1;
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
@@ -401,9 +403,14 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [[[UIImage alloc] initWithData:[userPhotos objectForKey:tag.username]] autorelease];
-        UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
-        [photoView setImage:photo];
+        UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]] autorelease];
+        //UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+        UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        [photoView.layer setBorderWidth: 2.0];
+        [photoView setImage:photo forState:UIControlStateNormal];
+        [photoView setTag:index];
+        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
         [headerView addSubview:photoView];
         
         UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
@@ -412,6 +419,10 @@
         [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
         [nameLabel setText:tag.username];
         [headerView addSubview:nameLabel];
+        
+       // UIbutton * nameButton [[[UIButton alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
+        //[nameLabel setTag:index];
+        //[nameButton addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
         
         UILabel * locLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)] autorelease];
         [locLabel setBackgroundColor:[UIColor clearColor]];
@@ -436,8 +447,12 @@
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     // todo: reloadData only once for a batch of reloadViewForItem - maybe after requesting content from aggregator
     NSLog(@"ReloadViewForItemAtIndex: %d", index);
+    if (index > [allTagsDisplayed count]-1) {
+        index = [allTagsDisplayed count]-1;
+        NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
+    }
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    VerticalFeedItemController * feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
+    VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
     
     NSString * name = tag.username;
@@ -461,7 +476,7 @@
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
     //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
     //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-    UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
+    UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
@@ -515,7 +530,6 @@
     [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
-    //NSLog(@"ReloadViewForItemAtIndex: %d newfeedItem %x ID %d size %f %f %f %f", index, feedItem, feedItem.tagID, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
 //    [feedItem autorelease];
     return feedItem.view;
@@ -529,7 +543,7 @@
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     
     if (!feedItem) {
-        feedItem = [[[VerticalFeedItemController alloc] init] autorelease];
+        feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease until we no longer need it as a delegate
         [feedItem setDelegate:self];
         
         NSString * name = tag.username;
@@ -543,7 +557,7 @@
         [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
         //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
         //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-        UIImage * photo = [[UIImage alloc] initWithData:[userPhotos objectForKey:name]];
+        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
         if (photo)
         {
             //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
@@ -579,7 +593,7 @@
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
-    UIImage * photo = [[[UIImage alloc] initWithData:[userPhotos objectForKey:username]] autorelease];
+    UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:username]] autorelease];
     return photo;
 }
 
@@ -639,14 +653,14 @@
             int tagid = [t.tagID intValue];
             //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
-            [self.delegate getNewerTagsThanID:tagid];            
+            [delegate getNewerTagsThanID:tagid];            
         }
         if (page >= [self numberOfSections] - LAZY_LOAD_BOUNDARY) { // trying to load an earlier tag
             Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:[self numberOfSections]-1];
             int tagid = [t.tagID intValue];
             //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
-            [self.delegate getOlderTagsThanID:tagid];
+            [delegate getOlderTagsThanID:tagid];
         }
     }
     else
@@ -666,15 +680,31 @@
 -(void)reloadCurrentPage {
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
     int section = [tableController getCurrentSectionAtPoint:CGPointMake(160, 240)];
-    self.allTags = [self.delegate getTags];
     [self populateAllTagsDisplayed];
     //[activityIndicator startCompleteAnimation];
     [self startActivityIndicator];
+    if (section>[allTagsDisplayed count])
+        section = 0;
     [self reloadViewForItemAtIndex:section];
+}
+
+-(void)forceReloadWholeTableZOMG {
+    NSLog(@"Calling forceReloadWholeTable - ZOMG!");
+    
+    int index = 0;
+    for (int i=0; i<[[self.view subviews] count]; i++) {
+        if ([[self.view subviews] objectAtIndex:i] == tableController.view) {
+            index = i;
+        }
+    }
+    [tableController.view removeFromSuperview];
+    [tableController.tableView reloadData];
+    [self.view insertSubview:tableController.view atIndex:index];
 }
 
 -(void)didUnfollowUser {
     
+    allTags = [self.delegate getTags];
     for (int i=0; i<[allTags count]; i++) {
         Tag * tag = [allTags objectAtIndex:i];
         NSNumber * tagID = tag.tagID;
@@ -694,67 +724,44 @@
         [tableController.tableView reloadSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationNone];
     }
      */
-    int index = 0;
-    for (int i=0; i<[[self.view subviews] count]; i++) {
-        if ([[self.view subviews] objectAtIndex:i] == tableController.view) {
-            index = i;
-        }
-    }
-    [tableController.view removeFromSuperview];
-    [tableController.tableView reloadData];
-    [self.view insertSubview:tableController.view atIndex:index];
+    [self forceReloadWholeTableZOMG];
     
     NSLog(@"After unfollowing user, there are %d tags on display.", [allTagsDisplayed count]);
 }
 -(void)didFollowUser {
-    /*
-    for (int i=0; i<[allTags count]; i++) {
-        [self reloadViewForItemAtIndex:i];
-    }
-     */
     [self populateAllTagsDisplayed];
-    //[tableController setContentPageIDs:allTags];
-    // just force call of heightForHeader and heightForSection
-    int index = 0;
-    for (int i=0; i<[[self.view subviews] count]; i++) {
-        if ([[self.view subviews] objectAtIndex:i] == tableController.view) {
-            index = i;
-        }
-    }
-    [tableController.view removeFromSuperview];
-    [tableController.tableView reloadData];
-    [self.view insertSubview:tableController.view atIndex:index];
+    [self forceReloadWholeTableZOMG];
 }
 
 -(void)populateAllTagsDisplayed {
     // allTags contains all tags that have been downloaded from the server
     // allTagsDisplayed contains only the tags that belong to the following list
+    self.allTags = [self.delegate getTags];
     if (!allTagsDisplayed)
         allTagsDisplayed = [[NSMutableArray alloc] init];
     [allTagsDisplayed removeAllObjects];
     NSMutableSet * followingSet = [delegate getFollowingList];
-    [followingSet addObject:[self getUsername]];
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
-        NSString * name = tag.username;
-        if ([followingSet containsObject:name])
-            [allTagsDisplayed addObject:tag];
-        else 
-            NSLog(@"Skipping tag %d with username %@", [tag.tagID intValue], tag.username);
+    if ([delegate isLoggedIn]) {
+        [followingSet addObject:[self getUsername]];
+        for (int i=0; i<[allTags count]; i++) {
+            Tag * tag = [allTags objectAtIndex:i];
+            NSString * name = tag.username;
+            if ([followingSet containsObject:name])
+                [allTagsDisplayed addObject:tag];
+            else 
+                NSLog(@"Skipping tag %d with username %@", [tag.tagID intValue], tag.username);
+        }
+    }
+    else
+    {
+        // display all tags
+        [allTagsDisplayed addObjectsFromArray:allTags];
     }
     NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
 }
 
 -(void)addTagForDisplay:(Tag *)tag {
-    // todo: like addTagWithCheck 
-    self.allTags = [self.delegate getTags];
-    self.userPhotos = [self.delegate getUserPhotos]; 
-    //NSLog(@"Loaded %d tags and %d users", [self.allTags count], [self.userPhotos count]);
-    
-    [self populateAllTagsDisplayed];
-    // do not reload table data - this only called after allTags has one tag added
-    if ([allTagsDisplayed count] > 0)
-        [self reloadCurrentPage];
+//    [self populateAllTagsDisplayed];
 }
 
 -(void)finishedCheckingForNewData:(bool)updated {
@@ -831,10 +838,25 @@
     //[commentView setTagID:tagID];
     //[commentView setNameString:nameString];
     
+#if 0
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     [commentView.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:commentView.view];
+#else
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
+    [self.view addSubview:commentView.view];
+    [commentView.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    }];
+    
+    // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [commentView viewDidAppear:YES];     
+#endif
 }
 
 -(void)sharePix:(int)tagID {
@@ -878,9 +900,17 @@
 /*** CommentViewDelegate ***/
 -(void)didCloseComments {
     // hack a way to remove view over camera; formerly dismissModalViewController
+#if 0
     [self.delegate didDismissSecondaryView]; // same as aux view
-    //[commentView release];
-    //commentView = nil;
+#else
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = commentView.view.frame;
+    
+    frameOffscreen.origin.x -= 330;
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [commentView.view removeFromSuperview];
+    }];
+#endif
 }
 
 -(void)didAddNewComment:(NSString *)newComment withTagID:(int)tagID{
@@ -895,7 +925,7 @@
 //    [self.delegate didClickFeedbackButton:@"Feed view"];
 //}
 
-/*** FeedViewItemDelegate, forwarded from StixViewDelegate ***/
+/*** FeedViewItemDelegate ***/
 -(NSString*)getUsername {
     return [self.delegate getUsername];
 }
@@ -934,5 +964,38 @@
     [self.tabBarController.view setFrame:newFrame];
 }
 
+#pragma mark UserGalleryDelegate
+
+-(void)shouldDisplayUserPage:(NSString *)username {
+    //    [self.delegate shouldDisplayUserPage:username];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = commentView.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [commentView.view removeFromSuperview];
+        [delegate shouldDisplayUserPage:username];
+    }];
+}
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
+}
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    /*
+    NSLog(@"VerticalFeedController calling delegate didReceiveRequestedStixView");
+    //[delegate didReceiveRequestedStixViewFromKumulos:theResults];
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            NSLog(@"VerticalFeedController didReceiveRequestedStix for feedItem index %d tagID %d", i, tagID);
+            [self reloadViewForItemAtIndex:i];
+        }
+    }
+     */
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
 @end
 

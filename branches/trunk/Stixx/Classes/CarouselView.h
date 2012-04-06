@@ -12,6 +12,8 @@
 #import "UIVerticalGestureRecognizer.h"
 #import <AudioToolbox/AudioServices.h>
 #import "StixAnimation.h"
+#import "Kumulos.h"
+#import <dispatch/dispatch.h>
 
 //#define SHELF_STIX_X 0
 //#define SHELF_STIX_Y 340
@@ -23,7 +25,8 @@
 #define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
 
 enum {
-    SHELF_CATEGORY_ALL = 0,
+    SHELF_CATEGORY_FIRST = 0,
+    SHELF_CATEGORY_ALL = 1,
     SHELF_CATEGORY_ANIMALS,
     SHELF_CATEGORY_ANIME,
     SHELF_CATEGORY_ART,
@@ -45,7 +48,7 @@ enum {
     SHELF_CATEGORY_MAX
 };
 
-@interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate, StixAnimationDelegate>{
+@interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate, StixAnimationDelegate, KumulosDelegate>{
 	
     int carouselHeight;
     //NSObject<CarouselViewDelegate> *delegate;
@@ -57,6 +60,8 @@ enum {
     NSMutableDictionary * allCarouselStixFrames;
     NSMutableDictionary * allCarouselStixViews;
     NSMutableDictionary * allCarouselStixStringIDsAtFrame;
+    NSMutableSet * allCarouselMissingStixStringIDs;
+    NSMutableDictionary * allCarouselMissingStixStringOpacity;
     
     bool allowTap;
     //CGPoint tapDefaultOffset; // offset of default location for tap  relative to carouselView frame
@@ -69,6 +74,9 @@ enum {
 
     int tabAnimationIDDismiss;
     int tabAnimationIDExpand;
+    
+    Kumulos * k;
+    dispatch_queue_t backgroundQueue;
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
@@ -87,7 +95,6 @@ enum {
 @property (nonatomic, assign) int expandedTabY;
 @property (nonatomic, assign) BOOL isShowingCarousel;
 
-
 -(void)initCarouselWithFrame:(CGRect)frame; // private function
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;
@@ -98,7 +105,7 @@ enum {
 -(void)carouselTabDismiss:(BOOL)doAnimation;
 -(void)didClickShowCarousel:(id)sender;
 -(void)didClickShelfCategory:(id)sender;
-
+-(void)requestStixFromKumulos:(NSString *)stixStringID;
 /*** make a singleton class ***/
 +(CarouselView*)sharedCarouselView;
 

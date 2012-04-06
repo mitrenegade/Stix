@@ -60,7 +60,6 @@ enum {
     
 	NSMutableArray * badges;
 	NSMutableArray * badgeLocations; // original frame of each badge
-	NSMutableArray * badgesLarge;
 	
 	UIImageView * badgeTouched; // the stix on the carousel (at whatever size the carousel is)
 	UIImageView * badgeLifted; // what a stix looks like in the correct context
@@ -84,7 +83,6 @@ enum {
 @property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
 @property (nonatomic, assign) UIView * underlay;
 @property (nonatomic, assign) bool showStixCounts;
-@property (nonatomic, retain) NSMutableArray * badgesLarge; // access allowed
 //@property (nonatomic, retain) UIImageView * shelf;
 @property (nonatomic, assign) NSString * selectedStixStringID;
 
@@ -103,7 +101,7 @@ enum {
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos;
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
-+(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixLikelihoods:(NSMutableDictionary*)savedStixLikelihoods andStixCategories:(NSMutableDictionary*)savedStixCategories;
++(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixCategories:(NSMutableDictionary*)savedStixCategories;
 +(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories;
 +(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults;
 
@@ -116,7 +114,6 @@ enum {
 
 // for displaying badges
 +(UIImageView *) getBadgeWithStixStringID:(NSString*)stixStringID;
-+(UIImageView *) getLargeBadgeWithStixStringID:(NSString*)stixStringID;
 +(NSMutableDictionary *) generateDefaultStix;
 +(NSMutableDictionary *) generateOneOfEachStix;
 +(NSString*) getStixStringIDAtIndex:(int)index;
@@ -125,7 +122,6 @@ enum {
 +(NSMutableArray *) getSubcategoriesForCategory:(NSString*)categoryName;
 +(NSMutableDictionary *)GetAllStixViewsForSave;
 +(NSMutableDictionary *)GetAllStixDescriptorsForSave;
-+(NSMutableDictionary *)GetAllStixLikelihoodsForSave;
 +(NSMutableArray *)GetAllStixStringIDsForSave;
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(NSMutableDictionary *)GetAllStixSubcategoriesForSave;

@@ -207,6 +207,32 @@
     [self.delegate receivedFacebookFriends:friendsArray];
 }
 
+-(void)sendInvite:(NSString *)name withFacebookID:(NSString*)facebookID {
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"Come remix my pictures! Click here to join Stix on your iPhone.",  @"message",
+                                   @"stix.herokuapp.com", @"redirect_uri", 
+                                   //facebookID, @"to",
+                                   @"701860", @"to",
+                                   @"Invite to Stix", @"title",
+                                   @"Invite to Stix!", @"caption", 
+                                   APP_ID, @"app_id",
+                                   nil];
+#if 1
+    [facebook dialog:@"apprequests"
+           andParams:params
+         andDelegate:self];
+#else
+    NSString * urlString = [NSString stringWithFormat: @"http://www.facebook.com/dialog/apprequests?app_id=%@&message=test&redirect_uri=http://www.google.com", APP_ID];
+    
+    NSString * fullURL = [NSString stringWithFormat:@"%@", urlString];
+    NSURL * url = [NSURL URLWithString:fullURL];
+    getRequest = [[SMWebRequest requestWithURL:url] retain];
+    [getRequest addTarget:self action:@selector(dialogDidComplete:) forRequestEvents:SMWebRequestEventComplete];
+    [getRequest start];
+    NSLog(@"Get request: %@", fullURL);
+#endif
+}
+
 #pragma mark FBRequestDelegate
 
 /**

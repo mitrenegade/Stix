@@ -15,6 +15,7 @@
 #if USE_PULL_TO_REFRESH
 @synthesize reloading=_reloading;
 @synthesize refreshHeaderView;
+@synthesize hasHeaderRow;
 #endif
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -22,6 +23,7 @@
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        hasHeaderRow = NO;
     }
     return self;
 }
@@ -139,6 +141,8 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (hasHeaderRow && [indexPath row] == 0)
+        return 180;
     return columnHeight + columnPadding;
 }
 
@@ -156,14 +160,15 @@
         //
         // Create a background image view.
         //
-        cell.backgroundView = [[[UIImageView alloc] init] autorelease];
-        cell.selectedBackgroundView = [[[UIImageView alloc] init] autorelease];
+        //cell.backgroundView = [[[UIImageView alloc] init] autorelease];
+        //cell.selectedBackgroundView = [[[UIImageView alloc] init] autorelease];
         
 		//cell.selectionStyle = UITableViewCellSelectionStyleBlue;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         [cell.textLabel setHighlightedTextColor:[cell.textLabel textColor]];
         cell.textLabel.numberOfLines = 1;
         [cell setBackgroundColor:[UIColor clearColor]];
+        [cell setBackgroundColor:[UIColor blackColor]];
     }
     /*
      else {
@@ -173,20 +178,58 @@
      */
     int row = [indexPath row];
     NSLog(@"Column table: populating row %d", row);
-    for (int col=0; col<numColumns; col++) {
-        CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
-        NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
-        UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
-        if (cellOldView != nil) 
-            [cellOldView removeFromSuperview];
-        UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns + col]; 
-        if (elementView != nil) {
-            [elementView setFrame:frame];
-            [cell addSubview:elementView];
-            [cellDictionary setObject:elementView forKey:cellColumnKey];
+    if ([self hasHeaderRow]) {
+        if (row == 0) {
+            // row 0 is header
+            CGRect frame = CGRectMake(borderWidth, columnPadding, tableView.frame.size.width - 2*columnPadding, 160);
+            NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10)];// finds unique identifier for position in this cell
+            UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
+            if (cellOldView != nil) 
+                [cellOldView removeFromSuperview];
+            UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns]; 
+            if (elementView != nil) {
+                [elementView setFrame:frame];
+//                [elementView setBackgroundColor:[UIColor greenColor]];
+                [cell addSubview:elementView];
+                [cellDictionary setObject:elementView forKey:cellColumnKey];
+            }
+        }
+        else
+        {   
+            // other rows are normal
+            for (int col=0; col<numColumns; col++) {
+                CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
+                NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
+                UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
+                if (cellOldView != nil) 
+                    [cellOldView removeFromSuperview];
+                UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns + col]; 
+                if (elementView != nil) {
+                    [elementView setFrame:frame];
+                    [cell addSubview:elementView];
+                    [cellDictionary setObject:elementView forKey:cellColumnKey];
+                }
+            }
+        }        
+    }
+    else
+    {
+        // all rows are normal
+        
+        for (int col=0; col<numColumns; col++) {
+            CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
+            NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
+            UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
+            if (cellOldView != nil) 
+                [cellOldView removeFromSuperview];
+            UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns + col]; 
+            if (elementView != nil) {
+                [elementView setFrame:frame];
+                [cell addSubview:elementView];
+                [cellDictionary setObject:elementView forKey:cellColumnKey];
+            }
         }
     }
-
     if (row == [self.delegate numberOfRows] - 3 || row == [self.delegate numberOfRows]-1)
         [self.delegate loadContentPastRow:[self.delegate numberOfRows]];
 

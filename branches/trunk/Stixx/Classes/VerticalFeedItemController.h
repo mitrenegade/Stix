@@ -27,6 +27,8 @@
 #import "StixView.h"
 #import "Kumulos.h"
 #import "CommentFeedTableController.h"
+#import "LoadingAnimationView.h"
+#import "StixAnimation.h"
 
 #define CONTENT_HEIGHT 320
 
@@ -39,6 +41,9 @@
 
 // forward from StixView
 -(NSString*)getUsername;
+
+-(void)didRequestStixFromKumulos:(NSString*)stixStringID withFeedItem:(VerticalFeedItemController*)feedItem;
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @optional
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
@@ -70,6 +75,7 @@
     UIImage * imageData;
     UIImageView * locationIcon;
     int commentCount;
+    Tag * tag; // do save the tag in case we need to repopulate the stix
     int tagID;
     
     BOOL isExpanded; // whether or not to show comments
@@ -79,6 +85,8 @@
 //    NSMutableArray * stixStringIDs;
     Kumulos * k;
 
+    LoadingAnimationView * placeholderView;
+    BOOL isShowingPlaceholder;
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;

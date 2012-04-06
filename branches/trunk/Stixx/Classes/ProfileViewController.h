@@ -18,6 +18,7 @@
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
 #import "UserGalleryController.h"
+#import "StixAnimation.h"
 
 #define DEFAULT_STIX_COUNT 2
 
@@ -32,7 +33,7 @@ enum {
 @protocol ProfileViewDelegate
 
 - (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
+- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
@@ -67,9 +68,10 @@ enum {
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 -(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
+-(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookID:(NSString*)fbID;
 @end
 
-@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate>{
+@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, StixAnimationDelegate>{
     
     //IBOutlet UIButton * logoutScreenButton;
     //IBOutlet UIButton * stixCountButton; // custom button but no clicking
@@ -108,6 +110,8 @@ enum {
     NSMutableArray * searchFriendEmail;
     NSMutableArray * searchFriendFacebookID;
     NSMutableArray * searchFriendIsStix;
+    
+    int dismissAnimation;
 }
 
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
@@ -139,7 +143,6 @@ enum {
 
 -(IBAction)changePhoto:(id)sender;
 -(void)takeProfilePicture;
--(void)updateFollowCount;
 -(void)updatePixCount;
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 // utils

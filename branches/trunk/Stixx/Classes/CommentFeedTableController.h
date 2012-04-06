@@ -17,6 +17,9 @@
 -(UIImage *)getPhotoForIndex:(int)index;
 -(int)getCount;
 -(float)getRowHeightForRow:(int)index;
+
+// for userGalleryDelegate calls
+-(void)shouldDisplayUserPage:(NSString *)username;
 @end
 
 #define SHOW_COMMENTS_ONLY 0

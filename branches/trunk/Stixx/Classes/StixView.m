@@ -22,6 +22,14 @@
 @synthesize referenceTransform;
 @synthesize selectStixStringID;
 @synthesize tagID;
+@synthesize stixViewID;
+
+static NSMutableDictionary * requestDictionaryForStix;
+static NSMutableDictionary * requestDictionaryForSuperViews;
+static NSMutableDictionary * requestDictionaryForDelegates;
+static NSMutableDictionary * requestDictionaryForKOps;
+
+static int currentStixViewID = 0;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -29,6 +37,11 @@
     if (self) {
         // Initialization code
         interactionAllowed = YES;
+        k = [[Kumulos alloc] init];
+        [k setDelegate:self];
+        
+        stixViewsMissing = [[NSMutableDictionary alloc] init];
+        stixViewID = currentStixViewID++;
     }
     return self;
 }
@@ -59,6 +72,146 @@
     _activeRecognizers = [[NSMutableSet alloc] init];
 }
 
+-(void)requestStixFromKumulos:(NSString *)stixStringID forStix:(UIImageView *)auxStix inStixView:(StixView *)stixView{ // andDelegate:(NSObject<StixViewDelegate> *)_delegate {
+
+    NSLog(@"StixView %d requestStixFromKumulos requesting %@", stixViewID, stixStringID);
+    
+    // add stix to own list
+    NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
+    if (stixArray == nil) {
+        stixArray = [[NSMutableArray alloc] init];
+    }
+    [stixArray addObject:auxStix];
+    [stixViewsMissing setObject:stixArray forKey:stixStringID];
+    
+    if (requestDictionaryForStix == nil) {
+        requestDictionaryForStix = [[NSMutableDictionary alloc] init];
+        //requestDictionaryForSuperViews = [[NSMutableDictionary alloc] init];
+        ///requestDictionaryForDelegates = [[NSMutableDictionary alloc] init];
+        //requestDictionaryForKOps = [[NSMutableDictionary alloc] init];
+    }
+    KSAPIOperation * kOp = [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+
+    // stixView refers to the StixView class that displays all the stix
+    NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
+    //NSMutableArray * superViewsThatNeedThisStix = [requestDictionaryForSuperViews objectForKey:stixStringID];
+    //NSMutableArray * delegatesThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
+    //NSMutableArray * kOpsThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
+    //NSLog(@"StixView requesting stix data: arrays for %@: in 0x%x there are %d views,%d delegates, and in 0x%x there are %d kOps", stixStringID, viewsThatNeedThisStix,
+   //       [viewsThatNeedThisStix count], [delegatesThatNeedThisStix count], kOpsThatNeedThisStix, [kOpsThatNeedThisStix count]);
+
+    if (!viewsThatNeedThisStix)  {
+        NSLog(@"Creating new queues for %@", stixStringID);
+        viewsThatNeedThisStix = [[NSMutableArray alloc] init];
+        //superViewsThatNeedThisStix = [[NSMutableArray alloc] init];
+        //delegatesThatNeedThisStix = [[NSMutableArray alloc] init];
+        //kOpsThatNeedThisStix = [[NSMutableArray alloc] init];
+
+        [viewsThatNeedThisStix addObject:stixView];
+        //[superViewsThatNeedThisStix addObject:superView];
+        //[delegatesThatNeedThisStix addObject:_delegate];
+        
+        // make a list of KSAPIOperations so that once one finishes, cancel the others
+        //NSLog(@"kOpsThatNeedThisStix 0x%x adding kOp 0x%x", kOpsThatNeedThisStix, kOp);
+        //[kOpsThatNeedThisStix addObject:kOp];
+    }
+    [requestDictionaryForStix setObject:viewsThatNeedThisStix forKey:stixStringID];
+        //[requestDictionaryForSuperViews setObject:superViewsThatNeedThisStix forKey:stixStringID];
+        //[requestDictionaryForDelegates setObject:delegatesThatNeedThisStix forKey:stixStringID];
+        //[requestDictionaryForKOps setObject:kOpsThatNeedThisStix forKey:stixStringID];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
+    
+    if ([theResults count] == 0) {
+        NSLog(@"StixView: GetStixDataByStixString returned no stix!");
+        return;        
+    }
+    
+    // populate all stix
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+    NSString * stixStringID = [d objectForKey:@"stixStringID"];
+    NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+    NSData * dataPNG = [d valueForKey:@"dataPNG"];
+    UIImage * img = [[UIImage alloc] initWithData:dataPNG];
+    
+    NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
+    //NSMutableArray * superViewsThatNeedThisStix = [requestDictionaryForSuperViews objectForKey:stixStringID];
+    //NSMutableArray * delegatesThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
+    //NSMutableArray * kOpsThatNeedThisStix = [requestDictionaryForKOps objectForKey:stixStringID];
+
+    NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
+    UIImageView * stixExists = [BadgeView getBadgeWithStixStringID:stixStringID];
+    if (stixExists.alpha == 0) {
+        [BadgeView AddStixView:theResults];
+        
+        for (int i=0; i<[viewsThatNeedThisStix count]; i++) {
+            StixView * stixView = [viewsThatNeedThisStix objectAtIndex:i];
+            //UIView * superView = [superViewsThatNeedThisStix objectAtIndex:i];
+            //NSObject<StixViewDelegate>*thisDelegate = [delegatesThatNeedThisStix objectAtIndex:i];
+            //[stixView setImage:img];
+            //[stixView removeFromSuperview];
+            //[superView addSubview:stixView];
+            NSLog(@"StixView %d is telling stixView %d to reload requested stix %@ = %@", stixViewID, stixView.stixViewID, descriptor, stixStringID);
+            //if ([thisDelegate respondsToSelector:@selector(didReceiveRequestedStixViewFromKumulos:)])
+            //    [thisDelegate didReceiveRequestedStixViewFromKumulos:theResults]; 
+            //else {
+            //    NSLog(@"StixView delegate cannot call didReceiveRequestedStixView!");
+            //}
+            [stixView didReceiveRequestedStix:stixStringID withResults:theResults fromStixView:stixViewID];
+        }
+        // clear list
+        //NSLog(@"StixView: GetStixDataByStixString for %@ = %@ filled %d missing views and cancelled %d identical kOps", descriptor, stixStringID, [viewsThatNeedThisStix count], [kOpsThatNeedThisStix count]-1);
+    }
+    else {
+        NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ previously finished!", stixViewID, descriptor, stixStringID);
+        
+        // hack: only remove from own
+        NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
+        if (stixArray) {
+            [stixViewsMissing removeObjectForKey:stixStringID];
+            NSLog(@"Previously finished stixView still exists in stixViewsMissing");
+        } else {
+            NSLog(@"Previously finished stixView already removed by sender");
+        }
+        
+        if ([stixViewsMissing count] == 0) {
+            NSLog(@"Previously finished StixView %d finished loading all missing stix views!", stixViewID);
+            [delegate didReceiveAllRequestedStixViews];
+        }
+    }
+    /*
+    for (KSAPIOperation * kOp in kOpsThatNeedThisStix) {
+        NSLog(@"--cancelling kOp 0x%x", kOp);
+        if (operation != kOp) {
+            [kOp cancel];
+            NSLog(@"Cancelling kOp");
+        }
+    }
+     */
+    //[viewsThatNeedThisStix removeAllObjects];
+    //[superViewsThatNeedThisStix removeAllObjects];
+    //[delegatesThatNeedThisStix removeAllObjects];
+    //[kOpsThatNeedThisStix removeAllObjects];
+}
+
+-(void)didReceiveRequestedStix:(NSString *)stixStringID withResults:(NSArray*)theResults fromStixView:(int)senderID{
+    NSLog(@"StixView %d received stix %@ sent by stixView %d", stixViewID, stixStringID, senderID);
+    
+    // remove auxStix from stixViewsMissing list
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+    NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
+    if (stixArray) {
+        [stixViewsMissing removeObjectForKey:stixStringID];
+        NSLog(@"Filling in %d previously missing stix. Stix types still outstanding: %d", [stixArray count], [stixViewsMissing count]);
+    }
+
+    if ([stixViewsMissing count] == 0) {
+        NSLog(@"StixView %d finished loading all missing stix views!", stixViewID);
+        [delegate didReceiveAllRequestedStixViews];
+    }
+}
+
 // originally initializeWithImage: withStix:
 // this function creates a temporary stix object that can be manipulated
 -(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation */{
@@ -66,12 +219,14 @@
     frame.origin.x = 0;
     frame.origin.y = 0;
     
-    //stixScale = scale;
-    //stixRotation = rotation;
     referenceTransform = CGAffineTransformIdentity;
     
     [self setSelectStixStringID:stixStringID];
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    if (stix.alpha == 0) { // alpha is set to 0 by [BadgeView getBadgeForStixStringId]
+        NSLog(@"Should not get here!");
+        //[self requestStixFromKumulos:stixStringID forStixView:stix inSuperView:self andDelegate:delegate];
+    }
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
     float centerY = y;
@@ -135,33 +290,33 @@
     [self setSelectStixStringID:stixStringID];
 }
 
--(void)populateWithAuxStixFromTag:(Tag *)tag {
+-(int)populateWithAuxStixFromTag:(Tag *)tag {
+    int allStixViewsExist = 1; // returns 1 if populated, 0 if missing stix
     auxStixStringIDs = tag.auxStixStringIDs;
     NSMutableArray * auxLocations = tag.auxLocations;
-    //NSMutableArray * auxRotations = tag.auxRotations; // deprecated
     NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
-    //auxScales = [[NSMutableArray alloc] init];
     tagID = tag.tagID;
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
-        //float auxScale, auxRotation;
         CGAffineTransform auxTransform;
-        // hack: backwards compatibility 
-        if ([auxTransforms count] == [auxStixStringIDs count]) {
-            NSString * transformString = [auxTransforms objectAtIndex:i];
-            auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
-            //aNSLog(@"AuxTransform: %@", NSStringFromCGAffineTransform(auxTransform));
-        }
-        else
-        {
-            //auxScale = 1;
-            //auxRotation = 0;
-            auxTransform = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
-        }
+        NSString * transformString = [auxTransforms objectAtIndex:i];
+        auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         UIImageView * auxStix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+        // hack: call update
+        if (auxStix.alpha == 0) {
+            [self requestStixFromKumulos:stixStringID forStix:auxStix inStixView:self];
+            allStixViewsExist = 0;
+        }
+        
+        // shortcircuit populateWithAuxStixFromTag because if any stix doesn't exist
+        // this whole StixView will have to be repopulated once we receive all stix
+        // requests. but we do have to run through all stix to initiate the requests
+        if (!allStixViewsExist)
+            continue;
+        
         //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
         float centerX = location.x;
         float centerY = location.y;
@@ -213,6 +368,7 @@
         //[auxScales addObject:[NSNumber numberWithFloat:auxScale]];
         [auxPeelableByUser addObject:[NSNumber numberWithBool:isPeelableByUser]];
     }
+    return allStixViewsExist;
 }
 
 -(void)doPeelAnimationForStix:(int)index {
@@ -303,7 +459,7 @@
     [dot4 release];
 }
 
--(void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if (interactionAllowed == NO) { // skips interaction with stix for dragging
         [super touchesBegan:touches withEvent:event];
         return;

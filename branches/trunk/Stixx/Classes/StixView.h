@@ -12,11 +12,16 @@
 #import "BadgeView.h"
 #import "OutlineLabel.h"
 #import "Tag.h"
+#import "Kumulos.h"
 
 @class StixView;
 
 @protocol StixViewDelegate 
 //-(void)didFinishScalingMotionWithScale:(float)scale;
+-(void)didRequestStixFromKumulos:(NSString*)stixStringID;
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+-(void)didReceiveAllRequestedStixViews;
 @optional
 -(NSString*) getUsername;
 -(void)didAttachStix:(int)index;
@@ -25,7 +30,7 @@
 -(void)didTouchInStixView:(StixView*)stixViewTouched;
 @end
 
-@interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate>
+@interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate, KumulosDelegate>
 {
     // stix to be manipulated: new stix or new aux stix
     UIImageView * stix;
@@ -63,6 +68,12 @@
 
     NSObject<StixViewDelegate> * delegate;    
     NSMutableSet *_activeRecognizers;
+    Kumulos * k;
+
+    // key: stixStringID
+    // value: array of all auxStix views of this type in this StixView
+    // if at any point we've satisfied all stixStringIDs, repopulate this view
+    NSMutableDictionary * stixViewsMissing;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -77,11 +88,11 @@
 @property (nonatomic, assign) CGAffineTransform referenceTransform;
 @property (nonatomic, copy) NSString * selectStixStringID;
 @property (nonatomic, retain) NSNumber * tagID;
-
+@property (nonatomic, assign) int stixViewID;
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;
--(void)populateWithAuxStixFromTag:(Tag*)tag;
+-(int)populateWithAuxStixFromTag:(Tag*)tag;
 -(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation*/;
 -(void)updateStixForManipulation:(NSString*)stixStringID;
 -(bool)isStixPeelable:(int)index;
@@ -90,4 +101,9 @@
 
 -(int)findPeelableStixAtLocation:(CGPoint)location;
 -(void)transformBoxShowAtFrame:(CGRect)frame;
+
+
+// on demand stix download
+-(void)requestStixFromKumulos:(NSString*)stixStringID forStix:(UIImageView*)auxStix inStixView:(StixView*)stixView; // andDelegate:(NSObject <StixViewDelegate>*)delegate;
+-(void)didReceiveRequestedStix:(NSString*)stixStringID withResults:(NSArray*)theResults fromStixView:(int)senderID;
 @end

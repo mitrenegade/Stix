@@ -134,8 +134,7 @@
         UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 230, 12)];
         UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 230, 14)];
         UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 42, 230, 12)];
-        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
-		nameLabel.textColor = fontNameColor;
+        nameLabel.textColor = fontNameColor;
 		nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
 		commentTextLabel.textColor = fontTextColor;
 		commentTextLabel.font = [UIFont fontWithName:@"Helvetica-BoldOblique" size:14];
@@ -145,8 +144,11 @@
         [nameLabel setBackgroundColor:[UIColor clearColor]];
         [commentTextLabel setBackgroundColor:[UIColor clearColor]];
         [timeLabel setBackgroundColor:[UIColor clearColor]];
-        [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        
+        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
+		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
         [photoView.layer setBorderWidth: 2.0];
+        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
         nameLabel.tag = LEFT_LABEL_TAG;
         commentTextLabel.tag = RIGHT_LABEL_TAG;
         timeLabel.tag = TIME_LABEL_TAG;
@@ -201,8 +203,9 @@
         //float minHeight = [self getHeightForComment:comment forStixStringID:stixStringID];//timeLabel.frame.origin.y + timeLabel.frame.size.height + 2;
         //NSLog(@"Row %d needs to be at least this big: %f", [indexPath row], minHeight);
 
-        UIImageView * photoView = (UIImageView*)[cell viewWithTag:PHOTO_TAG];
-        [photoView setImage:photo];
+        UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG];
+        [photoView setImage:photo forState:UIControlStateNormal];
+        [photoView setTag:index];
         [photo release]; // MRC
         
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
@@ -215,6 +218,12 @@
             cell.accessoryView = nil;
     }
     return cell;
+}
+
+-(void)didClickUserPhoto:(UIButton*)button {
+    NSLog(@"CommentFeedTable: did click on user's photo %d", button.tag);
+    NSString * name = [delegate getNameForIndex:button.tag];
+    [delegate shouldDisplayUserPage:name];
 }
 
 /*

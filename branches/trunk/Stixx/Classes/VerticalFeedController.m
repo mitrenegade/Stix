@@ -1182,5 +1182,15 @@
         }
     }
 }
+
+-(void)finishedCreateNewPix:(NSNumber*)tagID {
+    // force reload
+    [self populateAllTagsDisplayed];
+    [tableController.tableView reloadData];
+   
+    NSLog(@"FeedController: finished create new pix: sharing ID %d", [tagID intValue]);
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
+    [self didPressShareButtonForFeedItem:feedItem];
+}
 @end
 

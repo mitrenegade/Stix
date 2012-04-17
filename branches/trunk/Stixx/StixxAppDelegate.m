@@ -1002,10 +1002,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (added)
     {
         NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
-        //[feedController.scrollView populateScrollPagesAtPage:0]; // force update first page
-        //[feedController.tableController populateScrollPagesAtPage:0];
-        [feedController viewWillAppear:YES];
-        [feedController jumpToPageWithTagID:[newRecordID intValue]];
+        [feedController finishedCreateNewPix:newRecordID];
     }
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);

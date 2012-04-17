@@ -37,11 +37,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "356315683.868192"
+         timestampString = "356316408.687312"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2818"
-         endingLineNumber = "2818"
+         startingLineNumber = "2815"
+         endingLineNumber = "2815"
          landmarkName = "-didCloseBuxPurchaseMenu"
          landmarkType = "5">
       </FileBreakpoint>

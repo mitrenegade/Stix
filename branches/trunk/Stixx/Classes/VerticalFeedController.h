@@ -182,6 +182,7 @@
 -(void)shouldDisplayUserPage:(NSString*)galleryUsername;
 -(void)forceReloadWholeTableZOMG;
 -(void)didCloseShareSheet;
+-(void)finishedCreateNewPix:(NSNumber*)tagID;
 @end
 
 

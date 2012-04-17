@@ -18,10 +18,8 @@
 
 @protocol StixViewDelegate 
 //-(void)didFinishScalingMotionWithScale:(float)scale;
--(void)didRequestStixFromKumulos:(NSString*)stixStringID;
-
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
--(void)didReceiveAllRequestedStixViews;
+-(void)didReceiveAllRequestedMissingStix:(StixView*)stixView;
 @optional
 -(NSString*) getUsername;
 -(void)didAttachStix:(int)index;
@@ -74,6 +72,7 @@
     // value: array of all auxStix views of this type in this StixView
     // if at any point we've satisfied all stixStringIDs, repopulate this view
     NSMutableDictionary * stixViewsMissing;
+    BOOL isShowingPlaceholder;
 }
 
 @property (nonatomic, retain) UIImageView * stix;
@@ -89,6 +88,7 @@
 @property (nonatomic, copy) NSString * selectStixStringID;
 @property (nonatomic, retain) NSNumber * tagID;
 @property (nonatomic, assign) int stixViewID;
+@property (nonatomic, assign) BOOL isShowingPlaceholder;
 
 -(void)initializeWithImage:(UIImage*)imageData;
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;

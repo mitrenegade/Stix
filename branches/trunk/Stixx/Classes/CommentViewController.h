@@ -39,9 +39,11 @@
     
     IBOutlet UILabel * nameLabel;
     IBOutlet UIButton * backButton;
+    IBOutlet UIImageView * logo;
+    
     IBOutlet UIButton * addButton;
     IBOutlet UITextField * commentField;
-    IBOutlet UIImageView * logo;
+    IBOutlet UIToolbar * toolBar;
     
     NSObject<CommentViewDelegate> * delegate;
     
@@ -54,10 +56,11 @@
 @property (nonatomic, retain) IBOutlet UIButton * backButton;
 @property (nonatomic, retain) IBOutlet UIButton * addButton;
 @property (nonatomic, retain) IBOutlet UITextField * commentField;
+@property (nonatomic, retain) IBOutlet UIToolbar * toolBar;
 @property (nonatomic, assign) NSObject<CommentViewDelegate> * delegate;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
 
--(IBAction) backButtonPressed:(id)sender;
--(IBAction) addButtonPressed:(id)sender;
+-(IBAction) didClickBackButton:(id)sender;
+-(IBAction)didClickAddButton:(id)sender;
 -(void)initCommentViewWithTagID:(int)tagID andNameString:(NSString*)nameString;
 @end

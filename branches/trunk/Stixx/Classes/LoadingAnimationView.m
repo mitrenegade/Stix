@@ -11,40 +11,36 @@
     self = [super initWithFrame:frame];
   
     //[self setFrame:CGRectMake(0, 0, 100, 100)];
-    //customActivityIndicator.center = self.center;
     self.animationImages = [NSArray arrayWithObjects:
 #if 0
-                                               [UIImage imageNamed:@"fire_load1.png"],
-                                               [UIImage imageNamed:@"fire_load2.png"],
-                                               [UIImage imageNamed:@"fire_load3.png"],
-                                               [UIImage imageNamed:@"fire_load4.png"],
-                                               [UIImage imageNamed:@"fire_load3.png"],
-                                               [UIImage imageNamed:@"fire_load2.png"],
+                            [UIImage imageNamed:@"fire_load_side1.png"],
+                            [UIImage imageNamed:@"fire_load_side2.png"],
+                            [UIImage imageNamed:@"fire_load_side3.png"],
+                            [UIImage imageNamed:@"fire_load_side4.png"],
+                            [UIImage imageNamed:@"fire_load_side5.png"],
+                            [UIImage imageNamed:@"fire_load_side5.png"],
+                            [UIImage imageNamed:@"fire_load_side4.png"],
+                            [UIImage imageNamed:@"fire_load_side3.png"],
+                            [UIImage imageNamed:@"fire_load_side2.png"],
+                            [UIImage imageNamed:@"fire_load_side1.png"],                            
 #else
-                            [UIImage imageNamed:@"fire_load_side1.png"],
-                            [UIImage imageNamed:@"fire_load_side2.png"],
-                            [UIImage imageNamed:@"fire_load_side3.png"],
-                            [UIImage imageNamed:@"fire_load_side4.png"],
-                            [UIImage imageNamed:@"fire_load_side5.png"],
-                            [UIImage imageNamed:@"fire_load_side5.png"],
-                            [UIImage imageNamed:@"fire_load_side4.png"],
-                            [UIImage imageNamed:@"fire_load_side3.png"],
-                            [UIImage imageNamed:@"fire_load_side2.png"],
-                            [UIImage imageNamed:@"fire_load_side1.png"],
-                            
+                            [UIImage imageNamed:@"loading_01.png"],
+                            [UIImage imageNamed:@"loading_02.png"],
+                            [UIImage imageNamed:@"loading_03.png"],
+                            [UIImage imageNamed:@"loading_04.png"],
+                            [UIImage imageNamed:@"loading_05.png"],
 #endif
                                                //[UIImage imageNamed:@"fire_load4.png"],
                                                nil];
     
-    self.animationDuration = 0.8; // in seconds
+    self.animationDuration = 0.5; // in seconds
     self.animationRepeatCount = 0; // sets to loop
     [self setHidden:YES];
     //[self startAnimating];
     
-    UIImageView * bkg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"load_bkg.png"]];
+    UIImageView * bkg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loading_bkg.png"]];
     [bkg setFrame:CGRectMake(-5, -5, frame.size.width+10, frame.size.height+10)];
-    [self addSubview:bkg];
-    //[self addSubview:customActivityIndicator];
+    //[self insertSubview:bkg belowSubview:self];
     [bkg release];
     return self;
 }
@@ -70,7 +66,6 @@
 }
 
 - (void)dealloc {
-    [customActivityIndicator release];
 	[super dealloc];
 }
 

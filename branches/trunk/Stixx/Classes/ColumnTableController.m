@@ -193,6 +193,12 @@
                 [cell addSubview:elementView];
                 [cellDictionary setObject:elementView forKey:cellColumnKey];
             }
+            for (int col=1; col<numColumns; col++) {
+                NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10 + col)];// finds unique identifier for position in this cell
+                UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
+                if (cellOldView != nil) 
+                    [cellOldView removeFromSuperview];
+            }
         }
         else
         {   

@@ -114,7 +114,7 @@
 #if !TARGET_IPHONE_SIMULATOR
     if (descriptorIsOpen == NO) {
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
-        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
         needToShowCamera = NO;
     }
 #endif
@@ -195,6 +195,19 @@
 }
 
 -(void)didCancelAddStix {
+#if 0
+    // create Tag
+    NSString * username = [self.delegate getUsername];
+    if ([delegate isLoggedIn] == NO)
+    {
+        username = @"anonymous";
+    }
+    [cameraTag addUsername:username andDescriptor:@"" andComment:@"" andLocationString:@""];
+    [self.delegate didCreateNewPix:cameraTag];
+    [cameraTag release];
+    cameraTag = nil;
+#endif
+    
     //[[UIApplication sharedApplication] setStatusBarHidden:YES];
     //[self.camera dismissModalViewControllerAnimated:YES];
     [self.descriptorController.carouselView carouselTabDismiss:NO];
@@ -235,19 +248,8 @@
     }
     //newCoord = [arViewController createCoordinateWithLabel:desc];
     
-    // check if user is logged in
-    if ([delegate isLoggedIn] == NO)
-    {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello Anonymous User!"
-                                                          message:@"You are not logged in. Please make sure you visit the profile page!"
-                                                         delegate:self
-                                                cancelButtonTitle:@"Ok"
-                                                otherButtonTitles:nil];
-        [alert show];
-        [alert release];
-    }
     // create Tag
-    NSString * username = [self.delegate getUsername];
+    NSString * username = [delegate getUsername];
     if ([delegate isLoggedIn] == NO)
     {
         username = @"anonymous";
@@ -490,6 +492,10 @@
 }
 
 -(IBAction)didClickCloseButton:(id)sender {
+    if ([delegate getFirstTimeUserStage] == 0) {
+        // advance to next
+        [delegate advanceFirstTimeUserMessage];
+    }
     [self.delegate didDismissSecondaryView];
 }
 

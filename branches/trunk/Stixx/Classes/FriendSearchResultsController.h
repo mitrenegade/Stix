@@ -18,11 +18,12 @@
 -(int)getFollowingUserStatus:(int)index;
 -(int)getNumOfUsers;
 -(void)didClickAddFriendButton:(int)index;
+-(void)didSelectUserProfile:(int)index;
 @end
 
 @interface FriendSearchResultsController : UITableViewController 
 
-//@property (retain, nonatomic) NSMutableDictionary * userPhotos;
+@property (retain, nonatomic) NSMutableDictionary * userPhotos;
 //@property (retain, nonatomic) NSMutableArray * usernames;
 //@property (retain, nonatomic) NSMutableDictionary * userEmails;
 @property (retain, nonatomic) NSMutableDictionary * userButtons;

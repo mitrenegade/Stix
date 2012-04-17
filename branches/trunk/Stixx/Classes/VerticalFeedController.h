@@ -56,7 +56,7 @@
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 //-(void)didSharePixWithURL:(NSString*)url;
 //-(void)didPurchaseBux:(int)bux;
--(void)sharePix:(int)tagID;
+//-(void)sharePix:(int)tagID;
 -(void)didOpenProfileView;
 -(NSMutableSet*)getFollowingList;
 
@@ -70,6 +70,11 @@
 
 -(void)checkAggregatorStatus; // debug
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+
+-(int)getFirstTimeUserStage;
+-(void)didClickPurchaseBuxButton;
+-(void)agitateFirstTimePointer;
+
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserProfileViewDelegate, ProfileViewDelegate, StixAnimationDelegate> {
@@ -80,12 +85,14 @@
     UIImagePickerController * camera;
     
     LoadingAnimationView * activityIndicator;
+    LoadingAnimationView * activityIndicatorLarge;
     
     NSObject<VerticalFeedDelegate> * delegate;
     
     FeedTableController *tableController;	
     int lastPageViewed;
     int lastContentOffset;
+    int newestTagIDDisplayed;
     
     CGPoint feedItemViewOffset;
     
@@ -107,6 +114,23 @@
 //    int isShowingCarousel;
 //    NSString * stixSelected;
     
+    // stix purchase menu
+    UIImageView * buxInstructions;
+    UIButton * buttonBuxStore;
+    UIButton * buttonBuxInstructionsClose;
+    int buxAnimationOpen;
+    int buxAnimationClose;
+    BOOL isShowingBuxInstructions;
+    
+    // share animation, graphics and actions
+    UIImageView * shareSheet;
+    UIButton * buttonShareFacebook;
+    UIButton * buttonShareEmail;
+    UIButton * buttonShareClose;
+    int shareMenuOpenAnimation;
+    int shareMenuCloseAnimation;
+    VerticalFeedItemController * shareFeedItem;
+
     RaisedCenterTabBarController * tabBarController;
 }
 @property (nonatomic, assign) CarouselView * carouselView;
@@ -121,6 +145,7 @@
 //@property (nonatomic, retain) IBOutlet UILabel * labelBuxCount;
 @property (nonatomic, retain) OutlineLabel * labelBuxCount;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic, retain) CommentViewController * commentView;
 @property (nonatomic, retain) UIImagePickerController * camera;
@@ -131,6 +156,7 @@
 @property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
 //@property (nonatomic, copy) NSString * galleryUsername;
 @property (nonatomic, retain) IBOutlet UITextField * statusMessage;
+@property (nonatomic, assign) int newestTagIDDisplayed;
 
 -(void)populateAllTagsDisplayed;
 -(void)addTagForDisplay:(Tag*)tag;
@@ -155,6 +181,7 @@
 -(void)didFollowUser;
 -(void)shouldDisplayUserPage:(NSString*)galleryUsername;
 -(void)forceReloadWholeTableZOMG;
+-(void)didCloseShareSheet;
 @end
 
 

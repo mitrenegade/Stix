@@ -14,6 +14,7 @@
 @synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
+@synthesize activityIndicatorLarge;
 @synthesize feedItems;
 @synthesize headerViews;
 @synthesize allTags;
@@ -31,6 +32,7 @@
 @synthesize labelBuxCount;
 @synthesize bitlyHelper;
 @synthesize statusMessage;
+@synthesize newestTagIDDisplayed;
 
 -(id)init
 {
@@ -64,13 +66,18 @@
 }
 
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(void) viewDidLoad {
@@ -79,9 +86,8 @@
 
     //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
-    
-    //activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(10, 11, 25, 25)];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
+
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 11, 25, 25)];
     [self.view addSubview:activityIndicator];
     
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
@@ -104,7 +110,6 @@
     headerViews = [[NSMutableDictionary alloc] init];
     feedSectionHeights = [[NSMutableDictionary alloc] init];
     
-    //[activityIndicator startCompleteAnimation];
     [self startActivityIndicator];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
@@ -115,11 +120,6 @@
     [labelBuxCount release];
     
     [statusMessage setHidden:YES];
-}
-
-
--(void)didClickMoreBuxButton:(id)sender {
-    [self.delegate didClickPurchaseBuxButton];
 }
 
 -(void)configureCarouselView {
@@ -328,21 +328,26 @@
     NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
     //[carouselView carouselTabExpand:NO];
     [carouselView carouselTabDismiss:YES];
-    [self.delegate didDismissSecondaryView];
+    [delegate didDismissSecondaryView];
+    
+    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
+        //[tabBarController displayFirstTimeUserProgress:FIRSTTIME_MESSAGE_02];
+        [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
+    }
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
-    return [self.delegate getStixCount:stixStringID];
+    return [delegate getStixCount:stixStringID];
 }
 -(int)getStixOrder:(NSString*)stixStringID {
-    return [self.delegate getStixOrder:stixStringID];
+    return [delegate getStixOrder:stixStringID];
 }
 -(int)getBuxCount {
-    return [self.delegate getBuxCount];
+    return [delegate getBuxCount];
 }
 
 -(void)didStartDrag {
-    [self.carouselView carouselTabDismiss:YES];
+    [carouselView carouselTabDismiss:YES];
 }
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
@@ -365,7 +370,7 @@
     // HACK: feedItem should not be dynamically changing
     if (feedItemHeight != CONTENT_HEIGHT)
         feedItemHeight = CONTENT_HEIGHT;
-    return feedItemHeight;
+    return feedItemHeight+5;
 }
 
 -(int)heightForHeaderInSection:(int)index {
@@ -633,14 +638,16 @@
 }
 
 -(IBAction)didClickJumpButton:(id)sender {
-//    [scrollView jumpToPage:0];
+    // jumps to top
+    NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
 }
 
 -(IBAction)didClickProfileButton:(id)sender {
     [self.delegate didOpenProfileView];
 }
 
--(void)pullToRefresh {
+-(void)didPullToRefresh {
     [self updateScrollPagesAtPage:-1];
     [delegate checkAggregatorStatus];
 }
@@ -651,14 +658,12 @@
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:0];
             int tagid = [t.tagID intValue];
-            //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
             [delegate getNewerTagsThanID:tagid];            
         }
         if (page >= [self numberOfSections] - LAZY_LOAD_BOUNDARY) { // trying to load an earlier tag
             Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:[self numberOfSections]-1];
             int tagid = [t.tagID intValue];
-            //[activityIndicator startCompleteAnimation];
             [self startActivityIndicator];
             [delegate getOlderTagsThanID:tagid];
         }
@@ -704,6 +709,7 @@
 
 -(void)didUnfollowUser {
     
+    /*
     allTags = [self.delegate getTags];
     for (int i=0; i<[allTags count]; i++) {
         Tag * tag = [allTags objectAtIndex:i];
@@ -714,7 +720,7 @@
 //            [tableController.tableView deleteSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationTop];
         }
     }
-    
+    */
     [self populateAllTagsDisplayed];
     //[tableController setContentPageIDs:allTags];
     // just force call of heightForHeader and heightForSection
@@ -736,20 +742,27 @@
 -(void)populateAllTagsDisplayed {
     // allTags contains all tags that have been downloaded from the server
     // allTagsDisplayed contains only the tags that belong to the following list
+    newestTagIDDisplayed = -1;
     self.allTags = [self.delegate getTags];
     if (!allTagsDisplayed)
         allTagsDisplayed = [[NSMutableArray alloc] init];
     [allTagsDisplayed removeAllObjects];
     NSMutableSet * followingSet = [delegate getFollowingList];
+    NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:followingSet];
     if ([delegate isLoggedIn]) {
-        [followingSet addObject:[self getUsername]];
+        [followingSetWithMe addObject:[self getUsername]];
         for (int i=0; i<[allTags count]; i++) {
             Tag * tag = [allTags objectAtIndex:i];
             NSString * name = tag.username;
-            if ([followingSet containsObject:name])
+            if ([followingSetWithMe containsObject:name]) {
                 [allTagsDisplayed addObject:tag];
-            else 
+                if ([tag.tagID intValue] > newestTagIDDisplayed)
+                    newestTagIDDisplayed = [tag.tagID intValue];
+            }            
+            else {
                 NSLog(@"Skipping tag %d with username %@", [tag.tagID intValue], tag.username);
+                [feedItems removeObjectForKey:tag.tagID];
+            }
         }
     }
     else
@@ -758,10 +771,13 @@
         [allTagsDisplayed addObjectsFromArray:allTags];
     }
     NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
+    [followingSetWithMe release];
 }
 
 -(void)addTagForDisplay:(Tag *)tag {
-//    [self populateAllTagsDisplayed];
+    // add newly created tag so it appears in the feed
+    [allTagsDisplayed addObject:tag];
+    [self forceReloadWholeTableZOMG];
 }
 
 -(void)finishedCheckingForNewData:(bool)updated {
@@ -799,7 +815,7 @@
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
     // location is the click location inside feeditem's frame
     
-    //NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
+    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
 
     CGPoint locationInStixView = location;
     //locationInStixView.x -= feedItem.stixView.frame.origin.x;
@@ -830,6 +846,11 @@
 
 /*** verticalfeedItemDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
+    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
+        [delegate agitateFirstTimePointer];
+        return;
+    }
+
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
         [commentView setDelegate:self];
@@ -859,9 +880,6 @@
 #endif
 }
 
--(void)sharePix:(int)tagID {
-    [self.delegate sharePix:tagID];
-}
 
 - (void) shortenBlastTextUrls:(NSString*)url{
     
@@ -953,16 +971,27 @@
 }
 
 -(void)didDismissCarouselTab {
+    /*
     CGRect newFrame = CGRectMake(0, 0, 320, 480);
     [self.tabBarController.view setFrame:newFrame];
+     */
+    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
+        [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
+    }
 }
-
 -(void)didExpandCarouselTab {
+    /*
     CGRect newFrame = self.tabBarController.view.frame;
     newFrame.origin.y = 20;
     newFrame.size.height += 80;
     [self.tabBarController.view setFrame:newFrame];
+     */
+    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
+        [tabBarController toggleFirstTimeInstructions:NO];
+        [tabBarController toggleFirstTimePointer:NO atStage:FIRSTTIME_MESSAGE_02];
+    }
 }
+
 
 #pragma mark UserGalleryDelegate
 
@@ -983,19 +1012,175 @@
 }
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
-    /*
-    NSLog(@"VerticalFeedController calling delegate didReceiveRequestedStixView");
-    //[delegate didReceiveRequestedStixViewFromKumulos:theResults];
-    for (int i=0; i<[allTagsDisplayed count]; i++) {
-        Tag * tag = [allTagsDisplayed objectAtIndex:i];
-        if ([tag.tagID intValue] == tagID) {
-            NSLog(@"VerticalFeedController didReceiveRequestedStix for feedItem index %d tagID %d", i, tagID);
-            [self reloadViewForItemAtIndex:i];
-        }
-    }
-     */
     // send through to StixAppDelegate to save to defaults
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+
+#pragma mark bux instructions
+-(void)didCloseBuxInstructions {
+    isShowingBuxInstructions = NO;
+#if 0
+    [buxInstructions removeFromSuperview];
+    [buttonBuxStore removeFromSuperview];
+    [buttonBuxInstructionsClose removeFromSuperview];
+#else
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    buxAnimationClose = [animation doSlide:buxInstructions inView:self.view toFrame:frameOutside forTime:.5];
+#endif
+}
+
+-(void)didClickPurchaseBuxButton {
+    [self didCloseBuxInstructions];
+    [delegate didClickPurchaseBuxButton];
+}
+
+-(void)didClickMoreBuxButton:(id)sender {
+    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
+        [delegate agitateFirstTimePointer];
+        return;
+    }
+
+    if (isShowingBuxInstructions)
+        return;
+    isShowingBuxInstructions = YES;
+    CGRect frameInside = CGRectMake(16, 22, 289, 380);
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    buxInstructions = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_rewards.png"]];
+    [buxInstructions setFrame:frameOutside];
+    buttonBuxStore = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonBuxStore setFrame:CGRectMake(68-16, 300-22, 200, 60)];
+    [buttonBuxStore setBackgroundColor:[UIColor clearColor]];
+    [buttonBuxStore addTarget:self action:@selector(didClickPurchaseBuxButton) forControlEvents:UIControlEventTouchUpInside];
+    buttonBuxInstructionsClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonBuxInstructionsClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
+    [buttonBuxInstructionsClose setBackgroundColor:[UIColor clearColor]];
+    [buttonBuxInstructionsClose addTarget:self action:@selector(didCloseBuxInstructions) forControlEvents:UIControlEventTouchUpInside];
+//    [buxInstructions addSubview:buttonBuxStore];
+//    [buxInstructions addSubview:buttonBuxInstructionsClose];
+#if 1
+    [self.view insertSubview:buxInstructions aboveSubview:buttonProfile];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    buxAnimationOpen = [animation doSlide:buxInstructions inView:self.view toFrame:frameInside forTime:.5];
+#else
+    [buxInstructions setFrame:frameInside];
+    [self.view insertSubview:buxInstructions aboveSubview:tableController.view];    
+#endif
+}
+
+#pragma mark share
+-(void)didCloseShareSheet {
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
+}
+
+-(void)didClickShareViaFacebook {
+    [self startActivityIndicator];
+    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [self.view addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
+    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
+        [shareFeedItem didClickShareViaFacebook];
+    });
+    [self didCloseShareSheet];
+}
+
+-(void)didClickShareViaEmail {
+    [self startActivityIndicator];
+    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
+        [shareFeedItem didClickShareViaEmail];
+    });
+    [self didCloseShareSheet];
+    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [self.view addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
+    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
+        [delegate agitateFirstTimePointer];
+        return;
+    }
+
+    shareFeedItem = feedItem;
+    
+    CGRect frameInside = CGRectMake(16, 22, 289, 380);
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
+    [shareSheet setFrame:frameOutside];
+    
+    buttonShareFacebook = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
+    [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
+    [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
+    
+    buttonShareEmail = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
+    [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
+    [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
+    
+    buttonShareClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
+    [buttonShareClose setBackgroundColor:[UIColor clearColor]];
+    [buttonShareClose addTarget:self action:@selector(didCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:shareSheet];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
+}
+
+-(void)sharePixDialogDidFinish {
+    [self didCloseShareSheet];
+    if (activityIndicatorLarge) {
+        [activityIndicatorLarge setHidden:YES];
+        [activityIndicatorLarge stopCompleteAnimation];
+        [activityIndicatorLarge removeFromSuperview];
+        [activityIndicatorLarge release];
+        activityIndicatorLarge = nil;
+    }
+}
+
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+    // bux purchase menu
+    if (animationID == buxAnimationOpen) {
+        [self.view addSubview:buttonBuxStore];
+        [self.view addSubview:buttonBuxInstructionsClose];   
+    }
+    else if (animationID == buxAnimationClose) {
+        [buxInstructions removeFromSuperview];
+        [buttonBuxStore removeFromSuperview];
+        [buttonBuxInstructionsClose removeFromSuperview];
+        [buxInstructions release];
+        [buttonBuxStore release];
+        [buttonBuxInstructionsClose release];
+    }
+    // share menu
+    else if (animationID == shareMenuOpenAnimation) {
+        [self.view addSubview:buttonShareEmail];
+        [self.view addSubview:buttonShareFacebook];
+        [self.view addSubview:buttonShareClose];
+    }
+    else if (animationID == shareMenuCloseAnimation) {
+        [self stopActivityIndicator];
+        if (shareSheet) {
+            [shareSheet release];   
+            shareSheet = nil;
+            [buttonShareEmail removeFromSuperview];
+            [buttonShareFacebook removeFromSuperview];
+            [buttonShareClose removeFromSuperview];
+            [buttonShareEmail release];
+            [buttonShareFacebook release];
+            [buttonShareClose release];
+            buttonShareClose = nil;
+            buttonShareEmail = nil;
+            buttonShareFacebook = nil;
+        }
+    }
 }
 @end
 

@@ -44,6 +44,7 @@
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableDictionary alloc] init];
     contentViews = [[NSMutableDictionary alloc] init];
+    placeholderViews = [[NSMutableDictionary alloc] init];
 
     if (!pixTableController) {
         CGRect frame = CGRectMake(0,44, 320, 460-44);
@@ -58,7 +59,7 @@
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
 
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 9, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
     [self forceReloadAll];
 }
@@ -138,10 +139,29 @@
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
         [cview initializeWithImage:tag.image];
+#if 0
+        int canShow = [cview populateWithAuxStixFromTag:tag];
+        if (canShow) {
+            cview.isShowingPlaceholder = NO;
+        }
+        else {
+            UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
+            [placeholderView setCenter:cview.center];
+            cview.isShowingPlaceholder = YES;
+            [placeholderViews setObject:placeholderView forKey:key];
+            [placeholderView release];
+        }
+#else
+        // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
+        cview.isShowingPlaceholder = NO;
+#endif
         [contentViews setObject:cview forKey:key];
         [cview release];
     }
+    StixView * cview = [contentViews objectForKey:key];
+    if (cview.isShowingPlaceholder)
+        return [placeholderViews objectForKey:key];
     return [contentViews objectForKey:key];
 }
 
@@ -183,19 +203,25 @@
 
 #pragma other functions
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(void)forceReloadAll {    
     [allTags removeAllObjects];
     [allTagIDs removeAllObjects];
     [contentViews removeAllObjects];
+    [placeholderViews removeAllObjects];
     [self loadContentPastRow:-1];
     //isZooming = NO;
     [self startActivityIndicator];
@@ -217,6 +243,10 @@
 #pragma mark DetailView 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
+    if ([DetailViewController openingDetailView])
+        return;
+    [DetailViewController lockOpen];
+
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
     detailController = [[DetailViewController alloc] init];
@@ -231,11 +261,11 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
 }
-
+/*
 -(void)sharePix:(int)tagID {
     //[self.delegate sharePix:tagID];
     shareActionSheetTagID = tagID;
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", /*@"Move", */nil];
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", nil];
     [actionSheet showFromRect:CGRectMake(0,0,320,480) inView:self.view animated:YES];//showFromTabBar:self.tabBarController.tabBar];
     [actionSheet release];
 }
@@ -245,14 +275,6 @@
     switch (buttonIndex) {
         case 0: // Facebook
         {
-            /*
-             UIAlertView* alert = [[UIAlertView alloc]init];
-             [alert addButtonWithTitle:@"Ok"];
-             [alert setTitle:@"Beta Version"];
-             [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
-             [alert show];
-             [alert release];
-             */
             Tag * tag = nil;
             tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
             if (tag == nil) {
@@ -299,6 +321,7 @@
             break;
     }
 }
+*/
 
 -(void)shouldDisplayUserGallery:(NSString*)username {
     NSLog(@"Usergallery trying to be displayed from a detailview from a usergallery. FORGET IT");
@@ -323,4 +346,24 @@
 -(UIImage*)getUserPhotoForUsername:(NSString*)name {
     return [delegate getUserPhotoForGallery];
 }
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+-(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
+    [stixView removeFromSuperview];
+    for (int i=0; i<[contentViews count]; i++) {
+        StixView * cview = [contentViews objectForKey:[NSNumber numberWithInt:i]];
+        if ([cview stixViewID] == [stixView stixViewID]) {
+            NSLog(@"ExploreView: didReceiveAllRequestedMissingStix for stixView %d at index %d", [stixView stixViewID], i);
+            [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
+            [pixTableController.tableView reloadData];
+            break;
+        }
+    }
+}
+
+
 @end

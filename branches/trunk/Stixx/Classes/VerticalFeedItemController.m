@@ -55,7 +55,7 @@
     //commentString = [NSString alloc];
     //imageData = [UIImage alloc];
     
-    isShowingPlaceholder = YES;
+    stixView.isShowingPlaceholder = YES;
     
     return self;
 }
@@ -105,15 +105,16 @@
     int canShow = [stixView populateWithAuxStixFromTag:tag];
     if (canShow) {
         [self.view insertSubview:stixView belowSubview:imageView];
-        isShowingPlaceholder = NO;
+        stixView.isShowingPlaceholder = NO;
     }
     else {
-        placeholderView = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0,0,60,60)];
+        placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
         [placeholderView setCenter:stixView.center];
-        [placeholderView startCompleteAnimation];
         [self.view insertSubview:placeholderView belowSubview:imageView];
-        isShowingPlaceholder = YES;
+        stixView.isShowingPlaceholder = YES;
     }
+    [shareButton removeFromSuperview];
+    [self.view addSubview:shareButton];
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    
@@ -255,19 +256,6 @@
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
 }
 
--(IBAction)didPressShareButton:(id)sender {
-    [self.delegate sharePix:tagID];
-    /*
-    UIAlertView* alert = [[UIAlertView alloc]init];
-    [alert addButtonWithTitle:@"Ok"];
-    [alert setTitle:@"Beta Version"];
-    [alert setMessage:@"Share coming soon!"];
-    [alert show];
-    [alert release];
-     */
-    return;
-}
-
 - (void)didReceiveMemoryWarning
 {
     // Releases the view if it doesn't have a superview.
@@ -345,7 +333,7 @@
 
 /* StixViewDelegate */
 -(NSString*)getUsername {
-    return [self.delegate getUsername];
+    return [delegate getUsername];
 }
 
 -(void)didAttachStix:(int)index {
@@ -363,30 +351,33 @@
     [self.delegate didPerformPeelableAction:0 forAuxStix:index];
 }
 
--(void)didRequestStixFromKumulos:(NSString *)stixStringID {
-    //[delegate didRequestStixFromKumulos:stixStringID forFeedItem:self];
-}
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
-    NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
     // send through to StixAppDelegate to save to defaults
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
 }
--(void)didReceiveAllRequestedStixViews {
-    if (!isShowingPlaceholder)
+-(void)didReceiveAllRequestedMissingStix:(StixView*)_stixView {
+    if (!stixView.isShowingPlaceholder)
         return;
     
-    [placeholderView stopCompleteAnimation];
+    //[placeholderView stopCompleteAnimation];
     [placeholderView removeFromSuperview];
     
     NSLog(@"VerticalFeedItemController removing placeholder for StixView %d tagID %d", stixView.stixViewID, tagID);
-    [stixView populateWithAuxStixFromTag:tag];
-    [self.view insertSubview:stixView belowSubview:imageView];
+    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedItem.bgQueue", NULL), ^(void) {
+        [stixView populateWithAuxStixFromTag:tag];
+        [self.view insertSubview:stixView belowSubview:imageView];
+    });
 #if 1
     // fade in
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){}];
     //[animation doJump:stixView inView:self.view forDistance:50 forTime:.5];
 #endif
+    
+    stixView.isShowingPlaceholder = NO;
+    [shareButton removeFromSuperview];
+    [self.view addSubview:shareButton];
 }
 
 //[k getStixDataByStixStringIDWithStixStringID:stixStringID];
@@ -412,9 +403,139 @@
 	{
         UITouch *touch = [[event allTouches] anyObject];	
         CGPoint location = [touch locationInView:self.view];
-        if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
+        // hack: sometimes the share and comment buttons don't respond first
+        // check for that first
+        if (CGRectContainsPoint([shareButton frame], location))
+            [self didPressShareButton:shareButton];
+            //return;
+        else if (CGRectContainsPoint([addCommentButton frame], location)) 
+            [self didPressAddCommentButton:addCommentButton];
+            //return;
+        else if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
             [self.delegate didClickAtLocation:location withFeedItem:self];
     }
 }
+
+#pragma mark sharing
+
+-(IBAction)didPressShareButton:(id)sender {
+    [delegate didPressShareButtonForFeedItem:self];
+}
+
+-(void)didClickShareViaFacebook {
+    shareMethod = 0;
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+    
+    [self uploadImage:png];
+    
+    NSString * metricName = @"SharePixActionsheet";
+    NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
+    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+}
+
+-(void)didClickShareViaEmail {
+    shareMethod = 1;
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
+    
+    [self uploadImage:png];
+    
+    NSString * metricName = @"SharePixActionsheet";
+    NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
+    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+}
+
+-(void)uploadImage:(NSData *)dataPNG{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    [delegate sharePixDialogDidFinish];
+    NSLog(@"Uploading data for share method: %d", shareMethod);
+    
+    NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, username];
+    NSURL *url=[[NSURL alloc] initWithString:serverString];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
+    [request setDelegate:self];
+    [request setData:dataPNG forKey:@"picture[data]"];
+    [request startSynchronous];
+    [url autorelease];
+
+}
+
+-(void)didSharePixWithURL:(NSString *)url andImageURL:(NSString*)imageURL{
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
+    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", [self getUsername]];
+    NSString * fullmessage = [NSString stringWithFormat:@"%@ has shared a Pix with you! See it here: %@", [self getUsername], url];
+    if (shareMethod == 0) {
+        // facebook
+        FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"View my Stix collection" andDescription:@"Remix your photos with Stix! Click here to see my Pix."];
+    }
+    else if (shareMethod == 1) {
+        // email
+        NSString *mailString = [NSString stringWithFormat:@"mailto:?to=&subject=%@&body=%@",
+                                [subject stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
+                                [fullmessage  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+        
+        NSLog(@"Sending mail: mailstring %@", mailString);
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:mailString]];    }
+    [delegate sharePixDialogDidFinish];
+}
+
+#pragma mark ASIHTTP delegate 
+/*** ASIhttp request delegate functions ***/
+- (void) requestFinished:(ASIHTTPRequest *)request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"Response %d : %@", request.responseStatusCode, [request responseString]);
+    // the response is an HTML file of the redirect to the image page
+    // in this image page there is a meta tag: <meta shared_id='<ID>'>
+    // also the webURL: <meta web_url='/users/<USERNAME>/pictures/<ID>'>
+    
+    NSString * responseString = [request responseString];
+    NSRange range0 = [responseString rangeOfString:@"<meta web_url"];
+    NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
+    range0.location = range0.location + 15;
+    range0.length = range1.location - range0.location-3; // this could change based on how we output web
+    NSString * substring = [responseString substringWithRange:range0];
+    NSLog(@"substring for weburl: <%@>", substring);
+    
+    NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
+    imgRange.length = 60;
+    NSString * imgSubstring = [responseString substringWithRange:imgRange];
+    NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
+    imgRange.length = imgRangeEnd.location;
+    imgSubstring = [responseString substringWithRange:imgRange];
+    
+    NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
+    [self didSharePixWithURL:weburl andImageURL:imgSubstring];
+}
+
+- (void) requestStarted:(ASIHTTPRequest *) request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"request started...");
+}
+
+- (void) requestFailed:(ASIHTTPRequest *) request {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSError *error = [request error];
+    NSLog(@"%@", error);
+}
+
+
 
 @end

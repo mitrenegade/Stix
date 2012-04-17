@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "Kumulos.h"
-#import <dispatch/dispatch.h>
 
 @protocol UserTagAggregatorDelegate <NSObject>
 
@@ -17,7 +16,6 @@
 -(void)dismissAggregateIndicator;
 -(NSString*)getUsername;
 -(BOOL)isLoggedIn;
--(void)needFacebookLogin;
 @end
 
 @interface UserTagAggregator : NSObject <KumulosDelegate>
@@ -26,7 +24,6 @@
     int followingCountLeftToAggregate;
     BOOL isFirstTimeAggregating;
     int firstTimeAggregatingTrigger; // when all friends have been added to the aggregator queue for the first time, this trigger is set to 1 so that when the aggregator queue empties, we know the tagID is in order with the most recent tag in it
-    dispatch_queue_t backgroundQueue;
 }
 
 @property (nonatomic, retain) Kumulos * k;

@@ -29,11 +29,11 @@
 #import "KumulosHelper.h"
 #import "SMWebRequest.h"
 #import "ASIHTTPRequest.h"
+#import "ASIFormDataRequest.h"
 #import "FacebookLoginController.h"
 #import "UserTagAggregator.h"
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
-#import <dispatch/dispatch.h>
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -47,7 +47,8 @@ enum notification_bookmarks {
     NB_NEWGIFT,
     NB_PEELACTION,
     NB_UPDATECAROUSEL,
-    NB_INCREMENTBUX
+    NB_INCREMENTBUX,
+    NB_NEWFOLLOWER
 };
 
 enum alertview_actions {
@@ -73,6 +74,7 @@ struct UserInfo {
     int facebookID;
     int usertagtotal;
     int bux;
+    int firstTimeUserStage;
 
     // user info
 //    bool isFirstTimeUser;
@@ -143,7 +145,12 @@ struct UserInfo {
     int updatingPeelableAction;
     int shareActionSheetTagID;
     int shareMethod; // 0 = facebook, 1 = email
+    
     int buyBuxPurchaseAmount;
+    UIImageView * buxPurchaseMenu;
+    NSMutableArray * buxPurchaseButtons;
+    UIButton * buttonBuxPurchaseClose;
+    BOOL isShowingBuxPurchaseMenu;
     
     NSMutableDictionary * allUsers;
     int idOfMostRecentUser;
@@ -174,11 +181,9 @@ struct UserInfo {
         
     FacebookHelper * fbHelper;
     UserTagAggregator * aggregator;
-    dispatch_queue_t backgroundQueue;
-
 }
 
--(void)initializeBadges;
+-(void)initializeBadgesFromKumulos;
 -(void)checkVersion;
 -(int)loadDataFromDisk;
 -(void)saveDataToDisk;
@@ -187,8 +192,8 @@ struct UserInfo {
 -(void)saveStixDataToDefaults;
 -(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
 -(int)loadUserInfoFromDefaults;
--(int)loadStixFromDefaults;
-
+-(int)loadStixDataFromDefaults;
+-(void)saveStixTypesToDefaults;
 
 - (void)showAlertWithTitle:(NSString *) title andMessage:(NSString*)message andButton:(NSString*)buttonTitle andOtherButton:(NSString*)otherButtonTitle andAlertType:(int)alertType;
 -(NSString*)coordinateArrayPath; // calls FileHelpers.m to create path
@@ -220,7 +225,6 @@ struct UserInfo {
 -(void)rewardStix;
 -(void)rewardBux;
 -(void)rewardLocation;
--(void)didGetKumulosSubcategories:(NSMutableArray*)theResults;
 -(void)logMetricTimeInApp;
 -(void)checkConsistency;
 -(void)updateBuxCountFromKumulos;
@@ -229,6 +233,11 @@ struct UserInfo {
 -(void)updateBuxCount;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
 -(void)didPurchaseBux:(int)buxPurchased;
+
+-(void)hideFirstTimeUserMessage;
+-(void)advanceFirstTimeUserMessage;
+-(void)showBuxPurchaseMenu;
+-(void)agitateFirstTimePointer;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) UIViewController * emptyViewController;

@@ -22,7 +22,6 @@
 
 -(void)didDismissZoom;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
--(void)sharePix:(int)tagID;
 -(NSString*)getUsername;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
@@ -55,12 +54,21 @@
     Kumulos * k;
     
     int animationID[2];
+    
+    // share animation, graphics and actions
+    UIImageView * shareSheet;
+    UIButton * buttonShareFacebook;
+    UIButton * buttonShareEmail;
+    UIButton * buttonShareClose;
+    int shareMenuOpenAnimation;
+    int shareMenuCloseAnimation;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
 //@property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, assign) NSObject<DetailViewDelegate> *delegate;
 @property (nonatomic, retain) StixView * stixView;
 @property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic, retain) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, retain) IBOutlet UIImageView * logo;
 @property (nonatomic, retain) NSString * tagUsername;
 @property (nonatomic, retain) CommentViewController * commentView;
@@ -70,4 +78,10 @@
 -(void)headerFromTag:(Tag*) tag;
 -(void)initFeedItemWithTag:(Tag*)tag;
 -(void)setScrollHeight:(int)height;
+
+-(void)didCloseShareSheet;
+
++(BOOL)openingDetailView;
++(void)lockOpen;
++(void)unlockOpen;
 @end

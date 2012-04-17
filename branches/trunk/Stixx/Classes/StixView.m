@@ -23,11 +23,9 @@
 @synthesize selectStixStringID;
 @synthesize tagID;
 @synthesize stixViewID;
+@synthesize isShowingPlaceholder;
 
 static NSMutableDictionary * requestDictionaryForStix;
-static NSMutableDictionary * requestDictionaryForSuperViews;
-static NSMutableDictionary * requestDictionaryForDelegates;
-static NSMutableDictionary * requestDictionaryForKOps;
 
 static int currentStixViewID = 0;
 
@@ -74,7 +72,7 @@ static int currentStixViewID = 0;
 
 -(void)requestStixFromKumulos:(NSString *)stixStringID forStix:(UIImageView *)auxStix inStixView:(StixView *)stixView{ // andDelegate:(NSObject<StixViewDelegate> *)_delegate {
 
-    NSLog(@"StixView %d requestStixFromKumulos requesting %@", stixViewID, stixStringID);
+    //NSLog(@"StixView %d requestStixFromKumulos requesting %@", stixViewID, stixStringID);
     
     // add stix to own list
     NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
@@ -86,39 +84,19 @@ static int currentStixViewID = 0;
     
     if (requestDictionaryForStix == nil) {
         requestDictionaryForStix = [[NSMutableDictionary alloc] init];
-        //requestDictionaryForSuperViews = [[NSMutableDictionary alloc] init];
-        ///requestDictionaryForDelegates = [[NSMutableDictionary alloc] init];
-        //requestDictionaryForKOps = [[NSMutableDictionary alloc] init];
     }
-    KSAPIOperation * kOp = [k getStixDataByStixStringIDWithStixStringID:stixStringID];
+    [k getStixDataByStixStringIDWithStixStringID:stixStringID];
 
     // stixView refers to the StixView class that displays all the stix
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
-    //NSMutableArray * superViewsThatNeedThisStix = [requestDictionaryForSuperViews objectForKey:stixStringID];
-    //NSMutableArray * delegatesThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
-    //NSMutableArray * kOpsThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
-    //NSLog(@"StixView requesting stix data: arrays for %@: in 0x%x there are %d views,%d delegates, and in 0x%x there are %d kOps", stixStringID, viewsThatNeedThisStix,
-   //       [viewsThatNeedThisStix count], [delegatesThatNeedThisStix count], kOpsThatNeedThisStix, [kOpsThatNeedThisStix count]);
 
     if (!viewsThatNeedThisStix)  {
         NSLog(@"Creating new queues for %@", stixStringID);
         viewsThatNeedThisStix = [[NSMutableArray alloc] init];
-        //superViewsThatNeedThisStix = [[NSMutableArray alloc] init];
-        //delegatesThatNeedThisStix = [[NSMutableArray alloc] init];
-        //kOpsThatNeedThisStix = [[NSMutableArray alloc] init];
 
         [viewsThatNeedThisStix addObject:stixView];
-        //[superViewsThatNeedThisStix addObject:superView];
-        //[delegatesThatNeedThisStix addObject:_delegate];
-        
-        // make a list of KSAPIOperations so that once one finishes, cancel the others
-        //NSLog(@"kOpsThatNeedThisStix 0x%x adding kOp 0x%x", kOpsThatNeedThisStix, kOp);
-        //[kOpsThatNeedThisStix addObject:kOp];
     }
     [requestDictionaryForStix setObject:viewsThatNeedThisStix forKey:stixStringID];
-        //[requestDictionaryForSuperViews setObject:superViewsThatNeedThisStix forKey:stixStringID];
-        //[requestDictionaryForDelegates setObject:delegatesThatNeedThisStix forKey:stixStringID];
-        //[requestDictionaryForKOps setObject:kOpsThatNeedThisStix forKey:stixStringID];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
@@ -136,79 +114,52 @@ static int currentStixViewID = 0;
     UIImage * img = [[UIImage alloc] initWithData:dataPNG];
     
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
-    //NSMutableArray * superViewsThatNeedThisStix = [requestDictionaryForSuperViews objectForKey:stixStringID];
-    //NSMutableArray * delegatesThatNeedThisStix = [requestDictionaryForDelegates objectForKey:stixStringID];
-    //NSMutableArray * kOpsThatNeedThisStix = [requestDictionaryForKOps objectForKey:stixStringID];
-
-    NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
+    //NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
     UIImageView * stixExists = [BadgeView getBadgeWithStixStringID:stixStringID];
     if (stixExists.alpha == 0) {
         [BadgeView AddStixView:theResults];
         
         for (int i=0; i<[viewsThatNeedThisStix count]; i++) {
             StixView * stixView = [viewsThatNeedThisStix objectAtIndex:i];
-            //UIView * superView = [superViewsThatNeedThisStix objectAtIndex:i];
-            //NSObject<StixViewDelegate>*thisDelegate = [delegatesThatNeedThisStix objectAtIndex:i];
-            //[stixView setImage:img];
-            //[stixView removeFromSuperview];
-            //[superView addSubview:stixView];
             NSLog(@"StixView %d is telling stixView %d to reload requested stix %@ = %@", stixViewID, stixView.stixViewID, descriptor, stixStringID);
-            //if ([thisDelegate respondsToSelector:@selector(didReceiveRequestedStixViewFromKumulos:)])
-            //    [thisDelegate didReceiveRequestedStixViewFromKumulos:theResults]; 
-            //else {
-            //    NSLog(@"StixView delegate cannot call didReceiveRequestedStixView!");
-            //}
             [stixView didReceiveRequestedStix:stixStringID withResults:theResults fromStixView:stixViewID];
         }
         // clear list
         //NSLog(@"StixView: GetStixDataByStixString for %@ = %@ filled %d missing views and cancelled %d identical kOps", descriptor, stixStringID, [viewsThatNeedThisStix count], [kOpsThatNeedThisStix count]-1);
     }
     else {
-        NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ previously finished!", stixViewID, descriptor, stixStringID);
+        //NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ previously finished!", stixViewID, descriptor, stixStringID);
         
         // hack: only remove from own
         NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
         if (stixArray) {
             [stixViewsMissing removeObjectForKey:stixStringID];
-            NSLog(@"Previously finished stixView still exists in stixViewsMissing");
+            //NSLog(@"Previously finished stixView still exists in stixViewsMissing");
         } else {
-            NSLog(@"Previously finished stixView already removed by sender");
+            //NSLog(@"Previously finished stixView already removed by sender");
         }
         
         if ([stixViewsMissing count] == 0) {
-            NSLog(@"Previously finished StixView %d finished loading all missing stix views!", stixViewID);
-            [delegate didReceiveAllRequestedStixViews];
+            //NSLog(@"Previously finished StixView %d finished loading all missing stix views!", stixViewID);
+            [delegate didReceiveAllRequestedMissingStix:self];
         }
     }
-    /*
-    for (KSAPIOperation * kOp in kOpsThatNeedThisStix) {
-        NSLog(@"--cancelling kOp 0x%x", kOp);
-        if (operation != kOp) {
-            [kOp cancel];
-            NSLog(@"Cancelling kOp");
-        }
-    }
-     */
-    //[viewsThatNeedThisStix removeAllObjects];
-    //[superViewsThatNeedThisStix removeAllObjects];
-    //[delegatesThatNeedThisStix removeAllObjects];
-    //[kOpsThatNeedThisStix removeAllObjects];
 }
 
 -(void)didReceiveRequestedStix:(NSString *)stixStringID withResults:(NSArray*)theResults fromStixView:(int)senderID{
-    NSLog(@"StixView %d received stix %@ sent by stixView %d", stixViewID, stixStringID, senderID);
+    //NSLog(@"StixView %d received stix %@ sent by stixView %d", stixViewID, stixStringID, senderID);
     
     // remove auxStix from stixViewsMissing list
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
     NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
     if (stixArray) {
         [stixViewsMissing removeObjectForKey:stixStringID];
-        NSLog(@"Filling in %d previously missing stix. Stix types still outstanding: %d", [stixArray count], [stixViewsMissing count]);
+        //NSLog(@"Filling in %d previously missing stix. Stix types still outstanding: %d", [stixArray count], [stixViewsMissing count]);
     }
 
     if ([stixViewsMissing count] == 0) {
-        NSLog(@"StixView %d finished loading all missing stix views!", stixViewID);
-        [delegate didReceiveAllRequestedStixViews];
+        //NSLog(@"StixView %d finished loading all missing stix views!", stixViewID);
+        [delegate didReceiveAllRequestedMissingStix:self];
     }
 }
 
@@ -230,7 +181,7 @@ static int currentStixViewID = 0;
     //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
     float centerX = x;
     float centerY = y;
-    NSLog(@"StixView creating %@ stix to %d %d in image of size %f %f", stixStringID, x, y, self.frame.size.width, self.frame.size.height);
+    //NSLog(@"StixView creating %@ stix to %d %d in image of size %f %f", stixStringID, x, y, self.frame.size.width, self.frame.size.height);
     
     // scale stix and label down to 270x270 which is the size of the feedViewItem
     CGSize originalSize = originalImageSize;
@@ -335,6 +286,7 @@ static int currentStixViewID = 0;
         [auxStix setFrame:stixFrameScaled];
         [auxStix setCenter:CGPointMake(centerX, centerY)];
         auxStix.transform = auxTransform;
+        //[auxStix setBackgroundColor:[UIColor blackColor]];
         
         bool isPeelableByUser = NO;
         if (isPeelable) {
@@ -640,19 +592,36 @@ static int currentStixViewID = 0;
 }
 
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix {
+    BOOL isForeground = NO;
+    int dx=0;
+    int dy=0;
+    //for (int dx = -3; dx < 3; dx++) {
+    //    for (int dy = -3; dy < 3; dy++) {
+    
     unsigned char pixel[1] = {0};
     CGContextRef context = CGBitmapContextCreate(pixel, 
                                                  1, 1, 8, 1, NULL,
                                                  kCGImageAlphaOnly);
     UIGraphicsPushContext(context);
     UIImage * im = selectedStix.image;
-    [im drawAtPoint:CGPointMake(-point.x, -point.y)];
+    // convert - the point coordinates goes from 0-78 - convert point to view uses original stix UIImageView frame
+    // the image size varies - size of im could be 120x120, 240x240, etc
+    CGSize size = im.size;
+    float scale = size.width / (120 * .65);
+    point.x *= scale; // convert to the UIImage size
+    point.y *= scale; 
+    [im drawAtPoint:CGPointMake(-point.x + dx, -point.y + dy)];
     UIGraphicsPopContext();
     CGContextRelease(context);
     CGFloat alpha = pixel[0]/255.0;
-    BOOL transparent = alpha < 0.9; //0.01;
-    NSLog(@"Foreground test: x y %f %f, alpha %f", point.x, point.y, alpha);
-    return !transparent;
+    BOOL thisTransparent = alpha < 0.1;
+    if (!thisTransparent) {
+        isForeground = YES;
+    }
+    NSLog(@"Foreground test: x y %f %f, pixel %d alpha %f foreGround %d", point.x + dx, point.y + dy, pixel[0], alpha, isForeground);
+    //    }
+    // }
+    return isForeground;
 }
 
 // sent through delegate functions for clicks on scrollView; after interaction with main stix is disabled, the touch filters out of StixView but then comes back through its delegates
@@ -662,19 +631,14 @@ static int currentStixViewID = 0;
         NSLog(@"Tap detected in stix view at %f %f", location.x, location.y);
         int lastStixView = -1;
         for (int i=0; i<[self.auxStixViews count]; i++) {
-            CGRect frame = [[auxStixViews objectAtIndex:i] frame];
+            UIImageView * currStix = [auxStixViews objectAtIndex:i];
+            CGRect frame = [currStix frame];
             NSLog(@"Stix %d at %f %f %f %f", i, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
-            if (CGRectContainsPoint(frame, location) && [self isStixPeelable:i]) {
-                // also check to see if point has color data or is part of the clear background
-                CGPoint locationInFrame = location;
-                locationInFrame.x -= frame.origin.x;
-                locationInFrame.y -= frame.origin.y;
-                // UIImage is always 120x120, so we have to scale the touch from within the current frame to a 120x120 frame
-                float scale = 120 / frame.size.width;
-                locationInFrame.x *= scale;
-                locationInFrame.y *= scale;
-                NSLog(@"Tapped in frame <%f %f %f %f> of stix %d of type %@ at %f %f scale %f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, i, [auxStixStringIDs objectAtIndex:i], location.x, location.y, scale);
-                if ([self isForeground:locationInFrame inStix:[auxStixViews objectAtIndex:i]]) {
+            CGPoint pointInside = [self convertPoint:location toView:currStix];
+            NSLog(@"Changing point %f %f to %f %f", location.x, location.y, pointInside.x, pointInside.y);
+            if ([currStix pointInside:pointInside withEvent:nil] && [self isStixPeelable:i]) {
+                // pointInside goes from 0 to 120*.65 which is the original size of the stix UIImageView
+                if ([self isForeground:pointInside inStix:currStix]) {
                     lastStixView = i;
                 }
             }
@@ -699,7 +663,7 @@ static int currentStixViewID = 0;
 //}
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
     // button index: 0 = "Peel", 1 = "Stick", 2 = "Move", 3 = "Cancel"
-    NSLog(@"Button index: %d stixPeelSelected: %d", buttonIndex, stixPeelSelected);
+    //NSLog(@"Button index: %d stixPeelSelected: %d", buttonIndex, stixPeelSelected);
     switch (buttonIndex) {
         case 0: // Peel
             // performing a peel action causes this StixView and its delegate FeedItemView to eventually be deleted/removed. Until that happens and the user interface is correctly populated, do not allow interaction anymore.

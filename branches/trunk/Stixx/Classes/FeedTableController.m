@@ -230,7 +230,9 @@
 		} else if (refreshHeaderView.state == EGOOPullRefreshNormal && scrollView.contentOffset.y < -65.0f && !_reloading) {
             NSLog(@"ScrollView: EGO refreshHeaderView going to pulling");
 			[refreshHeaderView setState:EGOOPullRefreshPulling];
-		} else if (refreshHeaderView.state == EGOOPullRefreshLoading && _reloading) {
+		}
+        /*
+        else if (refreshHeaderView.state == EGOOPullRefreshLoading && _reloading) {
             NSLog(@"ScrollView: dragging while reloading: contentOffset %f", scrollView.contentOffset.y);
             // cancel reloading status (reset the position of the refresh header and allow future pulls to initiate a refresh
             if (scrollView.contentOffset.y > 0) {
@@ -240,6 +242,7 @@
                 
             }
         }
+         */
 	}
 }
 
@@ -247,12 +250,40 @@
 	
 	if (scrollView.contentOffset.y <= - 65.0f && !_reloading) {
 		_reloading = YES;
+#if 0
 		[self reloadTableViewDataSource];
 		[refreshHeaderView setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
 		[UIView setAnimationDuration:0.2];
+        //[UIView setAnimationDidStopSelector:@selector(refreshHeaderRestore)];
+        [UIView setAnimationDelegate:self];
 		self.tableView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
+#else
+        [refreshHeaderView setState:EGOOPullRefreshLoading];
+        [UIView animateWithDuration:.5
+                              delay:0
+                            options: UIViewAnimationCurveLinear
+                         animations:^{
+                             [self.tableView setContentInset:UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0)];
+                         } 
+                         completion:^(BOOL finished){
+                             NSLog(@"EGO Refresh view: content inset at 60 - calling reloadTableViewDataSource");
+                             [self reloadTableViewDataSource];
+                             [UIView animateWithDuration:0.2
+                                                   delay:1
+                                                 options: UIViewAnimationCurveLinear
+                                              animations:^{
+                                                  [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                                              }
+                                              completion:^(BOOL finished) {
+                                                  NSLog(@"EGO Refresh view: content inset at 0");
+                                                  [refreshHeaderView setState:EGOOPullRefreshNormal];
+                                              }
+                              ];
+                         }
+         ];
+#endif
 	}
 }
 #pragma mark -
@@ -277,10 +308,10 @@
     int total = [delegate itemCount];
     NSLog(@"Table pages: %d total tags: %d", pages, total);
     // [self.delegate updateScrollPagesAtPage:-1];
-    [self.delegate pullToRefresh];
+    [delegate didPullToRefresh];
     if ([self.delegate numberOfSections] == 1) {
         NSLog(@"Only one page so far, we should load more!");
-        [self.delegate updateScrollPagesAtPage:[self.delegate numberOfSections]];
+        [delegate updateScrollPagesAtPage:[self.delegate numberOfSections]];
     }
 }
 

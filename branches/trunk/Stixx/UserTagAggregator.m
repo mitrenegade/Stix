@@ -20,9 +20,6 @@
     if (self) {
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
-
-        backgroundQueue = dispatch_queue_create("com.Neroh.Stix.aggregator.bgQueue", NULL);
-        
         allTagIDs = [[NSMutableArray alloc] init];
         allUsernamesOfTagIDs = [[NSMutableDictionary alloc] init];
         
@@ -34,7 +31,6 @@
         followingCountLeftToAggregate = 0; // keep track of whether all friends have been aggregated
         isFirstTimeAggregating = YES;
         firstTimeAggregatingTrigger = 0;
-        
     }
     return self;
 }
@@ -53,15 +49,15 @@
     if (![delegate isLoggedIn])
         return;
     NSMutableSet * allFollowing = [delegate getFollowingList];
-    NSMutableSet * aggregateNamesList = [[NSMutableSet alloc] initWithSet:allFollowing];
-    [aggregateNamesList addObject:[delegate getUsername]];
+    NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:allFollowing];
+    [followingSetWithMe addObject:[delegate getUsername]];
     NSLog(@"StartAggregatingTagIDs: You are following %d people", [allFollowing count]);
-    for (NSString * name in aggregateNamesList) {
+    for (NSString * name in followingSetWithMe) {
         NSLog(@"Aggregating tags for followed user: %@", name);
         //[self aggregateTagIDsForUser:name];
         [k getAllPixBelongingToUserWithUsername:name];
     }
-    [aggregateNamesList release];
+    [followingSetWithMe release];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
@@ -75,20 +71,19 @@
 -(void)aggregateNewTagIDs {
     if (![delegate isLoggedIn]) {
         NSLog(@"Trying to aggregate tagIDs for following list but user is not logged in!");
-        [delegate needFacebookLogin];
         return;
     }
     NSMutableSet * allFollowing = [delegate getFollowingList];
-    NSMutableSet * aggregateNamesList = [[NSMutableSet alloc] initWithSet:allFollowing];
-    [aggregateNamesList addObject:[delegate getUsername]];
+    NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:allFollowing];
+    [followingSetWithMe addObject:[delegate getUsername]];
     followingCountLeftToAggregate = [allFollowing count];
     NSLog(@"AggregateNewTagIDs: You are following %d people", [allFollowing count]);
-    for (NSString * name in aggregateNamesList) {
+    for (NSString * name in followingSetWithMe) {
         NSNumber * newestTagID = [NSNumber numberWithInt:idOfNewestTagAggregated]; //[allTagIDs objectAtIndex:0]; 
         NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
         [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
     }    
-    [aggregateNamesList release];
+    [followingSetWithMe release];
 }
 
 -(void)reaggregateTagIDs {
@@ -97,16 +92,16 @@
         return;
     [allTagIDs removeAllObjects];
     NSMutableSet * allFollowing = [delegate getFollowingList];
-    NSMutableSet * aggregateNamesList = [[NSMutableSet alloc] initWithSet:allFollowing];
-    [aggregateNamesList addObject:[delegate getUsername]];
+    NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:allFollowing];
+    [followingSetWithMe addObject:[delegate getUsername]];
     followingCountLeftToAggregate = [allFollowing count];
     NSLog(@"ReaggregatingTagIDs: You are following %d people", [allFollowing count]);
-    for (NSString * name in aggregateNamesList) {
-        NSNumber * newestTagID = [NSNumber numberWithInt:-1]; //[allTagIDs objectAtIndex:0]; 
-        NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
-        [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+    for (NSString * name in followingSetWithMe) {
+        int newestTagID = -1; //[allTagIDs objectAtIndex:0]; 
+        NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, newestTagID);
+        [k getNewPixBelongingToUserWithUsername:name andTagID:newestTagID];
     }    
-    [aggregateNamesList release];
+    [followingSetWithMe release];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
@@ -127,7 +122,8 @@
 
 -(void)processAggregationQueueInBackground {
     // run continuous while loop in separate background thread
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
+                                             (unsigned long)NULL), ^(void) {
         
     while (1) {
         if ([aggregationQueue count]>0) {
@@ -171,13 +167,11 @@
                     // triggers "completion" of aggregator initially
                     // the highest id in this should be the most recent tagID for this user's following list
                     NSLog(@"FirstTimeAggregatingTrigger fired; allTagIDs now %d", [allTagIDs count]);
-                    //dispatch_async(dispatch_get_main_queue(), ^(void) {
-                        [delegate didFinishAggregation:YES];
-                    //});
+                    [delegate didFinishAggregation:YES];
                     firstTimeAggregatingTrigger = 0;
                 }
-                else
-                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
+//                else
+//                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
             }
         }
     }
@@ -291,8 +285,5 @@
     return nil;
 }
 
--(void)dealloc {
-    dispatch_release(backgroundQueue);
-    [super dealloc];
-}
+
 @end

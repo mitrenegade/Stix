@@ -24,6 +24,13 @@ enum {
     TABBAR_BUTTON_MAX
 };
 
+enum first_time_user_stage {
+    FIRSTTIME_MESSAGE_01,
+    FIRSTTIME_MESSAGE_02,
+    FIRSTTIME_MESSAGE_03,
+    FIRSTTIME_DONE
+};
+
 @interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -32,8 +39,7 @@ enum {
     UIImage * bgNormal[3];
     UIImage * bgSelected[3];
     
-    UIImageView * firstTimeInstructions;
-    UIImageView * firstTimeMallPointer;
+    UIButton * firstTimeInstructions;
     bool showMallPointer;
     UIButton * buttonClose;
     
@@ -42,6 +48,8 @@ enum {
     int animationIDsPurchase[4];
     
     int rewardValue;
+    BOOL pointerWasDismissed;
+    int agitatePointer;
 }
 
 @property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -57,9 +65,13 @@ enum {
 -(void)setButtonStateSelected:(int)pos;
 -(void)setButtonStateNormal:(int)pos;
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions;
--(void)toggleStixMallPointer:(BOOL)showPointer;
+-(void)toggleFirstTimePointer:(BOOL)showPointer atStage:(int)firstTimeUserStage;
 -(IBAction)closeInstructions:(id)sender;
 -(void)doRewardAnimation:(NSString *)title withAmount:(int)amount;
--(void)doPointerAnimation;
+-(void)doPointerAnimation:(int)firstTimeUserStage;
 -(void)doPurchaseAnimation:(NSString*)stixStringID;
+
+-(void)displayFirstTimeUserProgress:(int)firstTimeUserStage;
+-(void)agitateFirstTimePointer;
 @end
+

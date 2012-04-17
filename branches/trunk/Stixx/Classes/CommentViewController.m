@@ -18,6 +18,7 @@
 @synthesize commentField;
 @synthesize delegate;
 @synthesize activityIndicator;
+@synthesize toolBar;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -43,26 +44,51 @@
 
 
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 10, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 10, 25, 25)];
     [self.view addSubview:activityIndicator];
+#if 0
+    toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0,300,320,44)];
+    commentField = [[UITextField alloc] initWithFrame:CGRectMake(40, 10.0, 270, 40)];
+    commentField.backgroundColor = [UIColor clearColor];
+    [commentField.layer setCornerRadius:18];
     [commentField setText:@""]; // clear text
+    
+    addButton = [[UIButton alloc] initWithFrame:CGRectMake(5, 10, 30, 40)];
+    [addButton setTitle:@"Add" forState:UIControlStateNormal];
+    [addButton addTarget:self action:@selector(didClickAddButton) forControlEvents:UIControlEventTouchUpInside];
+    
+    [toolBar addSubview:commentField];
+    [toolBar addSubview:addButton];
+    
+    [self.view addSubview:toolBar];
+    [toolBar release];
+    [commentField release];
+    [addButton release];
+#endif
+    [commentField setPlaceholder:@"Enter a comment here"];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [commentField setText:@""]; // clear text
+    [commentField setText:@""];
+    [commentField setPlaceholder:@"Enter a comment here"];
 }
 
 -(void)initCommentViewWithTagID:(int)_tagID andNameString:(NSString*)_nameString {
@@ -75,9 +101,10 @@
         [commentsTable release];
     }
     commentsTable = [[CommentFeedTableController alloc] init];
-    [commentsTable.view setFrame:CGRectMake(0, 150, 320, 280)];
+    //[commentsTable.view setFrame:CGRectMake(0, 150, 320, 280)];
+    [commentsTable.view setFrame:CGRectMake(0, 88, 320, 300)];
     [commentsTable setDelegate:self];
-    [self.view addSubview:commentsTable.view];
+    [self.view insertSubview:commentsTable.view belowSubview:toolBar];
     
     // Custom initialization   
     // tagID must be set before this
@@ -98,7 +125,8 @@
     timestamps = [[NSMutableArray alloc] init];
     rowHeights = [[NSMutableArray alloc] init];
     
-    [nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
+    //[nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
+    [nameLabel setText:[NSString stringWithFormat:@"%@'s Pix",nameString]];
     NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
     
     [k getAllHistoryWithTagID:tagID];
@@ -188,14 +216,15 @@
     return [names count];
 }
 
--(IBAction)addButtonPressed:(id)sender {
+-(IBAction)didClickAddButton:(id)sender {
     NSString * newComment = [commentField text];
     [commentField resignFirstResponder];
     if ([newComment length] > 0)
         [self.delegate didAddNewComment:newComment withTagID:self.tagID];
 }
 
--(IBAction)backButtonPressed:(id)sender {
+-(IBAction)didClickBackButton:(id)sender {
+    [commentField resignFirstResponder];
     [self.delegate didCloseComments];
 }
 /*** UITextFieldDelegate ***/
@@ -205,6 +234,25 @@
 	//NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
+
+/*
+- (void)textFieldDidBeginEditing:(UITextField *)textField {	
+    [UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDelegate:self];
+	[UIView setAnimationDuration:0.25];
+	[UIView setAnimationBeginsFromCurrentState:YES];
+	toolBar.frame = CGRectMake(toolBar.frame.origin.x, (toolBar.frame.origin.y - (216-48)), toolBar.frame.size.width, toolBar.frame.size.height);
+	[UIView commitAnimations];
+}
+- (void)textFieldDidEndEditing:(UITextField *)textField {	
+    [UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDelegate:self];
+	[UIView setAnimationDuration:0.25];
+	[UIView setAnimationBeginsFromCurrentState:YES];
+	toolBar.frame = CGRectMake(toolBar.frame.origin.x, (toolBar.frame.origin.y + (216-48)), toolBar.frame.size.width, toolBar.frame.size.height);
+	[UIView commitAnimations];
+}
+ */
 
 /*** CommentFeedTableDelegate for user page ***/
 -(void)shouldDisplayUserPage:(NSString *)username {

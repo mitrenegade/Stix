@@ -13,7 +13,6 @@
 #import <AudioToolbox/AudioServices.h>
 #import "StixAnimation.h"
 #import "Kumulos.h"
-#import <dispatch/dispatch.h>
 
 //#define SHELF_STIX_X 0
 //#define SHELF_STIX_Y 340
@@ -26,24 +25,24 @@
 
 enum {
     SHELF_CATEGORY_FIRST = 0,
-    SHELF_CATEGORY_ALL = 1,
-    SHELF_CATEGORY_ANIMALS,
-    SHELF_CATEGORY_ANIME,
-    SHELF_CATEGORY_ART,
+    //SHELF_CATEGORY_ALL = 0,
+    SHELF_CATEGORY_ANIMALS = 0,
+//    SHELF_CATEGORY_ANIME,
+//    SHELF_CATEGORY_ART,
     SHELF_CATEGORY_COMICS,
-    SHELF_CATEGORY_COSTUMES,
+//    SHELF_CATEGORY_COSTUMES,
     SHELF_CATEGORY_CUTE,
-    SHELF_CATEGORY_DECORATIONS,
-    SHELF_CATEGORY_EVENTS,
+//    SHELF_CATEGORY_DECORATIONS,
+//    SHELF_CATEGORY_EVENTS,
     SHELF_CATEGORY_FACEFUN,
-    SHELF_CATEGORY_FASHION,
-    SHELF_CATEGORY_FOODANDDRINK,
-    SHELF_CATEGORY_GEEKY,
-    SHELF_CATEGORY_HOLLYWOOD,
-    SHELF_CATEGORY_NATURE,
+//    SHELF_CATEGORY_FASHION,
+//    SHELF_CATEGORY_FOODANDDRINK,
+//    SHELF_CATEGORY_GEEKY,
+//    SHELF_CATEGORY_HOLLYWOOD,
+//    SHELF_CATEGORY_NATURE,
     SHELF_CATEGORY_PRANKS,
-    SHELF_CATEGORY_SPORTS,
-    SHELF_CATEGORY_SYMBOLS,
+//    SHELF_CATEGORY_SPORTS,
+//    SHELF_CATEGORY_SYMBOLS,
     SHELF_CATEGORY_VIDEOGAMES,
     SHELF_CATEGORY_MAX
 };
@@ -76,7 +75,6 @@ enum {
     int tabAnimationIDExpand;
     
     Kumulos * k;
-    dispatch_queue_t backgroundQueue;
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
@@ -108,5 +106,6 @@ enum {
 -(void)requestStixFromKumulos:(NSString *)stixStringID;
 /*** make a singleton class ***/
 +(CarouselView*)sharedCarouselView;
+-(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
 
 @end

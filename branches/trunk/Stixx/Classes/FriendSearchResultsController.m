@@ -7,13 +7,14 @@
 //
 
 #import "FriendSearchResultsController.h"
-
+#import "QuartzCore/QuartzCore.h"
 #define TOP_LABEL_TAG 1001
 #define BOTTOM_LABEL_TAG 1002
+#define ROW_HEIGHT 70
 
 @implementation FriendSearchResultsController
 
-@synthesize userButtons;
+@synthesize userButtons, userPhotos;
 @synthesize delegate;
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -48,6 +49,7 @@
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
     
     userButtons = [[NSMutableDictionary alloc] init];
+    userPhotos = [[NSMutableDictionary alloc] init];
 }
 
 - (void)viewDidUnload
@@ -99,7 +101,7 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 70;
+    return ROW_HEIGHT;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -186,7 +188,32 @@
     [topLabel setText:username];
     [bottomLabel setText:[self.delegate getUserEmailForUser: y]];
     
-    [cell.imageView setImage:[self.delegate getUserPhotoForUser: y]];
+    if ([userPhotos objectForKey:username] == nil) {
+        UIImage * photo = [delegate getUserPhotoForUser:y];
+        if (!photo)
+            photo = [UIImage imageNamed:@"graphic_nopic.png"];
+        CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
+        UIGraphicsBeginImageContext(newSize);
+        [photo drawInRect:CGRectMake(5, 6, ROW_HEIGHT-10, ROW_HEIGHT-10)];	
+        
+        // add border
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
+        CGContextSetLineWidth(ctx, 2);
+        CGContextSetRGBStrokeColor(ctx, 0,0,0, 1.000);
+        
+        CGRect borderRect = CGRectMake(5, 6, ROW_HEIGHT-10, ROW_HEIGHT-10);
+        CGContextStrokeRect(ctx, borderRect);
+        
+        UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        [userPhotos setObject:imageView forKey:username];
+    }
+    for (UIView * subview in cell.imageView.subviews) {
+        [subview removeFromSuperview];
+    }
+    UIImage * userPhoto = [userPhotos objectForKey:username];
+    //cell.imageView = userPhoto; //addSubview:userPhoto];
+    [cell.imageView setImage:userPhoto];
     
     if ([userButtons objectForKey:username] == nil) {
         UIButton * addFriendButton = [[UIButton alloc] init]; 
@@ -215,7 +242,7 @@
     }
     
     NSMutableArray * buttonArray = [userButtons objectForKey:username];
-    int userStatus = [self.delegate getFollowingUserStatus:y];
+    int userStatus = [delegate getFollowingUserStatus:y];
     if (userStatus == 0) {
         // not following a user that is already on Stix
         cell.accessoryView = [buttonArray objectAtIndex:0];
@@ -227,11 +254,19 @@
     } else if (userStatus == -1) {
         // user is not a Stix user - invite button
         //NSMutableArray * buttonArray = [userButtons objectForKey:username];
-        [cell.imageView setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
         cell.accessoryView = [buttonArray objectAtIndex:2];
         cell.accessoryType = UITableViewCellAccessoryNone;
         [bottomLabel setText:@"Invite friend to Stix"];
     }
+    else if (userStatus == -2) { //self
+        cell.accessoryView = nil;
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    if ([bottomLabel.text length] == 0) {
+        [topLabel setFrame:CGRectMake(75, 15, 170, 40)];
+    }
+    else
+        [topLabel setFrame:CGRectMake(75, 5, 170, 40)];
 
     // Create the label for the top row of text
     //[cell.contentView addSubview:label];
@@ -303,6 +338,7 @@
      [self.navigationController pushViewController:detailViewController animated:YES];
      [detailViewController release];
      */
+    [delegate didSelectUserProfile:[indexPath row]];
 }
 
 @end

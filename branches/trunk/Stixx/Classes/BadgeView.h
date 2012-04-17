@@ -19,6 +19,9 @@
 #import <UIKit/UIKit.h>
 #import "OutlineLabel.h"
 
+#define TOTAL_RANDOM_BADGES 50
+#define FREE_STIX_PER_CATEGORY 12
+
 // Not used for kumulos based stix
 enum {
     BADGE_TYPE_FIRE = 0,
@@ -97,13 +100,12 @@ enum {
 // existence by their StringIDs (FIRE, ICE, GLASSES, STAR_GOLD, etc).
 // populates the static variable stixStringIDs from an array from the delegate
 // which calls kumulos beforehand to retrieve these values.
-+(void)InitializeGenericStixTypes;
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos;
 +(void)InitializeStixViews:(NSArray*)stixViewsFromKumulos;
 +(int)totalStixTypes;
 +(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixCategories:(NSMutableDictionary*)savedStixCategories;
-+(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories;
-+(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults;
+
++(void)InitializeDefaultStixTypes;
 
 // returns stixStringID for given badge type. THIS IS DONE FOR BACKWARD COMPATIBILITY.
 // Type is still drawn from a static list by some old builds.
@@ -119,12 +121,12 @@ enum {
 +(NSString*) getStixStringIDAtIndex:(int)index;
 +(NSString*) getRandomStixStringID;
 +(NSMutableArray *) getStixForCategory:(NSString*)categoryName;
-+(NSMutableArray *) getSubcategoriesForCategory:(NSString*)categoryName;
 +(NSMutableDictionary *)GetAllStixViewsForSave;
 +(NSMutableDictionary *)GetAllStixDescriptorsForSave;
 +(NSMutableArray *)GetAllStixStringIDsForSave;
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
-+(NSMutableDictionary *)GetAllStixSubcategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
++(NSMutableDictionary*)InitializeFirstTimeUserStix;
+
 
 @end

@@ -19,6 +19,7 @@
 -(UIImage*)getUserPhotoForGallery;
 -(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 @end
 
@@ -27,6 +28,7 @@
     NSMutableArray * allTagIDs; // ordered in descending order
     NSMutableDictionary * allTags; // key: allTagID
     NSMutableDictionary * contentViews; // generated views: key: row/column index of table
+    NSMutableDictionary * placeholderViews;
     int numColumns;
     
     IBOutlet UIImageView * logo;

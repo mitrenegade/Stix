@@ -21,6 +21,7 @@
 @synthesize headerView;
 @synthesize detailController;
 @synthesize lastUsername;
+@synthesize searchResultsController;
 -(id)init
 {
 	self = [super initWithNibName:@"UserProfileViewController" bundle:nil];
@@ -42,7 +43,7 @@
         [k setDelegate:self];    
     }
     
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 9, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
 
     headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 160)];
@@ -57,7 +58,9 @@
     photoButton = [[UIButton alloc] init];
     buttonAddFriend = [[UIButton alloc] init];//buttonWithType:UIButtonTypeCustom];
     bgFollowing = [UIButton buttonWithType:UIButtonTypeCustom];
+    [bgFollowing addTarget:self action:@selector(buttonFollowingClicked) forControlEvents:UIControlEventTouchUpInside];
     bgFollowers = [UIButton buttonWithType:UIButtonTypeCustom];
+    [bgFollowers addTarget:self action:@selector(buttonFollowersClicked) forControlEvents:UIControlEventTouchUpInside];
 
     myFollowingCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(105, 100-44, 99, 40)];
     myFollowingLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(105, 133-44, 99, 15)];
@@ -70,11 +73,14 @@
     myStixCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(80, 160-44, 50, 35)];
     myStixLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(130, 170-44, 25, 20)];
      */
-    
+    searchResultsController = nil;
+    allFollowers = [[NSMutableSet alloc] init];
+    allFollowing = [[NSMutableSet alloc] init];
+
     [self.headerView addSubview:nameLabel];
     [self.headerView addSubview:photoButton];
     [self.headerView addSubview:buttonAddFriend];
-
+    
     [self.headerView addSubview:bgFollowing];
     [self.headerView addSubview:bgFollowers];    
     
@@ -82,27 +88,49 @@
     [self.headerView addSubview:myFollowersLabel];
     [self.headerView addSubview:myFollowingCount];
     [self.headerView addSubview:myFollowersCount];
+
+    [self toggleMyButtons:YES];
+}
+
+-(void)toggleMyButtons:(BOOL)show {
+    [nameLabel setHidden:!show];
+    [photoButton setHidden:!show];
+    [buttonAddFriend setHidden:!show];
+
+    [bgFollowing setHidden:!show];
+    [bgFollowers setHidden:!show];
+
+    [myFollowersCount setHidden:!show];
+    [myFollowersLabel setHidden:!show];
+    [myFollowingCount setHidden:!show];
+    [myFollowingLabel setHidden:!show];
     
-    /*
-    [self.headerView addSubview:myPixCount];
-    [self.headerView addSubview:myPixLabel];
-    [self.headerView addSubview:myStixCount];
-    [self.headerView addSubview:myStixLabel];
-    */
+    [pixTableController.view setHidden:!show];
 }
 
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [delegate shouldCloseUserPage];
+    if (isDisplayingFollowLists) {
+        [searchResultsController.view removeFromSuperview];
+        [self toggleMyButtons:YES];
+        isDisplayingFollowLists = NO;
+    }
+    else
+        [delegate shouldCloseUserPage];
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name
@@ -247,17 +275,8 @@
 }
 
 -(void)updateFollowCounts {
-    // uses delegate functions
-    NSMutableSet * followingList = [self.delegate getFollowingList];
-    int followingCount = [followingList count];
-    NSString * followingString = [NSString stringWithFormat:@"%d", followingCount];
-    [myFollowingCount setText:followingString];
-    
-    NSMutableSet * followerList = [self.delegate getFollowerList];
-    int followerCount = [followerList count];
-    NSString * followerString = [NSString stringWithFormat:@"%d", followerCount];
-    [myFollowersCount setText:followerString];
-    NSLog(@"FollowerList: %@", followerList);
+    [k getFollowersOfUserWithFollowsUser:username];
+    [k getFollowListWithUsername:username]; 
 }
 
 -(void)updateStixCounts {
@@ -335,14 +354,30 @@
     }
 }
 
+-(void)didSelectUserProfile:(int)index {
+    NSString * new_username = [self getUsernameForUser:index];
+    if ([new_username isEqualToString:[delegate getUsername]]) {
+        [self didClickBackButton:nil];
+        [delegate shouldDisplayUserPage:[delegate getUsername]];
+    }
+    else {
+//        [delegate shouldCloseUserPage];
+//        [delegate shouldDisplayUserPage:new_username];
+        [searchResultsController.view removeFromSuperview];
+        isDisplayingFollowLists = NO;
+        [self toggleMyButtons:YES];
+        [self setUsername:new_username];
+        [self viewDidAppear:YES];
+    }
+}
+
 #pragma mark FriendSearchResultsDelegate
-/*
 -(NSString*)getUsernameForUser:(int)index {
     return [searchFriendName objectAtIndex:index];
 }
 -(UIImage*)getUserPhotoForUser:(int)index {
     NSString * friendName = [searchFriendName objectAtIndex:index];
-    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:friendName]];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:friendName];
     return userPhoto;
 }
 -(NSString*)getUserEmailForUser:(int)index {
@@ -360,13 +395,14 @@
         return -1;
     
     NSString * friendName = [searchFriendName objectAtIndex:index];
+    if ([friendName isEqualToString:[delegate getUsername]])
+        return -2;
     return [[delegate getFollowingList] containsObject:friendName];
 }
 
 -(int)getNumOfUsers {
     return [searchFriendName count];
 }
- */
 
 #pragma UserGalleryDelegate
 -(void)uploadImage:(NSData*)png withShareMethod:(int)buttonIndex
@@ -376,7 +412,7 @@
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
 //    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
--(UIImage*)getUserPhotoForgallery {return [self.delegate getUserPhotoForUsername:[delegate getUsername]];}
+-(UIImage*)getUserPhotoForgallery {return [self.delegate getUserPhotoForUsername:username];}
 
 #pragma mark ColumnTableController delegate
 /*
@@ -477,10 +513,16 @@
     [self stopActivityIndicator];
 }
 
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+}
 
 #pragma mark DetailView 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
+    if ([DetailViewController openingDetailView])
+        return;
+    [DetailViewController lockOpen];    
+    
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
     detailController = [[DetailViewController alloc] init];
@@ -494,79 +536,6 @@
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-}
-
--(void)sharePix:(int)tagID {
-    //[self.delegate sharePix:tagID];
-    /*
-    //shareActionSheetTagID = tagID;
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", nil];
-    [actionSheet showFromRect:CGRectMake(0,0,320,480) inView:self.view animated:YES];//showFromTabBar:self.tabBarController.tabBar];
-    [actionSheet release];
-     */
-}
-
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-#if 0
-    // button index: 0 = "Facebook", 1 = "Email", 2 = "Cancel"
-    switch (buttonIndex) {
-        case 0: // Facebook
-        {
-            /*
-             UIAlertView* alert = [[UIAlertView alloc]init];
-             [alert addButtonWithTitle:@"Ok"];
-             [alert setTitle:@"Beta Version"];
-             [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
-             [alert show];
-             [alert release];
-             */
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-            
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 1: // Email
-        {
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-            
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 2: // Cancel
-            return;
-            break;
-        default:
-            return;
-            break;
-    }
-#endif
-    
 }
 
 -(void)shouldDisplayUserPage:(NSString*)_username {
@@ -590,5 +559,151 @@
     [detailController release];
     detailController = nil;
 }
+
+#pragma mark stixview request delegates
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+
+-(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
+    [stixView removeFromSuperview];
+    for (int i=0; i<[contentViews count]; i++) {
+        StixView * cview = [contentViews objectForKey:[NSNumber numberWithInt:i]];
+        if ([cview stixViewID] == [stixView stixViewID]) {
+            NSLog(@"UserProfileView: didReceiveAllRequestedMissingStix for stixView %d at index %d", [stixView stixViewID], i);
+            [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
+            [pixTableController.tableView reloadData];
+            break;
+        }
+    }
+}
+
+#pragma mark followers and following lists
+
+-(void)buttonFollowingClicked {
+    if (isSearching)
+        return;
+    
+    NSLog(@"Following clicked!");
+    
+    isSearching = YES;
+    [self startActivityIndicator];
+    [self populateFollowingList];
+}
+
+-(void)buttonFollowersClicked {
+    if (isSearching)
+        return;
+    
+    NSLog(@"Followers clicked!");
+    
+    isSearching = YES;
+    [self startActivityIndicator];
+    [self populateFollowersList];
+}
+
+// followers and following
+-(void) initSearchResultLists {
+    if (!searchFriendName) {
+        searchFriendName = [[NSMutableArray alloc] init];
+        searchFriendEmail = [[NSMutableArray alloc] init];
+        searchFriendFacebookID = [[NSMutableArray alloc] init];
+        searchFriendIsStix = [[NSMutableArray alloc] init]; // whether they are using Stix already
+    }
+    [searchFriendName removeAllObjects];
+    [searchFriendEmail removeAllObjects];
+    [searchFriendFacebookID removeAllObjects];
+    [searchFriendIsStix removeAllObjects];
+}
+-(void)populateFollowingList {
+    [self initSearchResultLists];
+    
+    NSLog(@"Getting follows list from kumulos for username: %@", username);
+    if (searchResultsController) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];
+    }
+    searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    [searchResultsController setDelegate:self];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+    
+    [self toggleMyButtons:NO];
+    [self.view addSubview:searchResultsController.view];
+    isDisplayingFollowLists = YES;
+    
+    for (NSString * following in allFollowing) {
+        NSLog(@"ProfileViewController: followingSet contains %@", following);
+        [searchFriendName addObject:following];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+    }
+    [searchResultsController.tableView reloadData];
+    [self stopActivityIndicator];
+    isSearching = NO;
+}
+
+-(void)populateFollowersList {
+    NSLog(@"Getting follower list from kumulos for username: %@", username);
+    
+    [self initSearchResultLists];
+    
+    if (searchResultsController) {
+        [searchResultsController.view removeFromSuperview];
+        [searchResultsController release];
+    }
+    searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    [searchResultsController setDelegate:self];
+    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
+
+    [self toggleMyButtons:NO];
+    [self.view addSubview:searchResultsController.view];
+    isDisplayingFollowLists = YES;
+
+    for (NSString * follower in allFollowers) {
+        [searchFriendName addObject:follower];
+        [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+    }
+    [searchResultsController.tableView reloadData];
+    [self stopActivityIndicator];
+    isSearching = NO;
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
+    // list of people who follow this user
+    // key: friendName value: username
+    [allFollowers removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"username"];
+        if (![allFollowers containsObject:friendName])
+            [allFollowers addObject:friendName];
+    }
+    NSLog(@"Get followers returned: %@ has %d followers", username, [allFollowers count]);
+    int followerCount = [allFollowers count];
+    NSString * followerString = [NSString stringWithFormat:@"%d", followerCount];
+    [myFollowersCount setText:followerString];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
+    // list of people this user is following
+    // key: username value: friendName
+    [allFollowing removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"followsUser"];
+        if (![allFollowing containsObject:friendName]) {
+            NSLog(@"allFollowing adding %@", friendName);
+            [allFollowing addObject:friendName];
+        }
+    }
+    NSLog(@"Get follow list returned: %@ is following %d people", username, [allFollowing count]);
+    int followingCount = [allFollowing count];
+    NSString * followingString = [NSString stringWithFormat:@"%d", followingCount];
+    [myFollowingCount setText:followingString];
+}
+
+
 
 @end

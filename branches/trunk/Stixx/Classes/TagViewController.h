@@ -34,6 +34,9 @@
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 -(int)getBuxCount;
 
+-(int)getFirstTimeUserStage;
+-(void)advanceFirstTimeUserMessage;
+
 @end
 
 

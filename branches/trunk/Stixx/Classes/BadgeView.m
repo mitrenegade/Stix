@@ -13,7 +13,6 @@ static NSMutableArray * stixStringIDs = nil;
 static NSMutableDictionary * stixViews = nil;
 static NSMutableArray * pool = nil;
 static NSMutableDictionary * stixCategories = nil; // key: category name value: array of stixStringIDs
-static NSMutableDictionary * stixSubcategories = nil; // key: category name value: array of subcategory names
 static int totalStixTypes = 0;
 
 @implementation BadgeView
@@ -110,50 +109,6 @@ static int totalStixTypes = 0;
     return [stixDescriptors objectForKey:stixStringID];
 }
 
-+(void)InitializeGenericStixTypes {
-    if (!stixStringIDs)
-        stixStringIDs = [[NSMutableArray alloc] init];
-    if (!stixViews)
-        stixViews = [[NSMutableDictionary alloc] init];
-    if (!stixDescriptors)
-        stixDescriptors = [[NSMutableDictionary alloc] init];
-    NSString * stixStringID = @"FIRE";
-    NSString * descriptor = @"Fire Stix";
-    UIImage * img = [UIImage imageNamed:@"120_fire.png"];
-    UIImageView * stix = [[UIImageView alloc] initWithImage:img];
-    if (![stixStringIDs containsObject:stixStringID])
-        [stixStringIDs addObject:stixStringID];
-    //if ([stixViews objectForKey:stixStringID] != nil)
-        [stixViews setObject:stix forKey:stixStringID];
-    //if ([stixDescriptors objectForKey:stixStringID] != nil)
-        [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [stix release];
-    stixStringID = @"ICE";
-    descriptor = @"Ice Stix";
-    img = [UIImage imageNamed:@"120_ice.png"];
-    stix = [[UIImageView alloc] initWithImage:img];
-    if (![stixStringIDs containsObject:stixStringID])
-        [stixStringIDs addObject:stixStringID];
-    [stixViews setObject:stix forKey:stixStringID];
-    [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [stix release];
-#if TARGET_IPHONE_SIMULATOR
-    // debug: add temporary repeat stix to make carousel work
-    for (int i=0; i<5; i++) {
-        stixStringID = [NSString stringWithFormat:@"ICE%d", i+2];
-        descriptor = @"Generic";
-        img = [UIImage imageNamed:@"120_ice.png"];
-        stix = [[UIImageView alloc] initWithImage:img];
-        if (![stixStringIDs containsObject:stixStringID])
-            [stixStringIDs addObject:stixStringID];
-        [stixViews setObject:stix forKey:stixStringID];
-        [stixDescriptors setObject:descriptor forKey:stixStringID];
-        [stix release];
-    }
-#endif
-    totalStixTypes = [stixStringIDs count];
-}
-
 +(void)InitializeStixTypes:(NSArray*)stixStringIDsFromKumulos {
     NSLog(@"**** Initializing Stix Types from Kumulos ****");
     if (stixStringIDs)
@@ -230,69 +185,30 @@ static int totalStixTypes = 0;
     // this should be done first upon loading the app so all stix dictionaries should be reset
     // this saves from having to download the PNG file for each stix, but we should still
     // call InitializeStixTypes to get the current stix types and categories from Kumulos
-    if (stixStringIDs) {
-        [stixStringIDs release];
-        stixStringIDs = nil;
+    if (!stixStringIDs) {
+        stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[savedStixStringIDs count]];
     }
-    if (stixViews) {
-        [stixViews release];
-        stixViews = nil;
+    if (!stixViews) {
+        stixViews = [[NSMutableDictionary alloc] initWithCapacity:[savedStixViews count]];
     }
-    if (stixDescriptors) {
-        [stixDescriptors release];
-        stixDescriptors = nil;
+    if (!stixDescriptors) {
+        stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[savedStixDescriptors count]];
     }
-    if (stixCategories) {
-        [stixCategories release];
-        stixCategories = nil;
+    if (!stixCategories) {
+        stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[savedStixCategories count]];
     }
     if (pool)
     {
         [pool release];
         pool = nil;
     }
-    stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[savedStixStringIDs count]];
-    stixViews = [[NSMutableDictionary alloc] initWithCapacity:[savedStixViews count]];
-    stixDescriptors = [[NSMutableDictionary alloc] initWithCapacity:[savedStixDescriptors count]];
-    stixCategories = [[NSMutableDictionary alloc] initWithCapacity:[savedStixCategories count]];
+
     [stixStringIDs addObjectsFromArray:savedStixStringIDs];
     [stixViews addEntriesFromDictionary:savedStixViews];
     [stixDescriptors addEntriesFromDictionary:savedStixDescriptors];
     [stixCategories addEntriesFromDictionary:savedStixCategories];
     
     totalStixTypes = [stixStringIDs count];
-}
-
-+(void)InitializeStixSubcategoriesFromKumulos:(NSArray*)theResults {
-    // creating list of subcategories
-    if (stixSubcategories)
-    {
-        [stixSubcategories release];
-        stixSubcategories = nil;
-    }
-    stixSubcategories = [[NSMutableDictionary alloc] init];
-    for (NSMutableDictionary * d in theResults) {
-        NSString * categoryName = [d valueForKey:@"categoryName"];
-        NSString * subcategoryOf = [d valueForKey:@"subcategoryOf"];
-        if (subcategoryOf != nil) {
-            NSMutableArray * supercategory = [stixSubcategories objectForKey:subcategoryOf];
-            if (!supercategory) {
-                supercategory = [[[NSMutableArray alloc] init] autorelease];
-                [stixSubcategories setObject:supercategory forKey:subcategoryOf];
-            }
-            [supercategory addObject:categoryName];
-        }
-    }
-    //NSLog(@"Subcategories initialized from kumulos: %d", [stixSubcategories count]);
-}
-
-+(void)InitializeStixSubcategoriesFromDisk:(NSMutableDictionary *)subcategories {
-    if (stixSubcategories) {
-        [stixSubcategories release];
-        stixSubcategories = nil;
-    }
-    stixSubcategories = [[NSMutableDictionary alloc] init];
-    [stixSubcategories addEntriesFromDictionary:subcategories];
 }
 
 +(void)AddStixView:(NSArray*)resultFromKumulos {
@@ -357,13 +273,11 @@ static int totalStixTypes = 0;
 
 +(NSMutableDictionary *)generateDefaultStix {
     NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
-    const int TOTAL_RANDOM_BADGES = 48;
     NSMutableSet * randomBadges = [[NSMutableSet alloc] initWithCapacity:TOTAL_RANDOM_BADGES];
     for (int i=0; i<TOTAL_RANDOM_BADGES; i++) {
         NSString * randomBadge = [BadgeView getRandomStixStringID];
-        while ([randomBadges containsObject:randomBadge] || [randomBadge isEqualToString:@"FIRE"] || [randomBadge isEqualToString:@"ICE"]) {
+        while ([randomBadges containsObject:randomBadge])
             randomBadge = [BadgeView getRandomStixStringID];
-        }
         [randomBadges addObject:randomBadge];
         NSLog(@"Random badge %d: %@", i, [BadgeView getStixDescriptorForStixStringID:randomBadge]);
     }
@@ -372,15 +286,12 @@ static int totalStixTypes = 0;
     //NSString * randomBadge3 = [BadgeView getRandomStixStringID];
     //NSLog(@"Generate Default Stix: random free stix %@, %@, %@", randomBadge1, randomBadge2, randomBadge3);
 
-    for (int i=2; i<[BadgeView totalStixTypes]; i++) {
+    for (int i=0; i<[BadgeView totalStixTypes]; i++) {
         NSString * stixID = [stixStringIDs objectAtIndex:i];
         int num = 0;
-        if ([stixID isEqualToString:@"FIRE"] || [stixID isEqualToString:@"ICE"])
-            num = -1;
         if ([randomBadges containsObject:stixID])
         {   
-            NSLog(@"Setting stix %d: %@ %@ to 3", i, stixID, [BadgeView getStixDescriptorForStixStringID:stixID]);
-            num = 3;
+            num = -1;
         }
         [stixCounts setObject:[NSNumber numberWithInt:num] forKey:[stixStringIDs objectAtIndex:i]];
     }
@@ -433,14 +344,6 @@ static int totalStixTypes = 0;
     }
     return nil;
 }
-+(NSMutableArray *) getSubcategoriesForCategory:(NSString*)categoryName {
-    if (stixSubcategories) {
-        NSMutableArray * subcategories = [stixSubcategories objectForKey:categoryName];
-        return subcategories;
-    }
-    return nil;
-}
-
 +(NSMutableArray *)GetAllStixStringIDsForSave {
     // for saving to disk
     return stixStringIDs;
@@ -457,10 +360,6 @@ static int totalStixTypes = 0;
     // for saving to disk
     return stixDescriptors;
 }
-+(NSMutableDictionary *)GetAllStixSubcategoriesForSave {
-    // for saving to disk
-    return stixSubcategories;
-}
 
 - (void)dealloc {
 	[super dealloc];
@@ -474,6 +373,341 @@ static int totalStixTypes = 0;
     badgeLocations = nil;
     //[labels release];
     //labels = nil;
+}
+
+#pragma mark InitializeDefaultStixTypes from disk
+
++(NSMutableDictionary*)InitializeFirstTimeUserStix {
+    NSMutableDictionary * stixCounts = [[NSMutableDictionary alloc] initWithCapacity:[BadgeView totalStixTypes]];
+    NSArray * categoryArrays = [NSArray arrayWithObjects:@"animals", @"comics", @"cute", @"facefun", @"memes", @"videogames", nil];
+    for (int i=0; i<[categoryArrays count]; i++) {
+        NSString * categoryName = [categoryArrays objectAtIndex:i];
+        NSMutableArray * category = [BadgeView getStixForCategory:categoryName];
+        for (int j=0; j<FREE_STIX_PER_CATEGORY; j++) {
+            NSString * stixID = [category objectAtIndex:j];
+            //NSLog(@"Giving free sticker %d = %@ in category %@", j, stixID, categoryName);
+            [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:stixID];
+        }
+    }
+    return [stixCounts autorelease];
+}
+
++(void)InitializeDefaultStixTypes {
+    /* 
+     Manually initialize stix string IDs using the actual filenames
+     also create categories 
+     */
+    
+    NSArray * animals = [[NSArray alloc] initWithObjects:
+    @"baldeagle.png",
+    @"bluecrab.png",
+    @"brownbunny.png",
+    @"butterfly2.png",
+    @"butterfly3.png",
+    @"capuchin.png",
+    @"cat.png",
+    @"cheladamonkeyface.png",
+    @"chipmunk.png",
+    @"dog_cleo.png",
+    @"duck.png",
+    @"fatlizard.png",
+    @"fly.png",
+    @"frog.png",
+    @"frog2.png",
+    @"giraffehead.png",
+    @"goldfish.png",
+    @"judgementalcat.png",
+    @"kitten.png",
+    @"kittenface.png",
+    @"lazydog.png",
+    @"lemurhead.png",
+    @"lion.png",
+    @"lioness.png",
+    @"mallard.png",
+    @"meerkat.png",
+    @"monkeyface.png",
+    @"monkeyface2.png",
+    @"ostrichhead.png",
+    @"owl.png",
+    @"parrothead.png",
+    @"peacock.png",
+    @"penguin.png",
+    @"redcardinal.png",
+    @"rhino.png",
+    @"shybear.png",
+    @"sittingmonkey.png",
+    @"snowowl.png",
+    @"spider.png",
+    @"spottedbunny.png",
+    @"squirrel1.png",
+    @"squirrel2.png",
+    @"squirrel3.png",
+    @"swan.png",
+    @"zebra.png",
+    nil];
+    
+    NSArray * comics = [[NSArray alloc] initWithObjects:
+    @"ant.png",
+    @"bomb.png",
+    @"bone.png",
+    @"bonk.png",
+    @"brownanimeeyes.png",
+    @"cartoonfly.png",
+    @"chickenhero.png",
+    @"chimpzilla.png",
+    @"dynamite.png",
+    @"evilrobot.png",
+    @"exclamation.png",
+    @"greenspaceman.png",
+    @"hal.png",
+    @"handgun.png",
+    @"kaboom.png",
+    @"kapow.png",
+    @"lasergun.png",
+    @"lightning.png",
+    @"lightsword.png",
+    @"longsword.png",
+    @"milesanders_hook.png",
+    @"milesanders_horns.png",
+    @"milesanders_lobsterclaw.png",
+    @"ninja2.png",
+    @"ninjastar.png",
+    @"pinkskull.png",
+    @"plop.png",
+    @"poof.png",
+    @"pop.png",
+    @"pow.png",
+    @"question.png",
+    @"rocket.png",
+    @"shortsword.png",
+    @"smack.png",
+    @"speechbubble.png",
+    @"stickfigure.png",
+    @"thought_bubble.png",
+    @"thud.png",
+    @"thudd.png",
+    @"zombiehead.png",
+                        nil];
+    
+    NSArray * cute = [[NSArray alloc] initWithObjects:
+    @"abstractbubbles.png",
+    @"abstractsun.png",
+    @"babychick.png",
+    @"babychick2.png",
+    @"babypenguin.png",
+    @"bemine.png",
+    @"blue_splash.png",
+    @"blueflower.png",
+    @"bluepenguin.png",
+    @"bunchofstars.png",
+    @"cartoonpig.png",
+    @"cheekymonkey.png",
+    @"cherryblossomrabbits.png",
+    @"flowerpower.png",
+    @"giraffe.png",
+    @"green_splash.png",
+    @"happylemon.png",
+    @"hearts1.png",
+    @"heartsplenty.png",
+    @"hippo.png",
+    @"inksplash.png",
+    @"ladybug.png",
+    @"littlebear.png",
+    @"milesanders_bird.png",
+    @"milesanders_cat.png",
+    @"milesanders_crab.png",
+    @"milesanders_dog.png",
+    @"milesanders_fish.png",
+    @"milesanders_flower.png",
+    @"milesanders_owl.png",
+    @"milesanders_parrot.png",
+    @"mole.png",
+    @"musicnote.png",
+    @"panda.png",
+    @"panda2.png",
+    @"panda3.png",
+    @"pawprint.png",
+    @"pink_splash.png",
+    @"pinkballoon.png",
+    @"pinkdolphin.png",
+    @"pinkflower.png",
+    @"pinkstar.png",
+    @"purplebutterfly.png",
+    @"rainbow.png",
+    @"rainbow2.png",
+    @"realteddybear.png",
+    @"red_glowing_heart.png",
+    @"redrose.png",
+    @"smallwhale.png",
+    @"snowflake.png",
+    @"starexplode.png",
+    @"swirlyribbons.png",
+    @"teddy.png",
+    @"teddyface.png",
+    @"tulip.png",
+    @"wackybear.png",
+    @"yellowflowserborder.png",
+                        nil];
+    
+    NSArray * facefun = [[NSArray alloc] initWithObjects:
+
+    @"bandaid.png",
+    @"beard_scruffy.png",
+    @"blooddrip.png",
+    @"crown.png",
+    @"drop.png",
+    @"eye_scary.png",
+    @"eyepatch.png",
+    @"eyes_bulging.png",
+    @"eyes_creepycat.png",
+    @"eyes_crossed.png",
+    @"eyes_puppy.png",
+    @"furryears.png",
+    @"glasses_3d_glasses.png",
+    @"glasses_aviatorglasses.png",
+    @"glasses_catglasses.png",
+    @"hair_afro.png",
+    @"hair_blondshort.png",
+    @"hair_blondwithbangs.png",
+    @"hair_brownbangs.png",
+    @"hair_brownlong.png",
+    @"hair_celebrityboy.png",
+    @"hair_curlylongblond.png",
+    @"hair_dreadlocks.png",
+    @"hair_eurostyle.png",
+    @"hair_platinumblond.png",
+    @"hair_redshorthair.png",
+    @"hair_shortblondcosplayhair.png",
+    //@"hair_shortblondguy.png",
+    @"hair_shortblue.png",
+    @"hair_spikyblondcosplay.png",
+    @"hat_browncap.png",
+    @"hat_brownstripedcap.png",
+    @"hat_fedora.png",
+    @"hat_tophat.png",
+    @"hockeymask.png",
+    @"kiss.png",
+    @"mouth_buckteeth.png",
+    @"mouth_toothy.png",
+    @"mouth_toothy2.png",
+    @"mouth_uglyteeth.png",
+    @"mouth_vampirefangs.png",
+    @"nerdytie.png",
+    @"openmouth.png",
+    @"partyhat.png",
+    @"polarbearhat.png",
+    @"stache_bushy.png",
+    @"stache_rich.png",
+    @"surprised_eyes.png",
+                        nil];
+    
+    NSArray * memes = [[NSArray alloc] initWithObjects:
+
+    @"areyouseriousface.png",
+    @"censored.png",
+    @"chubbybaby.png",
+    @"derp.png",
+    @"derpeyes.png",
+    @"fail.png",
+    @"foreveralone.png",
+    @"ftw.png",
+    @"guy_fawkes.png",
+    @"happycutenessoverload.png",
+    @"happysmileyface.png",
+    @"lol.png",
+    @"lolface.png",
+    @"megusta.png",
+    @"noface.png",
+    @"okayguy.png",
+    @"omg.png",
+    @"pleaseface.png",
+    @"pokerface.png",
+    @"rawchicken.png",
+    @"skepticalbaby.png",
+    @"sleepingbabyface.png",
+    @"successkid.png",
+    @"trollface.png",
+    @"woodface.png",
+    @"yolo.png",
+    @"yunoguy.png",
+                      nil];
+    
+    NSArray * videogames = [[NSArray alloc] initWithObjects:
+
+    @"cubeangry.png",
+    @"cubecool.png",
+    @"cubekiss.png",
+    @"cubeshocked.png",
+    @"cubesick.png",
+    @"cubesilly.png",
+    @"cubesmile.png",
+    @"cubewink.png",
+    @"game_coin.png",
+    @"game_shroom.png",
+    @"gamecontroller.png",
+    @"gameinvader.png",
+    @"gametower.png",
+    @"handcursor.png",
+    @"isobuilding.png",
+    @"mariostar.png",
+    @"minecraft.png",
+    @"pacmangreen.png",
+    @"pirates_chest.png",
+    @"pressbutton.png",
+    @"redfireball.png",
+    @"robohead.png",
+    @"tallisotower.png",
+    @"tetris1.png",
+    @"tetris2.png",
+    @"tetris3.png",
+    @"videogame_pipe.png",
+                        nil];
+    
+    if (!stixStringIDs) {
+        stixStringIDs = [[NSMutableArray alloc] init];
+    }
+    if (!stixCategories) {
+        stixCategories = [[NSMutableDictionary alloc] init];
+    }
+    if (!stixViews) {
+        stixViews = [[NSMutableDictionary alloc] init];
+    }
+    if (!stixDescriptors) {
+        stixDescriptors = [[NSMutableDictionary alloc] init];
+    }
+
+    NSArray * filenameArrays = [[NSArray alloc] initWithObjects:animals, comics, cute, facefun, memes, videogames, nil];
+    NSArray * categoryArrays = [[NSArray alloc] initWithObjects:@"animals", @"comics", @"cute", @"facefun", @"memes", @"videogames", nil];
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"stix" ofType:@"bundle"];
+    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+    for (int i=0; i<[filenameArrays count]; i++) {
+        NSArray * stixStringArray = [filenameArrays objectAtIndex:i];
+        // add filenames as the stixStringIDs
+        [stixStringIDs addObjectsFromArray:stixStringArray];
+        NSString * categoryName = [categoryArrays objectAtIndex:i];
+        NSMutableArray * category = [stixCategories objectForKey:categoryName];
+        if (!category) {
+            category = [[[NSMutableArray alloc] init] autorelease];
+        }
+        [category addObjectsFromArray:stixStringArray];
+        [stixCategories setObject:category forKey:categoryName];
+        
+        for (NSString * stixStringID in stixStringArray) {
+            NSRange suffix = [stixStringID rangeOfString:@".png"];
+            NSString * descriptor = [stixStringID substringToIndex:suffix.location];
+            [stixDescriptors setValue:descriptor forKey:stixStringID];
+
+            NSString *imageName = [bundle pathForResource:descriptor ofType:@"png"];
+            UIImage *img = [[UIImage alloc] initWithContentsOfFile:imageName];
+            UIImageView * stix = [[UIImageView alloc] initWithImage:img];
+            [stixViews setObject:stix forKey:stixStringID];
+            
+            [img release];
+            [stix release];
+        }
+    }
+    totalStixTypes = [stixStringIDs count];
+    NSLog(@"BadgeView: Generated %d generic stix!", totalStixTypes);
 }
 
 @end

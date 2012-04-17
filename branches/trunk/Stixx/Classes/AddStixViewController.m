@@ -405,6 +405,13 @@
     [stixView setInteractionAllowed:YES];
     [stixView populateWithStixForManipulation:stixStringID withCount:1 atLocationX:location.x andLocationY:location.y /*andScale:1 andRotation:0*/];
     didAddStixToStixView = YES;
+
+    int count = [self.delegate getStixCount:stixStringID];
+    if (count == 0) {
+        [priceView setText:@"5 Bux"];
+    }
+    else
+        [priceView setText:@""];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

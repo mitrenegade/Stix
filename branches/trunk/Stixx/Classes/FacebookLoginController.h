@@ -14,7 +14,7 @@
 #import "BadgeView.h"
 #import "KumulosHelper.h"
 
-#define NEW_USER_BUX 50
+#define NEW_USER_BUX 100
 
 @protocol FacebookLoginDelegate <NSObject>
 -(void)didDismissSecondaryView;

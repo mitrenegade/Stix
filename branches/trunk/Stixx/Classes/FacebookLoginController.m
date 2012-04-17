@@ -70,7 +70,6 @@
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [loginButton setHidden:NO];
 }
 
 #pragma mark login or join
@@ -91,7 +90,7 @@
     //[img release];
     
     //[kumulos addEmailToUserWithUsername:username andEmail:email];
-    NSMutableDictionary * stix = [[BadgeView generateDefaultStix] retain];   
+    NSMutableDictionary * stix = [[BadgeView InitializeFirstTimeUserStix] retain];   
     NSMutableData * stixData = [[KumulosData dictionaryToData:stix] retain];
     //[kumulos addStixToUserWithUsername:username andStix:data];
     
@@ -99,19 +98,13 @@
     NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];
     NSMutableDictionary * stixOrder = [[NSMutableDictionary alloc] init];
     int orderct = 0;
-    [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:@"FIRE"]; 
-    [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:@"ICE"]; 
     NSEnumerator *e = [stix keyEnumerator];
     id key;
     while (key = [e nextObject]) {
         int ct = [[stix objectForKey:key] intValue];
         NSLog(@"Stix %@ count %d", key, ct);
         if (ct != 0)
-            NSLog(@"Here!");
-        if (![key isEqualToString:@"FIRE"] && ![key isEqualToString:@"ICE"]) {
-            if (ct != 0)
-                [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:key];
-        }
+            [stixOrder setObject:[NSNumber numberWithInt:orderct++] forKey:key];
     }
     [auxInfo setValue:stixOrder forKey:@"stixOrder"];
     
@@ -123,10 +116,6 @@
     */
     NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
     [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
-    // MRC
-    [auxInfo release];
-    [auxData release];
-    [stixOrder release];
     int totalTags = 0;
     int bux = NEW_USER_BUX;
     
@@ -135,10 +124,13 @@
     //[k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
     [k addUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux andFacebookID:facebookID];
     // MRC
-    [stixData release];
-    [stix release];
-    [photo release];
-    
+    //[stixData autorelease];
+    //[stix autorelease];
+    //[photo autorelease];
+    //[auxInfo autorelease];
+    //[auxData autorelease];
+    //[stixOrder autorelease];
+     
 }
 
 -(void)loginUser {
@@ -214,6 +206,7 @@
     }
      */
 //    [loginController.view removeFromSuperview];
+    [self stopActivityIndicator];
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
     [stix release]; // MRC
     [newPhoto release]; // MRC
@@ -291,10 +284,8 @@
     [alert show];
     [alert release];
     
-    [self stopActivityIndicator];
     isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:theResults];
-    
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{
@@ -312,11 +303,11 @@
         //[alert setTitle:@"Whoops"];
         //[alert setMessage:@"Sorry we could not log you in: invalid password."];
         // could not login with given facebook id and username; check facebook for that id
-        NSLog(@"Could not login with username %@ and facebookID %@, checking facebook", facebookName, facebookID);
-        [k getFacebookUserWithFacebookID:facebookID];
+        NSLog(@"Could not login with username %@ and facebookID %d, checking facebook", facebookName, facebookID);
+        //[k getFacebookUserWithFacebookID:facebookID];
+        [self addUser];
     }
     
-    [self stopActivityIndicator];
     //[alert show];
     [alert release];
 }

@@ -15,9 +15,12 @@
 @synthesize delegate;
 @synthesize stixView;
 @synthesize activityIndicator;
+@synthesize activityIndicatorLarge;
 @synthesize logo;
 @synthesize tagUsername;
 @synthesize commentView;
+
+static BOOL openingDetailView;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -64,13 +67,18 @@
 }
 
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 /*** commentFeedTableDelegate ***/
@@ -119,11 +127,35 @@
     animation.delegate = self;
     CGRect frameOffscreen = CGRectMake(-3-320, 0, 320, 480);
     animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+    [DetailViewController unlockOpen];
 }
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
     if (animID == animationID[1]) {
         //[stixView release];
         [delegate didDismissZoom];
+        [DetailViewController unlockOpen];
+    }
+    // share menu
+    else if (animID == shareMenuOpenAnimation) {
+        [self.view addSubview:buttonShareEmail];
+        [self.view addSubview:buttonShareFacebook];
+        [self.view addSubview:buttonShareClose];
+    }
+    else if (animID == shareMenuCloseAnimation) {
+        [self stopActivityIndicator];
+        if (shareSheet) {
+            [shareSheet release];   
+            shareSheet = nil;
+            [buttonShareEmail removeFromSuperview];
+            [buttonShareFacebook removeFromSuperview];
+            [buttonShareClose removeFromSuperview];
+            [buttonShareEmail release];
+            [buttonShareFacebook release];
+            [buttonShareClose release];
+            buttonShareClose = nil;
+            buttonShareEmail = nil;
+            buttonShareFacebook = nil;
+        }
     }
 }
 
@@ -138,6 +170,16 @@
 
 #pragma mark - View lifecycle
 
++(BOOL)openingDetailView {
+    return openingDetailView;
+}
++(void)lockOpen {
+    openingDetailView = YES;
+}
++(void)unlockOpen {
+    openingDetailView = NO;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -150,7 +192,7 @@
     scrollView.directionalLockEnabled = NO; // only allow vertical or horizontal scroll
     //[scrollView setDelegate:self];
     
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 11, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 11, 25, 25)];
     
     if (names)
         [names release];
@@ -398,9 +440,9 @@
     [commentView.view removeFromSuperview];
 }
 
--(void)sharePix:(int)tag_id {
-    [self.delegate sharePix:tag_id];
-}
+//-(void)sharePix:(int)tag_id {
+//    [self.delegate sharePix:tag_id];
+//}
 
 -(void)didClickUserPhoto:(UIButton*)button {
     NSLog(@"DetailViewController: Clicked user photo for tag: user %@", tagUsername);
@@ -419,6 +461,78 @@
         [commentView.view removeFromSuperview];
         [delegate shouldDisplayUserPage:username];
     }];
+    
+    // this is effectively a close action, so must unlock detailViewController open lock
+    [DetailViewController unlockOpen];
+}
+
+#pragma mark sharing from VerticalFeedItemDelegate
+
+-(void)didCloseShareSheet {
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
+}
+
+-(void)didClickShareViaFacebook {
+    [self startActivityIndicator];
+    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
+        [feedItem didClickShareViaFacebook];
+    });
+    [self didCloseShareSheet];
+    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [shareSheet addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)didClickShareViaEmail {
+    [self startActivityIndicator];
+    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
+        [feedItem didClickShareViaEmail];
+    });
+    [self didCloseShareSheet];
+    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [shareSheet addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
+    CGRect frameInside = CGRectMake(16, 22, 289, 380);
+    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
+    shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
+    [shareSheet setFrame:frameOutside];
+    
+    buttonShareFacebook = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
+    [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
+    [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
+    
+    buttonShareEmail = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
+    [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
+    [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
+    
+    buttonShareClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
+    [buttonShareClose setBackgroundColor:[UIColor clearColor]];
+    [buttonShareClose addTarget:self action:@selector(didCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:shareSheet];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
+}
+
+-(void)sharePixDialogDidFinish {
+    [self didCloseShareSheet];
+    if (activityIndicatorLarge) {
+        [activityIndicatorLarge setHidden:YES];
+        [activityIndicatorLarge stopCompleteAnimation];
+        [activityIndicatorLarge removeFromSuperview];
+        [activityIndicatorLarge release];
+        activityIndicatorLarge = nil;
+    }
 }
 
 @end

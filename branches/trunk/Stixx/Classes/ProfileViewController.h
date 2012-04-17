@@ -51,6 +51,8 @@ enum {
 -(NSMutableSet*)getFollowingList;
 -(NSMutableSet*)getFollowerList;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
+-(void)shouldDisplayUserPage:(NSString *)name;
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didSendGiftStix:(NSString*)stixStringID toUsername:(NSString*)friendName;
@@ -69,6 +71,9 @@ enum {
 -(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 -(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookID:(NSString*)fbID;
+
+-(int)getFirstTimeUserStage;
+-(void)advanceFirstTimeUserMessage;
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, StixAnimationDelegate>{
@@ -112,6 +117,7 @@ enum {
     NSMutableArray * searchFriendIsStix;
     
     int dismissAnimation;
+    BOOL showPointer;
 }
 
 @property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
@@ -163,6 +169,7 @@ enum {
 -(void)populateNameSearchResults;
 -(void)populateFollowingList;
 -(void)populateFollowersList;
+-(void)doPointerAnimation;
 
 // deprecated
 /*

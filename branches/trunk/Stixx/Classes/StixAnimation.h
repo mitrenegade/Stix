@@ -9,9 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @protocol StixAnimationDelegate <NSObject>
-
+@optional
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView*)canvas;
-
 @end
 
 @interface StixAnimation : UIView {

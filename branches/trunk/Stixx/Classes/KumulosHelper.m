@@ -125,15 +125,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
             NSEnumerator *e = [stix keyEnumerator];
             id key;
             int total = 0;
-            [stixOrder setValue:[NSNumber numberWithInt:total++] forKey:@"FIRE"];
-            [stixOrder setValue:[NSNumber numberWithInt:total++] forKey:@"ICE"];
             while (key = [e nextObject]) {
-                if ([key isEqualToString:@"FIRE"] || [key isEqualToString:@"ICE"])
-                    continue;
-                //NSLog(@"Key: %@ count: %d", key, [[stix objectForKey:key] intValue]);
                 if ([[stix objectForKey:key] intValue] != 0) {
                     [stixOrder setValue:[NSNumber numberWithInt:total++] forKey:key];
-                    //NSLog(@"user %@ stix %d %@ stixOrders %d", username, total, key, [stixOrder count]);
                 }
             }
 

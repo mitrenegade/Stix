@@ -42,8 +42,7 @@
     k = [[Kumulos alloc]init];
     [k setDelegate:self];    
 
-    //activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 140, 80, 80)];
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 9, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
 
     return self;
     
@@ -54,6 +53,7 @@
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableDictionary alloc] init];
     contentViews = [[NSMutableDictionary alloc] init];
+    placeholderViews = [[NSMutableDictionary alloc] init];
     
     newRandomTags = [[NSMutableDictionary alloc] init];
     
@@ -64,30 +64,29 @@
     isZooming = NO;
     [self forceReloadAll];
 
-    //NSArray *itemArray = [NSArray arrayWithObjects: @"Random", @"Recent", nil]; //, @"Popular", nil];
-    NSArray * itemArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"random.png"], [UIImage imageNamed:@"recent.png"], nil];
-    UISegmentedControl * segmentedControl = [[UISegmentedControl alloc] initWithItems:itemArray];
-    [segmentedControl setFrame:CGRectMake(20,50,280,30)];
-    segmentedControl.segmentedControlStyle = UISegmentedControlStylePlain;
-    segmentedControl.selectedSegmentIndex = EXPLORE_RANDOM;
-    [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RANDOM];
-    [segmentedControl setEnabled:YES forSegmentAtIndex:EXPLORE_RECENT];
-    //[segmentedControl setEnabled:NO forSegmentAtIndex:EXPLORE_POPULAR];
-    [segmentedControl addTarget:self
-	                     action:@selector(setExploreMode:)
-	           forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:segmentedControl];
-	[segmentedControl release];
-    /*
-    UISlider * slider = [[UISlider alloc] init];
-    [slider setFrame:CGRectMake(20, 85, 280, 10)];
-    [slider setMinimumValue:2];
-    [slider setMaximumValue:6];
-    [slider setContinuous:NO];
-    [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
-//    [self.view addSubview:slider];
-    [slider release];
-*/
+    exploreModeButtons = [[NSMutableArray alloc] init];
+    UIButton * buttonRecent = [[UIButton alloc] init];
+    [buttonRecent setImage:[UIImage imageNamed:@"recent.png"] forState:UIControlStateNormal];
+    [buttonRecent setImage:[UIImage imageNamed:@"recent_on.png"] forState:UIControlStateSelected];
+    [buttonRecent setFrame:CGRectMake(30, 50, 130, 30)];
+    [buttonRecent addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
+    [buttonRecent setTag:EXPLORE_RECENT];
+    [self.view addSubview:buttonRecent];
+
+    UIButton * buttonRandom = [[UIButton alloc] init];
+    [buttonRandom setImage:[UIImage imageNamed:@"random.png"] forState:UIControlStateNormal];
+    [buttonRandom setImage:[UIImage imageNamed:@"random_on.png"] forState:UIControlStateSelected];
+    [buttonRandom setFrame:CGRectMake(150, 50, 130, 30)];
+    [buttonRandom addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
+    [buttonRandom setTag:EXPLORE_RANDOM];
+    [self.view addSubview:buttonRandom];
+    
+    [exploreModeButtons addObject:buttonRecent];
+    [exploreModeButtons addObject:buttonRandom];
+    [self setExploreMode:buttonRecent];
+    [buttonRecent release];
+    [buttonRandom release];
+
     UIButton * buttonBux = [[[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)] autorelease];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
@@ -99,19 +98,35 @@
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
     [self.view insertSubview:labelBuxCount belowSubview:buttonProfile];
+
+    [buttonProfile setImage:[delegate getUserPhotoForUsername:[delegate getUsername]] forState:UIControlStateNormal];
+    [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
+    [buttonProfile.layer setBorderWidth:1];
 }
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
-- (void) setExploreMode:(UISegmentedControl *)sender{
-    exploreMode = [sender selectedSegmentIndex];
+-(void) setExploreMode:(UIButton*)button{
+    for (int i=0; i<[exploreModeButtons count]; i++){
+        [[exploreModeButtons objectAtIndex:i] setSelected:NO];
+        NSLog(@"Index: %d tag: %d mode: %d", i, [[exploreModeButtons objectAtIndex:i] tag], button.tag);
+        if (button.tag == [[exploreModeButtons objectAtIndex:i] tag])
+            [[exploreModeButtons objectAtIndex:i] setSelected:YES];
+    }
+    
+    exploreMode = [button tag];
     [self forceReloadAll];
 }
 
@@ -173,10 +188,29 @@
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
         [cview initializeWithImage:tag.image];
+#if 0
+        int canShow = [cview populateWithAuxStixFromTag:tag];
+        if (canShow) {
+            cview.isShowingPlaceholder = NO;
+        }
+        else {
+            UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
+            [placeholderView setCenter:cview.center];
+            cview.isShowingPlaceholder = YES;
+            [placeholderViews setObject:placeholderView forKey:key];
+            [placeholderView release];
+        }
+#else
+        // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
+        cview.isShowingPlaceholder = NO;
+#endif
         [contentViews setObject:cview forKey:key];
         [cview release];
     }
+    StixView * cview = [contentViews objectForKey:key];
+    if (cview.isShowingPlaceholder)
+        return [placeholderViews objectForKey:key];
     return [contentViews objectForKey:key];
 }
 
@@ -277,6 +311,7 @@
     [allTags removeAllObjects];
     [allTagIDs removeAllObjects];
     [contentViews removeAllObjects];
+    [placeholderViews removeAllObjects];
     [self loadContentPastRow:-1];
     isZooming = NO;
     [self startActivityIndicator];
@@ -289,6 +324,10 @@
 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
+    if ([DetailViewController openingDetailView])
+        return;
+    [DetailViewController lockOpen];
+    
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
     detailController = [[DetailViewController alloc] init];
@@ -301,94 +340,32 @@
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    animationID = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-}
-
--(void)sharePix:(int)tagID {
-    //[self.delegate sharePix:tagID];
-    shareActionSheetTagID = tagID;
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", /*@"Move", */nil];
-    [actionSheet showFromTabBar:self.tabBarController.tabBar];
-    [actionSheet release];
-}
-
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    // button index: 0 = "Facebook", 1 = "Email", 2 = "Cancel"
-    switch (buttonIndex) {
-        case 0: // Facebook
-        {
-            /*
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"Ok"];
-            [alert setTitle:@"Beta Version"];
-            [alert setMessage:@"Uploading Pix via Facebook coming soon!"];
-            [alert show];
-            [alert release];
-             */
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 1: // Email
-        {
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 2: // Cancel
-            return;
-            break;
-        default:
-            return;
-            break;
-    }
+    openDetailAnimation = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
 }
 
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
     [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
--(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
-    //[self.view addSubview:detailController.view];
-    //[detailController release];
-}
 -(void)didDismissZoom {
     isZooming = NO;
     //[carouselView setUnderlay:scrollView];
-    [detailController.view removeFromSuperview];
-    [detailController release];
-    detailController = nil;
+    if (detailController) {
+        [detailController.view removeFromSuperview];
+        [detailController release];
+        detailController = nil;
+    }
 }
 
 #pragma mark UserGalleryDelegate
+
+/*
+ -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+ if (animationID == openDetailAnimation) {
+ [DetailViewController unlockOpen];
+ }
+ }
+ */
 
 -(void)shouldDisplayUserPage:(NSString *)username {
     // close detailView first - click came from here
@@ -404,6 +381,25 @@
 }
 -(void)shouldCloseUserPage {
     [delegate shouldCloseUserPage];
+}
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+
+-(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
+    [stixView removeFromSuperview];
+    for (int i=0; i<[contentViews count]; i++) {
+        StixView * cview = [contentViews objectForKey:[NSNumber numberWithInt:i]];
+        if ([cview stixViewID] == [stixView stixViewID]) {
+            NSLog(@"ExploreView: didReceiveAllRequestedMissingStix for stixView %d at index %d", [stixView stixViewID], i);
+            [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
+            [self.tableController.tableView reloadData];
+            break;
+        }
+    }
 }
 /*
 -(UIImage*)getUserPhotoForGallery {

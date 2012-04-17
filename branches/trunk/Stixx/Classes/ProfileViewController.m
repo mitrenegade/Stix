@@ -58,7 +58,7 @@
         [k setDelegate:self];    
     }
     
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(150, 9, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
     
     // populate with followers profile
@@ -68,16 +68,22 @@
     [self populateWithMyButtons];
     
     searchResultsController = nil;
+    showPointer = NO;
 }
 
 -(void)startActivityIndicator {
-    [logo setHidden:YES];
+    //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
-    [logo setHidden:NO];
+    //[logo setHidden:NO];
+}
+-(void)stopActivityIndicatorAfterTimeout {
+    [self stopActivityIndicator];
+    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 #pragma mark initialization functions
@@ -200,6 +206,10 @@
 #pragma mark myProfile button responders
 
 -(void)didClickButtonFacebook {
+    if ([delegate getFirstTimeUserStage] == 3) {
+        showPointer = NO;
+        [delegate advanceFirstTimeUserMessage];
+    }
     if (isSearching)
         return;
     
@@ -213,6 +223,10 @@
     [self.delegate searchFriendsByFacebook];
 }
 -(void)didClickButtonContacts {
+    if ([delegate getFirstTimeUserStage] == 3) {
+        showPointer = NO;
+        [delegate advanceFirstTimeUserMessage];
+    }
     if (isSearching)
         return;
     
@@ -226,6 +240,10 @@
     [self populateContactSearchResults];
 }
 -(void)didClickButtonByName {
+    if ([delegate getFirstTimeUserStage] == 3) {
+        showPointer = NO;
+        [delegate advanceFirstTimeUserMessage];
+    }
     if (isSearching) 
         return;
     
@@ -251,7 +269,7 @@
 }
 -(IBAction)didClickBackButton:(id)sender {
     if (showMyButtons) { // myButtons are showing so we are in basic profile view
-        [self.delegate closeProfileView];
+        [delegate closeProfileView];
     }
     else {
         // reset views
@@ -259,6 +277,7 @@
         [self toggleMyInfo:YES];
         isSearching = NO;
     }
+    showPointer = NO;
 }
 
 /***** modifying user photo *******/
@@ -470,26 +489,16 @@
 
 -(void)updateFollowCounts {
     // uses delegate functions
-#if 0
-    NSLog(@"UpdateFollowCounts: username %@", [delegate getUsername]);
-    NSMutableSet * followerList = [delegate getFollowerList];
-    NSMutableSet * followingList = [delegate getFollowingList];
-    [myFollowersCount setText:[NSString stringWithFormat:@"%d", [followerList count]]];
-    NSLog(@"Updating followers count to %d", [followerList count]);
-    [myFollowingCount setText:[NSString stringWithFormat:@"%d", [followingList count]]];
-    NSLog(@"Updating following count to %d", [followingList count]);
-#else
     NSMutableSet * followingList = [self.delegate getFollowingList];
     int followingCount = [followingList count];
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
-    //NSLog(@"FollowingList: %@", followingList);
+    NSLog(@"FollowingList: %@", followingList);
     
     NSMutableSet * followerList = [self.delegate getFollowerList];
     int followerCount = [followerList count];
     [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
     NSLog(@"FollowerList: %@", followerList);
     //NSLog(@"UpdateFollowCount: updating following count to %d followercount to %d", followingCount, followerCount);
-#endif
 }
 
 -(void)updatePixCount {
@@ -551,7 +560,7 @@
     NSMutableArray * searchFriendNotStixID = [[NSMutableArray alloc] init];
     NSMutableArray * searchFriendNotStix = [[NSMutableArray alloc] init];
     
-    NSMutableArray * allFacebookIDs = [self.delegate getAllUserFacebookIDs];
+    NSMutableArray * allFacebookIDs = [delegate getAllUserFacebookIDs];
     for (NSMutableDictionary * d in facebookFriendArray) {
         NSString * fbID = [d valueForKey:@"id"];
         NSString * fbName = [d valueForKey:@"name"];
@@ -677,6 +686,8 @@
         return -1;
     
     NSString * friendName = [searchFriendName objectAtIndex:index];
+    if ([friendName isEqualToString:[delegate getUsername]])
+        return -2;
     return [[delegate getFollowingList] containsObject:friendName];
 }
 
@@ -696,10 +707,21 @@
     }
     else {
         // invite
-        NSString * fbID = [self getFacebookIDForUser:index];
+        NSString * fbID = [self getFacebookIDForUser:index]; // fbEmail does not exist
         [delegate didClickInviteButtonByFacebook:username withFacebookID:fbID];
     }
     [[searchResultsController tableView] reloadData];
+}
+
+-(void)didSelectUserProfile:(int)index {
+    NSString * username = [self getUsernameForUser:index];
+    if ([username isEqualToString:[delegate getUsername]]) {
+        [self didClickBackButton:nil];
+    }
+    else {
+        [delegate closeProfileView];
+        [delegate shouldDisplayUserPage:username];
+    }
 }
 
 #pragma mark ABAddressBook functions
@@ -769,7 +791,7 @@
     searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 44, 320, 44)];
     [searchBar setDelegate:self];
     [searchBar setBarStyle:UIBarStyleBlack];
-    //[bottomBackground addSubview:searchBar];
+    [searchBar setPlaceholder:@"Search by name, email, etc"];
     [self.view addSubview:searchBar];
     if (searchResultsController != nil) {
         [searchResultsController.view removeFromSuperview];
@@ -780,6 +802,8 @@
     [searchResultsController setDelegate:self];
     searchResultsController.tableView.showsVerticalScrollIndicator = NO;
     [self.view addSubview:searchResultsController.view];
+    
+    [searchBar becomeFirstResponder];
 }
 
 -(void)searchBarSearchButtonClicked:(UISearchBar *)_searchBar {
@@ -826,6 +850,8 @@
     }
     NSLog(@"Populating search results: %d names", [namesResults count]);
     for (NSString * name in namesResults) {
+        if ([name isEqualToString:[delegate getUsername]])
+            continue;
         [searchFriendName addObject:name];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
@@ -854,6 +880,7 @@
     
     NSMutableSet * followingSet = [delegate getFollowingList];
     for (NSString * following in followingSet) {
+        NSLog(@"ProfileViewController: followingSet contains %@", following);
         [searchFriendName addObject:following];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
@@ -900,98 +927,44 @@
 }
 -(UIImage*)getUserPhotoForGallery {return [self.delegate getUserPhoto];}
 
-/*** deprecated functions for old profile view ***/
-/*
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    NSLog(@"Button index: %d", buttonIndex);    
-    // 0 = cancel
-    // 1 = logout
-    if (buttonIndex != [alertView cancelButtonIndex])
-        [self showLogoutScreen:nil];
+-(void)doPointerAnimation {
+    showPointer = YES;
+    UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
+    CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 160, pointerImg.size.width, pointerImg.size.height);
+    UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
+    UIButton * pointer = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, pointerImg.size.width, pointerImg.size.height)];
+    [pointer setImage:pointerImg forState:UIControlStateNormal];
+    [pointer addTarget:self action:@selector(didClickPointer) forControlEvents:UIControlEventTouchUpInside];
+    //UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+    //pointer.transform = CGAffineTransformMakeRotation(3.141592);
+    [pointerCanvas addSubview:pointer];
+    [pointer release];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
+    [pointerCanvas release];
+    [animation release];
 }
 
-// ***** logging in with a username **** 
-
- -(void)loginWithUsername:(NSString *)name {
- // called by delegate, first time when no data has been loaded from kumulos
- NSLog(@"Trying to login as %@", name);
- if (k == nil) {
- k = [[Kumulos alloc]init];
- [k setDelegate:self];    
- }
- [k getUserWithUsername:name];
- }
- 
- // getUserWithUsername in ProfileViewController is a login operation that populates the profile with all the new user's info
- - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults {
- if ([theResults count] > 0)
- {
- //for (NSMutableDictionary * d in theResults) {
- NSMutableDictionary * d = [theResults objectAtIndex:0];
- NSString * name = [d valueForKey:@"username"];
- //[self didSelectUsername:name withResults:theResults];
- [self.nameLabel setText:name];
- UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
- if (newPhoto) {
- [photoButton setImage:newPhoto forState:UIControlStateNormal];
- //NSLog(@"User %@ has photo of dimensions %f %f\n", name, newPhoto.size.width, newPhoto.size.height);
- }
- else
- {
- newPhoto = [[UIImage imageNamed:@"graphic_nouser.png"] retain];
- [photoButton setImage:newPhoto forState:UIControlStateNormal];
- [photoButton setTitle:@"" forState:UIControlStateNormal]; 
- }
- // badge count array
- NSMutableDictionary * stix;
- @try {
- stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
- }
- @catch (NSException* exception) { 
- NSLog(@"Error! Exception caught while trying to load stix! Error %@", [exception reason]);
- stix = [[BadgeView generateDefaultStix] retain];
- }
- NSLog(@"ProfileViewController: DidLoginWithUsername: %@", name);
- // total Pix count
- int totalTags = [[d valueForKey:@"totalTags"] intValue];
- int bux = [[d valueForKey:@"bux"] intValue];
- 
- NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
- NSMutableDictionary * stixOrder = nil;
- //NSMutableSet * friendsList = nil;
- int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
- if (ret == 0) {
- stixOrder = [auxiliaryData objectForKey:@"stixOrder"];
- //friendsList = [auxiliaryData objectForKey:@"friendsList"];
- }
- [delegate didLoginWithUsername:name andPhoto:newPhoto andStix:stix andTotalTags:totalTags andBuxCount:(int)bux andStixOrder:stixOrder];
- [newPhoto release];
- }
- else if ([theResults count] == 0)
- {
- [delegate didLogout]; // force logout
- }
- }
- 
- -(IBAction) didClickLogoutButton:(id)sender {
- #if 0
- UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:[NSString stringWithFormat:@"Do you want to log out of account %@?", [delegate getUsername]] delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Log me out!", nil];
- [actionSheet showInView:self.view];
- [actionSheet release];
- #else
- UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logout"
- message:@"Do you want to log out?"
- delegate:self
- cancelButtonTitle:@"Cancel"
- otherButtonTitles:@"Log me out!", nil];    
- [alert show];
- [alert release];
- #endif
- }
-
--(IBAction) showLogoutScreen:(id)sender {
-    [delegate didLogout];
+-(void)didClickPointer {
+    showPointer = NO;
 }
- */
+
+-(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    if (showPointer)
+        [animation doJump:canvas inView:self.view forDistance:20 forTime:1];
+    else {
+        [canvas removeFromSuperview];
+    }
+    [animation release];
+}
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
 
 @end

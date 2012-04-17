@@ -25,6 +25,8 @@
 -(void)didLogoutFromFacebook;
 -(void)didCancelFacebookLogin;
 -(void)receivedFacebookFriends:(NSArray*)friendsArray;
+-(int)getUserFacebookID;
+-(void)didEarnFacebookReward:(int)bux;
 @end
 
 @interface FacebookHelper : NSObject < FBSessionDelegate, FBRequestDelegate, FBDialogDelegate>
@@ -33,6 +35,7 @@
     NSObject<FacebookHelperDelegate> * delegate;
 
     NSString * currentRequest;
+    NSString * postType;
 }
 
 @property (nonatomic, retain) Facebook * facebook;
@@ -48,4 +51,5 @@
 -(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description;
 -(void)requestFacebookFriends;
 -(void)sendInvite:(NSString*)name withFacebookID:(NSString*)facebookID;
++(FacebookHelper*)sharedFacebookHelper;
 @end

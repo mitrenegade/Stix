@@ -8,6 +8,8 @@
 
 #import "FacebookHelper.h"
 
+static FacebookHelper *sharedFacebookHelper;
+
 @implementation FacebookHelper
 
 @synthesize facebook;
@@ -22,6 +24,13 @@
  }
  
 */
++(FacebookHelper*)sharedFacebookHelper 
+{
+	if (!sharedFacebookHelper){
+		sharedFacebookHelper = [[FacebookHelper alloc] init];
+	}
+	return sharedFacebookHelper;
+}
 
 /**
  * To initialize, just make sure you have the correct APP_ID set in FacebookHelper.h
@@ -66,7 +75,7 @@
                                 @"user_photos",
                                 //@"user_likes", 
                                 //@"read_stream",
-                                //@"publish_stream",
+                                @"publish_stream", // post to friend's stream
                                 @"email",
                                 nil];
         if ([permissions count] == 0) {
@@ -138,6 +147,7 @@
 }
 
 -(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description {
+    postType = @"sharePix";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    APP_ID, @"app_id",
                                    link, @"link",
@@ -147,17 +157,6 @@
                                    description, @"description",
                                    nil];
     [facebook dialog:@"feed" andParams:params andDelegate:self];
-}
-
-#pragma mark FBDialogDelegate functions
-- (void)dialogDidComplete:(FBDialog *)dialog {
-    NSLog(@"Facebook dialog completed!");
-}
-- (void)dialogDidNotComplete:(FBDialog *)dialog {
-    NSLog(@"Facebook dialog did not complete!");
-}
-- (void)dialog:(FBDialog*)dialog didFailWithError:(NSError *)error {
-    NSLog(@"Facebook dialog failed: %@", [error description]);
 }
 
 #pragma mark friend request
@@ -208,28 +207,25 @@
 }
 
 -(void)sendInvite:(NSString *)name withFacebookID:(NSString*)facebookID {
+    postType = @"inviteFriend";
+    NSString * myFacebookID = [NSString stringWithFormat:@"%d", [delegate getUserFacebookID]];
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    @"Come remix my pictures! Click here to join Stix on your iPhone.",  @"message",
-                                   @"stix.herokuapp.com", @"redirect_uri", 
-                                   //facebookID, @"to",
-                                   @"701860", @"to",
+                                   @"stixmobile.com/", @"link", 
+                                   facebookID, @"to",
+                                   myFacebookID, @"from",
                                    @"Invite to Stix", @"title",
                                    @"Invite to Stix!", @"caption", 
                                    APP_ID, @"app_id",
                                    nil];
-#if 1
+#if 0
+    // send app request dialog
     [facebook dialog:@"apprequests"
            andParams:params
          andDelegate:self];
 #else
-    NSString * urlString = [NSString stringWithFormat: @"http://www.facebook.com/dialog/apprequests?app_id=%@&message=test&redirect_uri=http://www.google.com", APP_ID];
-    
-    NSString * fullURL = [NSString stringWithFormat:@"%@", urlString];
-    NSURL * url = [NSURL URLWithString:fullURL];
-    getRequest = [[SMWebRequest requestWithURL:url] retain];
-    [getRequest addTarget:self action:@selector(dialogDidComplete:) forRequestEvents:SMWebRequestEventComplete];
-    [getRequest start];
-    NSLog(@"Get request: %@", fullURL);
+    // post to wall
+    [facebook dialog:@"feed" andParams:params andDelegate:self];
 #endif
 }
 
@@ -251,9 +247,34 @@
     NSDictionary * dictionary = result;
     //NSLog(@"Result: %@", result);
     if ([currentRequest isEqualToString:@"requestGraphPathMe"])
-        [self.delegate didGetFacebookInfo:dictionary];
+        [delegate didGetFacebookInfo:dictionary];
     else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])
         [self requestFacebookFriendsFinished:result];
+}
+
+#pragma mark FBDialogDelegate functions
+//- (void)dialogDidComplete:(FBDialog *)dialog {
+- (void) dialogCompleteWithUrl:(NSURL*) url
+{
+    if ([url.absoluteString rangeOfString:@"post_id="].location != NSNotFound) {
+        //alert user of successful post
+        NSLog(@"Facebook dialog completed!");
+        if ([postType isEqualToString:@"inviteFriend"]) {
+            [delegate didEarnFacebookReward:10];
+        }
+        else if ([postType isEqualToString:@"sharePix"]) {
+            [delegate didEarnFacebookReward:1];
+        }
+    } else {
+        //user pressed "cancel"
+        NSLog(@"Facebook dialog did not complete!");
+    }
+}
+- (void)dialogDidNotComplete:(FBDialog *)dialog {
+    NSLog(@"Facebook dialog did not complete!");
+}
+- (void)dialog:(FBDialog*)dialog didFailWithError:(NSError *)error {
+    NSLog(@"Facebook dialog failed: %@", [error description]);
 }
 
 

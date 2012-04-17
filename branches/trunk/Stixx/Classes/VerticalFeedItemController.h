@@ -29,15 +29,18 @@
 #import "CommentFeedTableController.h"
 #import "LoadingAnimationView.h"
 #import "StixAnimation.h"
+#import "ASIHTTPRequest.h"
+#import "ASIFormDataRequest.h"
+#import "FacebookHelper.h"
 
 #define CONTENT_HEIGHT 320
+#define HOSTNAME @"stix.herokuapp.com"
 
 @class VerticalFeedItemController;
 
 @protocol VerticalFeedItemDelegate 
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
--(void)sharePix:(int)tagID;
 
 // forward from StixView
 -(NSString*)getUsername;
@@ -47,9 +50,13 @@
 @optional
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
+
+-(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *)feedItem;
+-(void)sharePixDialogDidFinish;
 @end
 
-@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate>{
+
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate, UIActionSheetDelegate, ASIHTTPRequestDelegate, StixAnimationDelegate>{
     
 	IBOutlet UILabel * labelName;
     //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
@@ -78,15 +85,17 @@
     Tag * tag; // do save the tag in case we need to repopulate the stix
     int tagID;
     
+    int shareMethod;
+    
     BOOL isExpanded; // whether or not to show comments
     CommentFeedTableController * commentsTable;
 //    NSMutableArray * names;
 //    NSMutableArray * comments;
 //    NSMutableArray * stixStringIDs;
     Kumulos * k;
+    LoadingAnimationView * activityIndicator;
 
-    LoadingAnimationView * placeholderView;
-    BOOL isShowingPlaceholder;
+    UIImageView * placeholderView;    
 }
 @property (retain, nonatomic) IBOutlet UILabel * labelName;
 @property (retain, nonatomic) IBOutlet UILabel * labelComment;
@@ -120,6 +129,12 @@
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;
 -(IBAction)didPressSeeAllCommentsButton:(id)sender;
+
+// sharing 
+-(void)didClickShareViaFacebook;
+-(void)didClickShareViaEmail;
+-(void)uploadImage:(NSData *)dataPNG;
+
 @end
 
 

@@ -18,6 +18,7 @@
 
 static CarouselView * sharedCarouselView;
 static int carouselRequests = 0;
+static dispatch_queue_t backgroundQueue;
 
 - (id)initWithFrame:(CGRect)frame 
 {
@@ -33,9 +34,8 @@ static int carouselRequests = 0;
     [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT)];
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
-    backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                                (unsigned long)NULL);
-    //backgroundQueue = dispatch_queue_create("com.Neroh.Stix.carouselView.bgQueue", NULL);
+    //backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL);
+    backgroundQueue = dispatch_queue_create("com.Neroh.Stix.carouselView.bgQueue", NULL);
     return self;
 }
 
@@ -59,17 +59,22 @@ static int carouselRequests = 0;
     [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
 
     buttonCategories = [[NSMutableArray alloc] init];
+    /*
     buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all.png", @"txt_animals.png", @"txt_anime.png", @"txt_art.png", @"txt_comics.png", @"txt_costumes.png", @"txt_cute.png", @"txt_decorations.png", @"txt_events.png", @"txt_facefun.png", @"txt_fashion.png", @"txt_foodanddrink.png", @"txt_geeky.png", @"txt_hollywood.png", @"txt_nature.png", @"txt_pranks.png", @"txt_sports.png", @"txt_symbols.png", @"txt_videogames.png", nil];
     buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all_selected.png", @"txt_animals_selected.png", @"txt_anime_selected.png", @"txt_art_selected.png", @"txt_comics_selected.png", @"txt_costumes_selected.png", @"txt_cute_selected.png", @"txt_decorations_selected.png", @"txt_events_selected.png", @"txt_facefun_selected.png", @"txt_fashion_selected.png", @"txt_foodanddrink_selected.png", @"txt_geeky_selected.png", @"txt_hollywood_selected.png", @"txt_nature_selected.png", @"txt_pranks_selected.png", @"txt_sports_selected.png", @"txt_symbols_selected.png", @"txt_videogames_selected.png", nil];
-    float currentContentOrigin = 20;
+     */
+    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_animals.png", @"txt_comics.png", @"txt_cute.png", @"txt_facefun.png", @"txt_meme.png", @"txt_videogames.png", nil];
+    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_animals_selected.png", @"txt_comics_selected.png", @"txt_cute_selected.png", @"txt_facefun_selected.png", @"txt_meme_selected.png", @"txt_videogames_selected.png", nil];
+    float currentContentOrigin = 0;
     for (int i=0; i<[buttonCategoriesSelected count]; i++) {
         UIButton * button0 = [[UIButton alloc] init];
         [button0 setTag:SHELF_CATEGORY_FIRST + i];
         [button0 addTarget:self action:@selector(didClickShelfCategory:) forControlEvents: UIControlEventTouchUpInside];
         int letters = [[buttonCategoriesNotSelected objectAtIndex:i] length] - 8;
-        float width = 20 + letters * 10 + 20;
+        float width = 20 + letters * 12;
         [button0 setFrame:CGRectMake(currentContentOrigin,10,width,50)];
-        currentContentOrigin = currentContentOrigin + width;
+        //[button0 setBackgroundColor:[UIColor greenColor]];
+        currentContentOrigin = currentContentOrigin + width+5;
         [buttonCategories addObject:button0];
         [button0 release];
     }
@@ -149,8 +154,10 @@ static int carouselRequests = 0;
     [self reloadAllStixWithFrame:stixScroll.frame];
 }
 -(void)reloadAllStixWithFrame:(CGRect)frame {
+    /*
     NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"All", @"Animals", @"Anime", @"Art", @"Comics", @"Costumes", @"Cuddly and Cute", @"Decorations", @"Events", @"Face Fun", @"Fashion", @"Food and Drink", @"Geeky", @"Hollywood", @"Nature", @"Pranks", @"Sports", @"Symbols", @"Video Games", nil]; 
-
+     */
+    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"animals", @"comics", @"cute", @"facefun", @"memes", @"videogames", nil]; 
     [stixScroll removeFromSuperview];
     stixScroll.frame = frame;
     
@@ -162,39 +169,17 @@ static int carouselRequests = 0;
     // create sets of all the categories to see if user has them requested stix
     NSMutableArray * categoryStix;
     NSMutableSet * categorySet = [[NSMutableSet alloc] init];
-    NSMutableArray * subcategories;
-    if (shelfCategory != SHELF_CATEGORY_FIRST) {
+    if (1) { //shelfCategory != SHELF_CATEGORY_FIRST) {
         NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
         categoryStix = [BadgeView getStixForCategory:categoryName];
         [categorySet addObjectsFromArray:categoryStix];
-        subcategories = [BadgeView getSubcategoriesForCategory:categoryName];
-        for (int i=0; i<[subcategories count]; i++) {
-            NSString * subcategory = [subcategories objectAtIndex:i];
-            NSLog(@"Subcategory %d of %@: %@",i, categoryName, subcategory);
-            NSMutableArray * stixForSubcategory = [BadgeView getStixForCategory:subcategory];
-            [categorySet addObjectsFromArray:stixForSubcategory];
-        }
         stixToShow = [categorySet count];
     }
     [stixCategoryNames release];
-    /*
-    else if (shelfCategory == SHELF_CATEGORY_FACEFUN) {
-        categoryStix = [BadgeView getStixForCategory:@"Face Fun"];
-        categorySet = [[NSMutableSet alloc] initWithArray:categoryStix];
-        subcategories = [BadgeView getSubcategoriesForCategory:@"Face Fun"];
-        for (int i=0; i<[subcategories count]; i++) {
-            NSString * subcategory = [subcategories objectAtIndex:i];
-            NSLog(@"Subcategory %d of face fun: %@",i, subcategory);
-            NSMutableArray * stixForSubcategory = [BadgeView getStixForCategory:subcategory];
-            [categorySet addObjectsFromArray:stixForSubcategory];
-        }
-        stixToShow = [categorySet count];
-    }
-     */
     int maxX = STIX_PER_ROW;
     double rows = (double) stixToShow / (double)maxX;
     int maxY = ceil(rows);
-    CGSize size = CGSizeMake(stixWidth * maxX, stixHeight * maxY);
+    CGSize size = CGSizeMake(stixWidth * maxX, stixHeight * maxY + 20);
     [stixScroll setContentSize:size];
     NSLog(@"Contentsize; x %d y %d stixToShow %d", maxX, maxY, stixToShow);
     
@@ -209,31 +194,24 @@ static int carouselRequests = 0;
         if (stixView)
             [stixView removeFromSuperview];
         
-        int count = [self.delegate getStixCount:stixStringID];
-        int order = -1;
-        if (shelfCategory == SHELF_CATEGORY_FIRST) {
-            order = [self.delegate getStixOrder:stixStringID];
-        }
-        else { //if (shelfCategory == SHELF_CATEGORY_CUTE || shelfCategory == SHELF_CATEGORY_FACEFUN) {
-            if ([categorySet containsObject:stixStringID]) {
-                order = orderCtForFilters++;
-            }
-        }
-        //NSLog(@"Order for %@: %d", stixStringID, order);
-        if (order != -1) {
+        int count = [delegate getStixCount:stixStringID];
+        int order = 0;
+        if ([categorySet containsObject:stixStringID]) {
+            order = orderCtForFilters++;
+            //NSLog(@"Order for %@: %d", stixStringID, order);
             int y = order / STIX_PER_ROW;
             int x = order - y * STIX_PER_ROW;
             UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
             NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             if (stix.alpha == 0) {
                 // debug
-                if (1) {
+                if (0) {
                     stix.alpha = 1;
                     float r = order/orderCtForFilters;
                     float g = 0;
                     float b = 1 - r;
                     NSLog(@"CarouselView: Stix %@ order %d needs to be loaded! rgb %f %f %f", stixStringID, order, r, g, b);
-                    [stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
+                    //[stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
                 }
                 // add stix to own list
                 [allCarouselMissingStixStringIDs addObject:stixStringID];
@@ -243,15 +221,29 @@ static int carouselRequests = 0;
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
             [stix setCenter:stixCenter];
             [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
-            //NSLog(@"Creating stixFrame for stixStringID: %@ = %f %f %f %f", stixStringID, stix.frame.origin.x, stix.frame.origin.y, stix.frame.size.width, stix.frame.size.height);
-            if (count == 0)
-                [stix setAlpha:.25];
+            if (count == 0) {
+                //[stix setAlpha:.25];
+                UIImageView * buxImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_price.png"]];
+                CGRect buxFrame = CGRectMake(stixWidth/2-54/2, stix.frame.size.height-10, 54, 20);
+                [buxImg setFrame:buxFrame];
+                [stix addSubview:buxImg];
+                UILabel * buxPrice = [[UILabel alloc] initWithFrame:buxFrame];
+                [buxPrice setTextColor:[UIColor blackColor]];
+                [buxPrice setBackgroundColor:[UIColor clearColor]];
+                [buxPrice setTextAlignment:UITextAlignmentCenter];
+                [buxPrice setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
+                [buxPrice setText:@"5"];
+//                [stix addSubview:buxPrice];
+                [buxPrice release];
+                [buxImg release];
+            }
             [stixScroll addSubview:stix];
             [allCarouselStixViews setObject:stix forKey:stixStringID];
             [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
             [stix release];
         }
-        else if (shelfCategory == SHELF_CATEGORY_FIRST) {
+        else { //if (shelfCategory == SHELF_CATEGORY_FIRST) {
+            /*
             // display nonowned stix, only on this category
             int neworder = (totalStix - stixToPurchase - 1);
             int y = neworder / STIX_PER_ROW;
@@ -262,13 +254,13 @@ static int carouselRequests = 0;
             NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             if (stix.alpha == 0) {
                 // debug
-                if (1) {
+                if (0) {
                     stix.alpha = 1;
                     float r = order/orderCtForFilters;
                     float g = 0;
                     float b = 1 - r;
                     //NSLog(@"CarouselView: Stix %@ order %d needs to be loaded! rgb %f %f %f", stixStringID, order, r, g, b);
-                    [stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
+                    //[stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
                 }
                 // add stix to own list
                 [allCarouselMissingStixStringIDs addObject:stixStringID];
@@ -288,6 +280,7 @@ static int carouselRequests = 0;
             [stix release];
             [buxImg release];
             stixToPurchase++;
+             */
         }
     }
     [categorySet release];
@@ -320,7 +313,6 @@ static int carouselRequests = 0;
 
     [stixScroll release];
     stixScroll = nil;
-    dispatch_release(backgroundQueue);
 }
 
 -(void)resetBadgeLocations{
@@ -675,9 +667,13 @@ static int lastContentOffsetY = 0;
 #else
     if (isShowingCarousel) {
         [self carouselTabDismiss:YES];
+        if ([delegate respondsToSelector:@selector(didDismissCarouselTab)])
+            [delegate didDismissCarouselTab];
     }
     else if (!isShowingCarousel) {
         [self carouselTabExpand:YES];
+        if ([delegate respondsToSelector:@selector(didExpandCarouselTab)])
+            [delegate didExpandCarouselTab];
     }
 #endif
 }
@@ -698,13 +694,13 @@ static int lastContentOffsetY = 0;
         return;        
     }
     
-    //dispatch_async(backgroundQueue, ^(void) {
-
+    dispatch_async(backgroundQueue, ^(void) {
+    
     // populate all stix
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * stixStringID = [d objectForKey:@"stixStringID"];
     
-//    NSLog(@"CarouselView: GetStixDataByStixString for %@ = %@ returned", descriptor, stixStringID);
+    //    NSLog(@"CarouselView: GetStixDataByStixString for %@ = %@ returned", descriptor, stixStringID);
     [BadgeView AddStixView:theResults];
     // in case carousel has changed
     NSString * descriptor = [d valueForKey:@"stixDescriptor"];
@@ -725,12 +721,25 @@ static int lastContentOffsetY = 0;
         carouselRequests--;
         NSLog(@"Received requested stix %@: carousel Requests left %d missing stix left %d", descriptor, carouselRequests, [allCarouselMissingStixStringIDs count]);
         //[stixNew release];
-//        NSLog(@"Filling stixFrame for stixStringID: %@ = %f %f %f %f", stixStringID, stixNew.frame.origin.x, stixNew.frame.origin.y, stixNew.frame.size.width, stixNew.frame.size.height);
+        //        NSLog(@"Filling stixFrame for stixStringID: %@ = %f %f %f %f", stixStringID, stixNew.frame.origin.x, stixNew.frame.origin.y, stixNew.frame.size.width, stixNew.frame.size.height);
     };
     //[stixView didReceiveRequestedStix:stixStringID withResults:theResults fromStixView:stixViewID];
-        
-    //}); // end dispatch
+    [self saveStixDataToDefaultsForStixStringID:stixStringID];
+    
+    }); // end dispatch
 }
 
-
+-(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    UIImageView * stixView = [[BadgeView GetAllStixViewsForSave] objectForKey:stixStringID];
+    NSString * stixDescriptor = [[BadgeView GetAllStixDescriptorsForSave] objectForKey:stixStringID];   
+    if (!stixView)
+        return 0;
+    NSData * stixPhoto = UIImagePNGRepresentation([stixView image]);
+    [defaults setObject:stixPhoto forKey:stixStringID];
+    NSLog(@"Saving stix data to disk for %@", stixDescriptor);
+    // defaults synchronize will happen periodically
+    return 1;
+}
 @end

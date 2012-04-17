@@ -54,9 +54,12 @@
 
 -(IBAction)closeInstructions:(id)sender {
     [self toggleFirstTimeInstructions:NO];
+//    [self toggleFirstTimePointer:NO atStage:0];
+//    pointerWasDismissed = YES;
 }
 
 -(void)addFirstTimeInstructions {
+#if 0
     UIImage * img1 = [UIImage imageNamed:@"message_firsttime_25.png"];
     UIImage * img3 = [UIImage imageNamed:@"btn_close.png"];
     firstTimeInstructions = [[UIImageView alloc] initWithImage:img1];
@@ -70,17 +73,37 @@
     [self.view addSubview:firstTimeInstructions];
     [self.view addSubview:buttonClose];
     [self toggleFirstTimeInstructions:YES];
-    [self toggleStixMallPointer:YES];
-        
+#else
+    UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
+    //UIImage * img2 = [UIImage imageNamed:@"firsttime_message_02.png"];
+    //UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
+    firstTimeInstructions = [[UIButton alloc] initWithFrame:CGRectMake(5, 130, img1.size.width+25, img1.size.height+20)];
+    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:firstTimeInstructions];
+    [self toggleFirstTimeInstructions:NO];
+#endif
 }
 
--(void)doPointerAnimation {
-    UIImage * pointerImg = [UIImage imageNamed:@"green_arrow.png"];
-    CGRect canvasFrame = CGRectMake(200, 375, pointerImg.size.width, pointerImg.size.height);
+-(void)doPointerAnimation:(int)firstTimeUserStage {
+    UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
+    CGRect canvasFrame;
+    if (firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
+        canvasFrame = CGRectMake(160-pointerImg.size.width/2, 375, pointerImg.size.width, pointerImg.size.height);
+    }
+    else if (firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
+        canvasFrame = CGRectMake(50-pointerImg.size.width/2, 335, pointerImg.size.width, pointerImg.size.height);
+    }
+    else if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+        canvasFrame = CGRectMake(280-pointerImg.size.width/2, 75, pointerImg.size.width, pointerImg.size.height);
+    }
     UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
     UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+    if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+        pointer.transform = CGAffineTransformMakeRotation(3.141592);
+    }
     [pointerCanvas addSubview:pointer];
     [pointer release];
+    agitatePointer = 0;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
@@ -189,8 +212,13 @@
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        if (showMallPointer)
-            mallPointerAnimationID = [animation doJump:canvas inView:self.view forDistance:20 forTime:1];
+        float time = 1;
+        if (agitatePointer > 0) {
+            agitatePointer--;
+            time = .15;
+        }
+        if (showMallPointer && !pointerWasDismissed)
+            mallPointerAnimationID = [animation doJump:canvas inView:self.view forDistance:20 forTime:time];
         else {
             [canvas removeFromSuperview];
         }
@@ -249,15 +277,95 @@
 }
 
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {
-    [firstTimeInstructions setHidden:!showInstructions];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
+    CGRect frameOnscreen = CGRectMake(5, 130, img1.size.width+25, img1.size.height+20);
+    CGRect frameOffscreen = frameOnscreen;
+    frameOffscreen.origin.y += 480;
+    
+    if (showInstructions) {
+        //[firstTimeInstructions setFrame:frameOffscreen];
+        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+            
+        }];
+    }
+    else {
+        //[firstTimeInstructions setFrame:frameOnscreen];
+        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+            
+        }];
+    }
+//    [firstTimeInstructions setHidden:!showInstructions];
     [buttonClose setHidden:!showInstructions];
 }
 
--(void)toggleStixMallPointer:(BOOL)showPointer {
+-(void)toggleFirstTimePointer:(BOOL)showPointer atStage:(int)firstTimeUserStage {
     showMallPointer = showPointer;
-    if (showPointer)
-        [self doPointerAnimation];
+    if (showPointer && !pointerWasDismissed)
+        [self doPointerAnimation:firstTimeUserStage];
 }
 
+-(void)displayFirstTimeUserProgress:(int)firstTimeUserStage {
+    switch (firstTimeUserStage) {
+        case FIRSTTIME_DONE:
+            return;
+            break;
+            
+        case FIRSTTIME_MESSAGE_01:
+        {
+            if (firstTimeInstructions == nil)
+                [self addFirstTimeInstructions];
+            UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
+            [firstTimeInstructions setImage:img1 forState:UIControlStateNormal];
+            pointerWasDismissed = NO;
+            // end old one
+            [self toggleFirstTimeInstructions:NO];
+            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
+            // start new one
+            [self toggleFirstTimeInstructions:YES];
+            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+        }
+            break;
+            
+        case FIRSTTIME_MESSAGE_02:
+        {
+            if (firstTimeInstructions == nil)
+                [self addFirstTimeInstructions];
+            UIImage * img2 = [UIImage imageNamed:@"firsttime_message_02.png"];
+            [firstTimeInstructions setImage:img2 forState:UIControlStateNormal];
+            pointerWasDismissed = NO;
+            // end old one
+            [self toggleFirstTimeInstructions:NO];
+            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
+            // start new one
+            [self toggleFirstTimeInstructions:YES];
+            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+        }
+            break;
+        
+        case FIRSTTIME_MESSAGE_03:
+        {
+            if (firstTimeInstructions == nil)
+                [self addFirstTimeInstructions];
+            UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
+            [firstTimeInstructions setImage:img3 forState:UIControlStateNormal];
+            pointerWasDismissed = NO;
+            // end old one
+            [self toggleFirstTimeInstructions:NO];
+            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
+            // start new one
+            [self toggleFirstTimeInstructions:YES];
+            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+        }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+-(void)agitateFirstTimePointer {
+    agitatePointer = 3;
+}
 @end
 

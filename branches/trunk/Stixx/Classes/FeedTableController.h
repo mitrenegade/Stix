@@ -24,7 +24,7 @@
 -(UIView*)headerForSection:(int)index;
 -(int)getHeightForSection:(int)index;
 -(int)heightForHeaderInSection:(int)index;
--(void)pullToRefresh;
+-(void)didPullToRefresh;
 
 @optional
 -(void)updateScrollPagesAtPage:(int)page;

@@ -102,7 +102,8 @@ static int animationID = 1;
                          [canvas setFrame:frameEnd];
                      } 
                      completion:^(BOOL finished) { 
-                         [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
+                         if ([delegate respondsToSelector:@selector(didFinishAnimation:withCanvas:)])
+                             [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
                          [canvas release];
                      }
      ];

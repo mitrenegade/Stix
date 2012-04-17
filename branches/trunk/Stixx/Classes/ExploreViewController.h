@@ -25,13 +25,12 @@
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
--(void)sharePix:(int)tagID;
+//-(void)sharePix:(int)tagID;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
 -(void)didOpenProfileView;
 
--(void)didCreateBadgeView:(UIView*)newBadgeView;
-//-(void)didClickFeedbackButton:(NSString*)fromView;
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(int)getNewestTagID;
 -(int)getBuxCount;
@@ -59,6 +58,7 @@ enum {
 //    IBOutlet UIButton * buttonFeedback;
     IBOutlet UIButton * buttonProfile;
     LoadingAnimationView * activityIndicator;
+    LoadingAnimationView * activityIndicatorLarge;
     
     // Feed for EXPLORE_RANDOM
     int newRandomTagsTargetCount;
@@ -69,6 +69,7 @@ enum {
     NSMutableArray * allTagIDs; // ordered in descending order
     NSMutableDictionary * allTags; // key: allTagID
     NSMutableDictionary * contentViews; // generated views: key: row/column index of table
+    NSMutableDictionary * placeholderViews; // generated views: key: row/column index of table
 
     // zoom view...?
     //StixView * stixView; // the view that is clicked for zoom
@@ -82,9 +83,11 @@ enum {
         
     OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
-    int animationID;
+    int openDetailAnimation;
     
     int shareActionSheetTagID;
+    
+    NSMutableArray * exploreModeButtons;
     
     Kumulos * k;
 }
@@ -105,5 +108,6 @@ enum {
 -(void)initializeTable;
 -(void)forceReloadAll;
 -(IBAction)didClickProfileButton:(id)sender;
+-(void) setExploreMode:(UIButton*)button;
 
 @end

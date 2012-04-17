@@ -128,6 +128,7 @@
         cell.textLabel.numberOfLines = 2;
         [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize]];
         [cell setBackgroundColor:[UIColor clearColor]];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
         if (showDivider)
             [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
         [cell.textLabel setTextColor:fontTextColor];

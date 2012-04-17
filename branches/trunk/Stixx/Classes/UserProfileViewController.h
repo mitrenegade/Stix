@@ -21,10 +21,11 @@
 #import "DetailViewController.h"
 #import "StixAnimation.h"
 #import "ColumnTableController.h"
+#import "FriendSearchResultsController.h"
 
 @protocol UserProfileViewDelegate
 
-- (NSString *)getUsername;
+-(NSString*)getUsername; // asks for username for the App user
 - (UIImage *)getUserPhotoForUsername:(NSString*)username;
 - (int)getUserTagTotal;
 - (bool)isLoggedIn;
@@ -36,9 +37,11 @@
 -(void)shouldCloseUserPage;
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate>{
     
     Kumulos * k;
     IBOutlet UIButton * logo;
@@ -53,6 +56,16 @@
     int numColumns;
     
     int dismissAnimation;
+    
+    BOOL isSearching;
+    BOOL isDisplayingFollowLists;
+    NSMutableArray * searchFriendName;
+    NSMutableArray * searchFriendEmail;
+    NSMutableArray * searchFriendFacebookID;
+    NSMutableArray * searchFriendIsStix;
+    
+    NSMutableSet * allFollowers;
+    NSMutableSet * allFollowing;
 }
 
 @property (nonatomic, retain) UIButton * photoButton;
@@ -76,6 +89,7 @@
 @property (nonatomic, retain) ColumnTableController * pixTableController;
 @property (nonatomic, retain) UIView * headerView;
 @property (nonatomic, retain) DetailViewController * detailController;
+@property (nonatomic, retain) FriendSearchResultsController * searchResultsController;
 
 -(void)populateUserInfo;
 -(void)populateFollowCounts;
@@ -83,4 +97,8 @@
 -(void)updateStixCounts;
 -(IBAction)didClickAddFriendButton:(id)sender;
 -(void)forceReloadAll;
+-(void)populateFollowersList;
+-(void)populateFollowingList;
+-(void)toggleMyButtons:(BOOL)show;
+
 @end

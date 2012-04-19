@@ -255,7 +255,7 @@ static int totalStixTypes = 0;
         // return an empty stix view
         stixView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120*.65, 120*.65)];
         [stixView setAlpha:0]; // alpha set to 0 as a check for missing stix
-        return stixView;
+        return [stixView autorelease];
     }
     // create smaller size for actual badgeView
     UIImageView * stix = [[UIImageView alloc] initWithImage:[stixView image]]; // copy
@@ -399,6 +399,7 @@ static int totalStixTypes = 0;
      */
     
     NSArray * animals = [[NSArray alloc] initWithObjects:
+    @"babychick.png",
     @"baldeagle.png",
     @"bluecrab.png",
     @"brownbunny.png",
@@ -445,6 +446,54 @@ static int totalStixTypes = 0;
     @"swan.png",
     @"zebra.png",
     nil];
+    NSArray * animalsDesc = [[NSArray alloc] initWithObjects:
+                             @"Baby Chick",
+                             @"Bald Eagle",
+                             @"Blue Crab",
+                             @"Brown Bunny",
+                             @"Butterfly",
+                             @"Butterfly",
+                             @"Capuchin",
+                             @"Cat",
+                             @"Chelada Monkeyface",
+                             @"Chipmunk",
+                             @"Golden Retriever",
+                             @"Duck",
+                             @"Fat Lizard",
+                             @"Fly",
+                             @"Frog",
+                             @"Frog",
+                             @"Giraffe Head",
+                             @"Gold Fish",
+                             @"Judgmental Cat",
+                             @"Kitten",
+                             @"Kitty Face",
+                             @"Lazy Dog",
+                             @"Lemur Head",
+                             @"Lion",
+                             @"Lioness",
+                             @"Mallard",
+                             @"Meerkat",
+                             @"Monkey Face",
+                             @"Monkey Face",
+                             @"Ostrich Head",
+                             @"Owl",
+                             @"Parrot Head",
+                             @"Peacock",
+                             @"Penguin",
+                             @"Red Cardinal",
+                             @"Rhino",
+                             @"Shy Bear",
+                             @"Sitting Monkey",
+                             @"Snow Owl",
+                             @"Spider",
+                             @"Spotted Bunny",
+                             @"Squirrel",
+                             @"Squirrel",
+                             @"Squirrel",
+                             @"Swan",
+                             @"Zebra",
+                             nil];
     
     NSArray * comics = [[NSArray alloc] initWithObjects:
     @"ant.png",
@@ -488,11 +537,52 @@ static int totalStixTypes = 0;
     @"thudd.png",
     @"zombiehead.png",
                         nil];
+    NSArray * comicsDesc = [[NSArray alloc] initWithObjects:
+                            @"Ant",
+                            @"Bomb",
+                            @"Bone",
+                            @"Bonk",
+                            @"Brown Anime Eyes",
+                            @"Cartoon Fly",
+                            @"Chicken Hero",
+                            @"Chimpzilla",
+                            @"Dynamite",
+                            @"Evil Robot",
+                            @"Exclamation",
+                            @"Green Space Guy",
+                            @"Hal", 
+                            @"Handgun",
+                            @"Kaboom",
+                            @"Kapow",
+                            @"Laser Gun",
+                            @"Lightening",
+                            @"Light Sword",
+                            @"Long Sword",
+                            @"Pirate Hook",
+                            @"Devil Horns",
+                            @"Lobster Claw",
+                            @"Ninja",
+                            @"Ninja Star",
+                            @"Pink Skull",
+                            @"Plop",
+                            @"Poof",
+                            @"Pop",
+                            @"Pow",
+                            @"Question Mark",
+                            @"Rocket",
+                            @"Short Sword",
+                            @"Smack",
+                            @"Speech Bubble",
+                            @"Stick Figure",
+                            @"Thought Bubble",
+                            @"Thud",
+                            @"Thudd",
+                            @"Zombie Head",
+                            nil];
     
     NSArray * cute = [[NSArray alloc] initWithObjects:
     @"abstractbubbles.png",
     @"abstractsun.png",
-    @"babychick.png",
     @"babychick2.png",
     @"babypenguin.png",
     @"bemine.png",
@@ -548,6 +638,64 @@ static int totalStixTypes = 0;
     @"wackybear.png",
     @"yellowflowserborder.png",
                         nil];
+    NSArray * cuteDesc = [[NSArray alloc] initWithObjects:
+                          @"Abstract Bubbles",
+                          @"Abstract Sun",
+                          @"Baby Chick",
+                          @"Baby Penguin",
+                          @"Be Mine",
+                          @"Blue Splash",
+                          @"Blue Flower",
+                          @"Blue Penguin",
+                          @"Bunch of Stars",
+                          @"Cartoon Pig",
+                          @"Cheeky Monkey",
+                          @"Cherry Blossom Rabbits",
+                          @"Flower Power",
+                          @"Giraffe",
+                          @"Green Splash",
+                          @"Happy Lemon",
+                          @"Hearts",
+                          @"Plenty of Hearts",
+                          @"Hippo",
+                          @"Ink Splash",
+                          @"Lady Bug",
+                          @"Little Bear",
+                          @"Green Bird",
+                          @"Purple Cat",
+                          @"Crab",
+                          @"Dog",
+                          @"Fish",
+                          @"Flower",
+                          @"Owl",
+                          @"Parrot",
+                          @"Mole",
+                          @"Music Note",
+                          @"Panda",
+                          @"Panda",
+                          @"Panda",
+                          @"Paw Prints",
+                          @"Pink Splash",
+                          @"Pink Balloon",
+                          @"Pink Dolphin",
+                          @"Pink Flower",
+                          @"Pink Star",
+                          @"Purple Butterfly",
+                          @"Rainbow",
+                          @"Rainbow", 
+                          @"Teddy Bear",
+                          @"Red Glowing Heart",
+                          @"Red Rose",
+                          @"Small Whale",
+                          @"Snow Flake",
+                          @"Star Explosion",
+                          @"Swirly Ribbons",
+                          @"Teddy",
+                          @"Teddy Face",
+                          @"Tulip",
+                          @"Wacky Bear",
+                          @"Yellow Flowers Border",
+                          nil];
     
     NSArray * facefun = [[NSArray alloc] initWithObjects:
 
@@ -578,7 +726,7 @@ static int totalStixTypes = 0;
     @"hair_platinumblond.png",
     @"hair_redshorthair.png",
     @"hair_shortblondcosplayhair.png",
-    //@"hair_shortblondguy.png",
+    @"hair_shortblondguy.png",
     @"hair_shortblue.png",
     @"hair_spikyblondcosplay.png",
     @"hat_browncap.png",
@@ -600,6 +748,8 @@ static int totalStixTypes = 0;
     @"stache_rich.png",
     @"surprised_eyes.png",
                         nil];
+    
+    NSArray * facefunDesc = [[NSArray alloc] initWithObjects:@"Band Aid", @"Scruffy Beard", @"Blood Drip", @"Crown", @"Tear Drop", @"Scary Eye", @"Eye Patch", @"Bulging Eyes", @"Creepy Cat Eyes", @"Crossed Eyes", @"Puppy Eyes", @"Furry Ears", @"3D Glasses", @"Aviator Glasses", @"Cat Glasses", @"Afro", @"Short Blond Hair", @"Blond Hair with Bangs", @"Brown Hair with Bangs", @"Long Brown Hair", @"Celebrity Boy Hair", @"Curly Long Blond Hair", @"Dreadlocks", @"Euro Style Hair", @"Plantinum Blond Hair", @"Red Short Hair", @"Short Blond Cosplay Hair", @"Short Blond Guy's Hair", @"Short Blue Hair", @"Spikey Hair", @"Brown Cap", @"Brown Striped Hat", @"Fedora", @"Top Hat", @"Hockey Mask", @"Kiss", @"Buck Teeth", @"Toothy Mouth", @"Toothy Smile", @"Ugly Teeth", @"Vampire Fangs", @"Nerdy Tie", @"Open Mouth", @"Party Hat", @"Polar Bear Hat", @"Bushy Mushtache", @"Rich Mustache", @"Surprised Eyes", nil];
     
     NSArray * memes = [[NSArray alloc] initWithObjects:
 
@@ -632,6 +782,8 @@ static int totalStixTypes = 0;
     @"yunoguy.png",
                       nil];
     
+    NSArray * memesDesc = [[NSArray alloc] initWithObjects: @"Are You Serous", @"Censored Bar", @"Chubby Baby", @"DERP ", @"DERP eyes", @"FAIL", @"Forever Alone", @"FTW", @"Guy Fawkes Mask", @"Happy Cuteness Overload", @"Happy Smiley Face", @"LOL ", @"LOL Face", @"Me Gusta", @"No Face", @"Okay Guy", @"OMG", @"Please ", @"Poker Face", @"Raw Chicken", @"Skeptical Baby", @"Sleeping Baby Face", @"Success Kid", @"Troll Face", @"Wood Face", @"YOLO", @"Y U NO", nil];
+    
     NSArray * videogames = [[NSArray alloc] initWithObjects:
 
     @"cubeangry.png",
@@ -663,6 +815,8 @@ static int totalStixTypes = 0;
     @"videogame_pipe.png",
                         nil];
     
+    NSArray * videogamesDesc = [[NSArray alloc] initWithObjects:@"Angry Cube", @"Cool Cube", @"Kissy Cube", @"Shocked Cube", @"Sick Cube", @"Silly Cube", @"Smiley Cube", @"Wink Cube", @"Game Coin", @"Game Shroom", @"Game Controller", @"Game Invader", @"Game Tower", @"Hand Cursor", @"Isometric Building", @"Game Star", @"Mine Cube", @"Green Ghost", @"Pirates Chest", @"Press Button", @"Red Fireball", @"Robo Head", @"Tall Isometric Tower", @"Puzzle Game Piece", @"Puzzle Game Piece", @"Puzzle Game Piece", @"Game Pipe", nil];
+    
     if (!stixStringIDs) {
         stixStringIDs = [[NSMutableArray alloc] init];
     }
@@ -678,6 +832,7 @@ static int totalStixTypes = 0;
 
     NSArray * filenameArrays = [[NSArray alloc] initWithObjects:animals, comics, cute, facefun, memes, videogames, nil];
     NSArray * categoryArrays = [[NSArray alloc] initWithObjects:@"animals", @"comics", @"cute", @"facefun", @"memes", @"videogames", nil];
+    NSArray * descArrays = [[NSArray alloc] initWithObjects:animalsDesc, comicsDesc, cuteDesc, facefunDesc, memesDesc, videogamesDesc, nil];
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"stix" ofType:@"bundle"];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
     for (int i=0; i<[filenameArrays count]; i++) {
@@ -691,13 +846,16 @@ static int totalStixTypes = 0;
         }
         [category addObjectsFromArray:stixStringArray];
         [stixCategories setObject:category forKey:categoryName];
+        NSMutableArray * stixDescArray = [descArrays objectAtIndex:i];
         
         for (NSString * stixStringID in stixStringArray) {
+            int index = [stixStringArray indexOfObject:stixStringID];
             NSRange suffix = [stixStringID rangeOfString:@".png"];
-            NSString * descriptor = [stixStringID substringToIndex:suffix.location];
+            NSString * filename = [stixStringID substringToIndex:suffix.location];
+            NSString * descriptor = [stixDescArray objectAtIndex:index]; //[stixStringID substringToIndex:suffix.location];
             [stixDescriptors setValue:descriptor forKey:stixStringID];
 
-            NSString *imageName = [bundle pathForResource:descriptor ofType:@"png"];
+            NSString *imageName = [bundle pathForResource:filename ofType:@"png"];
             UIImage *img = [[UIImage alloc] initWithContentsOfFile:imageName];
             UIImageView * stix = [[UIImageView alloc] initWithImage:img];
             [stixViews setObject:stix forKey:stixStringID];
@@ -708,6 +866,16 @@ static int totalStixTypes = 0;
     }
     totalStixTypes = [stixStringIDs count];
     NSLog(@"BadgeView: Generated %d generic stix!", totalStixTypes);
+    
+    // MRC
+    [animals release];
+    [comics release];
+    [cute release];
+    [facefun release];
+    [memes release];
+    [videogames release];
+    [filenameArrays release];
+    [categoryArrays release];
 }
 
 @end

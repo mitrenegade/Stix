@@ -415,12 +415,12 @@
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
-    return [self.delegate getStixCount:stixStringID];
+    return [delegate getStixCount:stixStringID];
 }
 
 -(int)getStixOrder:(NSString*)stixStringID;
 {
-    return [self.delegate getStixOrder:stixStringID];
+    return [delegate getStixOrder:stixStringID];
 }
 
 -(void)didStartDrag {

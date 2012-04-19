@@ -91,7 +91,7 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [delegate getUserPhotoForGallery];
+        UIImage * photo = [delegate getUserPhotoForUsername:username];
         UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
         [photoView setImage:photo];
         [headerView addSubview:photoView];
@@ -214,7 +214,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(void)forceReloadAll {    
@@ -233,7 +233,11 @@
     animation.delegate = self;
     CGRect frameOffscreen = self.view.frame;
     frameOffscreen.origin.x -= 330;
-    dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+    //dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+    [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [self.view removeFromSuperview];
+        [animation release];
+    }];
 }
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
     if (animID == dismissAnimation) {
@@ -260,71 +264,16 @@
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-}
-/*
--(void)sharePix:(int)tagID {
-    //[self.delegate sharePix:tagID];
-    shareActionSheetTagID = tagID;
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", nil];
-    [actionSheet showFromRect:CGRectMake(0,0,320,480) inView:self.view animated:YES];//showFromTabBar:self.tabBarController.tabBar];
-    [actionSheet release];
+    [animation release];
 }
 
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    // button index: 0 = "Facebook", 1 = "Email", 2 = "Cancel"
-    switch (buttonIndex) {
-        case 0: // Facebook
-        {
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-            
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 1: // Email
-        {
-            Tag * tag = nil;
-            tag = [allTags objectForKey:[NSNumber numberWithInt:shareActionSheetTagID]];
-            if (tag == nil) {
-                NSLog(@"Error in sharing pix! Tag doesn't exist!");
-                return;
-            }
-            UIImage * result = [tag tagToUIImage];
-            NSData *png = UIImagePNGRepresentation(result);
-            
-            UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-            
-            [self.delegate uploadImage:png withShareMethod:buttonIndex];
-            
-            NSString * metricName = @"SharePixActionsheet";
-            NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
-            [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
-        }
-            break;
-        case 2: // Cancel
-            return;
-            break;
-        default:
-            return;
-            break;
-    }
+-(void)shouldDisplayUserPage:(NSString *)name {
+    [self didClickBackButton:nil];
+    [delegate shouldDisplayUserPage:name];
 }
-*/
 
--(void)shouldDisplayUserGallery:(NSString*)username {
-    NSLog(@"Usergallery trying to be displayed from a detailview from a usergallery. FORGET IT");
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
 }
 
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
@@ -344,7 +293,7 @@
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name {
-    return [delegate getUserPhotoForGallery];
+    return [delegate getUserPhotoForUsername:name];
 }
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {

@@ -75,6 +75,7 @@ enum {
     int tabAnimationIDExpand;
     
     Kumulos * k;
+
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;

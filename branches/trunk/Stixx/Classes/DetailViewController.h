@@ -25,6 +25,8 @@
 -(NSString*)getUsername;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
+-(void)shouldCloseUserPage;
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @end
 
 @interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate>

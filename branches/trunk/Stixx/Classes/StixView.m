@@ -75,12 +75,13 @@ static int currentStixViewID = 0;
     //NSLog(@"StixView %d requestStixFromKumulos requesting %@", stixViewID, stixStringID);
     
     // add stix to own list
-    NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
-    if (stixArray == nil) {
-        stixArray = [[NSMutableArray alloc] init];
+    if ([stixViewsMissing objectForKey:stixStringID] == nil) {
+        NSMutableArray * stixArray = [[NSMutableArray alloc] init];
+        [stixViewsMissing setObject:stixArray forKey:stixStringID];
+        [stixArray release];
     }
+    NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
     [stixArray addObject:auxStix];
-    [stixViewsMissing setObject:stixArray forKey:stixStringID];
     
     if (requestDictionaryForStix == nil) {
         requestDictionaryForStix = [[NSMutableDictionary alloc] init];
@@ -88,15 +89,15 @@ static int currentStixViewID = 0;
     [k getStixDataByStixStringIDWithStixStringID:stixStringID];
 
     // stixView refers to the StixView class that displays all the stix
-    NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
-
-    if (!viewsThatNeedThisStix)  {
+    if ([requestDictionaryForStix objectForKey:stixStringID] == nil)  {
         NSLog(@"Creating new queues for %@", stixStringID);
-        viewsThatNeedThisStix = [[NSMutableArray alloc] init];
+        NSMutableArray * viewsThatNeedThisStix = [[NSMutableArray alloc] init];
 
-        [viewsThatNeedThisStix addObject:stixView];
+        [requestDictionaryForStix setObject:viewsThatNeedThisStix forKey:stixStringID];
+        [viewsThatNeedThisStix release];
     }
-    [requestDictionaryForStix setObject:viewsThatNeedThisStix forKey:stixStringID];
+    NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
+    [viewsThatNeedThisStix addObject:stixView];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
@@ -110,12 +111,12 @@ static int currentStixViewID = 0;
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * stixStringID = [d objectForKey:@"stixStringID"];
     NSString * descriptor = [d valueForKey:@"stixDescriptor"];
-    NSData * dataPNG = [d valueForKey:@"dataPNG"];
-    UIImage * img = [[UIImage alloc] initWithData:dataPNG];
+    //NSData * dataPNG = [d valueForKey:@"dataPNG"];
+    //UIImage * img = [[UIImage alloc] initWithData:dataPNG];
     
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
     //NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
-    UIImageView * stixExists = [BadgeView getBadgeWithStixStringID:stixStringID];
+    UIImageView * stixExists = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     if (stixExists.alpha == 0) {
         [BadgeView AddStixView:theResults];
         
@@ -144,6 +145,7 @@ static int currentStixViewID = 0;
             [delegate didReceiveAllRequestedMissingStix:self];
         }
     }
+    [stixExists release];
 }
 
 -(void)didReceiveRequestedStix:(NSString *)stixStringID withResults:(NSArray*)theResults fromStixView:(int)senderID{
@@ -198,6 +200,7 @@ static int currentStixViewID = 0;
     [stix setFrame:stixFrameScaled];
     [stix setCenter:CGPointMake(centerX, centerY)];
     [self addSubview:stix];
+    //[stix release];
         
     // add pinch gesture recognizer
     // add gesture recognizer
@@ -239,16 +242,18 @@ static int currentStixViewID = 0;
     [stix setTransform:transform];
     [self addSubview:stix];
     [self setSelectStixStringID:stixStringID];
+    //[stix release]; // MRC -> causing zombie
 }
 
 -(int)populateWithAuxStixFromTag:(Tag *)tag {
+    tagUsername = [[tag username] copy];
+    tagID = tag.tagID;
     int allStixViewsExist = 1; // returns 1 if populated, 0 if missing stix
     auxStixStringIDs = tag.auxStixStringIDs;
     NSMutableArray * auxLocations = tag.auxLocations;
     NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
-    tagID = tag.tagID;
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
@@ -265,8 +270,10 @@ static int currentStixViewID = 0;
         // shortcircuit populateWithAuxStixFromTag because if any stix doesn't exist
         // this whole StixView will have to be repopulated once we receive all stix
         // requests. but we do have to run through all stix to initiate the requests
-        if (!allStixViewsExist)
+        if (!allStixViewsExist) {
+            [auxStix release];
             continue;
+        }
         
         //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
         float centerX = location.x;
@@ -288,15 +295,16 @@ static int currentStixViewID = 0;
         auxStix.transform = auxTransform;
         //[auxStix setBackgroundColor:[UIColor blackColor]];
         
-        bool isPeelableByUser = NO;
+        bool isPeelableByUser = NO; // now setting this to YES means it has been tapped to display the peel menu if it was already stuck
         if (isPeelable) {
             BOOL stixIsPeelable = [[tag.auxPeelable objectAtIndex:i] boolValue];
-            NSString * tagUsername = tag.username;
-            NSString * delegateUsername = [self.delegate getUsername];
-            if (stixIsPeelable == YES && [tagUsername isEqualToString:delegateUsername]) {
+            NSString * tagname = tag.username;
+            NSString * delegateUsername = [delegate getUsernameOfApp];
+            if (stixIsPeelable == YES && [tagname isEqualToString:delegateUsername]) {
 
                 isPeelableByUser = YES;
                 // turn this stix into an animated one
+#if 1
                 CABasicAnimation *crossFade = [CABasicAnimation animationWithKeyPath:@"contents"];
                 UIImage * img1 = [[auxStix image] copy];
                 UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
@@ -307,6 +315,9 @@ static int currentStixViewID = 0;
                 crossFade.repeatCount = HUGE_VALF;
                 [auxStix.layer addAnimation:crossFade forKey:@"crossFade"];
                 [img1 release];
+#else
+                [self addPeelableAnimationToStix:auxStix];
+#endif
             } 
             else {
                 isPeelableByUser = NO;
@@ -325,28 +336,38 @@ static int currentStixViewID = 0;
 
 -(void)doPeelAnimationForStix:(int)index {
     UIImageView * auxStix = [auxStixViews objectAtIndex:index];
+    [auxStix setBackgroundColor:[UIColor clearColor]];
     [auxStix.layer removeAllAnimations];
     CGRect frameLift = auxStix.frame;
     CGPoint center = auxStix.center;
-    frameLift.size.width *= 2;
-    frameLift.size.height *= 2;
     frameLift.origin.x = center.x - frameLift.size.width / 2;
     frameLift.origin.y = center.y - frameLift.size.height / 2;
+    
+    CGAffineTransform transformLift = CGAffineTransformConcat(auxStix.transform, CGAffineTransformMakeScale(2.0, 2.0));
     [UIView transitionWithView:auxStix 
                       duration:.5
                        options:UIViewAnimationTransitionNone 
-                    animations: ^ { auxStix.frame = frameLift; } 
-                    completion: nil
-     ];
-    CGRect frameDisappear = CGRectMake(160, 300, 5, 5);
-    [UIView transitionWithView:auxStix 
-                      duration:.5
-                       options:UIViewAnimationTransitionNone 
-                    animations: ^ { auxStix.frame = frameDisappear; } 
-                    completion:^(BOOL finished) { 
-                        [auxStix removeFromSuperview]; 
-                        if ([self.delegate respondsToSelector:@selector(peelAnimationDidCompleteForStix:)])
-                            [self.delegate peelAnimationDidCompleteForStix:index]; 
+                    animations: ^ { 
+#if 0
+                        auxStix.frame = frameLift;
+#else
+                        [auxStix setTransform:transformLift];
+#endif
+                        
+                        
+                    } 
+                    completion: ^ (BOOL finished) { 
+                        CGRect frameDisappear = CGRectMake(160, 300, 5, 5);
+                        [UIView transitionWithView:auxStix 
+                                          duration:.25
+                                           options:UIViewAnimationTransitionNone 
+                                        animations: ^ { auxStix.frame = frameDisappear; } 
+                                        completion:^(BOOL finished) { 
+                                            [auxStix removeFromSuperview]; 
+                                            if ([delegate respondsToSelector:@selector(peelAnimationDidCompleteForStix:)])
+                                                [delegate peelAnimationDidCompleteForStix:index]; 
+                                        }
+                         ];
                     }
      ];
 }
@@ -624,10 +645,23 @@ static int currentStixViewID = 0;
     return isForeground;
 }
 
+-(void)addPeelableAnimationToStix:(UIImageView*)canvas {
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doPulse:canvas forTime:1 repeatCount:-1 withCompletion:^(BOOL finished) {
+        [animation release];
+ //       [self addPeelableAnimation:canvas];
+    }];
+}
 // sent through delegate functions for clicks on scrollView; after interaction with main stix is disabled, the touch filters out of StixView but then comes back through its delegates
 -(int)findPeelableStixAtLocation:(CGPoint)location {
     if ([self isPeelable]) {
-
+        
+        NSString * appUsername = [delegate getUsernameOfApp];
+        if (![tagUsername isEqualToString:appUsername])
+            return -1;
+        
+        int topStixIndex = -1;
+        BOOL topStixIsPeelable = NO;
         NSLog(@"Tap detected in stix view at %f %f", location.x, location.y);
         int lastStixView = -1;
         for (int i=0; i<[self.auxStixViews count]; i++) {
@@ -636,25 +670,44 @@ static int currentStixViewID = 0;
             NSLog(@"Stix %d at %f %f %f %f", i, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
             CGPoint pointInside = [self convertPoint:location toView:currStix];
             NSLog(@"Changing point %f %f to %f %f", location.x, location.y, pointInside.x, pointInside.y);
-            if ([currStix pointInside:pointInside withEvent:nil] && [self isStixPeelable:i]) {
-                // pointInside goes from 0 to 120*.65 which is the original size of the stix UIImageView
-                if ([self isForeground:pointInside inStix:currStix]) {
-                    lastStixView = i;
+            
+            // if click is on top of a stix
+            if ([currStix pointInside:pointInside withEvent:nil] && [self isForeground:pointInside inStix:currStix]) {
+                if (1) { //[self isStixPeelable:i]) {
+                    // this stix is currently peelable
+                    topStixIndex = i;
+                    topStixIsPeelable = YES;
                 }
+                /*
+                else {
+                    // make this stix peelable
+                    topStixIndex = i;
+                    topStixIsPeelable = NO;
+                    [auxPeelableByUser replaceObjectAtIndex:i withObject:[NSNumber numberWithBool:YES]];
+                    
+                    // add jiggle animation
+                    [self addJiggle:currStix];
+                }
+                 */
             }
         }
-        if (lastStixView == -1)
+        //if (lastStixView == -1)
+        //    return -1;
+        if (topStixIsPeelable == NO) 
             return -1;
-        
-        // display action sheet
-        NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
-        NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
-        stixPeelSelected = lastStixView;
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
-        [actionSheet showInView:self];
-        [actionSheet release];
-        return lastStixView;
+        else {
+            lastStixView = topStixIndex;
+            
+            // display action sheet
+            NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
+            NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+            NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
+            stixPeelSelected = lastStixView;
+            UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
+            [actionSheet showInView:self];
+            [actionSheet release];
+            return lastStixView;
+        }
     }
     return -1;
 }

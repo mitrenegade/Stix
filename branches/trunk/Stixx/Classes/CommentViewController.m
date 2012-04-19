@@ -55,7 +55,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 - (void)viewDidLoad

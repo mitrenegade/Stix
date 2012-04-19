@@ -27,12 +27,7 @@
 
 -(NSString*)getUsername; // asks for username for the App user
 - (UIImage *)getUserPhotoForUsername:(NSString*)username;
-- (int)getUserTagTotal;
-- (bool)isLoggedIn;
--(int)getStixCount:(NSString*)stixStringID;
--(int)getStixOrder:(NSString*)stixStringID;
 -(NSMutableSet*)getFollowingList;
--(NSMutableSet*)getFollowerList;
 
 -(void)shouldCloseUserPage;
 -(void)shouldDisplayUserPage:(NSString*)username;
@@ -68,7 +63,7 @@
     NSMutableSet * allFollowing;
 }
 
-@property (nonatomic, retain) UIButton * photoButton;
+@property (nonatomic, retain) UIImageView * photoButton;
 @property (nonatomic, retain) UIButton * buttonAddFriend;
 @property (nonatomic, retain) UILabel * nameLabel;
 @property (nonatomic, copy) NSString * lastUsername;

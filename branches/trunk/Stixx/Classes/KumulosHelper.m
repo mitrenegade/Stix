@@ -79,6 +79,17 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSLog(@"Calling kumulos getFaceBookUser with id %d", [fbID intValue]);
         [k getFacebookUserWithFacebookID:[fbID intValue]];
     }
+    else if ([function isEqualToString:@"checkForUpdatedStix"]) {
+        void * tag = [inputParams objectAtIndex:0];
+        NSNumber * tagID = [inputParams objectAtIndex:1];
+        [savedInfo setObject:tag forKey:@"tag"];
+        [k getAllHistoryWithTagID:[tagID intValue]];
+    }
+    else if ([function isEqualToString:@"updateStixForPix"]) {
+        NSNumber * tagID = [inputParams objectAtIndex:0];
+        [savedInfo setObject:tagID forKey:@"tagID"];
+        [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+    }
 }
 
 -(void)execute:(NSString*)_function {
@@ -214,12 +225,29 @@ static KumulosHelper *sharedKumulosHelper = nil;
             [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
         }
     }
+    else if ([function isEqualToString:@"checkForUpdatedStix"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] init];
+        [returnParams addObject:[savedInfo objectForKey:@"tag"]];
+        [returnParams addObjectsFromArray:theResults];
+        if (self.delegate) {
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+        }
+    }
     [self cleanup];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addCommentToPixDidCompleteWithResult:(NSNumber *)newRecordID {
     NSNumber * tagID = [savedInfo objectForKey:@"addCommentToPix_tagID"];
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, nil];
+    if (self.delegate) {
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    }
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults {
+    NSNumber * tagID = [savedInfo objectForKey:@"tagID"];
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, theResults, nil];
     if (self.delegate) {
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }

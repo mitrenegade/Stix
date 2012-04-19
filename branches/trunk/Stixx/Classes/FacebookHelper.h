@@ -27,6 +27,7 @@
 -(void)receivedFacebookFriends:(NSArray*)friendsArray;
 -(int)getUserFacebookID;
 -(void)didEarnFacebookReward:(int)bux;
+//-(void)facebookLoginIsOffline;
 @end
 
 @interface FacebookHelper : NSObject < FBSessionDelegate, FBRequestDelegate, FBDialogDelegate>

@@ -179,11 +179,11 @@
     
     if (index < [self.delegate getCount])
     {
-        NSString * name = [self.delegate getNameForIndex:index];
-        NSString * comment = [self.delegate getCommentForIndex:index];
-        NSString * stixStringID = [self.delegate getStixStringIDForIndex:index];
-        NSString * timeStampString = [self.delegate getTimestampStringForIndex:index];
-        UIImage * photo = [[self.delegate getPhotoForIndex:index] retain];
+        NSString * name = [delegate getNameForIndex:index];
+        NSString * comment = [delegate getCommentForIndex:index];
+        NSString * stixStringID = [delegate getStixStringIDForIndex:index];
+        NSString * timeStampString = [delegate getTimestampStringForIndex:index];
+        UIImage * photo = [[delegate getPhotoForIndex:index] retain];
         //NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
         // to set one line of text:
         // [cell.textLabel setText:commentLabel];
@@ -279,7 +279,7 @@
      [detailViewController release];
      */
 }
-    
+/*
 -(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID {
 
     NSString * str = @"";
@@ -302,6 +302,7 @@
     }
     return str;
 }
+ */
 
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID {
     
@@ -309,19 +310,21 @@
     if ([comment length] == 0) // add generic descriptor
     {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"added a %@", desc];
+        str = [NSString stringWithFormat:@"Added a %@", desc];
     }
     else if ([comment isEqualToString:@"PEEL"]) {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"peeled off a %@ to add to their collection", desc];
+        str = [NSString stringWithFormat:@"Peeled off a %@ to add to their collection", desc];
     }
     else if ([comment isEqualToString:@"SHARE"]) {
-        str = [NSString stringWithFormat:@"shared this Pix at %@", comment];
+        str = [NSString stringWithFormat:@"Shared this Pix at %@", comment];
     }
     else
     {
-        //str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
-        str = [NSString stringWithFormat:@"%@", comment];
+        /* get first char */
+        NSString *firstChar = [comment substringToIndex:1];
+        str = [[firstChar uppercaseString] stringByAppendingString:[comment substringFromIndex:1]];
+        // str = [NSString stringWithFormat:@"%@", comment];
     }
     return str;
 }

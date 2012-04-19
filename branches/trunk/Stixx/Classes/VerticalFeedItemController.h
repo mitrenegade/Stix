@@ -44,8 +44,8 @@
 
 // forward from StixView
 -(NSString*)getUsername;
-
--(void)didRequestStixFromKumulos:(NSString*)stixStringID withFeedItem:(VerticalFeedItemController*)feedItem;
+-(NSString*)getUsernameOfApp;
+//-(void)didRequestStixFromKumulos:(NSString*)stixStringID withFeedItem:(VerticalFeedItemController*)feedItem;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @optional
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
@@ -134,6 +134,8 @@
 -(void)didClickShareViaFacebook;
 -(void)didClickShareViaEmail;
 -(void)uploadImage:(NSData *)dataPNG;
+
+-(void)togglePlaceholderView:(BOOL)showPlaceholder;
 
 @end
 

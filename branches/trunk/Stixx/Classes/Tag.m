@@ -215,13 +215,14 @@
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         NSString * transformString = [auxTransforms objectAtIndex:i];
         CGAffineTransform auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
-        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+        UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
         //CGPoint center = [[auxLocations objectAtIndex:i] CGPointValue];
         //[stix setCenter:center];
         //CGPoint location = stix.frame.origin;
         
         // resize and rotate stix image source to correct auxTransform
         CGSize stixSize = stix.frame.size;
+        [stix release];
         UIGraphicsBeginImageContext(newSize);
         CGContextRef currentContext = UIGraphicsGetCurrentContext();
         

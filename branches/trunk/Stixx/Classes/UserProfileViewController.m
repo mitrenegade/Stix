@@ -55,7 +55,7 @@
     contentViews = [[NSMutableDictionary alloc] init];
     
     nameLabel = [[UILabel alloc] init];
-    photoButton = [[UIButton alloc] init];
+    photoButton = [[UIImageView alloc] init];//[[UIButton alloc] init];
     buttonAddFriend = [[UIButton alloc] init];//buttonWithType:UIButtonTypeCustom];
     bgFollowing = [UIButton buttonWithType:UIButtonTypeCustom];
     [bgFollowing addTarget:self action:@selector(buttonFollowingClicked) forControlEvents:UIControlEventTouchUpInside];
@@ -120,7 +120,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(IBAction)didClickBackButton:(id)sender {
@@ -133,17 +133,18 @@
         [delegate shouldCloseUserPage];
 }
 
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
+}
+
 -(UIImage*)getUserPhotoForUsername:(NSString*)name
 {return [self.delegate getUserPhotoForUsername:name];}
 
 /**** friendsViewControllerDelegate ****/
--(NSString*)getUsername {return username;}
--(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
--(int)getStixOrder:(NSString*)stixStringID;
-{
-    return [self.delegate getStixOrder:stixStringID];
+-(NSString*)getUsername {
+    NSLog(@"Current username for app: %@", [delegate getUsername]);
+    return [delegate getUsername];
 }
-
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (!pixTableController) {
@@ -228,8 +229,8 @@
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
     [photoButton setBackgroundColor:[UIColor blackColor]];
-    [photoButton setImage:[delegate getUserPhotoForUsername:username] forState:UIControlStateNormal];
-    [photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
+    [photoButton setImage:[delegate getUserPhotoForUsername:username]];// forState:UIControlStateNormal];
+    //[photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
 
     [buttonAddFriend setFrame:CGRectMake(100, 160-44, 120, 60)];
     [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
@@ -361,13 +362,24 @@
         [delegate shouldDisplayUserPage:[delegate getUsername]];
     }
     else {
-//        [delegate shouldCloseUserPage];
-//        [delegate shouldDisplayUserPage:new_username];
+#if 0
         [searchResultsController.view removeFromSuperview];
         isDisplayingFollowLists = NO;
         [self toggleMyButtons:YES];
         [self setUsername:new_username];
         [self viewDidAppear:YES];
+#else
+        CGRect frameOffscreen = self.view.frame;
+        frameOffscreen.origin.x -= 330;
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+            [searchResultsController.view removeFromSuperview];
+            isDisplayingFollowLists = NO;
+            [self toggleMyButtons:YES];
+            [self shouldDisplayUserPage:new_username];
+            [animation release];
+        }];
+#endif
     }
 }
 
@@ -412,7 +424,6 @@
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
 //    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
--(UIImage*)getUserPhotoForgallery {return [self.delegate getUserPhotoForUsername:username];}
 
 #pragma mark ColumnTableController delegate
 /*
@@ -432,7 +443,8 @@
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
-    if (index >= [allTagIDs count])
+    int actualIndex = index - numColumns;
+    if (index >= [allTagIDs count] + numColumns)
         return nil;
   
     NSNumber * key = [NSNumber numberWithInt:index-1];
@@ -441,7 +453,7 @@
         return nil;
     }
     else if ([contentViews objectForKey:key] == nil) {
-        NSNumber * tagID = [allTagIDs objectAtIndex:index];
+        NSNumber * tagID = [allTagIDs objectAtIndex:actualIndex];
         Tag * tag = [allTags objectForKey:tagID];
         
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
@@ -535,7 +547,10 @@
     [detailController.view setFrame:frameOffscreen];
     
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+    //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [animation release];
+    }];
 }
 
 -(void)shouldDisplayUserPage:(NSString*)_username {
@@ -549,6 +564,7 @@
     [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:_username];
+        [animation release];
     }];
 }
 

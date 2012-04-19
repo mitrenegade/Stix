@@ -209,7 +209,7 @@
                 UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
                 if (cellOldView != nil) 
                     [cellOldView removeFromSuperview];
-                UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns + col]; 
+                UIView * elementView = [delegate viewForItemAtIndex:row * numColumns + col]; 
                 if (elementView != nil) {
                     [elementView setFrame:frame];
                     [cell addSubview:elementView];

@@ -86,7 +86,7 @@
 
 -(void)doPointerAnimation:(int)firstTimeUserStage {
     UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
-    CGRect canvasFrame;
+    CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 375, pointerImg.size.width, pointerImg.size.height);
     if (firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
         canvasFrame = CGRectMake(160-pointerImg.size.width/2, 375, pointerImg.size.width, pointerImg.size.height);
     }
@@ -94,7 +94,7 @@
         canvasFrame = CGRectMake(50-pointerImg.size.width/2, 335, pointerImg.size.width, pointerImg.size.height);
     }
     else if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
-        canvasFrame = CGRectMake(280-pointerImg.size.width/2, 75, pointerImg.size.width, pointerImg.size.height);
+        canvasFrame = CGRectMake(295-pointerImg.size.width/2, 75, pointerImg.size.width, pointerImg.size.height);
     }
     UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
     UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
@@ -154,7 +154,7 @@
     int width = 140;
     CGRect canvasFrame = CGRectMake(0, 0, 320, 480);
     UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
-    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+    UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
     [stix setFrame:CGRectMake(0,0,width,width)];
     [stix setCenter:[rewardCanvas center]];
     [rewardCanvas addSubview:stix];
@@ -178,6 +178,7 @@
     animationIDsPurchase[0] = [animation doFade:rewardCanvas inView:self.view toAlpha:1 forTime:.1]; // not working
     [rewardCanvas release];
     [animation release];
+    [stix release]; // MRC
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
@@ -292,7 +293,7 @@
     else {
         //[firstTimeInstructions setFrame:frameOnscreen];
         [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
-            
+            [animation release];
         }];
     }
 //    [firstTimeInstructions setHidden:!showInstructions];

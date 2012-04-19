@@ -32,13 +32,10 @@ enum {
 
 @protocol ProfileViewDelegate
 
-- (void)checkForUpdatePhotos;
-- (void)didLoginWithUsername:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
--(void)didLogout;
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
 - (UIImage *)getUserPhoto;
-- (int)getUserTagTotal;
+//- (int)getUserTagTotal;
 - (bool)isLoggedIn;
 - (void)didChangeUserphoto:(UIImage*)photo;
 -(NSMutableDictionary*)getAllUsers;
@@ -47,11 +44,9 @@ enum {
 -(NSMutableArray*)getAllUserNames;
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
-//-(NSMutableSet*)getFriendsList;
 -(NSMutableSet*)getFollowingList;
 -(NSMutableSet*)getFollowerList;
 -(void)didCreateBadgeView:(UIView *) newBadgeView;
--(void)shouldDisplayUserPage:(NSString *)name;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(void)didClickFeedbackButton:(NSString*)fromView;
@@ -63,6 +58,8 @@ enum {
 -(void)didClickInviteButton;
 -(void)didDismissSecondaryView;
 -(void)closeProfileView;
+-(void)shouldDisplayUserPage:(NSString *)name;
+-(void)shouldCloseUserPage;
 -(void)needFacebookLogin;
 
 -(void)searchFriendsByFacebook;
@@ -76,7 +73,7 @@ enum {
 -(void)advanceFirstTimeUserMessage;
 @end
 
-@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, StixAnimationDelegate>{
+@interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIWebViewDelegate>{
     
     //IBOutlet UIButton * logoutScreenButton;
     //IBOutlet UIButton * stixCountButton; // custom button but no clicking
@@ -107,6 +104,8 @@ enum {
     UIButton * buttonMyPix;
     UIButton * buttonStixAdded;
     UIImageView * myPixBG;
+    
+    UIWebView * tosView;
     
     int userHistoryCount;
     int userCommentCount;
@@ -153,7 +152,7 @@ enum {
 -(IBAction)adminStixButtonPressed:(id)sender; // hack: for debug/admin mode
 // utils
 -(IBAction)didClickBackButton:(id)sender;
--(IBAction)feedbackButtonClicked:(id)sender;
+-(IBAction)aboutButtonClicked:(id)sender;
 -(IBAction)inviteButtonClicked:(id)sender;
 -(IBAction)buttonFollowingClicked:(id)sender;
 -(IBAction)buttonFollowersClicked:(id)sender;

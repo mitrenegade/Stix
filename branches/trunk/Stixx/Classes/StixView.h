@@ -13,6 +13,7 @@
 #import "OutlineLabel.h"
 #import "Tag.h"
 #import "Kumulos.h"
+#import "StixAnimation.h"
 
 @class StixView;
 
@@ -22,6 +23,7 @@
 -(void)didReceiveAllRequestedMissingStix:(StixView*)stixView;
 @optional
 -(NSString*) getUsername;
+-(NSString*) getUsernameOfApp;
 -(void)didAttachStix:(int)index;
 -(void)didPeelStix:(int)index;
 -(void)peelAnimationDidCompleteForStix:(int)index;
@@ -67,6 +69,8 @@
     NSObject<StixViewDelegate> * delegate;    
     NSMutableSet *_activeRecognizers;
     Kumulos * k;
+    
+    NSString * tagUsername;
 
     // key: stixStringID
     // value: array of all auxStix views of this type in this StixView
@@ -101,6 +105,7 @@
 
 -(int)findPeelableStixAtLocation:(CGPoint)location;
 -(void)transformBoxShowAtFrame:(CGRect)frame;
+-(void)addPeelableAnimationToStix:(UIImageView*)canvas;
 
 
 // on demand stix download

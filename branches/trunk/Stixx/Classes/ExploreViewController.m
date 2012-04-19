@@ -89,7 +89,7 @@
 
     UIButton * buttonBux = [[[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)] autorelease];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
-    //[buttonBux addTarget:<#(id)#> action:<#(SEL)#> forControlEvents:<#(UIControlEvents)#>];
+    [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
     
     CGRect labelFrame = CGRectMake(25, 5, 58, 38);
@@ -99,9 +99,6 @@
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
     [self.view insertSubview:labelBuxCount belowSubview:buttonProfile];
 
-    [buttonProfile setImage:[delegate getUserPhotoForUsername:[delegate getUsername]] forState:UIControlStateNormal];
-    [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
-    [buttonProfile.layer setBorderWidth:1];
 }
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
@@ -115,7 +112,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(void) setExploreMode:(UIButton*)button{
@@ -141,7 +138,7 @@
 }
 
 -(NSString*)getUsername {
-    return [self.delegate getUsername];
+    return [delegate getUsername];
 }
 
 /*** table ***/
@@ -402,15 +399,6 @@
     }
 }
 /*
--(UIImage*)getUserPhotoForGallery {
-    return [self.delegate getUserPhotoForUsername:galleryUsername];
-}
--(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method {
-    [delegate uploadImage:dataPNG withShareMethod:method];
-}
- */
-
-/*
 -(void)didClickAtLocation:(CGPoint)location {
 
     if (isZooming == YES)
@@ -489,6 +477,11 @@
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
+
+    UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
+    [buttonProfile setImage:photo forState:UIControlStateNormal];
+    [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
+    [buttonProfile.layer setBorderWidth:1];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -516,6 +509,11 @@
 }
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
     return [self.delegate getUserPhotoForUsername:username];
+}
+
+#pragma mark bux instructions
+-(void)didClickMoreBuxButton:(id)sender {
+    [delegate didShowBuxInstructions];
 }
 
 -(void)viewDidUnload {

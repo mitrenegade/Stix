@@ -145,6 +145,9 @@ struct UserInfo {
     int updatingPeelableAction;
     int shareActionSheetTagID;
     int shareMethod; // 0 = facebook, 1 = email
+
+    BOOL isDisplayingShareSheet;
+    BOOL isDisplayingBuxMenu;
     
     int buyBuxPurchaseAmount;
     UIImageView * buxPurchaseMenu;
@@ -181,14 +184,18 @@ struct UserInfo {
         
     FacebookHelper * fbHelper;
     UserTagAggregator * aggregator;
+    
+    BOOL followListsDidChangeDuringProfileView;
+    
+    UIImageView * buxInstructions;
+    UIButton * buttonBuxInstructionsClose;
+    BOOL isShowingBuxInstructions;
+    UIButton * buttonBuxStore;
 }
 
 -(void)initializeBadgesFromKumulos;
 -(void)checkVersion;
--(int)loadDataFromDisk;
--(void)saveDataToDisk;
 // saving and loading
--(void)saveDataToDefaults;
 -(void)saveStixDataToDefaults;
 -(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
 -(int)loadUserInfoFromDefaults;
@@ -211,14 +218,13 @@ struct UserInfo {
 //-(void)adminSaveFeed;
 -(void)adminResetAllStixOrders;
 
--(void)decrementStixCount:(NSString*)stixStringID;
--(void)incrementStixCount:(NSString*)stixStringID;
--(void)incrementStixCount:(NSString *)stixStringID byNumber:(int)increment;
 -(Tag*) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID;
--(void) Parse_unsubscribeFromAll;
+//-(void) Parse_unsubscribeFromAll;
+
+-(void) Parse_createSubscriptions;
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
@@ -238,6 +244,7 @@ struct UserInfo {
 -(void)advanceFirstTimeUserMessage;
 -(void)showBuxPurchaseMenu;
 -(void)agitateFirstTimePointer;
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) UIViewController * emptyViewController;

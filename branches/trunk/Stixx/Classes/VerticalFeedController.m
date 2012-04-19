@@ -77,7 +77,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 -(void) viewDidLoad {
@@ -120,6 +120,8 @@
     [labelBuxCount release];
     
     [statusMessage setHidden:YES];
+
+    backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.feedController.bgQueue", NULL);
 }
 
 -(void)configureCarouselView {
@@ -374,10 +376,10 @@
 }
 
 -(int)heightForHeaderInSection:(int)index {
-    Tag * tag = [allTagsDisplayed objectAtIndex:index];
     int headerHeight = HEADER_HEIGHT;
     /*
-    if (![delegate isFollowing:tag.username]) {
+     Tag * tag = [allTagsDisplayed objectAtIndex:index];
+     if (![delegate isFollowing:tag.username]) {
         NSLog(@"Unfollowing %@ means removing feed item at section %d", tag.username, index);
         headerHeight = 0;
     }
@@ -451,12 +453,13 @@
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     // todo: reloadData only once for a batch of reloadViewForItem - maybe after requesting content from aggregator
-    NSLog(@"ReloadViewForItemAtIndex: %d", index);
     if (index > [allTagsDisplayed count]-1) {
         index = [allTagsDisplayed count]-1;
         NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
     }
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
     
@@ -542,15 +545,17 @@
 
 -(UIView*)viewForItemAtIndex:(int)index
 {	        
-    //NSLog(@"ViewForItemAtIndex: %d", index);
     //index = index - 1;
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    VerticalFeedItemController * feedItem = nil;
+    if (tag.tagID)
+        feedItem = [feedItems objectForKey:tag.tagID];
     
     if (!feedItem) {
         feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease until we no longer need it as a delegate
         [feedItem setDelegate:self];
-        
+            
         NSString * name = tag.username;
         NSString * descriptor = tag.descriptor;
         NSString * comment = tag.comment;
@@ -560,46 +565,59 @@
         feedItemViewOffset = feedItem.view.frame.origin; // same offset
         [feedItem.view setBackgroundColor:[UIColor clearColor]];
         [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
-        //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-        //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
-        if (photo)
-        {
-            //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
-            [feedItem populateWithUserPhoto:photo];
-            [photo autorelease]; // MRC
-        }
-        //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
-        // add timestamp
-        [feedItem populateWithTimestamp:tag.timestamp];
-        // add badge and counts
-        [feedItem initStixView:tag];
-        feedItem.tagID = [tag.tagID intValue];
-        int count = [self.delegate getCommentCount:feedItem.tagID];
-        [feedItem populateWithCommentCount:count];
-        
-        // populate comments for this tag
-        NSMutableArray * param = [[NSMutableArray alloc] init];
-        [param addObject:tag.tagID];
-        [param autorelease];
-        KumulosHelper * kh = [[KumulosHelper alloc] init];
-        [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
-        
-        // this object must be retained so that the button actions can be used
-        [feedItems setObject:feedItem forKey:tag.tagID];
+#if 0
+        [feedItem togglePlaceholderView:YES];
+        dispatch_async(backgroundQueue, ^{
+#endif
+            //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+            //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+            UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+            if (photo)
+            {
+                //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
+                [feedItem populateWithUserPhoto:photo];
+                [photo autorelease]; // MRC
+            }
+            //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
+            // add timestamp
+            [feedItem populateWithTimestamp:tag.timestamp];
+            // add badge and counts
+            [feedItem initStixView:tag];
+            if (tag.tagID) {
+                feedItem.tagID = [tag.tagID intValue];
+                int count = [self.delegate getCommentCount:feedItem.tagID];
+                [feedItem populateWithCommentCount:count];
+                
+                // populate comments for this tag
+                NSMutableArray * param = [[NSMutableArray alloc] init];
+                [param addObject:tag.tagID];
+                [param autorelease];
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+            }
+            
+            // this object must be retained so that the button actions can be used
+            if (tag.tagID)
+                [feedItems setObject:feedItem forKey:tag.tagID];
+            
+#if 0
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [feedItem togglePlaceholderView:NO];
+            });
+        });
+#endif
     } 
     else {
         // see what the dimensions were saved previously
         //NSLog(@"ViewForItem EXISTS:  feedItem ID %d index %d view %x height: %f ", feedItem.tagID, index, feedItem.view, feedItem.view.frame.size.height);
     }
     //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
-    [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
+    //[feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
-    UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:username]] autorelease];
-    return photo;
+    return [delegate getUserPhotoForUsername:username];
 }
 
 -(void)didGetCommentHistoryWithResults:(NSMutableArray*)theResults {
@@ -630,7 +648,7 @@
         Tag * t = [allTagsDisplayed objectAtIndex:i];
         if ([t.tagID intValue] == tagID) {
             //[self reloadViewForItemAtIndex:i];
-            //NSLog(@"TagID: %d Target row: %d", tagID, i);
+            NSLog(@"JumpToPageWithTagID: %d Target row: %d", tagID, i);
             NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
             [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
         }
@@ -644,12 +662,18 @@
 }
 
 -(IBAction)didClickProfileButton:(id)sender {
+    if ([delegate isShowingBuxInstructions])
+        return;
+    if ([delegate isDisplayingShareSheet])
+        return;
+    
     [self.delegate didOpenProfileView];
 }
 
 -(void)didPullToRefresh {
     [self updateScrollPagesAtPage:-1];
     [delegate checkAggregatorStatus];
+    [self checkForUpdatedStix];
 }
 
 -(void)updateScrollPagesAtPage:(int)page {
@@ -682,6 +706,17 @@
     }
 }
 
+-(void)reloadPage:(int)page {
+    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
+    int section = page;
+    [self populateAllTagsDisplayed];
+    //[activityIndicator startCompleteAnimation];
+    [self startActivityIndicator];
+    if (section>[allTagsDisplayed count])
+        section = 0;
+    [self reloadViewForItemAtIndex:section];
+}
+
 -(void)reloadCurrentPage {
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
     int section = [tableController getCurrentSectionAtPoint:CGPointMake(160, 240)];
@@ -707,36 +742,10 @@
     [self.view insertSubview:tableController.view atIndex:index];
 }
 
--(void)didUnfollowUser {
-    
-    /*
-    allTags = [self.delegate getTags];
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * tag = [allTags objectAtIndex:i];
-        NSNumber * tagID = tag.tagID;
-        NSString * name = tag.username;
-        if (![delegate isFollowing:name]) {
-            [feedItems removeObjectForKey:tagID];
-//            [tableController.tableView deleteSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationTop];
-        }
-    }
-    */
+-(void)followListsDidChange {
     [self populateAllTagsDisplayed];
-    //[tableController setContentPageIDs:allTags];
-    // just force call of heightForHeader and heightForSection
-    /*
-    [tableController.tableView reloadData];
-    for (int i=0; i<[allTags count]; i++) {
-        [tableController.tableView reloadSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationNone];
-    }
-     */
     [self forceReloadWholeTableZOMG];
-    
     NSLog(@"After unfollowing user, there are %d tags on display.", [allTagsDisplayed count]);
-}
--(void)didFollowUser {
-    [self populateAllTagsDisplayed];
-    [self forceReloadWholeTableZOMG];
 }
 
 -(void)populateAllTagsDisplayed {
@@ -776,7 +785,10 @@
 
 -(void)addTagForDisplay:(Tag *)tag {
     // add newly created tag so it appears in the feed
-    [allTagsDisplayed addObject:tag];
+    // create temporary tag id and timestamps
+    tag.tagID = [NSNumber numberWithInt:-1]; // temp
+    tag.timestamp = [NSDate date];
+    [allTagsDisplayed insertObject:tag atIndex:0];
     [self forceReloadWholeTableZOMG];
 }
 
@@ -828,29 +840,19 @@
             break;            
         }
     }
-    
-    // if just a tap, add aux stix
-    if (peelableFound == -1) {
-        // do not add aux stix
-        /*
-        if ([carouselView stixSelected] != nil && [self.delegate getStixCount:[carouselView stixSelected]] != 0) {
-            UIImageView * stix = [BadgeView getBadgeWithStixStringID:[carouselView stixSelected]];
-            //locationInStixView = [tableController getPointInTableViewFrame:locationInStixView fromPage:lastPageViewed];
-            //locationInStixView.y += tableController.view.frame.origin.y; // hack: didDropStix takes away tableController's y offset
-            [stix setCenter:locationInStixView];
-            [self didDropStixByTap:stix ofType:[carouselView stixSelected]];
-        }
-         */
-    }
 }
 
 /*** verticalfeedItemDelegate ****/
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
-    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
+    if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
         return;
     }
-
+    if ([delegate isDisplayingShareSheet])
+        return;
+    if ([delegate isShowingBuxInstructions])
+        return;
+    
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
         [commentView setDelegate:self];
@@ -873,6 +875,7 @@
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+        [animation release];
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -927,6 +930,7 @@
     frameOffscreen.origin.x -= 330;
     [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [commentView.view removeFromSuperview];
+        [animation release];
     }];
 #endif
 }
@@ -945,7 +949,10 @@
 
 /*** FeedViewItemDelegate ***/
 -(NSString*)getUsername {
-    return [self.delegate getUsername];
+    return [delegate getUsername];
+}
+-(NSString*)getUsernameOfApp {
+    return [delegate getUsername];
 }
 
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index {
@@ -996,6 +1003,11 @@
 #pragma mark UserGalleryDelegate
 
 -(void)shouldDisplayUserPage:(NSString *)username {
+    if ([delegate isShowingBuxInstructions])
+        return;
+    if ([delegate isDisplayingShareSheet])
+        return;
+    
     //    [self.delegate shouldDisplayUserPage:username];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
@@ -1011,73 +1023,52 @@
     [delegate shouldCloseUserPage];
 }
 
+
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
     // send through to StixAppDelegate to save to defaults
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
 }
 
 #pragma mark bux instructions
--(void)didCloseBuxInstructions {
-    isShowingBuxInstructions = NO;
-#if 0
-    [buxInstructions removeFromSuperview];
-    [buttonBuxStore removeFromSuperview];
-    [buttonBuxInstructionsClose removeFromSuperview];
-#else
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    buxAnimationClose = [animation doSlide:buxInstructions inView:self.view toFrame:frameOutside forTime:.5];
-#endif
+-(BOOL)isShowingBuxInstructions {
+    return [delegate isShowingBuxInstructions];
 }
-
--(void)didClickPurchaseBuxButton {
-    [self didCloseBuxInstructions];
-    [delegate didClickPurchaseBuxButton];
-}
-
 -(void)didClickMoreBuxButton:(id)sender {
-    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
-        [delegate agitateFirstTimePointer];
-        return;
-    }
-
-    if (isShowingBuxInstructions)
-        return;
-    isShowingBuxInstructions = YES;
-    CGRect frameInside = CGRectMake(16, 22, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    buxInstructions = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_rewards.png"]];
-    [buxInstructions setFrame:frameOutside];
-    buttonBuxStore = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-    [buttonBuxStore setFrame:CGRectMake(68-16, 300-22, 200, 60)];
-    [buttonBuxStore setBackgroundColor:[UIColor clearColor]];
-    [buttonBuxStore addTarget:self action:@selector(didClickPurchaseBuxButton) forControlEvents:UIControlEventTouchUpInside];
-    buttonBuxInstructionsClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-    [buttonBuxInstructionsClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
-    [buttonBuxInstructionsClose setBackgroundColor:[UIColor clearColor]];
-    [buttonBuxInstructionsClose addTarget:self action:@selector(didCloseBuxInstructions) forControlEvents:UIControlEventTouchUpInside];
-//    [buxInstructions addSubview:buttonBuxStore];
-//    [buxInstructions addSubview:buttonBuxInstructionsClose];
-#if 1
-    [self.view insertSubview:buxInstructions aboveSubview:buttonProfile];
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    buxAnimationOpen = [animation doSlide:buxInstructions inView:self.view toFrame:frameInside forTime:.5];
-#else
-    [buxInstructions setFrame:frameInside];
-    [self.view insertSubview:buxInstructions aboveSubview:tableController.view];    
-#endif
+    [delegate didShowBuxInstructions];
 }
 
 #pragma mark share
+-(BOOL)isDisplayingShareSheet {
+    return [delegate isDisplayingShareSheet];
+}
 -(void)didCloseShareSheet {
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
+    //shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
+    [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished) {
+        [self stopActivityIndicator];
+        if (shareSheet) {
+            [shareSheet release];   
+            shareSheet = nil;
+            [buttonShareEmail removeFromSuperview];
+            [buttonShareFacebook removeFromSuperview];
+            [buttonShareClose removeFromSuperview];
+            [buttonShareEmail release];
+            [buttonShareFacebook release];
+            [buttonShareClose release];
+            buttonShareClose = nil;
+            buttonShareEmail = nil;
+            buttonShareFacebook = nil;
+        }
+    }];
+    
 }
 
+-(void)didClickCloseShareSheet {
+    [self didCloseShareSheet];
+    [delegate didCloseShareSheet];
+}
 -(void)didClickShareViaFacebook {
     [self startActivityIndicator];
     activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
@@ -1101,10 +1092,14 @@
 }
 
 -(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
-    if ([delegate getFirstTimeUserStage] != FIRSTTIME_DONE) {
+    if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
         return;
     }
+    if ([delegate isShowingBuxInstructions])
+        return;
+    if ([delegate isDisplayingShareSheet])
+        return;
 
     shareFeedItem = feedItem;
     
@@ -1112,6 +1107,11 @@
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
     shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
     [shareSheet setFrame:frameOutside];
+    //UIImageView * shareImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
+    //[shareImg setFrame:CGRectMake(16, 22, 289, 380)];
+    //[shareSheet addSubview:shareImg];
+    //CGRect frameInside = CGRectMake(0, 0, 320, 480);
+    //CGRect frameOutside = CGRectMake(-320, 0, 320, 480);
     
     buttonShareFacebook = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
     [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
@@ -1126,12 +1126,19 @@
     buttonShareClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
     [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
     [buttonShareClose setBackgroundColor:[UIColor clearColor]];
-    [buttonShareClose addTarget:self action:@selector(didCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
+    [buttonShareClose addTarget:self action:@selector(didClickCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:shareSheet];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
+//    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
+    [animation doViewTransition:shareSheet toFrame:frameInside forTime:.5 withCompletion:^(BOOL finished) {
+        [self.view addSubview:buttonShareEmail];
+        [self.view addSubview:buttonShareFacebook];
+        [self.view addSubview:buttonShareClose];
+    }];
+    
+    [delegate didDisplayShareSheet];
 }
 
 -(void)sharePixDialogDidFinish {
@@ -1143,43 +1150,14 @@
         [activityIndicatorLarge release];
         activityIndicatorLarge = nil;
     }
+    [delegate didCloseShareSheet];
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
-    // bux purchase menu
-    if (animationID == buxAnimationOpen) {
-        [self.view addSubview:buttonBuxStore];
-        [self.view addSubview:buttonBuxInstructionsClose];   
-    }
-    else if (animationID == buxAnimationClose) {
-        [buxInstructions removeFromSuperview];
-        [buttonBuxStore removeFromSuperview];
-        [buttonBuxInstructionsClose removeFromSuperview];
-        [buxInstructions release];
-        [buttonBuxStore release];
-        [buttonBuxInstructionsClose release];
-    }
     // share menu
-    else if (animationID == shareMenuOpenAnimation) {
-        [self.view addSubview:buttonShareEmail];
-        [self.view addSubview:buttonShareFacebook];
-        [self.view addSubview:buttonShareClose];
+    if (animationID == shareMenuOpenAnimation) {
     }
     else if (animationID == shareMenuCloseAnimation) {
-        [self stopActivityIndicator];
-        if (shareSheet) {
-            [shareSheet release];   
-            shareSheet = nil;
-            [buttonShareEmail removeFromSuperview];
-            [buttonShareFacebook removeFromSuperview];
-            [buttonShareClose removeFromSuperview];
-            [buttonShareEmail release];
-            [buttonShareFacebook release];
-            [buttonShareClose release];
-            buttonShareClose = nil;
-            buttonShareEmail = nil;
-            buttonShareFacebook = nil;
-        }
     }
 }
 
@@ -1191,6 +1169,75 @@
     NSLog(@"FeedController: finished create new pix: sharing ID %d", [tagID intValue]);
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
     [self didPressShareButtonForFeedItem:feedItem];
+}
+
+-(void)checkForUpdatedStix {
+    NSLog(@"Checking for updated stix in 10 most recent tags");
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        if (i >= [allTagsDisplayed count])
+            break;
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
+        NSLog(@"Checking for updated stix at tag %d", [[tag tagID] intValue]);
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:tag, tag.tagID, nil] autorelease];
+        [kh execute:@"checkForUpdatedStix" withParams:params withCallback:@selector(khCallback_checkForUpdatedStix:) withDelegate:self];        
+    }
+}
+
+-(void)khCallback_checkForUpdatedStix:(NSMutableArray*)returnParams {
+    Tag * tag = [returnParams objectAtIndex:0];
+    BOOL needUpdate = NO;
+    NSDate * timestamp = tag.timestamp;
+    for (int i=1; i<[returnParams count]; i++) {
+        NSMutableDictionary * historyItem = [returnParams objectAtIndex:i];
+        NSDate * timestampHistory = [historyItem objectForKey:@"timeCreated"];
+        if ([timestampHistory compare:timestamp] == NSOrderedDescending)
+            needUpdate = YES;
+    }
+    if (needUpdate) {
+        NSLog(@"Tag %d needs to update stix", [[tag tagID] intValue]);
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:tag.tagID, nil] autorelease];
+        [kh execute:@"updateStixForPix" withParams:params withCallback:@selector(khCallback_updateStixForPix:) withDelegate:self];        
+    } else {
+        NSLog(@"Tag %d does not need to update stix", [[tag tagID] intValue]);
+    }
+}
+
+-(void)khCallback_updateStixForPix:(NSMutableArray*)returnParams {
+    NSNumber * tagID = [returnParams objectAtIndex:0];
+    NSLog(@"UpdateStixForPix: %d", [tagID intValue]);
+    NSMutableArray * theResults = [returnParams objectAtIndex:1];
+    // find the correct tag in allTags;
+    if ([theResults count] == 0)
+        return;
+    Tag * tag = nil;
+    for (NSMutableDictionary * d in theResults) {
+        Tag * t = [[Tag getTagFromDictionary:d] retain]; // MRC
+        if ([t.tagID intValue]== [tagID intValue]) {
+            tag = t; // MRC: when we break, t is not released so tag is retaining t
+            break;
+        }
+        [t release];
+    }
+    if (tag == nil)
+        return;
+    // find local tag and sync with kumulos tag
+    Tag * localTag = nil;
+    int index = -1;
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        localTag = [allTagsDisplayed objectAtIndex:i];
+        if ([localTag.tagID intValue] == [tagID intValue]) {
+            index = i;
+            break;
+        }
+    }
+    NSLog(@"UpdateStixForPix: Found tag %d at index %d", [localTag.tagID intValue], index);
+    [allTagsDisplayed replaceObjectAtIndex:index withObject:localTag];
+    [delegate addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
+//    [self reloadViewForItemAtIndex:index];
+//    [self.tableController.tableView reloadData];
+    [self reloadPage:index];
 }
 @end
 

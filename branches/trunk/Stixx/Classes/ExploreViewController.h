@@ -38,6 +38,7 @@
 
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
+-(void)didShowBuxInstructions;
 @end
 
 enum {

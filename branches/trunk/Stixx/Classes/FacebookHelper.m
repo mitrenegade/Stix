@@ -209,13 +209,17 @@ static FacebookHelper *sharedFacebookHelper;
 -(void)sendInvite:(NSString *)name withFacebookID:(NSString*)facebookID {
     postType = @"inviteFriend";
     NSString * myFacebookID = [NSString stringWithFormat:@"%d", [delegate getUserFacebookID]];
+    // the only message that shows up
+    NSString * postname = @"Get Sticky with me...";
+//    NSString * caption = @"Get Sticky with me...";
+    NSString * description = @"Let's remix our photos with fun, crazy, digital stickers.";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   @"Come remix my pictures! Click here to join Stix on your iPhone.",  @"message",
                                    @"stixmobile.com/", @"link", 
                                    facebookID, @"to",
                                    myFacebookID, @"from",
-                                   @"Invite to Stix", @"title",
-                                   @"Invite to Stix!", @"caption", 
+                                   postname, @"name",
+                                   //caption, @"caption", 
+                                   description, @"description",
                                    APP_ID, @"app_id",
                                    nil];
 #if 0
@@ -236,6 +240,11 @@ static FacebookHelper *sharedFacebookHelper;
  */
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
     NSLog(@"FacebookHelper FBRequest failed with error: %@ currentRequest: %@", [error description], currentRequest);
+    /*
+    if ([error code] == -1009) {
+        [delegate facebookLoginIsOffline];
+    }
+     */
     if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
         NSLog(@"Repeating getFacebookInfo request");
         [self getFacebookInfo];
@@ -262,9 +271,9 @@ static FacebookHelper *sharedFacebookHelper;
         if ([postType isEqualToString:@"inviteFriend"]) {
             [delegate didEarnFacebookReward:10];
         }
-        else if ([postType isEqualToString:@"sharePix"]) {
-            [delegate didEarnFacebookReward:1];
-        }
+        //else if ([postType isEqualToString:@"sharePix"]) {
+        //    [delegate didEarnFacebookReward:1];
+        //}
     } else {
         //user pressed "cancel"
         NSLog(@"Facebook dialog did not complete!");

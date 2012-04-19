@@ -25,4 +25,6 @@
 
 -(void)doViewTransition:(UIView *)canvas toFrame:(CGRect)frameEnd forTime:(float)time withCompletion:(void (^)(BOOL finished))_completion;
 -(void)doFadeIn:(UIView*)canvas forTime:(float)time withCompletion:(void (^)(BOOL finished))_completion;
+-(void)doShake:(UIView *)canvas angleInDegrees:(float)deg forTime:(float)time withCompletion:(void (^)(BOOL))_completion;
+-(void)doPulse:(UIView *)canvas forTime:(float)time repeatCount:(int)repeat withCompletion:(void (^)(BOOL))_completion;
 @end

@@ -124,12 +124,11 @@
     //[k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
     [k addUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux andFacebookID:facebookID];
     // MRC
-    //[stixData autorelease];
-    //[stix autorelease];
-    //[photo autorelease];
-    //[auxInfo autorelease];
-    //[auxData autorelease];
-    //[stixOrder autorelease];
+    [stixData autorelease];
+    [stix autorelease];
+    [auxInfo autorelease];
+    [auxData autorelease];
+    [stixOrder autorelease];
      
 }
 
@@ -276,14 +275,14 @@
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addUserDidCompleteWithResult:(NSArray *)theResults {
     NSString* username = facebookName;
-    
+    /*
     UIAlertView* alert = [[UIAlertView alloc]init];
     [alert addButtonWithTitle:@"OK"];
     [alert setTitle:@"Success"];
     [alert setMessage:[NSString stringWithFormat:@"New User %@ created!", username]];
     [alert show];
     [alert release];
-    
+    */
     isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:theResults];
 }

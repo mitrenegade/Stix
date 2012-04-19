@@ -133,7 +133,7 @@
             NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
             if (d != nil) {
                 [aggregationQueue removeObject:d];
-                NSString * username = [d valueForKey:@"username"];
+                //NSString * username = [d valueForKey:@"username"];
                 NSNumber * tagID = [d valueForKey:@"tagID"];
                 
                 id newObject = tagID;

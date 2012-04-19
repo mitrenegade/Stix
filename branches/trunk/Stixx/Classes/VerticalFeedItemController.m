@@ -61,7 +61,7 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location {// andWithImage:(UIImage*)image {
-    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@\n", name, descriptor, comment, location);
+    //NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@\n", name, descriptor, comment, location);
     
     nameString = name;
     descriptorString = descriptor;
@@ -90,6 +90,28 @@
     }
 }
 
+-(void)togglePlaceholderView:(BOOL)showPlaceholder {
+    if (placeholderView == nil) {
+        placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
+        [placeholderView setCenter:imageView.center];
+    }
+    
+    if (showPlaceholder) {
+        [stixView removeFromSuperview];
+        [self.view insertSubview:placeholderView belowSubview:imageView];
+    }
+    else {
+        [placeholderView removeFromSuperview];
+        [self.view insertSubview:stixView belowSubview:imageView];
+    }
+    stixView.isShowingPlaceholder = showPlaceholder;
+    [shareButton removeFromSuperview];
+    [self.view addSubview:shareButton];
+    [addCommentButton removeFromSuperview];
+    [self.view addSubview:addCommentButton];
+
+}
+
 -(void)initStixView:(Tag*)_tag {
     tag = [_tag retain];
     imageData = tag.image;
@@ -104,17 +126,15 @@
     [stixView initializeWithImage:imageData];
     int canShow = [stixView populateWithAuxStixFromTag:tag];
     if (canShow) {
-        [self.view insertSubview:stixView belowSubview:imageView];
-        stixView.isShowingPlaceholder = NO;
+        [self togglePlaceholderView:NO];
     }
     else {
-        placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
-        [placeholderView setCenter:stixView.center];
-        [self.view insertSubview:placeholderView belowSubview:imageView];
-        stixView.isShowingPlaceholder = YES;
+        [self togglePlaceholderView:YES];
     }
     [shareButton removeFromSuperview];
     [self.view addSubview:shareButton];
+    [addCommentButton removeFromSuperview];
+    [self.view addSubview:addCommentButton];
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    
@@ -177,13 +197,12 @@
     }
     [commentsTable.view setFrame:CGRectMake(0, CONTENT_HEIGHT, 320, commentTableHeight)];
     
-    NSLog(@"Number of comments for feedItem %d: %d old frame height: %f new frame height: %d", self.tagID, [names count], self.view.frame.size.height, CONTENT_HEIGHT + commentContentHeight);
+    //NSLog(@"Number of comments for feedItem %d: %d old frame height: %f new frame height: %d", self.tagID, [names count], self.view.frame.size.height, CONTENT_HEIGHT + commentContentHeight);
     
     CGRect frame = self.view.frame;
     int newHeight = CONTENT_HEIGHT + commentContentHeight;
     frame.size.height = MAX(newHeight, frame.size.height);
     [self.view setFrame:frame];
-    NSLog(@"Setting frame size to %f", frame.size.height);
     if (showAllCommentsButton) {
         //[seeAllCommentsButton setFrame:CGRectMake(130, commentTableHeight + 2, 60, 20)];
         //[seeAllCommentsButton setHidden:NO];
@@ -335,10 +354,13 @@
 -(NSString*)getUsername {
     return [delegate getUsername];
 }
+-(NSString*)getUsernameOfApp {
+    return [delegate getUsernameOfApp];
+}
 
 -(void)didAttachStix:(int)index {
     // 1 = attach
-    [self.delegate didPerformPeelableAction:1 forAuxStix:index];
+    [delegate didPerformPeelableAction:1 forAuxStix:index];
 }
 
 -(void)didPeelStix:(int)index {
@@ -371,7 +393,7 @@
 #if 1
     // fade in
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){}];
+    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){ [animation release]; }];
     //[animation doJump:stixView inView:self.view forDistance:50 forTime:.5];
 #endif
     
@@ -384,7 +406,7 @@
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
     NSMutableDictionary * d = [theResults objectAtIndex:0]; 
     NSString * descriptor = [d valueForKey:@"stixDescriptor"];
-    NSLog(@"StixView requested stix data for %@", descriptor);
+    //NSLog(@"StixView requested stix data for %@", descriptor);
     [BadgeView AddStixView:theResults];
 }
 
@@ -473,12 +495,12 @@
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
-    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", [self getUsername]];
-    NSString * fullmessage = [NSString stringWithFormat:@"%@ has shared a Pix with you! See it here: %@", [self getUsername], url];
+    NSString * subject = [NSString stringWithFormat:@"%@ has shared a remixed photo with you", [self getUsername]];
+    NSString * fullmessage = [NSString stringWithFormat:@"View my remixed photo here... %@", url];
     if (shareMethod == 0) {
         // facebook
         FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
-        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"View my Stix collection" andDescription:@"Remix your photos with Stix! Click here to see my Pix."];
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"Remix your photos with Stix" andDescription:fullmessage];
     }
     else if (shareMethod == 1) {
         // email

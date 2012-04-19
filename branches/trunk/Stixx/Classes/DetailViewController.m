@@ -41,18 +41,7 @@ static BOOL openingDetailView;
     //NSLog(@"DetailView: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
     
     tagID = [tag.tagID intValue];
-#if 0
-    CGRect frame = CGRectMake(3, 3, 314, 282);
-    stixView = [[StixView alloc] initWithFrame:frame];
-    [stixView setInteractionAllowed:YES];
-    [stixView setIsPeelable:NO];
-    [stixView initializeWithImage:tag.image];
-    [stixView populateWithAuxStixFromTag:tag];
-    [stixView setDelegate:self];
-    //[self.view addSubview:stixView];    
-#else
     [self initFeedItemWithTag:tag];
-#endif
     [self headerFromTag:tag];
 }
 
@@ -78,7 +67,7 @@ static BOOL openingDetailView;
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 /*** commentFeedTableDelegate ***/
@@ -111,11 +100,11 @@ static BOOL openingDetailView;
 }
 
 -(UIImage *)getPhotoForIndex:(int)index {
-    return [self.delegate getUserPhotoForUsername:[names objectAtIndex:index]];
+    return [delegate getUserPhotoForUsername:[names objectAtIndex:index]];
 }
 
 -(UIImage *)getUserPhotoForUsername:(NSString *)username {
-    return [self.delegate getUserPhotoForUsername:username];
+    return [delegate getUserPhotoForUsername:username];
 }
 
 -(int)getCount {
@@ -398,7 +387,12 @@ static BOOL openingDetailView;
 
 /*** feedItem delegate ***/
 -(NSString*)getUsername {
-    return [self.delegate getUsername];
+    NSLog(@"DetailView returning username of tag: %@", tagUsername);
+    //return [self.delegate getUsername];
+    return tagUsername;
+}
+-(NSString*)getUsernameOfApp {
+    return [delegate getUsername];
 }
 
 -(NSString*)getTagUsername {
@@ -421,7 +415,7 @@ static BOOL openingDetailView;
 
 -(void)didAddNewComment:(NSString *)newComment withTagID:(int)_tagID{
     assert (_tagID == tagID);
-    NSString * name = [self.delegate getUsername];
+    NSString * name = [delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0) {
         [self.delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
@@ -446,7 +440,8 @@ static BOOL openingDetailView;
 
 -(void)didClickUserPhoto:(UIButton*)button {
     NSLog(@"DetailViewController: Clicked user photo for tag: user %@", tagUsername);
-    [self.delegate shouldDisplayUserPage:tagUsername];
+    [delegate shouldDisplayUserPage:tagUsername];
+    [DetailViewController unlockOpen];
 }
 
 -(void)shouldDisplayUserPage:(NSString *)username {
@@ -466,6 +461,9 @@ static BOOL openingDetailView;
     [DetailViewController unlockOpen];
 }
 
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
+}
 #pragma mark sharing from VerticalFeedItemDelegate
 
 -(void)didCloseShareSheet {
@@ -533,6 +531,27 @@ static BOOL openingDetailView;
         [activityIndicatorLarge release];
         activityIndicatorLarge = nil;
     }
+}
+
+-(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
+    /* DO NOT allow clicks - will lead to a delegate mess
+    // location is the click location inside feeditem's frame
+    
+    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
+    
+    CGPoint locationInStixView = location;
+    int peelableFound = [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];    
+     */
+}
+
+-(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
+    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    // send through to StixAppDelegate to save to defaults
+    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+}
+
+-(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
+    // do nothing
 }
 
 @end

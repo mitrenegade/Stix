@@ -16,11 +16,11 @@
 
 @protocol UserGalleryDelegate <NSObject>
 
--(UIImage*)getUserPhotoForGallery;
--(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
+-(UIImage*)getUserPhotoForUsername:(NSString*)name;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
-
+-(void)shouldDisplayUserPage:(NSString*)name;
+-(void)shouldCloseUserPage;
 @end
 
 @interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate, StixAnimationDelegate>

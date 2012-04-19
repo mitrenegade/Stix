@@ -162,7 +162,7 @@
     
     if (y == [delegate numberOfSections]-1) // last available row reached 
     {
-        NSLog(@"Reached last row in feed");
+        //NSLog(@"Reached last row in feed");
         [self.delegate updateScrollPagesAtPage:[delegate numberOfSections]];
     }
     return cell;
@@ -198,7 +198,7 @@
 
 -(int)getCurrentSectionAtPoint:(CGPoint) point {
     float offset = self.tableView.contentOffset.y;
-    NSLog(@"GetCurrentSectionAtPoint: %f %f Offset: %f", point.x, point.y, offset);
+    //NSLog(@"GetCurrentSectionAtPoint: %f %f Offset: %f", point.x, point.y, offset);
     point.y += offset;
     NSIndexPath * indexPath = [self.tableView indexPathForRowAtPoint: point];
     return [indexPath section];

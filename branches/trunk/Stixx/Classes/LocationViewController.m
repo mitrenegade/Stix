@@ -199,6 +199,9 @@
 
 -(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong
 {
+    [venueNames retain];
+    [latlong retain];
+    
     searching = NO;
     letUserSelectRow = YES;
     self.tableView.scrollEnabled = YES;
@@ -229,6 +232,8 @@
         [self.delegate didReceiveSearchResults];
     }
     [distArray release];
+    [venueNames release];
+    [latlong release];
 }
 
 -(void)didReceiveConnectionError {

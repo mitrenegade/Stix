@@ -38,6 +38,7 @@
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 
 - (bool) isLoggedIn;
 -(int)getStixCount:(NSString*)stixStringID;
@@ -75,9 +76,22 @@
 -(void)didClickPurchaseBuxButton;
 -(void)agitateFirstTimePointer;
 
+-(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
+-(void)didDisplayShareSheet;
+-(void)didCloseShareSheet;
+-(void)didShowBuxInstructions;
+-(void)didCloseBuxInstructions;
+-(BOOL)isDisplayingShareSheet;
+-(BOOL)isShowingBuxInstructions;
+-(UIImage*)getUserPhotoForUsername:(NSString*)name;
+
+-(BOOL)isDisplayingShareSheet;
+-(BOOL)isShowingBuxInstructions;
+
+
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserProfileViewDelegate, ProfileViewDelegate, StixAnimationDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
     
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
@@ -115,12 +129,8 @@
 //    NSString * stixSelected;
     
     // stix purchase menu
-    UIImageView * buxInstructions;
-    UIButton * buttonBuxStore;
-    UIButton * buttonBuxInstructionsClose;
     int buxAnimationOpen;
     int buxAnimationClose;
-    BOOL isShowingBuxInstructions;
     
     // share animation, graphics and actions
     UIImageView * shareSheet;
@@ -132,6 +142,8 @@
     VerticalFeedItemController * shareFeedItem;
 
     RaisedCenterTabBarController * tabBarController;
+    
+    dispatch_queue_t backgroundQueue;
 }
 @property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
@@ -177,12 +189,13 @@
 -(IBAction)didClickProfileButton:(id)sender;
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
--(void)didUnfollowUser;
--(void)didFollowUser;
+-(void)followListsDidChange;
 -(void)shouldDisplayUserPage:(NSString*)galleryUsername;
 -(void)forceReloadWholeTableZOMG;
 -(void)didCloseShareSheet;
 -(void)finishedCreateNewPix:(NSNumber*)tagID;
+-(void)checkForUpdatedStix;
+
 @end
 
 

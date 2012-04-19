@@ -13,7 +13,7 @@
 @synthesize delegate;
 -(id)init
 {
-	[super init];
+	self = [super init];
     gps = [[CLLocationManager alloc] init];
 
     // start listening
@@ -103,6 +103,10 @@
         if (nil != self.delegate) {
             [self.delegate receiveVenueNames:venueNames andLatLong:venueLL];
         }
+        [venueLL release];
+        [venueNames release];
     }];
+    [lat release];
+    [lon release];
 }
 @end

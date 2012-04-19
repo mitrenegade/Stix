@@ -158,6 +158,80 @@ static int animationID = 1;
      ];
 }
 
+-(void)doShake:(UIView *)canvas angleInDegrees:(float)deg forTime:(float)time withCompletion:(void (^)(BOOL))_completion {
+    // same as doFade but with no delegate calls
+    animationID++;
+    CGAffineTransform rot = CGAffineTransformMakeRotation(deg / 180 / 3.1415);
+    [UIView animateWithDuration:time/4
+                          delay:0
+                        options: UIViewAnimationCurveEaseIn 
+                     animations: ^ { 
+                         [canvas setTransform:rot];
+                     } 
+                     completion:^(BOOL finished) {
+                         CGAffineTransform rot = CGAffineTransformMakeRotation(-deg / 180 / 3.1415);
+                         [UIView animateWithDuration:time/2
+                                               delay:0
+                                             options: UIViewAnimationCurveEaseIn 
+                                          animations: ^ { 
+                                              [canvas setTransform:rot];
+                                          } 
+                                          completion:^(BOOL finished) {
+                                              CGAffineTransform rot = CGAffineTransformMakeRotation(0 / 180 / 3.1415);
+                                              [UIView animateWithDuration:time/4
+                                                                    delay:0
+                                                                  options: UIViewAnimationCurveEaseIn 
+                                                               animations: ^ { 
+                                                                   [canvas setTransform:rot];
+                                                               } 
+                                                               completion:
+                                                                   _completion
+                                               ];
+                                          }
+                          ];
+                     }
+     ];
+}
+
+-(void)doPulse:(UIView *)canvas forTime:(float)time repeatCount:(int)repeat withCompletion:(void (^)(BOOL))_completion {
+    // same as doFade but with no delegate calls
+    animationID++;
+    [UIView animateWithDuration:time/4
+                          delay:time/2
+                        options: UIViewAnimationCurveEaseIn 
+                     animations: ^ { 
+                         [canvas setAlpha:.25];
+                     } 
+                     completion:^(BOOL finished) {
+                         if (repeat == 0) {
+                             [UIView animateWithDuration:time/4
+                                                   delay:0
+                                                 options: UIViewAnimationCurveEaseOut 
+                                              animations: ^ { 
+                                                  [canvas setAlpha:1];
+                                              } 
+                                              completion:_completion 
+                              ];
+                         }
+                         else
+                             [UIView animateWithDuration:time/4
+                                               delay:0
+                                             options: UIViewAnimationCurveEaseOut 
+                                          animations: ^ { 
+                                              [canvas setAlpha:1];
+                                          } 
+                                          completion:^(BOOL finished) {
+                                              if (repeat == -1) {
+                                                  [self doPulse:canvas forTime:time repeatCount:repeat withCompletion:_completion];
+                                              }
+                                              else 
+                                                  [self doPulse:canvas forTime:time repeatCount:repeat-1 withCompletion:_completion];
+                                          }
+                          ];
+                     }
+     ];
+}
+
 /*
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.

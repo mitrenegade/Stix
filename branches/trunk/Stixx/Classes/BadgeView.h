@@ -57,6 +57,10 @@ enum {
 
 -(void)didDismissCarouselTab;
 -(void)didExpandCarouselTab;
+
+-(BOOL)isDisplayingShareSheet;
+-(BOOL)isShowingBuxInstructions;
+
 @end
 
 @interface BadgeView : UIView {// <UIScrollViewDelegate>{
@@ -127,6 +131,5 @@ enum {
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
 +(NSMutableDictionary*)InitializeFirstTimeUserStix;
-
 
 @end

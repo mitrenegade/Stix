@@ -41,7 +41,7 @@
 @property (nonatomic, assign) int rowHeight;
 @property (nonatomic, retain) UIColor * fontNameColor;
 @property (nonatomic, retain) UIColor * fontTextColor;
--(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
+//-(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor;
 -(float)getHeightForComment:(NSString*)comment forStixStringID:(NSString*)stixStringID;

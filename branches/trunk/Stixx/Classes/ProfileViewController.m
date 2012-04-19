@@ -83,7 +83,7 @@
 }
 -(void)stopActivityIndicatorAfterTimeout {
     [self stopActivityIndicator];
-    NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
+    //NSLog(@"%s: ActivityIndicator stopped after timeout!", __func__);
 }
 
 #pragma mark initialization functions
@@ -159,6 +159,11 @@
             [searchBar removeFromSuperview];
             [searchBar release];
             searchBar = nil;
+        }
+        if (tosView) {
+            [tosView removeFromSuperview];
+            [tosView release];
+            tosView = nil;
         }
     }
 }
@@ -336,39 +341,48 @@
     [picker release];
 }
 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
-{
-    NSLog(@"Added photo to username %@", [delegate getUsername]);
-    
-    // force friendView to update photo after we know it is in kumulos
-    [self.delegate checkForUpdatePhotos];
-}
-
 /*** other actions ****/
-/*
--(IBAction)closeInstructions:(id)sender;
-{
-    [buttonInstructions setHidden:YES];
-}
-*/
 -(IBAction)adminStixButtonPressed:(id)sender
 {
     [self.delegate didPressAdminEasterEgg:@"ProfileView"];
 }
 
--(IBAction)feedbackButtonClicked:(id)sender {
-    [self.delegate didClickFeedbackButton:@"Profile view"];
+-(IBAction)aboutButtonClicked:(id)sender {
+    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"About Stix"   delegate:self cancelButtonTitle:@"Close" destructiveButtonTitle:nil otherButtonTitles:@"Terms of Service", @"Contact Us", nil];
+    [actionSheet showInView:self.view];
+    [actionSheet release];
 }
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    switch (buttonIndex) {
+        case 0: // TOS
+        {
+            [self toggleMyInfo:NO];
+            [self toggleMyButtons:NO];
+            tosView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 44, 320, 480-44)];
+            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.stixmobile.com/tos/"]];
+            [tosView loadRequest:request];
+            [tosView setDelegate:self];
+            [self.view addSubview:tosView];
+        }
+            break;
+        case 1: // FEEDBACK
+            [self.delegate didClickFeedbackButton:@"ProfileView"];
+            break;
+        case 2: // Cancel
+            return;
+            break;
+        default:
+            return;
+            break;
+    }
+}
+
 
 -(IBAction)inviteButtonClicked:(id)sender {
     [self.delegate didClickInviteButton];
 }
 
-/**** friendsViewControllerDelegate ****/
-// badgeViewDelegate forwarded from friendsViewDelegate
-- (void)checkForUpdatePhotos {[self.delegate checkForUpdatePhotos];}
--(NSMutableDictionary *)getUserPhotos {return [self.delegate getUserPhotos];}
-//-(NSMutableSet*)getFriendsList {return [self.delegate getFriendsList];}
 -(NSString*)getUsername {return [self.delegate getUsername];}
 -(int)getStixCount:(NSString*)stixStringID {return [delegate getStixCount:stixStringID];}
 -(int)getStixOrder:(NSString*)stixStringID;
@@ -489,12 +503,12 @@
 
 -(void)updateFollowCounts {
     // uses delegate functions
-    NSMutableSet * followingList = [self.delegate getFollowingList];
+    NSMutableSet * followingList = [delegate getFollowingList];
     int followingCount = [followingList count];
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
     NSLog(@"FollowingList: %@", followingList);
     
-    NSMutableSet * followerList = [self.delegate getFollowerList];
+    NSMutableSet * followerList = [delegate getFollowerList];
     int followerCount = [followerList count];
     [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
     NSLog(@"FollowerList: %@", followerList);
@@ -581,6 +595,7 @@
     [searchFriendIsStix addObjectsFromArray:searchFriendNotStix];
     [searchFriendNotStix release];
     [searchFriendNotStixID release];
+    [searchFriendNotStixName release];
     
     [self stopActivityIndicator];
     if (isSearching) { 
@@ -690,6 +705,10 @@
         return -2;
     return [[delegate getFollowingList] containsObject:friendName];
 }
+-(UIImage*)getUserPhotoForUsername:(NSString *)name {
+    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:name]];
+    return userPhoto;
+}
 
 -(int)getNumOfUsers {
     return [searchFriendName count];
@@ -719,9 +738,25 @@
         [self didClickBackButton:nil];
     }
     else {
-        [delegate closeProfileView];
-        [delegate shouldDisplayUserPage:username];
+        if ([[searchFriendIsStix objectAtIndex:index] boolValue]) {
+            [delegate closeProfileView];
+            [delegate shouldDisplayUserPage:username];
+        }   
     }
+}
+
+-(void)shouldDisplayUserPage:(NSString *)name {
+    if ([name isEqualToString:[delegate getUsername]]) {
+        [self didClickBackButton:nil];
+    }
+    else {
+        [delegate closeProfileView];
+        [delegate shouldDisplayUserPage:name];
+    }
+}
+
+-(void)shouldCloseUserPage {
+    [delegate shouldCloseUserPage];
 }
 
 #pragma mark ABAddressBook functions
@@ -855,6 +890,7 @@
         [searchFriendName addObject:name];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
+    [namesResults release];
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];
     isSearching = NO;
@@ -925,7 +961,6 @@
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
     [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
--(UIImage*)getUserPhotoForGallery {return [self.delegate getUserPhoto];}
 
 -(void)doPointerAnimation {
     showPointer = YES;

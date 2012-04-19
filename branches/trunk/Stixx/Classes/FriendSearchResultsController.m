@@ -239,6 +239,7 @@
         [buttonArray release];
         [addFriendButton release];
         [alreadyFriendedButton release];
+        [inviteButton release];
     }
     
     NSMutableArray * buttonArray = [userButtons objectForKey:username];

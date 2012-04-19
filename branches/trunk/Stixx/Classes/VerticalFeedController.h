@@ -13,15 +13,13 @@
 #import "CarouselView.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
-//#import "AuxStixViewController.h"
 #import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
-#import "BTBitlyHelper.h"
+//#import "BTBitlyHelper.h"
 #import "ProfileViewController.h"
 #import "OutlineLabel.h"
 #import "KumulosHelper.h"
-//#import "UserGalleryController.h"
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
 
@@ -91,7 +89,7 @@
 
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, BTBitlyHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
     
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
@@ -165,7 +163,6 @@
 //@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
 @property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
-@property (nonatomic, retain) BTBitlyHelper * bitlyHelper;
 //@property (nonatomic, copy) NSString * galleryUsername;
 @property (nonatomic, retain) IBOutlet UITextField * statusMessage;
 @property (nonatomic, assign) int newestTagIDDisplayed;

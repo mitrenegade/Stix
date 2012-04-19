@@ -30,7 +30,6 @@
 //@synthesize stixSelected;
 @synthesize buttonProfile;
 @synthesize labelBuxCount;
-@synthesize bitlyHelper;
 @synthesize statusMessage;
 @synthesize newestTagIDDisplayed;
 
@@ -883,9 +882,10 @@
 #endif
 }
 
-
+#if 0
 - (void) shortenBlastTextUrls:(NSString*)url{
     
+    /*
     // Create bit.ly helper if nil
     if (self.bitlyHelper == nil) {
         self.bitlyHelper = [[[BTBitlyHelper alloc] init] autorelease];
@@ -893,12 +893,15 @@
     }
     
     [self.bitlyHelper shortenURLSInText:url];
+     */
 }
 - (void) BTBitlyShortUrl: (NSString *) shortUrl receivedForOriginalUrl: (NSString *) originalUrl{
     NSLog(@"URL %@ shortened to %@", originalUrl, shortUrl);
 }
 - (void) BTBitlyQueueStartedProcessing {}
 - (void) BTBitlyQueueFinishedProcessing {}
+
+#endif
 
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];

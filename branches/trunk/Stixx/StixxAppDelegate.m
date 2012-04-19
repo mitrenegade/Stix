@@ -16,9 +16,8 @@
 
 
 #import "StixxAppDelegate.h"
-//#import <MapKit/MapKit.h>
 #import "FileHelpers.h"
-#import "Kiip.h"
+//#import "Kiip.h"
 #import "QuartzCore/QuartzCore.h"
 
 #define START_ID 100

@@ -1711,6 +1711,7 @@
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "EB9CEC40-7716-4E34-A092-04490AE14F61";
 				SEPARATE_STRIP = YES;
+				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
@@ -1751,6 +1752,7 @@
 				);
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "EB9CEC40-7716-4E34-A092-04490AE14F61";
+				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;

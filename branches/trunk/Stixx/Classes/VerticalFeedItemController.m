@@ -131,10 +131,12 @@
     else {
         [self togglePlaceholderView:YES];
     }
+    /*
     [shareButton removeFromSuperview];
     [self.view addSubview:shareButton];
     [addCommentButton removeFromSuperview];
     [self.view addSubview:addCommentButton];
+     */
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    

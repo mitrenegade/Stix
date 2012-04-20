@@ -713,6 +713,10 @@
     [self startActivityIndicator];
     if (section>[allTagsDisplayed count])
         section = 0;
+    if ([allTagsDisplayed count] == 0) {
+        [self stopActivityIndicator];
+        return;
+    }
     [self reloadViewForItemAtIndex:section];
 }
 
@@ -724,6 +728,10 @@
     [self startActivityIndicator];
     if (section>[allTagsDisplayed count])
         section = 0;
+    if ([allTagsDisplayed count] == 0) {
+        [self stopActivityIndicator];
+        return;
+    }
     [self reloadViewForItemAtIndex:section];
 }
 

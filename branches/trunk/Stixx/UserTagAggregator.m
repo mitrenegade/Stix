@@ -22,8 +22,6 @@
         [k setDelegate:self];
         allTagIDs = [[NSMutableArray alloc] init];
         allUsernamesOfTagIDs = [[NSMutableDictionary alloc] init];
-
-        backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.aggregator", NULL);
         
         // create queue of tagIDs to insert in background
         aggregationQueue = [[NSMutableArray alloc] init];
@@ -33,7 +31,6 @@
         followingCountLeftToAggregate = 0; // keep track of whether all friends have been aggregated
         isFirstTimeAggregating = YES;
         firstTimeAggregatingTrigger = 0;
-        
     }
     return self;
 }
@@ -125,65 +122,64 @@
 
 -(void)processAggregationQueueInBackground {
     // run continuous while loop in separate background thread
-    dispatch_async(backgroundQueue, ^(void) {                
-        while (1) {
-            if ([aggregationQueue count]>0) {
-                // insert sorted
-                // assumes allTagIDs is sorted in ascending
-                //NSLog(@"Current aggregationQueue count %d", [aggregationQueue count]);
-                NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
-                if (d != nil) {
-                    [aggregationQueue removeObject:d];
-                    //NSString * username = [d valueForKey:@"username"];
-                    NSNumber * tagID = [d valueForKey:@"tagID"];
-                    NSLog(@"Aggregating queue now size %d tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
-                    
-                    id newObject = tagID;
-                    NSComparator comparator = ^(id obj1, id obj2) {
-                        return [obj1 compare: obj2];
-                    };
-                    
-                    if ([allTagIDs containsObject:tagID]) {
-                        NSLog(@"allTagIDs contains object");
-                        continue;
-                    }
-                    if (!newObject) {
-                        [k addMetricWithDescription:@"Invalid Aggregation Tag" andUsername:[delegate getUsername] andStringValue:[d valueForKey:@"username"] andIntegerValue:[tagID intValue]];
-                        continue;
-                    }
-                    
-                    NSUInteger newIndex = [allTagIDs indexOfObject:newObject
-                                                     inSortedRange:(NSRange){0, [allTagIDs count]}
-                                                           options:NSBinarySearchingInsertionIndex
-                                                   usingComparator:comparator];
-                    if (newIndex < [allTagIDs count]) {
-                        if ([[allTagIDs objectAtIndex:newIndex] intValue] != [tagID intValue])
-                            [allTagIDs insertObject:newObject atIndex:newIndex];
-                    }
-                    else
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
+                                             (unsigned long)NULL), ^(void) {
+        
+    while (1) {
+        if ([aggregationQueue count]>0) {
+            // insert sorted
+            // assumes allTagIDs is sorted in ascending
+            //NSLog(@"Current aggregationQueue count %d", [aggregationQueue count]);
+            NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
+            if (d != nil) {
+                [aggregationQueue removeObject:d];
+                //NSString * username = [d valueForKey:@"username"];
+                NSNumber * tagID = [d valueForKey:@"tagID"];
+                NSLog(@"Aggregating queue now size %d tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
+                
+                id newObject = tagID;
+                NSComparator comparator = ^(id obj1, id obj2) {
+                    return [obj1 compare: obj2];
+                };
+                
+                if ([allTagIDs containsObject:tagID])
+                    continue;
+                
+                NSUInteger newIndex = [allTagIDs indexOfObject:newObject
+                                                 inSortedRange:(NSRange){0, [allTagIDs count]}
+                                                       options:NSBinarySearchingInsertionIndex
+                                               usingComparator:comparator];
+                if (newIndex < [allTagIDs count]) {
+                    if ([[allTagIDs objectAtIndex:newIndex] intValue] != [tagID intValue])
                         [allTagIDs insertObject:newObject atIndex:newIndex];
-                    
-                    //NSLog(@"Aggregation queue: processed tagID %d username %@ index %d, remaining %d, allTagID size %d", [tagID intValue], username, newIndex, [aggregationQueue count], [allTagIDs count]);
-                    
-                    // set new most recent tagID
-                    if ([tagID intValue] > idOfNewestTagAggregated) {
-                        NSLog(@"Aggregator: newest tagID found: %d old newestTagID: %d", [tagID intValue], idOfNewestTagAggregated);
-                        idOfNewestTagAggregated = [tagID intValue];
-                    }
-                    
-                    if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
-                        // triggers "completion" of aggregator initially
-                        // the highest id in this should be the most recent tagID for this user's following list
-                        NSLog(@"FirstTimeAggregatingTrigger fired; allTagIDs now %d", [allTagIDs count]);
-                        [delegate didFinishAggregation:YES];
-                        firstTimeAggregatingTrigger = 0;
-                    }
-                    //                else
-                    //                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
                 }
+                else
+                    [allTagIDs insertObject:newObject atIndex:newIndex];
+                
+                //NSLog(@"Aggregation queue: processed tagID %d username %@ index %d, remaining %d, allTagID size %d", [tagID intValue], username, newIndex, [aggregationQueue count], [allTagIDs count]);
+                
+                // set new most recent tagID
+                if ([tagID intValue] > idOfNewestTagAggregated) {
+                    NSLog(@"Aggregator: newest tagID found: %d old newestTagID: %d", [tagID intValue], idOfNewestTagAggregated);
+                    idOfNewestTagAggregated = [tagID intValue];
+                }
+                
+                if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
+                    // triggers "completion" of aggregator initially
+                    // the highest id in this should be the most recent tagID for this user's following list
+                    NSLog(@"FirstTimeAggregatingTrigger fired; allTagIDs now %d", [allTagIDs count]);
+                    [delegate didFinishAggregation:YES];
+                    firstTimeAggregatingTrigger = 0;
+                }
+//                else
+//                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
             }
-        }        
+        }
+    }
+        
+        
     }); // end of dispatch_async
+
 }
 
 -(void)displayState {

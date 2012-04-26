@@ -205,7 +205,7 @@
         animation.delegate = self;
         allAnimationIDs[3] = [animation doDownwardFade:canvas inView:self.view forDistance:-100 forTime:1];
         [animation release];
-        [self.myDelegate didFinishRewardAnimation:rewardValue];
+        [myDelegate didFinishRewardAnimation:rewardValue];
     }
     
     /* first time mall pointer */
@@ -287,7 +287,7 @@
     if (showInstructions) {
         //[firstTimeInstructions setFrame:frameOffscreen];
         [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
-            
+            [animation release];
         }];
     }
     else {

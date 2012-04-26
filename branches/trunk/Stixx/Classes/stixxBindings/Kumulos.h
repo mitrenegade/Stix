@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Mar 30, 2012
+//  Created by Kumulos Bindings Compiler on Apr 25, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -14,6 +14,10 @@
 @protocol KumulosDelegate <kumulosProxyDelegate>
 @optional
 
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHighResImageDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getHighResImageDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addCommentToPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -129,6 +133,8 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation removeFollowerDidCompleteWithResult:(NSNumber*)affectedRows;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricHitDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPixBelongsToUserDidCompleteWithResult:(NSNumber*)newRecordID;
@@ -163,6 +169,12 @@
 -(Kumulos*)init;
 -(Kumulos*)initWithAPIKey:(NSString*)APIKey andSecretKey:(NSString*)secretKey;
 
+   
+-(KSAPIOperation*) addHighResImageWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID;
+    
+   
+-(KSAPIOperation*) getHighResImageWithTagID:(NSInteger)tagID;
+    
    
 -(KSAPIOperation*) addCommentToPixWithTagID:(NSInteger)tagID andUsername:(NSString*)username andComment:(NSString*)comment andStixStringID:(NSString*)stixStringID;
     
@@ -330,6 +342,9 @@
     
    
 -(KSAPIOperation*) removeFollowerWithUsername:(NSString*)username andFollowsUser:(NSString*)followsUser;
+    
+   
+-(KSAPIOperation*) addMetricWithDescription:(NSString*)description andUsername:(NSString*)username andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;
     
    
 -(KSAPIOperation*) addMetricHitWithDescription:(NSString*)description andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;

@@ -52,7 +52,8 @@ enum {
 @optional
 
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
--(void)didTapStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
+//-(void)didTapStix:(UIImageView *)badge ofType:(NSString*)stixStringID;
+-(void)didTapStixOfType:(NSString*)stixStringID;
 -(void)didStartDrag;
 
 -(void)didDismissCarouselTab;

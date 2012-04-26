@@ -115,7 +115,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
             username = [d objectForKey:@"username"];
             NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d objectForKey:@"stix"]] retain];
             NSLog(@"User %@ has %d stix", username, [stix count]);
-            NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
+            //NSMutableDictionary * auxiliaryData = [[NSMutableDictionary alloc] init];
             /*
             int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
             NSMutableSet * friendsList;

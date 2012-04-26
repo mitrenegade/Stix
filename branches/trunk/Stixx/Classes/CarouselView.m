@@ -164,17 +164,15 @@ static dispatch_queue_t backgroundQueue;
     int stixWidth = SHELF_STIX_SIZE + 10;
     int stixHeight = SHELF_STIX_SIZE + 20;
     int totalStix = [BadgeView totalStixTypes];
-    int stixToShow = totalStix;
+//    int stixToShow = totalStix;
     //int stixToPurchase = 0; // count the nonordered stix - display backwards
     // create sets of all the categories to see if user has them requested stix
     NSMutableArray * categoryStix;
     NSMutableSet * categorySet = [[NSMutableSet alloc] init];
-    if (1) { //shelfCategory != SHELF_CATEGORY_FIRST) {
-        NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
-        categoryStix = [BadgeView getStixForCategory:categoryName];
-        [categorySet addObjectsFromArray:categoryStix];
-        stixToShow = [categorySet count];
-    }
+    NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
+    categoryStix = [BadgeView getStixForCategory:categoryName];
+    [categorySet addObjectsFromArray:categoryStix];
+    int stixToShow = [categorySet count];
     [stixCategoryNames release];
     int maxX = STIX_PER_ROW;
     double rows = (double) stixToShow / (double)maxX;
@@ -566,11 +564,13 @@ static int lastContentOffsetY = 0;
                 NSString * stixStringID = [allCarouselStixStringIDsAtFrame objectForKey:key];
                 if (CGRectContainsPoint(stixFrame, location)) {
                     NSLog(@"Stix of type %@ touched", [BadgeView getStixDescriptorForStixStringID:stixStringID]);
-                    UIImageView * stixTouched = [allCarouselStixViews objectForKey:stixStringID];                    
-
+                    UIImageView * stixTouched = [allCarouselStixViews objectForKey:stixStringID];     
+                    NSLog(@"Stix center %f %f, affine transform %f %f %f %f %f %f", stixTouched.center.x, stixTouched.center.y, stixTouched.transform
+                          .a, stixTouched.transform.b, stixTouched.transform.c, stixTouched.transform.d, stixTouched.transform.tx, stixTouched.transform.ty);
                     //if ([self.delegate getStixCount:stixStringID] != 0) { 
-                        [self.delegate didTapStix:stixTouched ofType:stixStringID];
+                        //[delegate didTapStix:stixTouched ofType:stixStringID];
                     //}
+                    [delegate didTapStixOfType:stixStringID];
                     break;
                 }
             }

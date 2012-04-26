@@ -16,7 +16,7 @@
 @synthesize activityIndicator; // initially is active
 @synthesize activityIndicatorLarge;
 @synthesize feedItems;
-@synthesize headerViews;
+@synthesize headerViews, headerViewsDidLoadPhoto;
 @synthesize allTags;
 @synthesize allTagsDisplayed;
 @synthesize tableController;
@@ -82,6 +82,7 @@
 -(void) viewDidLoad {
     [super viewDidLoad];
     lastPageViewed = 0;
+    tempTagID = -1;
 
     //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
@@ -107,6 +108,7 @@
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
     headerViews = [[NSMutableDictionary alloc] init];
+    headerViewsDidLoadPhoto = [[NSMutableDictionary alloc] init];
     feedSectionHeights = [[NSMutableDictionary alloc] init];
     
     [self startActivityIndicator];
@@ -140,11 +142,10 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-	//[imageView setImage:[[ImageCache sharedImageCache] imageForKey:@"newImage"]];
 	[super viewWillAppear:animated];
     
-    [self populateAllTagsDisplayed];
-    [tableController.tableView reloadData];
+    //[self populateAllTagsDisplayed];
+    //[tableController.tableView reloadData];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -197,7 +198,7 @@
 }
 
 /******* badge view delegate ******/
--(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
+-(void)didTapStixOfType:(NSString *)stixStringID {
     //[self.carouselView carouselTabDismissWithStix:badge];
     if ([allTagsDisplayed count]==0) {
         [carouselView resetBadgeLocations];
@@ -208,16 +209,16 @@
     [self.carouselView setStixSelected:stixStringID];
     CGPoint center = self.view.center;
     center.y -= tableController.view.frame.origin.y; // remove tableController offset
-    [badge setCenter:center];
+    //[badge setCenter:center];
     int section = [tableController getCurrentSectionAtPoint:center];
     lastPageViewed = section;
-    [self didDropStixByTap:badge ofType:stixStringID];
+    [self didDropStixByTapOfType:stixStringID];
 }
 
--(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID {
+-(void)didDropStixByTapOfType:(NSString*)stixStringID {
     // tap inside the feed to add a stix
     Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didTapStix
-    [self addAuxStix:badge ofType:stixStringID toTag:tag];
+    [self addAuxStixOfType:stixStringID toTag:tag];
 }
 
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
@@ -231,7 +232,7 @@
     [badge setCenter:locationInSection];
     NSLog(@"VerticalFeedController: didDropStixByDrag: section found %d locationInSection origin %f %f center %f %f size %f %f", lastPageViewed, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, badge.frame.size.width, badge.frame.size.height);
     Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didDropStix
-    [self addAuxStix:badge ofType:stixStringID toTag:tag];
+    [self addAuxStixOfType:stixStringID toTag:tag];
 }
 
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
@@ -250,7 +251,7 @@
     [self didDropStixByDrag:badge ofType:stixStringID];
 }
 
--(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*) tag{ 
+-(void)addAuxStixOfType:(NSString*)stixStringID toTag:(Tag*) tag{ 
     // HACK: will be changed soon if we have an addStix button
     
     // input badge should have frame within the tag's frame
@@ -266,18 +267,15 @@
     //NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
     
     // scale stix frame back to full 300x275 size
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    //VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     
-    NSLog(@"VerticalFeedController: added stix of size %f %f at origin %f %f center %f %f (whole window's frame) in view %f %f\n", badge.frame.size.width, badge.frame.size.height, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, feedItem.imageView.frame.size.width, feedItem.imageView.frame.size.height);
-    
-	//CGRect stixFrameScaled = badge.frame;
-    //CGRect tableFrame = tableController.view.frame;
-    //CGRect imageViewFrame = feedItem.imageView.frame;
-    float centerx = badge.center.x - feedItemViewOffset.x; // small mismatch between placement
+    /*
+     float centerx = badge.center.x - feedItemViewOffset.x; // small mismatch between placement
     float centery = badge.center.y - feedItemViewOffset.y;
     CGPoint location = CGPointMake(centerx, centery); 
     [badge setCenter:location];
-
+*/
+    CGPoint location = CGPointMake(160,216);
     AddStixViewController * auxView = [[AddStixViewController alloc] init];
     
     // hack a way to display view over camera; formerly presentModalViewController
@@ -410,14 +408,19 @@
         [headerView setAlpha:.75];
         
         UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]] autorelease];
-        //UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
-        UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
-		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
-        [photoView.layer setBorderWidth: 2.0];
-        [photoView setImage:photo forState:UIControlStateNormal];
-        [photoView setTag:index];
-        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
-        [headerView addSubview:photoView];
+        if (photo) {
+            UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+            [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+            [photoView.layer setBorderWidth: 2.0];
+            [photoView setImage:photo forState:UIControlStateNormal];
+            [photoView setTag:index];
+            [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+            [headerView addSubview:photoView];
+            [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:YES] forKey:tag.tagID];
+        }
+        else {
+            [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:NO] forKey:tag.tagID];
+        }
         
         UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
@@ -446,6 +449,22 @@
         
         [headerViews setObject:headerView forKey:tag.tagID];
         [headerView autorelease];
+    }
+    else {
+        if ([[headerViewsDidLoadPhoto objectForKey:tag.tagID] boolValue] == NO) {
+            // try to reload header photo
+            UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]] autorelease];
+            if (photo) {
+                UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+                [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+                [photoView.layer setBorderWidth: 2.0];
+                [photoView setImage:photo forState:UIControlStateNormal];
+                [photoView setTag:index];
+                [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+                [headerView addSubview:photoView];
+                [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:YES] forKey:tag.tagID];
+            }
+        }
     }
     return [headerViews objectForKey:tag.tagID]; // MRC
 }
@@ -641,8 +660,9 @@
     }
 }
 
--(void)jumpToPageWithTagID:(int)tagID {
+-(BOOL)jumpToPageWithTagID:(int)tagID {
     // find position of tag in allTagsDisplayed
+    BOOL exists = NO;
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * t = [allTagsDisplayed objectAtIndex:i];
         if ([t.tagID intValue] == tagID) {
@@ -650,12 +670,17 @@
             NSLog(@"JumpToPageWithTagID: %d Target row: %d", tagID, i);
             NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
             [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+            exists = YES;
         }
     }
+    return exists;
 }
 
 -(IBAction)didClickJumpButton:(id)sender {
     // jumps to top
+    if ([allTagsDisplayed count] == 0) {
+        return;
+    }
     NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
 }
@@ -696,7 +721,16 @@
         NSLog(@"what's taking so long? sections %d tags %d feedItems %d", [self numberOfSections], [self itemCount], [feedItems count]);
         // no tags are loaded, just get the first few
         [delegate checkAggregatorStatus];
-        [delegate getNewerTagsThanID:-1];        
+        [delegate getNewerTagsThanID:-1];
+        //int lastIDNotDisplayed;
+        if ([allTags count] == 0)
+            [delegate getFirstTags];
+        else {
+            Tag * lastTag = [allTags objectAtIndex:0];
+            int lastIDNotDisplayed = [[lastTag tagID] intValue];
+            NSLog(@"allTags last tag: %d", lastIDNotDisplayed);
+            [delegate getOlderTagsThanID:lastIDNotDisplayed];
+        }
         // should not come here!
         //NSLog(@"Error! allTags was never seeded!");
         //[self.delegate checkForUpdateTags];
@@ -793,9 +827,10 @@
 -(void)addTagForDisplay:(Tag *)tag {
     // add newly created tag so it appears in the feed
     // create temporary tag id and timestamps
-    tag.tagID = [NSNumber numberWithInt:-1]; // temp
+    tag.tagID = [NSNumber numberWithInt:tempTagID--]; // temp
     tag.timestamp = [NSDate date];
     [allTagsDisplayed insertObject:tag atIndex:0];
+    //[self reloadPage:0];
     [self forceReloadWholeTableZOMG];
 }
 
@@ -833,13 +868,11 @@
 // comes from feedItem instead of carousel
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
     // location is the click location inside feeditem's frame
-    
-    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d\n", location.x, location.y, feedItem.tagID);
-
     CGPoint locationInStixView = location;
     //locationInStixView.x -= feedItem.stixView.frame.origin.x;
     //locationInStixView.y -= feedItem.stixView.frame.origin.y;
     int peelableFound = [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];
+    NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d peelableFound: %d\n", location.x, location.y, feedItem.tagID, peelableFound);
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == feedItem.tagID) {
@@ -1222,33 +1255,35 @@
     // find the correct tag in allTags;
     if ([theResults count] == 0)
         return;
-    Tag * tag = nil;
+    //Tag * tag = nil;
     for (NSMutableDictionary * d in theResults) {
-        Tag * t = [[Tag getTagFromDictionary:d] retain]; // MRC
-        if ([t.tagID intValue]== [tagID intValue]) {
-            tag = t; // MRC: when we break, t is not released so tag is retaining t
-            break;
+        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
+        if ([tag.tagID intValue]== [tagID intValue]) {
+//            tag = t; // MRC: when we break, t is not released so tag is retaining t
+//            break;
+            // find local tag and sync with kumulos tag
+            Tag * localTag = nil;
+            int index = -1;
+            for (int i=0; i<[allTagsDisplayed count]; i++) {
+                localTag = [allTagsDisplayed objectAtIndex:i];
+                if ([localTag.tagID intValue] == [tagID intValue]) {
+                    index = i;
+                    NSLog(@"UpdateStixForPix: Found tag %d at index %d", [localTag.tagID intValue], index);
+                    [allTagsDisplayed replaceObjectAtIndex:index withObject:tag];
+                    [delegate addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
+                    //    [self reloadViewForItemAtIndex:index];
+                    //    [self.tableController.tableView reloadData];
+                    [self reloadPage:index];
+                    [tag release];
+                    return;
+                }
+            }
+
         }
-        [t release];
+        [tag release];
     }
-    if (tag == nil)
+//    if (tag == nil)
         return;
-    // find local tag and sync with kumulos tag
-    Tag * localTag = nil;
-    int index = -1;
-    for (int i=0; i<[allTagsDisplayed count]; i++) {
-        localTag = [allTagsDisplayed objectAtIndex:i];
-        if ([localTag.tagID intValue] == [tagID intValue]) {
-            index = i;
-            break;
-        }
-    }
-    NSLog(@"UpdateStixForPix: Found tag %d at index %d", [localTag.tagID intValue], index);
-    [allTagsDisplayed replaceObjectAtIndex:index withObject:localTag];
-    [delegate addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
-//    [self reloadViewForItemAtIndex:index];
-//    [self.tableController.tableView reloadData];
-    [self reloadPage:index];
 }
 @end
 

@@ -896,7 +896,7 @@
 		}
 	}
 	
-	return dict;
+	return [dict autorelease];
 }
 
 + (void)    request:(NSString *)methodName 

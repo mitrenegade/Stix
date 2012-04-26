@@ -209,7 +209,8 @@
 }
 
 -(UIImage*)getPhotoForIndex:(int)index {
-    return [self.delegate getUserPhotoForUsername:[names objectAtIndex:index]];//[photos objectForKey:[names objectAtIndex:index]];
+    NSString * name = [names objectAtIndex:index];
+    return [delegate getUserPhotoForUsername:name];//[photos objectForKey:[names objectAtIndex:index]];
 }
 
 -(int)getCount {
@@ -217,21 +218,25 @@
 }
 
 -(IBAction)didClickAddButton:(id)sender {
-    NSString * newComment = [commentField text];
     [commentField resignFirstResponder];
+    NSString * newComment = [commentField text];
     if ([newComment length] > 0)
-        [self.delegate didAddNewComment:newComment withTagID:self.tagID];
+        [delegate didAddNewComment:newComment withTagID:self.tagID];
+	NSLog(@"Comment entered: %@", [commentField text]); 
 }
 
 -(IBAction)didClickBackButton:(id)sender {
     [commentField resignFirstResponder];
-    [self.delegate didCloseComments];
+    [delegate didCloseComments];
 }
 /*** UITextFieldDelegate ***/
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
-	//NSLog(@"Comment entered: %@", [textField text]); 
+    NSString * newComment = [commentField text];
+    if ([newComment length] > 0)
+        [delegate didAddNewComment:newComment withTagID:self.tagID];
+	NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
 

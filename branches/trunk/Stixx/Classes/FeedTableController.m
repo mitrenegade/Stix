@@ -279,6 +279,7 @@
                                               completion:^(BOOL finished) {
                                                   NSLog(@"EGO Refresh view: content inset at 0");
                                                   [refreshHeaderView setState:EGOOPullRefreshNormal];
+                                                  _reloading = NO;
                                               }
                               ];
                          }
@@ -291,7 +292,7 @@
 
 - (void)dataSourceDidFinishLoadingNewData{
 	
-    if (_reloading) {
+    if (1) { //_reloading) {
         _reloading = NO;
         
         [UIView beginAnimations:nil context:NULL];

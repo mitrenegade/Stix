@@ -138,7 +138,9 @@
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name
-{return [self.delegate getUserPhotoForUsername:name];}
+{
+    return [self.delegate getUserPhotoForUsername:name];
+}
 
 /**** friendsViewControllerDelegate ****/
 -(NSString*)getUsername {
@@ -229,7 +231,15 @@
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
     [photoButton setBackgroundColor:[UIColor blackColor]];
+#if 1
+    //NSString * friendName = username;
+    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:username]];
+    if (!userPhoto)
+        userPhoto = [UIImage imageNamed:@"graphic_nopic.png"];
+    [photoButton setImage:userPhoto];
+#else
     [photoButton setImage:[delegate getUserPhotoForUsername:username]];// forState:UIControlStateNormal];
+#endif
     //[photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
 
     [buttonAddFriend setFrame:CGRectMake(100, 160-44, 120, 60)];

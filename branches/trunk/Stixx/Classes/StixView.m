@@ -238,6 +238,11 @@ static int currentStixViewID = 0;
     [stix removeFromSuperview];
     [stix release];
     stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    if (transform.a==0 && transform.b==0 && transform.c == 0 && transform.d == 0 && transform.tx == 0 && transform.ty == 0) {
+        NSLog(@"Invalid transform! Why is the stix blank?");
+        transform = CGAffineTransformIdentity;
+        center = self.center;
+    }
     [stix setCenter:center];
     [stix setTransform:transform];
     [self addSubview:stix];
@@ -304,7 +309,7 @@ static int currentStixViewID = 0;
 
                 isPeelableByUser = YES;
                 // turn this stix into an animated one
-#if 1
+#if 0
                 CABasicAnimation *crossFade = [CABasicAnimation animationWithKeyPath:@"contents"];
                 UIImage * img1 = [[auxStix image] copy];
                 UIImage * img2 = [UIImage imageNamed:@"120_blank.png"];
@@ -316,7 +321,7 @@ static int currentStixViewID = 0;
                 [auxStix.layer addAnimation:crossFade forKey:@"crossFade"];
                 [img1 release];
 #else
-                [self addPeelableAnimationToStix:auxStix];
+//                [self addPeelableAnimationToStix:auxStix];
 #endif
             } 
             else {

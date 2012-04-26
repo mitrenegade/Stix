@@ -203,7 +203,7 @@
         username = @"anonymous";
     }
     [cameraTag addUsername:username andDescriptor:@"" andComment:@"" andLocationString:@""];
-    [self.delegate didCreateNewPix:cameraTag];
+    [delegate didCreateNewPix:cameraTag];
     [cameraTag release];
     cameraTag = nil;
 #endif
@@ -270,7 +270,7 @@
     //    [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
     //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
     //}
-    [self.delegate didCreateNewPix:cameraTag];
+    [delegate didCreateNewPix:cameraTag];
     [cameraTag release];
     cameraTag = nil;
     needToShowCamera = YES;
@@ -325,6 +325,7 @@
     
     // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
     if (!photoAlbumOpened) {
+        // save high res version
         CGSize newsize = CGSizeMake(1000, 1000*2592.0/1936.0);
         if (or == 0 && !photoAlbumOpened)
             newsize = CGSizeMake(2592.0/1936.0*1000, 1000);
@@ -347,6 +348,9 @@
         UIImage * cropped = [result croppedImage:frame];
         UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
         
+        if ([[ImageCache sharedImageCache] imageForKey:@"largeImage"])
+            [[ImageCache sharedImageCache] deleteImageForKey:@"largeImage"];
+        [[ImageCache sharedImageCache] setImage:cropped forKey:@"largeImage"];
     }
     int original_height = baseImage.size.height;
     int original_width = baseImage.size.width;

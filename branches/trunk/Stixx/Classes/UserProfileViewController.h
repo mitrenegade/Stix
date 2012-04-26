@@ -34,6 +34,7 @@
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+-(NSMutableDictionary *) getUserPhotos;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate>{

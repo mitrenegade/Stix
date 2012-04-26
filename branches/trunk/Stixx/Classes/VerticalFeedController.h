@@ -59,8 +59,6 @@
 -(void)didOpenProfileView;
 -(NSMutableSet*)getFollowingList;
 
--(void)didClickPurchaseBuxButton;
-
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 -(BOOL)isFollowing:(NSString*)name;
 
@@ -71,7 +69,6 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(int)getFirstTimeUserStage;
--(void)didClickPurchaseBuxButton;
 -(void)agitateFirstTimePointer;
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
@@ -86,7 +83,7 @@
 -(BOOL)isDisplayingShareSheet;
 -(BOOL)isShowingBuxInstructions;
 
-
+-(void)getFirstTags; // called if no tags exist
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
@@ -105,6 +102,8 @@
     int lastPageViewed;
     int lastContentOffset;
     int newestTagIDDisplayed;
+    
+    int tempTagID;
     
     CGPoint feedItemViewOffset;
     
@@ -146,6 +145,7 @@
 @property (nonatomic, assign) CarouselView * carouselView;
 @property (nonatomic, retain) NSMutableDictionary * feedItems;
 @property (nonatomic, retain) NSMutableDictionary * headerViews;
+@property (nonatomic, retain) NSMutableDictionary * headerViewsDidLoadPhoto;
 @property (nonatomic, retain) NSMutableArray *allTags;
 @property (nonatomic, retain) NSMutableArray *allTagsDisplayed;
 @property (nonatomic, retain) FeedTableController *tableController;
@@ -172,17 +172,18 @@
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;
 -(void)reloadCurrentPage;
+-(void)reloadPage:(int)page;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickJumpButton:(id)sender;
--(void)jumpToPageWithTagID:(int)tagID;
+-(BOOL)jumpToPageWithTagID:(int)tagID;
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID;
 -(IBAction)adminStixButtonPressed:(id)sender;
 -(UIView*)reloadViewForItemAtIndex:(int)index;
 -(void)finishedCheckingForNewData:(bool)updated;
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID;
--(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
--(void)addAuxStix:(UIImageView *) badge ofType:(NSString*)stixStringID toTag:(Tag*)tag;
-- (void) shortenBlastTextUrls:(NSString*)url;
+//-(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
+-(void)addAuxStixOfType:(NSString*)stixStringID toTag:(Tag*)tag;
+//- (void) shortenBlastTextUrls:(NSString*)url;
 -(IBAction)didClickProfileButton:(id)sender;
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;

@@ -225,7 +225,7 @@
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
 
-    [self.delegate searchFriendsByFacebook];
+    [delegate searchFriendsByFacebook];
 }
 -(void)didClickButtonContacts {
     if ([delegate getFirstTimeUserStage] == 3) {
@@ -790,16 +790,18 @@
         for(CFIndex idx = 0; idx < ABMultiValueGetCount(emails); idx++)
         {
             CFStringRef emailRef = ABMultiValueCopyValueAtIndex(emails, idx);
-            NSString *strLbl = (NSString*) ABAddressBookCopyLocalizedLabel (ABMultiValueCopyLabelAtIndex (emails, idx));
-            NSString *strEmail_old = (NSString*)emailRef;
+            CFStringRef labelRef = ABMultiValueCopyLabelAtIndex (emails, idx);
+            NSString *strLbl = (NSString*) ABAddressBookCopyLocalizedLabel (labelRef);
+            CFRelease(labelRef);
+            //[(NSString*)tmp release];
             NSMutableDictionary *temp = [[NSMutableDictionary alloc] init];
-            [temp setObject:strEmail_old forKey:@"strEmail_old"];
+            [temp setObject:(NSString*)emailRef forKey:@"strEmail_old"];
             [temp setObject:strLbl forKey:@"strLbl"];
             [arEmail addObject:temp];
             [temp release];
             [strLbl release];
-            [strEmail_old release];
-
+            CFRelease(emailRef);
+            
             //NSLog(@"Contact list: %@ %@ email %@", firstName, lastName, strEmail_old);
         }
         if (ABMultiValueGetCount(emails) == 0) {
@@ -812,8 +814,11 @@
         [myContact release];
         [firstName release];
         [lastName release];
+        CFRelease(emails);
     }
-    return [myAddressBook autorelease];;
+    CFRelease(people);
+    CFRelease(addressBook);
+    return [myAddressBook autorelease];
 }
 
 #pragma mark search by name

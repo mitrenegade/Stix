@@ -109,7 +109,8 @@
     [self.view addSubview:shareButton];
     [addCommentButton removeFromSuperview];
     [self.view addSubview:addCommentButton];
-
+    [labelCommentCount removeFromSuperview];
+    [self.view addSubview:labelCommentCount];
 }
 
 -(void)initStixView:(Tag*)_tag {
@@ -406,8 +407,8 @@
 
 //[k getStixDataByStixStringIDWithStixStringID:stixStringID];
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
-    NSMutableDictionary * d = [theResults objectAtIndex:0]; 
-    NSString * descriptor = [d valueForKey:@"stixDescriptor"];
+    //NSMutableDictionary * d = [theResults objectAtIndex:0]; 
+    //NSString * descriptor = [d valueForKey:@"stixDescriptor"];
     //NSLog(@"StixView requested stix data for %@", descriptor);
     [BadgeView AddStixView:theResults];
 }
@@ -456,8 +457,7 @@
     [self uploadImage:png];
     
     NSString * metricName = @"SharePixActionsheet";
-    NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Facebook", [self getUsername]];
-    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"Method: Facebook" andIntegerValue:[[tag tagID] intValue]];
 }
 
 -(void)didClickShareViaEmail {
@@ -470,8 +470,7 @@
     [self uploadImage:png];
     
     NSString * metricName = @"SharePixActionsheet";
-    NSString * metricData = [NSString stringWithFormat:@"User: %@ Method: Email", [self getUsername]];
-    [k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
+    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"Method: Email" andIntegerValue:[tag.tagID intValue]];
 }
 
 -(void)uploadImage:(NSData *)dataPNG{
@@ -498,11 +497,11 @@
 #endif  
     NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
     NSString * subject = [NSString stringWithFormat:@"%@ has shared a remixed photo with you", [self getUsername]];
-    NSString * fullmessage = [NSString stringWithFormat:@"View my remixed photo here... %@", url];
+    NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", url];
     if (shareMethod == 0) {
         // facebook
         FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
-        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"Remix your photos with Stix" andDescription:fullmessage];
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"Get Sticky with me..." andDescription:fullmessage];
     }
     else if (shareMethod == 1) {
         // email

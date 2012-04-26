@@ -876,6 +876,14 @@ static int totalStixTypes = 0;
     [videogames release];
     [filenameArrays release];
     [categoryArrays release];
+    
+    [animalsDesc release];
+    [comicsDesc release];
+    [cuteDesc release];
+    [facefunDesc release];
+    [memesDesc release];
+    [videogamesDesc release];
+    [descArrays release];
 }
 
 @end

@@ -109,6 +109,8 @@
         [stixView removeFromSuperview];
         [stixView release];
     }
+    didAddStixToStixView = NO;
+    
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
     [stixView initializeWithImage:imageData];
@@ -237,6 +239,9 @@
 	stixFrameScaled.size.height *= imageScale;
     float centerx = stixView.stix.center.x * imageScale; // center coordinates in original 300x275 space
     float centery = stixView.stix.center.y * imageScale;
+    if (centerx == 0 && centery == 0) {
+        NSLog(@"This sticker doesn't exist!");
+    }
     //float stixScale = [stixView stixScale];
     //float stixRotation = [stixView stixRotation];
     CGAffineTransform stixTransform = [stixView referenceTransform];
@@ -352,14 +357,18 @@
 }
 
 // BadgeViewDelegate function
--(void)didTapStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
+-(void)didTapStixOfType:(NSString *)stixStringID {
     // selection of a stix to use from the carousel
     //[self.carouselView carouselTabDismissWithStix:badge];
-    [self.carouselView carouselTabDismiss:YES];
-    [self.carouselView setStixSelected:stixStringID];
+    //NSLog(@"DidTapStix: center %f %f, affine transform %f %f %f %f %f %f", badge.center.x, badge.center.y, badge.transform
+      //    .a, badge.transform.b, badge.transform.c, badge.transform.d, badge.transform.tx, badge.transform.ty);
+    [carouselView carouselTabDismiss:YES];
+    [carouselView setStixSelected:stixStringID];
     if (didAddStixToStixView) {
+        NSLog(@"updateStixForManipulation   : center %f %f, affine transform %f %f %f %f %f %f", stixView.stix.center.x, stixView.stix.center.y, stixView.stix.transform
+              .a, stixView.stix.transform.b, stixView.stix.transform.c, stixView.stix.transform.d, stixView.stix.transform.tx, stixView.stix.transform.ty);
         // we've already added a stix, so the only thing we can do is now change it
-        [self.stixView updateStixForManipulation:stixStringID];
+        [stixView updateStixForManipulation:stixStringID];
     }
     else {
         CGPoint center = stixView.center;
@@ -395,6 +404,7 @@
 -(void)didDropStix:(UIImageView *)badge ofType:(NSString *)stixStringID {
     // delegate function for CarouselView 
     CGPoint location = badge.center;
+    NSLog(@"DidDropStix: location %f %f", location.x, location.y);
     [self.carouselView resetBadgeLocations];
     if (!didAddStixToStixView) {
         [self didDropStixByDrag:stixStringID atLocation:location];

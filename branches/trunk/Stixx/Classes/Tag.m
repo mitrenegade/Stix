@@ -79,14 +79,17 @@
 }
 
 -(NSString*)removeStixAtIndex:(int)index {
-    NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
-    [auxStixStringIDs removeObjectAtIndex:index];
-    [auxLocations removeObjectAtIndex:index];
-    //[auxScales removeObjectAtIndex:index];
-    //[auxRotations removeObjectAtIndex:index];
-    [auxTransforms removeObjectAtIndex:index];
-    [auxPeelable removeObjectAtIndex:index];
-    return [auxStringID autorelease]; // MRC
+    if (index < [auxStixStringIDs count]) {
+        NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
+        [auxStixStringIDs removeObjectAtIndex:index];
+        [auxLocations removeObjectAtIndex:index];
+        //[auxScales removeObjectAtIndex:index];
+        //[auxRotations removeObjectAtIndex:index];
+        [auxTransforms removeObjectAtIndex:index];
+        [auxPeelable removeObjectAtIndex:index];
+        return [auxStringID autorelease]; // MRC
+    }
+    return nil;
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {

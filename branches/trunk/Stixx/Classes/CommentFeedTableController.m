@@ -206,7 +206,7 @@
 
         UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG];
         [photoView setImage:photo forState:UIControlStateNormal];
-        [photoView setTag:index];
+        //[photoView setTag:index];
         [photo release]; // MRC
         
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
@@ -310,11 +310,11 @@
     if ([comment length] == 0) // add generic descriptor
     {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"Added a %@", desc];
+        str = [NSString stringWithFormat:@"Added %@", desc];
     }
     else if ([comment isEqualToString:@"PEEL"]) {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"Peeled off a %@ to add to their collection", desc];
+        str = [NSString stringWithFormat:@"Peeled off %@", desc];
     }
     else if ([comment isEqualToString:@"SHARE"]) {
         str = [NSString stringWithFormat:@"Shared this Pix at %@", comment];

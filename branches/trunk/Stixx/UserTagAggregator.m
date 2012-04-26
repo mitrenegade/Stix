@@ -135,14 +135,21 @@
                 [aggregationQueue removeObject:d];
                 //NSString * username = [d valueForKey:@"username"];
                 NSNumber * tagID = [d valueForKey:@"tagID"];
+                NSLog(@"Aggregating queue now size %d tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
                 
                 id newObject = tagID;
                 NSComparator comparator = ^(id obj1, id obj2) {
                     return [obj1 compare: obj2];
                 };
                 
-                if ([allTagIDs containsObject:tagID])
+                if ([allTagIDs containsObject:tagID]) {
+                    NSLog(@"allTagIDs contains object");
                     continue;
+                }
+                if (!newObject) {
+                    [k addMetricWithDescription:@"Invalid Aggregation Tag" andUsername:[delegate getUsername] andStringValue:[d valueForKey:@"username"] andIntegerValue:[tagID intValue]];
+                    continue;
+                }
                 
                 NSUInteger newIndex = [allTagIDs indexOfObject:newObject
                                                  inSortedRange:(NSRange){0, [allTagIDs count]}

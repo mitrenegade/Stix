@@ -34,6 +34,7 @@
 #import "UserTagAggregator.h"
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
+#import "Appirater.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -232,7 +233,7 @@ struct UserInfo {
 -(void)rewardBux;
 -(void)rewardLocation;
 -(void)logMetricTimeInApp;
--(void)checkConsistency;
+//-(void)checkConsistency;
 -(void)updateBuxCountFromKumulos;
 -(void)didDismissSecondaryView;
 // former store methods
@@ -242,9 +243,9 @@ struct UserInfo {
 
 -(void)hideFirstTimeUserMessage;
 -(void)advanceFirstTimeUserMessage;
--(void)showBuxPurchaseMenu;
 -(void)agitateFirstTimePointer;
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
+-(void)getFirstTags;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) UIViewController * emptyViewController;

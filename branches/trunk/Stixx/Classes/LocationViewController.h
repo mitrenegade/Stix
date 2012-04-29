@@ -17,7 +17,7 @@
 
 @interface LocationViewController : UITableViewController<VenueDelegate, UITableViewDataSource, UITableViewDelegate> {
 
-    NSObject<LocationViewControllerDelegate> *delegate;
+    NSObject<LocationViewControllerDelegate> *__unsafe_unretained delegate;
     FourSquareLocator* fsl;
     NSMutableArray * fsLocationStrings;
     NSMutableArray *searchResults;
@@ -26,8 +26,8 @@
     bool needSearch; // used to cancel a search if cancel button is hit in delegate
 }
 
-@property (nonatomic, assign) NSObject<LocationViewControllerDelegate> *delegate;
-@property (nonatomic, retain) NSMutableArray *searchResults;
+@property (nonatomic, unsafe_unretained) NSObject<LocationViewControllerDelegate> *delegate;
+@property (nonatomic) NSMutableArray *searchResults;
 @property (nonatomic, assign) bool needSearch;
 -(void)getFoursquareVenues:(NSString*)text;
 -(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong;

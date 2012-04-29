@@ -25,7 +25,6 @@
 static int animationID = 1;
 
 -(int)doDownwardFade:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time {
-    [canvas retain];
     [view addSubview:canvas];
     //[self addSubview:canvas];
     int myAnimationID = animationID++;
@@ -44,14 +43,12 @@ static int animationID = 1;
                     } 
                     completion:^(BOOL finished) { 
                         [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
-                        [canvas release];
                     }
      ];
     return myAnimationID; // when we initialize the animation give it an id
 }
 
 -(int)doJump:(UIView *)canvas inView:(UIView*) view forDistance:(int)pixels forTime:(float)time {
-    [canvas retain];
     [view addSubview:canvas];
     int myAnimationID = animationID++;
     int centerX = canvas.center.x;
@@ -79,7 +76,6 @@ static int animationID = 1;
                                         } 
                                         completion:^(BOOL finished) { 
                                             [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
-                                            [canvas release];
                                         }
                          ];    
                     }
@@ -88,7 +84,6 @@ static int animationID = 1;
 }
 
 -(int)doSlide:(UIView *)canvas inView:(UIView*)view toFrame:(CGRect)frameEnd forTime:(float)time {
-    [canvas retain];
     // no need to add subview, assume already exists
     //[view addSubview:canvas];
     
@@ -104,7 +99,6 @@ static int animationID = 1;
                      completion:^(BOOL finished) { 
                          if ([delegate respondsToSelector:@selector(didFinishAnimation:withCanvas:)])
                              [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
-                         [canvas release];
                      }
      ];
     return myAnimationID; // when we initialize the animation give it an id
@@ -124,7 +118,6 @@ static int animationID = 1;
 } 
 
 -(int)doFade:(UIView *)canvas inView:(UIView*)view toAlpha:(float)opacityEnd forTime:(float)time {
-    [canvas retain];
     // no need to add subview, assume already exists
     //[view addSubview:canvas];
     
@@ -138,7 +131,6 @@ static int animationID = 1;
                      } 
                      completion:^(BOOL finished) { 
                          [self.delegate didFinishAnimation:myAnimationID withCanvas:canvas];
-                         [canvas release];
                      }
      ];
     return myAnimationID; // when we initialize the animation give it an id

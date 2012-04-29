@@ -14,9 +14,9 @@
 @end
 
 @interface StixAnimation : UIView {
-    NSObject<StixAnimationDelegate> * delegate;
+    NSObject<StixAnimationDelegate> * __unsafe_unretained delegate;
 }
-@property (nonatomic, assign) NSObject<StixAnimationDelegate> * delegate;
+@property (nonatomic, unsafe_unretained) NSObject<StixAnimationDelegate> * delegate;
 
 -(int)doDownwardFade:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time;
 -(int)doJump:(UIView *)canvas inView:(UIView*) view forDistance:(int)pixels forTime:(float)time;

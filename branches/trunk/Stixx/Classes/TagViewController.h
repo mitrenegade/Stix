@@ -46,7 +46,7 @@
     UIImagePickerController * camera;
 	//ARViewController *arViewController; // for saving and displaying coordinates
     
-	NSObject<TagViewDelegate> *delegate;
+	NSObject<TagViewDelegate> *__unsafe_unretained delegate;
 //	UIView *overlayView;
     CGRect badgeFrame;
 
@@ -74,21 +74,21 @@
     bool photoAlbumOpened;
     int drag;
 }
-@property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-@property (nonatomic, retain) BadgeView * badgeView;
-@property (nonatomic, assign) NSObject<TagViewDelegate> *delegate;
-@property (nonatomic, retain) IBOutlet UIImageView * rectView;
-@property (nonatomic, retain) UIImagePickerController * camera;
+@property (nonatomic) IBOutlet UIButton * buttonInstructions;
+@property (nonatomic) BadgeView * badgeView;
+@property (nonatomic, unsafe_unretained) NSObject<TagViewDelegate> *delegate;
+@property (nonatomic) IBOutlet UIImageView * rectView;
+@property (nonatomic) UIImagePickerController * camera;
 @property (nonatomic, assign) bool descriptorIsOpen;
 @property (nonatomic, assign) bool needToShowCamera;
-@property (nonatomic, retain) AddStixViewController * descriptorController;
-@property (nonatomic, retain) IBOutlet UIImageView * aperture;
-@property (nonatomic, retain) IBOutlet UIButton * flashModeButton;
-@property (nonatomic, retain) IBOutlet UIButton * cameraDeviceButton;
-@property (nonatomic, retain) IBOutlet UIButton * buttonClose;
-@property (nonatomic, retain) IBOutlet UIButton * buttonTakePicture;
-@property (nonatomic, retain) IBOutlet UIButton * buttonImport;
-@property (nonatomic, retain) Tag * cameraTag;
+@property (nonatomic) AddStixViewController * descriptorController;
+@property (nonatomic) IBOutlet UIImageView * aperture;
+@property (nonatomic) IBOutlet UIButton * flashModeButton;
+@property (nonatomic) IBOutlet UIButton * cameraDeviceButton;
+@property (nonatomic) IBOutlet UIButton * buttonClose;
+@property (nonatomic) IBOutlet UIButton * buttonTakePicture;
+@property (nonatomic) IBOutlet UIButton * buttonImport;
+@property (nonatomic) Tag * cameraTag;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;

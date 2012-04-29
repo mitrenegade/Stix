@@ -41,7 +41,6 @@
     UIImageView * bkg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loading_bkg.png"]];
     [bkg setFrame:CGRectMake(-5, -5, frame.size.width+10, frame.size.height+10)];
     //[self insertSubview:bkg belowSubview:self];
-    [bkg release];
     return self;
 }
 
@@ -65,8 +64,5 @@
     shouldStop = true;
 }
 
-- (void)dealloc {
-	[super dealloc];
-}
 
 @end

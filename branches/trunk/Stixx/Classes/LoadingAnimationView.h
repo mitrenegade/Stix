@@ -6,7 +6,7 @@
 	UIImageView * customActivityIndicator;
     bool shouldStop;
 }
-@property (nonatomic, retain) UIImageView * customActivityIndicator;
+@property (nonatomic) UIImageView * customActivityIndicator;
 
 -(void)startCompleteAnimation;
 -(void)stopCompleteAnimation;

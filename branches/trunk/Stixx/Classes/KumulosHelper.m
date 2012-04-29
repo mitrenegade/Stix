@@ -17,6 +17,8 @@
 @synthesize delegate;
 @synthesize inputParams;
 
+static NSMutableSet * retainedHelpers;
+
 /*
 static KumulosHelper *sharedKumulosHelper = nil;
 +(KumulosHelper*)sharedKumulosHelper 
@@ -37,13 +39,21 @@ static KumulosHelper *sharedKumulosHelper = nil;
     [k setDelegate:self];
     
     savedInfo = [[NSMutableDictionary alloc] init];
+    
+    if (retainedHelpers == nil)
+        retainedHelpers = [[NSMutableSet alloc] init];
+    
 	return self;
 }
 
 -(void)execute:(NSString*)_function withParams:(NSMutableArray*)params withCallback:(SEL)_callback withDelegate:(NSObject<KumulosHelperDelegate>*)helperDelegate{
+    
+    [retainedHelpers addObject:self];
+    
     [self setInputParams:params];
     [self setFunction:_function];
     [self setCallback:_callback];
+    NSLog(@"KumulosHelper executing %@", _function);
     delegate = helperDelegate;
     if ([function isEqualToString:@"adminUpdateAllStixOrders"]) {
         [k getAllUsers];
@@ -100,6 +110,8 @@ static KumulosHelper *sharedKumulosHelper = nil;
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
     if (self.delegate)
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    [returnParams autorelease];
+    [self cleanup];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
@@ -148,6 +160,11 @@ static KumulosHelper *sharedKumulosHelper = nil;
             NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
             NSLog(@"User %@ now has %d stix and %d stixOrders", username, [stix count], [stixOrder count]);
             [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:newAuxData];
+            
+            [stix release];
+            [stixOrder release];
+            [auxiliaryDict release];
+            [newAuxData autorelease];
         }
     }
     else if ([self.function isEqualToString:@"adminUpdateAllFriendsLists"]) {
@@ -196,8 +213,11 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];         
 //        [theResults release];
         //NSLog(@"return params: %@", returnParams);
-        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
+        [delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
+        [returnParams autorelease];
     }
+
+    [self cleanup];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation updatePixTimestampDidCompleteWithResult:(NSNumber *)affectedRows {
@@ -214,6 +234,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
         if (self.delegate)
             [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+        [returnParams autorelease];
     }
     [self cleanup];
 }
@@ -224,6 +245,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         if (self.delegate) {
             [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
         }
+        [returnParams autorelease];
     }
     else if ([function isEqualToString:@"checkForUpdatedStix"]) {
         NSMutableArray * returnParams = [[NSMutableArray alloc] init];
@@ -232,6 +254,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         if (self.delegate) {
             [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
         }
+        [returnParams autorelease];
     }
     [self cleanup];
 }
@@ -242,6 +265,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     if (self.delegate) {
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }
+    [returnParams autorelease];
     [self cleanup];
 }
 
@@ -251,6 +275,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     if (self.delegate) {
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }
+    [returnParams autorelease];
     [self cleanup];
 }
 
@@ -259,6 +284,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     if (self.delegate) {
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
     }
+    [returnParams autorelease];
     [self cleanup];
 }
 
@@ -279,6 +305,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
 
 -(void)cleanup {
     [inputParams release];
+    [retainedHelpers removeObject:self];
 }
 
 @end

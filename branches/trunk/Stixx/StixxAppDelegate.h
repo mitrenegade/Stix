@@ -41,6 +41,9 @@
 #import "FacebookHelper.h"
 #endif
 #import "VerticalFeedController.h"
+#import "MKStoreKitConfigs.h"
+#import "MKStoreManager.h"
+#import "MKStoreObserver.h"
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
@@ -69,9 +72,9 @@ enum actionsheet_tags {
 };
 
 struct UserInfo {
-    NSString * username;
-    UIImage * userphoto;
-    NSString * email;
+//    NSString * username;
+//    UIImage * userphoto;
+//    NSString * email;
     int facebookID;
     int usertagtotal;
     int bux;
@@ -99,11 +102,15 @@ struct UserInfo {
     ExploreViewController * exploreController;
     FacebookLoginController * loginSplashController;
     
-    UIViewController * lastViewController;
+    UIViewController * __weak lastViewController;
 
     bool loggedIn;
     bool isLoggingIn;
     struct UserInfo * myUserInfo;
+    NSString * myUserInfo_username;
+    UIImage * myUserInfo_userphoto;
+    NSString * myUserInfo_email;
+
     bool stixViewsLoadedFromDisk;
     bool fbLoginIsJoin;
     
@@ -192,6 +199,8 @@ struct UserInfo {
     UIButton * buttonBuxInstructionsClose;
     BOOL isShowingBuxInstructions;
     UIButton * buttonBuxStore;
+    
+    FeedbackViewController * feedbackController;
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -247,42 +256,42 @@ struct UserInfo {
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) UIViewController * emptyViewController;
-@property (nonatomic, retain) RaisedCenterTabBarController *tabBarController;
-@property (nonatomic, retain) TagViewController *tagViewController;
+@property (nonatomic) IBOutlet UIWindow *window;
+@property (nonatomic) UIViewController * emptyViewController;
+@property (nonatomic) RaisedCenterTabBarController *tabBarController;
+@property (nonatomic) TagViewController *tagViewController;
 //@property (nonatomic, retain) FeedViewController *feedController;
-@property (nonatomic, retain) VerticalFeedController *feedController;
-@property (nonatomic, retain) ProfileViewController *profileController;
-@property (nonatomic, retain) UserProfileViewController *userProfileController;
+@property (nonatomic) VerticalFeedController *feedController;
+@property (nonatomic) ProfileViewController *profileController;
+@property (nonatomic) UserProfileViewController *userProfileController;
 //@property (nonatomic, retain) FriendsViewController *friendController;
-@property (nonatomic, retain) ExploreViewController *exploreController;
-@property (nonatomic, retain) FacebookLoginController * loginSplashController;
+@property (nonatomic) ExploreViewController *exploreController;
+@property (nonatomic) FacebookLoginController * loginSplashController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
-@property (nonatomic, assign) UIViewController * lastViewController;
-@property (nonatomic, retain) NSMutableArray * allTags;
-@property (nonatomic, retain) NSMutableDictionary * allTagIDs; // fast check for existence of allTags
-@property (nonatomic, retain) NSDate * timeStampOfMostRecentTag;
-@property (nonatomic, retain) NSMutableDictionary * allUsers;
-@property (nonatomic, retain) NSMutableDictionary * allUserPhotos;
-@property (nonatomic, retain) NSMutableDictionary * allStix;
-@property (nonatomic, retain) NSMutableDictionary * allStixOrder;
+@property (nonatomic, weak) UIViewController * lastViewController;
+@property (nonatomic) NSMutableArray * allTags;
+@property (nonatomic) NSMutableDictionary * allTagIDs; // fast check for existence of allTags
+@property (nonatomic) NSDate * timeStampOfMostRecentTag;
+@property (nonatomic) NSMutableDictionary * allUsers;
+@property (nonatomic) NSMutableDictionary * allUserPhotos;
+@property (nonatomic) NSMutableDictionary * allStix;
+@property (nonatomic) NSMutableDictionary * allStixOrder;
 //@property (nonatomic, retain) NSMutableSet * allFriends;
-@property (nonatomic, retain) NSMutableSet * allFollowers;
-@property (nonatomic, retain) NSMutableSet * allFollowing;
-@property (nonatomic, retain) NSMutableArray * allUserFacebookIDs;
-@property (nonatomic, retain) NSMutableArray * allUserEmails;
-@property (nonatomic, retain) NSMutableArray * allUserNames;
-@property (nonatomic, retain) Kumulos * k;
-@property (nonatomic, retain) NSMutableDictionary * allCommentCounts;
-@property (nonatomic, retain) NSMutableDictionary * allCommentHistories;
-@property (nonatomic, retain) NSMutableArray * allCarouselViews;
-@property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
-@property (nonatomic, retain) NSMutableArray * alertQueue;
-@property (nonatomic, retain) UIImagePickerController * camera;
-@property (nonatomic, retain) NSDate * metricLogonTime;
-@property (nonatomic, retain) NSDate * lastKumulosErrorTimestamp;
-@property (nonatomic, retain) FacebookHelper * fbHelper;
+@property (nonatomic) NSMutableSet * allFollowers;
+@property (nonatomic) NSMutableSet * allFollowing;
+@property (nonatomic) NSMutableArray * allUserFacebookIDs;
+@property (nonatomic) NSMutableArray * allUserEmails;
+@property (nonatomic) NSMutableArray * allUserNames;
+@property (nonatomic) Kumulos * k;
+@property (nonatomic) NSMutableDictionary * allCommentCounts;
+@property (nonatomic) NSMutableDictionary * allCommentHistories;
+@property (nonatomic) NSMutableArray * allCarouselViews;
+@property (nonatomic) IBOutlet UITextField * loadingMessage;
+@property (nonatomic) NSMutableArray * alertQueue;
+@property (nonatomic) UIImagePickerController * camera;
+@property (nonatomic) NSDate * metricLogonTime;
+@property (nonatomic) NSDate * lastKumulosErrorTimestamp;
+@property (nonatomic) FacebookHelper * fbHelper;
 
 @end
 

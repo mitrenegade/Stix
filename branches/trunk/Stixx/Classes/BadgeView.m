@@ -42,7 +42,7 @@ static int totalStixTypes = 0;
     for (int i=0; i<totalStixTypes; i++)
     {
         NSString * stixStringID = [stixStringIDs objectAtIndex:i];
-        UIImageView * badge = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+        UIImageView * badge = [BadgeView getBadgeWithStixStringID:stixStringID];
         [badges addObject:badge];
         [badgeLocations addObject:[NSValue valueWithCGRect:badge.frame]];
 
@@ -55,7 +55,6 @@ static int totalStixTypes = 0;
 
         [label release];
          */
-        [badge release];
     }
     
  	return self;
@@ -113,12 +112,10 @@ static int totalStixTypes = 0;
     NSLog(@"**** Initializing Stix Types from Kumulos ****");
     if (stixStringIDs)
     {
-        [stixStringIDs release];
         stixStringIDs = nil;
     }
     if (stixCategories)
     {
-        [stixCategories release];
         stixCategories = nil;
     }
     stixStringIDs = [[NSMutableArray alloc] initWithCapacity:[stixStringIDsFromKumulos count]];
@@ -129,7 +126,7 @@ static int totalStixTypes = 0;
         NSString * categoryName = [d valueForKey:@"categoryName"];
         NSMutableArray * category = [stixCategories objectForKey:categoryName];
         if (!category) {
-            category = [[[NSMutableArray alloc] init] autorelease];
+            category = [[NSMutableArray alloc] init];
             [stixCategories setObject:category forKey:categoryName];
         }
         [category addObject:stixStringID];
@@ -150,7 +147,6 @@ static int totalStixTypes = 0;
     }
     if (pool)
     {
-        [pool release];
         pool = nil;
     }
     // enable stixRepeat to check for repeats
@@ -164,8 +160,6 @@ static int totalStixTypes = 0;
         UIImageView * stix = [[UIImageView alloc] initWithImage:img];
         [stixViews setObject:stix forKey:stixStringID];
         [stixDescriptors setObject:descriptor forKey:stixStringID];
-        [img release];
-        [stix release];
         /*
         if ([stixStringIDs containsObject:stixStringID] == 0)
             NSLog(@"Stix View for %@ downloaded but not in Stix Types!", stixStringID);
@@ -199,7 +193,6 @@ static int totalStixTypes = 0;
     }
     if (pool)
     {
-        [pool release];
         pool = nil;
     }
 
@@ -229,8 +222,6 @@ static int totalStixTypes = 0;
     UIImageView * stix = [[UIImageView alloc] initWithImage:img];
     [stixViews setObject:stix forKey:stixStringID];
     [stixDescriptors setObject:descriptor forKey:stixStringID];
-    [img release];
-    [stix release];
     //NSLog(@"Adding a new Stix view downloaded from Kumulos: %@ stixStringID %@", descriptor, stixStringID);
 }
 
@@ -255,7 +246,7 @@ static int totalStixTypes = 0;
         // return an empty stix view
         stixView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 120*.65, 120*.65)];
         [stixView setAlpha:0]; // alpha set to 0 as a check for missing stix
-        return [stixView autorelease];
+        return stixView;
     }
     // create smaller size for actual badgeView
     UIImageView * stix = [[UIImageView alloc] initWithImage:[stixView image]]; // copy
@@ -264,7 +255,7 @@ static int totalStixTypes = 0;
     frame.size.width = 120*.65;
     frame.size.height = 120*.65;
     [stix setFrame:frame];    
-    return [stix autorelease];
+    return stix;
 }
 
 +(NSString*)getStixStringIDAtIndex:(int)index {
@@ -295,7 +286,7 @@ static int totalStixTypes = 0;
         }
         [stixCounts setObject:[NSNumber numberWithInt:num] forKey:[stixStringIDs objectAtIndex:i]];
     }
-    return [stixCounts autorelease];
+    return stixCounts;
 }
 
 +(NSMutableDictionary *)generateOneOfEachStix {
@@ -304,7 +295,7 @@ static int totalStixTypes = 0;
         [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:[stixStringIDs objectAtIndex:i]];
     for (int i=2; i<[BadgeView totalStixTypes]; i++)
         [stixCounts setObject:[NSNumber numberWithInt:1] forKey:[stixStringIDs objectAtIndex:i]];
-    return [stixCounts autorelease];
+    return stixCounts;
 }
 
 +(NSString*)getRandomStixStringID {
@@ -362,14 +353,11 @@ static int totalStixTypes = 0;
 }
 
 - (void)dealloc {
-	[super dealloc];
     
     //[shelf release];
     //shelf = nil;
     
-    [badges release];
     badges = nil;
-    [badgeLocations release];
     badgeLocations = nil;
     //[labels release];
     //labels = nil;
@@ -389,7 +377,7 @@ static int totalStixTypes = 0;
             [stixCounts setObject:[NSNumber numberWithInt:-1] forKey:stixID];
         }
     }
-    return [stixCounts autorelease];
+    return stixCounts;
 }
 
 +(void)InitializeDefaultStixTypes {
@@ -842,7 +830,7 @@ static int totalStixTypes = 0;
         NSString * categoryName = [categoryArrays objectAtIndex:i];
         NSMutableArray * category = [stixCategories objectForKey:categoryName];
         if (!category) {
-            category = [[[NSMutableArray alloc] init] autorelease];
+            category = [[NSMutableArray alloc] init];
         }
         [category addObjectsFromArray:stixStringArray];
         [stixCategories setObject:category forKey:categoryName];
@@ -860,30 +848,13 @@ static int totalStixTypes = 0;
             UIImageView * stix = [[UIImageView alloc] initWithImage:img];
             [stixViews setObject:stix forKey:stixStringID];
             
-            [img release];
-            [stix release];
         }
     }
     totalStixTypes = [stixStringIDs count];
     NSLog(@"BadgeView: Generated %d generic stix!", totalStixTypes);
     
     // MRC
-    [animals release];
-    [comics release];
-    [cute release];
-    [facefun release];
-    [memes release];
-    [videogames release];
-    [filenameArrays release];
-    [categoryArrays release];
     
-    [animalsDesc release];
-    [comicsDesc release];
-    [cuteDesc release];
-    [facefunDesc release];
-    [memesDesc release];
-    [videogamesDesc release];
-    [descArrays release];
 }
 
 @end

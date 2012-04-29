@@ -92,6 +92,9 @@ static dispatch_queue_t backgroundQueue;
      [testObject save];
      */
     
+    /*** MKStoreKit ***/
+    [MKStoreManager sharedManager];
+    
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
 
@@ -104,7 +107,7 @@ static dispatch_queue_t backgroundQueue;
 	uniqueDeviceID = [appPasteBoard string];    
     if (uniqueDeviceID == nil) {
         CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
-        uniqueDeviceID = (NSString *)CFUUIDCreateString(NULL,uuidRef);
+        uniqueDeviceID = (__bridge_transfer NSString *)CFUUIDCreateString(NULL,uuidRef);
         CFRelease(uuidRef);
         [appPasteBoard setString:uniqueDeviceID];
         NSLog(@"Unique device created and set to pasteboard: %@", uniqueDeviceID);
@@ -112,7 +115,6 @@ static dispatch_queue_t backgroundQueue;
     else {
         NSLog(@"Unique device retrieved from pasteboard: %@", uniqueDeviceID);
     }
-    [uniqueDeviceID retain];
     NSString * description = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
     NSString * string = @"Application started";
     [k addMetricWithDescription:description andUsername:@"" andStringValue:string andIntegerValue:0];
@@ -135,11 +137,11 @@ static dispatch_queue_t backgroundQueue;
     [Crashlytics startWithAPIKey:@"747b4305662b69b595ac36f88f9c2abe54885ba3"];
 
     myUserInfo = malloc(sizeof(struct UserInfo));
-    myUserInfo->username = nil;
-    myUserInfo->userphoto = nil;
+    myUserInfo_username = nil;
+    myUserInfo_userphoto = nil;
     myUserInfo->bux = 0;
     myUserInfo->usertagtotal = 0;
-    myUserInfo->email = nil;
+    myUserInfo_email = nil;
     myUserInfo->facebookID = 0;
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
 
@@ -283,7 +285,6 @@ static dispatch_queue_t backgroundQueue;
 	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, emptyViewController, exploreController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
-    [emptyViewController release];
     [exploreController setTabBarController:tabBarController];
     
     lastViewController = feedController;
@@ -303,7 +304,7 @@ static dispatch_queue_t backgroundQueue;
     isLoggingIn = NO;
     loginSplashController = [[FacebookLoginController alloc] init];
     [loginSplashController setDelegate:self];
-    if (![fbHelper facebookHasSession] || myUserInfo->username == nil) // !myUserInfo->username || [myUserInfo->username length] == 0)
+    if (![fbHelper facebookHasSession] || myUserInfo_username == nil) // !myUserInfo_username || [myUserInfo_username length] == 0)
     {
         NSLog(@"Could not log in: forcing new login screen!");
         isLoggingIn = YES;
@@ -316,11 +317,11 @@ static dispatch_queue_t backgroundQueue;
     }
     else
     {
-        NSLog(@"Loggin in as %@", myUserInfo->username);
+        NSLog(@"Loggin in as %@", myUserInfo_username);
         //[loadingMessage setText:[NSString stringWithFormat:@"Logging in as %@...", username]];
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
           //                                       (unsigned long)NULL), ^(void) {
-        //[profileController loginWithUsername:myUserInfo->username];
+        //[profileController loginWithUsername:myUserInfo_username];
         //});
         [self doFacebookLogin];
     }   
@@ -395,7 +396,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //[self Parse_unsubscribeFromAll];
     // register for notifications on update channel
     
-    notificationDeviceToken = [newDeviceToken retain];
+    notificationDeviceToken = newDeviceToken;
 }
 
 /*** facebook delegates ***/
@@ -473,7 +474,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Did logout from facebook");
     UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Logout Success" message:@"You have been logged out of facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
     [alertView show];
-    [alertView release];
 }
 
 -(void)didCancelFacebookLogin {
@@ -578,12 +578,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
     [defaults setObject:versionStringStable forKey:@"stixVersion"];
-    [defaults setObject:myUserInfo->username forKey:@"username"];
-    [defaults setObject:myUserInfo->email forKey:@"email"];
+    [defaults setObject:myUserInfo_username forKey:@"username"];
+    [defaults setObject:myUserInfo_email forKey:@"email"];
     [defaults setInteger:myUserInfo->facebookID forKey:@"facebookID"];
     [defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
     [defaults setInteger:myUserInfo->bux forKey:@"bux"];
-    NSData *userphoto = UIImageJPEGRepresentation(myUserInfo->userphoto, 100);
+    NSData *userphoto = UIImageJPEGRepresentation(myUserInfo_userphoto, 100);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
 
@@ -593,14 +593,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 -(void)saveStixTypesToDefaults {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-    NSMutableArray * stixStringIDs = [[BadgeView GetAllStixStringIDsForSave] retain];
-    NSMutableDictionary * stixCategories = [[BadgeView GetAllStixCategoriesForSave] retain];
+    NSMutableArray * stixStringIDs = [BadgeView GetAllStixStringIDsForSave];
+    NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
 
     [defaults setObject:stixCategories forKey:@"stixCategories"];
     [defaults setObject:stixStringIDs forKey:@"stixStringIDs"];
     NSLog(@"Saved %d stixStringIDs", [stixStringIDs count]);
-    [stixStringIDs release];
-    [stixCategories release];
     
     [defaults synchronize];
 }
@@ -610,12 +608,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     [defaults setObject:versionStringBeta forKey:@"stixDataVersion"];
     
-    NSMutableArray * stixStringIDs = [[BadgeView GetAllStixStringIDsForSave] retain];
-    NSMutableDictionary * stixDescriptors = [[BadgeView GetAllStixDescriptorsForSave] retain];   
-    NSMutableDictionary * stixCategories = [[BadgeView GetAllStixCategoriesForSave] retain];
+    NSMutableArray * stixStringIDs = [BadgeView GetAllStixStringIDsForSave];
+    NSMutableDictionary * stixDescriptors = [BadgeView GetAllStixDescriptorsForSave];   
+    NSMutableDictionary * stixCategories = [BadgeView GetAllStixCategoriesForSave];
     [defaults setObject:stixDescriptors forKey:@"stixDescriptors"];
     [defaults setObject:stixCategories forKey:@"stixCategories"];
-    NSMutableDictionary * stixViews = [[BadgeView GetAllStixViewsForSave] retain];
+    //NSMutableDictionary * stixViews = [BadgeView GetAllStixViewsForSave];
     [defaults setObject:stixStringIDs forKey:@"stixStringIDs"];
     NSLog(@"Saved %d stixStringIDs", [stixStringIDs count]);
     int total=0;
@@ -623,10 +621,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         total += [self saveStixDataToDefaultsForStixStringID:stixStringID];
     }
     NSLog(@"Saved %d stixViews", total);
-    [stixStringIDs release];
-    [stixViews release];
-    [stixDescriptors release];
-    [stixCategories release];
     
     [defaults synchronize];
 }
@@ -659,13 +653,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     
     // if there's a version string > 0.9, then we must have also saved username sometime
-    myUserInfo->username = [defaults objectForKey:@"username"];
-    myUserInfo->email = [defaults objectForKey:@"email"];
+    myUserInfo_username = [defaults objectForKey:@"username"];
+    myUserInfo_email = [defaults objectForKey:@"email"];
     myUserInfo->facebookID = [defaults integerForKey:@"facebookID"];
     myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
     myUserInfo->bux = [defaults integerForKey:@"bux"];
     NSData * userphoto = [defaults objectForKey:@"userphoto"];
-    myUserInfo->userphoto = [UIImage imageWithData:userphoto];
+    myUserInfo_userphoto = [UIImage imageWithData:userphoto];
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
     
     return 1;
@@ -701,12 +695,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         {
             NSLog(@"Loading %d saved Stix from disk", [stixViews count]);
             [BadgeView InitializeFromDiskWithStixStringIDs:stixStringIDs andStixViews:stixViews andStixDescriptors:stixDescriptors andStixCategories:stixCategories];
-            [stixViews release];
             return 1;
         }
         else
             NSLog(@"No Stix were saved to disk!");
-        [stixViews release];
         return 0;
     }
     @catch (NSException * exception) {
@@ -807,7 +799,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif  
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", myUserInfo->username);
+        NSLog(@"Logging out and saving username %@", myUserInfo_username);
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
           //                                       (unsigned long)NULL), ^(void) {
             //[self saveDataToDisk];
@@ -832,7 +824,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // archive username
     if (init == 2) {
         //NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", myUserInfo->username);
+        NSLog(@"Logging out and saving username %@", myUserInfo_username);
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
         //[self saveDataToDisk];
         //});
@@ -883,10 +875,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 - (void)dealloc {
 	
 	//NEW COMMENT!
-    [k release];
-    [window release];
     free(myUserInfo);
-    [super dealloc];
 }
 
 /**** loading and adding of stix from kumulos ****/
@@ -908,7 +897,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     bool added = NO;
     bool alreadyExists = NO;
     int i;
-    [tag retain];
     tag.tagID = [NSNumber numberWithInt:newID];
     for (i=0; i<[allTags count]; i++)
     {
@@ -959,7 +947,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         else 
             added = NO;
     }
-    [tag release];
     return added;
 }
 
@@ -985,7 +972,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 
     // this function migrates toward not using the basic stix
-    newestTag = [newTag retain];
+    newestTag = newTag;
     
     [k setDelegate:self];
     NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
@@ -998,7 +985,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
 	//[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
-    [encoder release];
     
     // this must match Tag.m:getTagFromDictionary
     NSMutableData *theAuxStixData;
@@ -1011,7 +997,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [encoder encodeObject:newTag.auxTransforms forKey:@"auxTransforms"];
     [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
     [encoder finishEncoding];
-    [encoder release];
     
     [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
             
@@ -1036,7 +1021,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         UIImage * hiResImg = [[ImageCache sharedImageCache] imageForKey:@"largeImage"];
         NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
         [k addHighResImageWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
-        [largeImgData release];
     });
 
     [newestTag setTagID:newRecordID];
@@ -1057,8 +1041,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSString * stixStringID = [newestTag.auxStixStringIDs objectAtIndex:0];
     if (stixStringID != nil) {
         NSLog(@"New pix has a new stix also: %@", [BadgeView getStixDescriptorForStixStringID:stixStringID]);
-        //[self didAddCommentWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID];
-        [k addCommentToPixWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID];
+        //[self didAddCommentWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID];
+        [k addCommentToPixWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID];
     }
 
     // do not add scale and rotation - all saved in aux stix
@@ -1120,12 +1104,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         bool didAddTag = NO;
         // assume result is ordered by allTagID
         for (NSMutableDictionary * d in theResults) {
-            Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
+            Tag * tag = [Tag getTagFromDictionary:d]; // MRC
             int new_id = [tag.tagID intValue];
             didAddTag = [self addTagWithCheck:tag withID:new_id];
             //if (didAddTag)
             //    [feedController addTagForDisplay:tag];
-            [tag release];
         }
         if (didAddTag)
             [feedController reloadCurrentPage];
@@ -1162,13 +1145,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             return;
         Tag * tag = nil;
         for (NSMutableDictionary * d in theResults) {
-            Tag * t = [[Tag getTagFromDictionary:d] retain]; // MRC
+            Tag * t = [Tag getTagFromDictionary:d]; // MRC
             if ([t.tagID intValue]== updatingAuxTagID) {
                 NSLog(@"Found tag %d", [t.tagID intValue]);
                 tag = t; // MRC: when we break, t is not released so tag is retaining t
                 break;
             }
-            [t release];
         }
         if (tag == nil)
             return;
@@ -1180,7 +1162,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //float rotation = 0;//updatingAuxRotation;
         CGAffineTransform transform = updatingAuxTransform;
         float peelable = YES;
-        if ([tag.username isEqualToString:myUserInfo->username])
+        if ([tag.username isEqualToString:myUserInfo_username])
             peelable = NO;
         
         // find local tag and sync with kumulos tag
@@ -1191,8 +1173,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 break;
         }
         if (localTag == nil) {
-            if (tag)
-                [tag release];
             return;            
         }
         // FIXME: in case of bad internet connections, updated stix from one user might
@@ -1212,13 +1192,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
-        [encoder release];
         
         // update kumulos version of tag with most recent tags
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         // immediately notify
         // if adding to own pix, do not notify or broadcast
-        if (![myUserInfo->username isEqualToString:tag.username]) {
+        if (![myUserInfo_username isEqualToString:tag.username]) {
             NSString * stixStringDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             NSString * article = @"a";
             if ([stixStringDesc characterAtIndex:0] == 'A' ||
@@ -1229,12 +1208,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 ) {
                 article = @"an";
             }
-            NSString * message = [NSString stringWithFormat:@"%@ added %@ %@ to your Pix!", myUserInfo->username, article, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
+            NSString * message = [NSString stringWithFormat:@"%@ added %@ %@ to your Pix!", myUserInfo_username, article, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
             [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
         }
         // replace old tag in allTags
         [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
-        [tag release];
                 
         //NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
         isUpdatingAuxStix = 0;
@@ -1252,12 +1230,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             return;
         Tag * tag = nil;
         for (NSMutableDictionary * d in theResults) {
-            Tag * t = [[Tag getTagFromDictionary:d] retain]; // MRC
+            Tag * t = [Tag getTagFromDictionary:d]; // MRC
             if ([t.tagID intValue]== updatingPeelableTagID) {
                 tag = t; // MRC: when we break, t is not released so tag is retaining t
                 break;
             }
-            [t release]; // MRC
+             // MRC
         }
         if (tag == nil)
             return;
@@ -1269,9 +1247,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 NSLog(@"Adding %@ (%@) stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [BadgeView getStixDescriptorForStixStringID:peeledAuxStixStringID], [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
                 
                 // add to comment log - if comment == @"PEEL" then it is a peel action
-                [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
+                [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
                 
-                [peeledAuxStixStringID release];
             }
         }
         else if (updatingPeelableAction == 1) { // attach stix
@@ -1300,12 +1277,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
         [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
         [encoder finishEncoding];
-        [encoder release];
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         // send a notification to update for a peel/stick action, but no need to acknowledge or jump to the tag
         [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID orGiftStix:nil];
         
-        [tag release]; // MRC
+         // MRC
     }
 }
 
@@ -1458,7 +1434,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     int totalAdded = 0;
     // tags with IDs greater than idOfCurrentTag should go to the head of the array allTags
 	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
+        Tag * tag = [Tag getTagFromDictionary:d]; // MRC
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id > idOfNewestTagReceived)
@@ -1468,7 +1444,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         didAddTag = [self addTagWithCheck:tag withID:new_id]; // insert newest key to head
         if (didAddTag)
             totalAdded = totalAdded+1;
-        [tag release]; // MRC
+         // MRC
 	}
     // force reload of beginning. because of leftward scroll, we should advance the page viewed one to the left.
     // if we've added more than one page, the correct new page number is lastPageViewed+totalAdded-1.
@@ -1492,7 +1468,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     bool didAddTag = NO;
     int totalAdded = 0;
 	for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
+        Tag * tag = [Tag getTagFromDictionary:d]; // MRC
         id key = [d valueForKey:@"allTagID"];
         int new_id = [key intValue];
         if (new_id < idOfOldestTagReceived)
@@ -1501,7 +1477,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         didAddTag = [self addTagWithCheck:tag withID:new_id];
         if (didAddTag)
             totalAdded = totalAdded+1;
-        [tag release];
     }
     if (totalAdded>0) 
     {
@@ -1537,7 +1512,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
 #if 1
-    NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil] autorelease];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
     //[[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
@@ -1549,7 +1524,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // actual comment
 
         // notify
-        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo->username, comment];
+        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo_username, comment];
         Tag * tag = [self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
@@ -1646,7 +1621,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo->username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
+    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo_username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
     [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
 }
 
@@ -1687,7 +1662,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (isDisplayingShareSheet)
         return;
     if (isLoggingIn) {
-        [feedController.buttonProfile setImage:myUserInfo->userphoto forState:UIControlStateNormal];
+        [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
         [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
         [feedController.buttonProfile.layer setBorderWidth:1];
     }
@@ -1700,7 +1675,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
-        [animation release];
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -1738,7 +1712,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [profileController.view removeFromSuperview];
 //        [self.camera setCameraOverlayView:self.tabBarController.view];
-        [animation release];
     }];
     /*
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
@@ -1789,7 +1762,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
     [tabBarController setSelectedIndex:0];
     //[profileController viewWillAppear:YES];
-    [picker release];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
@@ -1827,13 +1799,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didChangeUserphoto:rounded];
     
     // add to kumulos
-    [k addPhotoWithUsername:myUserInfo->username andPhoto:img];
+    [k addPhotoWithUsername:myUserInfo_username andPhoto:img];
     //if (lastViewController == feedController)
     //    [self didPressTabButton:0];
     //else if (lastViewController == exploreController)
     //    [self didPressTabButton:2];
     //[self closeProfileView];
-    [picker release];
+    [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+    [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
+    [feedController.buttonProfile.layer setBorderWidth:1];
+    [exploreController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+    [exploreController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
+    [exploreController.buttonProfile.layer setBorderWidth:1];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
@@ -1841,7 +1818,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSLog(@"Added photo to username %@",  myUserInfo->username);
+    NSLog(@"Added photo to username %@",  myUserInfo_username);
     
     // force friendView to update photo after we know it is in kumulos
     [self checkForUpdatePhotos];
@@ -1913,8 +1890,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     
-    [photo retain];
-    [stix retain];
     
     NSLog(@"DidLoginFromSplashScreen: username %@ stix %d, stixOrder %d", username, [stix count], [stixOrder count]);
     
@@ -1928,7 +1903,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[loginSplashController.view removeFromSuperview];
     //[loginSplashController release];
     
-    //[profileController loginWithUsername:myUserInfo->username];
+    //[profileController loginWithUsername:myUserInfo_username];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
@@ -1940,8 +1915,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
-    [photo release];
-    [stix release];
     if (firstTime) {
         [k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
         [k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
@@ -1964,10 +1937,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allStix removeAllObjects];
     }
     else {
-        [stix retain];
         [allStix removeAllObjects];
         [allStix addEntriesFromDictionary:stix];
-        [stix release];
     }
     if (![stixOrder isKindOfClass:[NSMutableDictionary class]]) {
        
@@ -1975,10 +1946,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [stixOrder removeAllObjects];
     }
     else {
-        [stixOrder retain];
         [allStixOrder removeAllObjects];
         [allStixOrder addEntriesFromDictionary:stixOrder];
-        [stixOrder release];
         
         NSLog(@"DidLoginWithUsername: %@ allStix: %d stixOrder: %d", name, [allStix count], [stixOrder count]);
 
@@ -2017,19 +1986,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k getFollowersOfUserWithFollowsUser:name];
     
     loggedIn = YES;
-    myUserInfo->username = [name retain];
-    myUserInfo->userphoto = [photo retain];
+    myUserInfo_username = name;
+    myUserInfo_userphoto = photo;
     myUserInfo->usertagtotal = total;
     myUserInfo->bux = bux;
-    myUserInfo->email = email;
+    myUserInfo_email = email;
     myUserInfo->facebookID = [facebookID intValue];
     [profileController viewDidAppear:YES]; // force reload of view if we logged into facebook from here - really only happens in simulator
     
-    [feedController.buttonProfile setImage:myUserInfo->userphoto forState:UIControlStateNormal];
+    [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [feedController.buttonProfile.layer setBorderWidth:1];
     
-    NSLog(@"Username %@ with email %@ and facebookID %d", myUserInfo->username, email, [facebookID intValue]);
+    NSLog(@"Username %@ with email %@ and facebookID %d", myUserInfo_username, email, [facebookID intValue]);
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
@@ -2135,10 +2104,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     loggedIn = NO;
-    myUserInfo->username = @"";
-    if (myUserInfo->userphoto) {
-        [myUserInfo->userphoto release];
-        myUserInfo->userphoto = nil;
+    myUserInfo_username = @"";
+    if (myUserInfo_userphoto) {
+        myUserInfo_userphoto = nil;
     }
     myUserInfo->usertagtotal = 0;
     myUserInfo->bux = 0;
@@ -2157,10 +2125,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // logging out from profile view controller
         
         loggedIn = NO;
-        myUserInfo->username = @"";
-        if (myUserInfo->userphoto) {
-            [myUserInfo->userphoto release];
-            myUserInfo->userphoto = nil;
+        myUserInfo_username = @"";
+        if (myUserInfo_userphoto) {
+            [myUserInfo_userphoto release];
+            myUserInfo_userphoto = nil;
         }
         myUserInfo->usertagtotal = 0;
         myUserInfo->bux = 0;
@@ -2191,7 +2159,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    myUserInfo->userphoto = photo;
+    myUserInfo_userphoto = photo;
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -2291,7 +2259,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
     float peelable = YES;
-    if ([tag.username isEqualToString:myUserInfo->username])
+    if ([tag.username isEqualToString:myUserInfo_username])
         peelable = NO;
     [tag addStix:stixStringID withLocation:location /*withScale:scale withRotation:rotation */withTransform:transform withPeelable:peelable];
 
@@ -2307,7 +2275,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     // immediately add comment, update total, decrement stix count
-    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo->username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
+    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
     [self updateUserTagTotal];        
     
     // metrics
@@ -2382,7 +2350,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (loggedIn == YES)
     {
         //NSLog(@"[delegate getUsername] returning %@", username);
-        return myUserInfo->username;
+        return myUserInfo_username;
     }
     //NSLog(@"[delegate getUsername] returning anonymous");
     return @"anonymous";
@@ -2394,7 +2362,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     if ([self isLoggedIn] == NO)
         return [UIImage imageNamed:@"graphic_nopic.png"];
-    return myUserInfo->userphoto;
+    return myUserInfo_userphoto;
 }
 
 -(NSMutableDictionary * )getUserPhotos {
@@ -2402,7 +2370,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
     NSData * photoData = [allUserPhotos objectForKey:username];
-    UIImage * photo = [[[UIImage alloc] initWithData:photoData] autorelease];
+    UIImage * photo = [[UIImage alloc] initWithData:photoData];
     if (photo)
         return photo;
     else
@@ -2486,7 +2454,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
     [self reloadAllCarousels];
     NSMutableData * data = [KumulosData dictionaryToData:allStix];
-    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
+    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
 }
 
 -(void)updateUserTagTotal {
@@ -2495,7 +2463,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     // update usertagtotal
     myUserInfo->usertagtotal += 1;
-    [k updateTotalTagsWithUsername:myUserInfo->username andTotalTags:myUserInfo->usertagtotal];
+    [k updateTotalTagsWithUsername:myUserInfo_username andTotalTags:myUserInfo->usertagtotal];
     if ((myUserInfo->usertagtotal % 5) == 0) {
         //[self rewardStix];
         [self rewardBux];
@@ -2527,7 +2495,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"Feedback button clicked from %@", fromView);
-    FeedbackViewController * feedbackController = [[FeedbackViewController alloc] init];
+    feedbackController = [[FeedbackViewController alloc] init];
     [feedbackController setDelegate:self];
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -2564,7 +2532,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"Feedback submitted for %@ by %@", type, [self getUsername]);
-    NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo->username];
+    NSString * subject = [NSString stringWithFormat:@"%@ sent from %@", type, myUserInfo_username];
     NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@", versionStringStable, versionStringBeta, message];
 	[self sendEmailTo:@"bobbyren@gmail.com, willh103@gmail.com" withCC:@"" withSubject:subject withBody:fullmessage];
     [self didDismissSecondaryView];
@@ -2585,7 +2553,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [request setDelegate:self];
     [request setData:imageData forKey:@"picture[data]"];
     [request startSynchronous];
-    [url autorelease];
+    //[url autorelease]; // arc conversion
 }
 #if 0
 -(void)sharePix:(int)tagID {
@@ -2602,7 +2570,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
    NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
-    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", myUserInfo->username];
+    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", myUserInfo_username];
     NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@ has shared a Pix with you! See it here: %@", versionStringStable, versionStringBeta, [self getUsername], url];
     if (shareMethod == 0) {
         // facebook
@@ -2656,7 +2624,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:userProfileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
-        [animation release];
     }];    // does not need delegate function
     // must force viewDidAppear because it doesn't happen when it's offscreen?
     [userProfileController viewDidAppear:YES]; 
@@ -2685,24 +2652,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSMutableDictionary * stix = [[BadgeView InitializeFirstTimeUserStix] retain];   
-    NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
+    NSMutableDictionary * stix = [BadgeView InitializeFirstTimeUserStix];   
+    NSMutableData * data = [KumulosData dictionaryToData:stix];
     [k adminAddStixToAllUsersWithStix:data];
-    [data autorelease]; // MRC
-    [stix autorelease];
+    //[data autorelease]; // arc conversion
+    //[stix autorelease]; // arc conversion
 }
 
 -(void)adminUpdateAllStixCountsToOne {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-   NSMutableDictionary * stix = [[BadgeView generateOneOfEachStix] retain]; 
+   NSMutableDictionary * stix = [BadgeView generateOneOfEachStix]; 
     int ct = [[stix objectForKey:@"HEART"] intValue];
     NSLog(@"Heart: %d", ct);
-    NSMutableData * data = [[KumulosData dictionaryToData:stix] retain];
+    NSMutableData * data = [KumulosData dictionaryToData:stix];
     [k adminAddStixToAllUsersWithStix:data];
-    [data autorelease]; // MRC
-    [stix autorelease];
+    //[data autorelease]; // arc conversion
+    //[stix autorelease]; // arc conversion
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber *)affectedRows {
@@ -2725,9 +2692,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allStix setObject:[NSNumber numberWithInt:count+1] forKey:stixStringID];
     }
     [self reloadAllCarousels];
-    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
-    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
-    [data autorelease]; // MRC
+    NSMutableData * data = [KumulosData dictionaryToData:allStix];
+    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
+    //[data autorelease]; // arc conversion
 }
 
 -(void)adminSetUnlimitedStix {
@@ -2745,9 +2712,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
     }
     [self reloadAllCarousels];
-    NSMutableData * data = [[KumulosData dictionaryToData:allStix] retain];
-    [k addStixToUserWithUsername:myUserInfo->username andStix:data];
-    [data autorelease]; // MRC
+    NSMutableData * data = [KumulosData dictionaryToData:allStix];
+    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
+    //[data autorelease]; // arc conversion
 }
 
 -(void)adminResetAllStixOrders {
@@ -2769,10 +2736,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; 
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = [[BadgeView InitializeFirstTimeUserStix] retain];
+        stix = [BadgeView InitializeFirstTimeUserStix];
         [allStix removeAllObjects];
         [allStix addEntriesFromDictionary:stix];
-        [stix autorelease];
+        //[stix autorelease];// arc conversion
     }
     else 
     {
@@ -2817,7 +2784,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Test" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Reset All Users Stix (disabled)", @"Get me one of each (disabled)", @"Set my stix to unlimited (disabled)", @"Increment all Users' Bux by 5", @"Reset all stix orders (disabled)", nil];
         [actionSheet setTag:ACTIONSHEET_TAG_ADMIN];
         [actionSheet showFromTabBar:tabBarController.tabBar ];
-        [actionSheet release];
     }
     else
         [self showAlertWithTitle:@"Wrong Password!" andMessage:@"You cannot access the super secret club." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
@@ -2858,7 +2824,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [buxPurchaseButtons addObject:buxButton];
     }
     
-    buttonBuxPurchaseClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonBuxPurchaseClose = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonBuxPurchaseClose setFrame:CGRectMake(270-16, 60-22+20, 37, 39)];
     [buttonBuxPurchaseClose setBackgroundColor:[UIColor clearColor]];
     [buttonBuxPurchaseClose addTarget:self action:@selector(didCloseBuxPurchaseMenu) forControlEvents:UIControlEventTouchUpInside];
@@ -2897,15 +2863,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     animation.delegate = self;
     [animation doViewTransition:buxPurchaseMenu toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished){
         [buxPurchaseMenu removeFromSuperview];
-        [buxPurchaseMenu release];
         buxPurchaseMenu = nil;
         for (int i=0; i<3; i++) {
             UIButton * buxButton = [buxPurchaseButtons objectAtIndex:i];
             [buxButton removeFromSuperview];
         }
-        [buxPurchaseMenu release];
         [buttonBuxPurchaseClose removeFromSuperview];
-        [buttonBuxPurchaseClose release];
     }];
 }
 
@@ -3012,11 +2975,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [PFPush unsubscribeFromChannel:element withError:&error];
         }
         NSLog(@"%@", channelsString);
-        [channelsString autorelease];
+        //[channelsString autorelease]; // arc conversion
         // subscribe
         dispatch_async(backgroundQueue, ^{
-            [PFPush subscribeToChannel:@"" withError:&error];
-            [PFPush subscribeToChannel:@"StixUpdates" withError:&error];
+            NSError * err = nil;
+            [PFPush subscribeToChannel:@"" withError:&err];
+            [PFPush subscribeToChannel:@"StixUpdates" withError:&err];
             if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
             {
                 NSString * channel_ = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""];
@@ -3034,7 +2998,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                                 [channelsString appendString:@" "];
                             }
                             NSLog(@"%@", channelsString);
-                            [channelsString autorelease];
+                            //[channelsString autorelease]; // arc conversion
                         }];
                     }
                     else
@@ -3187,7 +3151,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             [self updateBuxCountFromKumulos];
         }
         if (notificationBookmarkType == NB_UPDATECAROUSEL) {
-            [k getUserStixWithUsername:myUserInfo->username];
+            [k getUserStixWithUsername:myUserInfo_username];
             doJump = NO;
         }
         if (notificationBookmarkType == NB_NEWGIFT) {
@@ -3261,7 +3225,6 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
     }
     [alertQueue insertObject:alert atIndex:[alertQueue count]]; // insert at end
     [alertAction insertObject:[NSNumber numberWithInt:alertType] atIndex:[alertAction count]];
-    [alert release];
     [self showAllAlerts];
 }
 
@@ -3272,13 +3235,12 @@ static bool isShowingAlerts = NO;
 #endif  
     if (isShowingAlerts == YES)
         return;
-    UIAlertView * firstAlert = [[alertQueue objectAtIndex:0] retain];
+    UIAlertView * firstAlert = [alertQueue objectAtIndex:0];
     [alertQueue removeObjectAtIndex:0];
     alertActionCurrent = [[alertAction objectAtIndex:0] intValue];
     [alertAction removeObjectAtIndex:0];
     [firstAlert show];
     isShowingAlerts = YES;
-    [firstAlert release];
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -3327,11 +3289,10 @@ static bool isShowingAlerts = NO;
     }
     if ([alertQueue count] == 0)
         return;
-    UIAlertView * nextAlert = [[alertQueue objectAtIndex:0] retain];
+    UIAlertView * nextAlert = [alertQueue objectAtIndex:0];
     [alertQueue removeObjectAtIndex:0];
     [nextAlert show];
     isShowingAlerts = YES;
-    [nextAlert release];
 }
 
 -(void)updateBuxCountFromKumulos {
@@ -3382,7 +3343,7 @@ static bool isShowingAlerts = NO;
     }
      */
     [self reloadAllCarousels];
-    NSMutableData * stixData = [[KumulosData dictionaryToData:allStix] retain];
+    NSMutableData * stixData = [KumulosData dictionaryToData:allStix];
     [k addStixToUserWithUsername:[self getUsername] andStix:stixData];
     
     // debug - see all stix counts
@@ -3399,13 +3360,11 @@ static bool isShowingAlerts = NO;
     NSMutableDictionary * auxiliaryDict = [[NSMutableDictionary alloc] init];
     [auxiliaryDict setObject:allStixOrder forKey:@"stixOrder"];
     //[auxiliaryDict setObject:allFriends forKey:@"friendsList"];
-    NSMutableData * newAuxData = [[KumulosData dictionaryToData:auxiliaryDict] retain];
-    [auxiliaryDict release];   // MRC  
+    NSMutableData * newAuxData = [KumulosData dictionaryToData:auxiliaryDict];
+       // MRC  
     [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
     
     [self changeBuxCountByAmount:-5];
-    [stixData release];
-    [newAuxData release];
     
     // metric
     NSString * metricName = @"GetStixFromStore";
@@ -3426,11 +3385,7 @@ static bool isShowingAlerts = NO;
                 andAlertType:ALERTVIEW_SIMPLE];
 }
 
--(void)didPurchaseBux:(int)buxPurchased {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    [self didCloseBuxPurchaseMenu];
+-(void)displayPurchasedBuxMessage:(int)buxPurchased {
     [self showAlertWithTitle:@"Thank you!" andMessage:[NSString stringWithFormat:@"You have received %d Bux. Have fun buying stickers!", buxPurchased] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     [self changeBuxCountByAmount:buxPurchased];
     if  (buxPurchased == 25) {
@@ -3441,8 +3396,49 @@ static bool isShowingAlerts = NO;
     else { 
         NSString * metricName = @"MoreBux";
         NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
-        [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];
+        [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
     }
+}
+
+-(void)didPurchaseBux:(int)buxPurchased {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    [self didCloseBuxPurchaseMenu];
+    
+#if 1
+    [self displayPurchasedBuxMessage:buxPurchased];
+#else
+    NSString * buxPurchaseObject = nil;
+    if (buxPurchased == 50) {
+        buxPurchaseObject = @"neroh.stix.bux.50";
+    }
+    else if (buxPurchased == 125) {
+        buxPurchaseObject = @"neroh.stix.bux.125";
+    }
+    else if (buxPurchased == 200) {
+        buxPurchaseObject = @"neroh.stix.bux.200";
+    }
+
+    [[MKStoreManager sharedManager] buyFeature:buxPurchaseObject
+                                    onComplete:^(NSString* purchasedFeature, NSData * data)
+     {
+         // provide your product to the user here.
+         // if it's a subscription, allow user to use now.
+         // remembering this purchase is taken care of by MKStoreKit.
+         [self displayPurchasedBuxMessage:buxPurchased];
+
+         // consume
+         [[MKStoreManager sharedManager] consumeProduct:buxPurchaseObject quantity:buxPurchased];
+     }
+     onCancelled:^
+     {
+         // User cancels the transaction, you can log this using any analytics software like Flurry.
+         NSString * metricName = @"CancelledBux";
+         NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
+         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
+     }];
+#endif
 }
 
 /*** ASIhttp request delegate functions ***/
@@ -3574,9 +3570,6 @@ static bool isShowingAlerts = NO;
         [buxInstructions removeFromSuperview];
         [buttonBuxStore removeFromSuperview];
         [buttonBuxInstructionsClose removeFromSuperview];
-        [buxInstructions release];
-        [buttonBuxStore release];
-        [buttonBuxInstructionsClose release];
     }];
 #endif
 }
@@ -3597,11 +3590,13 @@ static bool isShowingAlerts = NO;
     CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
     buxInstructions = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_rewards.png"]];
     [buxInstructions setFrame:frameOutside];
-    buttonBuxStore = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    /*
+    buttonBuxStore = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonBuxStore setFrame:CGRectMake(68-10, 300, 200, 60)];
     [buttonBuxStore setBackgroundColor:[UIColor clearColor]];
     [buttonBuxStore addTarget:self action:@selector(didClickShowBuxPurchaseMenu) forControlEvents:UIControlEventTouchUpInside];
-    buttonBuxInstructionsClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+     */
+    buttonBuxInstructionsClose = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonBuxInstructionsClose setFrame:CGRectMake(270-6, 60-12, 37, 39)];
     [buttonBuxInstructionsClose setBackgroundColor:[UIColor clearColor]];
     [buttonBuxInstructionsClose addTarget:self action:@selector(didCloseBuxInstructions) forControlEvents:UIControlEventTouchUpInside];
@@ -3613,7 +3608,7 @@ static bool isShowingAlerts = NO;
     //int buxAnimationOpen = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameInside forTime:.5];
     [animation doViewTransition:buxInstructions toFrame:frameInside forTime:.5 withCompletion:^(BOOL finished) {
         // bux purchase menu
-            [self.tabBarController.view addSubview:buttonBuxStore];
+            //[self.tabBarController.view addSubview:buttonBuxStore];
             [self.tabBarController.view addSubview:buttonBuxInstructionsClose];   
     }];
 }

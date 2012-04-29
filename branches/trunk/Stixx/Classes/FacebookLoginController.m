@@ -81,17 +81,17 @@
 #if 0
     UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
 #else
-    NSURL * url = [[[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]] autorelease];
+    NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
     CGSize newSize = CGSizeMake(90, 90);
-    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] autorelease];
+    UIImage * img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]];
     UIImage * resized = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
 #endif
     NSData * photo = UIImageJPEGRepresentation(resized, .8);
     //[img release];
     
     //[kumulos addEmailToUserWithUsername:username andEmail:email];
-    NSMutableDictionary * stix = [[BadgeView InitializeFirstTimeUserStix] retain];   
-    NSMutableData * stixData = [[KumulosData dictionaryToData:stix] retain];
+    NSMutableDictionary * stix = [BadgeView InitializeFirstTimeUserStix];   
+    NSMutableData * stixData = [KumulosData dictionaryToData:stix];
     //[kumulos addStixToUserWithUsername:username andStix:data];
     
     // add auxiliary data
@@ -114,7 +114,7 @@
     [friendsList addObject:@"willh103"];
     [auxInfo setValue:friendsList forKey:@"friendsList"];
     */
-    NSData * auxData = [[KumulosData dictionaryToData:auxInfo] retain];
+    NSData * auxData = [KumulosData dictionaryToData:auxInfo];
     [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
     int totalTags = 0;
     int bux = NEW_USER_BUX;
@@ -123,13 +123,14 @@
     
     //[k createUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux];
     [k addUserWithUsername:username andPassword:[k md5:password] andEmail:email andPhoto:photo andStix:stixData andAuxiliaryData:auxData andTotalTags:totalTags andBux:bux andFacebookID:facebookID];
-    // MRC
+    // arc conversion
+    /*
     [stixData autorelease];
     [stix autorelease];
     [auxInfo autorelease];
     [auxData autorelease];
     [stixOrder autorelease];
-     
+    */
 }
 
 -(void)loginUser {
@@ -149,13 +150,12 @@
     NSString* password = [NSString stringWithFormat:@"%d", newFacebookID];
     NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%d/picture", facebookID]];
     CGSize newSize = CGSizeMake(90, 90);
-    UIImage * img = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]] autorelease];
+    UIImage * img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]];
     UIImage * resized = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
     NSData * photo = UIImageJPEGRepresentation(resized, .8);
 //    [k updateUserWithEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5:password] andFacebookID:newFacebookID];
     [k updateUserByEmailWithEmail:facebookEmail andUsername:username andPassword:[k md5: password] andPhoto:photo andFacebookID:newFacebookID];
-    [url release];
-    [photo release]; // MRC
+     // MRC
 }
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
@@ -167,7 +167,7 @@
         return;
     UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
     // badge count array
-    NSMutableDictionary * stix = [[KumulosData dataToDictionary:[d valueForKey:@"stix"]] retain]; // returns a dictionary whose one element is a dictionary of stix
+    NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
     // total badge count
     int totalTags;
     int bux;
@@ -207,9 +207,8 @@
 //    [loginController.view removeFromSuperview];
     [self stopActivityIndicator];
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
-    [stix release]; // MRC
-    [newPhoto release]; // MRC
-    [auxiliaryData release];
+     // MRC
+     // MRC
 }
 
 
@@ -308,7 +307,6 @@
     }
     
     //[alert show];
-    [alert release];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserByEmailDidCompleteWithResult:(NSArray *)theResults {

@@ -45,7 +45,7 @@ static void *finishedContext = @"finishedContext";
 @interface Facebook ()
 
 // private properties
-@property(nonatomic, retain) NSArray* permissions;
+@property(nonatomic) NSArray* permissions;
 @property(nonatomic, copy) NSString* appId;
 
 @end
@@ -104,7 +104,7 @@ static void *finishedContext = @"finishedContext";
     self = [super init];
     if (self) {
         _requests = [[NSMutableSet alloc] init];
-        _lastAccessTokenUpdate = [[NSDate distantPast] retain];
+        _lastAccessTokenUpdate = [NSDate distantPast];
         _frictionlessRequestSettings = [[FBFrictionlessRequestSettings alloc] init];
         self.appId = appId;
         self.sessionDelegate = delegate;
@@ -122,17 +122,6 @@ static void *finishedContext = @"finishedContext";
     for (FBRequest* _request in _requests) {
         [_request removeObserver:self forKeyPath:requestFinishedKeyPath];
     }
-    [_lastAccessTokenUpdate release];
-    [_accessToken release];
-    [_expirationDate release];
-    [_requests release];
-    [_loginDialog release];
-    [_fbDialog release];
-    [_appId release];
-    [_permissions release];
-    [_urlSchemeSuffix release];
-    [_frictionlessRequestSettings release];
-    [super dealloc];
 }
 
 - (void)invalidateSession {
@@ -270,7 +259,6 @@ static void *finishedContext = @"finishedContext";
     // If single sign-on failed, open an inline login dialog. This will require the user to
     // enter his or her credentials.
     if (!didOpenOtherApp) {
-        [_loginDialog release];
         _loginDialog = [[FBLoginDialog alloc] initWithURL:loginDialogURL
                                               loginParams:params
                                                  delegate:self];
@@ -283,7 +271,7 @@ static void *finishedContext = @"finishedContext";
  */
 - (NSDictionary*)parseURLParams:(NSString *)query {
 	NSArray *pairs = [query componentsSeparatedByString:@"&"];
-	NSMutableDictionary *params = [[[NSMutableDictionary alloc] init] autorelease];
+	NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
 	for (NSString *pair in pairs) {
 		NSArray *kv = [pair componentsSeparatedByString:@"="];
 		NSString *val =
@@ -371,7 +359,7 @@ static void *finishedContext = @"finishedContext";
  */
 - (BOOL)shouldExtendAccessToken {
     if ([self isSessionValid]){
-        NSCalendar *calendar = [[[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar] autorelease];
+        NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
         NSDateComponents *components = [calendar components:NSHourCalendarUnit
                                                    fromDate:_lastAccessTokenUpdate
                                                      toDate:[NSDate date]
@@ -690,7 +678,6 @@ static void *finishedContext = @"finishedContext";
      andParams:(NSMutableDictionary *)params
    andDelegate:(id <FBDialogDelegate>)delegate {
     
-    [_fbDialog release];
     
     NSString *dialogURL = [kDialogBaseURL stringByAppendingString:action];
     [params setObject:@"touch" forKey:@"display"];
@@ -726,7 +713,7 @@ static void *finishedContext = @"finishedContext";
             id fbid = [params objectForKey:@"to"];
             if (fbid != nil) {
                 // if value parses as a json array expression get the list that way
-                SBJsonParser *parser = [[[SBJsonParser alloc] init] autorelease];
+                SBJsonParser *parser = [[SBJsonParser alloc] init];
                 id fbids = [parser objectWithString:fbid];
                 if (![fbids isKindOfClass:[NSArray class]]) {
                     // otherwise seperate by commas (handles the singleton case too)
@@ -784,8 +771,7 @@ static void *finishedContext = @"finishedContext";
 - (void)fbDialogLogin:(NSString *)token expirationDate:(NSDate *)expirationDate {
     self.accessToken = token;
     self.expirationDate = expirationDate;
-    [_lastAccessTokenUpdate release];
-    _lastAccessTokenUpdate = [[NSDate date] retain];
+    _lastAccessTokenUpdate = [NSDate date];
     [self reloadFrictionlessRecipientCache];
     if ([self.sessionDelegate respondsToSelector:@selector(fbDidLogin)]) {
         [self.sessionDelegate fbDidLogin];
@@ -828,8 +814,7 @@ static void *finishedContext = @"finishedContext";
         expirationDate = [NSDate dateWithTimeIntervalSince1970:timeInterval];
     }
     self.expirationDate = expirationDate;
-    [_lastAccessTokenUpdate release];
-    _lastAccessTokenUpdate = [[NSDate date] retain];
+    _lastAccessTokenUpdate = [NSDate date];
     
     if ([self.sessionDelegate respondsToSelector:@selector(fbDidExtendToken:expiresAt:)]) {
         [self.sessionDelegate fbDidExtendToken:accessToken expiresAt:expirationDate];

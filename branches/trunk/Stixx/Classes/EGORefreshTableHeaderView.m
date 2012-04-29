@@ -72,7 +72,6 @@ static NSDateFormatter *refreshFormatter;
 		lastUpdatedLabel.backgroundColor = [UIColor clearColor];
 		lastUpdatedLabel.textAlignment = UITextAlignmentCenter;
 		[self addSubview:lastUpdatedLabel];
-		[lastUpdatedLabel release];
 
 //		if ([[NSUserDefaults standardUserDefaults] objectForKey:@"EGORefreshTableView_LastRefresh"]) {
 //			lastUpdatedLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"EGORefreshTableView_LastRefresh"];
@@ -90,20 +89,17 @@ static NSDateFormatter *refreshFormatter;
 		statusLabel.textAlignment = UITextAlignmentCenter;
 		[self setState:EGOOPullRefreshNormal];
 		[self addSubview:statusLabel];
-		[statusLabel release];
 		
 		arrowImage = [[CALayer alloc] init];
 		arrowImage.frame = CGRectMake(25.0f, frame.size.height - 65.0f, 30.0f, 55.0f);
 		arrowImage.contentsGravity = kCAGravityResizeAspect;
 		arrowImage.contents = (id)[UIImage imageNamed:@"blueArrow.png"].CGImage;
 		[[self layer] addSublayer:arrowImage];
-		[arrowImage release];
 		
 		activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 		activityView.frame = CGRectMake(25.0f, frame.size.height - 38.0f, 20.0f, 20.0f);
 		activityView.hidesWhenStopped = YES;
 		[self addSubview:activityView];
-		[activityView release];
 		
     }
     return self;
@@ -200,12 +196,11 @@ static NSDateFormatter *refreshFormatter;
 }
 
 - (void)dealloc {
-	[bottomBorderColor release], bottomBorderColor = nil;
+	bottomBorderColor = nil;
 	activityView = nil;
 	statusLabel = nil;
 	arrowImage = nil;
 	lastUpdatedLabel = nil;
-    [super dealloc];
 }
 
 

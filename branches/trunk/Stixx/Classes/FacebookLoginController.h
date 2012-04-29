@@ -28,15 +28,15 @@
     BOOL isFirstTimeUser;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton * loginButton;
+@property (nonatomic) IBOutlet UIButton * loginButton;
 //@property (nonatomic, retain) LoginViewController * loginController;
-@property (nonatomic, assign) NSObject<FacebookLoginDelegate> *delegate;
+@property (nonatomic, unsafe_unretained) NSObject<FacebookLoginDelegate> *delegate;
 //@property (nonatomic, assign) UIImagePickerController * camera;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic, copy) NSString * facebookName;
 @property (nonatomic, copy) NSString * facebookEmail;
 @property (nonatomic, assign) int facebookID;
-@property (nonatomic, retain) Kumulos * k;
+@property (nonatomic) Kumulos * k;
 
 -(IBAction)didClickJoinButton:(id)sender;
 -(void)didGetFacebookName:(NSString*)name andEmail:(NSString*)email andID:(int)facebookID;

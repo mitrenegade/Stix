@@ -76,7 +76,6 @@ static dispatch_queue_t backgroundQueue;
         //[button0 setBackgroundColor:[UIColor greenColor]];
         currentContentOrigin = currentContentOrigin + width+5;
         [buttonCategories addObject:button0];
-        [button0 release];
     }
     
     categoryScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(5, 40, 300, 70)];
@@ -88,7 +87,6 @@ static dispatch_queue_t backgroundQueue;
     UIImageView * tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];    
     carouselTab = [[UIView alloc] initWithFrame:tabImage.frame];
     [carouselTab addSubview:tabImage];
-    [tabImage release];
     [carouselTab addSubview:stixScroll];
     [carouselTab addSubview:buttonShowCarousel];
     [carouselTab addSubview:categoryScroll];
@@ -173,7 +171,6 @@ static dispatch_queue_t backgroundQueue;
     categoryStix = [BadgeView getStixForCategory:categoryName];
     [categorySet addObjectsFromArray:categoryStix];
     int stixToShow = [categorySet count];
-    [stixCategoryNames release];
     int maxX = STIX_PER_ROW;
     double rows = (double) stixToShow / (double)maxX;
     int maxY = ceil(rows);
@@ -199,7 +196,7 @@ static dispatch_queue_t backgroundQueue;
             //NSLog(@"Order for %@: %d", stixStringID, order);
             int y = order / STIX_PER_ROW;
             int x = order - y * STIX_PER_ROW;
-            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
             //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             if (stix.alpha == 0) {
                 // debug
@@ -232,13 +229,10 @@ static dispatch_queue_t backgroundQueue;
                 [buxPrice setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
                 [buxPrice setText:@"5"];
 //                [stix addSubview:buxPrice];
-                [buxPrice release];
-                [buxImg release];
             }
             [stixScroll addSubview:stix];
             [allCarouselStixViews setObject:stix forKey:stixStringID];
             [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
-            [stix release];
         }
         else { //if (shelfCategory == SHELF_CATEGORY_FIRST) {
             /*
@@ -281,7 +275,6 @@ static dispatch_queue_t backgroundQueue;
              */
         }
     }
-    [categorySet release];
     [carouselTab addSubview:stixScroll];
 }
 
@@ -302,16 +295,6 @@ static dispatch_queue_t backgroundQueue;
     [self removeFromSuperview];
 }
 
-- (void)dealloc {
-
-	[super dealloc];
-    
-    [allCarouselStixFrames release];
-    [allCarouselStixViews release];
-
-    [stixScroll release];
-    stixScroll = nil;
-}
 
 -(void)resetBadgeLocations{
     // center frame and adjust for size
@@ -458,7 +441,7 @@ static int lastContentOffsetY = 0;
             [badgeTouched setFrame:frameOutsideCarousel];
             [self addSubview:badgeTouched];
 
-            badgeLifted = [[BadgeView getBadgeWithStixStringID:selectedStixStringID] retain]; 
+            badgeLifted = [BadgeView getBadgeWithStixStringID:selectedStixStringID]; 
             float scale =1; // sizeOfStixContext / 300; // if stix context is different from the camera view in TagViewController
             badgeLifted.frame = CGRectMake(0, 0, badgeLifted.frame.size.width*scale, badgeLifted.frame.size.height * scale);
             float centerX = badgeTouched.center.x; 
@@ -714,7 +697,7 @@ static int lastContentOffsetY = 0;
         // remove old, invisible stixView
         UIImageView * stixOld = [allCarouselStixViews objectForKey:stixStringID];
         [stixOld removeFromSuperview];
-        UIImageView * stixNew = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+        UIImageView * stixNew = [BadgeView getBadgeWithStixStringID:stixStringID];
         CGRect frame = [[allCarouselStixFrames objectForKey:stixStringID] CGRectValue];
         double opacity = [[allCarouselMissingStixStringOpacity objectForKey:stixStringID] doubleValue];
         [stixNew setFrame:frame];
@@ -722,7 +705,7 @@ static int lastContentOffsetY = 0;
         [stixScroll addSubview:stixNew];
         [allCarouselStixViews setObject:stixNew forKey:stixStringID];
         [allCarouselMissingStixStringIDs removeObject:stixStringID];
-        [stixNew release]; // MRC
+         // MRC
         
         carouselRequests--;
         NSLog(@"Received requested stix %@: carousel Requests left %d missing stix left %d", descriptor, carouselRequests, [allCarouselMissingStixStringIDs count]);

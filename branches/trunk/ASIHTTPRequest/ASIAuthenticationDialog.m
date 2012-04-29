@@ -41,7 +41,7 @@ static const NSUInteger kDomainSection = 1;
 - (void)orientationChanged:(NSNotification *)notification;
 - (void)cancelAuthenticationFromDialog:(id)sender;
 - (void)loginWithCredentialsFromDialog:(id)sender;
-@property (retain) UITableView *tableView;
+@property  UITableView *tableView;
 @end
 
 @implementation ASIAuthenticationDialog
@@ -51,7 +51,7 @@ static const NSUInteger kDomainSection = 1;
 + (void)initialize
 {
 	if (self == [ASIAuthenticationDialog class]) {
-		requestsNeedingAuthentication = [[NSMutableArray array] retain];
+		requestsNeedingAuthentication = [NSMutableArray array];
 	}
 }
 
@@ -99,11 +99,7 @@ static const NSUInteger kDomainSection = 1;
 	}
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 
-	[request release];
-	[tableView release];
 	[presentingController.view removeFromSuperview];
-	[presentingController release];
-	[super dealloc];
 }
 
 #pragma mark keyboard notifications
@@ -221,11 +217,8 @@ static const NSUInteger kDomainSection = 1;
 
 - (void)viewDidDisappear:(BOOL)animated
 {
-	[self retain];
-	[sharedDialog release];
 	sharedDialog = nil;
 	[self performSelector:@selector(presentNextDialog) withObject:nil afterDelay:0];
-	[self release];
 }
 
 - (void)dismiss
@@ -267,10 +260,10 @@ static const NSUInteger kDomainSection = 1;
 	}
 
 	// Setup toolbar
-	UINavigationBar *bar = [[[UINavigationBar alloc] init] autorelease];
+	UINavigationBar *bar = [[UINavigationBar alloc] init];
 	[bar setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
 
-	UINavigationItem *navItem = [[[UINavigationItem alloc] init] autorelease];
+	UINavigationItem *navItem = [[UINavigationItem alloc] init];
 	bar.items = [NSArray arrayWithObject:navItem];
 
 	[[self view] addSubview:bar];
@@ -284,8 +277,8 @@ static const NSUInteger kDomainSection = 1;
 		[navItem setTitle:[[[self request] url] host]];
 	}
 
-	[navItem setLeftBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelAuthenticationFromDialog:)] autorelease]];
-	[navItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(loginWithCredentialsFromDialog:)] autorelease]];
+	[navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelAuthenticationFromDialog:)]];
+	[navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonItemStyleDone target:self action:@selector(loginWithCredentialsFromDialog:)]];
 
 	// We show the login form in a table view, similar to Safari's authentication dialog
 	[bar sizeToFit];
@@ -293,7 +286,7 @@ static const NSUInteger kDomainSection = 1;
 	f.origin.y = [bar frame].size.height;
 	f.size.height -= f.origin.y;
 
-	[self setTableView:[[[UITableView alloc] initWithFrame:f style:UITableViewStyleGrouped] autorelease]];
+	[self setTableView:[[UITableView alloc] initWithFrame:f style:UITableViewStyleGrouped]];
 	[[self tableView] setDelegate:self];
 	[[self tableView] setDataSource:self];
 	[[self tableView] setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
@@ -425,7 +418,7 @@ static const NSUInteger kDomainSection = 1;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 #if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_3_0
-	UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
+	UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 #else
 	UITableViewCell *cell = [[[UITableViewCell alloc] initWithFrame:CGRectMake(0,0,0,0) reuseIdentifier:nil] autorelease];
 #endif
@@ -433,7 +426,7 @@ static const NSUInteger kDomainSection = 1;
 	[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
 
 	CGRect f = CGRectInset([cell bounds], 10, 10);
-	UITextField *textField = [[[UITextField alloc] initWithFrame:f] autorelease];
+	UITextField *textField = [[UITextField alloc] initWithFrame:f];
 	[textField setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
 	[textField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
 	[textField setAutocorrectionType:UITextAutocorrectionTypeNo];

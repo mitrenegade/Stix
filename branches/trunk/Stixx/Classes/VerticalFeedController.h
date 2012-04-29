@@ -96,7 +96,7 @@
     LoadingAnimationView * activityIndicator;
     LoadingAnimationView * activityIndicatorLarge;
     
-    NSObject<VerticalFeedDelegate> * delegate;
+    NSObject<VerticalFeedDelegate> * __unsafe_unretained delegate;
     
     FeedTableController *tableController;	
     int lastPageViewed;
@@ -137,34 +137,35 @@
     int shareMenuOpenAnimation;
     int shareMenuCloseAnimation;
     VerticalFeedItemController * shareFeedItem;
-
-    RaisedCenterTabBarController * tabBarController;
+    AddStixViewController * auxView;
+    
+    RaisedCenterTabBarController * __weak tabBarController;
     
     dispatch_queue_t backgroundQueue;
 }
-@property (nonatomic, assign) CarouselView * carouselView;
-@property (nonatomic, retain) NSMutableDictionary * feedItems;
-@property (nonatomic, retain) NSMutableDictionary * headerViews;
-@property (nonatomic, retain) NSMutableDictionary * headerViewsDidLoadPhoto;
-@property (nonatomic, retain) NSMutableArray *allTags;
-@property (nonatomic, retain) NSMutableArray *allTagsDisplayed;
-@property (nonatomic, retain) FeedTableController *tableController;
-@property (nonatomic, assign) NSObject<VerticalFeedDelegate> * delegate;
+@property (nonatomic, weak) CarouselView * carouselView;
+@property (nonatomic) NSMutableDictionary * feedItems;
+@property (nonatomic) NSMutableDictionary * headerViews;
+@property (nonatomic) NSMutableDictionary * headerViewsDidLoadPhoto;
+@property (nonatomic) NSMutableArray *allTags;
+@property (nonatomic) NSMutableArray *allTagsDisplayed;
+@property (nonatomic) FeedTableController *tableController;
+@property (nonatomic, unsafe_unretained) NSObject<VerticalFeedDelegate> * delegate;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
-@property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
+@property (nonatomic) IBOutlet UIButton * buttonProfile;
 //@property (nonatomic, retain) IBOutlet UILabel * labelBuxCount;
-@property (nonatomic, retain) OutlineLabel * labelBuxCount;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicatorLarge;
+@property (nonatomic) OutlineLabel * labelBuxCount;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
-@property (nonatomic, retain) CommentViewController * commentView;
-@property (nonatomic, retain) UIImagePickerController * camera;
+@property (nonatomic) CommentViewController * commentView;
+@property (nonatomic) UIImagePickerController * camera;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonShowCarousel;
 //@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
-@property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
+@property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 //@property (nonatomic, copy) NSString * galleryUsername;
-@property (nonatomic, retain) IBOutlet UITextField * statusMessage;
+@property (nonatomic) IBOutlet UITextField * statusMessage;
 @property (nonatomic, assign) int newestTagIDDisplayed;
 
 -(void)populateAllTagsDisplayed;

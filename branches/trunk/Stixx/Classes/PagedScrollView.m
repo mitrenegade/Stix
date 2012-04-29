@@ -40,7 +40,6 @@
                 if ((NSNull*)d != [NSNull null])
                     [d removeFromSuperview];
             }
-            [scrollViewPages release];
         }
         scrollViewPages = [[NSMutableArray alloc] initWithCapacity:pageCount];
 
@@ -93,9 +92,8 @@
         //    [view removeFromSuperview];
         //}
         if ((NSNull *)view == [NSNull null]) {
-            view = [[self.myDelegate viewForItemAtIndex:page] retain];
+            view = [self.myDelegate viewForItemAtIndex:page];
             [scrollViewPages replaceObjectAtIndex:page withObject:view];
-            [view release];
         }
         
         // add the controller's view to the scroll view	if it's not already added
@@ -120,9 +118,8 @@
     UIView *view = [scrollViewPages objectAtIndex:page];
     [view removeFromSuperview];
     
-    UIView * newview = [[self.myDelegate viewForItemAtIndex:page] retain];
+    UIView * newview = [self.myDelegate viewForItemAtIndex:page];
     [scrollViewPages replaceObjectAtIndex:page withObject:newview];
-    [newview release];
     
     // Position the view in our scrollview
     view = [scrollViewPages objectAtIndex:page];
@@ -192,10 +189,5 @@
     }
 }
 
--(void)dealloc
-{
-    [scrollViewPages release];
-    [super dealloc];
-}
 
 @end

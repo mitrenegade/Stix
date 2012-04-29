@@ -73,7 +73,7 @@
     IBOutlet UIButton * shareButton;
     //IBOutlet UIButton * seeAllCommentsButton;
     
-    NSObject<VerticalFeedItemDelegate> * delegate;    
+    NSObject<VerticalFeedItemDelegate> * __unsafe_unretained delegate;    
     
     NSString * nameString;
     NSString * descriptorString;
@@ -97,25 +97,25 @@
 
     UIImageView * placeholderView;    
 }
-@property (retain, nonatomic) IBOutlet UILabel * labelName;
-@property (retain, nonatomic) IBOutlet UILabel * labelComment;
-@property (retain, nonatomic) IBOutlet UILabel * labelCommentCount;
-@property (retain, nonatomic) IBOutlet UILabel * labelDescriptor;
-@property (retain, nonatomic) IBOutlet UIImageView * labelDescriptorBG;
-@property (retain, nonatomic) IBOutlet UILabel * labelTime;
-@property (retain, nonatomic) IBOutlet UILabel * labelLocationString;
-@property (nonatomic, retain) IBOutlet UIImageView * imageView;
-@property (nonatomic, retain) IBOutlet UIImageView * userPhotoView;
-@property (nonatomic, retain) IBOutlet UIImageView * locationIcon;
-@property (nonatomic, retain) NSString * nameString;
-@property (nonatomic, retain) NSString * commentString;
-@property (nonatomic, retain) UIImage * imageData;
-@property (nonatomic, retain) IBOutlet UIButton * addCommentButton;
-@property (nonatomic, retain) IBOutlet UIButton * shareButton;
+@property ( nonatomic) IBOutlet UILabel * labelName;
+@property ( nonatomic) IBOutlet UILabel * labelComment;
+@property ( nonatomic) IBOutlet UILabel * labelCommentCount;
+@property ( nonatomic) IBOutlet UILabel * labelDescriptor;
+@property ( nonatomic) IBOutlet UIImageView * labelDescriptorBG;
+@property ( nonatomic) IBOutlet UILabel * labelTime;
+@property ( nonatomic) IBOutlet UILabel * labelLocationString;
+@property (nonatomic) IBOutlet UIImageView * imageView;
+@property (nonatomic) IBOutlet UIImageView * userPhotoView;
+@property (nonatomic) IBOutlet UIImageView * locationIcon;
+@property (nonatomic) NSString * nameString;
+@property (nonatomic) NSString * commentString;
+@property (nonatomic) UIImage * imageData;
+@property (nonatomic) IBOutlet UIButton * addCommentButton;
+@property (nonatomic) IBOutlet UIButton * shareButton;
 @property (nonatomic, assign) int tagID;
 @property (nonatomic, assign) int commentCount;
-@property (nonatomic, assign) NSObject<VerticalFeedItemDelegate> * delegate;   
-@property (nonatomic, retain) StixView * stixView;
+@property (nonatomic, unsafe_unretained) NSObject<VerticalFeedItemDelegate> * delegate;   
+@property (nonatomic) StixView * stixView;
 //@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;

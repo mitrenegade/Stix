@@ -103,10 +103,6 @@
         if (nil != self.delegate) {
             [self.delegate receiveVenueNames:venueNames andLatLong:venueLL];
         }
-        [venueLL release];
-        [venueNames release];
     }];
-    [lat release];
-    [lon release];
 }
 @end

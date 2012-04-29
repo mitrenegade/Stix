@@ -45,20 +45,20 @@
     IBOutlet UITextField * commentField;
     IBOutlet UIToolbar * toolBar;
     
-    NSObject<CommentViewDelegate> * delegate;
+    NSObject<CommentViewDelegate> * __unsafe_unretained delegate;
     
     LoadingAnimationView * activityIndicator;
 }
 
 @property (nonatomic, assign) int tagID;
-@property (nonatomic, retain) NSString * nameString;
-@property (nonatomic, retain) IBOutlet UILabel * nameLabel;
-@property (nonatomic, retain) IBOutlet UIButton * backButton;
-@property (nonatomic, retain) IBOutlet UIButton * addButton;
-@property (nonatomic, retain) IBOutlet UITextField * commentField;
-@property (nonatomic, retain) IBOutlet UIToolbar * toolBar;
-@property (nonatomic, assign) NSObject<CommentViewDelegate> * delegate;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic) NSString * nameString;
+@property (nonatomic) IBOutlet UILabel * nameLabel;
+@property (nonatomic) IBOutlet UIButton * backButton;
+@property (nonatomic) IBOutlet UIButton * addButton;
+@property (nonatomic) IBOutlet UITextField * commentField;
+@property (nonatomic) IBOutlet UIToolbar * toolBar;
+@property (nonatomic, unsafe_unretained) NSObject<CommentViewDelegate> * delegate;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
 
 -(IBAction) didClickBackButton:(id)sender;
 -(IBAction)didClickAddButton:(id)sender;

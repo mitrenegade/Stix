@@ -66,7 +66,7 @@
     bool showTransformCanvas;
     UIView * transformCanvas;
 
-    NSObject<StixViewDelegate> * delegate;    
+    NSObject<StixViewDelegate> * __unsafe_unretained delegate;    
     NSMutableSet *_activeRecognizers;
     Kumulos * k;
     
@@ -79,18 +79,18 @@
     BOOL isShowingPlaceholder;
 }
 
-@property (nonatomic, retain) UIImageView * stix;
-@property (nonatomic, retain) OutlineLabel * stixCount;
+@property (nonatomic) UIImageView * stix;
+@property (nonatomic) OutlineLabel * stixCount;
 @property (nonatomic, assign) bool interactionAllowed;
 //@property (nonatomic, assign) float stixScale;
 //@property (nonatomic, assign) float stixRotation;
-@property (nonatomic, retain) NSMutableArray * auxStixViews;
-@property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
+@property (nonatomic) NSMutableArray * auxStixViews;
+@property (nonatomic) NSMutableArray * auxStixStringIDs;
 @property (nonatomic, assign) bool isPeelable;
-@property (nonatomic, assign) NSObject<StixViewDelegate> * delegate;
+@property (nonatomic, unsafe_unretained) NSObject<StixViewDelegate> * delegate;
 @property (nonatomic, assign) CGAffineTransform referenceTransform;
 @property (nonatomic, copy) NSString * selectStixStringID;
-@property (nonatomic, retain) NSNumber * tagID;
+@property (nonatomic) NSNumber * tagID;
 @property (nonatomic, assign) int stixViewID;
 @property (nonatomic, assign) BOOL isShowingPlaceholder;
 

@@ -48,7 +48,7 @@ typedef enum{
 }
 
 @property(nonatomic,assign) EGOPullRefreshState state;
-@property(nonatomic,retain) UIColor *bottomBorderColor;
+@property(nonatomic) UIColor *bottomBorderColor;
 @property(nonatomic,assign) CGFloat bottomBorderThickness;
 
 - (id)initWithFrameRelativeToFrame:(CGRect)originalFrame;

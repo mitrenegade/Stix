@@ -140,15 +140,15 @@ Copyright (C) 2010 Apple Inc. All Rights Reserved.
 
     //Change the host name here to change the server your monitoring
     remoteHostLabel.text = [NSString stringWithFormat: @"Remote Host: %@", @"www.apple.com"];
-	hostReach = [[Reachability reachabilityWithHostName: @"www.apple.com"] retain];
+	hostReach = [Reachability reachabilityWithHostName: @"www.apple.com"];
 	[hostReach startNotifier];
 	[self updateInterfaceWithReachability: hostReach];
 	
-    internetReach = [[Reachability reachabilityForInternetConnection] retain];
+    internetReach = [Reachability reachabilityForInternetConnection];
 	[internetReach startNotifier];
 	[self updateInterfaceWithReachability: internetReach];
 
-    wifiReach = [[Reachability reachabilityForLocalWiFi] retain];
+    wifiReach = [Reachability reachabilityForLocalWiFi];
 	[wifiReach startNotifier];
 	[self updateInterfaceWithReachability: wifiReach];
 

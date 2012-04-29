@@ -15,7 +15,7 @@ static ImageCache *sharedImageCache;
 
 -(id)init
 {
-	[super init];
+	self = [super init];
 	dictionary = [[NSMutableDictionary alloc] init];
 	return self;
 }
@@ -64,9 +64,11 @@ static ImageCache *sharedImageCache;
 	return self;
 }
 
+/*
 -(void) release
 {
 	// no op
 }
+ */
 
 @end

@@ -54,7 +54,7 @@ enum {
     int numColumns;
     
     ColumnTableController * tableController;
-    NSObject<ExploreViewDelegate> * delegate;
+    NSObject<ExploreViewDelegate> * __unsafe_unretained delegate;
     
 //    IBOutlet UIButton * buttonFeedback;
     IBOutlet UIButton * buttonProfile;
@@ -93,14 +93,14 @@ enum {
     Kumulos * k;
 }
 
-@property (nonatomic, retain) ColumnTableController * tableController;
-@property (nonatomic, assign) NSObject<ExploreViewDelegate> * delegate;
+@property (nonatomic) ColumnTableController * tableController;
+@property (nonatomic, unsafe_unretained) NSObject<ExploreViewDelegate> * delegate;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
-@property (nonatomic, retain) OutlineLabel * labelBuxCount;
-@property (nonatomic, retain) IBOutlet UIButton * buttonProfile;
-@property (nonatomic, assign) RaisedCenterTabBarController * tabBarController;
+@property (nonatomic) OutlineLabel * labelBuxCount;
+@property (nonatomic) IBOutlet UIButton * buttonProfile;
+@property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;

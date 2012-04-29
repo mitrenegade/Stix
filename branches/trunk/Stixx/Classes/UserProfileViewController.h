@@ -64,28 +64,28 @@
     NSMutableSet * allFollowing;
 }
 
-@property (nonatomic, retain) UIImageView * photoButton;
-@property (nonatomic, retain) UIButton * buttonAddFriend;
-@property (nonatomic, retain) UILabel * nameLabel;
+@property (nonatomic) UIImageView * photoButton;
+@property (nonatomic) UIButton * buttonAddFriend;
+@property (nonatomic) UILabel * nameLabel;
 @property (nonatomic, copy) NSString * lastUsername;
-@property (nonatomic, assign) NSObject<UserProfileViewDelegate> *delegate;
-@property (nonatomic, retain) Kumulos * k;
+@property (nonatomic, unsafe_unretained) NSObject<UserProfileViewDelegate> *delegate;
+@property (nonatomic) Kumulos * k;
 @property (nonatomic, copy) NSString * username;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, retain) UIButton * bgFollowers;
-@property (nonatomic, retain) UIButton * bgFollowing;
-@property (nonatomic, retain) OutlineLabel * myFollowersCount;
-@property (nonatomic, retain) OutlineLabel * myFollowingCount;
-@property (nonatomic, retain) OutlineLabel * myFollowersLabel;
-@property (nonatomic, retain) OutlineLabel * myFollowingLabel;
-@property (nonatomic, retain) OutlineLabel * myPixCount;
-@property (nonatomic, retain) OutlineLabel * myStixCount;
-@property (nonatomic, retain) OutlineLabel * myPixLabel;
-@property (nonatomic, retain) OutlineLabel * myStixLabel;
-@property (nonatomic, retain) ColumnTableController * pixTableController;
-@property (nonatomic, retain) UIView * headerView;
-@property (nonatomic, retain) DetailViewController * detailController;
-@property (nonatomic, retain) FriendSearchResultsController * searchResultsController;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) UIButton * bgFollowers;
+@property (nonatomic) UIButton * bgFollowing;
+@property (nonatomic) OutlineLabel * myFollowersCount;
+@property (nonatomic) OutlineLabel * myFollowingCount;
+@property (nonatomic) OutlineLabel * myFollowersLabel;
+@property (nonatomic) OutlineLabel * myFollowingLabel;
+@property (nonatomic) OutlineLabel * myPixCount;
+@property (nonatomic) OutlineLabel * myStixCount;
+@property (nonatomic) OutlineLabel * myPixLabel;
+@property (nonatomic) OutlineLabel * myStixLabel;
+@property (nonatomic) ColumnTableController * pixTableController;
+@property (nonatomic) UIView * headerView;
+@property (nonatomic) DetailViewController * detailController;
+@property (nonatomic) FriendSearchResultsController * searchResultsController;
 
 -(void)populateUserInfo;
 -(void)populateFollowCounts;

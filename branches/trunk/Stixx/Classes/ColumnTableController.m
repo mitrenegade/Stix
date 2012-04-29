@@ -57,7 +57,6 @@
         refreshHeaderView.bottomBorderThickness = 1.0;
         [self.tableView addSubview:refreshHeaderView];
         self.tableView.showsVerticalScrollIndicator = YES;
-        [refreshHeaderView release];
     }
 #endif
     cellDictionary = [[NSMutableDictionary alloc] init];
@@ -154,7 +153,7 @@
     UITableViewCell * cell = (UITableViewCell *) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         //cell = [[[StixStoreTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         
         // from http://cocoawithlove.com/2009/04/easy-custom-uitableview-drawing.html
         //
@@ -177,7 +176,7 @@
      }
      */
     int row = [indexPath row];
-    NSLog(@"Column table: populating row %d", row);
+    //NSLog(@"Column table: populating row %d", row);
     if ([self hasHeaderRow]) {
         if (row == 0) {
             // row 0 is header

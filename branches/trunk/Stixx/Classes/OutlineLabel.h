@@ -14,7 +14,7 @@
 @interface OutlineLabel : UILabel {
     UIColor * outlineColor;
 }
-@property (nonatomic, retain) UIColor * outlineColor;
+@property (nonatomic) UIColor * outlineColor;
 
 -(void)setTextAttributesForBadgeType:(int)type;
 -(void)setFontSize:(int)size;

@@ -52,7 +52,6 @@
         refreshHeaderView.bottomBorderThickness = 1.0;
         [self.tableView addSubview:refreshHeaderView];
         self.tableView.showsVerticalScrollIndicator = YES;
-        [refreshHeaderView release];
     }
     
     cellDictionary = [[NSMutableDictionary alloc] init];
@@ -127,14 +126,14 @@
     UITableViewCell * cell = (UITableViewCell *) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         //cell = [[[StixStoreTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         
         // from http://cocoawithlove.com/2009/04/easy-custom-uitableview-drawing.html
         //
         // Create a background image view.
         //
-        cell.backgroundView = [[[UIImageView alloc] init] autorelease];
-        cell.selectedBackgroundView = [[[UIImageView alloc] init] autorelease];
+        cell.backgroundView = [[UIImageView alloc] init];
+        cell.selectedBackgroundView = [[UIImageView alloc] init];
         
 		//cell.selectionStyle = UITableViewCellSelectionStyleBlue;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;

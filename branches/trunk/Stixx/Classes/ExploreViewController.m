@@ -84,16 +84,16 @@
     [exploreModeButtons addObject:buttonRecent];
     [exploreModeButtons addObject:buttonRandom];
     [self setExploreMode:buttonRecent];
-    [buttonRecent release];
-    [buttonRandom release];
 
-    UIButton * buttonBux = [[[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)] autorelease];
+    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
     
-    CGRect labelFrame = CGRectMake(25, 5, 58, 38);
-    labelBuxCount = [[[OutlineLabel alloc] initWithFrame:labelFrame] autorelease];
+    CGRect labelFrame = CGRectMake(28, 5, 58, 38);
+    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    //[labelBuxCount setBackgroundColor:[UIColor redColor]];
+    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
@@ -203,7 +203,6 @@
         cview.isShowingPlaceholder = NO;
 #endif
         [contentViews setObject:cview forKey:key];
-        [cview release];
     }
     StixView * cview = [contentViews objectForKey:key];
     if (cview.isShowingPlaceholder)
@@ -354,7 +353,6 @@
     //[carouselView setUnderlay:scrollView];
     if (detailController) {
         [detailController.view removeFromSuperview];
-        [detailController release];
         detailController = nil;
     }
 }
@@ -502,7 +500,6 @@
     [alert setTitle:@"Beta Version"];
     [alert setMessage:@"Adding Stix in the Explore view coming soon!"];
     [alert show];
-    [alert release];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -525,17 +522,9 @@
     
     //[carouselView release];
     //carouselView = nil;
-    [k release];
-    [activityIndicator release];
     activityIndicator = nil;
 
     [super viewDidUnload];
-}
--(void)dealloc {
-    [k release];
-    //[carouselView release];
-    [activityIndicator release];
-    [super dealloc];
 }
 
 @end

@@ -46,7 +46,7 @@
     
 }
 
-@property (nonatomic, retain) NSObject<ColumnTableControllerDelegate> * delegate;
+@property (nonatomic) NSObject<ColumnTableControllerDelegate> * delegate;
 #if USE_PULL_TO_REFRESH
 @property(assign,getter=isReloading) BOOL reloading;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;

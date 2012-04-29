@@ -69,11 +69,8 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    [headerView release];
     headerView = nil;
-    [pixTableController release];
     pixTableController = nil;
-    [k release];
     k = nil;
 }
 
@@ -92,11 +89,11 @@
         [headerView setAlpha:.75];
         
         UIImage * photo = [delegate getUserPhotoForUsername:username];
-        UIImageView * photoView = [[[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+        UIImageView * photoView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
         [photoView setImage:photo];
         [headerView addSubview:photoView];
         
-        UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
         [nameLabel setTextColor:[UIColor whiteColor]];
         [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
@@ -157,7 +154,6 @@
         cview.isShowingPlaceholder = NO;
 #endif
         [contentViews setObject:cview forKey:key];
-        [cview release];
     }
     StixView * cview = [contentViews objectForKey:key];
     if (cview.isShowingPlaceholder)
@@ -236,7 +232,6 @@
     //dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
     [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [self.view removeFromSuperview];
-        [animation release];
     }];
 }
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
@@ -264,7 +259,6 @@
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-    [animation release];
 }
 
 -(void)shouldDisplayUserPage:(NSString *)name {
@@ -284,7 +278,6 @@
     //isZooming = NO;
     //[carouselView setUnderlay:scrollView];
     [detailController.view removeFromSuperview];
-    [detailController release];
     detailController = nil;
 }
 

@@ -98,7 +98,6 @@
     if (commentsTable)
     {
         [commentsTable.view removeFromSuperview];
-        [commentsTable release];
     }
     commentsTable = [[CommentFeedTableController alloc] init];
     //[commentsTable.view setFrame:CGRectMake(0, 150, 320, 280)];
@@ -109,16 +108,6 @@
     // Custom initialization   
     // tagID must be set before this
     
-    if (names)
-        [names release];
-    if (comments)
-        [comments release];
-    if (stixStringIDs)
-        [stixStringIDs release];
-    if (timestamps)
-        [timestamps release];
-    if (rowHeights)
-        [rowHeights release];
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
     stixStringIDs = [[NSMutableArray alloc] init];

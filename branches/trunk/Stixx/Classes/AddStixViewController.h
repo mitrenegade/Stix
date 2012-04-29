@@ -53,7 +53,7 @@
     bool shouldShowLocationView;
     bool didAddStixToStixView;
     
-	NSObject<AddStixViewControllerDelegate> *delegate;
+	NSObject<AddStixViewControllerDelegate> *__unsafe_unretained delegate;
 
     // new stix being added to this view
     bool showTransformCanvas;
@@ -62,20 +62,20 @@
     NSMutableSet *_activeRecognizers;
 }
 
-@property (nonatomic, retain) IBOutlet UIImageView * imageView;
-@property (nonatomic, retain) IBOutlet UITextField * commentField;
-@property (nonatomic, retain) IBOutlet UITextField * commentField2;
-@property (nonatomic, retain) IBOutlet UITextField * locationField;
-@property (nonatomic, retain) IBOutlet UIButton * locationButton;
-@property (nonatomic, retain) IBOutlet UIButton * buttonOK;
-@property (nonatomic, retain) IBOutlet UIButton * buttonCancel;
-@property (nonatomic, assign) NSObject<AddStixViewControllerDelegate> *delegate;
+@property (nonatomic) IBOutlet UIImageView * imageView;
+@property (nonatomic) IBOutlet UITextField * commentField;
+@property (nonatomic) IBOutlet UITextField * commentField2;
+@property (nonatomic) IBOutlet UITextField * locationField;
+@property (nonatomic) IBOutlet UIButton * locationButton;
+@property (nonatomic) IBOutlet UIButton * buttonOK;
+@property (nonatomic) IBOutlet UIButton * buttonCancel;
+@property (nonatomic, unsafe_unretained) NSObject<AddStixViewControllerDelegate> *delegate;
 @property (nonatomic, assign) CGRect badgeFrame;
-@property (nonatomic, retain) IBOutlet UIButton * buttonInstructions;
-@property (nonatomic, retain) StixView * stixView;
-@property (nonatomic, retain) CarouselView * carouselView;
-@property (nonatomic, retain) UIImageView * blackBarView;
-@property (nonatomic, retain) UILabel * priceView;
+@property (nonatomic) IBOutlet UIButton * buttonInstructions;
+@property (nonatomic) StixView * stixView;
+@property (nonatomic) CarouselView * carouselView;
+@property (nonatomic) UIImageView * blackBarView;
+@property (nonatomic) UILabel * priceView;
 
 -(void)toggleCarouselView:(BOOL)carouselEnabled;
 

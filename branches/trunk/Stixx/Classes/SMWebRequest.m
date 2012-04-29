@@ -10,7 +10,7 @@
 @end
 @implementation SMCallbackProxy
 - (id)initWithTarget:(id)theTarget { target = theTarget; return self; }
-- (void)releaseAndClearTarget { target = nil; [self release]; }
+- (void)releaseAndClearTarget { target = nil;  }
 - (NSMethodSignature *) methodSignatureForSelector:(SEL)sel { return [target methodSignatureForSelector:sel]; }
 - (void) forwardInvocation:(NSInvocation *)invocation { [invocation setTarget:target]; [invocation invoke]; }
 - (BOOL) respondsToSelector:(SEL)sel { return [target respondsToSelector:sel]; }
@@ -42,13 +42,13 @@ NSString *const SMErrorResponseKey = @"response";
 static BOOL was_dealloced = NO;
 
 @interface SMWebRequest ()
-@property (nonatomic, assign) id<SMWebRequestDelegate> delegate;
-@property (nonatomic, retain) id context;
-@property (nonatomic, retain) NSMutableArray *targetActions;
-@property (nonatomic, retain) NSMutableData *data;
-@property (nonatomic, retain) NSURLRequest *request;
-@property (nonatomic, retain) NSURLResponse *response;
-@property (nonatomic, retain) NSURLConnection *connection;
+@property (nonatomic, unsafe_unretained) id<SMWebRequestDelegate> delegate;
+@property (nonatomic) id context;
+@property (nonatomic) NSMutableArray *targetActions;
+@property (nonatomic) NSMutableData *data;
+@property (nonatomic) NSURLRequest *request;
+@property (nonatomic) NSURLResponse *response;
+@property (nonatomic) NSURLConnection *connection;
 @end
 
 @implementation SMWebRequest
@@ -73,13 +73,6 @@ static BOOL was_dealloced = NO;
     proxy = nil;
     [self cancel];
     self.delegate = nil;
-    self.context = nil;
-    self.request = nil;
-    self.response = nil;
-    self.data = nil;
-    self.connection = nil;
-    self.targetActions = nil;
-    [super dealloc];
 }
 
 + (SMWebRequest *)requestWithURL:(NSURL *)theURL {
@@ -98,7 +91,7 @@ static BOOL was_dealloced = NO;
 }
 
 + (SMWebRequest *)requestWithURLRequest:(NSURLRequest *)theRequest delegate:(id<SMWebRequestDelegate>)theDelegate context:(id)theContext {
-    return [[[SMWebRequest alloc] initWithURLRequest:theRequest delegate:theDelegate context:theContext] autorelease];
+    return [[SMWebRequest alloc] initWithURLRequest:theRequest delegate:theDelegate context:theContext];
 }
 
 - (NSString *)description {
@@ -147,7 +140,7 @@ static BOOL was_dealloced = NO;
     SMTargetAction *ta = [self targetActionForTarget:target action:action];
     
     if (!ta) {
-        ta = [[[SMTargetAction alloc] init] autorelease];
+        ta = [[SMTargetAction alloc] init];
         ta->target = target;
         ta->action = action;
         [targetActions addObject:ta];
@@ -227,15 +220,15 @@ static BOOL was_dealloced = NO;
 
 // in a background thread! don't touch our instance members!
 - (void)processDataInBackground:(NSData *)theData {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
     
-    id resultObject = theData;
-    
-    if ([delegate respondsToSelector:@selector(webRequest:resultObjectForData:context:)])
-        resultObject = [delegate webRequest:self resultObjectForData:theData context:context];
-    
-    [self performSelectorOnMainThread:@selector(backgroundProcessingComplete:) withObject:resultObject waitUntilDone:NO];
-    [pool release];
+        id resultObject = theData;
+        
+        if ([delegate respondsToSelector:@selector(webRequest:resultObjectForData:context:)])
+            resultObject = [delegate webRequest:self resultObjectForData:theData context:context];
+        
+        [self performSelectorOnMainThread:@selector(backgroundProcessingComplete:) withObject:resultObject waitUntilDone:NO];
+    }
 }
 
 // back on the main thread
@@ -245,8 +238,6 @@ static BOOL was_dealloced = NO;
     // thread wasn't running. So, we'll tentatively release ourself here first, and if we get dealloced then
     // we'll know to do nothing and exit without calling dispatch on our listeners (which probably are dealloced themselves).
     was_dealloced = NO;
-    [delegate release];
-    [self release];
 
     if (was_dealloced) return; // OK, we were dealloced, quick, exit before touching our instance vars (pointers to garbage now)!
     
@@ -282,25 +273,24 @@ static BOOL was_dealloced = NO;
     
     self.connection = nil;
     self.data = nil;
-    [self retain]; // we must retain ourself before we call handlers, in case they release us!
+     // we must retain ourself before we call handlers, in case they release us!
     
     [self dispatchError:error];
     
-    [self release];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)conn {
     
     //NSLog(@"Finished loading %@", self);
     
-    [self retain]; // we must retain ourself before we call handlers, in case they release us!
+     // we must retain ourself before we call handlers, in case they release us!
     
     NSInteger status = [response isKindOfClass:[NSHTTPURLResponse class]] ? [(NSHTTPURLResponse *)response statusCode] : 200;
     
     if (conn && response && (status < 200 || (status >= 300 && status != 304))) {
         NSLog(@"Failed with HTTP status code %i while loading %@", (int)status, self);
         
-        SMErrorResponse *error = [[[SMErrorResponse alloc] init] autorelease];
+        SMErrorResponse *error = [[SMErrorResponse alloc] init];
         error.response = (NSHTTPURLResponse *)response;
         error.data = data;
         
@@ -317,8 +307,6 @@ static BOOL was_dealloced = NO;
             // thread or else the background thread could try to do stuff with pointers to garbage.
             // thus we need have a mechanism for keeping ourselves alive during the background
             // processing.
-            [self retain];
-            [delegate retain];
             
             [self performSelectorInBackground:@selector(processDataInBackground:) withObject:data];
         }
@@ -328,16 +316,10 @@ static BOOL was_dealloced = NO;
     
     self.connection = nil;
     self.data = nil; // don't keep this!
-    [self release];
 }
 
 @end
 
 @implementation SMErrorResponse
 @synthesize response, data;
-- (void)dealloc {
-    self.response = nil;
-    self.data = nil;
-    [super dealloc];
-}
 @end

@@ -25,13 +25,13 @@
     IBOutlet UIButton * buttonBug;
     NSString * typeString;
 
-    NSObject<FeedbackViewDelegate> * delegate;    
+    NSObject<FeedbackViewDelegate> * __unsafe_unretained delegate;    
 }
 
-@property (nonatomic, retain) IBOutlet UITextView * messageView;
-@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
-@property (nonatomic, retain) IBOutlet UIButton * buttonBug;
-@property (nonatomic, assign) NSObject<FeedbackViewDelegate> * delegate;    
+@property (nonatomic) IBOutlet UITextView * messageView;
+@property (nonatomic) IBOutlet UIButton * buttonFeedback;
+@property (nonatomic) IBOutlet UIButton * buttonBug;
+@property (nonatomic, unsafe_unretained) NSObject<FeedbackViewDelegate> * delegate;    
 
 -(IBAction)didClickFeedbackButton:(id)sender;
 -(IBAction)didClickBugButton:(id)sender;

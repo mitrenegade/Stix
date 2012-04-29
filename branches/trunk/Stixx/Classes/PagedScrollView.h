@@ -24,15 +24,15 @@
 @interface PagedScrollView : UIScrollView <UIScrollViewDelegate>
 {
 	NSMutableArray *scrollViewPages;
-	NSObject<PagedScrollViewDelegate> * myDelegate;
+	NSObject<PagedScrollViewDelegate> * __unsafe_unretained myDelegate;
     
     int lastPageCount;
     bool isLazy;
     int drag;
 }
 /**** from old BSPreviewScrollView ******/
-@property (nonatomic, assign) NSObject<PagedScrollViewDelegate> * myDelegate;
-@property (nonatomic, retain) NSMutableArray * scrollViewPages;
+@property (nonatomic, unsafe_unretained) NSObject<PagedScrollViewDelegate> * myDelegate;
+@property (nonatomic) NSMutableArray * scrollViewPages;
 @property (nonatomic, assign) bool isLazy;
 @property (nonatomic, assign) int lastPageCount;
 @property (nonatomic, assign) int drag;

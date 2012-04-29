@@ -23,11 +23,11 @@
 
 @interface FriendSearchResultsController : UITableViewController 
 
-@property (retain, nonatomic) NSMutableDictionary * userPhotos;
+@property ( nonatomic) NSMutableDictionary * userPhotos;
 //@property (retain, nonatomic) NSMutableArray * usernames;
 //@property (retain, nonatomic) NSMutableDictionary * userEmails;
-@property (retain, nonatomic) NSMutableDictionary * userButtons;
+@property ( nonatomic) NSMutableDictionary * userButtons;
 
-@property (retain, nonatomic) NSObject<FriendSearchResultsDelegate> * delegate;
+@property ( nonatomic) NSObject<FriendSearchResultsDelegate> * delegate;
 
 @end

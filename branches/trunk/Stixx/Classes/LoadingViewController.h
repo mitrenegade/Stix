@@ -13,12 +13,12 @@
 {
     IBOutlet UITextField * loadingMessage;
     LoadingAnimationView * activityIndicator;
-    UIView * mySuperView;
+    UIView * __weak mySuperView;
 }
 
-@property (nonatomic, retain) IBOutlet UITextField * loadingMessage;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, assign) UIView * mySuperView;
+@property (nonatomic) IBOutlet UITextField * loadingMessage;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic, weak) UIView * mySuperView;
 -(void)setMessage:(NSString*)message;
 
 @end

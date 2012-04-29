@@ -46,7 +46,7 @@
 
 @property(assign,getter=isReloading) BOOL reloading;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
-@property (nonatomic, retain) NSObject<FeedTableControllerDelegate> * delegate;
+@property (nonatomic) NSObject<FeedTableControllerDelegate> * delegate;
 
 - (void)reloadTableViewDataSource;
 - (void)dataSourceDidFinishLoadingNewData;

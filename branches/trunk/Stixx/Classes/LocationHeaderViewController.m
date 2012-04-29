@@ -88,8 +88,7 @@
 
 -(void)dealloc
 {
-    [savedSearchTerm release], savedSearchTerm = nil;
-    [super dealloc];
+    savedSearchTerm = nil;
 }
 
 
@@ -142,7 +141,7 @@
     [locationController getFoursquareVenues:searchText];
     
     if (![self savedSearchTerm]) {
-        savedSearchTerm = [searchText retain];
+        savedSearchTerm = searchText;
     }
     
     [searchBar resignFirstResponder];

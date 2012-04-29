@@ -137,7 +137,6 @@
 	// e.g. self.myOutlet = nil;
 	//[overlayView release];
 	//overlayView = nil;
-    [rectView release];
     rectView = nil;
     //[buttonInstructions release];
     //buttonInstructions = nil;
@@ -157,10 +156,6 @@
 	// Release any cached data, images, etc that aren't in use.
 }
 
-- (void)dealloc {
-	
-    [super dealloc];
-}
 
 - (void)cameraDidTakePicture:(id)sender {
 	// set a title
@@ -271,7 +266,6 @@
     //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
     //}
     [delegate didCreateNewPix:cameraTag];
-    [cameraTag release];
     cameraTag = nil;
     needToShowCamera = YES;
     descriptorIsOpen = NO;
@@ -522,7 +516,6 @@
     [self.camera dismissModalViewControllerAnimated:YES];
     photoAlbumOpened = NO;
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-    [picker release];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

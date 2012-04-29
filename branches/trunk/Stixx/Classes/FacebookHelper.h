@@ -39,9 +39,9 @@
     NSString * postType;
 }
 
-@property (nonatomic, retain) Facebook * facebook;
-@property (nonatomic, retain) NSObject<FacebookHelperDelegate> * delegate;
-@property (nonatomic, retain) SMWebRequest * getRequest;
+@property (nonatomic) Facebook * facebook;
+@property (nonatomic) NSObject<FacebookHelperDelegate> * delegate;
+@property (nonatomic) SMWebRequest * getRequest;
 -(void)initFacebook;
 -(int)facebookLogin;
 -(void)facebookLogout;

@@ -22,7 +22,6 @@
         [theTextField setSecureTextEntry:YES];
         [self addSubview:theTextField];
         self.textField = theTextField;
-        [theTextField release];
         //CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0, 50.0); 
         //[self setTransform:translate];
     }
@@ -47,7 +46,5 @@
 - (void)dealloc
 {
     [textField resignFirstResponder];
-    [textField release];
-    [super dealloc];
 }
 @end

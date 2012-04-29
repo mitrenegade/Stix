@@ -75,24 +75,24 @@ enum {
     
 	int drag;
     int badgeSelect; // id into the badgesLarge and locations arrays
-    NSString * selectedStixStringID; // replaces badgeSelect for stringID based stix
+    NSString * __weak selectedStixStringID; // replaces badgeSelect for stringID based stix
     
 	CGFloat offset_from_center_X; // offset of touch point from center of icno
 	CGFloat offset_from_center_Y;
 	
-	NSObject<BadgeViewDelegate> *delegate;
-	UIView * underlay; // pointer to a sibling view of the badgeView owned by its superview's controller - for hitTest
+	NSObject<BadgeViewDelegate> *__unsafe_unretained delegate;
+	UIView * __weak underlay; // pointer to a sibling view of the badgeView owned by its superview's controller - for hitTest
     
     //NSMutableArray * labels;
     
     bool showStixCounts;
 }
 
-@property (nonatomic, assign) NSObject<BadgeViewDelegate> *delegate;
-@property (nonatomic, assign) UIView * underlay;
+@property (nonatomic, unsafe_unretained) NSObject<BadgeViewDelegate> *delegate;
+@property (nonatomic, weak) UIView * underlay;
 @property (nonatomic, assign) bool showStixCounts;
 //@property (nonatomic, retain) UIImageView * shelf;
-@property (nonatomic, assign) NSString * selectedStixStringID;
+@property (nonatomic, weak) NSString * selectedStixStringID;
 
 -(void)resetBadgeLocations;
 //-(void)updateStixCounts;

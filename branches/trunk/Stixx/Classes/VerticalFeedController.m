@@ -93,15 +93,15 @@
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
-    
     [self.view insertSubview:buttonBux belowSubview:tableController.view];
     
-    CGRect labelFrame = CGRectMake(25, 5, 58, 38);
+    CGRect labelFrame = CGRectMake(28, 5, 58, 38);
     labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
+    //[labelBuxCount setBackgroundColor:[UIColor redColor]];
+    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
     [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
-    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
     [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
     
     // array to retain each FeedItemViewController as it is created so its callback
@@ -117,9 +117,6 @@
     [self configureCarouselView];
     [self.carouselView carouselTabDismiss:NO];
 
-    [buttonBux release];
-    [labelBuxCount release];
-    
     [statusMessage setHidden:YES];
 
     backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.feedController.bgQueue", NULL);
@@ -172,6 +169,9 @@
 - (void)viewDidUnload {
 	// Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
 	// For example: self.myOutlet = nil;
+    
+    // arc conversion
+    /*
     [activityIndicator release];
     activityIndicator = nil;
     
@@ -179,23 +179,12 @@
     carouselView = nil;
     [tableController release];
     tableController = nil;
+    */
     
     [super viewDidUnload];
 }
 
 
-- (void)dealloc 
-{
-	[allTags release];
-    
-    [activityIndicator release];
-    activityIndicator = nil;
-    
-    [carouselView release];
-    carouselView = nil;
-    
-    [super dealloc];
-}
 
 /******* badge view delegate ******/
 -(void)didTapStixOfType:(NSString *)stixStringID {
@@ -276,7 +265,7 @@
     [badge setCenter:location];
 */
     CGPoint location = CGPointMake(160,216);
-    AddStixViewController * auxView = [[AddStixViewController alloc] init];
+    auxView = [[AddStixViewController alloc] init];
     
     // hack a way to display view over camera; formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
@@ -407,9 +396,9 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]] autorelease];
+        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
         if (photo) {
-            UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+            UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
             [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
             [photoView.layer setBorderWidth: 2.0];
             [photoView setImage:photo forState:UIControlStateNormal];
@@ -422,7 +411,7 @@
             [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:NO] forKey:tag.tagID];
         }
         
-        UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
         [nameLabel setTextColor:[UIColor whiteColor]];
         [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
@@ -433,14 +422,14 @@
         //[nameLabel setTag:index];
         //[nameButton addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
         
-        UILabel * locLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)] autorelease];
+        UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
         [locLabel setBackgroundColor:[UIColor clearColor]];
         [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
         [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
         [locLabel setText:tag.locationString];
         [headerView addSubview:locLabel];    
         
-        UILabel * timeLabel = [[[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)] autorelease];
+        UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
         [timeLabel setBackgroundColor:[UIColor clearColor]];
         [timeLabel setTextColor:[UIColor whiteColor]];
         [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
@@ -448,14 +437,14 @@
         [headerView addSubview:timeLabel];
         
         [headerViews setObject:headerView forKey:tag.tagID];
-        [headerView autorelease];
+        //[headerView autorelease]; // arc conversion
     }
     else {
         if ([[headerViewsDidLoadPhoto objectForKey:tag.tagID] boolValue] == NO) {
             // try to reload header photo
-            UIImage * photo = [[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]] autorelease];
+            UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
             if (photo) {
-                UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+                UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
                 [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
                 [photoView.layer setBorderWidth: 2.0];
                 [photoView setImage:photo forState:UIControlStateNormal];
@@ -476,7 +465,7 @@
         NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
     }
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    //NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
 
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
@@ -507,7 +496,7 @@
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
         [feedItem populateWithUserPhoto:photo];
-        [photo autorelease]; // MRC
+        //[photo autorelease]; // arc conversion
     }
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
@@ -543,9 +532,6 @@
                 [stixStringIDs addObject:stixStringID];
             }
             //[feedItem populateCommentsWithNames:names andComments:comments andStixStringIDs:stixStringIDs];
-            [names release];
-            [comments release];
-            [stixStringIDs release];
         }
     }
     
@@ -557,7 +543,6 @@
     [self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
     [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
-//    [feedItem autorelease];
     return feedItem.view;
 }
 
@@ -565,7 +550,7 @@
 {	        
     //index = index - 1;
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    //NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
     VerticalFeedItemController * feedItem = nil;
     if (tag.tagID)
         feedItem = [feedItems objectForKey:tag.tagID];
@@ -594,7 +579,7 @@
             {
                 //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
                 [feedItem populateWithUserPhoto:photo];
-                [photo autorelease]; // MRC
+                //[photo autorelease]; // arc conversion
             }
             //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
             // add timestamp
@@ -609,7 +594,7 @@
                 // populate comments for this tag
                 NSMutableArray * param = [[NSMutableArray alloc] init];
                 [param addObject:tag.tagID];
-                [param autorelease];
+                //[param autorelease]; // arc conversion
                 KumulosHelper * kh = [[KumulosHelper alloc] init];
                 [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
             }
@@ -821,7 +806,6 @@
         [allTagsDisplayed addObjectsFromArray:allTags];
     }
     NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
-    [followingSetWithMe release];
 }
 
 -(void)addTagForDisplay:(Tag *)tag {
@@ -915,7 +899,6 @@
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
-        [animation release];
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -974,7 +957,6 @@
     frameOffscreen.origin.x -= 330;
     [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [commentView.view removeFromSuperview];
-        [animation release];
     }];
 #endif
 }
@@ -1093,14 +1075,10 @@
     [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished) {
         [self stopActivityIndicator];
         if (shareSheet) {
-            [shareSheet release];   
             shareSheet = nil;
             [buttonShareEmail removeFromSuperview];
             [buttonShareFacebook removeFromSuperview];
             [buttonShareClose removeFromSuperview];
-            [buttonShareEmail release];
-            [buttonShareFacebook release];
-            [buttonShareClose release];
             buttonShareClose = nil;
             buttonShareEmail = nil;
             buttonShareFacebook = nil;
@@ -1157,17 +1135,17 @@
     //CGRect frameInside = CGRectMake(0, 0, 320, 480);
     //CGRect frameOutside = CGRectMake(-320, 0, 320, 480);
     
-    buttonShareFacebook = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
     [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
     [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
     
-    buttonShareEmail = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareEmail = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
     [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
     [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
     
-    buttonShareClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareClose = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
     [buttonShareClose setBackgroundColor:[UIColor clearColor]];
     [buttonShareClose addTarget:self action:@selector(didClickCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
@@ -1191,7 +1169,6 @@
         [activityIndicatorLarge setHidden:YES];
         [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
-        [activityIndicatorLarge release];
         activityIndicatorLarge = nil;
     }
     [delegate didCloseShareSheet];
@@ -1223,7 +1200,7 @@
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         NSLog(@"Checking for updated stix at tag %d", [[tag tagID] intValue]);
         KumulosHelper * kh = [[KumulosHelper alloc] init];
-        NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:tag, tag.tagID, nil] autorelease];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag, tag.tagID, nil];
         [kh execute:@"checkForUpdatedStix" withParams:params withCallback:@selector(khCallback_checkForUpdatedStix:) withDelegate:self];        
     }
 }
@@ -1241,7 +1218,7 @@
     if (needUpdate) {
         NSLog(@"Tag %d needs to update stix", [[tag tagID] intValue]);
         KumulosHelper * kh = [[KumulosHelper alloc] init];
-        NSMutableArray * params = [[[NSMutableArray alloc] initWithObjects:tag.tagID, nil] autorelease];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil];
         [kh execute:@"updateStixForPix" withParams:params withCallback:@selector(khCallback_updateStixForPix:) withDelegate:self];        
     } else {
         NSLog(@"Tag %d does not need to update stix", [[tag tagID] intValue]);
@@ -1257,7 +1234,7 @@
         return;
     //Tag * tag = nil;
     for (NSMutableDictionary * d in theResults) {
-        Tag * tag = [[Tag getTagFromDictionary:d] retain]; // MRC
+        Tag * tag = [Tag getTagFromDictionary:d]; // MRC
         if ([tag.tagID intValue]== [tagID intValue]) {
 //            tag = t; // MRC: when we break, t is not released so tag is retaining t
 //            break;
@@ -1274,13 +1251,11 @@
                     //    [self reloadViewForItemAtIndex:index];
                     //    [self.tableController.tableView reloadData];
                     [self reloadPage:index];
-                    [tag release];
                     return;
                 }
             }
 
         }
-        [tag release];
     }
 //    if (tag == nil)
         return;

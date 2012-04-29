@@ -33,7 +33,7 @@ enum first_time_user_stage {
 
 @interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
-    NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
+    NSObject<RaisedCenterTabBarControllerDelegate> *__unsafe_unretained myDelegate;
     
     UIButton * button[3];
     UIImage * bgNormal[3];
@@ -52,7 +52,7 @@ enum first_time_user_stage {
     int agitatePointer;
 }
 
-@property (nonatomic, assign) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
+@property (nonatomic, unsafe_unretained) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
 
 
 // Create a view controller and setup it's tab bar item with a title and image

@@ -124,13 +124,13 @@
     
     UITableViewCell * cell = (UITableViewCell *) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         cell.textLabel.numberOfLines = 2;
         [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize]];
         [cell setBackgroundColor:[UIColor clearColor]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         if (showDivider)
-            [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
+            [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]]];
         [cell.textLabel setTextColor:fontTextColor];
         UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 230, 12)];
         UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 230, 14)];
@@ -159,10 +159,6 @@
         [cell.contentView addSubview:timeLabel];
         [cell.contentView addSubview:photoView];
         [cell addSubview:cell.contentView];
-        [nameLabel release];
-        [commentTextLabel release];
-        [timeLabel release];
-        [photoView release];
     }
     
     // Configure the cell...
@@ -183,7 +179,7 @@
         NSString * comment = [delegate getCommentForIndex:index];
         NSString * stixStringID = [delegate getStixStringIDForIndex:index];
         NSString * timeStampString = [delegate getTimestampStringForIndex:index];
-        UIImage * photo = [[delegate getPhotoForIndex:index] retain];
+        UIImage * photo = [delegate getPhotoForIndex:index];
         //NSString * commentLabel = [self commentStringFor:name andComment:comment andStixType:stixStringID];
         // to set one line of text:
         // [cell.textLabel setText:commentLabel];
@@ -207,12 +203,12 @@
         UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG];
         [photoView setImage:photo forState:UIControlStateNormal];
         //[photoView setTag:index];
-        [photo release]; // MRC
+         // MRC
         
         if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
-            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+            UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
             [stix setFrame:CGRectMake(10,10,40,40)];
-            cell.accessoryView = [stix autorelease];
+            cell.accessoryView = stix;
             cell.accessoryType = UITableViewCellAccessoryNone;
         }
         else

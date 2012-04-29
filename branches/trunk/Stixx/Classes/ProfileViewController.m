@@ -157,13 +157,11 @@
         [searchResultsController.view removeFromSuperview];
         if (searchBar) {
             [searchBar removeFromSuperview];
-            [searchBar release];
-            searchBar = nil;
+            //searchBar = nil;
         }
         if (tosView) {
             [tosView removeFromSuperview];
-            [tosView release];
-            tosView = nil;
+            //tosView = nil;
         }
     }
 }
@@ -266,7 +264,6 @@
     [myGalleryController setDelegate:self];
     [myGalleryController setUsername:[delegate getUsername]];
     [self.view addSubview:myGalleryController.view];
-    [myGalleryController release];
 }
 
 -(void)didClickButtonStixAdded {
@@ -305,7 +302,6 @@
     //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
     //    [picker release];    
     [self dismissModalViewControllerAnimated:YES];
-    [picker release];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
@@ -338,7 +334,6 @@
     // add to kumulos
     [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-    [picker release];
 }
 
 /*** other actions ****/
@@ -350,7 +345,6 @@
 -(IBAction)aboutButtonClicked:(id)sender {
     UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"About Stix"   delegate:self cancelButtonTitle:@"Close" destructiveButtonTitle:nil otherButtonTitles:@"Terms of Service", @"Contact Us", nil];
     [actionSheet showInView:self.view];
-    [actionSheet release];
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -434,31 +428,13 @@
     [friendCountButton release];
     friendCountButton = nil;
      */
-    [nameLabel release];
     nameLabel = nil;
-    [photoButton release];
     photoButton = nil;
     
     [super viewDidUnload];
 }
 
 
-- (void)dealloc {
-    [k release]; 
-    //[loginScreenButton release];
-    //loginScreenButton = nil;
-    /*
-    [stixCountButton release];
-    stixCountButton = nil;
-    [friendCountButton release];
-    friendCountButton = nil;
-     */
-    [nameLabel release];
-    nameLabel = nil;
-    [photoButton release];
-    photoButton = nil;
-    [super dealloc];
-}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
@@ -566,7 +542,6 @@
     if (resultType != RESULTS_SEARCH_FACEBOOK)
         return;
     
-    [facebookFriendArray retain];
 
     [self initSearchResultLists];
 
@@ -593,9 +568,6 @@
     [searchFriendName addObjectsFromArray:searchFriendNotStixName];
     [searchFriendFacebookID addObjectsFromArray:searchFriendNotStixID];
     [searchFriendIsStix addObjectsFromArray:searchFriendNotStix];
-    [searchFriendNotStix release];
-    [searchFriendNotStixID release];
-    [searchFriendNotStixName release];
     
     [self stopActivityIndicator];
     if (isSearching) { 
@@ -603,7 +575,6 @@
         // if not searching, we've returned to the previous page so we don't want to display results
         if (searchResultsController) {
             [searchResultsController.view removeFromSuperview];
-            [searchResultsController release];
         }
         searchResultsController = [[FriendSearchResultsController alloc] init];
         [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
@@ -618,7 +589,7 @@
     if (resultType != RESULTS_SEARCH_CONTACTS)
         return;
 
-    NSMutableArray * contactResults = [[self collectFriendsFromContactList] retain];
+    NSMutableArray * contactResults = [self collectFriendsFromContactList];
     
     [self initSearchResultLists];
     
@@ -657,7 +628,6 @@
             }
         }
     }
-    [contactResults release];
     
     [self stopActivityIndicator];
     if (isSearching) { 
@@ -665,7 +635,6 @@
         // if not searching, we've returned to the previous page so we don't want to display results
         if (searchResultsController != nil) {
             [searchResultsController.view removeFromSuperview];
-            [searchResultsController release];        
         }
         searchResultsController = [[FriendSearchResultsController alloc] init];
         [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
@@ -771,8 +740,8 @@
         
         // Get First name, Last name, Prefix, Suffix, Job title 
         ABRecordRef ref = CFArrayGetValueAtIndex(people, i);
-        NSString *firstName = (NSString *)ABRecordCopyValue(ref,kABPersonFirstNameProperty);
-        NSString *lastName = (NSString *)ABRecordCopyValue(ref,kABPersonLastNameProperty);
+        NSString *firstName = (__bridge_transfer NSString *)ABRecordCopyValue(ref,kABPersonFirstNameProperty);
+        NSString *lastName = (__bridge_transfer NSString *)ABRecordCopyValue(ref,kABPersonLastNameProperty);
         //NSString *email = (NSString *)ABRecordCopyValue(ref, kABPersonEmailProperty);
 
         //[myContact setObject:firstName forKey:@"firstName"];
@@ -791,16 +760,15 @@
         {
             CFStringRef emailRef = ABMultiValueCopyValueAtIndex(emails, idx);
             CFStringRef labelRef = ABMultiValueCopyLabelAtIndex (emails, idx);
-            NSString *strLbl = (NSString*) ABAddressBookCopyLocalizedLabel (labelRef);
-            CFRelease(labelRef);
+            NSString *strLbl = (__bridge_transfer NSString*) ABAddressBookCopyLocalizedLabel (labelRef);
+            //CFRelease(labelRef);
             //[(NSString*)tmp release];
             NSMutableDictionary *temp = [[NSMutableDictionary alloc] init];
-            [temp setObject:(NSString*)emailRef forKey:@"strEmail_old"];
+            // arc conversion
+            [temp setObject:(__bridge_transfer NSString*)emailRef forKey:@"strEmail_old"];
             [temp setObject:strLbl forKey:@"strLbl"];
             [arEmail addObject:temp];
-            [temp release];
-            [strLbl release];
-            CFRelease(emailRef);
+            //CFRelease(emailRef);
             
             //NSLog(@"Contact list: %@ %@ email %@", firstName, lastName, strEmail_old);
         }
@@ -809,16 +777,12 @@
         }
         [myContact setObject:arEmail forKey:@"email"];
         [myContact setObject:@"" forKey:@"id"];
-        [arEmail release];
         [myAddressBook addObject:myContact];
-        [myContact release];
-        [firstName release];
-        [lastName release];
         CFRelease(emails);
     }
     CFRelease(people);
     CFRelease(addressBook);
-    return [myAddressBook autorelease];
+    return myAddressBook;
 }
 
 #pragma mark search by name
@@ -835,7 +799,6 @@
     [self.view addSubview:searchBar];
     if (searchResultsController != nil) {
         [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];        
     }
     searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, 88, 320, 480-108)];
@@ -895,7 +858,6 @@
         [searchFriendName addObject:name];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
-    [namesResults release];
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];
     isSearching = NO;
@@ -908,7 +870,6 @@
     NSLog(@"Getting follows list from kumulos for username: %@", [delegate getUsername]);
     if (searchResultsController) {
         [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];
     }
     searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
@@ -937,7 +898,6 @@
 
     if (searchResultsController) {
         [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];
     }
     searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
@@ -978,12 +938,9 @@
     //UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
     //pointer.transform = CGAffineTransformMakeRotation(3.141592);
     [pointerCanvas addSubview:pointer];
-    [pointer release];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
-    [pointerCanvas release];
-    [animation release];
 }
 
 -(void)didClickPointer {
@@ -998,7 +955,6 @@
     else {
         [canvas removeFromSuperview];
     }
-    [animation release];
 }
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {

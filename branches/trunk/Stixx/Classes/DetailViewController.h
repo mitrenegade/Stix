@@ -35,7 +35,7 @@
     //    IBOutlet UILabel * labelComment;
     //    IBOutlet UILabel * labelLocationString;
     CommentFeedTableController * commentsTable;
-	NSObject<DetailViewDelegate> *delegate;
+	NSObject<DetailViewDelegate> *__unsafe_unretained delegate;
     StixView * stixView;
     UIView * headerView;
     IBOutlet UIImageView * logo;
@@ -67,13 +67,13 @@
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
 //@property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
-@property (nonatomic, assign) NSObject<DetailViewDelegate> *delegate;
-@property (nonatomic, retain) StixView * stixView;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicatorLarge;
-@property (nonatomic, retain) IBOutlet UIImageView * logo;
-@property (nonatomic, retain) NSString * tagUsername;
-@property (nonatomic, retain) CommentViewController * commentView;
+@property (nonatomic, unsafe_unretained) NSObject<DetailViewDelegate> *delegate;
+@property (nonatomic) StixView * stixView;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
+@property (nonatomic) IBOutlet UIImageView * logo;
+@property (nonatomic) NSString * tagUsername;
+@property (nonatomic) CommentViewController * commentView;
 
 -(IBAction)didClickBackButton:(id)sender;
 -(void)initDetailViewWithTag:(Tag *)tag;

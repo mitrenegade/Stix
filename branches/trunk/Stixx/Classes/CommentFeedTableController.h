@@ -26,7 +26,7 @@
 
 @interface CommentFeedTableController : UITableViewController
 {
-    NSObject<CommentFeedTableDelegate> * delegate;
+    NSObject<CommentFeedTableDelegate> * __unsafe_unretained delegate;
     //NSMutableDictionary * cellDictionary;
     
     // configurable
@@ -37,10 +37,10 @@
     UIColor * fontTextColor;
 }
 
-@property (nonatomic, assign) NSObject<CommentFeedTableDelegate> * delegate;
+@property (nonatomic, unsafe_unretained) NSObject<CommentFeedTableDelegate> * delegate;
 @property (nonatomic, assign) int rowHeight;
-@property (nonatomic, retain) UIColor * fontNameColor;
-@property (nonatomic, retain) UIColor * fontTextColor;
+@property (nonatomic) UIColor * fontNameColor;
+@property (nonatomic) UIColor * fontTextColor;
 //-(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID;
 -(void)configureRowsWithHeight:(int)height dividerVisible:(BOOL)visible fontSize:(int)size fontNameColor:(UIColor*)nameColor fontTextColor:(UIColor*)textColor;

@@ -83,10 +83,8 @@
 
 -(void)populateWithUserPhoto:(UIImage*)photo {
     if (photo){
-        [photo retain];
         [userPhotoView setImage:photo];
         [userPhotoView setBackgroundColor:[UIColor blackColor]];
-        [photo release];
     }
 }
 
@@ -114,7 +112,7 @@
 }
 
 -(void)initStixView:(Tag*)_tag {
-    tag = [_tag retain];
+    tag = _tag;
     imageData = tag.image;
     
     //NSLog(@"VerticalFeedItem: Creating stix view of size %f %f", imageData.size.width, imageData.size.height);
@@ -266,10 +264,6 @@
 }
 */
 
-- (void)dealloc
-{
-    [super dealloc];
-}
 
 -(IBAction)didPressAddCommentButton:(id)sender {
     [self.delegate displayCommentsOfTag:tagID andName:nameString];
@@ -342,6 +336,7 @@
 
 - (void)viewDidUnload
 {
+    NSLog(@"View did unload");
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -396,7 +391,7 @@
 #if 1
     // fade in
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){ [animation release]; }];
+    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){  }];
     //[animation doJump:stixView inView:self.view forDistance:50 forTime:.5];
 #endif
     
@@ -487,7 +482,7 @@
     [request setDelegate:self];
     [request setData:dataPNG forKey:@"picture[data]"];
     [request startSynchronous];
-    [url autorelease];
+    //[url autorelease]; // arc conversion
 
 }
 

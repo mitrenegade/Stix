@@ -111,14 +111,14 @@
     
     if (cell == nil) {
         //cell = [[[StixStoreTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         
         // from http://cocoawithlove.com/2009/04/easy-custom-uitableview-drawing.html
         //
         // Create a background image view.
         //
-        cell.backgroundView = [[[UIImageView alloc] init] autorelease];
-        cell.selectedBackgroundView = [[[UIImageView alloc] init] autorelease];
+        cell.backgroundView = [[UIImageView alloc] init];
+        cell.selectedBackgroundView = [[UIImageView alloc] init];
         
 		//cell.selectionStyle = UITableViewCellSelectionStyleBlue;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -150,9 +150,6 @@
          [cell addSubview:bottomLabel];
          */
         [cell addSubview:cell.contentView];
-        [divider release];
-        [topLabel release];
-        [bottomLabel release];
         
     }
     
@@ -180,7 +177,7 @@
     else
         [bgimage setAlpha:.15];
     [cell setBackgroundView:bgimage];
-    [bgimage release]; // MRC
+     // MRC
     
     UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
     UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
@@ -236,10 +233,6 @@
 
         NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, inviteButton, nil];
         [userButtons setObject:buttonArray forKey:username];
-        [buttonArray release];
-        [addFriendButton release];
-        [alreadyFriendedButton release];
-        [inviteButton release];
     }
     
     NSMutableArray * buttonArray = [userButtons objectForKey:username];

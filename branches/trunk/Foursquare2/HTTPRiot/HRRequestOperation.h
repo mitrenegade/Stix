@@ -16,7 +16,7 @@
  */
 @interface HRRequestOperation : NSOperation {
     /// HRResponse Delegate
-    NSObject        <HRResponseDelegate>*_delegate;
+    NSObject        <HRResponseDelegate>*__unsafe_unretained _delegate;
     
     /// Connection object
     NSURLConnection *_connection;
@@ -57,7 +57,7 @@
  * The HRResponseDelegate responsible for handling the success and failure of 
  * a request.
  */
-@property (nonatomic, readonly, assign) NSObject <HRResponseDelegate>*delegate;
+@property (nonatomic, readonly, unsafe_unretained) NSObject <HRResponseDelegate>*delegate;
  
 /// The lenght of time in seconds before the request times out.
 /**
@@ -83,13 +83,13 @@
 /**
  This needs documented
  */
-@property (nonatomic, retain) NSDictionary *options;
+@property (nonatomic) NSDictionary *options;
 
 /// The formatter used to decode the response body.
 /**
  Currently, only JSON is supported.
  */
-@property (nonatomic, readonly, retain) id formatter;
+@property (nonatomic, readonly) id formatter;
 
 /**
  * Returns an HRRequestOperation

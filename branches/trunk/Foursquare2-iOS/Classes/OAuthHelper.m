@@ -112,14 +112,14 @@
 }
 
 + (NSString *)generateTimestamp {
-	return [[NSString stringWithFormat:@"%d", time(NULL)] retain];
+	return [NSString stringWithFormat:@"%d", time(NULL)];
 }
 
 + (NSString *)generateNonce {
 	CFUUIDRef uuidObj = CFUUIDCreate(nil);
-	NSString *uuidString = (NSString*)CFUUIDCreateString(nil, uuidObj);
+	NSString *uuidString = (__bridge_transfer NSString*)CFUUIDCreateString(nil, uuidObj);
 	CFRelease(uuidObj);
-	return [uuidString autorelease];	
+	return uuidString;	
 }
 
 + (NSString *)createParamString:(NSDictionary *)params
@@ -131,7 +131,6 @@
 		//[paramArray addObject:[NSString stringWithFormat:@"%@=%@", [key URLEncodedString], [val URLEncodedString]]];
 	}
 	NSArray *sortedParams = [paramArray sortedArrayUsingSelector:@selector(compare:)];
-	[paramArray release];
 	return [sortedParams componentsJoinedByString:@"&"];
 }
 
@@ -143,7 +142,7 @@
 
 	CCHmac(kCCHmacAlgSHA1, [secretData bytes], [secretData length], [clearTextData bytes], [clearTextData length], result);
     
-	NSData *hmac = [[[NSData alloc] initWithBytes:result length:sizeof(result)] autorelease];
+	NSData *hmac = [[NSData alloc] initWithBytes:result length:sizeof(result)];
 	NSLog(@"%@",hmac);	
 	return [hmac base64Encoding];
 }
@@ -169,7 +168,7 @@
     
     NSString *base64EncodedResult = [[NSString alloc] initWithData:theData encoding:NSUTF8StringEncoding];
     
-    return [base64EncodedResult autorelease];
+    return base64EncodedResult;
 }
 
 @end

@@ -190,35 +190,14 @@
      [friendCountButton release];
      friendCountButton = nil;
      */
-    [nameLabel release];
     nameLabel = nil;
-    [photoButton release];
     photoButton = nil;
-    [buttonAddFriend release];
     buttonAddFriend = nil;
     
     [super viewDidUnload];
 }
 
 
-- (void)dealloc {
-    [k release]; 
-    //[loginScreenButton release];
-    //loginScreenButton = nil;
-    /*
-     [stixCountButton release];
-     stixCountButton = nil;
-     [friendCountButton release];
-     friendCountButton = nil;
-     */
-    [nameLabel release];
-    nameLabel = nil;
-    [photoButton release];
-    photoButton = nil;
-    [buttonAddFriend release];
-    buttonAddFriend = nil;
-    [super dealloc];
-}
 
 #pragma mark Init
 
@@ -387,7 +366,6 @@
             isDisplayingFollowLists = NO;
             [self toggleMyButtons:YES];
             [self shouldDisplayUserPage:new_username];
-            [animation release];
         }];
 #endif
     }
@@ -481,7 +459,6 @@
         [cview initializeWithImage:tag.image];
         [cview populateWithAuxStixFromTag:tag];
         [contentViews setObject:cview forKey:key];
-        [cview release];
     }
     return [contentViews objectForKey:key];
 }
@@ -559,7 +536,6 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
-        [animation release];
     }];
 }
 
@@ -574,7 +550,6 @@
     [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:_username];
-        [animation release];
     }];
 }
 
@@ -582,7 +557,6 @@
     //isZooming = NO;
     //[carouselView setUnderlay:scrollView];
     [detailController.view removeFromSuperview];
-    [detailController release];
     detailController = nil;
 }
 
@@ -650,7 +624,6 @@
     NSLog(@"Getting follows list from kumulos for username: %@", username);
     if (searchResultsController) {
         [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];
     }
     searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
@@ -678,7 +651,6 @@
     
     if (searchResultsController) {
         [searchResultsController.view removeFromSuperview];
-        [searchResultsController release];
     }
     searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];

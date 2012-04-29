@@ -6,10 +6,9 @@
 - (NSURL *)URLBySmartlyAppendingPathComponent:(NSString *)component 
 {
     NSString *newPath = [[self path] stringByAppendingPathComponent:component];
-    return [[[NSURL alloc] initWithScheme: [self scheme] 
+    return [[NSURL alloc] initWithScheme: [self scheme] 
                                      host: [self host] 
-                                     path: newPath]
-			autorelease];
+                                     path: newPath];
 }	
 
 @end

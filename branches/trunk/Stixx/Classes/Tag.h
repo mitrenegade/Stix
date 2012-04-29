@@ -72,15 +72,15 @@
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
 
-@property (nonatomic, retain) NSString * username;
-@property (nonatomic, retain) NSString * descriptor;
-@property (nonatomic, retain) NSString * comment;
-@property (nonatomic, retain) NSString * locationString;
-@property (nonatomic, retain) UIImage * image;
+@property (nonatomic) NSString * username;
+@property (nonatomic) NSString * descriptor;
+@property (nonatomic) NSString * comment;
+@property (nonatomic) NSString * locationString;
+@property (nonatomic) UIImage * image;
 //@property (nonatomic, retain) ARCoordinate * coordinate;
-@property (nonatomic, retain) NSNumber * tagID;
-@property (nonatomic, retain) NSString * timestring;
-@property (nonatomic, retain) NSDate * timestamp;
+@property (nonatomic) NSNumber * tagID;
+@property (nonatomic) NSString * timestring;
+@property (nonatomic) NSDate * timestamp;
 /*
 @property (nonatomic, assign) int badge_x; // center coordinate
 @property (nonatomic, assign) int badge_y; // center coordinate
@@ -90,10 +90,10 @@
 @property (nonatomic, assign) float stixRotation;
 */
 
-@property (nonatomic, retain) NSMutableArray * auxStixStringIDs;
-@property (nonatomic, retain) NSMutableArray * auxLocations;
-@property (nonatomic, retain) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
-@property (nonatomic, retain) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
-@property (nonatomic, retain) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
-@property (nonatomic, retain) NSMutableArray * auxTransforms;
+@property (nonatomic) NSMutableArray * auxStixStringIDs;
+@property (nonatomic) NSMutableArray * auxLocations;
+@property (nonatomic) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
+@property (nonatomic) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
+@property (nonatomic) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
+@property (nonatomic) NSMutableArray * auxTransforms;
 @end

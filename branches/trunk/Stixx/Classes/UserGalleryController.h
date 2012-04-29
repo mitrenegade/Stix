@@ -37,13 +37,13 @@
     
     int dismissAnimation;
 }
-@property (nonatomic, retain) NSString * username;
-@property (nonatomic, assign) NSObject<UserGalleryDelegate> * delegate;
-@property (nonatomic, retain) Kumulos * k;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, retain) ColumnTableController * pixTableController;
-@property (nonatomic, retain) UIView * headerView;
-@property (nonatomic, retain) DetailViewController * detailController;
+@property (nonatomic) NSString * username;
+@property (nonatomic, unsafe_unretained) NSObject<UserGalleryDelegate> * delegate;
+@property (nonatomic) Kumulos * k;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) ColumnTableController * pixTableController;
+@property (nonatomic) UIView * headerView;
+@property (nonatomic) DetailViewController * detailController;
 
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;

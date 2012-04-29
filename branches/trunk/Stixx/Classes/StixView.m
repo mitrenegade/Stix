@@ -53,7 +53,6 @@ static int currentStixViewID = 0;
     UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
     [imageView setImage:imageData];
     [self addSubview:imageView];
-    [imageView release];
     _activeRecognizers = [[NSMutableSet alloc] init];
 }
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame{
@@ -66,7 +65,6 @@ static int currentStixViewID = 0;
     UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
     [imageView setImage:imageData];
     [self addSubview:imageView];
-    [imageView release];
     _activeRecognizers = [[NSMutableSet alloc] init];
 }
 
@@ -78,7 +76,6 @@ static int currentStixViewID = 0;
     if ([stixViewsMissing objectForKey:stixStringID] == nil) {
         NSMutableArray * stixArray = [[NSMutableArray alloc] init];
         [stixViewsMissing setObject:stixArray forKey:stixStringID];
-        [stixArray release];
     }
     NSMutableArray * stixArray = [stixViewsMissing objectForKey:stixStringID];
     [stixArray addObject:auxStix];
@@ -94,7 +91,6 @@ static int currentStixViewID = 0;
         NSMutableArray * viewsThatNeedThisStix = [[NSMutableArray alloc] init];
 
         [requestDictionaryForStix setObject:viewsThatNeedThisStix forKey:stixStringID];
-        [viewsThatNeedThisStix release];
     }
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
     [viewsThatNeedThisStix addObject:stixView];
@@ -116,7 +112,7 @@ static int currentStixViewID = 0;
     
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
     //NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
-    UIImageView * stixExists = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    UIImageView * stixExists = [BadgeView getBadgeWithStixStringID:stixStringID];
     if (stixExists.alpha == 0) {
         [BadgeView AddStixView:theResults];
         
@@ -145,7 +141,6 @@ static int currentStixViewID = 0;
             [delegate didReceiveAllRequestedMissingStix:self];
         }
     }
-    [stixExists release];
 }
 
 -(void)didReceiveRequestedStix:(NSString *)stixStringID withResults:(NSArray*)theResults fromStixView:(int)senderID{
@@ -175,7 +170,7 @@ static int currentStixViewID = 0;
     referenceTransform = CGAffineTransformIdentity;
     
     [self setSelectStixStringID:stixStringID];
-    stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     if (stix.alpha == 0) { // alpha is set to 0 by [BadgeView getBadgeForStixStringId]
         NSLog(@"Should not get here!");
         //[self requestStixFromKumulos:stixStringID forStixView:stix inSuperView:self andDelegate:delegate];
@@ -236,8 +231,7 @@ static int currentStixViewID = 0;
     CGPoint center = stix.center;
     CGAffineTransform transform = stix.transform;
     [stix removeFromSuperview];
-    [stix release];
-    stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     if (transform.a==0 && transform.b==0 && transform.c == 0 && transform.d == 0 && transform.tx == 0 && transform.ty == 0) {
         NSLog(@"Invalid transform! Why is the stix blank?");
         transform = CGAffineTransformIdentity;
@@ -265,7 +259,7 @@ static int currentStixViewID = 0;
         CGAffineTransform auxTransform;
         NSString * transformString = [auxTransforms objectAtIndex:i];
         auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
-        UIImageView * auxStix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+        UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
         // hack: call update
         if (auxStix.alpha == 0) {
             [self requestStixFromKumulos:stixStringID forStix:auxStix inStixView:self];
@@ -276,7 +270,6 @@ static int currentStixViewID = 0;
         // this whole StixView will have to be repopulated once we receive all stix
         // requests. but we do have to run through all stix to initiate the requests
         if (!allStixViewsExist) {
-            [auxStix release];
             continue;
         }
         
@@ -332,7 +325,6 @@ static int currentStixViewID = 0;
         //NSLog(@"StixView: adding %@ auxStix %@ at center %f %f\n", isPeelableByUser?@"peelable":@"attached", stixStringID, centerX, centerY);
         
         [auxStixViews addObject:auxStix];
-        [auxStix release];
         //[auxScales addObject:[NSNumber numberWithFloat:auxScale]];
         [auxPeelableByUser addObject:[NSNumber numberWithBool:isPeelableByUser]];
     }
@@ -429,12 +421,6 @@ static int currentStixViewID = 0;
     
     [self addSubview:transformCanvas];
     
-    [transformBox release];
-    [transformBoxShadow release];
-    [dot1 release];
-    [dot2 release];
-    [dot3 release];
-    [dot4 release];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -653,7 +639,6 @@ static int currentStixViewID = 0;
 -(void)addPeelableAnimationToStix:(UIImageView*)canvas {
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doPulse:canvas forTime:1 repeatCount:-1 withCompletion:^(BOOL finished) {
-        [animation release];
  //       [self addPeelableAnimation:canvas];
     }];
 }
@@ -710,7 +695,6 @@ static int currentStixViewID = 0;
             stixPeelSelected = lastStixView;
             UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
             [actionSheet showInView:self];
-            [actionSheet release];
             return lastStixView;
         }
     }

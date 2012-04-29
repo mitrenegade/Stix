@@ -87,7 +87,7 @@
         //[auxRotations removeObjectAtIndex:index];
         [auxTransforms removeObjectAtIndex:index];
         [auxPeelable removeObjectAtIndex:index];
-        return [auxStringID autorelease]; // MRC
+        return auxStringID; // MRC
     }
     return nil;
 }
@@ -106,13 +106,12 @@
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData];
     //ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
     [decoder finishDecoding];
-    [decoder release];
     
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
     //[tag addARCoordinate:coordinate];
-    [image release]; // MRC
+     // MRC
     
     NSMutableData *theData2 = (NSMutableData*)[d valueForKey:@"auxStix"];
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
@@ -123,11 +122,10 @@
     [tag setAuxTransforms:[decoder decodeObjectForKey:@"auxTransforms"]];
     [tag setAuxPeelable:[decoder decodeObjectForKey:@"auxPeelable"]];
     [decoder finishDecoding];
-    [decoder release];
     
     // backwards compatibility
-    [tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]]; // MRC
-    [tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
+    [tag setAuxScales:[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]]]; // MRC
+    [tag setAuxRotations:[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]]];
     for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
         [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
         [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
@@ -135,7 +133,7 @@
     
     // backwards compatibility
     if (tag.auxTransforms == nil) {
-        [tag setAuxTransforms:[[[NSMutableArray alloc] init] autorelease]]; // MRC
+        [tag setAuxTransforms:[[NSMutableArray alloc] init]]; // MRC
         for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
             CGAffineTransform t = CGAffineTransformMake(1, 0, 0, 1, 0, 0);
             [tag.auxTransforms addObject:NSStringFromCGAffineTransform(t)];
@@ -148,7 +146,7 @@
     NSDate * timeCreated = [d valueForKey:@"timeCreated"];
     NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
     tag.timestamp = [timeCreated laterDate:timeUpdated];
-    return [tag autorelease];
+    return tag;
 }
 
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp {
@@ -191,7 +189,7 @@
     }
     else //if (interval >= 86400)
     {
-        NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
         unit = [dateFormatter stringFromDate:timestamp];
         num = 0;
@@ -218,14 +216,13 @@
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         NSString * transformString = [auxTransforms objectAtIndex:i];
         CGAffineTransform auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
-        UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+        UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
         //CGPoint center = [[auxLocations objectAtIndex:i] CGPointValue];
         //[stix setCenter:center];
         //CGPoint location = stix.frame.origin;
         
         // resize and rotate stix image source to correct auxTransform
         CGSize stixSize = stix.frame.size;
-        [stix release];
         UIGraphicsBeginImageContext(newSize);
         CGContextRef currentContext = UIGraphicsGetCurrentContext();
         

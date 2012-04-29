@@ -86,7 +86,7 @@ enum {
     //LoginViewController * loginController;
     //FriendsViewController * friendController;
     
-    NSObject<ProfileViewDelegate> *delegate;
+    NSObject<ProfileViewDelegate> *__unsafe_unretained delegate;
     Kumulos * k;
 //    bool friendViewIsDisplayed;
     IBOutlet UIButton * logo;
@@ -119,24 +119,24 @@ enum {
     BOOL showPointer;
 }
 
-@property (nonatomic, assign) NSObject<ProfileViewDelegate> *delegate;
-@property (nonatomic, retain) IBOutlet UILabel * nameLabel;
-@property (nonatomic, retain) IBOutlet UIButton * photoButton;
-@property (nonatomic, retain) IBOutlet UIButton * bgFollowers;
-@property (nonatomic, retain) IBOutlet UIButton * bgFollowing;
-@property (nonatomic, retain) Kumulos * k;
-@property (nonatomic, retain) UIImageView * bottomBackground;
-@property (nonatomic, retain) OutlineLabel * myFollowersCount;
-@property (nonatomic, retain) OutlineLabel * myFollowingCount;
-@property (nonatomic, retain) OutlineLabel * myFollowersLabel;
-@property (nonatomic, retain) OutlineLabel * myFollowingLabel;
-@property (nonatomic, retain) OutlineLabel * myPixCount;
-@property (nonatomic, retain) OutlineLabel * myStixCount;
-@property (nonatomic, retain) OutlineLabel * myPixLabel;
-@property (nonatomic, retain) OutlineLabel * myStixLabel;
-@property (nonatomic, retain) FriendSearchResultsController * searchResultsController;
-@property (nonatomic, retain) UISearchBar * searchBar;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
+@property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> *delegate;
+@property (nonatomic) IBOutlet UILabel * nameLabel;
+@property (nonatomic) IBOutlet UIButton * photoButton;
+@property (nonatomic) IBOutlet UIButton * bgFollowers;
+@property (nonatomic) IBOutlet UIButton * bgFollowing;
+@property (nonatomic) Kumulos * k;
+@property (nonatomic) UIImageView * bottomBackground;
+@property (nonatomic) OutlineLabel * myFollowersCount;
+@property (nonatomic) OutlineLabel * myFollowingCount;
+@property (nonatomic) OutlineLabel * myFollowersLabel;
+@property (nonatomic) OutlineLabel * myFollowingLabel;
+@property (nonatomic) OutlineLabel * myPixCount;
+@property (nonatomic) OutlineLabel * myStixCount;
+@property (nonatomic) OutlineLabel * myPixLabel;
+@property (nonatomic) OutlineLabel * myStixLabel;
+@property (nonatomic) FriendSearchResultsController * searchResultsController;
+@property (nonatomic) UISearchBar * searchBar;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
 
 //@property (nonatomic, retain) IBOutlet UIButton * logoutScreenButton;
 //@property (nonatomic, retain) IBOutlet UIButton * stixCountButton;

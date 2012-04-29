@@ -12,11 +12,11 @@
 @interface FoursquareWebLogin : UIViewController<UIWebViewDelegate> {
 	NSString *_url;
 	UIWebView *webView;
-	id delegate;
+	id __unsafe_unretained delegate;
 	SEL selector;
 }
 
-@property(nonatomic,assign) id delegate;
+@property(nonatomic,unsafe_unretained) id delegate;
 @property (nonatomic,assign)SEL selector;
 - (id) initWithUrl:(NSString*)url;
 @end

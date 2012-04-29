@@ -133,14 +133,10 @@ static BOOL openingDetailView;
     else if (animID == shareMenuCloseAnimation) {
         [self stopActivityIndicator];
         if (shareSheet) {
-            [shareSheet release];   
             shareSheet = nil;
             [buttonShareEmail removeFromSuperview];
             [buttonShareFacebook removeFromSuperview];
             [buttonShareClose removeFromSuperview];
-            [buttonShareEmail release];
-            [buttonShareFacebook release];
-            [buttonShareClose release];
             buttonShareClose = nil;
             buttonShareEmail = nil;
             buttonShareFacebook = nil;
@@ -183,16 +179,6 @@ static BOOL openingDetailView;
     
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 11, 25, 25)];
     
-    if (names)
-        [names release];
-    if (comments)
-        [comments release];
-    if (stixStringIDs)
-        [stixStringIDs release];
-    if (timestamps)
-        [timestamps release];
-    if (rowHeights)
-        [rowHeights release];
     
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
@@ -205,7 +191,6 @@ static BOOL openingDetailView;
     if (commentsTable)
     {
         [commentsTable.view removeFromSuperview];
-        [commentsTable release];
     }
     commentsTable = [[CommentFeedTableController alloc] init];
     [commentsTable.view setFrame:CGRectMake(0, feedItem.view.frame.size.height, 320, 0)];
@@ -296,28 +281,28 @@ static BOOL openingDetailView;
     [headerView setAlpha:.75];
     
     UIImage * photo = [self.delegate getUserPhotoForUsername:tag.username];
-    UIButton * photoView = [[[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)] autorelease];
+    UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
     [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
     [photoView.layer setBorderWidth: 2.0];
     [photoView setImage:photo forState:UIControlStateNormal];
     [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
     [headerView addSubview:photoView];
     
-    UILabel * nameLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
+    UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
     [nameLabel setBackgroundColor:[UIColor clearColor]];
     [nameLabel setTextColor:[UIColor whiteColor]];
     [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
     [nameLabel setText:tag.username];
     [headerView addSubview:nameLabel];
     
-    UILabel * locLabel = [[[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)] autorelease];
+    UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
     [locLabel setBackgroundColor:[UIColor clearColor]];
     [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
     [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
     [locLabel setText:tag.locationString];
     [headerView addSubview:locLabel];    
     
-    UILabel * timeLabel = [[[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)] autorelease];
+    UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
     [timeLabel setBackgroundColor:[UIColor clearColor]];
     [timeLabel setTextColor:[UIColor whiteColor]];
     [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
@@ -334,10 +319,6 @@ static BOOL openingDetailView;
     //[labelLocationString release];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    [scrollView release];
-    [commentsTable release];
-    [stixView release];
-    [headerView release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -350,7 +331,6 @@ static BOOL openingDetailView;
 {
     if (feedItem) {
         [feedItem.view removeFromSuperview];
-        [feedItem release];        
     }
     
     feedItem = [[VerticalFeedItemController alloc] init];
@@ -501,17 +481,17 @@ static BOOL openingDetailView;
     shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
     [shareSheet setFrame:frameOutside];
     
-    buttonShareFacebook = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
     [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
     [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
     
-    buttonShareEmail = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareEmail = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
     [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
     [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
     
-    buttonShareClose = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    buttonShareClose = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
     [buttonShareClose setBackgroundColor:[UIColor clearColor]];
     [buttonShareClose addTarget:self action:@selector(didCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
@@ -528,7 +508,6 @@ static BOOL openingDetailView;
         [activityIndicatorLarge setHidden:YES];
         [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
-        [activityIndicatorLarge release];
         activityIndicatorLarge = nil;
     }
 }

@@ -19,10 +19,10 @@
 @interface FourSquareLocator : NSObject<CLLocationManagerDelegate> {
     NSString *activeQuery;
     CLLocationManager *gps;
-    NSObject<VenueDelegate> *delegate;
+    NSObject<VenueDelegate> *__unsafe_unretained delegate;
 }
 
-@property (nonatomic, assign) NSObject<VenueDelegate> *delegate;
+@property (nonatomic, unsafe_unretained) NSObject<VenueDelegate> *delegate;
 
 - (id)init;
 - (void)query:(NSString*)text;

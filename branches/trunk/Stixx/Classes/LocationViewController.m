@@ -38,9 +38,8 @@
 }
 
 - (void)dealloc {
-    [fsLocationStrings release], fsLocationStrings = nil;
-    [searchResults release], searchResults = nil;
-    [super dealloc];
+    fsLocationStrings = nil;
+    searchResults = nil;
 }
 
 #pragma mark - View lifecycle
@@ -77,10 +76,8 @@
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     [fsLocationStrings removeAllObjects];
-    [fsLocationStrings release];
     fsLocationStrings = nil;
     
-    [fsl release];
     fsl = nil;
 
     [self setSearchResults:nil];
@@ -133,8 +130,8 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        [cell addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]] autorelease]];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]]];
     }
     
     // Configure the cell...
@@ -199,8 +196,6 @@
 
 -(void)receiveVenueNames:(NSArray *)venueNames andLatLong:(NSArray *)latlong
 {
-    [venueNames retain];
-    [latlong retain];
     
     searching = NO;
     letUserSelectRow = YES;
@@ -231,9 +226,6 @@
         
         [self.delegate didReceiveSearchResults];
     }
-    [distArray release];
-    [venueNames release];
-    [latlong release];
 }
 
 -(void)didReceiveConnectionError {

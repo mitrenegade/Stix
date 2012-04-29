@@ -75,15 +75,10 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-	[imageView release];
 	imageView = nil;
-    [blackBarView release];
     blackBarView = nil;
-    [priceView release];
     priceView = nil;
-    [buttonOK release];
     buttonOK = nil;
-    [buttonCancel release];
     buttonCancel = nil;
 }
 
@@ -107,7 +102,6 @@
     CGRect frame = [imageView frame];
     if (stixView) {
         [stixView removeFromSuperview];
-        [stixView release];
     }
     didAddStixToStixView = NO;
     
@@ -204,12 +198,6 @@
     
     [self.view addSubview:transformCanvas];
     
-    [transformBox release];
-    [transformBoxShadow release];
-    [dot1 release];
-    [dot2 release];
-    [dot3 release];
-    [dot4 release];
 }
 
 -(IBAction)buttonOKPressed:(id)sender
@@ -221,9 +209,8 @@
             UIAlertView* alert = [[UIAlertView alloc]init];
             [alert addButtonWithTitle:@"Ok"];
             [alert setTitle:@"Cannot use this Stix!"];
-            [alert setMessage:@"You don't own this Stix and have no Bux to buy it! Please click on the Bux counter to 'purchase' more Bux."];
+            [alert setMessage:@"You don't own this Stix and have no Bux to buy it! You can earn more Bux by using Stix you already own."];
             [alert show];
-            [alert release];
             return;
         }
         // purchase
@@ -273,11 +260,6 @@
     [super viewDidAppear:animated];
 }
 
-- (void)dealloc {
-    [super dealloc];
-	
-	[imageView release];
-}
 
 // hack
 - (BOOL)disablesAutomaticKeyboardDismissal {
@@ -323,7 +305,6 @@
     [alert setTitle:@"Location error!"];
     [alert setMessage:@"Could not connect to location server!"];
     [alert show];
-    [alert release];
 }
 
 /**** Carousel ****/

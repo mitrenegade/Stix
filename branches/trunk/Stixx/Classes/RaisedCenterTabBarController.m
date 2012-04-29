@@ -15,8 +15,8 @@
 // Create a view controller and setup it's tab bar item with a title and image
 -(UIViewController*) viewControllerWithTabTitle:(NSString*) title image:(UIImage*)image
 {
-    UIViewController* viewController = [[[UIViewController alloc] init] autorelease];
-    viewController.tabBarItem = [[[UITabBarItem alloc] initWithTitle:title image:image tag:0] autorelease];
+    UIViewController* viewController = [[UIViewController alloc] init];
+    viewController.tabBarItem = [[UITabBarItem alloc] initWithTitle:title image:image tag:0];
     return viewController;
 }
 
@@ -29,8 +29,8 @@
     button[pos] = [UIButton buttonWithType:UIButtonTypeCustom];
     button[pos].autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
     button[pos].frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
-    bgNormal[pos] = [buttonImage retain];
-    bgSelected[pos] = [highlightImage retain];
+    bgNormal[pos] = buttonImage;
+    bgSelected[pos] = highlightImage;
     [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
     if (highlightImage)
         [button[pos] setBackgroundImage:bgSelected[pos] forState:UIControlStateHighlighted];
@@ -102,13 +102,10 @@
         pointer.transform = CGAffineTransformMakeRotation(3.141592);
     }
     [pointerCanvas addSubview:pointer];
-    [pointer release];
     agitatePointer = 0;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
-    [pointerCanvas release];
-    [animation release];
 }
 
 -(void)doRewardAnimation:(NSString*)title withAmount:(int)amount {
@@ -139,22 +136,17 @@
     [rewardName setCenter:CGPointMake(canvasFrame.size.width/2, rewardName.center.y)];
     [rewardAmount setCenter:CGPointMake(canvasFrame.size.width/2, rewardAmount.center.y)];
     
-    [coinView release];
-    [rewardName release];
-    [rewardAmount release];
 
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     allAnimationIDs[0] = [animation doJump:rewardCanvas inView:self.view forDistance:15 forTime:.5];
-    [rewardCanvas release];
-    [animation release];
 }
 
 -(void)doPurchaseAnimation:(NSString*)stixStringID {
     int width = 140;
     CGRect canvasFrame = CGRectMake(0, 0, 320, 480);
     UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
-    UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
+    UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
     [stix setFrame:CGRectMake(0,0,width,width)];
     [stix setCenter:[rewardCanvas center]];
     [rewardCanvas addSubview:stix];
@@ -170,41 +162,35 @@
     [rewardName setNumberOfLines:2];
     [rewardName setTextAlignment:UITextAlignmentCenter];
     [rewardCanvas addSubview:rewardName];
-    [rewardName release];
 
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     [rewardCanvas setAlpha:0];
     animationIDsPurchase[0] = [animation doFade:rewardCanvas inView:self.view toAlpha:1 forTime:.1]; // not working
-    [rewardCanvas release];
-    [animation release];
-    [stix release]; // MRC
+     // MRC
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
     NSLog(@"Animation %d finished!", animationID);
-    [canvas retain]; // animations autorelease the canvas they are sent
+     // animations autorelease the canvas they are sent
     /* reward animations */
     if (animationID == allAnimationIDs[0]) // first jump animation finished
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         allAnimationIDs[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
-        [animation release];
     }
     else if (animationID == allAnimationIDs[1]) // second jump animation finished
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         allAnimationIDs[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
-        [animation release];
     }
     else if (animationID == allAnimationIDs[2]) // first animation finished
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         allAnimationIDs[3] = [animation doDownwardFade:canvas inView:self.view forDistance:-100 forTime:1];
-        [animation release];
         [myDelegate didFinishRewardAnimation:rewardValue];
     }
     
@@ -223,7 +209,6 @@
         else {
             [canvas removeFromSuperview];
         }
-        [animation release];
     }
     
     /* purchase stix */
@@ -231,25 +216,21 @@
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         animationIDsPurchase[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
-        [animation release];
     }
     else if (animationID == animationIDsPurchase[1]) { // first jump finished
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         animationIDsPurchase[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
-        [animation release];
     }
     else if (animationID == animationIDsPurchase[2]) { // second jump finished
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
         animationIDsPurchase[3] = [animation doDownwardFade:canvas inView:self.view forDistance:300 forTime:1.5];
-        [animation release];
     }
     else if (animationID == animationIDsPurchase[3]) {
         [canvas removeFromSuperview];
     }
 
-    [canvas release];
 }
 
 
@@ -287,13 +268,11 @@
     if (showInstructions) {
         //[firstTimeInstructions setFrame:frameOffscreen];
         [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
-            [animation release];
         }];
     }
     else {
         //[firstTimeInstructions setFrame:frameOnscreen];
         [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
-            [animation release];
         }];
     }
 //    [firstTimeInstructions setHidden:!showInstructions];

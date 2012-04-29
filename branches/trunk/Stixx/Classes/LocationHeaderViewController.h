@@ -20,7 +20,7 @@
 @interface LocationHeaderViewController : UIViewController <UITextFieldDelegate,   
     UISearchDisplayDelegate, UISearchBarDelegate, LocationViewControllerDelegate>{
 
-    NSObject<LocationHeaderViewControllerDelegate> *delegate;
+    NSObject<LocationHeaderViewControllerDelegate> *__unsafe_unretained delegate;
     NSString *savedSearchTerm;
     IBOutlet UISearchBar *mySearchBar;
     IBOutlet UIButton * cancelButton;
@@ -32,14 +32,14 @@
     LoadingAnimationView * activityIndicator;
 }
 
-@property(nonatomic, assign) NSObject<LocationHeaderViewControllerDelegate> *delegate;
+@property(nonatomic, unsafe_unretained) NSObject<LocationHeaderViewControllerDelegate> *delegate;
 @property (nonatomic, copy) NSString *savedSearchTerm;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, retain) IBOutlet UISearchBar * mySearchBar;
-@property (nonatomic, retain) IBOutlet UIButton * cancelButton;
-@property (nonatomic, retain) IBOutlet UIButton * manualEnterLocationButton;
-@property (nonatomic, retain) LocationViewController * locationController;
-@property (nonatomic, retain) IBOutlet UITextField * locationInputField;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) IBOutlet UISearchBar * mySearchBar;
+@property (nonatomic) IBOutlet UIButton * cancelButton;
+@property (nonatomic) IBOutlet UIButton * manualEnterLocationButton;
+@property (nonatomic) LocationViewController * locationController;
+@property (nonatomic) IBOutlet UITextField * locationInputField;
 
 -(IBAction)didClickManualButton:(id)sender;
 -(IBAction)didClickCancelButton:(id)sender;

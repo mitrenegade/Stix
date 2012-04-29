@@ -42,7 +42,6 @@
 	[webView loadRequest:request];
 	[webView setDelegate:self];
 	[self.view addSubview:webView];
-	[webView release];
 	
 
 }
@@ -109,9 +108,6 @@
 }
 
 
-- (void)dealloc {
-    [super dealloc];
-}
 
 
 @end

@@ -79,17 +79,17 @@ enum {
 }
 
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
-@property (nonatomic, retain) UIScrollView * stixScroll;
-@property (nonatomic, retain) UIScrollView * categoryScroll;
+@property (nonatomic) UIScrollView * stixScroll;
+@property (nonatomic) UIScrollView * categoryScroll;
 @property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) bool allowTap;
 //@property (nonatomic, assign) CGPoint tapDefaultOffset;
-@property (nonatomic, retain) UIButton * buttonShowCarousel;
-@property (nonatomic, retain) NSMutableArray * buttonCategories;
-@property (nonatomic, retain) NSMutableArray * buttonCategoriesSelected;
-@property (nonatomic, retain) NSMutableArray * buttonCategoriesNotSelected;
-@property (nonatomic, retain) UIView * carouselTab;
-@property (nonatomic, retain) NSString * stixSelected;
+@property (nonatomic) UIButton * buttonShowCarousel;
+@property (nonatomic) NSMutableArray * buttonCategories;
+@property (nonatomic) NSMutableArray * buttonCategoriesSelected;
+@property (nonatomic) NSMutableArray * buttonCategoriesNotSelected;
+@property (nonatomic) UIView * carouselTab;
+@property (nonatomic) NSString * stixSelected;
 @property (nonatomic, assign) int dismissedTabY;
 @property (nonatomic, assign) int expandedTabY;
 @property (nonatomic, assign) BOOL isShowingCarousel;

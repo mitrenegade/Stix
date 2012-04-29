@@ -80,11 +80,9 @@ static FacebookHelper *sharedFacebookHelper;
                                 nil];
         if ([permissions count] == 0) {
             [facebook authorize:nil];
-            [permissions release];
         }
         else {
             [facebook authorize:permissions];
-            [permissions release];
         }
         return 1; // logged in anew
     }

@@ -112,9 +112,9 @@
     
     int currentBuxPurchase;
     
-    IBOutlet UIButton * logo;
+    IBOutlet UIImageView * logo;
     
-    IBOutlet UITextField * statusMessage;
+    //IBOutlet UITextField * statusMessage;
     
     //UserGalleryController * galleryController;
     //UserProfileViewController * userPageController;
@@ -165,8 +165,9 @@
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 //@property (nonatomic, copy) NSString * galleryUsername;
-@property (nonatomic) IBOutlet UITextField * statusMessage;
+//@property (nonatomic) IBOutlet UITextField * statusMessage;
 @property (nonatomic, assign) int newestTagIDDisplayed;
+@property (nonatomic) IBOutlet UIImageView * logo;
 
 -(void)populateAllTagsDisplayed;
 -(void)addTagForDisplay:(Tag*)tag;
@@ -194,7 +195,7 @@
 -(void)didCloseShareSheet;
 -(void)finishedCreateNewPix:(NSNumber*)tagID;
 -(void)checkForUpdatedStix;
-
+-(void)updateFeedTimestamps;
 @end
 
 

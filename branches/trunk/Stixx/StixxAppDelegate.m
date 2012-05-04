@@ -93,7 +93,7 @@ static dispatch_queue_t backgroundQueue;
      */
     
     /*** MKStoreKit ***/
-    [MKStoreManager sharedManager];
+    //[MKStoreManager sharedManager];
     
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
@@ -828,8 +828,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
         //[self saveDataToDisk];
         //});
-        [self logMetricTimeInApp];
     }
+    [self logMetricTimeInApp];
     
 #if USING_KIIP
     // End the Kiip session when the user leaves the app
@@ -843,6 +843,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // Start a Kiip session when the user enters the app
     [[KPManager sharedManager] startSession];
 #endif
+
     /*
     [mainController presentModalViewController:camera animated:YES];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
@@ -857,6 +858,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
      */
     
     [self setMetricLogonTime: [NSDate date]];
+    
+    [feedController updateFeedTimestamps];
 }
 
 - (void)application:(UIApplication *)application 
@@ -1005,6 +1008,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([loc length] > 0)
 //        [self updateUserTagTotal];
         [self rewardLocation];
+    
+    [Appirater userDidSignificantEvent:YES];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixDidCompleteWithResult:(NSNumber *)newRecordID {
@@ -1019,6 +1024,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // save large image to large image database
     dispatch_async(backgroundQueue, ^{
         UIImage * hiResImg = [[ImageCache sharedImageCache] imageForKey:@"largeImage"];
+        UIImageView * preview = [[UIImageView alloc] initWithImage:hiResImg];
+        CGRect frame = preview.frame;
+        //[preview setBackgroundColor:[UIColor blackColor]];
+        NSLog(@"Frame: %f %f", frame.size.width, frame.size.height);
+        [tabBarController.view addSubview:preview];
         NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
         [k addHighResImageWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
     });
@@ -1052,6 +1062,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
         [self advanceFirstTimeUserMessage];
     }
+}
+
+-(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addHighResImageDidCompleteWithResult:(NSArray *)theResults {
+    NSLog(@"High res pic uploaded!");
+    NSLog(@"TheResults: %d", [theResults count]);
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
@@ -1323,6 +1338,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     // because this gets called multiple times during scrollViewDidScroll, we have to save
     // the last request to try to minimize making duplicate requests
+    //[feedController stopActivityIndicator];
 
     if (tagID == idOfNewestTagReceived || // we always want to make this request
         pageOfLastNewerTagsRequest != tagID){
@@ -1391,6 +1407,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    [feedController stopActivityIndicator];
+
     if (1) { //pageOfLastOlderTagsRequest != tagID) {
         pageOfLastOlderTagsRequest = tagID;
         //[k getAllTagsWithIDLessThanWithAllTagID:tagID andNumTags:[NSNumber numberWithInt:TAG_LOAD_WINDOW]];
@@ -1410,7 +1428,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 //bool didAddTag = [self addTagWithCheck:tag withID:tagID];
                 //if (didAddTag)
                 //    [feedController addTagForDisplay:tag];
-                //[feedController stopActivityIndicator];
             }
             else {
                 int tID = [[oldTagsToGet objectAtIndex:i] intValue];
@@ -1458,7 +1475,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [feedController finishedCheckingForNewData:NO];
     }
     [feedController stopActivityIndicator];
-    //[feedController.activityIndicator stopCompleteAnimation];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllTagsWithIDLessThanDidCompleteWithResult:(NSArray *)theResults {
@@ -1489,7 +1505,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [feedController finishedCheckingForNewData:NO];
     }
     [feedController stopActivityIndicator];
-    //[feedController.activityIndicator stopCompleteAnimation];
 }
 
 - (NSMutableArray *) getTags {
@@ -1649,6 +1664,19 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allUserNames addObject:name];
         }
     });
+}
+
+-(void)didAddNewUserWithResult:(NSArray *)theResults {
+    for (NSMutableDictionary * d in theResults) {
+        NSString * name = [d valueForKey:@"username"];
+        UIImage * photo = [d valueForKey:@"photo"];
+        NSNumber * facebookID = [d valueForKey:@"facebookID"];
+        [allUsers setObject:d forKey:name];
+        [allUserPhotos setObject:photo forKey:name];
+        [allUserFacebookIDs addObject:[NSString stringWithFormat:@"%d", [facebookID intValue]]];
+        [allUserEmails addObject:[d valueForKey:@"email"]];
+        [allUserNames addObject:name];
+    }    
 }
 
 /**** LoginSplashController delegate ****/
@@ -3420,6 +3448,7 @@ static bool isShowingAlerts = NO;
         buxPurchaseObject = @"neroh.stix.bux.200";
     }
 
+#if USE_MKSTOREKIT
     [[MKStoreManager sharedManager] buyFeature:buxPurchaseObject
                                     onComplete:^(NSString* purchasedFeature, NSData * data)
      {
@@ -3429,7 +3458,7 @@ static bool isShowingAlerts = NO;
          [self displayPurchasedBuxMessage:buxPurchased];
 
          // consume
-         [[MKStoreManager sharedManager] consumeProduct:buxPurchaseObject quantity:buxPurchased];
+         //[[MKStoreManager sharedManager] consumeProduct:buxPurchaseObject quantity:buxPurchased];
      }
      onCancelled:^
      {
@@ -3438,6 +3467,8 @@ static bool isShowingAlerts = NO;
          NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
          [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
      }];
+#endif
+    
 #endif
 }
 

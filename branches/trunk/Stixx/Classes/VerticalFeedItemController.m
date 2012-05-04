@@ -266,10 +266,12 @@
 
 
 -(IBAction)didPressAddCommentButton:(id)sender {
-    [self.delegate displayCommentsOfTag:tagID andName:nameString];
+    if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
+        [delegate displayCommentsOfTag:tagID andName:nameString];
 }
 -(void)didPressSeeAllCommentsButton:(id)sender {
-    [self.delegate displayCommentsOfTag:tagID andName:nameString];
+    if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
+        [delegate displayCommentsOfTag:tagID andName:nameString];
 }
 
 - (void)didReceiveMemoryWarning
@@ -277,7 +279,6 @@
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
     
-    // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -336,7 +337,10 @@
 
 - (void)viewDidUnload
 {
-    NSLog(@"View did unload");
+    NSLog(@"View did unload for feed item with tag id %d", [self tagID]);
+    // Release any cached data, images, etc that aren't in use.
+    [delegate didReceiveMemoryWarningForFeedItem:self];
+    
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -368,13 +372,15 @@
 }
 
 -(void)peelAnimationDidCompleteForStix:(int)index {
-    [self.delegate didPerformPeelableAction:0 forAuxStix:index];
+    if ([delegate respondsToSelector:@selector(didPerformPeelableAction:forAuxStix:)])
+        [delegate didPerformPeelableAction:0 forAuxStix:index];
 }
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
-    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
+    NSLog(@"VerticalFeedItemController with tagID %d calling delegate didReceiveRequestedStixView", [self tagID]);
     // send through to StixAppDelegate to save to defaults
-    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+    if ([delegate respondsToSelector:@selector(didReceiveRequestedStixViewFromKumulos:)])
+        [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
 }
 -(void)didReceiveAllRequestedMissingStix:(StixView*)_stixView {
     if (!stixView.isShowingPlaceholder)
@@ -398,6 +404,9 @@
     stixView.isShowingPlaceholder = NO;
     [shareButton removeFromSuperview];
     [self.view addSubview:shareButton];
+    
+    // hack: forced retain of delegate (if it is DetailView)
+    delegatePointer = nil;
 }
 
 //[k getStixDataByStixStringIDWithStixStringID:stixStringID];
@@ -431,15 +440,16 @@
         else if (CGRectContainsPoint([addCommentButton frame], location)) 
             [self didPressAddCommentButton:addCommentButton];
             //return;
-        else if ([self.delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
-            [self.delegate didClickAtLocation:location withFeedItem:self];
+        else if ([delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
+            [delegate didClickAtLocation:location withFeedItem:self];
     }
 }
 
 #pragma mark sharing
 
 -(IBAction)didPressShareButton:(id)sender {
-    [delegate didPressShareButtonForFeedItem:self];
+    if ([delegate respondsToSelector:@selector(didPressShareButtonForFeedItem:)])
+        [delegate didPressShareButtonForFeedItem:self];
 }
 
 -(void)didClickShareViaFacebook {
@@ -472,7 +482,8 @@
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    [delegate sharePixDialogDidFinish];
+    if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
+        [delegate sharePixDialogDidFinish];
     NSLog(@"Uploading data for share method: %d", shareMethod);
     
     NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
@@ -506,7 +517,8 @@
         
         NSLog(@"Sending mail: mailstring %@", mailString);
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:mailString]];    }
-    [delegate sharePixDialogDidFinish];
+    if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
+        [delegate sharePixDialogDidFinish];
 }
 
 #pragma mark ASIHTTP delegate 
@@ -523,20 +535,27 @@
     NSString * responseString = [request responseString];
     NSRange range0 = [responseString rangeOfString:@"<meta web_url"];
     NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
-    range0.location = range0.location + 15;
-    range0.length = range1.location - range0.location-3; // this could change based on how we output web
-    NSString * substring = [responseString substringWithRange:range0];
-    NSLog(@"substring for weburl: <%@>", substring);
-    
-    NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
-    imgRange.length = 60;
-    NSString * imgSubstring = [responseString substringWithRange:imgRange];
-    NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
-    imgRange.length = imgRangeEnd.location;
-    imgSubstring = [responseString substringWithRange:imgRange];
-    
-    NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
-    [self didSharePixWithURL:weburl andImageURL:imgSubstring];
+    if (range0.length == 0 || range1.length == 0) {
+        NSLog(@"Create share page failed!");
+        if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
+            [delegate sharePixDialogDidFail:0];
+    }
+    else {
+        range0.location = range0.location + 15;
+        range0.length = range1.location - range0.location-3; // this could change based on how we output web
+        NSString * substring = [responseString substringWithRange:range0];
+        NSLog(@"substring for weburl: <%@>", substring);
+        
+        NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
+        imgRange.length = 60;
+        NSString * imgSubstring = [responseString substringWithRange:imgRange];
+        NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
+        imgRange.length = imgRangeEnd.location;
+        imgSubstring = [responseString substringWithRange:imgRange];
+        
+        NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
+        [self didSharePixWithURL:weburl andImageURL:imgSubstring];
+    }
 }
 
 - (void) requestStarted:(ASIHTTPRequest *) request {
@@ -552,8 +571,29 @@
 #endif  
     NSError *error = [request error];
     NSLog(@"%@", error);
+
+    NSLog(@"ASIHttpRequest to upload image failed!");
+    if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
+        [delegate sharePixDialogDidFail:1];
 }
 
+-(void)needsRetainForDelegateCall {
+    // comes from stixView
+    delegatePointer = delegate; // saves detailViewController if from detailView
+}
 
+-(void)doneWithAsynchronousDelegateCall {
+    delegatePointer = nil;
+}
 
+/*
+-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController {
+    // comes from detailView
+    delegatePointer = delegate; // saves detailViewController
+}
+
+-(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController *)detailController {
+    delegatePointer = nil;
+}
+ */
 @end

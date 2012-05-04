@@ -59,12 +59,8 @@ static dispatch_queue_t backgroundQueue;
     [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
 
     buttonCategories = [[NSMutableArray alloc] init];
-    /*
-    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all.png", @"txt_animals.png", @"txt_anime.png", @"txt_art.png", @"txt_comics.png", @"txt_costumes.png", @"txt_cute.png", @"txt_decorations.png", @"txt_events.png", @"txt_facefun.png", @"txt_fashion.png", @"txt_foodanddrink.png", @"txt_geeky.png", @"txt_hollywood.png", @"txt_nature.png", @"txt_pranks.png", @"txt_sports.png", @"txt_symbols.png", @"txt_videogames.png", nil];
-    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_all_selected.png", @"txt_animals_selected.png", @"txt_anime_selected.png", @"txt_art_selected.png", @"txt_comics_selected.png", @"txt_costumes_selected.png", @"txt_cute_selected.png", @"txt_decorations_selected.png", @"txt_events_selected.png", @"txt_facefun_selected.png", @"txt_fashion_selected.png", @"txt_foodanddrink_selected.png", @"txt_geeky_selected.png", @"txt_hollywood_selected.png", @"txt_nature_selected.png", @"txt_pranks_selected.png", @"txt_sports_selected.png", @"txt_symbols_selected.png", @"txt_videogames_selected.png", nil];
-     */
-    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_animals.png", @"txt_comics.png", @"txt_cute.png", @"txt_facefun.png", @"txt_meme.png", @"txt_videogames.png", nil];
-    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_animals_selected.png", @"txt_comics_selected.png", @"txt_cute_selected.png", @"txt_facefun_selected.png", @"txt_meme_selected.png", @"txt_videogames_selected.png", nil];
+    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun.png", @"txt_meme.png", @"txt_cute.png", @"txt_animals.png", @"txt_comics.png", @"txt_videogames.png", nil];
+    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun_selected.png", @"txt_meme_selected.png", @"txt_cute_selected.png", @"txt_animals_selected.png", @"txt_comics_selected.png", @"txt_videogames_selected.png", nil];
     float currentContentOrigin = 0;
     for (int i=0; i<[buttonCategoriesSelected count]; i++) {
         UIButton * button0 = [[UIButton alloc] init];
@@ -155,7 +151,7 @@ static dispatch_queue_t backgroundQueue;
     /*
     NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"All", @"Animals", @"Anime", @"Art", @"Comics", @"Costumes", @"Cuddly and Cute", @"Decorations", @"Events", @"Face Fun", @"Fashion", @"Food and Drink", @"Geeky", @"Hollywood", @"Nature", @"Pranks", @"Sports", @"Symbols", @"Video Games", nil]; 
      */
-    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"animals", @"comics", @"cute", @"facefun", @"memes", @"videogames", nil]; 
+    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects:@"facefun", @"memes", @"cute", @"animals", @"comics", @"videogames", nil]; 
     [stixScroll removeFromSuperview];
     stixScroll.frame = frame;
     

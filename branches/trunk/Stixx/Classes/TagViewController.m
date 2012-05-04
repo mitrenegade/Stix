@@ -250,7 +250,6 @@
         username = @"anonymous";
     }
     [cameraTag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
-    //UIImage * image = [[[ImageCache sharedImageCache] imageForKey:@"newImage"] retain];
     //[cameraTag addImage:image];
     //[tag addARCoordinate:newCoord];
 }

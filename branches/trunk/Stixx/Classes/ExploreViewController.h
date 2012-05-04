@@ -102,6 +102,7 @@ enum {
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
+@property (nonatomic) DetailViewController * detailController;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(void)startActivityIndicator;

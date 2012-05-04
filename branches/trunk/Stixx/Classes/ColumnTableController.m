@@ -261,8 +261,10 @@
 	
 	if (scrollView.isDragging) {
 		if (refreshHeaderView.state == EGOOPullRefreshPulling && scrollView.contentOffset.y > -65.0f && scrollView.contentOffset.y < 0.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to normal");
 			[refreshHeaderView setState:EGOOPullRefreshNormal];
 		} else if (refreshHeaderView.state == EGOOPullRefreshNormal && scrollView.contentOffset.y < -65.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to pulling");
 			[refreshHeaderView setState:EGOOPullRefreshPulling];
 		}
 	}
@@ -272,14 +274,45 @@
 	
 	if (scrollView.contentOffset.y <= - 65.0f && !_reloading) {
 		_reloading = YES;
+#if 0
 		[self reloadTableViewDataSource];
 		[refreshHeaderView setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
 		[UIView setAnimationDuration:0.2];
+        //[UIView setAnimationDidStopSelector:@selector(refreshHeaderRestore)];
+        [UIView setAnimationDelegate:self];
 		self.tableView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
+#else
+        //[delegate didPullToRefreshDoActivityIndicator];
+        [refreshHeaderView setState:EGOOPullRefreshLoading];
+        [UIView animateWithDuration:.5
+                              delay:0
+                            options: UIViewAnimationCurveLinear
+                         animations:^{
+                             [self.tableView setContentInset:UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0)];
+                         } 
+                         completion:^(BOOL finished){
+                             NSLog(@"EGO Refresh view: content inset at 60 - calling reloadTableViewDataSource");
+                             [self reloadTableViewDataSource];
+                             [UIView animateWithDuration:0.2
+                                                   delay:1
+                                                 options: UIViewAnimationCurveLinear
+                                              animations:^{
+                                                  [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                                              }
+                                              completion:^(BOOL finished) {
+                                                  NSLog(@"EGO Refresh view: content inset at 0");
+                                                  [refreshHeaderView setState:EGOOPullRefreshNormal];
+                                                  _reloading = NO;
+                                              }
+                              ];
+                         }
+         ];
+#endif
 	}
 }
+
 #pragma mark -
 #pragma mark refreshHeaderView Methods
 

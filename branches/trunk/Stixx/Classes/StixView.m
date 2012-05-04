@@ -26,6 +26,7 @@
 @synthesize isShowingPlaceholder;
 
 static NSMutableDictionary * requestDictionaryForStix;
+//static NSMutableSet * retainedDelegates;
 
 static int currentStixViewID = 0;
 
@@ -94,6 +95,15 @@ static int currentStixViewID = 0;
     }
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
     [viewsThatNeedThisStix addObject:stixView];
+    
+    // hack: force delegate to stick around
+    /*
+    if (!retainedDelegates)
+        retainedDelegates = [[NSMutableSet alloc] init];
+    [retainedDelegates addObject:delegate];
+     */
+    if ([delegate respondsToSelector:@selector(needsRetainForDelegateCall)])
+        [delegate needsRetainForDelegateCall];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getStixDataByStixStringIDDidCompleteWithResult:(NSArray *)theResults {
@@ -139,6 +149,10 @@ static int currentStixViewID = 0;
         if ([stixViewsMissing count] == 0) {
             //NSLog(@"Previously finished StixView %d finished loading all missing stix views!", stixViewID);
             [delegate didReceiveAllRequestedMissingStix:self];
+            
+            // hack: tell delegate to remove retained detailView
+            if ([delegate respondsToSelector:@selector(doneWithAsynchronousDelegateCall)])
+                [delegate doneWithAsynchronousDelegateCall];
         }
     }
 }
@@ -156,7 +170,9 @@ static int currentStixViewID = 0;
 
     if ([stixViewsMissing count] == 0) {
         //NSLog(@"StixView %d finished loading all missing stix views!", stixViewID);
-        [delegate didReceiveAllRequestedMissingStix:self];
+        if ([delegate respondsToSelector:@selector(didReceiveAllRequestedMissingStix:)])
+            [delegate didReceiveAllRequestedMissingStix:self];
+//        [retainedDelegates removeObject:delegate];
     }
 }
 

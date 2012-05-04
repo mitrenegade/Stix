@@ -28,6 +28,8 @@
 -(void)didPeelStix:(int)index;
 -(void)peelAnimationDidCompleteForStix:(int)index;
 -(void)didTouchInStixView:(StixView*)stixViewTouched;
+-(void)needsRetainForDelegateCall;
+-(void)doneWithAsynchronousDelegateCall;
 @end
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate, KumulosDelegate>

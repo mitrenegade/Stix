@@ -30,8 +30,9 @@
 //@synthesize stixSelected;
 @synthesize buttonProfile;
 @synthesize labelBuxCount;
-@synthesize statusMessage;
+//@synthesize statusMessage;
 @synthesize newestTagIDDisplayed;
+@synthesize logo;
 
 -(id)init
 {
@@ -66,6 +67,7 @@
 
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
+    [activityIndicator setHidden:NO];
     [self.activityIndicator startCompleteAnimation];
     [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
 }
@@ -84,11 +86,15 @@
     lastPageViewed = 0;
     tempTagID = -1;
 
-    //[self initializeScrollWithPageSize:CGSizeMake(FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)];
     [self initializeTable];
 
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 11, 25, 25)];
+    
+    //[activityIndicator setBackgroundColor:[UIColor blackColor]];
     [self.view addSubview:activityIndicator];
+
+    //[self startActivityIndicator];
+    //[logo setHidden:YES];
     
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
@@ -117,7 +123,7 @@
     [self configureCarouselView];
     [self.carouselView carouselTabDismiss:NO];
 
-    [statusMessage setHidden:YES];
+    //[statusMessage setHidden:YES];
 
     backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.feedController.bgQueue", NULL);
 }
@@ -465,7 +471,7 @@
         NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
     }
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    //NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
 
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
@@ -540,7 +546,7 @@
     
     [self.tableController.tableView reloadData];
     [tableController dataSourceDidFinishLoadingNewData];
-    [self stopActivityIndicator];
+    //[self stopActivityIndicator];
     //[self.activityIndicator stopCompleteAnimation];
     [feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
@@ -550,7 +556,7 @@
 {	        
     //index = index - 1;
     Tag * tag = [allTagsDisplayed objectAtIndex:index];
-    //NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
     VerticalFeedItemController * feedItem = nil;
     if (tag.tagID)
         feedItem = [feedItems objectForKey:tag.tagID];
@@ -683,9 +689,14 @@
     [self updateScrollPagesAtPage:-1];
     [delegate checkAggregatorStatus];
     [self checkForUpdatedStix];
+    [self updateFeedTimestamps];
+}
+-(void)didPullToRefreshDoActivityIndicator {
+    [self startActivityIndicator];
 }
 
 -(void)updateScrollPagesAtPage:(int)page {
+    [self startActivityIndicator];
     NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTagsDisplayed count]);
     if ([self numberOfSections] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
@@ -1093,7 +1104,8 @@
 }
 -(void)didClickShareViaFacebook {
     [self startActivityIndicator];
-    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    if (!activityIndicatorLarge)
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
     [self.view addSubview:activityIndicatorLarge];
     [activityIndicatorLarge startCompleteAnimation];
     dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
@@ -1104,13 +1116,15 @@
 
 -(void)didClickShareViaEmail {
     [self startActivityIndicator];
+    [self didCloseShareSheet];
+    if (!activityIndicatorLarge)
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [self.view addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
     dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
         [shareFeedItem didClickShareViaEmail];
     });
     [self didCloseShareSheet];
-    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
 }
 
 -(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
@@ -1166,12 +1180,36 @@
 -(void)sharePixDialogDidFinish {
     [self didCloseShareSheet];
     if (activityIndicatorLarge) {
-        [activityIndicatorLarge setHidden:YES];
-        [activityIndicatorLarge stopCompleteAnimation];
-        [activityIndicatorLarge removeFromSuperview];
-        activityIndicatorLarge = nil;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+            [activityIndicatorLarge setHidden:YES];
+            [activityIndicatorLarge stopCompleteAnimation];
+            [activityIndicatorLarge removeFromSuperview];
+        });
+        //activityIndicatorLarge = nil;
     }
     [delegate didCloseShareSheet];
+}
+-(void)sharePixDialogDidFail:(int)errorType {
+    [self didCloseShareSheet];
+    if (activityIndicatorLarge) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+            [activityIndicatorLarge setHidden:YES];
+            [activityIndicatorLarge stopCompleteAnimation];
+            [activityIndicatorLarge removeFromSuperview];
+        });
+        //activityIndicatorLarge = nil;
+    }
+    [delegate didCloseShareSheet];
+    if (errorType == 0) {
+        // upload picture malfunction
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
+    else if (errorType == 1) {
+        // asihttp request timeout
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connectivity Failed" message:@"Could not contact Stix Share pages due to low internet connectivity. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
@@ -1188,7 +1226,9 @@
     [tableController.tableView reloadData];
    
     NSLog(@"FeedController: finished create new pix: sharing ID %d", [tagID intValue]);
+    [self reloadPage:0];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
+    shareFeedItem = feedItem;
     [self didPressShareButtonForFeedItem:feedItem];
 }
 
@@ -1259,6 +1299,31 @@
     }
 //    if (tag == nil)
         return;
+}
+
+-(void)updateFeedTimestamps {
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
+        if (!tag.tagID) 
+            continue;
+        VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+        if (feedItem) {
+            [[self headerViews] removeObjectForKey:tag.tagID];
+            //[feedItem populateWithTimestamp:tag.timestamp];
+            [self reloadPage:i];
+        }
+    }
+}
+
+-(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController *)feedItem {
+    // feedItem will be released soon
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
+        if ([tag.tagID intValue] == feedItem.tagID) {
+            NSLog(@"FeedView: reloading deallocated feedItem at index %d with tagID %d", i, feedItem.tagID);
+            [self reloadPage:i];
+        }
+    }
 }
 @end
 

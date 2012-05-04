@@ -41,9 +41,12 @@
 #import "FacebookHelper.h"
 #endif
 #import "VerticalFeedController.h"
+
+#if USE_MKSTOREKIT
 #import "MKStoreKitConfigs.h"
 #import "MKStoreManager.h"
 #import "MKStoreObserver.h"
+#endif
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,

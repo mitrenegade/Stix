@@ -259,6 +259,7 @@
 		self.tableView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
 #else
+        [delegate didPullToRefreshDoActivityIndicator];
         [refreshHeaderView setState:EGOOPullRefreshLoading];
         [UIView animateWithDuration:.5
                               delay:0

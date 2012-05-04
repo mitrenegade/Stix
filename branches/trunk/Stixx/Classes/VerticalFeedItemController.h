@@ -53,6 +53,9 @@
 
 -(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *)feedItem;
 -(void)sharePixDialogDidFinish;
+-(void)sharePixDialogDidFail:(int)errorType;
+
+-(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController*)feedItem;
 @end
 
 
@@ -74,6 +77,7 @@
     //IBOutlet UIButton * seeAllCommentsButton;
     
     NSObject<VerticalFeedItemDelegate> * __unsafe_unretained delegate;    
+    NSObject<VerticalFeedItemDelegate> * __strong delegatePointer;
     
     NSString * nameString;
     NSString * descriptorString;

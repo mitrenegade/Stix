@@ -19,10 +19,39 @@
 @synthesize buttonProfile;
 @synthesize tabBarController;
 @synthesize galleryUsername;
+@synthesize detailController;
 //@synthesize segmentedControl;
 
 #define EXPLORE_COL 2
 #define EXPLORE_ROW 2
+
+static NSMutableSet * retainedDetailControllers;
+
+-(void)needsRetainForDelegateCall {
+    // comes from stixViews
+    /*
+    if (!retainedDetailControllers) 
+        retainedDetailControllers = [[NSMutableSet alloc] init];
+    [retainedDetailControllers addObject:detailController];
+     */
+}
+
+-(void)doneWithAsynchronousDelegateCall {
+    //[retainedDetailControllers removeObject:detailController];
+}
+
+-(void)detailViewNeedsRetainForDelegateCall {
+    // comes from stixViews
+    if (!retainedDetailControllers) 
+        retainedDetailControllers = [[NSMutableSet alloc] init];
+    NSLog(@"ExploreView: retaining detail view with username %@", [detailController tagUsername]);
+    [retainedDetailControllers addObject:detailController];
+}
+
+-(void)detailViewDoneWithAsynchronousDelegateCall {
+    NSLog(@"ExploreView: releasing detail view with username %@", [detailController tagUsername]);
+    [retainedDetailControllers removeObject:detailController];
+}
 
 -(id)init
 {

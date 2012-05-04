@@ -18,6 +18,8 @@
 #import "VerticalFeedItemController.h"
 #import "CommentViewController.h"
 
+@class DetailViewController;
+
 @protocol DetailViewDelegate
 
 -(void)didDismissZoom;
@@ -27,6 +29,8 @@
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;
+-(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController *)detailController;
 @end
 
 @interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate>

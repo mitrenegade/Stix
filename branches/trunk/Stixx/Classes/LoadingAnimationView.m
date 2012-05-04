@@ -33,7 +33,7 @@
                                                //[UIImage imageNamed:@"fire_load4.png"],
                                                nil];
     
-    self.animationDuration = 0.5; // in seconds
+    self.animationDuration = .5; // in seconds
     self.animationRepeatCount = 0; // sets to loop
     [self setHidden:YES];
     //[self startAnimating];
@@ -51,14 +51,14 @@
         [self stopAnimating];
     }
     else
-        [self performSelector:@selector(checkForShouldStop) withObject:self afterDelay:self.animationDuration];        
+        [self performSelector:@selector(checkForShouldStop) withObject:self afterDelay:0]; //self.animationDuration];        
 }
 
 - (void)startCompleteAnimation {
     shouldStop = false;
     [self setHidden:NO];
     [self startAnimating];
-    [self performSelector:@selector(checkForShouldStop) withObject:self afterDelay:self.animationDuration];
+    [self performSelector:@selector(checkForShouldStop) withObject:self afterDelay:0]; //self.animationDuration];
 }
 -(void) stopCompleteAnimation {
     shouldStop = true;

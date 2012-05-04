@@ -284,6 +284,7 @@
     */
     isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:theResults];
+    [delegate didAddNewUserWithResult:theResults];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults{

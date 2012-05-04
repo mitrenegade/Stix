@@ -21,6 +21,7 @@
 @synthesize commentView;
 
 static BOOL openingDetailView;
+//static NSMutableSet * retainedViewsForDelegateCallGetAllHistory;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -198,14 +199,6 @@ static BOOL openingDetailView;
     [commentsTable setDelegate:self];
     //[commentsTable configureRowsWithHeight:18 dividerVisible:NO fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     
-#if 0
-    [scrollView setContentSize:CGSizeMake(320, stixView.frame.size.height + commentsTable.view.frame.size.height + 5)];
-    [scrollView addSubview:stixView];
-    [scrollView addSubview:commentsTable.view];
-    k = [[Kumulos alloc] init];
-    [k setDelegate:self];
-    [k getAllHistoryWithTagID:tagID];
-#else
     NSLog(@"DetailView: header start %f height %f feedItem start %f height %f commentsTable start %f height %f scrollView start %f height %f", headerView.frame.origin.y, headerView.frame.size.height, feedItem.view.frame.origin.y, feedItem.view.frame.size.height, commentsTable.view.frame.origin.y, commentsTable.view.frame.size.height, scrollView.frame.origin.y, scrollView.frame.size.height);
     int feedHeight = feedItem.view.frame.size.height;
     int tableHeight = commentsTable.rowHeight * [names count];
@@ -213,7 +206,6 @@ static BOOL openingDetailView;
     [scrollView setContentSize:CGSizeMake(320, feedHeight + tableHeight + 5)];
     [scrollView addSubview:feedItem.view];
     [scrollView addSubview:commentsTable.view];
-#endif
 }
 
 -(void)setScrollHeight:(int)height {
@@ -228,6 +220,9 @@ static BOOL openingDetailView;
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
+    
+    if ([delegate respondsToSelector:@selector(detailViewDoneWithAsynchronousDelegateCall:)])
+        [delegate detailViewDoneWithAsynchronousDelegateCall:self];
     
     //NSNumber * tagID;
     trueCommentCount = 0;
@@ -361,7 +356,16 @@ static BOOL openingDetailView;
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
     [k getAllHistoryWithTagID:feedItem.tagID];
-    NSLog(@"DetailView: calling getAllHistory for tag %d", feedItem.tagID);
+    
+    // force retention of delegate
+    if ([delegate respondsToSelector:@selector(detailViewNeedsRetainForDelegateCall:)])
+        [delegate detailViewNeedsRetainForDelegateCall:self];
+    /*
+    if (!retainedViewsForDelegateCallGetAllHistory)
+        retainedViewsForDelegateCallGetAllHistory = [[NSMutableSet alloc] init];
+    [retainedViewsForDelegateCallGetAllHistory addObject:self.view];
+    NSLog(@"DetailView: calling getAllHistory for tag %d: retained items %d", feedItem.tagID, [retainedViewsForDelegateCallGetAllHistory count]);
+     */
 #endif
 }
 
@@ -406,6 +410,16 @@ static BOOL openingDetailView;
         [timestamps removeAllObjects];
         [rowHeights removeAllObjects];
         [k getAllHistoryWithTagID:feedItem.tagID];
+        
+        // force retention of delegate call
+        if ([delegate respondsToSelector:@selector(detailViewNeedsRetainForDelegateCall:)])
+            [delegate detailViewNeedsRetainForDelegateCall:self];
+        /*
+        if (!retainedViewsForDelegateCallGetAllHistory)
+            retainedViewsForDelegateCallGetAllHistory = [[NSMutableSet alloc] init];
+        [retainedViewsForDelegateCallGetAllHistory addObject:self.view]; // force retention of delegate
+        NSLog(@"DetailView: adding a comment and calling getAllHistory for tag %d: retained items %d", feedItem.tagID, [retainedViewsForDelegateCallGetAllHistory count]);
+         */
     }
     [self didCloseComments];
 }

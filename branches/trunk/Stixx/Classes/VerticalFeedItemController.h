@@ -56,6 +56,7 @@
 -(void)sharePixDialogDidFail:(int)errorType;
 
 -(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController*)feedItem;
+-(void)didClickReloadButtonForFeedItem:(VerticalFeedItemController *)feedItem;
 @end
 
 
@@ -99,7 +100,11 @@
     Kumulos * k;
     LoadingAnimationView * activityIndicator;
 
-    UIImageView * placeholderView;    
+    UIImageView * placeholderView;
+    UIImageView * reloadView;
+    UIImageView * reloadMessage;
+    UIImageView * reloadMessage2;
+    UIButton * reloadButton;
 }
 @property ( nonatomic) IBOutlet UILabel * labelName;
 @property ( nonatomic) IBOutlet UILabel * labelComment;
@@ -120,6 +125,10 @@
 @property (nonatomic, assign) int commentCount;
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedItemDelegate> * delegate;   
 @property (nonatomic) StixView * stixView;
+@property (nonatomic) UIImageView * reloadView;
+@property (nonatomic) UIImageView * reloadMessage;
+@property (nonatomic) UIImageView * reloadMessage2;
+@property (nonatomic) UIButton * reloadButton;
 //@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
@@ -129,6 +138,7 @@
 //-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;
 
 -(void)initStixView:(Tag*)tag;
+-(void)initReloadView;
 
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;

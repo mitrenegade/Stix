@@ -34,6 +34,7 @@
 @synthesize stixView;
 @synthesize locationIcon;
 @synthesize shareButton;
+@synthesize reloadView, reloadMessage, reloadMessage2, reloadButton;
 //@synthesize seeAllCommentsButton;
 /*
  - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -136,6 +137,50 @@
     [addCommentButton removeFromSuperview];
     [self.view addSubview:addCommentButton];
      */
+}
+
+-(void)initReloadView {
+    if (reloadView)
+    {
+        [reloadView removeFromSuperview];
+        [reloadMessage removeFromSuperview];
+        [reloadMessage2 removeFromSuperview];
+        [reloadButton removeFromSuperview];
+    }
+    [self setReloadView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_retry.png"]]];
+    [reloadView setFrame:CGRectMake(0, 0, 48, 54)];
+    [reloadView setCenter:[stixView center]];
+    [self.view addSubview:reloadView];
+    //[feedItem setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
+
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doSpin:reloadView forTime:10 withCompletion:^(BOOL finished){ 
+        NSLog(@"Spin finished!");
+        [reloadView setCenter:CGPointMake(stixView.center.x - 30, stixView.center.y)];
+        [self setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_uploadfailed.png"]]];
+        [reloadMessage setFrame:CGRectMake(0,0, 117, 26)];
+        [reloadMessage setCenter:CGPointMake(stixView.center.x, stixView.center.y - 40)];
+        [self setReloadMessage2:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
+        [reloadMessage2 setFrame:CGRectMake(0,0, 64, 36)];
+        [reloadMessage2 setCenter:CGPointMake(reloadView.center.x + 60, reloadView.center.y)];
+//        [reloadView setBackgroundColor:[UIColor blackColor]];
+//        [reloadMessage2 setBackgroundColor:[UIColor redColor]];
+//        [reloadMessage setBackgroundColor:[UIColor greenColor]];
+        reloadButton = [[UIButton alloc] initWithFrame:CGRectMake(reloadMessage.frame.origin.x, reloadMessage.frame.origin.y, 120, 70)];
+        //[reloadButton setBackgroundColor:[UIColor blueColor]];
+        [reloadButton setTag:[tag.tagID intValue]];
+        [reloadButton addTarget:self action:@selector(didClickReloadButton:) forControlEvents:UIControlEventTouchUpOutside];
+        
+        [self.view addSubview:reloadMessage];
+        [self.view addSubview:reloadMessage2];
+        [self.view insertSubview:reloadButton aboveSubview:stixView
+         ];
+    }];
+}
+
+-(void)didClickReloadButton:(UIButton*)button {
+    if ([delegate respondsToSelector:@selector(didClickReloadButtonForFeedItem:)])
+        [delegate didClickReloadButtonForFeedItem:self];
 }
 
 -(void)populateWithTimestamp:(NSDate *)timestamp {    
@@ -439,6 +484,8 @@
             //return;
         else if (CGRectContainsPoint([addCommentButton frame], location)) 
             [self didPressAddCommentButton:addCommentButton];
+        else if (CGRectContainsPoint([reloadButton frame], location))
+            [self didClickReloadButton:reloadButton];
             //return;
         else if ([delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
             [delegate didClickAtLocation:location withFeedItem:self];

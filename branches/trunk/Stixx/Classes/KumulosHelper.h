@@ -9,6 +9,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Kumulos.h"
+#import "Tag.h"
 
 @protocol KumulosHelperDelegate <NSObject>
 

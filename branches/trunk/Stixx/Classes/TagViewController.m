@@ -255,15 +255,9 @@
 }
 
 -(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
-    if (stixStringID != nil)
+    if (stixStringID != nil) {
         [cameraTag addStix:stixStringID withLocation:location withTransform:transform withPeelable:NO];
-    // backwards compatibility
-    //[tag setAuxScales:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
-    //[tag setAuxRotations:[[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]] autorelease]];
-    //for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
-    //    [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
-    //    [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
-    //}
+    }
     [delegate didCreateNewPix:cameraTag];
     cameraTag = nil;
     needToShowCamera = YES;

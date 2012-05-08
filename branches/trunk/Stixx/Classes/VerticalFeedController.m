@@ -19,6 +19,7 @@
 @synthesize headerViews, headerViewsDidLoadPhoto;
 @synthesize allTags;
 @synthesize allTagsDisplayed;
+@synthesize allTagsPending;
 @synthesize tableController;
 @synthesize lastPageViewed;
 @synthesize commentView;
@@ -134,7 +135,7 @@
     [self setCarouselView:[CarouselView sharedCarouselView]];
     [carouselView setDelegate:self];
     [carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
-    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT];
+    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT+100];
     [carouselView setAllowTap:YES];
     //[carouselView removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
@@ -156,6 +157,10 @@
     //[self configureCarouselView];
 	[super viewDidAppear:animated];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
+  
+    // test spin
+//    StixAnimation * animation = [[StixAnimation alloc] init];
+//    [animation doSpin:logo forTime:10 withCompletion:^(BOOL finished){ }];
 }
 
 #pragma mark -
@@ -212,7 +217,14 @@
 
 -(void)didDropStixByTapOfType:(NSString*)stixStringID {
     // tap inside the feed to add a stix
-    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didTapStix
+    Tag * tag;
+    if (lastPageViewed < [allTagsPending count]) {
+        tag = [allTagsPending objectAtIndex:lastPageViewed];
+    }
+    else
+    {
+        tag = [allTagsDisplayed objectAtIndex:lastPageViewed - [allTagsPending count]]; // lastPageViewed set by didTapStix
+    }
     [self addAuxStixOfType:stixStringID toTag:tag];
 }
 
@@ -250,26 +262,12 @@
     // HACK: will be changed soon if we have an addStix button
     
     // input badge should have frame within the tag's frame
-    //if ([allTags count] == 0) {
     if (tag == nil) {
         // nothing loaded yet
         [carouselView resetBadgeLocations];
         return;
     }
-    //allTags = [self.delegate getTags];
-    //Tag * t = (Tag*) [allTags objectAtIndex:lastPageViewed];   
-    
-    //NSLog(@"Dropped new %@ stix onto tag %d: id %d auxStix %d lastStix %@", stixStringID, lastPageViewed, [t.tagID intValue], [t.auxStixStringIDs count], [t.auxStixStringIDs objectAtIndex:[t.auxStixStringIDs count]-1]);
-    
-    // scale stix frame back to full 300x275 size
-    //VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
-    
-    /*
-     float centerx = badge.center.x - feedItemViewOffset.x; // small mismatch between placement
-    float centery = badge.center.y - feedItemViewOffset.y;
-    CGPoint location = CGPointMake(centerx, centery); 
-    [badge setCenter:location];
-*/
+
     CGPoint location = CGPointMake(160,216);
     auxView = [[AddStixViewController alloc] init];
     
@@ -351,7 +349,11 @@
 /*********** FeedTableView functions *******/
 
 -(int)getHeightForSection:(int)index {
-    Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     //NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
     int feedItemHeight = feedItem.view.frame.size.height;
@@ -380,7 +382,13 @@
 }
 
 -(Tag *) tagAtIndex:(int)index {
-    return [allTagsDisplayed objectAtIndex:index];
+//    return [allTagsDisplayed objectAtIndex:index];
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    return tag;
 }
 
 -(UIView*)viewForItemWithTagID:(NSNumber*)tagID {
@@ -388,14 +396,23 @@
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
+//    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
+    int index = button.tag;
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     NSLog(@"Clicked on user photo %d in feed for user %@", button.tag, tag.username);
     [self shouldDisplayUserPage:tag.username];
 }
 
 -(UIView*)headerForSection:(int)index {
-    //index = index - 1;
-    Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     UIView * headerView = [headerViews objectForKey:tag.tagID];
     if (!headerView) {
         headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
@@ -466,11 +483,15 @@
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     // todo: reloadData only once for a batch of reloadViewForItem - maybe after requesting content from aggregator
-    if (index > [allTagsDisplayed count]-1) {
-        index = [allTagsDisplayed count]-1;
+    if (index > [allTagsDisplayed count]+[allTagsPending count]-1) {
+        index = [allTagsDisplayed count]+[allTagsPending count]-1;
         NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
     }
-    Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
 
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
@@ -481,17 +502,6 @@
     NSString * comment = tag.comment;
     NSString * locationString = tag.locationString;
     
-    // if no longer following but still in feed
-    /*
-    if (![delegate isFollowing:name]) {
-        [feedItem.view setFrame:CGRectMake(0, 0, 320, 0)];
-        [feedItems setObject:feedItem forKey:tag.tagID];
-        [self.tableController.tableView reloadData];
-        [tableController dataSourceDidFinishLoadingNewData];
-        [self stopActivityIndicator];
-        return feedItem.view;
-    }
-     */
     [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
@@ -540,7 +550,14 @@
             //[feedItem populateCommentsWithNames:names andComments:comments andStixStringIDs:stixStringIDs];
         }
     }
-    
+
+    // create overlay for pending feedItem
+    if (index < [allTagsPending count]) {
+        //[feedItem.view setAlpha:.25];
+        [[feedItem stixView] setInteractionAllowed:NO];
+        [feedItem initReloadView];
+    }
+
     // this object must be retained so that the button actions can be used
     [feedItems setObject:feedItem forKey:tag.tagID];
     
@@ -555,7 +572,14 @@
 -(UIView*)viewForItemAtIndex:(int)index
 {	        
     //index = index - 1;
-    Tag * tag = [allTagsDisplayed objectAtIndex:index];
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return nil;
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
     VerticalFeedItemController * feedItem = nil;
     if (tag.tagID)
@@ -603,6 +627,12 @@
                 //[param autorelease]; // arc conversion
                 KumulosHelper * kh = [[KumulosHelper alloc] init];
                 [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+            }
+            // create overlay for pending feedItem
+            if (index < [allTagsPending count]) {
+                //[feedItem.view setAlpha:.25];
+                [[feedItem stixView] setInteractionAllowed:NO];
+                [feedItem initReloadView];
             }
             
             // this object must be retained so that the button actions can be used
@@ -664,6 +694,17 @@
             exists = YES;
         }
     }
+    if (!exists) {
+        for (int i=0; i<[allTagsPending count]; i++) {
+            Tag * t = [allTagsPending objectAtIndex:i];
+            if ([t.tagID intValue] == tagID) {
+                NSLog(@"JumpToPageWithTagID: %d Target row: %d", tagID, i);
+                NSIndexPath * targetIndexPath = [NSIndexPath indexPathForRow:0 inSection:i];
+                [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+                exists = YES;
+            }
+        }
+    }
     return exists;
 }
 
@@ -697,7 +738,7 @@
 
 -(void)updateScrollPagesAtPage:(int)page {
     [self startActivityIndicator];
-    NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTags currently has %d elements", page, [allTagsDisplayed count]);
+    NSLog(@"VerticalFeedController: UpdateScrollPagesAtPage %d: AllTagsDisplayed currently has %d elements", page, [allTagsDisplayed count]);
     if ([self numberOfSections] > 0) {
         if (page < 0 + LAZY_LOAD_BOUNDARY) { // trying to find a more recent tag
             Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:0];
@@ -727,16 +768,11 @@
             NSLog(@"allTags last tag: %d", lastIDNotDisplayed);
             [delegate getOlderTagsThanID:lastIDNotDisplayed];
         }
-        // should not come here!
-        //NSLog(@"Error! allTags was never seeded!");
-        //[self.delegate checkForUpdateTags];
-        //[activityIndicator startCompleteAnimation];
-        //[self startActivityIndicator];
     }
 }
 
 -(void)reloadPage:(int)page {
-    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
+    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed
     int section = page;
     [self populateAllTagsDisplayed];
     //[activityIndicator startCompleteAnimation];
@@ -750,8 +786,20 @@
     [self reloadViewForItemAtIndex:section];
 }
 
+-(void)reloadPageForTagID:(int)tagID {
+//#error Not implemented!
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * tag = [allTagsDisplayed objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            [self reloadPage:i];
+            return;
+        }
+    }
+    [self reloadCurrentPage];
+}
+
 -(void)reloadCurrentPage {
-    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed, assumes updated allTags from the app delegate
+    // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed
     int section = [tableController getCurrentSectionAtPoint:CGPointMake(160, 240)];
     [self populateAllTagsDisplayed];
     //[activityIndicator startCompleteAnimation];
@@ -783,6 +831,17 @@
     [self populateAllTagsDisplayed];
     [self forceReloadWholeTableZOMG];
     NSLog(@"After unfollowing user, there are %d tags on display.", [allTagsDisplayed count]);
+}
+
+-(void)populateAllTagsDisplayedWithTag:(Tag*)tag {
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * t = [allTagsDisplayed objectAtIndex:i];
+        if (t.tagID == tag.tagID) {
+            [allTagsDisplayed replaceObjectAtIndex:i withObject:tag];
+            [self reloadPageForTagID:[tag.tagID intValue]];
+            return;
+        }
+    }
 }
 
 -(void)populateAllTagsDisplayed {
@@ -824,7 +883,10 @@
     // create temporary tag id and timestamps
     tag.tagID = [NSNumber numberWithInt:tempTagID--]; // temp
     tag.timestamp = [NSDate date];
-    [allTagsDisplayed insertObject:tag atIndex:0];
+    //[allTagsDisplayed insertObject:tag atIndex:0];
+    if (!allTagsPending)
+        allTagsPending = [[NSMutableArray alloc] init];
+    [allTagsPending insertObject:tag atIndex:0];
     //[self reloadPage:0];
     [self forceReloadWholeTableZOMG];
 }
@@ -841,11 +903,11 @@
 -(int)itemCount
 {
 	// Return the total number of pages that exist, including unfollowed pages
-	return [self.allTags count];
+	return [allTags count];
 }
 
 -(int)numberOfSections {
-    return [self.allTagsDisplayed count];
+    return [allTagsDisplayed count];
 }
 
 -(void)forceUpdateCommentCount:(int)tagID {
@@ -954,6 +1016,7 @@
             }
         }
     }
+    // todo: implement for offline pending pics?
 }
 
 /*** CommentViewDelegate ***/
@@ -994,20 +1057,27 @@
 
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index {
     // change local tag structure for immediate display
-    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed];
+    //Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed];
+    Tag * tag;
+    if (lastPageViewed < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:lastPageViewed];
+    else
+        tag = [allTagsDisplayed objectAtIndex:(lastPageViewed-[allTagsPending count])];
     if (action == 0) {
         // peel stix
-        [tag removeStixAtIndex:index];
+        //[tag removeStixAtIndex:index];
     }
+    /*
     else if (action == 1) {
         // attach stix
         [[tag auxPeelable] replaceObjectAtIndex:index withObject:[NSNumber numberWithBool:NO]];
         [allTagsDisplayed replaceObjectAtIndex:lastPageViewed withObject:tag];
     }
+     */
     //[self reloadCurrentPage];
     
     // tell app delegate to reload tag before altering internal info
-    [self.delegate didPerformPeelableAction:action forTagWithIndex:lastPageViewed forAuxStix:index];
+    [delegate didPerformPeelableAction:action forTagWithID:[tag.tagID intValue] forAuxStix:index];
 }
 
 -(IBAction)adminStixButtonPressed:(id)sender {
@@ -1220,14 +1290,42 @@
     }
 }
 
--(void)finishedCreateNewPix:(NSNumber*)tagID {
-    // force reload
-    [self populateAllTagsDisplayed];
-    [tableController.tableView reloadData];
+-(void)finishedCreateNewPix:(Tag*)tag withPendingID:(int)pendingID {
+    // remove from pending list
+    for (int i=0; i<[allTagsPending count]; i++) {
+        Tag * pendingTag = [allTagsPending objectAtIndex:i];
+        if ([pendingTag.tagID intValue] == pendingID) {
+            NSLog(@"Founding pending tag in allTagsPending: pendingID %d index %d new record id %d", pendingID, i, [tag.tagID intValue]);
+            
+            // if we added a stix, save stix as comment history
+            // new way to add stix
+            // any stix created in offline mode will still get saved to auxStixStringId and other structures
+            // first time a Pix is added to Kumulos, we call addAuxiliaryStixToPix based on its auxStix structures.
+            // when a Pix is downloaded, we generate auxStix structures from auxiliaryStixes table, not from the saved auxStix in the tag
+            if ([pendingTag.auxStixStringIDs count] > 0) {
+                [delegate pendingTagDidHaveAuxiliaryStix:pendingTag withNewTagID:[tag.tagID intValue]];
+            }            
+
+            [allTagsPending removeObjectAtIndex:i];
+            /*
+            [tag setAuxStixStringIDs:pendingTag.auxStixStringIDs];
+            [tag setAuxLocations:pendingTag.auxLocations];
+            [tag setAuxTransforms:pendingTag.auxTransforms];
+            [tag setAuxPeelable:pendingTag.auxPeelable];
+            [self populateAllTagsDisplayedWithTag:tag];
+             */
+            break;
+        }
+    }
    
-    NSLog(@"FeedController: finished create new pix: sharing ID %d", [tagID intValue]);
+    // force reload
+    //[self populateAllTagsDisplayed];
+    [self reloadPageForTagID:[tag.tagID intValue]];
+    [tableController.tableView reloadData];
+
+    NSLog(@"FeedController: finished create new pix: sharing ID %d", [tag.tagID intValue]);
     [self reloadPage:0];
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     shareFeedItem = feedItem;
     [self didPressShareButtonForFeedItem:feedItem];
 }
@@ -1246,6 +1344,7 @@
 }
 
 -(void)khCallback_checkForUpdatedStix:(NSMutableArray*)returnParams {
+#if 0
     Tag * tag = [returnParams objectAtIndex:0];
     BOOL needUpdate = NO;
     NSDate * timestamp = tag.timestamp;
@@ -1263,6 +1362,12 @@
     } else {
         NSLog(@"Tag %d does not need to update stix", [[tag tagID] intValue]);
     }
+#else
+    Tag * updatingTag = [returnParams objectAtIndex:0];
+    NSMutableArray * auxiliaryStix = [returnParams objectAtIndex:1];
+    [updatingTag populateWithAuxiliaryStix:auxiliaryStix];
+    [self populateAllTagsDisplayedWithTag:updatingTag];
+#endif
 }
 
 -(void)khCallback_updateStixForPix:(NSMutableArray*)returnParams {
@@ -1324,6 +1429,19 @@
             [self reloadPage:i];
         }
     }
+}
+
+-(void)didClickReloadButtonForFeedItem:(VerticalFeedItemController *)feedItem {
+    int tagID = [feedItem tagID];
+    for (int i=0; i<[allTagsPending count]; i++) {
+        Tag * tag = [allTagsPending objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            [delegate didReloadPendingPix:tag];
+            [feedItem initReloadView];
+            return;
+        }
+    }
+    NSLog(@"didClickReloadButton couldn't find feedItem with tag %d", [feedItem tagID]);
 }
 @end
 

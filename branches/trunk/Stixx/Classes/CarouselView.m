@@ -31,7 +31,7 @@ static dispatch_queue_t backgroundQueue;
     allCarouselStixStringIDsAtFrame = [[NSMutableDictionary alloc] initWithCapacity:total];
     allCarouselMissingStixStringIDs = [[NSMutableSet alloc] initWithCapacity:total];
     allCarouselMissingStixStringOpacity = [[NSMutableDictionary alloc] initWithCapacity:total];
-    [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT)];
+    [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT-100)];
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
     //backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL);

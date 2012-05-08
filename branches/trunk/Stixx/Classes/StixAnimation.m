@@ -7,6 +7,7 @@
 //
 
 #import "StixAnimation.h"
+#import "QuartzCore/QuartzCore.h"
 
 @implementation StixAnimation
 
@@ -222,6 +223,62 @@ static int animationID = 1;
                           ];
                      }
      ];
+}
+
+-(void)doSpinHelper:(UIView *)canvas forTime:(float)time atAngle:(float)radians withCompletion:(void (^)(BOOL))_completion {
+    float timeDelta = .05;
+    float radianDelta = M_PI*2*timeDelta;
+    if (time < timeDelta) {
+        CGAffineTransform rot = CGAffineTransformMakeRotation(M_PI*2 * time);
+        [UIView animateWithDuration:time
+                              delay:0
+                            options: UIViewAnimationCurveLinear 
+                         animations: ^ { 
+                             [canvas setTransform:rot];
+                         } 
+                         completion:_completion];
+    }
+    else {
+        CGAffineTransform rot1 = CGAffineTransformMakeRotation(radianDelta + radians);
+        [UIView animateWithDuration:timeDelta
+                              delay:0
+                            options: UIViewAnimationCurveLinear 
+                         animations: ^ { 
+                             [canvas setTransform:rot1];
+                         } 
+                         completion:^(BOOL finished) {
+                             //[self doSpinHelper:canvas forTime:time-.1 atRadius:radians withCompletion:_completion];
+                             [self doSpinHelper:canvas forTime:time-timeDelta atAngle:radians+radianDelta withCompletion:_completion];
+                         }
+         ];
+    }
+}
+-(void)doSpin:(UIView *)canvas forTime:(float)time withCompletion:(void (^)(BOOL))_completion {
+    // same as doFade but with no delegate calls
+    animationID++;
+    // we want a full rotation every second
+    // so the total radians to rotate through for a period of time is
+    // time * 6.28
+#if 1
+    [self doSpinHelper:canvas forTime:time atAngle:0 withCompletion:_completion];
+#else
+    CAKeyframeAnimation *theAnimation = [CAKeyframeAnimation animation];
+    theAnimation.values = [NSArray arrayWithObjects:
+                           [NSValue valueWithCATransform3D:CATransform3DMakeRotation(0, 0,0,1)],
+                           [NSValue valueWithCATransform3D:CATransform3DMakeRotation(3.13, 0,0,1)],
+                           [NSValue valueWithCATransform3D:CATransform3DMakeRotation(6.26, 0,0,1)],
+                           nil];
+    theAnimation.cumulative = YES;
+    theAnimation.duration = time;
+    theAnimation.repeatCount = 0;
+    theAnimation.removedOnCompletion = YES;
+    
+    theAnimation.timingFunctions = [NSArray arrayWithObjects:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn], 
+                                    [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut],
+                                    nil
+                                    ];
+    [canvas.layer addAnimation:theAnimation forKey:@"transform"];
+#endif
 }
 
 /*

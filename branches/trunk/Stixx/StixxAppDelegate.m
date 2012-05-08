@@ -1,3 +1,4 @@
+
 //
 //  StixxAppDelegate.m
 //  Stixx
@@ -958,7 +959,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     // when adding a tag, we add it to both our local tag structure, and to kumulos database
-    //[allTags addObject:newTag];
 
     [self didDismissSecondaryView];
     [tabBarController setSelectedIndex:0];
@@ -977,20 +977,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // this function migrates toward not using the basic stix
     newestTag = newTag;
     
-    [k setDelegate:self];
     NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
     //UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
     
     // this must match Tag.m:getTagFromDictionary
-    NSMutableData *theCoordData;
+    NSMutableData *theCoordData = nil;
+    /*
     NSKeyedArchiver *encoder;
     theCoordData = [NSMutableData data];
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
 	//[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
     [encoder finishEncoding];
+    */
     
     // this must match Tag.m:getTagFromDictionary
-    NSMutableData *theAuxStixData;
+/*
+ NSMutableData *theAuxStixData = nil;
     theAuxStixData = [NSMutableData data];
     encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
 	[encoder encodeObject:newTag.auxLocations forKey:@"auxLocations"];
@@ -1000,9 +1002,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [encoder encodeObject:newTag.auxTransforms forKey:@"auxTransforms"];
     [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
     [encoder finishEncoding];
+*/
     
-    [k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
-            
+    //[k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
+    //[k createNewPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andPendingID:[newTag.tagID intValue]];
+    
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+
     NSString * loc = newTag.locationString;
     //NSLog(@"Location: %@", newTag.locationString);
     if ([loc length] > 0)
@@ -1012,55 +1020,91 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [Appirater userDidSignificantEvent:YES];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createPixDidCompleteWithResult:(NSNumber *)newRecordID {
+-(void)didReloadPendingPix:(Tag *)tag {
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+}
+
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createNewPixDidCompleteWithResult:(NSNumber *)newRecordID {
+-(void)khCallback_didCreateNewPix:(NSArray*)returnParams {
+    NSNumber * newRecordID = [returnParams objectAtIndex:0];
+    [k getNewlyCreatedPixWithAllTagID:[newRecordID intValue]];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewlyCreatedPixDidCompleteWithResult:(NSArray *)theResults {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+    Tag * newTag = [Tag getTagFromDictionary:d];
+    NSNumber * newRecordID = newTag.tagID;
+    NSNumber * pendingID = [d objectForKey:@"pendingID"];
+    NSLog(@"New pix created: id %d pendingID %d", [newRecordID intValue], [pendingID intValue]);
+
     // metrics
     NSString * metricName = @"CreatePix";
     //NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
     [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"" andIntegerValue:[newRecordID intValue]];
     
     // save large image to large image database
-    dispatch_async(backgroundQueue, ^{
+    if (0) {
         UIImage * hiResImg = [[ImageCache sharedImageCache] imageForKey:@"largeImage"];
-        UIImageView * preview = [[UIImageView alloc] initWithImage:hiResImg];
-        CGRect frame = preview.frame;
-        //[preview setBackgroundColor:[UIColor blackColor]];
-        NSLog(@"Frame: %f %f", frame.size.width, frame.size.height);
-        [tabBarController.view addSubview:preview];
         NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
-        [k addHighResImageWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
-    });
-
+        [k addHighResPixWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
+    }
+    /*
     [newestTag setTagID:newRecordID];
     [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
-    //[allTags addObject:newestTag];
-    bool added = [self addTagWithCheck:newestTag withID:[newRecordID intValue]];
+     */
+    [k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
+    
+    bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
     if (added)
     {
         NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
-        [feedController finishedCreateNewPix:newRecordID];
+        [feedController finishedCreateNewPix:newTag withPendingID:[pendingID intValue]];
     }
     else
         NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
-
-    [k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
     
-    // if we added a stix, save stix as comment history
-    NSString * stixStringID = [newestTag.auxStixStringIDs objectAtIndex:0];
-    if (stixStringID != nil) {
-        NSLog(@"New pix has a new stix also: %@", [BadgeView getStixDescriptorForStixStringID:stixStringID]);
-        //[self didAddCommentWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID];
-        [k addCommentToPixWithTagID:[newestTag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID];
-    }
-
     // do not add scale and rotation - all saved in aux stix
     [self updateUserTagTotal];
     
     // check for first time user experience
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
         [self advanceFirstTimeUserMessage];
+    }
+}
+
+-(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID {
+    for (int i=0; i<[pendingTag.auxStixStringIDs count]; i++) {
+        NSString * stixStringID = [pendingTag.auxStixStringIDs objectAtIndex:i];
+        CGPoint location = [[pendingTag.auxLocations objectAtIndex:i] CGPointValue];
+        NSString * transform = [pendingTag.auxTransforms objectAtIndex:i];
+        
+        NSLog(@"New pix has a new stix also: %@", [BadgeView getStixDescriptorForStixStringID:stixStringID]);
+        
+        // add aux stix to auxiliaryStixes table
+        [k addAuxiliaryStixToPixWithTagID:tagID andStixStringID:stixStringID andX:location.x andY:location.y andTransform:transform];
+        
+        // add comment to comment table
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], myUserInfo_username, @"", stixStringID, nil];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+    }
+    
+    // add to current tag
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            [tag setAuxStixStringIDs:pendingTag.auxStixStringIDs];
+            [tag setAuxLocations:pendingTag.auxLocations];
+            [tag setAuxTransforms:pendingTag.auxTransforms];
+            [tag setAuxPeelable:pendingTag.auxPeelable];
+            break;
+        }
     }
 }
 
@@ -1122,13 +1166,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             Tag * tag = [Tag getTagFromDictionary:d]; // MRC
             int new_id = [tag.tagID intValue];
             didAddTag = [self addTagWithCheck:tag withID:new_id];
-            //if (didAddTag)
-            //    [feedController addTagForDisplay:tag];
+            if (didAddTag)
+                [feedController reloadPageForTagID:[tag.tagID intValue]];
+
+            // new system of auxiliary stix: request from auxiliaryStixes table
+            if (1) {
+                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil]; 
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
+            }
         }
-        if (didAddTag)
-            [feedController reloadCurrentPage];
+        //if (didAddTag) {
+            //[feedController reloadCurrentPage]; // should reload page that it is displayed on
+        //}
         [feedController stopActivityIndicator];
     }    
+    
     
     // we get here from handleNotificationBookmarks
     if (isUpdatingNotifiedTag) {
@@ -1151,8 +1204,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         updatingNotifiedTagDoJump = NO;
         isUpdatingNotifiedTag = NO;
     }
+    
     // we get here from didAddStixToPix
     // so that we can add the new aux stix to the correct auxStix structure
+    /*
     if (isUpdatingAuxStix) {
         
         // find the correct tag in allTags;
@@ -1197,7 +1252,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // this can be done by creating an auxStix table where addition of a stix
         // simply adds to that database instead of adding to a data structure that gets
         // loaded to the pix in allTags
-        [tag addStix:stixStringID withLocation:location /*withScale:scale withRotation:rotation */withTransform:transform withPeelable:peelable];
+        [tag addStix:stixStringID withLocation:location withTransform:transform withPeelable:peelable];
+#if 0
         NSMutableData *theAuxStixData = [NSMutableData data];
         NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
         [encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
@@ -1210,6 +1266,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         // update kumulos version of tag with most recent tags
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
+#else
+        [k addAuxiliaryStixToPixWithTagID:[tag.tagID intValue] andStixStringID:stixStringID andX:location.x andY:location.y andTransform:NSStringFromCGAffineTransform(transform)];
+#endif
         // immediately notify
         // if adding to own pix, do not notify or broadcast
         if (![myUserInfo_username isEqualToString:tag.username]) {
@@ -1234,10 +1293,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [feedController reloadCurrentPage];
         
     }
-    
+    */
     // we get here from didPerformPeelableAction
     // so that we can modify the new peelable stix status to the correct tag structure
     // we have to call getTag to download the most recent auxStix
+/*
     if (isUpdatingPeelableStix) {
         
         // find the correct tag in allTags;
@@ -1261,13 +1321,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             if (peeledAuxStixStringID) {
                 NSLog(@"Adding %@ (%@) stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [BadgeView getStixDescriptorForStixStringID:peeledAuxStixStringID], [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
                 
-                // add to comment log - if comment == @"PEEL" then it is a peel action
-                [k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
                 
+                // add to comment log - if comment == @"PEEL" then it is a peel action
+                //[k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
+                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, myUserInfo_username, @"PEEL", peeledAuxStixStringID, nil];
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
             }
-        }
-        else if (updatingPeelableAction == 1) { // attach stix
-            [[tag auxPeelable] replaceObjectAtIndex:updatingPeelableAuxStixIndex withObject:[NSNumber numberWithBool:NO]];
         }
         
         // find index in current tags
@@ -1298,6 +1358,33 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
          // MRC
     }
+    */
+}
+
+-(void)updateTagWithStix:(NSMutableArray *)theResults forTagID:(int)tagID{
+    NSLog(@"Updating aux stix for tag: %d downloaded %d auxStix", tagID, [theResults count]);
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * tag = [allTags objectAtIndex:i];
+        if ([[tag tagID] intValue] == tagID) {
+            [tag populateWithAuxiliaryStix:theResults];
+            [feedController populateAllTagsDisplayedWithTag:tag];
+            return;
+        }
+    }
+}
+
+-(void)khCallback_didGetAuxiliaryStixOfTag:(NSMutableArray *) returnParams {
+    NSNumber * tagID = [returnParams objectAtIndex:0];
+    NSMutableArray * theResults = [returnParams objectAtIndex:1];
+    
+    if ([theResults count] > 0) {
+        NSLog(@"Got auxiliary stix of tag %d with %d stix!", [tagID intValue], [theResults count]);
+        [self updateTagWithStix:theResults forTagID:[tagID intValue]];
+    }
+}
+
+-(void)khCallback_didRemoveAuxiliaryStix:(NSMutableArray *) returnParams {
+    [self khCallback_didGetAuxiliaryStixOfTag:returnParams];
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllTagsWithIDRangeDidCompleteWithResult:(NSArray *)theResults
@@ -1426,8 +1513,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             if (tag) {
                 NSLog(@"Older tag with id %d already exists in allTags structure", tagID);
                 //bool didAddTag = [self addTagWithCheck:tag withID:tagID];
-                //if (didAddTag)
-                //    [feedController addTagForDisplay:tag];
             }
             else {
                 int tID = [[oldTagsToGet objectAtIndex:i] intValue];
@@ -1526,15 +1611,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-#if 1
+
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
-    //[[KumulosHelper sharedKumulosHelper] execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
     NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
-#else
-    [k addCommentToPixWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
-#endif
+
     if (![comment isEqualToString:@""]) {
         // actual comment
 
@@ -2318,15 +2400,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:0];
     }
 
-    
-    /*
-    if ([self getStixCount:stixStringID] == 0) {
-        // ran out of a nonpermanent stix
-        [feedController.carouselView carouselTabDismissRemoveStix];
-        [tagViewController.descriptorController.carouselView carouselTabDismissRemoveStix];
-    }
-     */
-    
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
     updatingAuxStixStringID = stixStringID;
@@ -2335,25 +2408,54 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //updatingAuxRotation = rotation;
     updatingAuxTransform = transform;
 
+#if 0
     isUpdatingAuxStix = YES;
-    [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
+#else
+    [k addAuxiliaryStixToPixWithTagID:[tag.tagID intValue] andStixStringID:stixStringID andX:location.x andY:location.y andTransform:NSStringFromCGAffineTransform(transform)];
+#endif
+    
+    //[k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
     
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
         [self advanceFirstTimeUserMessage];
     }
 }
 
--(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index {
+-(void)didPerformPeelableAction:(int)action forTagWithID:(int)tagID forAuxStix:(int)index {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    Tag * tag = [allTags objectAtIndex:tagIndex];
+    if (tagID < 0)
+        return;
+    Tag * tag = nil;
+    for (int i=0; i<[allTags count]; i++) {
+        tag = [allTags objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID)
+            break;
+    }
+    if (tag==nil)
+        return;
+#if 0
     isUpdatingPeelableStix = YES;
     updatingPeelableAction = action;
     updatingPeelableTagID = [tag.tagID intValue];
     updatingPeelableAuxStixIndex = index;
 
     [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
+#else
+    CGPoint peeledLocation = [tag getLocationOfRemoveStixAtIndex:updatingPeelableAuxStixIndex];
+    NSString * peeledAuxStixStringID = [[tag removeStixAtIndex:updatingPeelableAuxStixIndex] copy];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, myUserInfo_username, @"PEEL", peeledAuxStixStringID, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+
+    [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID orGiftStix:nil];
+    
+    NSMutableArray * params2 = [[NSMutableArray alloc] initWithObjects:tag.tagID, peeledAuxStixStringID, [NSValue valueWithCGPoint:peeledLocation], nil]; 
+    KumulosHelper * kh2 = [[KumulosHelper alloc] init];
+    [kh2 execute:@"removeAuxiliaryStix" withParams:params2 withCallback:@selector(khCallback_didRemoveAuxiliaryStix:) withDelegate:self];
+    
+#endif
 }
 
 // not used

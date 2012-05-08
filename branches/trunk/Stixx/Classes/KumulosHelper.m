@@ -93,12 +93,32 @@ static KumulosHelper *sharedKumulosHelper = nil;
         void * tag = [inputParams objectAtIndex:0];
         NSNumber * tagID = [inputParams objectAtIndex:1];
         [savedInfo setObject:tag forKey:@"tag"];
-        [k getAllHistoryWithTagID:[tagID intValue]];
+        //[k getAllHistoryWithTagID:[tagID intValue]];
+        [k getAllAuxiliaryStixWithTagID:[tagID intValue]];
     }
     else if ([function isEqualToString:@"updateStixForPix"]) {
         NSNumber * tagID = [inputParams objectAtIndex:0];
         [savedInfo setObject:tagID forKey:@"tagID"];
         [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+    }
+    else if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
+        NSNumber * tagID = [inputParams objectAtIndex:0];
+        [savedInfo setObject:tagID forKey:@"tagID"];
+        [k getAllAuxiliaryStixWithTagID:[tagID intValue]];
+    }
+    else if ([function isEqualToString:@"removeAuxiliaryStix"]) {
+        NSNumber * tagID = [inputParams objectAtIndex:0];
+        NSString * stixStringID = [inputParams objectAtIndex:1];
+        CGPoint location = [[inputParams objectAtIndex:2] CGPointValue];
+        [savedInfo setObject:tagID forKey:@"tagID"];
+        [k removeAuxiliaryStixFromPixWithTagID:[tagID intValue] andStixStringID:stixStringID andX:location.x andY:location.y];
+    }
+    else if ([function isEqualToString:@"createNewPix"]) {
+        Tag * newTag = [inputParams objectAtIndex:0];
+        NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
+        KSAPIOperation * kOP = [k createNewPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:nil andPendingID:[newTag.tagID intValue]];
+        //[kOP setDelegate:self];
+        //[kOP setDebugMode:YES];
     }
 }
 
@@ -106,10 +126,46 @@ static KumulosHelper *sharedKumulosHelper = nil;
     [self execute:_function withParams:nil withCallback:nil withDelegate:nil];
 }
 
+-(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createNewPixDidCompleteWithResult:(NSNumber *)newRecordID {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
+    if (self.delegate)
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    [returnParams autorelease];
+    [self cleanup];
+}
+
 - (void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation savePixDidCompleteWithResult:(NSNumber *)newRecordID {
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
     if (self.delegate)
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    [returnParams autorelease];
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllAuxiliaryStixDidCompleteWithResult:(NSArray *)theResults {
+    if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:[savedInfo objectForKey:@"tagID"], theResults, nil];         
+        [delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
+        [returnParams autorelease];
+    }
+    else if ([function isEqualToString:@"checkForUpdatedStix"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] init];
+        Tag * tag = [savedInfo objectForKey:@"tag"];
+        [returnParams addObject:[savedInfo objectForKey:@"tag"]];
+        [returnParams addObject:theResults];
+        if (self.delegate) {
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+        }
+        [returnParams autorelease];
+    }
+
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation removeAuxiliaryStixFromPixDidCompleteWithResult:(NSArray *)theResults {
+    // also returns the remaining stix
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:[savedInfo objectForKey:@"tagID"], theResults, nil];         
+    [delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
     [returnParams autorelease];
     [self cleanup];
 }
@@ -247,6 +303,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         }
         [returnParams autorelease];
     }
+    /*
     else if ([function isEqualToString:@"checkForUpdatedStix"]) {
         NSMutableArray * returnParams = [[NSMutableArray alloc] init];
         [returnParams addObject:[savedInfo objectForKey:@"tag"]];
@@ -256,6 +313,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         }
         [returnParams autorelease];
     }
+     */
     [self cleanup];
 }
 
@@ -300,7 +358,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"getAllUsersForUpdatePhotos"]) {
         [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
     }
-    [self cleanup];
+    else if ([function isEqualToString:@"createNewPix"]) {
+        // NOT coming here so we create some other timeout
+    }
 }
 
 -(void)cleanup {

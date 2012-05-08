@@ -96,6 +96,9 @@
 		9E71ACB4153768DD00A5CB1B /* txt_meme.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E71ACB2153768DD00A5CB1B /* txt_meme.png */; };
 		9E71ACB61537696D00A5CB1B /* bux_price.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E71ACB51537696D00A5CB1B /* bux_price.png */; };
 		9E71ACB8153779FF00A5CB1B /* graphic_emptypic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E71ACB7153779FF00A5CB1B /* graphic_emptypic.png */; };
+		9E726BE415550C7A006E2F60 /* graphic_retry.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E726BE115550C7A006E2F60 /* graphic_retry.png */; };
+		9E726BE515550C7A006E2F60 /* txt_retry.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E726BE215550C7A006E2F60 /* txt_retry.png */; };
+		9E726BE615550C7A006E2F60 /* txt_uploadfailed.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E726BE315550C7A006E2F60 /* txt_uploadfailed.png */; };
 		9E75E73F14E6EA1B0017DC3D /* AlertPrompt.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E75E73E14E6EA1A0017DC3D /* AlertPrompt.m */; };
 		9E75E74114E721D90017DC3D /* check.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E75E74014E721D90017DC3D /* check.png */; };
 		9E75E74314E721F80017DC3D /* graphic_bux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E75E74214E721F80017DC3D /* graphic_bux.png */; };
@@ -159,8 +162,6 @@
 		9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D21524DD8500BEA5D1 /* btn_mypix.png */; };
 		9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */; };
 		9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */; };
-		9E9C5DFD151BF0640048CDED /* Kumulos.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9C5DFA151BF0640048CDED /* Kumulos.m */; };
-		9E9C5DFE151BF0640048CDED /* libKumulos_iOS_.0.7.4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9C5DFB151BF0640048CDED /* libKumulos_iOS_.0.7.4.a */; };
 		9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9C5E00151CCBF90048CDED /* FacebookLoginController.m */; };
 		9E9C5E03151CCBF90048CDED /* FacebookLoginController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9C5E01151CCBF90048CDED /* FacebookLoginController.xib */; };
 		9E9C5E05151CCCDA0048CDED /* fb_login.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9C5E04151CCCDA0048CDED /* fb_login.png */; };
@@ -195,6 +196,8 @@
 		9EB0322D142C01340019F2BD /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB03212142C01340019F2BD /* splash.png */; };
 		9EB03242142C015A0019F2BD /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB03241142C015A0019F2BD /* CoreLocation.framework */; };
 		9EB03244142C01640019F2BD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB03243142C01640019F2BD /* QuartzCore.framework */; };
+		9EB0D10315548F5B00EDB7BC /* Kumulos.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB0D10015548F5B00EDB7BC /* Kumulos.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9EB0D10415548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB0D10115548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a */; };
 		9EB5F680148AA7C000F403D1 /* graphic_nopic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */; };
 		9EB8B50514464D5C0066ADB2 /* nav_bar.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB8B50414464D5C0066ADB2 /* nav_bar.png */; };
 		9EC4337B14392C3B002D095B /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EC4337A14392C3B002D095B /* logo.png */; };
@@ -406,6 +409,9 @@
 		9E71ACB2153768DD00A5CB1B /* txt_meme.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_meme.png; sourceTree = "<group>"; };
 		9E71ACB51537696D00A5CB1B /* bux_price.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bux_price.png; sourceTree = "<group>"; };
 		9E71ACB7153779FF00A5CB1B /* graphic_emptypic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_emptypic.png; sourceTree = "<group>"; };
+		9E726BE115550C7A006E2F60 /* graphic_retry.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_retry.png; sourceTree = "<group>"; };
+		9E726BE215550C7A006E2F60 /* txt_retry.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_retry.png; sourceTree = "<group>"; };
+		9E726BE315550C7A006E2F60 /* txt_uploadfailed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_uploadfailed.png; sourceTree = "<group>"; };
 		9E75E73D14E6EA190017DC3D /* AlertPrompt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlertPrompt.h; path = ../AlertPrompt.h; sourceTree = "<group>"; };
 		9E75E73E14E6EA1A0017DC3D /* AlertPrompt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AlertPrompt.m; path = ../AlertPrompt.m; sourceTree = "<group>"; };
 		9E75E74014E721D90017DC3D /* check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = check.png; sourceTree = "<group>"; };
@@ -516,10 +522,6 @@
 		9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserGalleryController.h; sourceTree = "<group>"; };
 		9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserGalleryController.m; sourceTree = "<group>"; };
 		9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserGalleryController.xib; sourceTree = "<group>"; };
-		9E9C5DF9151BF0640048CDED /* Kumulos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Kumulos.h; sourceTree = "<group>"; };
-		9E9C5DFA151BF0640048CDED /* Kumulos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Kumulos.m; sourceTree = "<group>"; };
-		9E9C5DFB151BF0640048CDED /* libKumulos_iOS_.0.7.4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libKumulos_iOS_.0.7.4.a; sourceTree = "<group>"; };
-		9E9C5DFC151BF0640048CDED /* libKumulos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libKumulos.h; sourceTree = "<group>"; };
 		9E9C5DFF151CCBF90048CDED /* FacebookLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookLoginController.h; sourceTree = "<group>"; };
 		9E9C5E00151CCBF90048CDED /* FacebookLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookLoginController.m; sourceTree = "<group>"; };
 		9E9C5E01151CCBF90048CDED /* FacebookLoginController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FacebookLoginController.xib; sourceTree = "<group>"; };
@@ -567,6 +569,10 @@
 		9EB03212142C01340019F2BD /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = splash.png; sourceTree = "<group>"; };
 		9EB03241142C015A0019F2BD /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		9EB03243142C01640019F2BD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		9EB0D0FF15548F5B00EDB7BC /* Kumulos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Kumulos.h; sourceTree = "<group>"; };
+		9EB0D10015548F5B00EDB7BC /* Kumulos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Kumulos.m; sourceTree = "<group>"; };
+		9EB0D10115548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libKumulos_iOS_.0.7.4.a; sourceTree = "<group>"; };
+		9EB0D10215548F5B00EDB7BC /* libKumulos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libKumulos.h; sourceTree = "<group>"; };
 		9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_nopic.png; sourceTree = "<group>"; };
 		9EB8B50414464D5C0066ADB2 /* nav_bar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = nav_bar.png; sourceTree = "<group>"; };
 		9EC4337A14392C3B002D095B /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
@@ -688,8 +694,8 @@
 				9E88A499148A8EB400E67864 /* libxml2.2.7.3.dylib in Frameworks */,
 				9ECB659414DDD5770067F3F3 /* MapKit.framework in Frameworks */,
 				9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */,
-				9E9C5DFE151BF0640048CDED /* libKumulos_iOS_.0.7.4.a in Frameworks */,
 				9E17AE051543780100F9E5F8 /* Crashlytics.framework in Frameworks */,
+				9EB0D10415548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -954,10 +960,10 @@
 		9EA17D3A143BFF8700CD710C /* stixxBindings */ = {
 			isa = PBXGroup;
 			children = (
-				9E9C5DF9151BF0640048CDED /* Kumulos.h */,
-				9E9C5DFA151BF0640048CDED /* Kumulos.m */,
-				9E9C5DFB151BF0640048CDED /* libKumulos_iOS_.0.7.4.a */,
-				9E9C5DFC151BF0640048CDED /* libKumulos.h */,
+				9EB0D0FF15548F5B00EDB7BC /* Kumulos.h */,
+				9EB0D10015548F5B00EDB7BC /* Kumulos.m */,
+				9EB0D10115548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a */,
+				9EB0D10215548F5B00EDB7BC /* libKumulos.h */,
 			);
 			name = stixxBindings;
 			path = Classes/stixxBindings;
@@ -1185,6 +1191,9 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9E726BE115550C7A006E2F60 /* graphic_retry.png */,
+				9E726BE215550C7A006E2F60 /* txt_retry.png */,
+				9E726BE315550C7A006E2F60 /* txt_uploadfailed.png */,
 				9E11B9D1154210880021A940 /* overlay.png */,
 				9EE95A55153F39E000A82CDE /* btn_about.png */,
 				9EDE3FBA153A5E88005DC12E /* loading_01.png */,
@@ -1543,6 +1552,9 @@
 				9E5EFBA71549D929003277E7 /* featureCheck.php in Resources */,
 				9E5EFBA81549D929003277E7 /* requestAccess.php in Resources */,
 				9E5EFBA91549D929003277E7 /* verifyProduct.php in Resources */,
+				9E726BE415550C7A006E2F60 /* graphic_retry.png in Resources */,
+				9E726BE515550C7A006E2F60 /* txt_retry.png in Resources */,
+				9E726BE615550C7A006E2F60 /* txt_uploadfailed.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1672,7 +1684,6 @@
 				9EC914F0151BC193005415E2 /* FBLoginDialog.m in Sources */,
 				9EC914F1151BC193005415E2 /* FBRequest.m in Sources */,
 				9EC91501151BC526005415E2 /* FacebookHelper.m in Sources */,
-				9E9C5DFD151BF0640048CDED /* Kumulos.m in Sources */,
 				9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */,
 				9E2390AD1522D22B0060D0AE /* FriendSearchResultsController.m in Sources */,
 				9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */,
@@ -1695,6 +1706,7 @@
 				9E5EFBA01549D929003277E7 /* MKSKSubscriptionProduct.m in Sources */,
 				9E5EFBA21549D929003277E7 /* MKStoreManager.m in Sources */,
 				9E5EFBA31549D929003277E7 /* MKStoreObserver.m in Sources */,
+				9EB0D10315548F5B00EDB7BC /* Kumulos.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1810,7 +1822,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Bobby Ren";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -1838,7 +1850,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "D4EC17B5-CCC0-43A1-92BD-29AABA30EE99";
+				PROVISIONING_PROFILE = "2DB7BFC4-D96D-428B-B423-18E199CAD4EF";
 				SEPARATE_STRIP = YES;
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
@@ -1852,7 +1864,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Bobby Ren";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bobby Ren (UQA7D88UV9)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -1881,7 +1893,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "D4EC17B5-CCC0-43A1-92BD-29AABA30EE99";
+				PROVISIONING_PROFILE = "2DB7BFC4-D96D-428B-B423-18E199CAD4EF";
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"";
 				VALID_ARCHS = "armv6 armv7";

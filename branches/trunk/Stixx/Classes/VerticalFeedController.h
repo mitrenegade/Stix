@@ -46,7 +46,7 @@
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
 
--(void)didPerformPeelableAction:(int)action forTagWithIndex:(int)tagIndex forAuxStix:(int)index;
+-(void)didPerformPeelableAction:(int)action forTagWithID:(int)tagID forAuxStix:(int)index;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didDismissSecondaryView;
 
@@ -84,9 +84,17 @@
 -(BOOL)isShowingBuxInstructions;
 
 -(void)getFirstTags; // called if no tags exist
+
+-(void)didReloadPendingPix:(Tag*)tag;
+-(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
+
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
+    
+    NSMutableArray * allTags;
+    NSMutableArray * allTagsPending;
+    NSMutableArray * allTagsDisplayed;
     
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
@@ -149,6 +157,7 @@
 @property (nonatomic) NSMutableDictionary * headerViewsDidLoadPhoto;
 @property (nonatomic) NSMutableArray *allTags;
 @property (nonatomic) NSMutableArray *allTagsDisplayed;
+@property (nonatomic) NSMutableArray * allTagsPending;
 @property (nonatomic) FeedTableController *tableController;
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedDelegate> * delegate;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
@@ -170,11 +179,13 @@
 @property (nonatomic) IBOutlet UIImageView * logo;
 
 -(void)populateAllTagsDisplayed;
+-(void)populateAllTagsDisplayedWithTag:(Tag*)tag;
 -(void)addTagForDisplay:(Tag*)tag;
 -(void)forceUpdateCommentCount:(int)tagID;
 -(void)configureCarouselView;
 -(void)reloadCurrentPage;
 -(void)reloadPage:(int)page;
+-(void)reloadPageForTagID:(int)tagID;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickJumpButton:(id)sender;
 -(BOOL)jumpToPageWithTagID:(int)tagID;
@@ -193,7 +204,7 @@
 -(void)shouldDisplayUserPage:(NSString*)galleryUsername;
 -(void)forceReloadWholeTableZOMG;
 -(void)didCloseShareSheet;
--(void)finishedCreateNewPix:(NSNumber*)tagID;
+-(void)finishedCreateNewPix:(Tag*)tag withPendingID:(int)pendingID;
 -(void)checkForUpdatedStix;
 -(void)updateFeedTimestamps;
 @end

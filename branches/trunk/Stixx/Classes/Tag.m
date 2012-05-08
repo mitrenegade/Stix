@@ -14,7 +14,7 @@
 @synthesize comment;
 @synthesize descriptor;
 @synthesize locationString;
-@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable, auxTransforms;
+@synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable, auxTransforms, auxIDs;
 //@synthesize badge_x, badge_y, badgeCount;
 //@synthesize stixStringID;
 //@synthesize stixScale, stixRotation;
@@ -35,24 +35,9 @@
     //NSLog(@"Added username %@ and comment %@ to tag", newUsername, newComment);
 }
 
-//- (void)addARCoordinate:(ARCoordinate*)newARCoordinate {
-    //[self setCoordinate:newARCoordinate];
-    //NSLog(@"Added coordinate %@ to tag", newARCoordinate);
-//}
-
 - (void) addImage:(UIImage*)newImage {
     [self setImage:newImage]; // MRC: setter should call retain automatically
 }
-
-/*
--(void)addMainStixOfType:(NSString*)stringID andCount:(int)count atLocationX:(int)x andLocationY:(int)y{
-    badge_x = x;
-    badge_y = y;
-    badgeCount = count;
-    stixStringID = [stringID copy];
-    NSLog(@"Added badge at %d %d to tag", x, y);
-}
-*/
 
 -(void)addStix:(NSString*)newStixStringID withLocation:(CGPoint)newLocation /*withScale:(float)newScale withRotation:(float)newRotation */withTransform:(CGAffineTransform)transform withPeelable:(bool)newPeelable {
     // called by StixAppDelegate multiple places - makes a decision whether
@@ -61,35 +46,53 @@
     if (auxStixStringIDs == nil) {
         auxStixStringIDs = [[NSMutableArray alloc] init];
         auxLocations = [[NSMutableArray alloc] init];
-        //auxScales = [[NSMutableArray alloc] init];
-        //auxRotations = [[NSMutableArray alloc] init];
         auxPeelable = [[NSMutableArray alloc] init];
         auxTransforms = [[NSMutableArray alloc] init];
+        auxIDs = [[NSMutableArray alloc] init];
     }
-    //if adding a gift stix, or adding fire or ice to a gift stix, add to the auxStix
-    // array for the tag
-    //[self addAuxiliaryStixOfType:newStixStringID withLocation:newLocation withScale:newScale withRotation:newRotation withPeelable:newPeelable];
     
     [auxStixStringIDs addObject:newStixStringID];
     [auxLocations addObject:[NSValue valueWithCGPoint:newLocation]];
-    //[auxScales addObject:[NSNumber numberWithFloat:newScale]];
-    //[auxRotations addObject:[NSNumber numberWithFloat:newRotation]];
     [auxPeelable addObject:[NSNumber numberWithBool:newPeelable]];
     [auxTransforms addObject:NSStringFromCGAffineTransform(transform)];
 }
 
+-(CGPoint)getLocationOfRemoveStixAtIndex:(int)index {
+    if (index < [auxStixStringIDs count]) {
+        CGPoint location = [[auxLocations objectAtIndex:index] CGPointValue];
+        return location;
+    }
+    return CGPointMake(-1, -1);
+}
 -(NSString*)removeStixAtIndex:(int)index {
     if (index < [auxStixStringIDs count]) {
         NSString * auxStringID = [[auxStixStringIDs objectAtIndex:index] copy];
         [auxStixStringIDs removeObjectAtIndex:index];
         [auxLocations removeObjectAtIndex:index];
-        //[auxScales removeObjectAtIndex:index];
-        //[auxRotations removeObjectAtIndex:index];
         [auxTransforms removeObjectAtIndex:index];
         [auxPeelable removeObjectAtIndex:index];
         return auxStringID; // MRC
     }
     return nil;
+}
+
+-(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults {
+    NSLog(@"Populating tag with %d aux stix", [theResults count]);
+//#error Not implemented!
+    [auxStixStringIDs removeAllObjects];
+    [auxLocations removeAllObjects];
+    [auxTransforms removeAllObjects];
+    [auxPeelable removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * newStixStringID = [d objectForKey:@"stixStringID"];
+        float x = [[d objectForKey:@"x"] floatValue];
+        float y = [[d objectForKey:@"y"] floatValue];
+        NSString * transform = [d objectForKey:@"transform"];
+        [auxStixStringIDs addObject:newStixStringID];
+        [auxLocations addObject:[NSValue valueWithCGPoint:CGPointMake(x, y)]];
+        [auxPeelable addObject:[NSNumber numberWithBool:NO]];
+        [auxTransforms addObject:transform];
+    }
 }
 
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
@@ -117,21 +120,25 @@
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
     [tag setAuxStixStringIDs:[decoder decodeObjectForKey:@"auxStixStringIDs"]];
     [tag setAuxLocations:[decoder decodeObjectForKey:@"auxLocations"] ];
-    //tag.auxScales = [decoder decodeObjectForKey:@"auxScales"];
-    //tag.auxRotations = [decoder decodeObjectForKey:@"auxRotations"];
     [tag setAuxTransforms:[decoder decodeObjectForKey:@"auxTransforms"]];
     [tag setAuxPeelable:[decoder decodeObjectForKey:@"auxPeelable"]];
     [decoder finishDecoding];
     
-    // backwards compatibility
-    [tag setAuxScales:[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]]]; // MRC
-    [tag setAuxRotations:[[NSMutableArray alloc] initWithCapacity:[tag.auxStixStringIDs count]]];
-    for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
-        [tag.auxScales addObject:[NSNumber numberWithFloat:1]];
-        [tag.auxRotations addObject:[NSNumber numberWithFloat:0]];
+    if (tag.auxStixStringIDs == nil) {
+        [tag setAuxStixStringIDs:[[NSMutableArray alloc] init]];
     }
-    
-    // backwards compatibility
+    if (tag.auxLocations == nil) {
+        [tag setAuxLocations:[[NSMutableArray alloc] init]];
+        for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+            [tag.auxLocations addObject:[NSValue valueWithCGPoint:CGPointMake(0, 0)]];
+        }
+    }
+    if (tag.auxPeelable == nil) {
+        [tag setAuxPeelable:[[NSMutableArray alloc] init]];
+        for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
+            [tag.auxLocations addObject:[NSNumber numberWithBool:NO]];
+        }
+    }
     if (tag.auxTransforms == nil) {
         [tag setAuxTransforms:[[NSMutableArray alloc] init]]; // MRC
         for (int i=0; i<[tag.auxStixStringIDs count]; i++) {
@@ -140,8 +147,6 @@
         }
     }
 
-    //tag.stixScale = stixScale; // no more main stix
-    //tag.stixRotation = stixRotation;
     tag.tagID = [d valueForKey:@"allTagID"];
     NSDate * timeCreated = [d valueForKey:@"timeCreated"];
     NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];

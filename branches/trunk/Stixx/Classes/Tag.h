@@ -50,6 +50,7 @@
     NSMutableArray * auxRotations; // deprecated
     NSMutableArray * auxPeelable;
     NSMutableArray * auxTransforms; // rotation and scale combined
+    NSMutableArray * auxIDs; // id in table auxiliaryStixes
     
     // data blob saved by Kumulos
     //ARCoordinate * coordinate;
@@ -71,6 +72,8 @@
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
+-(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults;
+-(CGPoint)getLocationOfRemoveStixAtIndex:(int)index;
 
 @property (nonatomic) NSString * username;
 @property (nonatomic) NSString * descriptor;
@@ -96,4 +99,5 @@
 @property (nonatomic) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
 @property (nonatomic) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
 @property (nonatomic) NSMutableArray * auxTransforms;
+@property (nonatomic) NSMutableArray * auxIDs;
 @end

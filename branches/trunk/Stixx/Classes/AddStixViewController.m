@@ -235,14 +235,14 @@
     //stix.frame = badgeFrame;
     //[stix setCenter:CGPointMake(centerx, centery)];
     NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
-	[self.delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text]];
-    [self.delegate didAddStixWithStixStringID:[stixView selectStixStringID] withLocation:CGPointMake(centerx, centery) withTransform:stixTransform];
+	[delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text]];
+    [delegate didAddStixWithStixStringID:[stixView selectStixStringID] withLocation:CGPointMake(centerx, centery) withTransform:stixTransform];
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
 {
     didAddStixToStixView = NO;
-	[self.delegate didCancelAddStix];
+	[delegate didCancelAddStix];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
@@ -313,7 +313,7 @@
     // reserves the carousel for self
     [self setCarouselView:[CarouselView sharedCarouselView]];
     carouselView.delegate = self;
-    [carouselView setExpandedTabY:5-20]; // hack: a bit lower
+    [carouselView setExpandedTabY:5-20+100]; // hack: a bit lower
     [carouselView setDismissedTabY:375-20];
     [carouselView setAllowTap:YES];
 //    [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];

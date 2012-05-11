@@ -361,6 +361,10 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"createNewPix"]) {
         // NOT coming here so we create some other timeout
     }
+    else if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
+        // if this happens while we are trying to load galleries, we need 
+        // to decrement pendingContentCount
+    }
 }
 
 -(void)cleanup {

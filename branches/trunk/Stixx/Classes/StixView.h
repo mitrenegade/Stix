@@ -63,7 +63,8 @@
     //NSMutableArray * auxScales; // needed for touch test
     NSMutableArray * auxPeelableByUser;
     
-    int stixPeelSelected;
+    NSString * stixPeelSelected;
+    CGPoint stixPeelSelectedCenter;
     
     bool showTransformCanvas;
     UIView * transformCanvas;
@@ -79,6 +80,8 @@
     // if at any point we've satisfied all stixStringIDs, repopulate this view
     NSMutableDictionary * stixViewsMissing;
     BOOL isShowingPlaceholder;
+    
+    BOOL isStillPeeling;
 }
 
 @property (nonatomic) UIImageView * stix;
@@ -103,7 +106,7 @@
 -(void)updateStixForManipulation:(NSString*)stixStringID;
 -(bool)isStixPeelable:(int)index;
 -(bool)isForeground:(CGPoint)point inStix:(UIImageView*)selectedStix;
--(void)doPeelAnimationForStix:(int)index;
+-(void)doPeelAnimationForStix;
 
 -(int)findPeelableStixAtLocation:(CGPoint)location;
 -(void)transformBoxShowAtFrame:(CGRect)frame;

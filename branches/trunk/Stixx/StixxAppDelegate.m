@@ -72,7 +72,7 @@ static dispatch_queue_t backgroundQueue;
     NSLog(@"Function: %s", __func__);
 #endif  
     versionStringStable = @"1.0";
-    versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]; //@"0.7.7.4";
+    versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]; //@"0.7.7.4";
     
     metricLogonTime = nil;
     backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.bgQueue", NULL);
@@ -1042,6 +1042,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSNumber * newRecordID = newTag.tagID;
     NSNumber * pendingID = [d objectForKey:@"pendingID"];
     NSLog(@"New pix created: id %d pendingID %d", [newRecordID intValue], [pendingID intValue]);
+    
+    // touch tag to indicate it was updated
+    // force timeUpdated to exist - if there's no stix this will be 0 otherwise
+    [k touchPixToUpdateWithAllTagID:[newTag.tagID intValue]];
 
     // metrics
     NSString * metricName = @"CreatePix";
@@ -1629,6 +1633,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
         }
         [self updateUserTagTotal];
+        
         // don't updateCommentCount;
         // touch tag to indicate it was updated
         [k touchPixToUpdateWithAllTagID:tagID];
@@ -2366,6 +2371,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [feedController configureCarouselView];
     [feedController.carouselView carouselTabDismiss:YES];
     
+    // touch tag to indicate it was updated
+    [k touchPixToUpdateWithAllTagID:[tag.tagID intValue]];
+    
     // first update existing tag and display to user for immediate viewing
     // only uses these if not fire/ice 
     float peelable = YES;
@@ -2435,16 +2443,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     if (tag==nil)
         return;
+
+    updatingPeelableAuxStixIndex = index;
 #if 0
     isUpdatingPeelableStix = YES;
     updatingPeelableAction = action;
     updatingPeelableTagID = [tag.tagID intValue];
-    updatingPeelableAuxStixIndex = index;
 
     [k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
 #else
     CGPoint peeledLocation = [tag getLocationOfRemoveStixAtIndex:updatingPeelableAuxStixIndex];
-    NSString * peeledAuxStixStringID = [[tag removeStixAtIndex:updatingPeelableAuxStixIndex] copy];
+
+    // do not call removeStixAtIndex - instead, allow tag to update all stix together
+    //NSString * peeledAuxStixStringID = [[tag removeStixAtIndex:updatingPeelableAuxStixIndex] copy];
+    NSString * peeledAuxStixStringID = [[tag.auxStixStringIDs objectAtIndex:updatingPeelableAuxStixIndex] copy];
+    
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, myUserInfo_username, @"PEEL", peeledAuxStixStringID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
@@ -3301,18 +3314,35 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         }
     }
     else {
+        BOOL doUpdateTag = YES;
         if (notificationBookmarkType == NB_PEELACTION) {
             // either sent globally, or a peel action - does not require jump
             updatingNotifiedTagDoJump = NO;
+            
+            // if peel was on own stix, do not download it again
+            Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:notificationTagID]];
+            if (tag == nil) {
+                // if tag is not in feed, ignore notification
+                doUpdateTag = NO;
+            }
+            else { 
+                if ([tag.username isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]]) {
+                    // if tag belongs to self, do not update it
+                    doUpdateTag = NO;
+                }
+            }
         } else if (![notificationTargetChannel isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]]) {
-        // either sent globally, or a peel action - does not require jump
-            updatingNotifiedTagDoJump = NO;
+            // notification to target that is not the current user
+            updatingNotifiedTagDoJump = NO; // does it ever go here?
+            doUpdateTag = NO;
         }
         else {
             updatingNotifiedTagDoJump = doJump;
+            doUpdateTag = YES;
         }
         isUpdatingNotifiedTag = YES;
-        [k getAllTagsWithIDRangeWithId_min:notificationTagID-1 andId_max:notificationTagID+1];
+        if (doUpdateTag)
+            [k getAllTagsWithIDRangeWithId_min:notificationTagID-1 andId_max:notificationTagID+1];
     }
 }
 

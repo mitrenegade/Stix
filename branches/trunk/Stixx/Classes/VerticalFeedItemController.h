@@ -105,6 +105,7 @@
     UIImageView * reloadMessage;
     UIImageView * reloadMessage2;
     UIButton * reloadButton;
+    BOOL tapStartsReloading;
 }
 @property ( nonatomic) IBOutlet UILabel * labelName;
 @property ( nonatomic) IBOutlet UILabel * labelComment;

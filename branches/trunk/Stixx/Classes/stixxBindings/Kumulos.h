@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on May  5, 2012
+//  Created by Kumulos Bindings Compiler on May  8, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -64,6 +64,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixByTimeDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixByUpdateTimeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixCountDidCompleteWithResult:(NSNumber*)aggregateResult;
  
@@ -258,6 +260,9 @@
     
    
 -(KSAPIOperation*) getUserPixByTimeWithUsername:(NSString*)username andLastUpdated:(NSDate*)lastUpdated andNumRequested:(NSNumber*)numRequested;
+    
+   
+-(KSAPIOperation*) getUserPixByUpdateTimeWithUsername:(NSString*)username andTimeUpdated:(NSDate*)timeUpdated andNumRequested:(NSNumber*)numRequested;
     
    
 -(KSAPIOperation*) getUserPixCountWithUsername:(NSString*)username;

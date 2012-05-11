@@ -55,6 +55,7 @@ static int currentStixViewID = 0;
     [imageView setImage:imageData];
     [self addSubview:imageView];
     _activeRecognizers = [[NSMutableSet alloc] init];
+    isStillPeeling = NO;
 }
 -(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame{
     // context frame in which a stix will be dropped - different if we are dropping directly 
@@ -261,6 +262,13 @@ static int currentStixViewID = 0;
 }
 
 -(int)populateWithAuxStixFromTag:(Tag *)tag {
+    // clear all existing stix in the stixview
+    for (int i=0; i<[auxStixViews count]; i++) {
+        UIView * subview = [auxStixViews objectAtIndex:i];
+        [subview removeFromSuperview];
+    }
+    [auxStixViews removeAllObjects];
+    
     tagUsername = [[tag username] copy];
     tagID = tag.tagID;
     int allStixViewsExist = 1; // returns 1 if populated, 0 if missing stix
@@ -347,12 +355,28 @@ static int currentStixViewID = 0;
     return allStixViewsExist;
 }
 
--(void)doPeelAnimationForStix:(int)index {
-    UIImageView * auxStix = [auxStixViews objectAtIndex:index];
+-(void)doPeelAnimationForStix {
+    
+    int stixID = -1;
+    for (int i=0; i<[auxStixStringIDs count]; i++) {
+        UIImageView * peelStix = [auxStixViews objectAtIndex:i];
+        CGPoint center = peelStix.center;
+        if ([[auxStixStringIDs objectAtIndex:i] isEqualToString:stixPeelSelected] &&
+            center.x == stixPeelSelectedCenter.x && center.y == stixPeelSelectedCenter.y) {
+            stixID = i;
+            break;
+        }
+    }
+    if (stixID == -1)
+        return;
+    
+    UIImageView * auxStix = [auxStixViews objectAtIndex:stixID];
+    NSString * stixStringID = [auxStixStringIDs objectAtIndex:stixID];
+    CGPoint center = [auxStix center];
+    NSLog(@"Do peel animation: Stix %@ index %d frame %f %f", stixStringID, stixID, center.x, center.y);
     [auxStix setBackgroundColor:[UIColor clearColor]];
     [auxStix.layer removeAllAnimations];
     CGRect frameLift = auxStix.frame;
-    CGPoint center = auxStix.center;
     frameLift.origin.x = center.x - frameLift.size.width / 2;
     frameLift.origin.y = center.y - frameLift.size.height / 2;
     
@@ -377,8 +401,9 @@ static int currentStixViewID = 0;
                                         animations: ^ { auxStix.frame = frameDisappear; } 
                                         completion:^(BOOL finished) { 
                                             [auxStix removeFromSuperview]; 
+                                            isStillPeeling = NO;
                                             if ([delegate respondsToSelector:@selector(peelAnimationDidCompleteForStix:)])
-                                                [delegate peelAnimationDidCompleteForStix:index]; 
+                                                [delegate peelAnimationDidCompleteForStix:stixID]; 
                                         }
                          ];
                     }
@@ -660,6 +685,10 @@ static int currentStixViewID = 0;
 }
 // sent through delegate functions for clicks on scrollView; after interaction with main stix is disabled, the touch filters out of StixView but then comes back through its delegates
 -(int)findPeelableStixAtLocation:(CGPoint)location {
+    if (isStillPeeling) {
+        NSLog(@"Still peeling stix!");
+        return -1;
+    }
     if ([self isPeelable]) {
         
         NSString * appUsername = [delegate getUsernameOfApp];
@@ -680,21 +709,9 @@ static int currentStixViewID = 0;
             // if click is on top of a stix
             if ([currStix pointInside:pointInside withEvent:nil] && [self isForeground:pointInside inStix:currStix]) {
                 if (1) { //[self isStixPeelable:i]) {
-                    // this stix is currently peelable
                     topStixIndex = i;
                     topStixIsPeelable = YES;
                 }
-                /*
-                else {
-                    // make this stix peelable
-                    topStixIndex = i;
-                    topStixIsPeelable = NO;
-                    [auxPeelableByUser replaceObjectAtIndex:i withObject:[NSNumber numberWithBool:YES]];
-                    
-                    // add jiggle animation
-                    [self addJiggle:currStix];
-                }
-                 */
             }
         }
         //if (lastStixView == -1)
@@ -708,9 +725,18 @@ static int currentStixViewID = 0;
             NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
             NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
-            stixPeelSelected = lastStixView;
+            //stixPeelSelected = lastStixView;
             UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
             [actionSheet showInView:self];
+
+            UIImageView * currStix = [auxStixViews objectAtIndex:lastStixView];
+            CGPoint center = currStix.center;
+            NSLog(@"Presenting peelable actionsheet for %@ lastStixView %d at center %f %f", stixStringID, lastStixView, center.x, center.y);
+            
+            // save stixStringID and center to find the correct stix to remove later, in case the stix gets reloaded and stixStrings get out of order
+            stixPeelSelected = [stixStringID copy];
+            stixPeelSelectedCenter = center;
+            
             return lastStixView;
         }
     }
@@ -725,13 +751,16 @@ static int currentStixViewID = 0;
     switch (buttonIndex) {
         case 0: // Peel
             // performing a peel action causes this StixView and its delegate FeedItemView to eventually be deleted/removed. Until that happens and the user interface is correctly populated, do not allow interaction anymore.
-            self.isPeelable = NO;
+            //self.isPeelable = NO;
+            
+            isStillPeeling = YES;
             // remove from delegate's tag structure
-            if ([self.delegate respondsToSelector:@selector(didPeelStix:)])
-                [self.delegate didPeelStix:stixPeelSelected];
+            //if ([self.delegate respondsToSelector:@selector(didPeelStix:)])
+                //[self.delegate didPeelStix:stixPeelSelected];
+            [self doPeelAnimationForStix];    
             break;
         case 1: // Stick
-            self.isPeelable = NO;
+            //self.isPeelable = NO;
             if ([self.delegate respondsToSelector:@selector(didAttachStix:)])
                 [self.delegate didAttachStix:stixPeelSelected]; // will cause new StixView to be created
             break;

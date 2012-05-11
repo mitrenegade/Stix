@@ -53,6 +53,8 @@
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableDictionary alloc] init];
     contentViews = [[NSMutableDictionary alloc] init];
+    isShowingPlaceholderView = [[NSMutableDictionary alloc] init];
+    placeholderViews = [[NSMutableDictionary alloc] init];
     
     nameLabel = [[UILabel alloc] init];
     photoButton = [[UIImageView alloc] init];//[[UIButton alloc] init];
@@ -429,13 +431,23 @@
     return ceil(total / numColumns) + 1;
 }
 
+-(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key andTagID:(NSNumber*)tagID{
+    UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
+    [placeholderView setCenter:cview.center];
+    LoadingAnimationView * loadingAnimation = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+    [loadingAnimation setCenter:cview.center];
+    [loadingAnimation startCompleteAnimation];
+    [placeholderView addSubview:loadingAnimation];
+    [placeholderViews setObject:placeholderView forKey:key];
+}
+
 -(UIView*)viewForItemAtIndex:(int)index
 {    
     int actualIndex = index - numColumns;
     if (index >= [allTagIDs count] + numColumns)
         return nil;
   
-    NSNumber * key = [NSNumber numberWithInt:index-1];
+    NSNumber * key = [NSNumber numberWithInt:actualIndex];
     if (index < numColumns) {
         if (index == 0) return headerView;
         return nil;
@@ -444,40 +456,57 @@
         NSNumber * tagID = [allTagIDs objectAtIndex:actualIndex];
         Tag * tag = [allTags objectForKey:tagID];
         
-        //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
-        
         int contentWidth = [pixTableController getContentWidth];
         int targetWidth = contentWidth;
         int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
-        NSLog(@"Index: %d frame: %@", index, frame);
-
+        
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
         [cview initializeWithImage:tag.image];
+        
+        // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
+        if (![isShowingPlaceholderView objectForKey:tagID]) {
+            cview.isShowingPlaceholder = YES;
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:tagID];
+            
+            [self createPlaceholderViewForStixView:cview andKey:key andTagID:tagID];
+        }
+        else {
+            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:tagID] boolValue];
+        }
         [contentViews setObject:cview forKey:key];
     }
+    StixView * cview = [contentViews objectForKey:key];
+    if (cview.isShowingPlaceholder)
+        return [placeholderViews objectForKey:key];
     return [contentViews objectForKey:key];
 }
 
 -(void)loadContentPastRow:(int)row {
-    NSLog(@"Loading row %d of total %d for gallery of user %@", row, [self numberOfRows], username);
+    if (pendingContentCount > 0) {
+        NSLog(@"Trying to load past row %d: still waiting on %d pending contents", row, pendingContentCount);
+        return;
+    }
+    //NSLog(@"Loading row %d of total %d for gallery of user %@", row, [self numberOfRows], username);
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     if (row == -1 || row == 0) {
         // load initial row(s)
         NSDate * now = [NSDate date]; // now
         [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:(numColumns*5)]];
+        pendingContentCount += numColumns * 5;
     }
     else {
         NSNumber * tagID = [allTagIDs lastObject];
         Tag * tag = [allTags objectForKey:tagID];
         NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
-        NSLog(@"lastUpdated: %@", lastUpdated);
+        //NSLog(@"lastUpdated: %@", lastUpdated);
         [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:(numColumns*3)]];
+        pendingContentCount += numColumns * 3;
     }
 }
 
@@ -506,10 +535,49 @@
         [allTagIDs addObject:newtag.tagID]; // save in order 
         //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
+
+        // new system of auxiliary stix: request from auxiliaryStixes table
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
+        
+        pendingContentCount--;
+        if (pendingContentCount <= 0)
+            pendingContentCount = 0;            
+        
+        //NSLog(@"MyUserGallery recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
     }
     if ([theResults count]>0)
         [pixTableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
+}
+
+-(void)khCallback_didGetAuxiliaryStixOfTag:(NSMutableArray *) returnParams {
+    NSNumber * tagID = [returnParams objectAtIndex:0];
+    NSMutableArray * theResults = [returnParams objectAtIndex:1];
+    
+    NSLog(@"Got auxiliary stix of tag %d with %d stix!", [tagID intValue], [theResults count]);
+    //    if ([theResults count] > 0) {
+    Tag * tag = [allTags objectForKey:tagID];
+    if (tag) {
+        [tag populateWithAuxiliaryStix:theResults];
+        for (int i=0; i<[allTagIDs count]; i++) {
+            NSNumber * tID = [allTagIDs objectAtIndex:i];
+            if (tID == tagID) {
+                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
+                [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
+                break;
+            }
+        }
+        [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:tagID];
+        [pixTableController.tableView reloadData];
+        return;
+    }
+}
+
+#pragma kumulosHelper callback
+-(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+    [self performSelector:callback withObject:params afterDelay:0];
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {

@@ -96,6 +96,8 @@
     NSMutableArray * allTagsPending;
     NSMutableArray * allTagsDisplayed;
     
+    NSMutableSet * deallocatedIndices;
+    
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
     

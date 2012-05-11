@@ -13,10 +13,13 @@
 #import "SMWebRequest.h"
 #import "SMXMLDocument.h"
 
-#define APP_ID @"191699640937330" // DEFINE YOUR FACEBOOK APP ID HERE - this is for Stix
-#define APP_SUFFIX nil //@"foo"
-//#define APP_ID @"220429624645828" // GYMPACT
-//#define APP_SUFFIX nil
+// for Stix
+//#define APP_ID @"191699640937330" // DEFINE YOUR FACEBOOK APP ID HERE - this is for Stix
+//#define APP_SUFFIX nil //@"foo"
+
+// for Stix Lite
+#define APP_ID @"244406082334236"
+#define APP_SUFFIX nil
 
 @protocol FacebookHelperDelegate <NSObject>
 

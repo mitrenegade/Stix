@@ -148,7 +148,7 @@
         [reloadButton removeFromSuperview];
     }
     [self setReloadView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_retry.png"]]];
-    [reloadView setFrame:CGRectMake(0, 0, 48, 54)];
+    [reloadView setFrame:CGRectMake(0, 0, 60, 60)];
     [reloadView setCenter:[stixView center]];
     [self.view addSubview:reloadView];
     //[feedItem setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
@@ -156,7 +156,7 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSpin:reloadView forTime:10 withCompletion:^(BOOL finished){ 
         NSLog(@"Spin finished!");
-        [reloadView setCenter:CGPointMake(stixView.center.x - 30, stixView.center.y)];
+        [reloadView setCenter:CGPointMake(stixView.center.x - 35, stixView.center.y)];
         [self setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_uploadfailed.png"]]];
         [reloadMessage setFrame:CGRectMake(0,0, 117, 26)];
         [reloadMessage setCenter:CGPointMake(stixView.center.x, stixView.center.y - 40)];
@@ -166,19 +166,19 @@
 //        [reloadView setBackgroundColor:[UIColor blackColor]];
 //        [reloadMessage2 setBackgroundColor:[UIColor redColor]];
 //        [reloadMessage setBackgroundColor:[UIColor greenColor]];
-        reloadButton = [[UIButton alloc] initWithFrame:CGRectMake(reloadMessage.frame.origin.x, reloadMessage.frame.origin.y, 120, 70)];
-        //[reloadButton setBackgroundColor:[UIColor blueColor]];
-        [reloadButton setTag:[tag.tagID intValue]];
-        [reloadButton addTarget:self action:@selector(didClickReloadButton:) forControlEvents:UIControlEventTouchUpOutside];
+        //reloadButton = [[UIButton alloc] initWithFrame:CGRectMake(reloadMessage.frame.origin.x, reloadMessage.frame.origin.y, 120, 70)];
+        //[reloadButton setTag:[tag.tagID intValue]];
+        //[reloadButton addTarget:self action:@selector(didClickReloadButton:) forControlEvents:UIControlEventTouchUpOutside];
         
         [self.view addSubview:reloadMessage];
         [self.view addSubview:reloadMessage2];
-        [self.view insertSubview:reloadButton aboveSubview:stixView
-         ];
+        //[self.view insertSubview:reloadButton aboveSubview:stixView];
+        tapStartsReloading = YES;
     }];
 }
 
--(void)didClickReloadButton:(UIButton*)button {
+-(void)didClickReloadButton {
+    tapStartsReloading = NO;
     if ([delegate respondsToSelector:@selector(didClickReloadButtonForFeedItem:)])
         [delegate didClickReloadButtonForFeedItem:self];
 }
@@ -384,11 +384,14 @@
 {
     NSLog(@"View did unload for feed item with tag id %d", [self tagID]);
     // Release any cached data, images, etc that aren't in use.
-    [delegate didReceiveMemoryWarningForFeedItem:self];
-    
+
+    NSLog(@"Super viewDidUnload");
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+
+    NSLog(@"Delegate didReceiveMemoryWarning for self");
+    [delegate didReceiveMemoryWarningForFeedItem:self];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -407,13 +410,17 @@
 
 -(void)didAttachStix:(int)index {
     // 1 = attach
-    [delegate didPerformPeelableAction:1 forAuxStix:index];
+    //[delegate didPerformPeelableAction:1 forAuxStix:index];
+    
+    // no more attach
 }
 
 -(void)didPeelStix:(int)index {
     // 0 = peel
     // show peel animation
-    [stixView doPeelAnimationForStix:index];
+    //[stixView doPeelAnimationForStix:index];
+    
+    // just call from stixView
 }
 
 -(void)peelAnimationDidCompleteForStix:(int)index {
@@ -484,9 +491,11 @@
             //return;
         else if (CGRectContainsPoint([addCommentButton frame], location)) 
             [self didPressAddCommentButton:addCommentButton];
-        else if (CGRectContainsPoint([reloadButton frame], location))
-            [self didClickReloadButton:reloadButton];
+        //else if (CGRectContainsPoint([reloadButton frame], location))
+        //    [self didClickReloadButton:reloadButton];
             //return;
+        else if (tapStartsReloading)
+            [self didClickReloadButton];
         else if ([delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
             [delegate didClickAtLocation:location withFeedItem:self];
     }

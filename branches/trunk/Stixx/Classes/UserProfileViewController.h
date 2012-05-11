@@ -22,6 +22,7 @@
 #import "StixAnimation.h"
 #import "ColumnTableController.h"
 #import "FriendSearchResultsController.h"
+#import "KumulosHelper.h"
 
 @protocol UserProfileViewDelegate
 
@@ -37,7 +38,7 @@
 -(NSMutableDictionary *) getUserPhotos;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate>{
     
     Kumulos * k;
     IBOutlet UIButton * logo;
@@ -49,6 +50,8 @@
     NSMutableArray * allTagIDs; // ordered in descending order
     NSMutableDictionary * allTags; // key: allTagID
     NSMutableDictionary * contentViews; // generated views: key: row/column index of table
+    NSMutableDictionary * placeholderViews;
+    NSMutableDictionary * isShowingPlaceholderView;
     int numColumns;
     
     int dismissAnimation;
@@ -62,6 +65,8 @@
     
     NSMutableSet * allFollowers;
     NSMutableSet * allFollowing;
+    
+    int pendingContentCount;
 }
 
 @property (nonatomic) UIImageView * photoButton;

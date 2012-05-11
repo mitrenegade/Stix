@@ -20,6 +20,7 @@
 #import "ProfileViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "UserGalleryController.h"
+#import "KumulosHelper.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -48,7 +49,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate, KumulosHelperDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -71,6 +72,9 @@ enum {
     NSMutableDictionary * allTags; // key: allTagID
     NSMutableDictionary * contentViews; // generated views: key: row/column index of table
     NSMutableDictionary * placeholderViews; // generated views: key: row/column index of table
+    NSMutableDictionary * isShowingPlaceholderView;
+    
+    UIView * placeholderViewGlobal;
 
     // zoom view...?
     //StixView * stixView; // the view that is clicked for zoom
@@ -89,6 +93,8 @@ enum {
     int shareActionSheetTagID;
     
     NSMutableArray * exploreModeButtons;
+    
+    int pendingContentCount; // prevents multiple rows from being loaded because our latest tag is not set yet
     
     Kumulos * k;
 }

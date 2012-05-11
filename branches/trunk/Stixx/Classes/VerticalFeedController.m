@@ -1,3 +1,4 @@
+
 //
 //  VerticalFeedController.m
 //  Stixx
@@ -352,8 +353,11 @@
     Tag * tag;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
-    else
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return 0;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     //NSLog(@"GetHeightForSection: item at row %d: ID %d comments %d view %x frame %f %f %f %f feedSectionHeight %d", index, [tag.tagID intValue], [feedItem commentCount], feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height, [[feedSectionHeights objectForKey:tag.tagID] intValue]);
     int feedItemHeight = feedItem.view.frame.size.height;
@@ -386,8 +390,11 @@
     Tag * tag;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
-    else
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     return tag;
 }
 
@@ -401,8 +408,11 @@
     Tag * tag;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
-    else
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     NSLog(@"Clicked on user photo %d in feed for user %@", button.tag, tag.username);
     [self shouldDisplayUserPage:tag.username];
 }
@@ -411,8 +421,11 @@
     Tag * tag;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
-    else
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     UIView * headerView = [headerViews objectForKey:tag.tagID];
     if (!headerView) {
         headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
@@ -490,8 +503,11 @@
     Tag * tag;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
-    else
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
     NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
 
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
@@ -582,8 +598,14 @@
     }
     NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
     VerticalFeedItemController * feedItem = nil;
-    if (tag.tagID)
-        feedItem = [feedItems objectForKey:tag.tagID];
+    if (tag.tagID) {
+        if (deallocatedIndices && [deallocatedIndices containsObject:tag.tagID]) {
+            NSLog(@"Viewing deallocated index %d for tag item %d", index, [tag.tagID intValue]);
+            feedItem = nil;
+        }
+        else
+            feedItem = [feedItems objectForKey:tag.tagID];
+    }
     
     if (!feedItem) {
         feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease until we no longer need it as a delegate
@@ -653,6 +675,59 @@
     //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     //[feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
+}
+
+-(void)refreshViewForItemAtIndex:(int)index withTag:(Tag*)tag {
+    // refreshes feedItem, without deleting it (so delegate function calls don't go haywire)
+    // happens when peel stix causes feedItem to be deallocated
+    NSLog(@"RefreshViewForItemAtIndex: tag %d", [tag.tagID intValue]);
+    [self startActivityIndicator];
+    if (index>[allTagsDisplayed count])
+        index = 0;
+    if ([allTagsDisplayed count] == 0) {
+        [self stopActivityIndicator];
+        return;
+    }
+    /*
+    Tag * tag;
+    if (index < [allTagsPending count])
+        tag = [allTagsPending objectAtIndex:index];
+    else {
+        if ([allTagsDisplayed count] <= index - [allTagsPending count])
+            return;
+        tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
+     */
+    
+    // copy of reloadviewforitematindex
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    
+    if (!feedItem) {
+        [self viewForItemAtIndex:index];
+        return;
+    }
+    
+    NSString * name = tag.username;
+    NSString * descriptor = tag.descriptor;
+    NSString * comment = tag.comment;
+    NSString * locationString = tag.locationString;
+    
+    [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];
+    UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+    if (photo)
+        [feedItem populateWithUserPhoto:photo];
+    // add timestamp
+    [feedItem populateWithTimestamp:tag.timestamp];
+    int count = [self.delegate getCommentCount:feedItem.tagID];
+    [feedItem populateWithCommentCount:count];
+    
+    // update stix
+    [feedItem.stixView populateWithAuxStixFromTag:tag];
+    
+    // this object must be retained so that the button actions can be used
+    [feedItems setObject:feedItem forKey:tag.tagID];
+    
+    [self.tableController.tableView reloadData];
 }
 
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
@@ -792,6 +867,7 @@
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == tagID) {
             [self reloadPage:i];
+            //[self refreshPage:i];
             return;
         }
     }
@@ -834,11 +910,13 @@
 }
 
 -(void)populateAllTagsDisplayedWithTag:(Tag*)tag {
+    // replaces an object with no auxStix with a new tag that has been populated with auxStix from kumulos
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * t = [allTagsDisplayed objectAtIndex:i];
         if (t.tagID == tag.tagID) {
             [allTagsDisplayed replaceObjectAtIndex:i withObject:tag];
-            [self reloadPageForTagID:[tag.tagID intValue]];
+            //[self reloadPageForTagID:[tag.tagID intValue]];
+            [self refreshViewForItemAtIndex:i withTag:t];
             return;
         }
     }
@@ -1063,19 +1141,6 @@
         tag = [allTagsPending objectAtIndex:lastPageViewed];
     else
         tag = [allTagsDisplayed objectAtIndex:(lastPageViewed-[allTagsPending count])];
-    if (action == 0) {
-        // peel stix
-        //[tag removeStixAtIndex:index];
-    }
-    /*
-    else if (action == 1) {
-        // attach stix
-        [[tag auxPeelable] replaceObjectAtIndex:index withObject:[NSNumber numberWithBool:NO]];
-        [allTagsDisplayed replaceObjectAtIndex:lastPageViewed withObject:tag];
-    }
-     */
-    //[self reloadCurrentPage];
-    
     // tell app delegate to reload tag before altering internal info
     [delegate didPerformPeelableAction:action forTagWithID:[tag.tagID intValue] forAuxStix:index];
 }
@@ -1320,6 +1385,7 @@
    
     // force reload
     //[self populateAllTagsDisplayed];
+    [headerViews removeAllObjects];
     [self reloadPageForTagID:[tag.tagID intValue]];
     [tableController.tableView reloadData];
 
@@ -1422,11 +1488,17 @@
 
 -(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController *)feedItem {
     // feedItem will be released soon
+    if (!deallocatedIndices)
+        deallocatedIndices = [[NSMutableSet alloc] init];
+    
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == feedItem.tagID) {
             NSLog(@"FeedView: reloading deallocated feedItem at index %d with tagID %d", i, feedItem.tagID);
-            [self reloadPage:i];
+            //[self reloadPage:i];
+            //[feedItems removeObjectForKey:tag.tagID]; // will automatically cause reloadviewforitematindex
+            [deallocatedIndices addObject:tag.tagID];
+            return;
         }
     }
 }

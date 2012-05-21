@@ -136,7 +136,7 @@
     [self setCarouselView:[CarouselView sharedCarouselView]];
     [carouselView setDelegate:self];
     [carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
-    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT+100];
+    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT+SHELF_LOWER_FROM_TOP];
     [carouselView setAllowTap:YES];
     //[carouselView removeFromSuperview];
     [self.view insertSubview:carouselView aboveSubview:tableController.view];
@@ -280,9 +280,9 @@
     auxView.delegate = self;
     [auxView initStixView:tag];
     //[auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
+    [auxView configureCarouselView];
     [auxView addStixToStixView:stixStringID atLocation:location];
     //[auxView toggleCarouselView:NO];
-    [auxView configureCarouselView];
     //[carouselView setExpandedTabY:5-STATUS_BAR_SHIFT]; // hack: a bit lower
     //[carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
     //[auxView.carouselView carouselTabExpand:NO];
@@ -345,6 +345,11 @@
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
     [self.delegate didPurchaseStixFromCarousel:stixStringID];
+}
+
+-(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
+    // just pass on
+    return [delegate shouldPurchasePremiumPack:stixPackName];
 }
 
 /*********** FeedTableView functions *******/
@@ -1117,8 +1122,58 @@
     NSString * name = [self.delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0)
-        [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
+}
+
+-(void)didClickLikeButton:(int)type withTagID:(int)tagID {
+    NSString * newComment = @"";
+    NSString * newType = @"LIKE";
+    switch (type) {
+        case 0:
+            //newComment = @"ME LIKEY";
+            newComment = @"LIKE_SMILES";
+            break;
+        case 1:
+            //newComment = @"OMG LOVE IT";
+            newComment = @"LIKE_LOVE";
+            break;
+        
+        case 2:
+            //newComment = @" ;) HOW U DOIN";
+            newComment = @"LIKE_WINK";
+            break;
+            
+        case 3:
+            //newComment = @"OH NO U DIDNT *Z SNAP*";
+            newComment = @"LIKE_SHOCKED";
+            break;
+            
+        default:
+            break;
+    }
+    //[self didAddNewComment:newComment withTagID:tagID];
+    NSString * name = [delegate getUsername];
+//    if ([newComment length] > 0)
+    [delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:newType];
+}
+
+-(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem {
+    if (!feedItemsWithLikeToolbar)
+        feedItemsWithLikeToolbar = [[NSMutableArray alloc] init];
+    
+    [feedItemsWithLikeToolbar addObject:feedItem];
+}
+
+-(void) feedDidScroll {
+    if (!feedItemsWithLikeToolbar || [feedItemsWithLikeToolbar count] == 0)
+        return;
+    
+    for (int i=0; i<[feedItemsWithLikeToolbar count]; i++) {
+        VerticalFeedItemController * feedItem = [feedItemsWithLikeToolbar objectAtIndex:i];
+        [feedItem likeToolbarHide:-1];
+    }
+    [feedItemsWithLikeToolbar removeAllObjects];
 }
 
 //-(IBAction)feedbackButtonClicked:(id)sender {
@@ -1199,6 +1254,9 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
     // send through to StixAppDelegate to save to defaults
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
+    
+    if (feedItemsWithLikeToolbar)
+        [feedItemsWithLikeToolbar removeAllObjects];
 }
 
 #pragma mark bux instructions
@@ -1514,6 +1572,21 @@
         }
     }
     NSLog(@"didClickReloadButton couldn't find feedItem with tag %d", [feedItem tagID]);
+}
+
+-(void)showReloadPendingPix:(Tag *)failedTag {
+    int tagID = [failedTag.tagID intValue];
+    NSLog(@"Network connectivity problem: forcing reload view for feedItem with tagID %d", tagID);
+    for (int i=0; i<[allTagsPending count]; i++) {
+        Tag * tag = [allTagsPending objectAtIndex:i];
+        if ([tag.tagID intValue] == tagID) {
+            VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+            if (!feedItem)
+                return;
+            [feedItem displayReloadView];
+            return;
+        }
+    }
 }
 @end
 

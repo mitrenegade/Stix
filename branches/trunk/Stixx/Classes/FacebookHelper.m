@@ -9,6 +9,7 @@
 #import "FacebookHelper.h"
 
 static FacebookHelper *sharedFacebookHelper;
+static NSString * appID;
 
 @implementation FacebookHelper
 
@@ -39,8 +40,18 @@ static FacebookHelper *sharedFacebookHelper;
  * a string for your scheme. see https://developers.facebook.com/docs/mobile/ios/build/#multipleapps
  */
 -(void)initFacebook {
+
+    if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"Neroh"])
+    {
+        appID = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"FACEBOOK_APP_ID"];
+    }
+    else if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"com.Neroh.Stix.Lite"]){
+        appID = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"FACEBOOK_APP_ID_LITE"];
+    }
+    NSLog(@"FacebookHelper: bundle %@ appID %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], appID);
+
     //facebook = [[Facebook alloc] initWithAppId:APP_ID andDelegate:self];
-    facebook = [[Facebook alloc] initWithAppId:APP_ID urlSchemeSuffix:APP_SUFFIX andDelegate:self];
+    facebook = [[Facebook alloc] initWithAppId:appID urlSchemeSuffix:APP_SUFFIX andDelegate:self];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if ([defaults objectForKey:@"FBAccessTokenKey"] 
         && [defaults objectForKey:@"FBExpirationDateKey"]) {
@@ -147,7 +158,7 @@ static FacebookHelper *sharedFacebookHelper;
 -(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description {
     postType = @"sharePix";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   APP_ID, @"app_id",
+                                   appID, @"app_id",
                                    link, @"link",
                                    pictureLink, @"picture",
                                    title, @"name",
@@ -218,7 +229,7 @@ static FacebookHelper *sharedFacebookHelper;
                                    postname, @"name",
                                    //caption, @"caption", 
                                    description, @"description",
-                                   APP_ID, @"app_id",
+                                   appID, @"app_id",
                                    nil];
 #if 0
     // send app request dialog

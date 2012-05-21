@@ -70,6 +70,7 @@ enum first_time_user_stage {
 -(void)doRewardAnimation:(NSString *)title withAmount:(int)amount;
 -(void)doPointerAnimation:(int)firstTimeUserStage;
 -(void)doPurchaseAnimation:(NSString*)stixStringID;
+-(void)doPremiumPurchaseAnimation:(NSString*)stixPackName;
 
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage;
 -(void)agitateFirstTimePointer;

@@ -40,12 +40,13 @@ static NSMutableSet * retainedDetailControllers;
     //[retainedDetailControllers removeObject:detailController];
 }
 
--(void)detailViewNeedsRetainForDelegateCall {
+-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)_detailController {
+//-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController*)_detailController {
     // comes from stixViews
     if (!retainedDetailControllers) 
         retainedDetailControllers = [[NSMutableSet alloc] init];
-    NSLog(@"ExploreView: retaining detail view with username %@", [detailController tagUsername]);
-    [retainedDetailControllers addObject:detailController];
+    NSLog(@"ExploreView: retaining detail view with username %@", [_detailController tagUsername]);
+    [retainedDetailControllers addObject:_detailController];
 }
 
 -(void)detailViewDoneWithAsynchronousDelegateCall {

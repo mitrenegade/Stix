@@ -243,6 +243,8 @@
         }
          */
 	}
+    
+    [delegate feedDidScroll];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{

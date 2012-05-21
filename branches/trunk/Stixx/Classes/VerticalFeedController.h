@@ -53,6 +53,7 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
+-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 //-(void)didSharePixWithURL:(NSString*)url;
 //-(void)didPurchaseBux:(int)bux;
 //-(void)sharePix:(int)tagID;
@@ -151,6 +152,8 @@
     
     RaisedCenterTabBarController * __weak tabBarController;
     
+    NSMutableArray * feedItemsWithLikeToolbar;
+    
     dispatch_queue_t backgroundQueue;
 }
 @property (nonatomic, weak) CarouselView * carouselView;
@@ -209,6 +212,7 @@
 -(void)finishedCreateNewPix:(Tag*)tag withPendingID:(int)pendingID;
 -(void)checkForUpdatedStix;
 -(void)updateFeedTimestamps;
+-(void)showReloadPendingPix:(Tag*)failedTag;
 @end
 
 

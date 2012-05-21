@@ -269,6 +269,11 @@
     [self.delegate didPurchaseStixFromCarousel:stixStringID];
 }
 
+-(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
+    // just pass on
+    return [delegate shouldPurchasePremiumPack:stixPackName];
+}
+
 - (void)addCoordinateOfTag:(Tag*)tag {
     //if (tag.coordinate)
     //    [arViewController addCoordinate:[tag coordinate]];

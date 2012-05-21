@@ -48,6 +48,7 @@ enum {
 
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
+-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 
 @optional
 
@@ -132,5 +133,6 @@ enum {
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
 +(NSMutableDictionary*)InitializeFirstTimeUserStix;
++(void)InitializePremiumStixTypes;
 
 @end

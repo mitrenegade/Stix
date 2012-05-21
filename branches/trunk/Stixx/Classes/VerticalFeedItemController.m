@@ -57,6 +57,7 @@
     //imageData = [UIImage alloc];
     
     stixView.isShowingPlaceholder = YES;
+    isDisplayingLikeToolbar = NO;
     
     return self;
 }
@@ -139,6 +140,27 @@
      */
 }
 
+-(void)displayReloadView {
+    [reloadView setCenter:CGPointMake(stixView.center.x - 35, stixView.center.y)];
+    [self setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_uploadfailed.png"]]];
+    [reloadMessage setFrame:CGRectMake(0,0, 117, 26)];
+    [reloadMessage setCenter:CGPointMake(stixView.center.x, stixView.center.y - 40)];
+    [self setReloadMessage2:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
+    [reloadMessage2 setFrame:CGRectMake(0,0, 64, 36)];
+    [reloadMessage2 setCenter:CGPointMake(reloadView.center.x + 60, reloadView.center.y)];
+    //        [reloadView setBackgroundColor:[UIColor blackColor]];
+    //        [reloadMessage2 setBackgroundColor:[UIColor redColor]];
+    //        [reloadMessage setBackgroundColor:[UIColor greenColor]];
+    //reloadButton = [[UIButton alloc] initWithFrame:CGRectMake(reloadMessage.frame.origin.x, reloadMessage.frame.origin.y, 120, 70)];
+    //[reloadButton setTag:[tag.tagID intValue]];
+    //[reloadButton addTarget:self action:@selector(didClickReloadButton:) forControlEvents:UIControlEventTouchUpOutside];
+    
+    [self.view addSubview:reloadMessage];
+    [self.view addSubview:reloadMessage2];
+    //[self.view insertSubview:reloadButton aboveSubview:stixView];
+    tapStartsReloading = YES;
+}
+
 -(void)initReloadView {
     if (reloadView)
     {
@@ -156,24 +178,7 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSpin:reloadView forTime:10 withCompletion:^(BOOL finished){ 
         NSLog(@"Spin finished!");
-        [reloadView setCenter:CGPointMake(stixView.center.x - 35, stixView.center.y)];
-        [self setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_uploadfailed.png"]]];
-        [reloadMessage setFrame:CGRectMake(0,0, 117, 26)];
-        [reloadMessage setCenter:CGPointMake(stixView.center.x, stixView.center.y - 40)];
-        [self setReloadMessage2:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
-        [reloadMessage2 setFrame:CGRectMake(0,0, 64, 36)];
-        [reloadMessage2 setCenter:CGPointMake(reloadView.center.x + 60, reloadView.center.y)];
-//        [reloadView setBackgroundColor:[UIColor blackColor]];
-//        [reloadMessage2 setBackgroundColor:[UIColor redColor]];
-//        [reloadMessage setBackgroundColor:[UIColor greenColor]];
-        //reloadButton = [[UIButton alloc] initWithFrame:CGRectMake(reloadMessage.frame.origin.x, reloadMessage.frame.origin.y, 120, 70)];
-        //[reloadButton setTag:[tag.tagID intValue]];
-        //[reloadButton addTarget:self action:@selector(didClickReloadButton:) forControlEvents:UIControlEventTouchUpOutside];
-        
-        [self.view addSubview:reloadMessage];
-        [self.view addSubview:reloadMessage2];
-        //[self.view insertSubview:reloadButton aboveSubview:stixView];
-        tapStartsReloading = YES;
+        [self displayReloadView];
     }];
 }
 
@@ -309,10 +314,18 @@
 }
 */
 
-
 -(IBAction)didPressAddCommentButton:(id)sender {
+#if 0
     if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
         [delegate displayCommentsOfTag:tagID andName:nameString];
+#else
+    if (isDisplayingLikeToolbar) {
+        [self likeToolbarHide:-1];
+    }
+    else {
+        [self likeToolbarShow];
+    }
+#endif
 }
 -(void)didPressSeeAllCommentsButton:(id)sender {
     if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
@@ -378,6 +391,14 @@
     
     //[shareButton setHidden:YES];
     //[seeAllCommentsButton setHidden:YES];
+    
+    UITapGestureRecognizer * myDoubleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
+    [myDoubleTapRecognizer setNumberOfTapsRequired:2];
+    [myDoubleTapRecognizer setNumberOfTouchesRequired:1];
+    [myDoubleTapRecognizer setDelegate:self];
+    
+    //if (isPeelable)
+    [self.view addGestureRecognizer:myDoubleTapRecognizer];
 }
 
 - (void)viewDidUnload
@@ -494,6 +515,16 @@
         //else if (CGRectContainsPoint([reloadButton frame], location))
         //    [self didClickReloadButton:reloadButton];
             //return;
+        else if (CGRectContainsPoint([likeIconSmiles frame], location)) 
+            [self didClickLikeIconSmiles];
+        else if (CGRectContainsPoint([likeIconLove frame], location)) 
+            [self didClickLikeIconLove];
+        else if (CGRectContainsPoint([likeIconWink frame], location)) 
+            [self didClickLikeIconWink];
+        else if (CGRectContainsPoint([likeIconShocked frame], location)) 
+            [self didClickLikeIconShocked];
+        else if (CGRectContainsPoint([likeIconComment frame], location)) 
+            [self didClickLikeIconComment];
         else if (tapStartsReloading)
             [self didClickReloadButton];
         else if ([delegate respondsToSelector:@selector(didClickAtLocation:withFeedItem:)])
@@ -652,4 +683,119 @@
     delegatePointer = nil;
 }
  */
+
+#pragma mark like toolbar
+
+-(void)likeToolbarShow {
+    if (!likeToolbarBg) {
+        CGRect frame = [imageView frame];
+        float iconY = frame.size.height-50;
+        likeToolbarBg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_comment_background@2x.png"]];
+        [likeToolbarBg setFrame:CGRectMake(0, frame.size.height-50, frame.size.width, 50)];
+        
+        likeIconSmiles = [[UIButton alloc] initWithFrame:CGRectMake(15, iconY, 50, 50)];
+        [likeIconSmiles setImage:[UIImage imageNamed:@"icon_pix_smiles@2x.png"] forState:UIControlStateNormal];
+        [likeIconSmiles addTarget:self action:@selector(didClickLikeIconSmiles) forControlEvents:UIControlEventTouchUpInside];
+        
+        likeIconLove = [[UIButton alloc] initWithFrame:CGRectMake(75, iconY, 50, 50)];
+        [likeIconLove setImage:[UIImage imageNamed:@"icon_pix_love@2x.png"] forState:UIControlStateNormal];
+        [likeIconLove addTarget:self action:@selector(didClickLikeIconLove) forControlEvents:UIControlEventTouchUpInside];
+        
+        likeIconWink = [[UIButton alloc] initWithFrame:CGRectMake(135, iconY, 50, 50)];
+        [likeIconWink setImage:[UIImage imageNamed:@"icon_pix_wink@2x.png"] forState:UIControlStateNormal];
+        [likeIconWink addTarget:self action:@selector(didClickLikeIconWink) forControlEvents:UIControlEventTouchUpInside];
+        
+        likeIconShocked = [[UIButton alloc] initWithFrame:CGRectMake(195, iconY, 50, 50)];
+        [likeIconShocked setImage:[UIImage imageNamed:@"icon_pix_shocked@2x.png"] forState:UIControlStateNormal];
+        [likeIconShocked addTarget:self action:@selector(didClickLikeIconShocked) forControlEvents:UIControlEventTouchUpInside];
+        
+        likeIconComment = [[UIButton alloc] initWithFrame:CGRectMake(255, iconY, 50, 50)];
+        [likeIconComment setImage:[UIImage imageNamed:@"icon_addcomment@2x.png"] forState:UIControlStateNormal];
+        [likeIconComment addTarget:self action:@selector(didClickLikeIconComment) forControlEvents:UIControlEventTouchUpInside];
+
+#if 1
+        [self.view addSubview:likeToolbarBg];
+        [self.view addSubview:likeIconSmiles];
+        [self.view addSubview:likeIconLove];
+        [self.view addSubview:likeIconWink];
+        [self.view addSubview:likeIconShocked];
+        [self.view addSubview:likeIconComment];
+#else
+        [likeToolbarBg addSubview:likeIconSmiles];
+        [likeToolbarBg addSubview:likeIconLove];
+        [likeToolbarBg addSubview:likeIconWink];
+        [likeToolbarBg addSubview:likeIconShocked];
+        [likeToolbarBg addSubview:likeIconComment];
+        [self.view addSubview:likeToolbarBg];
+#endif
+    }
+
+    [likeToolbarBg setAlpha:0];
+    [likeIconSmiles setAlpha:0];
+    [likeIconLove setAlpha:0];
+    [likeIconWink setAlpha:0];
+    [likeIconShocked setAlpha:0];
+    [likeIconComment setAlpha:0];
+    float fadeTime = .25;
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFade:likeToolbarBg inView:self.view toAlpha:1 forTime:fadeTime];
+    [animation doFade:likeIconSmiles inView:self.view toAlpha:1 forTime:fadeTime];
+    [animation doFade:likeIconLove inView:self.view toAlpha:1 forTime:fadeTime];
+    [animation doFade:likeIconWink inView:self.view toAlpha:1 forTime:fadeTime];
+    [animation doFade:likeIconShocked inView:self.view toAlpha:1 forTime:fadeTime];
+    [animation doFade:likeIconComment inView:self.view toAlpha:1 forTime:fadeTime];
+    
+    isDisplayingLikeToolbar = YES;
+    
+    if ([delegate respondsToSelector:@selector(didDisplayLikeToolbar:)])
+        [delegate didDisplayLikeToolbar:self];
+}
+
+-(void)likeToolbarHide:(int)selected {
+//    [likeToolbarBg setAlpha:1];
+    float fadeTimeLong = 1.25;
+    float fadeTime = .25;
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFade:likeToolbarBg inView:self.view toAlpha:0 forTime:selected==-1?fadeTime:fadeTimeLong];
+    [animation doFade:likeIconSmiles inView:self.view toAlpha:0 forTime:selected==0?fadeTimeLong:fadeTime];
+    [animation doFade:likeIconLove inView:self.view toAlpha:0 forTime:selected==1?fadeTimeLong:fadeTime];
+    [animation doFade:likeIconWink inView:self.view toAlpha:0 forTime:selected==2?fadeTimeLong:fadeTime];
+    [animation doFade:likeIconShocked inView:self.view toAlpha:0 forTime:selected==3?fadeTimeLong:fadeTime];
+    [animation doFade:likeIconComment inView:self.view toAlpha:0 forTime:fadeTime];
+    isDisplayingLikeToolbar = NO;
+}
+
+-(void)didClickLikeIconSmiles {
+    NSLog(@"Did click Smile!");
+    [self likeToolbarHide:0];
+    [delegate didClickLikeButton:0 withTagID:tagID];
+}
+-(void)didClickLikeIconLove {
+    NSLog(@"Did click Love!");
+    [self likeToolbarHide:1];
+    [delegate didClickLikeButton:1 withTagID:tagID];
+}
+-(void)didClickLikeIconWink {
+    NSLog(@"Did click Wink!");
+    [self likeToolbarHide:2];
+    [delegate didClickLikeButton:2 withTagID:tagID];
+}
+-(void)didClickLikeIconShocked {
+    NSLog(@"Did click Shocked!");
+    [self likeToolbarHide:3];
+    [delegate didClickLikeButton:3 withTagID:tagID];
+}
+-(void)didClickLikeIconComment {
+    NSLog(@"Did click Comment!");
+    [self likeToolbarHide:-1];
+    if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
+        [delegate displayCommentsOfTag:tagID andName:nameString];
+}
+
+-(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
+    // warning: this gets recognized after single tap on a stix
+    NSLog(@"Double tap!");
+    [self didPressAddCommentButton:nil];
+}
+
 @end

@@ -89,10 +89,8 @@
     NSData * photo = UIImageJPEGRepresentation(resized, .8);
     //[img release];
     
-    //[kumulos addEmailToUserWithUsername:username andEmail:email];
     NSMutableDictionary * stix = [BadgeView InitializeFirstTimeUserStix];   
     NSMutableData * stixData = [KumulosData dictionaryToData:stix];
-    //[kumulos addStixToUserWithUsername:username andStix:data];
     
     // add auxiliary data
     NSMutableDictionary * auxInfo = [[NSMutableDictionary alloc] init];

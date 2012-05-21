@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on May  8, 2012
+//  Created by Kumulos Bindings Compiler on May 14, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -162,6 +162,10 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllPixBelongingToUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation didPurchasePremiumPackDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPremiumPacksDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getSharedPixDidCompleteWithResult:(NSArray*)theResults;
  
@@ -404,6 +408,12 @@
     
    
 -(KSAPIOperation*) getNewPixBelongingToUserWithUsername:(NSString*)username andTagID:(NSInteger)tagID;
+    
+   
+-(KSAPIOperation*) didPurchasePremiumPackWithUsername:(NSString*)username andStixPackName:(NSString*)stixPackName;
+    
+   
+-(KSAPIOperation*) getUserPremiumPacksWithUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) getSharedPixWithSharedPixID:(NSUInteger)sharedPixID;

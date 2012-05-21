@@ -36,7 +36,7 @@
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;
-
+-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 @end
 
 

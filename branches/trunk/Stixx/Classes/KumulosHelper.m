@@ -360,10 +360,16 @@ static KumulosHelper *sharedKumulosHelper = nil;
     }
     else if ([function isEqualToString:@"createNewPix"]) {
         // NOT coming here so we create some other timeout
+        if (self.delegate && [delegate respondsToSelector:@selector(kumulosHelperCreateNewPixDidFail:)]) {
+            Tag * failedTag = [inputParams objectAtIndex:0];
+            [delegate kumulosHelperCreateNewPixDidFail:failedTag];
+        }
     }
     else if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
         // if this happens while we are trying to load galleries, we need 
         // to decrement pendingContentCount
+        // instead, redo
+        [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
     }
 }
 

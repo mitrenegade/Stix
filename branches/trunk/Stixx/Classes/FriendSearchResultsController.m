@@ -140,15 +140,6 @@
         bottomLabel.tag = BOTTOM_LABEL_TAG;
         [cell.contentView addSubview:topLabel];
         [cell.contentView addSubview:bottomLabel];
-        /*
-         UILabel * bottomLabel =
-         [[UILabel alloc]
-         initWithFrame:
-         CGRectMake(0,10,cell.textLabel.frame.size.width, cell.textLabel.frame.size.height)];
-         [bottomLabel setText:@"5 Bux"];
-         //[cell.contentView addSubview:bottomLabel];
-         [cell addSubview:bottomLabel];
-         */
         [cell addSubview:cell.contentView];
         
     }

@@ -8,7 +8,7 @@
 
 //@synthesize delegate;
 @synthesize stixScroll, categoryScroll;
-@synthesize carouselHeight;
+//@synthesize carouselHeight;
 @synthesize allowTap;
 //@synthesize tapDefaultOffset;
 @synthesize buttonShowCarousel, carouselTab, stixSelected;
@@ -31,7 +31,9 @@ static dispatch_queue_t backgroundQueue;
     allCarouselStixStringIDsAtFrame = [[NSMutableDictionary alloc] initWithCapacity:total];
     allCarouselMissingStixStringIDs = [[NSMutableSet alloc] initWithCapacity:total];
     allCarouselMissingStixStringOpacity = [[NSMutableDictionary alloc] initWithCapacity:total];
-    [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT-100)];
+    premiumPacksPurchased = [[NSMutableSet alloc] init];
+    premiumPurchaseButtons = [[NSMutableDictionary alloc] init];
+    [self initCarouselWithFrame:CGRectMake(0,SHELF_SCROLL_OFFSET_FROM_TOP,320,SHELF_HEIGHT-SHELF_LOWER_FROM_TOP)];
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
     //backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL);
@@ -48,8 +50,12 @@ static dispatch_queue_t backgroundQueue;
 }
 
 -(void)initCarouselWithFrame:(CGRect)frame{
+    scrollFrameRegular = frame;
+    scrollFramePremium = frame;
+    scrollFramePremium.origin.y += 40;
+    scrollFramePremium.size.height -= 30;
     stixScroll = [[UIScrollView alloc] initWithFrame:frame];
-    carouselHeight = stixScroll.frame.size.height;
+    //carouselHeight = stixScroll.frame.size.height;
     stixScroll.showsHorizontalScrollIndicator = NO;
     stixScroll.scrollEnabled = YES;
     stixScroll.directionalLockEnabled = NO; // only allow vertical or horizontal scroll
@@ -59,8 +65,8 @@ static dispatch_queue_t backgroundQueue;
     [buttonShowCarousel addTarget:self action:@selector(didClickShowCarousel:) forControlEvents:UIControlEventTouchUpInside];
 
     buttonCategories = [[NSMutableArray alloc] init];
-    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun.png", @"txt_meme.png", @"txt_cute.png", @"txt_animals.png", @"txt_comics.png", @"txt_videogames.png", nil];
-    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun_selected.png", @"txt_meme_selected.png", @"txt_cute_selected.png", @"txt_animals_selected.png", @"txt_comics_selected.png", @"txt_videogames_selected.png", nil];
+    buttonCategoriesNotSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun.png", @"txt_meme.png", @"txt_cute.png", @"txt_animals.png", @"txt_comics.png", @"txt_videogames.png", @"txt_hipster.png", nil];
+    buttonCategoriesSelected = [[NSMutableArray alloc] initWithObjects:@"txt_facefun_selected.png", @"txt_meme_selected.png", @"txt_cute_selected.png", @"txt_animals_selected.png", @"txt_comics_selected.png", @"txt_videogames_selected.png", @"txt_hipster_selected.png", nil];
     float currentContentOrigin = 0;
     for (int i=0; i<[buttonCategoriesSelected count]; i++) {
         UIButton * button0 = [[UIButton alloc] init];
@@ -80,7 +86,8 @@ static dispatch_queue_t backgroundQueue;
     [categoryScroll setContentSize:CGSizeMake(currentContentOrigin+20, 70)];
     [categoryScroll setDelegate:self];    
                         
-    UIImageView * tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];    
+    tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];
+    [tabImage setAlpha:.75];
     carouselTab = [[UIView alloc] initWithFrame:tabImage.frame];
     [carouselTab addSubview:tabImage];
     [carouselTab addSubview:stixScroll];
@@ -124,6 +131,18 @@ static dispatch_queue_t backgroundQueue;
 
 -(void)didClickShelfCategory:(id)sender {
     UIButton * senderButton = (UIButton *)sender;
+    if (senderButton.tag == shelfCategory)
+        return;
+    
+    // remove purchase button if premium
+    NSMutableArray * premiumCategoryNames = [[NSMutableArray alloc] initWithObjects:@"hipster", nil];
+    for (NSString * categoryName in premiumCategoryNames) {
+        UIButton * button = [premiumPurchaseButtons objectForKey:categoryName];
+        if (button) {
+            [button removeFromSuperview];
+        }
+    }
+
     NSLog(@"Button pressed: %d", senderButton.tag);
     for (int i=0; i<[buttonCategories count]; i++) {
         UIButton * button = [buttonCategories objectAtIndex:i];
@@ -145,13 +164,11 @@ static dispatch_queue_t backgroundQueue;
 
 
 -(void)reloadAllStix {
-    [self reloadAllStixWithFrame:stixScroll.frame];
+    [self reloadAllStixWithFrame:scrollFrameRegular]; //stixScroll.frame];
 }
 -(void)reloadAllStixWithFrame:(CGRect)frame {
-    /*
-    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects: @"All", @"Animals", @"Anime", @"Art", @"Comics", @"Costumes", @"Cuddly and Cute", @"Decorations", @"Events", @"Face Fun", @"Fashion", @"Food and Drink", @"Geeky", @"Hollywood", @"Nature", @"Pranks", @"Sports", @"Symbols", @"Video Games", nil]; 
-     */
     NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects:@"facefun", @"memes", @"cute", @"animals", @"comics", @"videogames", nil]; 
+    NSMutableArray * premiumCategoryNames = [[NSMutableArray alloc] initWithObjects:@"hipster", nil];
     [stixScroll removeFromSuperview];
     stixScroll.frame = frame;
     
@@ -163,7 +180,26 @@ static dispatch_queue_t backgroundQueue;
     // create sets of all the categories to see if user has them requested stix
     NSMutableArray * categoryStix;
     NSMutableSet * categorySet = [[NSMutableSet alloc] init];
-    NSString * categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
+    NSString * categoryName;
+    
+    // check for premium category status
+    if (shelfCategory < [stixCategoryNames count]) {
+        categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
+    }
+    else {
+        categoryName = [premiumCategoryNames objectAtIndex:(shelfCategory - [stixCategoryNames count])];
+        if (![premiumPacksPurchased containsObject:categoryName]) {
+            // pack not purchased, add button
+            if ([premiumPurchaseButtons objectForKey:categoryName] == nil) {
+                UIButton * purchaseButton = [[UIButton alloc] initWithFrame:CGRectMake(165-372/4, scrollFramePremium.origin.y - 40, 372/2, 72/2)];
+                [purchaseButton setImage:[UIImage imageNamed:@"btn_addcollection@2x.png"] forState:UIControlStateNormal];
+                [purchaseButton setTag:shelfCategory];
+                //[purchaseButton addTarget:self action:@selector(didClickPurchasePremiumPack:) forControlEvents:UIControlEventTouchUpInside];
+                [premiumPurchaseButtons setObject:purchaseButton forKey:categoryName];
+            }
+            [stixScroll setFrame:scrollFramePremium];
+        }
+    }
     categoryStix = [BadgeView getStixForCategory:categoryName];
     [categorySet addObjectsFromArray:categoryStix];
     int stixToShow = [categorySet count];
@@ -212,7 +248,7 @@ static dispatch_queue_t backgroundQueue;
             CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
             [stix setCenter:stixCenter];
             [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
-            if (count == 0) {
+            if (count == 0 && ![premiumCategoryNames containsObject:categoryName]) {
                 //[stix setAlpha:.25];
                 UIImageView * buxImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_price.png"]];
                 CGRect buxFrame = CGRectMake(stixWidth/2-54/2, stix.frame.size.height-10, 54, 20);
@@ -230,48 +266,118 @@ static dispatch_queue_t backgroundQueue;
             [allCarouselStixViews setObject:stix forKey:stixStringID];
             [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
         }
-        else { //if (shelfCategory == SHELF_CATEGORY_FIRST) {
-            /*
-            // display nonowned stix, only on this category
-            int neworder = (totalStix - stixToPurchase - 1);
-            int y = neworder / STIX_PER_ROW;
-            int x = neworder - y*STIX_PER_ROW;
-            //NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-            //NSLog(@"Adding nonowned stix %@ = %@ to %d %d index %d, totalStix-stixToPurchase-1 %d", stixStringID, stixDescriptor, x, y, stixToPurchase, neworder);
-            UIImageView * stix = [[BadgeView getBadgeWithStixStringID:stixStringID] retain];
-            NSString * stixDescriptor = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-            if (stix.alpha == 0) {
-                // debug
-                if (0) {
-                    stix.alpha = 1;
-                    float r = order/orderCtForFilters;
-                    float g = 0;
-                    float b = 1 - r;
-                    //NSLog(@"CarouselView: Stix %@ order %d needs to be loaded! rgb %f %f %f", stixStringID, order, r, g, b);
-                    //[stix setBackgroundColor:[UIColor colorWithRed:r green:g blue:b alpha:1]];
-                }
-                // add stix to own list
-                [allCarouselMissingStixStringIDs addObject:stixStringID];
-                [allCarouselMissingStixStringOpacity setObject:[NSNumber numberWithDouble:.5] forKey:stixStringID];
-                [self requestStixFromKumulos:stixStringID];
-            }
-            CGPoint stixCenter = CGPointMake(stixWidth*(x+NUM_STIX_FOR_BORDER) + stixWidth / 2, stixHeight*(y+NUM_STIX_FOR_BORDER) + stixHeight/2);
-            [stix setCenter:stixCenter];
-            [allCarouselStixFrames setObject:[NSValue valueWithCGRect:stix.frame] forKey:stixStringID];
-            [allCarouselStixStringIDsAtFrame setObject:stixStringID forKey:[NSValue valueWithCGRect:stix.frame]];
-            [stix setAlpha:.5];
-            UIImageView * buxImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"5bux.png"]];
-            [buxImg setFrame:CGRectMake(0,stix.frame.size.height+5,stix.frame.size.width, 18)];
-            [stix addSubview:buxImg];
-            [stixScroll addSubview:stix];
-            [allCarouselStixViews setObject:stix forKey:stixStringID];
-            [stix release];
-            [buxImg release];
-            stixToPurchase++;
-             */
-        }
     }
     [carouselTab addSubview:stixScroll];
+
+    // pack not purchased, add button
+    if (![premiumPacksPurchased containsObject:categoryName])
+    {
+        NSEnumerator * e = [premiumPurchaseButtons keyEnumerator];
+        for (id key in e) {
+            UIButton * button = [premiumPurchaseButtons objectForKey:key];
+            [button removeFromSuperview];        
+        }
+        [carouselTab addSubview:[premiumPurchaseButtons objectForKey:categoryName]];
+    }
+}
+
+-(void)unlockPremiumPack:(NSString *)stixPackName {
+    [premiumPacksPurchased addObject:stixPackName];
+    // remove button 
+    NSEnumerator * e = [premiumPurchaseButtons keyEnumerator];
+    for (id key in e) {
+        UIButton * button = [premiumPurchaseButtons objectForKey:key];
+        [button removeFromSuperview];        
+    }
+    [self reloadAllStix];
+}
+
+-(void)premiumPurchasePrompt:(NSString*)categoryName {
+#if 0
+    NSString *firstChar = [categoryName substringToIndex:1];
+    NSString * category = [[firstChar uppercaseString] stringByAppendingString:[categoryName substringFromIndex:1]];
+    //NSString * category = [categoryName uppercaseString];
+    NSString * title = @"Purchase Premium Collection";
+    NSString * message = [NSString stringWithFormat:@"Do you want to buy the %@ Stix collection for $0.99?", category];
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:title
+                                                     message:message
+                                                    delegate:self
+                                           cancelButtonTitle:@"Cancel"
+                                           otherButtonTitles:@"Purchase", nil];    
+    [alert show];
+#else
+    BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:[self getCurrentCategory]]; // BOBBY
+    NSLog(@"Purchase prompt returned %d", mkStoreKitSuccess);
+#endif
+}
+/*
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) { 
+        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
+        // cancel
+        return;
+    }
+    else if (buttonIndex == 1) {
+        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
+        // mkStoreKitSuccess not used; comes here if we clickon the Add Collection button
+        // and success/cancel is handled in mkStoreKit call
+        BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:[self getCurrentCategory]]; // BOBBY
+    }
+    return;
+}
+ */
+
+-(void)didClickPurchasePremiumPack:(UIButton*)sender {
+    // does not come here because button does not have target
+    if (sender.tag != shelfCategory) {
+        NSLog(@"Error! current category not the button pressed!");
+        return;
+    }
+    
+    NSString * categoryName = [self getCurrentCategory];
+    NSLog(@"Did purchase premium pack: %@", categoryName);
+    // mkStoreKitSuccess not used; comes here if we clickon the Add Collection button
+    // and success/cancel is handled in mkStoreKit call
+    BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:categoryName]; // BOBBY
+
+    UIButton * button = [premiumPurchaseButtons objectForKey:categoryName];
+    if (button) {
+        [button removeFromSuperview];
+        [premiumPurchaseButtons removeObjectForKey:categoryName];
+    }
+}
+
+-(BOOL)isPremiumStix:(NSString *) stixStringID {
+    NSMutableArray * premiumCategoryNames = [[NSMutableArray alloc] initWithObjects:@"hipster", nil];
+    for (NSString * categoryName in premiumCategoryNames) {
+        NSMutableArray * categoryStix = [BadgeView getStixForCategory:categoryName];
+        if ([categoryStix containsObject:stixStringID])
+            return YES;
+    }
+    return NO;
+}
+
+-(BOOL)isPremiumStixPurchased:(NSString *)stixStringID {
+    NSMutableArray * premiumCategoryNames = [[NSMutableArray alloc] initWithObjects:@"hipster", nil];
+    for (NSString * categoryName in premiumCategoryNames) {
+        NSMutableArray * categoryStix = [BadgeView getStixForCategory:categoryName];
+        if ([categoryStix containsObject:stixStringID])
+            return [premiumPacksPurchased containsObject:categoryName];
+    }
+    return NO;
+}
+
+-(NSString*)getCurrentCategory {
+    NSMutableArray * stixCategoryNames = [[NSMutableArray alloc] initWithObjects:@"facefun", @"memes", @"cute", @"animals", @"comics", @"videogames", nil]; 
+    NSMutableArray * premiumCategoryNames = [[NSMutableArray alloc] initWithObjects:@"hipster", nil];
+    NSString * categoryName;
+    if (shelfCategory < [stixCategoryNames count]) {
+        categoryName = [stixCategoryNames objectAtIndex:shelfCategory];
+    }
+    else {
+        categoryName = [premiumCategoryNames objectAtIndex:(shelfCategory - [stixCategoryNames count])];
+    }
+    return categoryName;
 }
 
 -(void)clearAllViews {
@@ -553,6 +659,21 @@ static int lastContentOffsetY = 0;
                     break;
                 }
             }
+            
+            // check for clicking of premium button
+            //CGPoint locationRelativeToButton = location;
+            //locationRelativeToButton.y += 36; //  button is not located in scrollView
+            location = [sender locationInView:carouselTab];
+            e = [premiumPurchaseButtons keyEnumerator];
+            while (key = [e nextObject])
+            {
+                UIButton * purchaseButton = [premiumPurchaseButtons objectForKey:key];
+                CGRect frame = [purchaseButton frame];
+                if (CGRectContainsPoint(frame, location) && purchaseButton.tag == shelfCategory) {
+                    [self premiumPurchasePrompt:[self getCurrentCategory]];
+                    break;
+                }
+            }
         }
     }
 }
@@ -592,6 +713,7 @@ static int lastContentOffsetY = 0;
     else {
         // use this the first time to dismiss tab without animating it
         [carouselTab setFrame:tabFrameHidden];
+        [tabImage setAlpha:1];
     }
 }
 
@@ -607,6 +729,7 @@ static int lastContentOffsetY = 0;
     else {
 */
     if (1) {
+        [tabImage setAlpha:.9];
         [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
         [buttonShowCarousel setFrame:tabButtonShow];
         isShowingCarousel = YES;
@@ -623,7 +746,8 @@ static int lastContentOffsetY = 0;
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
-    // do nothing for carousel button
+    if (animationID == tabAnimationIDDismiss)
+        [tabImage setAlpha:1];
 }
 
 -(void)didClickShowCarousel:(id)sender {

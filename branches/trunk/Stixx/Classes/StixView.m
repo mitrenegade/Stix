@@ -222,20 +222,20 @@ static int currentStixViewID = 0;
     
     UIRotationGestureRecognizer *myRotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)]; //(pinchRotateHandler:)];
     [myRotateRecognizer setDelegate:self];
-    
-#if 0
-    UITapGestureRecognizer * myTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
-    [myTapRecognizer setNumberOfTapsRequired:2];
-    [myTapRecognizer setNumberOfTouchesRequired:1];
-    [myTapRecognizer setDelegate:self];
-
-    if (isPeelable)
-        [self addGestureRecognizer:myTapRecognizer];
-#endif
-    
+        
     if (interactionAllowed) {
         [self addGestureRecognizer:myPinchRecognizer];
         [self addGestureRecognizer:myRotateRecognizer];    
+
+#if 0
+        UITapGestureRecognizer * myDoubleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
+        [myDoubleTapRecognizer setNumberOfTapsRequired:2];
+        [myDoubleTapRecognizer setNumberOfTouchesRequired:1];
+        [myDoubleTapRecognizer setDelegate:self];
+        
+        //if (isPeelable)
+        [self addGestureRecognizer:myDoubleTapRecognizer];
+#endif
     }
 
     // display transform box 
@@ -599,6 +599,7 @@ static int currentStixViewID = 0;
 
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
     // do nothing
+    NSLog(@"Double tap!");
 }
 
 //-(void)pinchGestureHandler:(UIPinchGestureRecognizer*) gesture {
@@ -726,7 +727,7 @@ static int currentStixViewID = 0;
             NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
             NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
             //stixPeelSelected = lastStixView;
-            UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", @"Stick", /*@"Move", */nil];
+            UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", /*@"Stick", @"Move", */nil];
             [actionSheet showInView:self];
 
             UIImageView * currStix = [auxStixViews objectAtIndex:lastStixView];
@@ -760,9 +761,11 @@ static int currentStixViewID = 0;
             [self doPeelAnimationForStix];    
             break;
         case 1: // Stick
+            /*
             //self.isPeelable = NO;
             if ([self.delegate respondsToSelector:@selector(didAttachStix:)])
                 [self.delegate didAttachStix:stixPeelSelected]; // will cause new StixView to be created
+             */
             break;
         case 2: // Cancel
             return;

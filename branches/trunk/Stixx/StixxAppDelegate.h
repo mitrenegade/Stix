@@ -8,6 +8,7 @@
 
 #define USING_KIIP 0
 #define USING_FACEBOOK 1
+#define USING_MKSTOREKIT 1
 
 #import <UIKit/UIKit.h>
 
@@ -42,7 +43,7 @@
 #endif
 #import "VerticalFeedController.h"
 
-#if USE_MKSTOREKIT
+#if USING_MKSTOREKIT
 #import "MKStoreKitConfigs.h"
 #import "MKStoreManager.h"
 #import "MKStoreObserver.h"
@@ -55,7 +56,8 @@ enum notification_bookmarks {
     NB_PEELACTION,
     NB_UPDATECAROUSEL,
     NB_INCREMENTBUX,
-    NB_NEWFOLLOWER
+    NB_NEWFOLLOWER,
+    NB_NEWPIX
 };
 
 enum alertview_actions {
@@ -88,7 +90,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, SKProductsRequestDelegate> {
     
     UIWindow *window;
     
@@ -173,7 +175,7 @@ struct UserInfo {
 
     NSData * notificationDeviceToken; // if nil, not ready to register yet
     int notificationBookmarkType;
-    int notificationTagID;
+    NSNumber * notificationTagID;
     NSString * notificationTargetChannel;
     bool updatingNotifiedTagDoJump;
     bool isUpdatingNotifiedTag;
@@ -203,6 +205,7 @@ struct UserInfo {
     BOOL isShowingBuxInstructions;
     UIButton * buttonBuxStore;
     
+    BOOL mkStoreKitSuccess; // hack
     FeedbackViewController * feedbackController;
 }
 
@@ -222,9 +225,7 @@ struct UserInfo {
 -(void)updateCommentCount:(int)tagID;
 -(void)adminUpdateAllStixCountsToZero;
 -(void)adminIncrementAllUsersBuxCounts;
--(void)adminIncrementAllStixCounts;
 -(void) adminSetAllUsersBuxCounts;
--(void)adminSetUnlimitedStix;
 -(void)adminEasterEggShowMenu:(NSString*)password;
 -(void)updateUserTagTotal;
 -(void)changeBuxCountByAmount:(int)change;
@@ -234,14 +235,13 @@ struct UserInfo {
 -(Tag*) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
--(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID;
+-(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID;
 //-(void) Parse_unsubscribeFromAll;
 
 -(void) Parse_createSubscriptions;
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
--(void)rewardStix;
 -(void)rewardBux;
 -(void)rewardLocation;
 -(void)logMetricTimeInApp;

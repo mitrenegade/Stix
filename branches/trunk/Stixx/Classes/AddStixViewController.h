@@ -26,7 +26,7 @@
 -(int)getStixOrder:(NSString*)stixStringID;
 -(int)getBuxCount;
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
-
+-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 @end
 
 @interface AddStixViewController : UIViewController <BadgeViewDelegate, UITextFieldDelegate, LocationHeaderViewControllerDelegate, UIGestureRecognizerDelegate>{

@@ -29,6 +29,7 @@
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+@optional
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;
 -(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController *)detailController;
 @end

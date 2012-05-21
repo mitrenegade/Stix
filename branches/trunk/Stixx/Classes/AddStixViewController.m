@@ -200,23 +200,43 @@
     
 }
 
--(IBAction)buttonOKPressed:(id)sender
-{
-    // check to see if this sticker requires a purchase
-    int cost = 5;
-    if ((carouselView.stixSelected != nil) && [self.delegate getStixCount:carouselView.stixSelected] == 0) {
-        if ([self.delegate getBuxCount] < cost) {
-            UIAlertView* alert = [[UIAlertView alloc]init];
-            [alert addButtonWithTitle:@"Ok"];
-            [alert setTitle:@"Cannot use this Stix!"];
-            [alert setMessage:@"You don't own this Stix and have no Bux to buy it! You can earn more Bux by using Stix you already own."];
-            [alert show];
-            return;
-        }
-        // purchase
-        [self.delegate didPurchaseStixFromCarousel:carouselView.stixSelected];
+-(void)premiumPurchasePrompt:(NSString*)categoryName {
+#if 0
+    /* get first char */
+    NSString *firstChar = [categoryName substringToIndex:1];
+    NSString * category = [[firstChar uppercaseString] stringByAppendingString:[categoryName substringFromIndex:1]];
+    //NSString * category = [categoryName uppercaseString];
+    NSString * title = @"Purchase Premium Collection";
+    NSString * message = [NSString stringWithFormat:@"Do you want to buy the %@ Stix collection for $0.99?", category];
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:title
+                                       message:message
+                                      delegate:self
+                             cancelButtonTitle:@"Cancel"
+                             otherButtonTitles:@"Purchase", nil];    
+    [alert show];
+#else
+    BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:[carouselView getCurrentCategory]];
+    if (mkStoreKitSuccess) 
+        [self doAddStix];
+#endif
+}
+/*
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) { 
+        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
+        // cancel
+        return;
     }
-    
+    else if (buttonIndex == 1) {
+        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
+        BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:[carouselView getCurrentCategory]];
+        if (mkStoreKitSuccess) 
+            [self doAddStix];
+    }
+    return;
+}
+ */
+-(void)doAddStix {
     // scale stix frame back
     float imageScale = 1;
     CGRect stixFrameScaled = stixView.stix.frame;
@@ -237,6 +257,38 @@
     NSLog(@"TagDescriptor: didAddDescriptor adding badge of size %f %f at %f %f in image size %f %f\n", stixFrameScaled.size.width, stixFrameScaled.size.height, centerx, centery, imageView.frame.size.width * imageScale, imageView.frame.size.height * imageScale);
 	[delegate didAddDescriptor:[commentField text] andComment:[commentField2 text] andLocation:[locationField text]];
     [delegate didAddStixWithStixStringID:[stixView selectStixStringID] withLocation:CGPointMake(centerx, centery) withTransform:stixTransform];
+}
+
+-(IBAction)buttonOKPressed:(id)sender
+{
+    // check to see if this sticker requires a purchase
+    if ([carouselView isPremiumStix:carouselView.stixSelected]) {
+        if (![carouselView isPremiumStixPurchased:carouselView.stixSelected]) {
+            NSString * stixCategory = [carouselView getCurrentCategory];
+            // prompt to purchase
+            [self premiumPurchasePrompt:stixCategory];
+        }
+        else {
+            [self doAddStix];
+        }
+    }
+    else {
+        int cost = 5;
+        if ((carouselView.stixSelected != nil) && [self.delegate getStixCount:carouselView.stixSelected] == 0) {
+            if ([self.delegate getBuxCount] < cost) {
+                UIAlertView* alert = [[UIAlertView alloc]init];
+                [alert addButtonWithTitle:@"Ok"];
+                [alert setTitle:@"Cannot use this Stix!"];
+                [alert setMessage:@"You don't own this Stix and have no Bux to buy it! You can earn more Bux by using Stix you already own."];
+                [alert show];
+                return;
+            }
+            // purchase
+            [self.delegate didPurchaseStixFromCarousel:carouselView.stixSelected];
+        }
+        
+        [self doAddStix];
+    }
 }
 
 -(IBAction)buttonCancelPressed:(id)sender
@@ -313,7 +365,7 @@
     // reserves the carousel for self
     [self setCarouselView:[CarouselView sharedCarouselView]];
     carouselView.delegate = self;
-    [carouselView setExpandedTabY:5-20+100]; // hack: a bit lower
+    [carouselView setExpandedTabY:5-20+SHELF_LOWER_FROM_TOP]; // hack: a bit lower
     [carouselView setDismissedTabY:375-20];
     [carouselView setAllowTap:YES];
 //    [carouselView setTapDefaultOffset:CGPointMake(imageView.center.x / 2, imageView.center.y/2)];//carouselView.frame.origin.x - self.aperture.center.x, carouselView.frame.origin.y - self.aperture.center.y)];
@@ -356,12 +408,22 @@
         [self didDropStixByTap:stixStringID atLocation:center];
     }
     
-    int count = [self.delegate getStixCount:stixStringID];
-    if (count == 0) {
-        [priceView setText:@"5 Bux"];
+    if ([carouselView isPremiumStix:stixStringID]) {
+        [priceView setFrame:CGRectMake(260-15, 420, 80, 30)];
+        if (![carouselView isPremiumStixPurchased:stixStringID])
+            [priceView setText:@"Premium"];
+        else
+            [priceView setText:@""];
     }
-    else
-        [priceView setText:@""];
+    else {
+        [priceView setFrame:CGRectMake(260, 420, 80, 30)];
+        int count = [delegate getStixCount:stixStringID];
+        if (count == 0) {
+            [priceView setText:@"5 Bux"];
+        }
+        else
+            [priceView setText:@""];
+    }
 }
 
 -(void)didDropStixByTap:(NSString*)stixStringID atLocation:(CGPoint)location{
@@ -397,13 +459,24 @@
     [stixView populateWithStixForManipulation:stixStringID withCount:1 atLocationX:location.x andLocationY:location.y /*andScale:1 andRotation:0*/];
     didAddStixToStixView = YES;
 
-    int count = [self.delegate getStixCount:stixStringID];
-    if (count == 0) {
-        [priceView setText:@"5 Bux"];
+    if ([carouselView isPremiumStix:stixStringID]) {
+        [priceView setFrame:CGRectMake(260-15, 420, 80, 30)];
+        if (![carouselView isPremiumStixPurchased:stixStringID]) {
+            [priceView setText:@"Premium"];
+        }
+        else {
+            [priceView setText:@""];
+        }
     }
-    else
-        [priceView setText:@""];
-}
+    else {
+        int count = [delegate getStixCount:stixStringID];
+        [priceView setFrame:CGRectMake(260-15, 420, 80, 30)];
+        if (count == 0) {
+            [priceView setText:@"5 Bux"];
+        }
+        else
+            [priceView setText:@""];
+    }}
 
 -(int)getStixCount:(NSString*)stixStringID {
     return [delegate getStixCount:stixStringID];
@@ -432,6 +505,11 @@
         // auto take a photo?
         // focus?
     }
+}
+
+-(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
+    // just pass on
+    return [delegate shouldPurchasePremiumPack:stixPackName];
 }
 
 @end

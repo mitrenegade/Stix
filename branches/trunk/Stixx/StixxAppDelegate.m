@@ -1,4 +1,3 @@
-
 //
 //  StixxAppDelegate.m
 //  Stixx
@@ -85,17 +84,16 @@ static dispatch_queue_t backgroundQueue;
     k = [[Kumulos alloc]init];
     [k setDelegate:self];
     [self setLastKumulosErrorTimestamp: [NSDate dateWithTimeIntervalSinceReferenceDate:0]];
-    
-    /*** Parse service ***/
-    /*
-     PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
-     [testObject setObject:@"bar" forKey:@"foo"];
-     [testObject save];
-     */
-    
+        
     /*** MKStoreKit ***/
-    //[MKStoreManager sharedManager];
-    
+    [MKStoreManager sharedManager];
+#if 0
+    /*** doing store kit stuff manually ***/
+    NSSet * productIDs = [[NSSet alloc] initWithObjects:@"collection.Hipster", nil];
+    SKProductsRequest * productRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIDs];
+    [productRequest setDelegate:self];
+    [productRequest start];
+#endif
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
 
@@ -155,7 +153,7 @@ static dispatch_queue_t backgroundQueue;
     [KPManager setSharedManager:manager];
     [manager release];
 #endif
-    
+        
     /*** Facebook service ***/
     fbHelper = [FacebookHelper sharedFacebookHelper]; //[[FacebookHelper alloc] init];
     [fbHelper setDelegate:self];
@@ -191,6 +189,7 @@ static dispatch_queue_t backgroundQueue;
     [self loadUserInfoFromDefaults];
     dispatch_async(backgroundQueue, ^{
         [BadgeView InitializeDefaultStixTypes];
+        [BadgeView InitializePremiumStixTypes];
         stixViewsLoadedFromDisk = [self loadStixDataFromDefaults];
     });
     /*
@@ -337,7 +336,19 @@ static dispatch_queue_t backgroundQueue;
     
     return YES;
 }
-
+/*
+-(void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response {
+    NSLog(@"Received products response!");
+    for (int i=0; i<[response.products count]; i++) {
+        SKProduct * product = [response.products objectAtIndex:i];
+        NSLog(@"Product %d: %@", i, product.description);
+    }
+    for (int i=0; i<[response.invalidProductIdentifiers count]; i++) {
+        NSString * invalidProductID = [response.invalidProductIdentifiers objectAtIndex:i];
+        NSLog(@"Invalid product %d: %@", i, invalidProductID);
+    }
+}
+*/
 -(void)getFirstTags {
     [k getLastTagIDWithNumEls:[NSNumber numberWithInt:3]];
 }
@@ -872,7 +883,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([error code] == 3010) {
         NSLog(@"Push notifications don't work in the simulator!");
     } else {
-        NSLog(@"didFailToRegisterForRemoteNotificationsWithError: %@", error);
+        NSLog(@"didFailToRegisterForRemoteNotificationsWithError: %@", [error description]);
     }
 }
 
@@ -977,11 +988,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // this function migrates toward not using the basic stix
     newestTag = newTag;
     
-    NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
+    //NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
     //UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
     
     // this must match Tag.m:getTagFromDictionary
-    NSMutableData *theCoordData = nil;
+    //NSMutableData *theCoordData = nil;
     /*
     NSKeyedArchiver *encoder;
     theCoordData = [NSMutableData data];
@@ -1028,8 +1039,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 //-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createNewPixDidCompleteWithResult:(NSNumber *)newRecordID {
 -(void)khCallback_didCreateNewPix:(NSArray*)returnParams {
+    // get that record and add to feed
     NSNumber * newRecordID = [returnParams objectAtIndex:0];
     [k getNewlyCreatedPixWithAllTagID:[newRecordID intValue]];
+    
+    // send notification
+    NSString * message = [NSString stringWithFormat:@"%@ added a new photo to remix.", myUserInfo_username];
+    NSString * channel = @"";
+    [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newRecordID];
+}
+
+-(void)kumulosHelperCreateNewPixDidFail:(Tag *)failedTag {
+    [feedController showReloadPendingPix:failedTag];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewlyCreatedPixDidCompleteWithResult:(NSArray *)theResults {
@@ -1195,15 +1216,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self.camera setCameraOverlayView:tabBarController.view];
 #endif
             [tabBarController setSelectedIndex:0];
-            BOOL exists = [feedController jumpToPageWithTagID:notificationTagID];
+            BOOL exists = [feedController jumpToPageWithTagID:[notificationTagID intValue]];
             if (!exists) {
                 NSLog(@"How come no exist?!");
             }
         }
         [feedController reloadCurrentPage]; // allTags were already updated
-        [self updateCommentCount:notificationTagID];
+        [feedController configureCarouselView];
+        [self updateCommentCount:[notificationTagID intValue]];
         if (notificationBookmarkType == NB_NEWCOMMENT) {
-            [feedController openCommentForPageWithTagID:[NSNumber numberWithInt:notificationTagID]];
+            [feedController openCommentForPageWithTagID:notificationTagID];
         }
         updatingNotifiedTagDoJump = NO;
         isUpdatingNotifiedTag = NO;
@@ -1287,7 +1309,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 article = @"an";
             }
             NSString * message = [NSString stringWithFormat:@"%@ added %@ %@ to your Pix!", myUserInfo_username, article, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
-            [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
+            [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID];
         }
         // replace old tag in allTags
         [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
@@ -1358,7 +1380,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [encoder finishEncoding];
         [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
         // send a notification to update for a peel/stick action, but no need to acknowledge or jump to the tag
-        [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID orGiftStix:nil];
+        [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID];
         
          // MRC
     }
@@ -1621,7 +1643,27 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
     NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
 
-    if (![comment isEqualToString:@""]) {
+    if ([stixStringID isEqualToString:@"LIKE"]) {
+        // comment from the Like Toolbar
+        
+        // notify
+        NSString * actionMsg;
+        if ([comment isEqualToString:@"LIKE_SMILES"])
+            actionMsg = [NSString stringWithFormat:@"%@ smiled at your Pix.", myUserInfo_username];
+        if ([comment isEqualToString:@"LIKE_LOVE"])
+            actionMsg = [NSString stringWithFormat:@"%@ loves your Pix.", myUserInfo_username];
+        if ([comment isEqualToString:@"LIKE_WINK"])
+            actionMsg = [NSString stringWithFormat:@"%@ winked at your Pix.", myUserInfo_username];
+        if ([comment isEqualToString:@"LIKE_SHOCKED"])
+            actionMsg = [NSString stringWithFormat:@"%@ is shocked by your Pix.", myUserInfo_username];
+        Tag * tag = [self getTagWithID:tagID];
+        if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
+        {
+            if (![tag.username isEqualToString:[self getUsername]])
+                [self Parse_sendBadgedNotification:actionMsg OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID];
+        }
+    }
+    else if ([stixStringID isEqualToString:@"COMMENT"]) { //![comment isEqualToString:@""]) {
         // actual comment
 
         // notify
@@ -1630,7 +1672,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
             if (![tag.username isEqualToString:[self getUsername]])
-                [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID orGiftStix:nil];
+                [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID];
         }
         [self updateUserTagTotal];
         
@@ -1723,8 +1765,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    /*
     NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo_username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
-    [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil orGiftStix:stixStringID];
+    [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil];
+     */
 }
 
 //- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
@@ -2167,6 +2211,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     });
      */
     
+    // check for premium
+    [k getUserPremiumPacksWithUsername:myUserInfo_username];
+    
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
 }
 
@@ -2329,7 +2376,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         followListsDidChangeDuringProfileView = YES;
         
         NSString * message = [NSString stringWithFormat:@"%@ is now following you on Stix.", [self getUsername]];
-        [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:friendName withTag:nil orGiftStix:nil];
+        [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:friendName withTag:nil];
     }
     else {
         [allFollowing removeObject:friendName];
@@ -2422,6 +2469,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k addAuxiliaryStixToPixWithTagID:[tag.tagID intValue] andStixStringID:stixStringID andX:location.x andY:location.y andTransform:NSStringFromCGAffineTransform(transform)];
 #endif
     
+    // send notification
+    // if adding to own pix, do not notify or broadcast
+    if (![myUserInfo_username isEqualToString:tag.username]) {
+        NSString * message = [NSString stringWithFormat:@"%@ added %@ to your Pix!", myUserInfo_username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
+        [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID];
+    }
+    
     //[k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
     
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
@@ -2462,7 +2516,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
 
-    [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID orGiftStix:nil];
+    [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID];
     
     NSMutableArray * params2 = [[NSMutableArray alloc] initWithObjects:tag.tagID, peeledAuxStixStringID, [NSValue valueWithCGPoint:peeledLocation], nil]; 
     KumulosHelper * kh2 = [[KumulosHelper alloc] init];
@@ -2573,32 +2627,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     //[self changeBuxCountByAmount:amount];
 }
--(void)rewardStix {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSString * newStixStringID = [BadgeView getRandomStixStringID];
-    int count = [[allStix objectForKey:newStixStringID] intValue];
-    if (count == 0) {
-#if USING_KIIP
-        [[KPManager sharedManager] unlockAchievement:@"1"];
-#else
-        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded a new Stix: %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-#endif
-    }
-    else
-    {
-#if USING_KIIP
-        [[KPManager sharedManager] unlockAchievement:@"1"];
-#else
-        [self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have earned additional %@!", [BadgeView getStixDescriptorForStixStringID:newStixStringID]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-#endif
-    }
-    [allStix setObject:[NSNumber numberWithInt:count+3] forKey:newStixStringID];
-    [self reloadAllCarousels];
-    NSMutableData * data = [KumulosData dictionaryToData:allStix];
-    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
-}
 
 -(void)updateUserTagTotal {
 #if DEBUGX==1
@@ -2608,7 +2636,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     myUserInfo->usertagtotal += 1;
     [k updateTotalTagsWithUsername:myUserInfo_username andTotalTags:myUserInfo->usertagtotal];
     if ((myUserInfo->usertagtotal % 5) == 0) {
-        //[self rewardStix];
         [self rewardBux];
         //[self reloadAllCarousels];
     }
@@ -2819,45 +2846,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    [self Parse_sendBadgedNotification:@"Ninja admin stix update" OfType:NB_UPDATECAROUSEL toChannel:@"" withTag:nil orGiftStix:nil];
-}
-
--(void)adminIncrementAllStixCounts {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    int totalStixTypes = [BadgeView totalStixTypes];
-    NSLog(@"Total stix: %d", totalStixTypes);
-    for (int i=0; i<totalStixTypes; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-        int count = [[allStix objectForKey:stixStringID] intValue];
-        NSLog(@"New count for %@: %d", stixStringID, count+1);
-        [allStix setObject:[NSNumber numberWithInt:count+1] forKey:stixStringID];
-    }
-    [self reloadAllCarousels];
-    NSMutableData * data = [KumulosData dictionaryToData:allStix];
-    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
-    //[data autorelease]; // arc conversion
-}
-
--(void)adminSetUnlimitedStix {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    int totalStixTypes = [BadgeView totalStixTypes];
-    NSLog(@"Total stix: %d", totalStixTypes);
-    for (int i=0; i<totalStixTypes; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-        int order = [[allStixOrder objectForKey:stixStringID] intValue];
-        int count = [[allStix objectForKey:stixStringID] intValue];
-        NSLog(@"For %@: old count %d order %d", stixStringID, count, order);
-        if (order != -1)
-            [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
-    }
-    [self reloadAllCarousels];
-    NSMutableData * data = [KumulosData dictionaryToData:allStix];
-    [k addStixToUserWithUsername:myUserInfo_username andStix:data];
-    //[data autorelease]; // arc conversion
+    [self Parse_sendBadgedNotification:@"Ninja admin stix update" OfType:NB_UPDATECAROUSEL toChannel:@"" withTag:nil];
 }
 
 -(void)adminResetAllStixOrders {
@@ -3087,7 +3076,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     int buxIncrement = 5;
     [k adminIncrementAllUserBuxWithBux:buxIncrement];
     
-    [self Parse_sendBadgedNotification:[NSString stringWithFormat:@"Your Bux have been incremented by %d", buxIncrement] OfType:NB_INCREMENTBUX toChannel:@"" withTag:nil orGiftStix:nil];
+    [self Parse_sendBadgedNotification:[NSString stringWithFormat:@"Your Bux have been incremented by %d", buxIncrement] OfType:NB_INCREMENTBUX toChannel:@"" withTag:nil];
 }
 
 -(Tag*) getTagWithID:(int)tagID {
@@ -3108,6 +3097,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
+    
+    /*** Parse service ***/
+#if 1
+    PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
+    [testObject setObject:myUserInfo_username forKey:@"foo"];
+    [testObject save];
+#endif
+
     [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
         NSEnumerator * e = [channels objectEnumerator];
         id element;
@@ -3165,24 +3162,25 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 
--(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID orGiftStix:(NSString*)giftStixStringID {
+-(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     NSString * channel_ = [channel stringByReplacingOccurrencesOfString:@" " withString:@""];
-    NSLog(@"Parse: sending notification to channel <%@>", channel_);
+    NSLog(@"Parse: sending notification to channel <%@> with message: %@", channel_, message);
 
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX || type == NB_NEWFOLLOWER)
+    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX || type == NB_NEWFOLLOWER || type == NB_NEWPIX)
         [data setObject:message forKey:@"alert"];
-    [data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
-    [data setObject:[NSNumber numberWithInt:type] forKey:@"notificationBookmarkType"];
+    [data setObject:myUserInfo_username forKey:@"sender"];
+    //[data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
+    [data setObject:[NSNumber numberWithInt:type] forKey:@"nbType"]; //notificationBookmarkType
     [data setObject:message forKey:@"message"];
     [data setObject:channel_ forKey:@"channel"];
     if (tagID != nil)
         [data setObject:tagID forKey:@"tagID"];
-    if (giftStixStringID != nil)
-        [data setObject:giftStixStringID forKey:@"giftStixStringID"];
+//    if (giftStixStringID != nil)
+//        [data setObject:giftStixStringID forKey:@"giftStixStringID"];
     [PFPush sendPushDataToChannelInBackground:channel_ withData:data];
 }
 
@@ -3197,7 +3195,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
     // debug - display userInfo
     NSLog(@"%@", userInfo);
     //NSDictionary * aps = [userInfo objectForKey:@"aps"]; 
-    notificationBookmarkType = [[userInfo objectForKey:@"notificationBookmarkType"] intValue];
+    notificationBookmarkType = [[userInfo objectForKey:@"nbType"] intValue];
     // todo: client should track badge counts and set them this way:
     //[UIApplication sharedApplication].applicationIconBadgeNumber = badgeCount;
 
@@ -3207,6 +3205,15 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         NSLog(@"Key: %@", key);
     }
     bool doAlert = NO;
+#if 1
+    notificationTagID = [userInfo objectForKey:@"tagID"];
+    if (notificationBookmarkType == NB_NEWSTIX || notificationBookmarkType == NB_NEWCOMMENT) 
+        doAlert = YES;
+    if (notificationBookmarkType == NB_NEWPIX && 
+        (![[userInfo objectForKey:@"sender"] isEqualToString:myUserInfo_username])) {
+            doAlert = YES;
+        }
+#else
     switch (notificationBookmarkType) {
         case NB_NEWSTIX: 
         {
@@ -3224,7 +3231,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             doAlert = YES;
             break;
         }
-            
+        /*
         case NB_NEWGIFT:
         {
             notificationTagID = -1;
@@ -3232,46 +3239,53 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             doAlert = YES;
             break;
         }
+         */
             
         case NB_PEELACTION:
         {
             // a general tag update - either a stix was peeled or attached, or a stix or comment was added to a tag but not the user's tag
             notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
-            notificationGiftStixStringID = nil;
-            break;
         }
             
         case NB_UPDATECAROUSEL:
         {
             notificationTagID = -1;
-            notificationGiftStixStringID = nil;
         }
             break;
             
         case NB_INCREMENTBUX: 
         {
             notificationTagID = -1;
-            notificationGiftStixStringID = nil;
             doAlert = NO; // do not show general alert - go to bookmark jump
         }
             break;
-            
+         
+        case NB_NEWPIX: {
+            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
+            doAlert = YES;
+            break;
+        }
         default:
             break;
     }
+#endif
 
     notificationTargetChannel = [[userInfo objectForKey:@"channel"] copy];
     NSString * message = [userInfo objectForKey:@"message"]; // get alert message
-    NSLog(@"Message %@ for channel %@", message, notificationTargetChannel);
+    NSLog(@"Message %@ for channel <%@>", message, notificationTargetChannel);
 
-    if ( application.applicationState == UIApplicationStateActive && ([notificationTargetChannel isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]] || [notificationTargetChannel isEqualToString:@""]) && doAlert) {
+    if ( application.applicationState == UIApplicationStateActive && doAlert) {
         // app was already in the foreground
-        // create something that will parse and jump to the correct tag
-        [self showAlertWithTitle:@"Stix Alert" andMessage:message andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_NOTIFICATION];
+        if ([notificationTargetChannel isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]] || [notificationTargetChannel isEqualToString:@""]) {
+            // if target channel is Broadcast or this user
+            // create something that will parse and jump to the correct tag
+            [self showAlertWithTitle:@"Stix Alert" andMessage:message andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_NOTIFICATION];
+        }
     }
     else {
         // app was just brought from background to foreground due to clicking
         // because the user clicked, we treat the behavior same as "View" 
+        // the target channel in this case must have been broadcast or self
         [self handleNotificationBookmarks:YES withMessage:message];
     }
 #endif
@@ -3281,9 +3295,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    // message is only used for NB_GENERAL - if coming from offline
-    if (notificationTagID == -1) {
-        // gift stix only - no need to jump to or update feed
+    if (notificationTagID == nil) { //== -1) {
         if (notificationBookmarkType == NB_NEWFOLLOWER) {
             // only display message
             [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
@@ -3295,8 +3307,9 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         }
         if (notificationBookmarkType == NB_UPDATECAROUSEL) {
             [k getUserStixWithUsername:myUserInfo_username];
-            doJump = NO;
+            //doJump = NO;
         }
+        /*
         if (notificationBookmarkType == NB_NEWGIFT) {
             if (doJump) {
                 [tabBarController setSelectedIndex:3]; // go to mystixview
@@ -3312,6 +3325,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
                 [self showAlertWithTitle:@"New Stix" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             }
         }
+         */
     }
     else {
         BOOL doUpdateTag = YES;
@@ -3320,7 +3334,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             updatingNotifiedTagDoJump = NO;
             
             // if peel was on own stix, do not download it again
-            Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:notificationTagID]];
+            Tag * tag = [allTagIDs objectForKey:notificationTagID];
             if (tag == nil) {
                 // if tag is not in feed, ignore notification
                 doUpdateTag = NO;
@@ -3331,6 +3345,11 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
                     doUpdateTag = NO;
                 }
             }
+        } else if (notificationBookmarkType == NB_NEWPIX) {
+            // user should be prompted to jump to new pix
+            updatingNotifiedTagDoJump = YES;
+            doUpdateTag = YES;
+            NSLog(@"Handling notification NB_NEWPIX for tagID %d", [notificationTagID intValue]);
         } else if (![notificationTargetChannel isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]]) {
             // notification to target that is not the current user
             updatingNotifiedTagDoJump = NO; // does it ever go here?
@@ -3342,7 +3361,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         }
         isUpdatingNotifiedTag = YES;
         if (doUpdateTag)
-            [k getAllTagsWithIDRangeWithId_min:notificationTagID-1 andId_max:notificationTagID+1];
+            [k getAllTagsWithIDRangeWithId_min:[notificationTagID intValue]-1 andId_max:[notificationTagID intValue]+1];
     }
 }
 
@@ -3580,7 +3599,7 @@ static bool isShowingAlerts = NO;
         buxPurchaseObject = @"neroh.stix.bux.200";
     }
 
-#if USE_MKSTOREKIT
+#if USING_MKSTOREKIT
     [[MKStoreManager sharedManager] buyFeature:buxPurchaseObject
                                     onComplete:^(NSString* purchasedFeature, NSData * data)
      {
@@ -3776,4 +3795,79 @@ static bool isShowingAlerts = NO;
     }];
 }
 
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPremiumPacksDidCompleteWithResult:(NSArray *)theResults {
+    for (NSMutableDictionary * d in theResults) {
+        NSString * stixPackName = [d objectForKey:@"stixPackName"];
+        
+        NSMutableArray * stixArray = [BadgeView getStixForCategory:stixPackName];
+        for (int i=0; i<[stixArray count]; i++) {
+            NSString * stixStringID = [stixArray objectAtIndex:i];
+            [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID]; 
+        }
+        
+        [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+    }
+}
+
+-(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
+    NSLog(@"Did purchase premium pack: %@", stixPackName);
+    
+#if 0 // beta
+    // add purchase to kumulos
+    [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
+    
+    // force carouselview to update
+    [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+    
+    // animate
+    NSString *firstChar = [stixPackName substringToIndex:1];
+    NSString * stixPack = [[firstChar uppercaseString] stringByAppendingString:[stixPackName substringFromIndex:1]];
+    [tabBarController doPremiumPurchaseAnimation:stixPack]; 
+
+    // metrics
+    NSString * metricName = @"PremiumPurchase";
+    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:stixPack andIntegerValue:0];     
+    
+    return YES;
+#else
+    
+#if USING_MKSTOREKIT
+    NSString * purchaseID = @"collection.Hipster";
+    mkStoreKitSuccess = NO;
+    [[MKStoreManager sharedManager] buyFeature:purchaseID
+                                    onComplete:^(NSString* purchasedFeature, NSData * data)
+     {
+         // provide your product to the user here.
+         // if it's a subscription, allow user to use now.
+         // remembering this purchase is taken care of by MKStoreKit.
+         // add purchase to kumulos
+         [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
+         
+         // force carouselview to update
+         [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+         
+         // animate
+         NSString *firstChar = [stixPackName substringToIndex:1];
+         NSString * stixPack = [[firstChar uppercaseString] stringByAppendingString:[stixPackName substringFromIndex:1]];
+         [tabBarController doPremiumPurchaseAnimation:stixPack]; 
+
+         // metrics
+         NSString * metricName = @"PremiumPurchase";
+         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:stixPack andIntegerValue:0];     
+         mkStoreKitSuccess = YES;
+     }
+                                    onCancelled:^
+     {
+         // User cancels the transaction, you can log this using any analytics software like Flurry.
+         NSString * metricName = @"CancelledPurchase";
+         NSString * firstChar = [stixPackName substringToIndex:1];
+         NSString * metricData = [[firstChar uppercaseString] stringByAppendingString:[stixPackName substringFromIndex:1]];
+         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:0];     
+         mkStoreKitSuccess = NO;
+     }];
+    return mkStoreKitSuccess;
+#endif
+
+#endif
+}
 @end

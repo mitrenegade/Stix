@@ -57,10 +57,13 @@
 
 -(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController*)feedItem;
 -(void)didClickReloadButtonForFeedItem:(VerticalFeedItemController *)feedItem;
+
+-(void)didClickLikeButton:(int)type withTagID:(int)tagID;
+-(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem;
 @end
 
 
-@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate, UIActionSheetDelegate, ASIHTTPRequestDelegate, StixAnimationDelegate>{
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate, UIActionSheetDelegate, ASIHTTPRequestDelegate, StixAnimationDelegate, UIGestureRecognizerDelegate>{
     
 	IBOutlet UILabel * labelName;
     //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
@@ -106,6 +109,14 @@
     UIImageView * reloadMessage2;
     UIButton * reloadButton;
     BOOL tapStartsReloading;
+    
+    BOOL isDisplayingLikeToolbar;
+    UIButton * likeIconSmiles;
+    UIButton * likeIconLove;
+    UIButton * likeIconWink;
+    UIButton * likeIconShocked;
+    UIButton * likeIconComment;
+    UIImageView * likeToolbarBg;
 }
 @property ( nonatomic) IBOutlet UILabel * labelName;
 @property ( nonatomic) IBOutlet UILabel * labelComment;
@@ -139,7 +150,8 @@
 //-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;
 
 -(void)initStixView:(Tag*)tag;
--(void)initReloadView;
+-(void)initReloadView; // start the spin
+-(void)displayReloadView; // only display view
 
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;
@@ -151,6 +163,7 @@
 -(void)uploadImage:(NSData *)dataPNG;
 
 -(void)togglePlaceholderView:(BOOL)showPlaceholder;
+-(void)likeToolbarHide:(int)selected;
 
 @end
 

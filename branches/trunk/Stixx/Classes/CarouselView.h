@@ -21,6 +21,7 @@
 #define USE_VERTICAL_GESTURE 0
 #define STIX_PER_ROW 4
 #define SHELF_SCROLL_OFFSET_FROM_TOP 108
+#define SHELF_LOWER_FROM_TOP 0
 #define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
 
 enum {
@@ -45,12 +46,13 @@ enum {
 //    SHELF_CATEGORY_PRANKS,
 //    SHELF_CATEGORY_SPORTS,
 //    SHELF_CATEGORY_SYMBOLS,
+    SHELF_CATEGORY_HIPSTER,
     SHELF_CATEGORY_MAX
 };
 
 @interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate, StixAnimationDelegate, KumulosDelegate>{
 	
-    int carouselHeight;
+    //int carouselHeight;
     //NSObject<CarouselViewDelegate> *delegate;
     
     UIScrollView * stixScroll;
@@ -62,15 +64,20 @@ enum {
     NSMutableDictionary * allCarouselStixStringIDsAtFrame;
     NSMutableSet * allCarouselMissingStixStringIDs;
     NSMutableDictionary * allCarouselMissingStixStringOpacity;
+    NSMutableSet * premiumPacksPurchased;
+    NSMutableDictionary * premiumPurchaseButtons;
     
     bool allowTap;
     //CGPoint tapDefaultOffset; // offset of default location for tap  relative to carouselView frame
     
     UIButton * buttonShowCarousel;
     UIView * carouselTab;
+    UIImageView * tabImage;
     BOOL isShowingCarousel;
     NSString * stixSelected;
     int shelfCategory;
+    CGRect scrollFrameRegular;
+    CGRect scrollFramePremium;
 
     int tabAnimationIDDismiss;
     int tabAnimationIDExpand;
@@ -82,7 +89,7 @@ enum {
 //@property (nonatomic, assign) NSObject<CarouselViewDelegate> *delegate;
 @property (nonatomic) UIScrollView * stixScroll;
 @property (nonatomic) UIScrollView * categoryScroll;
-@property (nonatomic, assign) int carouselHeight;
+//@property (nonatomic, assign) int carouselHeight;
 @property (nonatomic, assign) bool allowTap;
 //@property (nonatomic, assign) CGPoint tapDefaultOffset;
 @property (nonatomic) UIButton * buttonShowCarousel;
@@ -95,6 +102,9 @@ enum {
 @property (nonatomic, assign) int expandedTabY;
 @property (nonatomic, assign) BOOL isShowingCarousel;
 
+/*** make a singleton class ***/
++(CarouselView*)sharedCarouselView;
+
 -(void)initCarouselWithFrame:(CGRect)frame; // private function
 -(void)reloadAllStix;
 -(void)reloadAllStixWithFrame:(CGRect)frame;
@@ -106,8 +116,10 @@ enum {
 -(void)didClickShowCarousel:(id)sender;
 -(void)didClickShelfCategory:(id)sender;
 -(void)requestStixFromKumulos:(NSString *)stixStringID;
-/*** make a singleton class ***/
-+(CarouselView*)sharedCarouselView;
 -(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
+-(void)unlockPremiumPack:(NSString*)stixPackName;
 
+-(BOOL)isPremiumStix:(NSString*)stixStringID;
+-(BOOL)isPremiumStixPurchased:(NSString*)stixStringID;
+-(NSString*)getCurrentCategory;
 @end

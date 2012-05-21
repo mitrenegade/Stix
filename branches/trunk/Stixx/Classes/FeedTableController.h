@@ -26,6 +26,7 @@
 -(int)heightForHeaderInSection:(int)index;
 -(void)didPullToRefresh;
 -(void)didPullToRefreshDoActivityIndicator;
+-(void)feedDidScroll;
 
 @optional
 -(void)updateScrollPagesAtPage:(int)page;

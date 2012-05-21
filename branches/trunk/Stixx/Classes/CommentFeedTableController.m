@@ -8,10 +8,10 @@
 
 #import "CommentFeedTableController.h"
 #import <QuartzCore/QuartzCore.h>
-#define LEFT_LABEL_TAG 1001
-#define RIGHT_LABEL_TAG 1002
-#define TIME_LABEL_TAG 1003
-#define PHOTO_TAG 1004
+#define LEFT_LABEL_TAG 1001000
+#define RIGHT_LABEL_TAG 1002000
+#define TIME_LABEL_TAG 1003000
+#define PHOTO_TAG 1004000 // tag is going to be combined with comment index...hack: most comments possible: 999
 
 @implementation CommentFeedTableController
 
@@ -153,7 +153,7 @@
         nameLabel.tag = LEFT_LABEL_TAG;
         commentTextLabel.tag = RIGHT_LABEL_TAG;
         timeLabel.tag = TIME_LABEL_TAG;
-        photoView.tag = PHOTO_TAG;
+        photoView.tag = PHOTO_TAG + [indexPath row];
         [cell.contentView addSubview:nameLabel];
         [cell.contentView addSubview:commentTextLabel];
         [cell.contentView addSubview:timeLabel];
@@ -200,13 +200,29 @@
         //float minHeight = [self getHeightForComment:comment forStixStringID:stixStringID];//timeLabel.frame.origin.y + timeLabel.frame.size.height + 2;
         //NSLog(@"Row %d needs to be at least this big: %f", [indexPath row], minHeight);
 
-        UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG];
+        UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG + index];
         [photoView setImage:photo forState:UIControlStateNormal];
         //[photoView setTag:index];
          // MRC
         
-        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"]) {
+        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"] && ![stixStringID isEqualToString:@"LIKE"]) {
             UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+            [stix setFrame:CGRectMake(10,10,40,40)];
+            cell.accessoryView = stix;
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        }
+        //else if ([stixStringID isEqualToString:@"LIKE_SMILES"] || [stixStringID isEqualToString:@"LIKE_LOVE"] || [stixStringID isEqualToString:@"LIKE_WINK"] || [stixStringID isEqualToString:@"LIKE_SHOCKED"]) {
+        else if ([stixStringID isEqualToString:@"LIKE"]) {
+            UIImageView * stix = [[UIImageView alloc] init];
+            if ([comment isEqualToString:@"LIKE_SMILES"]) 
+                [stix setImage:[UIImage imageNamed:@"icon_pix_smiles@2x.png"]];
+            if ([comment isEqualToString:@"LIKE_LOVE"]) 
+                [stix setImage:[UIImage imageNamed:@"icon_pix_love@2x.png"]];
+            if ([comment isEqualToString:@"LIKE_WINK"]) 
+                [stix setImage:[UIImage imageNamed:@"icon_pix_wink@2x.png"]];
+            if ([comment
+                 isEqualToString:@"LIKE_SHOCKED"]) 
+                [stix setImage:[UIImage imageNamed:@"icon_pix_shocked@2x.png"]];
             [stix setFrame:CGRectMake(10,10,40,40)];
             cell.accessoryView = stix;
             cell.accessoryType = UITableViewCellAccessoryNone;
@@ -218,8 +234,9 @@
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    NSLog(@"CommentFeedTable: did click on user's photo %d", button.tag);
-    NSString * name = [delegate getNameForIndex:button.tag];
+    int row = button.tag - PHOTO_TAG;
+    NSString * name = [delegate getNameForIndex:row];
+    NSLog(@"CommentFeedTable: did click on user's photo %d, username = %@", row, name);
     [delegate shouldDisplayUserPage:name];
 }
 
@@ -315,6 +332,14 @@
     else if ([comment isEqualToString:@"SHARE"]) {
         str = [NSString stringWithFormat:@"Shared this Pix at %@", comment];
     }
+    else if ([comment isEqualToString:@"LIKE_SMILES"]) 
+        str = [NSString stringWithFormat:@"Smiled at this Pix"];
+    else if ([comment isEqualToString:@"LIKE_LOVE"]) 
+        str = [NSString stringWithFormat:@"Loves this Pix"];
+    else if ([comment isEqualToString:@"LIKE_WINK"]) 
+        str = [NSString stringWithFormat:@"Winked at this Pix"];
+    else if ([comment isEqualToString:@"LIKE_SHOCKED"]) 
+        str = [NSString stringWithFormat:@"Is shocked by this Pix"];
     else
     {
         /* get first char */

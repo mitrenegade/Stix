@@ -170,6 +170,7 @@
     if (![lastUsername isEqualToString:username]) {
         [self forceReloadAll];
         [self setLastUsername:username];
+        pendingContentCount = 0;
     }
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
     [pixTableController.view removeFromSuperview];

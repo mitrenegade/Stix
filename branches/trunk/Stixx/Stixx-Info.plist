@@ -14,15 +14,15 @@
 		<dict>
 			<key>CFBundleIconFiles</key>
 			<array>
-				<string>icon_lite_57.png</string>
-				<string>icon_lite_114.png</string>
+				<string>icon_57.png</string>
+				<string>icon_114.png</string>
 			</array>
 			<key>UIPrerenderedIcon</key>
 			<true/>
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.Neroh.Stix.Lite</string>
+	<string>Neroh</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -30,7 +30,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.7</string>
+	<string>1.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -39,6 +39,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb244406082334236</string>
+				<string>fb191699640937330</string>
 			</array>
 		</dict>
 	</array>
@@ -46,6 +47,25 @@
 	<string>1.0</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>FACEBOOK_APP_ID</key>
+		<string>191699640937330</string>
+		<key>FACEBOOK_APP_ID_LITE</key>
+		<string>244406082334236</string>
+		<key>ITUNES_APP_ID</key>
+		<string>520841261</string>
+		<key>ITUNES_APP_ID_LITE</key>
+		<string>525733067</string>
+		<key>PARSE_APP_ID</key>
+		<string>BZpZEXeYgWUeu2Pg3nJSbcGIkoYkR5qxaAsK1ClT</string>
+		<key>PARSE_APP_ID_LITE</key>
+		<string>yip3Sp7VzlBYHQMX906g8Ht8AguxEHmibuBsi38N</string>
+		<key>PARSE_CLIENT_ID</key>
+		<string>GuFFolAFIpDNoe8If7Jm6ATYNPaJc2bdAvPLfBZx</string>
+		<key>PARSE_CLIENT_ID_LITE</key>
+		<string>P7w6DeECEo9a7wTHHdAox3aAuL76MeTibUSLTsmQ</string>
+	</dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMainNibFile</key>

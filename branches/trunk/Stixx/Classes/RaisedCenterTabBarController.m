@@ -170,6 +170,48 @@
      // MRC
 }
 
+-(void)doPremiumPurchaseAnimation:(NSString*)stixPackName {
+    int width = 140;
+    CGRect canvasFrame = CGRectMake(0, 0, 320, 480);
+    UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
+    //UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+    //[stix setFrame:CGRectMake(0,0,width,width)];
+    //[stix setCenter:[rewardCanvas center]];
+    //[rewardCanvas addSubview:stix];
+    CGRect rewardNameFrame = CGRectMake(0, 0, width*2, 40);
+    OutlineLabel * rewardName = [[OutlineLabel alloc] initWithFrame:rewardNameFrame];
+    [rewardName setFrame:rewardNameFrame];
+    CGPoint rewardNameCenter = rewardCanvas.center;
+    //rewardNameCenter.y += width/2;
+    [rewardName setCenter:rewardNameCenter];
+    [rewardName setTextAttributesForBadgeType:0]; // generic red font
+    [rewardName setFontSize:20];
+    [rewardName setText:@"Purchased Premium Pack:"];
+    [rewardName setNumberOfLines:2];
+    [rewardName setTextAlignment:UITextAlignmentCenter];
+
+    CGRect packFrame = CGRectMake(0, 0, width*2, 40);
+    OutlineLabel * packName = [[OutlineLabel alloc] initWithFrame:packFrame];
+    [packName setFrame:packFrame];
+    CGPoint packCenter = rewardCanvas.center;
+    packCenter.y += 30;
+    [packName setCenter:packCenter];
+    [packName setTextAttributesForBadgeType:0]; // generic red font
+    [packName setFontSize:30];
+    [packName setText:stixPackName];
+    [packName setNumberOfLines:2];
+    [packName setTextAlignment:UITextAlignmentCenter];
+
+    [rewardCanvas addSubview:rewardName];
+    [rewardCanvas addSubview:packName];
+    
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    [rewardCanvas setAlpha:0];
+    animationIDsPurchase[0] = [animation doFade:rewardCanvas inView:self.view toAlpha:1 forTime:.1]; // not working
+    // MRC
+}
+
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
     NSLog(@"Animation %d finished!", animationID);
      // animations autorelease the canvas they are sent

@@ -412,12 +412,12 @@ static int totalStixTypes = 0;
         stixDescriptors = [[NSMutableDictionary alloc] init];
     }
 
-    NSArray * filenameArrays = [[NSArray alloc] initWithObjects:facefun, memes, cute, animals, comics, videogames, nil];
     NSArray * categoryArrays = [[NSArray alloc] initWithObjects:@"facefun", @"memes",  @"cute", @"animals", @"comics", @"videogames", nil];
+    NSArray * filenameArrays = [[NSArray alloc] initWithObjects:facefun, memes, cute, animals, comics, videogames, nil];
     NSArray * descArrays = [[NSArray alloc] initWithObjects:facefunDesc, memesDesc, cuteDesc, animalsDesc, comicsDesc, videogamesDesc, nil];
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"stix" ofType:@"bundle"];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    for (int i=0; i<[filenameArrays count]; i++) {
+    for (int i=0; i<[categoryArrays count]; i++) {
         NSArray * stixStringArray = [filenameArrays objectAtIndex:i];
         // add filenames as the stixStringIDs
         [stixStringIDs addObjectsFromArray:stixStringArray];
@@ -445,10 +445,47 @@ static int totalStixTypes = 0;
         }
     }
     totalStixTypes = [stixStringIDs count];
-    NSLog(@"BadgeView: Generated %d generic stix!", totalStixTypes);
-    
-    // MRC
-    
+    NSLog(@"BadgeView: Generated %d generic stix!", totalStixTypes);    
+}
+
++(void)InitializePremiumStixTypes {
+    NSArray * hipster = [[NSArray alloc] initWithObjects:@"hipster_bluewovencap.png", @"hipster_bowtie.png", @"hipster_bull_nosering.png", @"hipster_chunkyframe_glasses.png", @"hipster_deep_vneck.png", @"hipster_denim_shorts.png", @"hipster_dotteddress.png", @"hipster_fauxhawk_hairstyle.png", @"hipster_girls_hairstyle.png", @"hipster_ironic_mustache.png", @"hipster_kitty_sticker.png", @"hipster_lomocamera.png", @"hipster_messenger_bag.png", @"hipster_neckscarf.png", @"hipster_oldschoolsneakers.png", @"hipster_oversized_glasses.png", @"hipster_oversized_headphones.png", @"hipster_pinkshutter_glasses.png", @"hipster_plaidshirt.png", @"hipster_ski_vest.png", @"hipster_skinnytie.png", @"hipster_star_tattoo.png", @"hipster_triangle.png", @"hipster_truckerhat.png", @"hipster_tweed_fedora.png", nil];
+    NSArray * hipsterDesc = [[NSArray alloc] initWithObjects: @"Blue Woven Cap", @"Plaid Bowtie", @"Bull Nose Ring", @"Chunky Framed Glasses", @"Deep V Neck", @"Denim Shorts", @"Dotted Blue Dress", @"Faux Hawk", @"Hipster Girls Hairstyle", @"Ironic Mustache", @"Hipster Kitty Sticker", @"Lomo Camera", @"Messenger Bag", @"Neck Scarf", @"Vintage Sneakers", @"Oversized Glasses", @"Large Headphones", @"Pink Shutter Glasses", @"Plaid Shirt", @"70's Ski Vest", @"Skinny Tie", @"Star Tattoo", @"Hipster Triangle", @"Trucker Hat", @"Tweed Fedora", nil];
+
+    NSArray * filenameArrays = [[NSArray alloc] initWithObjects:hipster, nil];
+    NSArray * categoryArrays = [[NSArray alloc] initWithObjects:@"hipster", nil];
+    NSArray * descArrays = [[NSArray alloc] initWithObjects:hipsterDesc, nil];
+    for (int i=0; i<[categoryArrays count]; i++) {
+        NSString * bundleName = [categoryArrays objectAtIndex:i];
+        NSString *bundlePath = [[NSBundle mainBundle] pathForResource:bundleName ofType:@"bundle"];
+        NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+        NSArray * stixStringArray = [filenameArrays objectAtIndex:i];
+        // add filenames as the stixStringIDs
+        [stixStringIDs addObjectsFromArray:stixStringArray];
+        NSString * categoryName = bundleName; //[categoryArrays objectAtIndex:i];
+        NSMutableArray * category = [stixCategories objectForKey:categoryName];
+        if (!category) {
+            category = [[NSMutableArray alloc] init];
+        }
+        [category addObjectsFromArray:stixStringArray];
+        [stixCategories setObject:category forKey:categoryName];
+        NSMutableArray * stixDescArray = [descArrays objectAtIndex:i];
+        
+        for (NSString * stixStringID in stixStringArray) {
+            int index = [stixStringArray indexOfObject:stixStringID];
+            NSRange suffix = [stixStringID rangeOfString:@".png"];
+            NSString * filename = [stixStringID substringToIndex:suffix.location];
+            NSString * descriptor = [stixDescArray objectAtIndex:index]; //[stixStringID substringToIndex:suffix.location];
+            [stixDescriptors setValue:descriptor forKey:stixStringID];
+            
+            NSString *imageName = [bundle pathForResource:filename ofType:@"png"];
+            UIImage *img = [[UIImage alloc] initWithContentsOfFile:imageName];
+            UIImageView * stix = [[UIImageView alloc] initWithImage:img];
+            [stixViews setObject:stix forKey:stixStringID];
+        }
+    }
+    totalStixTypes = [stixStringIDs count];
+    NSLog(@"BadgeView: Loaded %d premium stix collections!", [categoryArrays count]);
 }
 
 @end

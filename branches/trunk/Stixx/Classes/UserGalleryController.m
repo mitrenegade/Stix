@@ -350,7 +350,7 @@
 }
 
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+    [delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
 -(void)didDismissZoom {

@@ -32,6 +32,7 @@
 #import "ASIHTTPRequest.h"
 #import "ASIFormDataRequest.h"
 #import "FacebookHelper.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
 #define CONTENT_HEIGHT 320
 #define HOSTNAME @"stix.herokuapp.com"
@@ -101,7 +102,6 @@
 //    NSMutableArray * comments;
 //    NSMutableArray * stixStringIDs;
     Kumulos * k;
-    LoadingAnimationView * activityIndicator;
 
     UIImageView * placeholderView;
     UIImageView * reloadView;

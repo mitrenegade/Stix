@@ -19,6 +19,7 @@
 #import <AddressBook/AddressBook.h>
 #import "UserGalleryController.h"
 #import "StixAnimation.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
 #define DEFAULT_STIX_COUNT 2
 

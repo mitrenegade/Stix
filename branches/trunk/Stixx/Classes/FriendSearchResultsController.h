@@ -17,8 +17,9 @@
 //-(BOOL)isFollowingUser:(int)index;
 -(int)getFollowingUserStatus:(int)index;
 -(int)getNumOfUsers;
--(void)didClickAddFriendButton:(int)index;
+//-(void)didClickAddFriendButton:(int)index; // for that single button to add friend of this profile
 -(void)didSelectUserProfile:(int)index;
+-(void)addFriendFromList:(int)index; // for friends in list
 @end
 
 @interface FriendSearchResultsController : UITableViewController 

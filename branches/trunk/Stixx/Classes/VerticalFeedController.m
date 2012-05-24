@@ -1336,11 +1336,6 @@
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
     shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
     [shareSheet setFrame:frameOutside];
-    //UIImageView * shareImg = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
-    //[shareImg setFrame:CGRectMake(16, 22, 289, 380)];
-    //[shareSheet addSubview:shareImg];
-    //CGRect frameInside = CGRectMake(0, 0, 320, 480);
-    //CGRect frameOutside = CGRectMake(-320, 0, 320, 480);
     
     buttonShareFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
     [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
@@ -1451,7 +1446,8 @@
     [self reloadPage:0];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     shareFeedItem = feedItem;
-    [self didPressShareButtonForFeedItem:feedItem];
+    //[self didPressShareButtonForFeedItem:feedItem];
+    [delegate displayShareController:tag];
 }
 
 -(void)checkForUpdatedStix {

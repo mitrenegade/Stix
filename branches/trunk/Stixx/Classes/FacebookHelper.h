@@ -51,7 +51,7 @@
 -(NSString*)getAccessToken;
 -(BOOL)handleOpenURL:(NSURL*)url;
 -(int)facebookHasSession;
--(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description;
+-(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description useDialog:(BOOL)useDialog;
 -(void)requestFacebookFriends;
 -(void)sendInvite:(NSString*)name withFacebookID:(NSString*)facebookID;
 +(FacebookHelper*)sharedFacebookHelper;

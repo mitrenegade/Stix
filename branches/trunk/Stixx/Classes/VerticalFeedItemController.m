@@ -544,8 +544,15 @@
     UIImage * result = [tag tagToUIImage];
     NSData *png = UIImagePNGRepresentation(result);
     
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-    
+#if 0
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); 
+#else
+    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+        if (error!=nil) {
+            NSLog(@"Could not write to library: error %@", [error description]);
+        }
+    }];
+#endif    
     [self uploadImage:png];
     
     NSString * metricName = @"SharePixActionsheet";
@@ -557,8 +564,15 @@
     UIImage * result = [tag tagToUIImage];
     NSData *png = UIImagePNGRepresentation(result);
     
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); // write to photo album
-    
+#if 0
+    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); 
+#else
+    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+        if (error!=nil) {
+            NSLog(@"Could not write to library: error %@", [error description]);
+        }
+    }];
+#endif    
     [self uploadImage:png];
     
     NSString * metricName = @"SharePixActionsheet";
@@ -589,12 +603,13 @@
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
-    NSString * subject = [NSString stringWithFormat:@"%@ has shared a remixed photo with you", [self getUsername]];
+    NSString * subject = [NSString stringWithFormat:@"%@ wants to share and remix a photo by %@", [self getUsername], self.nameString];
+    NSString * caption = [NSString stringWithFormat:@"Get Sticky with me...a photo by %@", self.nameString];
     NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", url];
     if (shareMethod == 0) {
         // facebook
         FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
-        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"Get Sticky with me..." andDescription:fullmessage];
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:caption andDescription:fullmessage useDialog:YES];
     }
     else if (shareMethod == 1) {
         // email

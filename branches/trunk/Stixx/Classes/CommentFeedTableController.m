@@ -153,7 +153,7 @@
         nameLabel.tag = LEFT_LABEL_TAG;
         commentTextLabel.tag = RIGHT_LABEL_TAG;
         timeLabel.tag = TIME_LABEL_TAG;
-        photoView.tag = PHOTO_TAG + [indexPath row];
+        photoView.tag = PHOTO_TAG; // + [indexPath row];
         [cell.contentView addSubview:nameLabel];
         [cell.contentView addSubview:commentTextLabel];
         [cell.contentView addSubview:timeLabel];
@@ -200,8 +200,10 @@
         //float minHeight = [self getHeightForComment:comment forStixStringID:stixStringID];//timeLabel.frame.origin.y + timeLabel.frame.size.height + 2;
         //NSLog(@"Row %d needs to be at least this big: %f", [indexPath row], minHeight);
 
-        UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG + index];
+        UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG]; // + index];
         [photoView setImage:photo forState:UIControlStateNormal];
+        photoView.titleLabel.text = [NSString stringWithFormat:@"%d", indexPath.row];
+        photoView.titleLabel.hidden = YES;
         //[photoView setTag:index];
          // MRC
         
@@ -234,7 +236,8 @@
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    int row = button.tag - PHOTO_TAG;
+    //NSLog(@"Button titleLabel: %@", button.titleLabel.text);
+    int row = [button.titleLabel.text intValue]; //[indexPath row]; //button.tag - PHOTO_TAG;
     NSString * name = [delegate getNameForIndex:row];
     NSLog(@"CommentFeedTable: did click on user's photo %d, username = %@", row, name);
     [delegate shouldDisplayUserPage:name];

@@ -325,9 +325,7 @@
 
 -(IBAction)locationTextBoxEntered:(id)sender
 {   
-    //[self presentModalViewController:locationController animated:YES];
-    //[stixView setInteractionAllowed:NO];
-    [self.view addSubview:locationController.view];
+    //[self.view addSubview:locationController.view];
 }
 
 /*** LocationHeaderViewControllerDelegate ****/
@@ -341,9 +339,7 @@
 -(void)didChooseLocation:(NSString *)location {
     NSLog(@"FourSquare locator returned %@\n", location);
     [locationField setText:location];
-    //[self dismissModalViewControllerAnimated:YES];
-    //[stixView setInteractionAllowed:YES];
-    [locationController.view removeFromSuperview];
+    //[locationController.view removeFromSuperview];
 }
 
 -(void)didCancelLocation

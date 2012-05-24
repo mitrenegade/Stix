@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ImageCache.h"
 #import "BadgeView.h"
-#import "LocationHeaderViewController.h"
+//#import "LocationHeaderViewController.h"
 #import "StixView.h"
 #import "CarouselView.h"
 #import "Tag.h"
@@ -29,7 +29,7 @@
 -(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 @end
 
-@interface AddStixViewController : UIViewController <BadgeViewDelegate, UITextFieldDelegate, LocationHeaderViewControllerDelegate, UIGestureRecognizerDelegate>{
+@interface AddStixViewController : UIViewController <BadgeViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate>{
 	IBOutlet UIImageView * imageView;
     StixView * stixView;
 	IBOutlet UITextField * commentField;
@@ -41,7 +41,7 @@
     IBOutlet UIButton * buttonInstructions;
     CarouselView * carouselView; // for dragging and releasing badge
     
-    LocationHeaderViewController * locationController;
+    //LocationHeaderViewController * locationController;
     
     CGRect badgeFrame;
     

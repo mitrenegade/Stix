@@ -144,13 +144,6 @@
         
     }
     
-    /*
-     else {
-     [cell.accessoryView removeFromSuperview];
-     [cell.contentView removeFromSuperview];
-     }
-     */
-    
     int y = [indexPath row];
     
     NSLog(@"Cell for row %d", y);
@@ -260,16 +253,22 @@
 }
 
 -(void)didAddFriend:(UIButton*)sender {
-    NSLog(@"Clicked add friend button %d!", sender.tag);
-    [delegate didClickAddFriendButton:sender.tag];
+    //[delegate didClickAddFriendButton:sender.tag];
+    NSString * name = [delegate getUsernameForUser:sender.tag];
+    NSLog(@"Clicked add friend button %d: adding %@!", sender.tag, name);
+    [delegate addFriendFromList:sender.tag];
 }
 -(void)didRemoveFriend:(UIButton*)sender {
     NSLog(@"Clicked remove friend button %d!", sender.tag);
-    [delegate didClickAddFriendButton:sender.tag];
+    //NSString * name = [delegate getUsernameForUser:sender.tag];
+    //[delegate didClickAddFriendButton:sender.tag];
+    [delegate addFriendFromList:sender.tag];
 }
 -(void)didInviteFriend:(UIButton*)sender {
     NSLog(@"Clicked invite friend button %d!", sender.tag);
-    [delegate didClickAddFriendButton:sender.tag];
+    //NSString * name = [delegate getUsernameForUser:sender.tag];
+    //[delegate didClickAddFriendButton:sender.tag];
+    [delegate addFriendFromList:sender.tag];
 }
 
 /*

@@ -54,9 +54,6 @@
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 -(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
-//-(void)didSharePixWithURL:(NSString*)url;
-//-(void)didPurchaseBux:(int)bux;
-//-(void)sharePix:(int)tagID;
 -(void)didOpenProfileView;
 -(NSMutableSet*)getFollowingList;
 
@@ -88,6 +85,7 @@
 
 -(void)didReloadPendingPix:(Tag*)tag;
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
+-(void)displayShareController:(Tag*)tag;
 
 @end
 

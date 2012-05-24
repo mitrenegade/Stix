@@ -331,9 +331,15 @@ static dispatch_queue_t backgroundQueue;
     {
         [self showAlertWithTitle:@"Update Available" andMessage:[NSString stringWithFormat:@"This version of Stix (v%@) is out of date. Version %@ is available through TestFlight.", versionStringStable, currVersion] andButton:@"Close" andOtherButton:@"View" andAlertType:ALERTVIEW_UPGRADE];
     }
-    
-    /* add administration calls here */
-    
+
+    /*** twitter ***/
+    /*
+    twitterHelper = [TwitterHelper sharedTwitterHelper];
+    [twitterHelper initTwitter];
+//    [self showTwitterDialog];
+    [twitterHelper requestTwitterPostPermission];
+    */
+     
     return YES;
 }
 /*
@@ -480,6 +486,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [alertView release];
     */
     [fbHelper getFacebookInfo];
+
 }
 
 -(void)didLogoutFromFacebook {
@@ -988,35 +995,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // this function migrates toward not using the basic stix
     newestTag = newTag;
     
-    //NSData * theImgData = UIImageJPEGRepresentation([newTag image], .8); 
-    //UIImage * thumbnail = [[newTag image] resizedImage:CGSizeMake(100, 100) interpolationQuality:kCGInterpolationMedium];
-    
-    // this must match Tag.m:getTagFromDictionary
-    //NSMutableData *theCoordData = nil;
-    /*
-    NSKeyedArchiver *encoder;
-    theCoordData = [NSMutableData data];
-    encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theCoordData];
-	//[encoder encodeObject:newTag.coordinate forKey:@"coordinate"];
-    [encoder finishEncoding];
-    */
-    
-    // this must match Tag.m:getTagFromDictionary
-/*
- NSMutableData *theAuxStixData = nil;
-    theAuxStixData = [NSMutableData data];
-    encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
-	[encoder encodeObject:newTag.auxLocations forKey:@"auxLocations"];
-	[encoder encodeObject:newTag.auxStixStringIDs forKey:@"auxStixStringIDs"];
-    //[encoder encodeObject:newTag.auxScales forKey:@"auxScales"]; // deprecated
-    //[encoder encodeObject:newTag.auxRotations forKey:@"auxRotations"]; // deprecated
-    [encoder encodeObject:newTag.auxTransforms forKey:@"auxTransforms"];
-    [encoder encodeObject:newTag.auxPeelable forKey:@"auxPeelable"];
-    [encoder finishEncoding];
-*/
-    
-    //[k createPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andAuxStix:theAuxStixData];
-    //[k createNewPixWithUsername:newTag.username andDescriptor:newTag.descriptor andComment:newTag.comment andLocationString:newTag.locationString andImage:theImgData andTagCoordinate:theCoordData andPendingID:[newTag.tagID intValue]];
+    /*** automatic sharing and background uploading ***/
+    /* New functionality: display the ShareController and allow user
+     * to enter a caption and select automatic sharing options.
+     * In the background, we should also perform uploading to stixmobile.com
+     */
+    // display share options controller and start upload
+    newPixShareToggle = 0;
     
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -1047,6 +1032,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSString * message = [NSString stringWithFormat:@"%@ added a new photo to remix.", myUserInfo_username];
     NSString * channel = @"";
     [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newRecordID];
+/*
+    // this tagID is necessary for the shareController to work - if we have a comment
+    [newestTag setTagID:newRecordID];
+    [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
+    [self displayShareController:newestTag];
+ */
 }
 
 -(void)kumulosHelperCreateNewPixDidFail:(Tag *)failedTag {
@@ -1079,10 +1070,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
         [k addHighResPixWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
     }
-    /*
-    [newestTag setTagID:newRecordID];
-    [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
-     */
     [k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
     
     bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
@@ -1950,8 +1937,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
     
     // save to album
+#if 0
     UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
-    
+#else
+    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:rounded toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+        if (error!=nil) {
+            NSLog(@"Could not write to library: error %@", [error description]);
+        }
+    }];
+#endif    
     //NSData * img = UIImageJPEGRepresentation(rounded, .8);
     NSData * img = UIImagePNGRepresentation(rounded);
     [profileController.photoButton setImage:rounded forState:UIControlStateNormal];
@@ -2215,6 +2209,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
     
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
+
 }
 
 /*
@@ -2708,52 +2703,77 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didDismissSecondaryView];
 }
 
--(void)uploadImage:(NSData *)dataPNG withShareMethod:(int)method{
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    shareMethod = method;
-    NSLog(@"Uploading data for share method: %d", shareMethod);
+#pragma mark shareController and share services
+-(void)displayShareController:(Tag*)tag {
+    if (shareController == nil) {
+        shareController = [[ShareController alloc] init];
+        [shareController setDelegate:self];
 
-    NSData *imageData = dataPNG;
-    NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, username];
-    NSURL *url=[[NSURL alloc] initWithString:serverString];
-    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-    [request setDelegate:self];
-    [request setData:imageData forKey:@"picture[data]"];
-    [request startSynchronous];
-    //[url autorelease]; // arc conversion
-}
-#if 0
--(void)sharePix:(int)tagID {
-    //[self.delegate sharePix:tagID];
-    shareActionSheetTagID = tagID;
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Share Pix" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook", @"Email", /*@"Move", */nil];
-    [actionSheet setTag:ACTIONSHEET_TAG_SHAREPIX];
-    [actionSheet showFromTabBar:tabBarController.tabBar ];
-    [actionSheet release];
-}
-
--(void)didSharePixWithURL:(NSString *)url andImageURL:(NSString*)imageURL{
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-   NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
-    NSString * subject = [NSString stringWithFormat:@"%@ has shared a Stix picture with you!", myUserInfo_username];
-    NSString * fullmessage = [NSString stringWithFormat:@"Stix version Stable %@ Beta %@\n\n%@ has shared a Pix with you! See it here: %@", versionStringStable, versionStringBeta, [self getUsername], url];
-    if (shareMethod == 0) {
-        // facebook
-        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:@"View my Stix collection" andDescription:@"Remix your photos with Stix! Click here to see my Pix."];
+        serviceIsConnected = [[NSMutableDictionary alloc] init];
+        serviceIsSharing = [[NSMutableDictionary alloc] init];
+        
+        // check to see if each service is already sharing
+        if ([fbHelper facebookHasSession])
+            [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:@"Facebook"];
     }
-    else if (shareMethod == 1) {
-        // email
-        [self sendEmailTo:@"" withCC:@"" withSubject:subject withBody:fullmessage];        
-    }
-    [self didDismissSecondaryView];
     
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    //[shareController uploadImage:png];
+    [shareController setPNG:png];
+
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:shareController.view];
+    [shareController.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    }];
+    
+    // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [shareController viewDidAppear:YES]; 
 }
+
+-(BOOL) shareServiceIsConnected:(NSString *)service {
+    NSNumber * connectionState = [serviceIsConnected objectForKey:service];
+    if (!connectionState) {
+        // check with each service to see if it's already connected
+        if ([service isEqualToString:@"Facebook"]) {
+            if (![fbHelper facebookHasSession])
+                return NO;
+            // hack: assume that if session is valid, user has given post permission
+            return YES;
+        }
+        else {
+            return NO;
+        }
+    }
+    return [connectionState boolValue];
+}
+-(BOOL) shareServiceIsSharing:(NSString*)service {
+    NSNumber * sharingState = [serviceIsSharing objectForKey:service];
+    if (!sharingState)
+        return NO;
+    return [sharingState boolValue];
+}
+-(void)shareServiceDidToggle:(NSString *)service {
+    NSLog(@"Toggling sharing service %@", service);
+    BOOL state = [self shareServiceIsSharing:service];
+    [serviceIsSharing setObject:[NSNumber numberWithBool:!state] forKey:service];
+}
+
+-(void)connectService:(NSString *)service {
+    NSLog(@"Connecting sharing service %@", service);
+#if 0
+    [serviceIsConnected setObject:[NSNumber numberWithBool:YES] forKey:service];
+    [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:service]; // automatically start sharing after connect
+    [shareController didConnectService:service];
+#else
+    [self showAlertWithTitle:@"Connect for Share" andMessage:[NSString stringWithFormat:@"Connecting with %@ coming soon!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 #endif
+}
 
 -(void)didClickInviteButton {
     /*
@@ -2815,8 +2835,82 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 
-/*** processing stix counts ***/
+-(void)shouldCloseShareController:(BOOL)didClickDone {
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = userProfileController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    if (didClickDone) {
+        // check for caption
+        NSString * caption = [shareController.caption text];
+        NSLog(@"Did add caption: %@", caption);
+        if (caption && [caption length] > 0) {
+            int tagID = [newestTag.tagID intValue];
+            [self didAddCommentWithTagID:tagID andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
+        }
+        else {
+            caption = @"Get Sticky with me...";
+        }
+        
+        // check for share pix status
+        // upload finished and user confirmed share, do share
+        NSLog(@"Upload finished, do share!");
+        
+        // check for each service
+        NSEnumerator * e = [serviceIsSharing keyEnumerator];
+        id key;
+        while (key = [e nextObject]) {
+            NSLog(@"Sharing on service %@", key);
+            if ([key isEqualToString:@"Facebook"]) {
+                // facebook share without displaying share dialog
+                NSLog(@"Pix shared by %@ at %@", [self getUsername], [shareController shareURL]);
+                NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", [shareController shareURL]];
+                [fbHelper postToFacebookWithLink:[shareController shareURL] andPictureLink:[shareController shareImageURL] andTitle:@"Stix it!" andCaption:caption andDescription:fullmessage useDialog:NO];
+            }
+        }
+    }
+    
+    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [shareController.view removeFromSuperview];
+    }];
+}
 
+#pragma mark twitter helper
+/*
+-(void)showTwitterDialog {
+#if 0
+    twitterDialog = [twitterHelper getTwitterDialog];
+    
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:twitterDialog.view];
+    [twitterDialog.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:twitterDialog.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    }];
+#else
+    // Create the item to share (in this example, a url)
+	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
+	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
+    
+	// Get the ShareKit action sheet
+	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
+    
+	// Display the action sheet
+	[actionSheet showFromTabBar:(UITabBar*)tabBarController];
+#endif
+}
+-(void)twitterDialogDidFinish {
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [twitterDialog.view removeFromSuperview];
+        twitterDialog = nil;
+    }];
+}
+*/
 // debug
 -(void)adminUpdateAllStixCountsToZero {
 #if DEBUGX==1
@@ -3622,52 +3716,6 @@ static bool isShowingAlerts = NO;
     
 #endif
 }
-
-/*** ASIhttp request delegate functions ***/
-/*
-- (void) requestFinished:(ASIHTTPRequest *)request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"Response %d : %@", request.responseStatusCode, [request responseString]);
-    // the response is an HTML file of the redirect to the image page
-    // in this image page there is a meta tag: <meta shared_id='<ID>'>
-    // also the webURL: <meta web_url='/users/<USERNAME>/pictures/<ID>'>
-    
-    NSString * responseString = [request responseString];
-    NSRange range0 = [responseString rangeOfString:@"<meta web_url"];
-    NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
-    range0.location = range0.location + 15;
-    range0.length = range1.location - range0.location-3; // this could change based on how we output web
-    NSString * substring = [responseString substringWithRange:range0];
-    NSLog(@"substring for weburl: <%@>", substring);
-    
-    NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
-    imgRange.length = 60;
-    NSString * imgSubstring = [responseString substringWithRange:imgRange];
-    NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
-    imgRange.length = imgRangeEnd.location;
-    imgSubstring = [responseString substringWithRange:imgRange];
-
-    NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
-    [self didSharePixWithURL:weburl andImageURL:imgSubstring];
-}
-
-- (void) requestStarted:(ASIHTTPRequest *) request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"request started...");
-}
-
-- (void) requestFailed:(ASIHTTPRequest *) request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSError *error = [request error];
-    NSLog(@"%@", error);
-}
- */
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
     // list of people who follow this user

@@ -12,7 +12,6 @@ static ImageCache *sharedImageCache;
 
 @implementation ImageCache
 
-
 -(id)init
 {
 	self = [super init];

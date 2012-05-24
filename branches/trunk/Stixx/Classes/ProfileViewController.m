@@ -323,8 +323,15 @@
     UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
     
     // save to album
+#if 0
     UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
-    
+#else
+    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:rounded toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+        if (error!=nil) {
+            NSLog(@"Could not write to library: error %@", [error description]);
+        }
+    }];
+#endif
     //NSData * img = UIImageJPEGRepresentation(rounded, .8);
     NSData * img = UIImagePNGRepresentation(rounded);
     NSLog(@"Adding photo of size %f %f to user %@", rounded.size.width, rounded.size.height, [delegate getUsername]);
@@ -683,7 +690,8 @@
     return [searchFriendName count];
 }
 
--(void)didClickAddFriendButton:(int)index {
+//-(void)didClickAddFriendButton:(int)index {
+-(void)addFriendFromList:(int)index {
     NSString * username = [self getUsernameForUser:index];
     //NSMutableSet * friendsList = [self.delegate getFriendsList];
     if ([self getFollowingUserStatus:index] == 1) { 
@@ -921,7 +929,7 @@
 #pragma UserGalleryDelegate
 -(void)uploadImage:(NSData*)png withShareMethod:(int)buttonIndex
 {
-    [self.delegate uploadImage:png withShareMethod:buttonIndex];
+    [delegate uploadImage:png withShareMethod:buttonIndex];
 }
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
     [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];

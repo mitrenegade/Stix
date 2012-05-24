@@ -16,6 +16,7 @@
 #import "UIImage+Alpha.h"
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
 #define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
 

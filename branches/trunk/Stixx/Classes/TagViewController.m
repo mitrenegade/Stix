@@ -338,8 +338,15 @@
         frame.origin.x *= scale2;
         frame.origin.y *= scale2;
         UIImage * cropped = [result croppedImage:frame];
-        UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album
-        
+#if 0
+        UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); 
+#else
+        [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:cropped toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+            if (error!=nil) {
+                NSLog(@"Could not write to library: error %@", [error description]);
+            }
+        }];
+#endif        
         if ([[ImageCache sharedImageCache] imageForKey:@"largeImage"])
             [[ImageCache sharedImageCache] deleteImageForKey:@"largeImage"];
         [[ImageCache sharedImageCache] setImage:cropped forKey:@"largeImage"];
@@ -404,7 +411,6 @@
         CGSize resultSize = [cropped size];
         NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
     }
-    //UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); // write to photo album    
     
 	// hack: use the image cache in the easy way - just cache one image each time
     CGSize fullSize = CGSizeMake(314, 282);

@@ -223,6 +223,11 @@ static BOOL openingDetailView;
     
     if ([delegate respondsToSelector:@selector(detailViewDoneWithAsynchronousDelegateCall:)])
         [delegate detailViewDoneWithAsynchronousDelegateCall:self];
+    [names removeAllObjects];
+    [comments removeAllObjects];
+    [stixStringIDs removeAllObjects];
+    [timestamps removeAllObjects];
+    [rowHeights removeAllObjects];
     
     //NSNumber * tagID;
     trueCommentCount = 0;
@@ -402,7 +407,7 @@ static BOOL openingDetailView;
     NSString * name = [delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0) {
-        [self.delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
         // reload all comments - clear old ones
         [names removeAllObjects];
         [comments removeAllObjects];
@@ -546,5 +551,40 @@ static BOOL openingDetailView;
 -(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
     // do nothing
 }
+
+-(void)didClickLikeButton:(int)type withTagID:(int)_tagID {
+    NSString * newComment = @"";
+    NSString * newType = @"LIKE";
+    switch (type) {
+        case 0:
+            //newComment = @"ME LIKEY";
+            newComment = @"LIKE_SMILES";
+            break;
+        case 1:
+            //newComment = @"OMG LOVE IT";
+            newComment = @"LIKE_LOVE";
+            break;
+            
+        case 2:
+            //newComment = @" ;) HOW U DOIN";
+            newComment = @"LIKE_WINK";
+            break;
+            
+        case 3:
+            //newComment = @"OH NO U DIDNT *Z SNAP*";
+            newComment = @"LIKE_SHOCKED";
+            break;
+            
+        default:
+            break;
+    }
+    //[self didAddNewComment:newComment withTagID:tagID];
+    NSString * name = [delegate getUsername];
+    //    if ([newComment length] > 0)
+    [delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:newType];
+
+    [k getAllHistoryWithTagID:feedItem.tagID];
+}
+
 
 @end

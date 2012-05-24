@@ -36,13 +36,15 @@
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
 #import "Appirater.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
+#import "ShareController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
 #import "FacebookHelper.h"
 #endif
 #import "VerticalFeedController.h"
-
+#import "SHK.h" // sharekit
 #if USING_MKSTOREKIT
 #import "MKStoreKitConfigs.h"
 #import "MKStoreManager.h"
@@ -90,7 +92,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, SKProductsRequestDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate> {
     
     UIWindow *window;
     
@@ -157,7 +159,7 @@ struct UserInfo {
     int updatingPeelableAuxStixIndex;
     int updatingPeelableAction;
     int shareActionSheetTagID;
-    int shareMethod; // 0 = facebook, 1 = email
+    //int shareMethod; // 0 = facebook, 1 = email
 
     BOOL isDisplayingShareSheet;
     BOOL isDisplayingBuxMenu;
@@ -207,6 +209,17 @@ struct UserInfo {
     
     BOOL mkStoreKitSuccess; // hack
     FeedbackViewController * feedbackController;
+    
+    // share services
+    ShareController * shareController;
+    NSMutableDictionary * serviceIsConnected;
+    NSMutableDictionary * serviceIsSharing;
+    int newPixShareToggle;
+    int newPixShareTagID;
+    
+    // twitter helper
+//    TwitterHelper * twitterHelper;
+//    UIViewController * twitterDialog;
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -258,6 +271,10 @@ struct UserInfo {
 -(void)agitateFirstTimePointer;
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
+-(void)displayShareController:(Tag*)tag;
+-(void)uploadImage:(NSData *)dataPNG;
+
+//-(void)showTwitterDialog;
 
 @property (nonatomic) IBOutlet UIWindow *window;
 @property (nonatomic) UIViewController * emptyViewController;

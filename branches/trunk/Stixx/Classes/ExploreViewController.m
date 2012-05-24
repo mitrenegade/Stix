@@ -458,7 +458,7 @@ static NSMutableSet * retainedDetailControllers;
 }
 
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+    [delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
 -(void)didDismissZoom {
@@ -595,6 +595,9 @@ static NSMutableSet * retainedDetailControllers;
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
 
     UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
+    if ([[delegate getUsername] isEqualToString:@"anonymous"]) {
+        photo = [UIImage imageNamed:@"nav_profilebutton.png"];
+    }
     [buttonProfile setImage:photo forState:UIControlStateNormal];
     [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [buttonProfile.layer setBorderWidth:1];

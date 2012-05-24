@@ -1,4 +1,4 @@
-//
+    //
 //  FacebookHelper.m
 //  MyFacebookApp2
 //
@@ -155,9 +155,10 @@ static NSString * appID;
     return [facebook accessToken];
 }
 
--(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description {
+-(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description useDialog:(BOOL)useDialog{
     postType = @"sharePix";
-    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+    if (useDialog) {
+        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    appID, @"app_id",
                                    link, @"link",
                                    pictureLink, @"picture",
@@ -165,7 +166,23 @@ static NSString * appID;
                                    caption, @"caption",
                                    description, @"description",
                                    nil];
-    [facebook dialog:@"feed" andParams:params andDelegate:self];
+        [facebook dialog:@"feed" andParams:params andDelegate:self];
+    }
+    else {
+        
+        // There are many other params you can use, check the API
+        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       appID, @"app_id",
+                                       caption, @"message",
+                                       link, @"link",
+                                       pictureLink, @"picture",
+                                       description, @"description",
+                                       title, @"name",
+                                       nil];
+        //[NSMutableDictionary dictionaryWithObjects:obj forKeys:keys];
+        NSLog(@"Requesting graphPath");
+        [facebook requestWithGraphPath:@"me/feed" andParams:params andHttpMethod:@"POST" andDelegate:nil];    
+    }
 }
 
 #pragma mark friend request

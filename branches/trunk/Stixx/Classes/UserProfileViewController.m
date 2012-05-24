@@ -416,6 +416,24 @@
 //    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
+-(void)addFriendFromList:(int)index{
+    NSString * name = [self getUsernameForUser:index];
+    //NSMutableSet * friendsList = [self.delegate getFriendsList];
+    if ([self getFollowingUserStatus:index] == 1) { 
+        [delegate setFollowing:name toState:NO];
+    }
+    else if ([self getFollowingUserStatus:index] == 0)
+    {
+        [delegate setFollowing:name toState:YES];
+    }
+    else {
+        // cannot invite!
+        // invite
+        //NSString * fbID = [self getFacebookIDForUser:index]; // fbEmail does not exist
+        //[delegate didClickInviteButtonByFacebook:name withFacebookID:fbID];
+    }
+    [[searchResultsController tableView] reloadData];
+}
 #pragma mark ColumnTableController delegate
 /*
 -(UIView*)headerForSection:(NSInteger)section {

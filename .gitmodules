@@ -1,0 +1,3 @@
+[submodule "branches/trunk/Submodules/ShareKit"]
+	path = branches/trunk/Submodules/ShareKit
+	url = git://github.com/ShareKit/ShareKit.git

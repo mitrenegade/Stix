@@ -339,6 +339,14 @@ static dispatch_queue_t backgroundQueue;
 //    [self showTwitterDialog];
     [twitterHelper requestTwitterPostPermission];
     */
+    
+    // sharekit test
+    if (shareController == nil) {
+        shareController = [[ShareController alloc] init];
+        [shareController setDelegate:self];
+    }
+    [self.window addSubview:shareController.view];
+    [shareController doShareKit];
      
     return YES;
 }

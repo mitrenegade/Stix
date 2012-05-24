@@ -10,6 +10,8 @@
 #import "ASIFormDataRequest.h"
 #import "ASIHTTPRequest.h"
 #import "LoadingAnimationView.h"
+#import "SHK.h"
+#import "SHKConfiguration.h"
 
 #define HOSTNAME @"stix.herokuapp.com"
 
@@ -26,6 +28,9 @@
 -(void)sharePixDialogDidFinish;
 -(void)sharePixDialogDidFail:(int)errorType;
 
+@end
+
+@interface MySHKConfigurator:DefaultSHKConfigurator    
 @end
 
 @interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate>
@@ -68,4 +73,5 @@
 -(int)numberOfServices;
 -(void)uploadImage:(NSData *)dataPNG;
 -(BOOL)isUploading;
+-(void)doShareKit;
 @end

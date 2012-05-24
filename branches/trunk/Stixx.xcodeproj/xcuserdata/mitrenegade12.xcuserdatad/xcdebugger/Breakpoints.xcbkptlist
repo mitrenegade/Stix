@@ -843,7 +843,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "113"
          endingLineNumber = "113"
-         landmarkName = "-tableView:cellForRowAtIndexPath:"
+         landmarkName = "-initializeServices"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -890,11 +890,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "359545809.57468"
+         timestampString = "359589062.830342"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "2895"
-         endingLineNumber = "2895"
+         startingLineNumber = "2903"
+         endingLineNumber = "2903"
          landmarkName = "@implementation StixxAppDelegate"
          landmarkType = "3">
       </FileBreakpoint>

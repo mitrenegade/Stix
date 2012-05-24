@@ -12,8 +12,35 @@
 #define ROW_HEIGHT 44
 #define NUM_SERVICES 5
 
-@interface ShareController ()
+@implementation MySHKConfigurator
+- (NSString*)appName {
+	return @"Stix";
+}
 
+- (NSString*)appURL {
+	return @"http://stixmobile.com";
+}
+
+- (NSString*)facebookAppId {
+	return @"191699640937330";
+}
+
+//Change if your app needs some special Facebook permissions only. In most cases you can leave it as it is.
+- (NSArray*)facebookListOfPermissions {    
+    return [NSArray arrayWithObjects: @"user_about_me",@"user_photos",@"publish_stream",@"email",nil];
+}
+
+- (NSString*)twitterConsumerKey {
+	return @"VwXbDvMflzcj6NSwo6NtA";
+}
+
+- (NSString*)twitterSecret {
+	return @"sU8OFkq08sU9s4g6BKRVpnXgI9iqsfzWSlHYRTxyo";
+}
+// You need to set this if using OAuth, see note above (xAuth users can skip it)
+- (NSString*)twitterCallbackUrl {
+	return @"None";
+}
 @end
 
 @implementation ShareController
@@ -59,6 +86,9 @@
 }
 
 -(void)initializeServices {
+    DefaultSHKConfigurator *configurator = [[MySHKConfigurator alloc] init];
+    [SHKConfiguration sharedInstanceWithConfigurator:configurator];
+    
     names = [[NSMutableArray alloc] initWithObjects:@"Facebook", @"Twitter", @"Instagram", @"Tumblr", @"Pinterest", nil];
     NSMutableArray * imageNames = [[NSMutableArray alloc] initWithObjects:@"icon_share_facebook@2x.png", @"icon_share_twitter@2x.png", @"icon_share_instagram@2x.png", @"icon_share_tumblr@2x.png", @"icon_share_pinterest@2x.png", nil];
     
@@ -203,7 +233,8 @@
         });
     });
 #else
-    [self uploadImage:PNG];
+    //[self uploadImage:PNG];
+    [self doShareKit];
 #endif
 }
 
@@ -331,6 +362,20 @@
 #else
     [self uploadImage:PNG];
 #endif
+}
+
+#pragma mark sharekit
+
+-(void)doShareKit {
+    // Create the item to share (in this example, a url)
+	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
+	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
+    
+	// Get the ShareKit action sheet    
+	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
+    
+	// Display the action sheet
+	[actionSheet showFromRect:self.view.frame inView:self.view animated:YES];
 }
 
 @end

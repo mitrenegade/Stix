@@ -10,8 +10,9 @@
 #import "ASIFormDataRequest.h"
 #import "ASIHTTPRequest.h"
 #import "LoadingAnimationView.h"
-#import "SHK.h"
-#import "SHKConfiguration.h"
+//#import "SHK.h"
+#import "MySHKConfigurator.h"
+#import "SHKSharer.h"
 
 #define HOSTNAME @"stix.herokuapp.com"
 
@@ -30,10 +31,7 @@
 
 @end
 
-@interface MySHKConfigurator:DefaultSHKConfigurator    
-@end
-
-@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate>
+@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate, SHKSharerDelegate>
 {
     IBOutlet UIButton * backButton;
     IBOutlet UIButton * doneButton;
@@ -73,5 +71,5 @@
 -(int)numberOfServices;
 -(void)uploadImage:(NSData *)dataPNG;
 -(BOOL)isUploading;
--(void)doShareKit;
+-(void)doTwitterConnect;
 @end

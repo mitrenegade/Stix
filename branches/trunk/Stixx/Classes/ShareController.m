@@ -8,40 +8,11 @@
 
 #import "ShareController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "SHKTwitter.h"
+#import "SHKConfiguration.h"
 
 #define ROW_HEIGHT 44
 #define NUM_SERVICES 5
-
-@implementation MySHKConfigurator
-- (NSString*)appName {
-	return @"Stix";
-}
-
-- (NSString*)appURL {
-	return @"http://stixmobile.com";
-}
-
-- (NSString*)facebookAppId {
-	return @"191699640937330";
-}
-
-//Change if your app needs some special Facebook permissions only. In most cases you can leave it as it is.
-- (NSArray*)facebookListOfPermissions {    
-    return [NSArray arrayWithObjects: @"user_about_me",@"user_photos",@"publish_stream",@"email",nil];
-}
-
-- (NSString*)twitterConsumerKey {
-	return @"VwXbDvMflzcj6NSwo6NtA";
-}
-
-- (NSString*)twitterSecret {
-	return @"sU8OFkq08sU9s4g6BKRVpnXgI9iqsfzWSlHYRTxyo";
-}
-// You need to set this if using OAuth, see note above (xAuth users can skip it)
-- (NSString*)twitterCallbackUrl {
-	return @"None";
-}
-@end
 
 @implementation ShareController
 
@@ -86,8 +57,11 @@
 }
 
 -(void)initializeServices {
+    
+    // configuring sharekit
     DefaultSHKConfigurator *configurator = [[MySHKConfigurator alloc] init];
     [SHKConfiguration sharedInstanceWithConfigurator:configurator];
+    //[[SHK currentHelper] setCurrentView:self]; // dont do this or auth screen won't work
     
     names = [[NSMutableArray alloc] initWithObjects:@"Facebook", @"Twitter", @"Instagram", @"Tumblr", @"Pinterest", nil];
     NSMutableArray * imageNames = [[NSMutableArray alloc] initWithObjects:@"icon_share_facebook@2x.png", @"icon_share_twitter@2x.png", @"icon_share_instagram@2x.png", @"icon_share_tumblr@2x.png", @"icon_share_pinterest@2x.png", nil];
@@ -201,6 +175,7 @@
     [self.view addSubview:activityIndicatorLarge];
     [activityIndicatorLarge startCompleteAnimation];
 #if 0
+    /* for asynchronous upload
     // check for lock in background
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
                                              (unsigned long)NULL), ^(void) {
@@ -232,9 +207,11 @@
             [delegate shouldCloseShareController:YES];
         });
     });
+     */
 #else
     //[self uploadImage:PNG];
-    [self doShareKit];
+    //[self doTwitterConnect];
+    [self doTwitterShare];
 #endif
 }
 
@@ -242,7 +219,11 @@
     UIButton * button = (UIButton*)sender;
     NSLog(@"Clicking connect for %@", button.titleLabel.text);
 
-    [delegate connectService:button.titleLabel.text];
+    //[delegate connectService:button.titleLabel.text];
+    if ([button.titleLabel.text isEqualToString:@"Twitter"]) {
+        // enable twitter
+        [self doTwitterConnect];
+    }
 }
 
 -(void)didConnectService:(NSString*)name {
@@ -366,16 +347,89 @@
 
 #pragma mark sharekit
 
--(void)doShareKit {
+-(void)doTwitterConnect {
+	[SHK setRootViewController:self];
+    /*
+    For Twitter with iOS 5, it will not autoshare. If you want twitter to autoshare on iOS 5, remove the iOS 5 support from the SHKTwitter.m file.
+    
+    - (BOOL)twitterFrameworkAvailable {
+        return NO;
+        ...
+    }
+    
+    To enable autoshare, change this function to return YES for both SHKTwitter.m and SHKFacebook.m.
+        
+        - (BOOL)shouldAutoShare
+    {
+        return YES;
+    }
+     */
+    
+    if ([SHKTwitter isServiceAuthorized])
+//        [SHKTwitter logout];
+        NSLog(@"Twitter already authorized!");
+
+    SHKTwitter * twitter = [[SHKTwitter alloc] init];
+    [twitter setShareDelegate:self];
+    
+#if 0
+    // try to connect only
+    if (![SHK connected]) { //![SHKTwitter isServiceAuthorized]) {
+        SHKItem *item = [[SHKItem alloc] init];
+        [item setShareType:SHKShareTypeUserInfo];
+        [twitter setItem:item];
+        [twitter send];
+    } else {
+        [self didTwitterConnect];
+    }
+#else
+    // do a full share
     // Create the item to share (in this example, a url)
-	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
-	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
-    
-	// Get the ShareKit action sheet    
-	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
-    
-	// Display the action sheet
-	[actionSheet showFromRect:self.view.frame inView:self.view animated:YES];
+    SHKItem *item = [SHKItem text:@"Twitter from stix"];
+    [twitter setItem:item];
+    [twitter share];
+#endif
+}
+
+-(void)didTwitterConnect {
+    [delegate connectService:@"Twitter"];
+}
+
+-(void)doTwitterShare {
+    SHKTwitter * twitter = [[SHKTwitter alloc] init];
+    [twitter setShareDelegate:self];
+    SHKItem *item = [SHKItem text:@"Twitter from stix"];
+    [twitter setItem:item];
+    [twitter share];
+}
+
+- (void)sharerStartedSending:(SHKSharer *)sharer {
+    NSLog(@"Started sending");
+}
+- (void)sharerFinishedSending:(SHKSharer *)sharer {
+    if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
+        NSLog(@"Finished sending: userinfo");
+        [self didTwitterConnect];
+    }
+    if (activityIndicatorLarge) {
+        [activityIndicatorLarge setHidden:YES];
+        [activityIndicatorLarge stopCompleteAnimation];
+        [activityIndicatorLarge removeFromSuperview];
+    }
+    //[delegate shouldCloseShareController:YES];
+    [delegate shouldCloseShareController:NO];
+}
+- (void)sharer:(SHKSharer *)sharer failedWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin {
+    NSLog(@"Failed with error: %@ shouldRelogin: %d", [error description], shouldRelogin);
+}
+- (void)sharerCancelledSending:(SHKSharer *)sharer {
+    NSLog(@"Cancelled sending");
+}
+- (void)sharerShowBadCredentialsAlert:(SHKSharer *)sharer {
+    NSLog(@"Bad credentials!");
+}
+- (void)sharerShowOtherAuthorizationErrorAlert:(SHKSharer *)sharer {
+    NSLog(@"Other error");
 }
 
 @end

@@ -498,7 +498,7 @@
         // advance to next
         [delegate advanceFirstTimeUserMessage];
     }
-    [self.delegate didDismissSecondaryView];
+    [delegate didDismissSecondaryView];
 }
 
 -(IBAction)didClickTakePicture:(id)sender {

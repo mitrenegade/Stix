@@ -22,7 +22,7 @@
 @synthesize detailController;
 //@synthesize segmentedControl;
 
-#define EXPLORE_COL 2
+#define EXPLORE_COL 3
 #define EXPLORE_ROW 2
 
 static NSMutableSet * retainedDetailControllers;
@@ -149,9 +149,10 @@ static NSMutableSet * retainedDetailControllers;
 
 -(void) setExploreMode:(UIButton*)button{
     for (int i=0; i<[exploreModeButtons count]; i++){
-        [[exploreModeButtons objectAtIndex:i] setSelected:NO];
-        NSLog(@"Index: %d tag: %d mode: %d", i, [[exploreModeButtons objectAtIndex:i] tag], button.tag);
-        if (button.tag == [[exploreModeButtons objectAtIndex:i] tag])
+        UIButton * modeButton = [exploreModeButtons objectAtIndex:i];
+        [modeButton setSelected:NO];
+        NSLog(@"Index: %d tag: %d mode: %d", i, [modeButton tag], button.tag);
+        if (button.tag == [modeButton tag])
             [[exploreModeButtons objectAtIndex:i] setSelected:YES];
     }
     
@@ -183,7 +184,7 @@ static NSMutableSet * retainedDetailControllers;
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
     tableController.delegate = self;
-    numColumns = 2;
+    numColumns = EXPLORE_COL;
     [tableController setNumberOfColumns:numColumns andBorder:4];
     [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
 }
@@ -449,7 +450,10 @@ static NSMutableSet * retainedDetailControllers;
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    openDetailAnimation = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+    //openDetailAnimation = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [DetailViewController unlockOpen];
+    }];
     
     NSString * metricName = @"ExplorePix";
     //NSString * metricData = [NSString stringWithFormat:@"User: %@ ExploreType: %@", [self getUsername], exploreMode == EXPLORE_RECENT?@"Recent":@"Random"];
@@ -457,8 +461,8 @@ static NSMutableSet * retainedDetailControllers;
     [k addMetricWithDescription:metricName andUsername:[delegate getUsername] andStringValue:exploreMode == EXPLORE_RECENT?@"Recent":@"Random" andIntegerValue:[tagID intValue]];
 }
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-    [delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
+    [delegate didAddCommentFromDetailViewController:detailViewController withTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
 -(void)didDismissZoom {
@@ -514,71 +518,6 @@ static NSMutableSet * retainedDetailControllers;
         }
     }
 }
-/*
--(void)didClickAtLocation:(CGPoint)location {
-
-    if (isZooming == YES)
-        return;
-    
-    // dumb way to calculate which view we're looking at 
-    // but this mirrors the way we populate this page
-    int items_per_page = EXPLORE_COL * EXPLORE_ROW;
-    int start_index = 0; //[scrollView currentPage] * items_per_page;
-    int end_index = start_index + items_per_page - 1;
-    int x=0;
-    int y=0;
-    int x0, y0, x1, y1;
-    int item_width = 140;
-    int item_height = 140;
-    int ct;
-    int foundid=-1;
-    if (start_index >= items_per_page) {
-        //location.x -= [scrollView currentPage] * 300; // remove offset from scrollview 
-    }
-    for (ct=0; ct<[allTags count]; ct++) {
-        if (ct >= start_index && ct <= end_index) {
-            x0 = 5 + x * (item_width + 10);
-            y0 = 50 + y * (item_height + 10);
-            x1 = x0 + item_width;
-            y1 = y0 + item_height;
-
-            if (location.x >= x0 && location.x <= x1 && location.y >= y0 && location.y <= y1) {
-                foundid = ct;
-                break;
-            }
-
-            x = x + 1;
-            if (x==EXPLORE_COL)
-            {
-                x = 0;
-                y = y + 1;
-            }
-            if (y == EXPLORE_ROW)
-                break;            
-        }
-    }
-
-    // no item was clicked
-    if (ct >= [allTags count] || foundid == -1)
-        return; 
-    
-    NSNumber * tagID = [allTagIDs objectAtIndex:ct];
-    Tag * tag = [allTags objectForKey:tagID];
-    NSString * label = tag.descriptor;
-    NSString * locationString = tag.locationString;
-    NSLog(@"Using tag of comment %@ and location %@", label, locationString);
-
-    [DetailViewController setDelegate:self];
-    //[self.view insertSubview:DetailViewController.view aboveSubview:scrollView];
-    [DetailViewController setLabel:label];
-    [DetailViewController setStixUsingTag:tag];
-    isZooming = NO;
-    
-}
-*/
-//-(IBAction)feedbackButtonClicked:(id)sender {
-//    [self.delegate didClickFeedbackButton:@"Explore view"];
-//}
 
 - (void)didReceiveMemoryWarning
 {
@@ -601,6 +540,11 @@ static NSMutableSet * retainedDetailControllers;
     [buttonProfile setImage:photo forState:UIControlStateNormal];
     [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [buttonProfile.layer setBorderWidth:1];
+    
+    // if we opened detail controller, then switched to a different tab, then switched back, unlock it
+    //if (detailController)
+    //    detailController = nil;
+    //[DetailViewController unlockOpen]; 
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

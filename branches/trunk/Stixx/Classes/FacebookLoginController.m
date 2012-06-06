@@ -161,6 +161,7 @@
     //for (NSMutableDictionary * d in theResults) {
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * newname = [d valueForKey:@"username"];
+    NSNumber * userID = [d valueForKey:@"allUserID"];
     if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
         return;
     UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
@@ -204,7 +205,7 @@
      */
 //    [loginController.view removeFromSuperview];
     [self stopActivityIndicator];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andUserID:userID andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
      // MRC
      // MRC
 }

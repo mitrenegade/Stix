@@ -28,7 +28,7 @@
 @synthesize nameString, commentString, imageData;
 @synthesize userPhotoView;
 @synthesize addCommentButton;
-@synthesize tagID;
+@synthesize tagID, tag;
 @synthesize delegate;
 @synthesize commentCount;
 @synthesize stixView;
@@ -176,7 +176,7 @@
     //[feedItem setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
 
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doSpin:reloadView forTime:10 withCompletion:^(BOOL finished){ 
+    [animation doSpin:reloadView forTime:20 withCompletion:^(BOOL finished){ 
         NSLog(@"Spin finished!");
         [self displayReloadView];
     }];
@@ -537,146 +537,6 @@
 -(IBAction)didPressShareButton:(id)sender {
     if ([delegate respondsToSelector:@selector(didPressShareButtonForFeedItem:)])
         [delegate didPressShareButtonForFeedItem:self];
-}
-
--(void)didClickShareViaFacebook {
-    shareMethod = 0;
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    
-#if 0
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); 
-#else
-    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
-        if (error!=nil) {
-            NSLog(@"Could not write to library: error %@", [error description]);
-        }
-    }];
-#endif    
-    [self uploadImage:png];
-    
-    NSString * metricName = @"SharePixActionsheet";
-    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"Method: Facebook" andIntegerValue:[[tag tagID] intValue]];
-}
-
--(void)didClickShareViaEmail {
-    shareMethod = 1;
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    
-#if 0
-    UIImageWriteToSavedPhotosAlbum(result, nil, nil, nil); 
-#else
-    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
-        if (error!=nil) {
-            NSLog(@"Could not write to library: error %@", [error description]);
-        }
-    }];
-#endif    
-    [self uploadImage:png];
-    
-    NSString * metricName = @"SharePixActionsheet";
-    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"Method: Email" andIntegerValue:[tag.tagID intValue]];
-}
-
--(void)uploadImage:(NSData *)dataPNG{
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
-        [delegate sharePixDialogDidFinish];
-    NSLog(@"Uploading data for share method: %d", shareMethod);
-    
-    NSString * username = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-    NSString * serverString = [NSString stringWithFormat:@"http://%@/users/%@/pictures", HOSTNAME, username];
-    NSURL *url=[[NSURL alloc] initWithString:serverString];
-    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-    [request setDelegate:self];
-    [request setData:dataPNG forKey:@"picture[data]"];
-    [request startSynchronous];
-    //[url autorelease]; // arc conversion
-
-}
-
--(void)didSharePixWithURL:(NSString *)url andImageURL:(NSString*)imageURL{
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"Pix shared by %@ at %@", [self getUsername], url);
-    NSString * subject = [NSString stringWithFormat:@"%@ wants to share and remix a photo by %@", [self getUsername], self.nameString];
-    NSString * caption = [NSString stringWithFormat:@"Get Sticky with me...a photo by %@", self.nameString];
-    NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", url];
-    if (shareMethod == 0) {
-        // facebook
-        FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
-        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"Stix it!" andCaption:caption andDescription:fullmessage useDialog:YES];
-    }
-    else if (shareMethod == 1) {
-        // email
-        NSString *mailString = [NSString stringWithFormat:@"mailto:?to=&subject=%@&body=%@",
-                                [subject stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding],
-                                [fullmessage  stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
-        
-        NSLog(@"Sending mail: mailstring %@", mailString);
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:mailString]];    }
-    if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
-        [delegate sharePixDialogDidFinish];
-}
-
-#pragma mark ASIHTTP delegate 
-/*** ASIhttp request delegate functions ***/
-- (void) requestFinished:(ASIHTTPRequest *)request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"Response %d : %@", request.responseStatusCode, [request responseString]);
-    // the response is an HTML file of the redirect to the image page
-    // in this image page there is a meta tag: <meta shared_id='<ID>'>
-    // also the webURL: <meta web_url='/users/<USERNAME>/pictures/<ID>'>
-    
-    NSString * responseString = [request responseString];
-    NSRange range0 = [responseString rangeOfString:@"<meta web_url"];
-    NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
-    if (range0.length == 0 || range1.length == 0) {
-        NSLog(@"Create share page failed!");
-        if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
-            [delegate sharePixDialogDidFail:0];
-    }
-    else {
-        range0.location = range0.location + 15;
-        range0.length = range1.location - range0.location-3; // this could change based on how we output web
-        NSString * substring = [responseString substringWithRange:range0];
-        NSLog(@"substring for weburl: <%@>", substring);
-        
-        NSRange imgRange = [responseString rangeOfString:@"http://s3.amazonaws.com"];
-        imgRange.length = 60;
-        NSString * imgSubstring = [responseString substringWithRange:imgRange];
-        NSRange imgRangeEnd = [imgSubstring rangeOfString:@"\" />"];
-        imgRange.length = imgRangeEnd.location;
-        imgSubstring = [responseString substringWithRange:imgRange];
-        
-        NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
-        [self didSharePixWithURL:weburl andImageURL:imgSubstring];
-    }
-}
-
-- (void) requestStarted:(ASIHTTPRequest *) request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"request started...");
-}
-
-- (void) requestFailed:(ASIHTTPRequest *) request {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSError *error = [request error];
-    NSLog(@"%@", error);
-
-    NSLog(@"ASIHttpRequest to upload image failed!");
-    if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
-        [delegate sharePixDialogDidFail:1];
 }
 
 -(void)needsRetainForDelegateCall {

@@ -36,6 +36,7 @@ enum {
 -(NSMutableDictionary *)getUserPhotos;
 - (NSString *)getUsername;
 - (UIImage *)getUserPhoto;
+- (UIImage *)getUserPhotoForProfile;
 //- (int)getUserTagTotal;
 - (bool)isLoggedIn;
 - (void)didChangeUserphoto:(UIImage*)photo;
@@ -66,8 +67,7 @@ enum {
 -(void)searchFriendsByFacebook;
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
--(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 -(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookID:(NSString*)fbID;
 
 -(int)getFirstTimeUserStage;
@@ -118,6 +118,8 @@ enum {
     
     int dismissAnimation;
     BOOL showPointer;
+    
+    LoadingAnimationView * activityIndicatorLarge;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> *delegate;
@@ -170,7 +172,7 @@ enum {
 -(void)populateFollowingList;
 -(void)populateFollowersList;
 -(void)doPointerAnimation;
-
+-(void)didLogin;
 // deprecated
 /*
  -(IBAction)showLogoutScreen:(id)sender;

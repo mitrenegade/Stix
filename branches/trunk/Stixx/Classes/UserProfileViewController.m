@@ -168,9 +168,9 @@
     
     NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
     if (![lastUsername isEqualToString:username]) {
+        pendingContentCount = 0;
         [self forceReloadAll];
         [self setLastUsername:username];
-        pendingContentCount = 0;
     }
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
     [pixTableController.view removeFromSuperview];
@@ -212,13 +212,13 @@
     [nameLabel setText:username];
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
-    [photoButton setBackgroundColor:[UIColor blackColor]];
+    //[photoButton setBackgroundColor:[UIColor clearColor]];
 #if 1
     //NSString * friendName = username;
     UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:username]];
-    if (!userPhoto)
-        userPhoto = [UIImage imageNamed:@"graphic_nopic.png"];
     [photoButton setImage:userPhoto];
+    if (!userPhoto)
+        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
 #else
     [photoButton setImage:[delegate getUserPhotoForUsername:username]];// forState:UIControlStateNormal];
 #endif
@@ -391,9 +391,6 @@
     return [searchFriendFacebookID objectAtIndex:index];
 }
 -(int)getFollowingUserStatus:(int)index {
-    // if Facebook friend is not on Stix, return -1
-    //NSMutableArray * allFacebookIDs = [self.delegate getAllUserFacebookIDs];
-    //if (![allFacebookIDs containsObject:[searchFriendFacebookID objectAtIndex:index]])
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
         return -1;
     
@@ -408,11 +405,7 @@
 }
 
 #pragma UserGalleryDelegate
--(void)uploadImage:(NSData*)png withShareMethod:(int)buttonIndex
-{
-//    [self.delegate uploadImage:png withShareMethod:buttonIndex];
-}
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
 //    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
@@ -779,7 +772,7 @@
     for (NSMutableDictionary * d in theResults) {
         NSString * friendName = [d valueForKey:@"followsUser"];
         if (![allFollowing containsObject:friendName]) {
-            NSLog(@"allFollowing adding %@", friendName);
+            //NSLog(@"allFollowing adding %@", friendName);
             [allFollowing addObject:friendName];
         }
     }

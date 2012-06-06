@@ -27,8 +27,7 @@
 -(int)getStixOrder:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 //-(void)sharePix:(int)tagID;
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
--(void)uploadImage:(NSData*)dataPNG withShareMethod:(int)method;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)didOpenProfileView;
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;

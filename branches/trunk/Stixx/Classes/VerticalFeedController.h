@@ -35,7 +35,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 
 - (bool) isLoggedIn;
@@ -85,7 +85,7 @@
 
 -(void)didReloadPendingPix:(Tag*)tag;
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
--(void)displayShareController:(Tag*)tag;
+-(void)doParallelNewPixShare:(Tag*)_tag;
 
 @end
 
@@ -211,6 +211,10 @@
 -(void)checkForUpdatedStix;
 -(void)updateFeedTimestamps;
 -(void)showReloadPendingPix:(Tag*)failedTag;
+
+-(void)startActivityIndicatorLarge;
+-(void)stopActivityIndicatorLarge;
+
 @end
 
 

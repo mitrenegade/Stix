@@ -295,7 +295,7 @@
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     if ([descriptor length] > 0) {
         NSString * name = [self.delegate getUsername];
-        [self.delegate didAddCommentWithTagID:[t.tagID intValue] andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
+        [delegate didAddCommentFromDetailViewController:nil withTagID:[t.tagID intValue] andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
         //        [self didAddNewComment:descriptor withTagID:[t.tagID intValue]];
     }
 }
@@ -438,25 +438,31 @@
         [headerView setAlpha:.75];
         
         UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
+        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
+        [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        [photoView.layer setBorderWidth: 2.0];
         if (photo) {
-            UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
-            [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
-            [photoView.layer setBorderWidth: 2.0];
             [photoView setImage:photo forState:UIControlStateNormal];
-            [photoView setTag:index];
-            [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
-            [headerView addSubview:photoView];
             [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:YES] forKey:tag.tagID];
         }
         else {
+            [photoView setImage:[UIImage imageNamed:@"graphic_nopic.png"] forState:UIControlStateNormal];
             [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:NO] forKey:tag.tagID];
         }
+        [photoView setTag:index];
+        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        [headerView addSubview:photoView];
         
         UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 260, 30)];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
         [nameLabel setTextColor:[UIColor whiteColor]];
         [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
-        [nameLabel setText:tag.username];
+        if ([tag.username length] > 26) {
+            NSString * shortName = [tag.username substringToIndex:25];
+            [nameLabel setText:[NSString stringWithFormat:@"%@...", shortName]];
+        }
+        else
+            [nameLabel setText:tag.username];
         [headerView addSubview:nameLabel];
         
        // UIbutton * nameButton [[[UIButton alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
@@ -803,7 +809,7 @@
     if ([delegate isDisplayingShareSheet])
         return;
     
-    [self.delegate didOpenProfileView];
+    [delegate didOpenProfileView];
 }
 
 -(void)didPullToRefresh {
@@ -1122,7 +1128,7 @@
     NSString * name = [self.delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0)
-        [delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [delegate didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
 }
 
@@ -1155,7 +1161,7 @@
     //[self didAddNewComment:newComment withTagID:tagID];
     NSString * name = [delegate getUsername];
 //    if ([newComment length] > 0)
-    [delegate didAddCommentWithTagID:tagID andUsername:name andComment:newComment andStixStringID:newType];
+    [delegate didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:newComment andStixStringID:newType];
 }
 
 -(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem {
@@ -1295,6 +1301,7 @@
     [self didCloseShareSheet];
     [delegate didCloseShareSheet];
 }
+/*
 -(void)didClickShareViaFacebook {
     [self startActivityIndicator];
     if (!activityIndicatorLarge)
@@ -1319,7 +1326,7 @@
     });
     [self didCloseShareSheet];
 }
-
+*/
 -(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
@@ -1329,7 +1336,7 @@
         return;
     if ([delegate isDisplayingShareSheet])
         return;
-
+#if 0
     shareFeedItem = feedItem;
     
     CGRect frameInside = CGRectMake(16, 22, 289, 380);
@@ -1361,20 +1368,41 @@
         [self.view addSubview:buttonShareFacebook];
         [self.view addSubview:buttonShareClose];
     }];
-    
+
     [delegate didDisplayShareSheet];
+#else
+    //for (int i=0; i<[allTags count]; i++) {
+        //Tag * tag = [allTags objectAtIndex:i];
+        //if ([tag.tagID intValue] == feedItem.tagID) {
+        //    [delegate displayShareController:tag];
+        //    return;
+        //}
+    //}
+    [delegate doParallelNewPixShare:feedItem.tag];
+#endif
+}
+
+-(void)startActivityIndicatorLarge {
+    if (!activityIndicatorLarge)
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+    [self.view addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)stopActivityIndicatorLarge {
+    if (activityIndicatorLarge) {
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
+            [activityIndicatorLarge setHidden:YES];
+            [activityIndicatorLarge stopCompleteAnimation];
+            [activityIndicatorLarge removeFromSuperview];
+//        });
+        //activityIndicatorLarge = nil;
+    }
 }
 
 -(void)sharePixDialogDidFinish {
     [self didCloseShareSheet];
-    if (activityIndicatorLarge) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
-            [activityIndicatorLarge setHidden:YES];
-            [activityIndicatorLarge stopCompleteAnimation];
-            [activityIndicatorLarge removeFromSuperview];
-        });
-        //activityIndicatorLarge = nil;
-    }
+    [self startActivityIndicatorLarge];
     [delegate didCloseShareSheet];
 }
 -(void)sharePixDialogDidFail:(int)errorType {
@@ -1446,13 +1474,12 @@
     [self reloadPage:0];
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     shareFeedItem = feedItem;
-    //[self didPressShareButtonForFeedItem:feedItem];
-    [delegate displayShareController:tag];
+    //[delegate displayShareController:tag];
 }
 
 -(void)checkForUpdatedStix {
     NSLog(@"Checking for updated stix in 10 most recent tags");
-    for (int i=0; i<[allTagsDisplayed count]; i++) {
+    for (int i=0; i<MIN(20, [allTagsDisplayed count]); i++) {
         if (i >= [allTagsDisplayed count])
             break;
         Tag * tag = [allTagsDisplayed objectAtIndex:i];

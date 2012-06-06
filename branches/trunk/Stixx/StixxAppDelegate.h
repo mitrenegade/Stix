@@ -9,20 +9,17 @@
 #define USING_KIIP 0
 #define USING_FACEBOOK 1
 #define USING_MKSTOREKIT 1
+#define OPTIMIZATION_HACK 1 // for parse subscription
 
 #import <UIKit/UIKit.h>
 
 #import "TagViewController.h"
 #import "ProfileViewController.h"
-//#import "FriendsViewController.h"
-//#import "TagDescriptorController.h"
 #import "ExploreViewController.h"
 #import "Kumulos.h"
 #import "Tag.h"
-//#import "ARCoordinate.h"
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
-//#import "LoginSplashController.h"
 #import "LoadingViewController.h"
 #import "FeedbackViewController.h"
 #import <Parse/Parse.h>
@@ -38,13 +35,13 @@
 #import "Appirater.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
 #import "ShareController.h"
+#import "SHK.h" // sharekit
+#import "VerticalFeedController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
 #import "FacebookHelper.h"
 #endif
-#import "VerticalFeedController.h"
-#import "SHK.h" // sharekit
 #if USING_MKSTOREKIT
 #import "MKStoreKitConfigs.h"
 #import "MKStoreManager.h"
@@ -59,6 +56,8 @@ enum notification_bookmarks {
     NB_UPDATECAROUSEL,
     NB_INCREMENTBUX,
     NB_NEWFOLLOWER,
+    NB_ONLINE,
+    NB_ONLINEREPLY,
     NB_NEWPIX
 };
 
@@ -86,6 +85,7 @@ struct UserInfo {
     int usertagtotal;
     int bux;
     int firstTimeUserStage;
+    int userID;
 
     // user info
 //    bool isFirstTimeUser;
@@ -212,10 +212,12 @@ struct UserInfo {
     
     // share services
     ShareController * shareController;
-    NSMutableDictionary * serviceIsConnected;
-    NSMutableDictionary * serviceIsSharing;
-    int newPixShareToggle;
-    int newPixShareTagID;
+    BOOL newPixDidClickShare;
+    BOOL newPixDidFinishUpload;
+    
+    NSMutableSet * Parse_subscribedChannels;
+    
+    BOOL didGetFollowingLists;
     
     // twitter helper
 //    TwitterHelper * twitterHelper;
@@ -248,8 +250,10 @@ struct UserInfo {
 -(Tag*) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
+-(void) Parse_unsubscribeFromChannel:(NSString*)channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID;
 //-(void) Parse_unsubscribeFromAll;
+-(void) Parse_sendNotificationToFollowers:(NSString*)message ofType:(int)type withTag:(NSNumber*)tagID;
 
 -(void) Parse_createSubscriptions;
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
@@ -269,10 +273,15 @@ struct UserInfo {
 -(void)hideFirstTimeUserMessage;
 -(void)advanceFirstTimeUserMessage;
 -(void)agitateFirstTimePointer;
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
 -(void)displayShareController:(Tag*)tag;
 -(void)uploadImage:(NSData *)dataPNG;
+-(void)initializeShareController;
+
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;    
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)doParallelNewPixShare:(Tag*)_tag;
 
 //-(void)showTwitterDialog;
 
@@ -302,6 +311,7 @@ struct UserInfo {
 @property (nonatomic) NSMutableArray * allUserFacebookIDs;
 @property (nonatomic) NSMutableArray * allUserEmails;
 @property (nonatomic) NSMutableArray * allUserNames;
+@property (nonatomic) NSMutableDictionary * allUserIDs;
 @property (nonatomic) Kumulos * k;
 @property (nonatomic) NSMutableDictionary * allCommentCounts;
 @property (nonatomic) NSMutableDictionary * allCommentHistories;

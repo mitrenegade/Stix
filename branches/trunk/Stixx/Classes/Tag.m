@@ -103,19 +103,19 @@
     NSString * comment = [d valueForKey:@"comment"];
     NSString * locationString = [d valueForKey:@"locationString"];
     UIImage * image = [[UIImage alloc] initWithData:[d valueForKey:@"image"]];
-        
-    NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
-    NSKeyedUnarchiver *decoder;
-    decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData];
-    //ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
-    [decoder finishDecoding];
-    
+            
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
-    //[tag addARCoordinate:coordinate];
-     // MRC
     
+    /*
+    //NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
+    //NSKeyedUnarchiver *decoder;
+    //decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData];
+    //ARCoordinate * coordinate = [decoder decodeObjectForKey:@"coordinate"];
+    //[decoder finishDecoding];
+    //[tag addARCoordinate:coordinate];
+     
     NSMutableData *theData2 = (NSMutableData*)[d valueForKey:@"auxStix"];
     decoder = [[NSKeyedUnarchiver alloc] initForReadingWithData:theData2];
     [tag setAuxStixStringIDs:[decoder decodeObjectForKey:@"auxStixStringIDs"]];
@@ -123,6 +123,7 @@
     [tag setAuxTransforms:[decoder decodeObjectForKey:@"auxTransforms"]];
     [tag setAuxPeelable:[decoder decodeObjectForKey:@"auxPeelable"]];
     [decoder finishDecoding];
+    */
     
     if (tag.auxStixStringIDs == nil) {
         [tag setAuxStixStringIDs:[[NSMutableArray alloc] init]];

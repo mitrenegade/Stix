@@ -33,6 +33,7 @@
 #import "ASIFormDataRequest.h"
 #import "FacebookHelper.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
+#import "ShareController.h"
 
 #define CONTENT_HEIGHT 320
 #define HOSTNAME @"stix.herokuapp.com"
@@ -64,7 +65,7 @@
 @end
 
 
-@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate, UIActionSheetDelegate, ASIHTTPRequestDelegate, StixAnimationDelegate, UIGestureRecognizerDelegate>{
+@interface VerticalFeedItemController : UIViewController <StixViewDelegate,/*CommentFeedTableDelegate,*/ KumulosDelegate, UIActionSheetDelegate, ASIHTTPRequestDelegate, StixAnimationDelegate, UIGestureRecognizerDelegate, ShareControllerDelegate>{
     
 	IBOutlet UILabel * labelName;
     //    IBOutlet UILabel * labelDescriptorBG; // needed for opacity trick
@@ -134,6 +135,7 @@
 @property (nonatomic) IBOutlet UIButton * addCommentButton;
 @property (nonatomic) IBOutlet UIButton * shareButton;
 @property (nonatomic, assign) int tagID;
+@property (nonatomic) Tag * tag;
 @property (nonatomic, assign) int commentCount;
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedItemDelegate> * delegate;   
 @property (nonatomic) StixView * stixView;
@@ -156,11 +158,6 @@
 -(IBAction)didPressAddCommentButton:(id)sender;
 -(IBAction)didPressShareButton:(id)sender;
 -(IBAction)didPressSeeAllCommentsButton:(id)sender;
-
-// sharing 
--(void)didClickShareViaFacebook;
--(void)didClickShareViaEmail;
--(void)uploadImage:(NSData *)dataPNG;
 
 -(void)togglePlaceholderView:(BOOL)showPlaceholder;
 -(void)likeToolbarHide:(int)selected;

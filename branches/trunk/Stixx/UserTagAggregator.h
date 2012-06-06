@@ -12,7 +12,9 @@
 @protocol UserTagAggregatorDelegate <NSObject>
 
 -(NSMutableSet*)getFollowingList;
+-(void)didStartAggregationWithTagID:(NSNumber*)tagID;
 -(void)didFinishAggregation:(BOOL)isFirstTime;
+-(void)didSetAggregationTrigger;
 -(void)dismissAggregateIndicator;
 -(NSString*)getUsername;
 -(BOOL)isLoggedIn;
@@ -24,6 +26,9 @@
     int followingCountLeftToAggregate;
     BOOL isFirstTimeAggregating;
     int firstTimeAggregatingTrigger; // when all friends have been added to the aggregator queue for the first time, this trigger is set to 1 so that when the aggregator queue empties, we know the tagID is in order with the most recent tag in it
+    
+    BOOL aggregationGetTagRequested; // first time a friend's tag has been found, tell delegate to download that tag
+    NSMutableDictionary * userTagList;
 }
 
 @property (nonatomic, retain) Kumulos * k;
@@ -31,6 +36,7 @@
 @property (nonatomic, retain) NSMutableDictionary * allUsernamesOfTagIDs;
 @property (nonatomic, assign) NSObject<UserTagAggregatorDelegate> * delegate;
 @property (nonatomic, retain) NSMutableArray * aggregationQueue;
+@property (nonatomic, retain) NSMutableDictionary * usernameForOperations;
 
 -(void)processAggregationQueueInBackground;
 -(void)startAggregatingTagIDs;
@@ -42,4 +48,5 @@
 -(int)getOldestTag;
 -(void)displayState;
 -(void)resetFirstTimeState;
+-(void)loadCachedUserTagListForUsers;
 @end

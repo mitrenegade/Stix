@@ -84,10 +84,28 @@ static KumulosHelper *sharedKumulosHelper = nil;
         
         [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
     }
+    else if ([function isEqualToString:@"addCommentToPixWithDetailViewController"]) {
+        NSNumber * tagID = [inputParams objectAtIndex:0];
+        NSString * name = [inputParams objectAtIndex:1];
+        NSString * comment = [inputParams objectAtIndex:2];
+        NSString * stixStringID = [inputParams objectAtIndex:3];
+        DetailViewController * detailViewController = [inputParams objectAtIndex:4];
+        [k addCommentToPixWithTagID:[tagID intValue] andUsername:name andComment:comment andStixStringID:stixStringID];
+        
+        [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
+        [savedInfo setObject:detailViewController forKey:@"addCommentToPix_detailViewController"];
+    }
     else if ([function isEqualToString:@"getFacebookUser"]) {
         NSNumber * fbID = [inputParams objectAtIndex:0];
         NSLog(@"Calling kumulos getFaceBookUser with id %d", [fbID intValue]);
         [k getFacebookUserWithFacebookID:[fbID intValue]];
+    }
+    else if ([function isEqualToString:@"addPixBelongsToUser"]) {
+        NSString * username = [inputParams objectAtIndex:0];
+        NSNumber * tagID = [inputParams objectAtIndex:1];
+        [savedInfo setObject:username forKey:@"addPixBelongsToUser_username"];
+        [savedInfo setObject:tagID forKey:@"addPixBelongsToUser_tagID"];
+        [k addPixBelongsToUserWithUsername:username andTagID:[tagID intValue]];
     }
     else if ([function isEqualToString:@"checkForUpdatedStix"]) {
         void * tag = [inputParams objectAtIndex:0];
@@ -285,6 +303,10 @@ static KumulosHelper *sharedKumulosHelper = nil;
     [self cleanup];
 }
 
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addPixBelongsToUserDidCompleteWithResult:(NSNumber *)newRecordID {
+    [self cleanup];
+}
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllCategoriesDidCompleteWithResult:(NSArray *)theResults {
     if ([self.function isEqualToString:@"getSubcategories"]) {
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:theResults, nil];
@@ -319,11 +341,21 @@ static KumulosHelper *sharedKumulosHelper = nil;
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addCommentToPixDidCompleteWithResult:(NSNumber *)newRecordID {
     NSNumber * tagID = [savedInfo objectForKey:@"addCommentToPix_tagID"];
-    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, nil];
-    if (self.delegate) {
-        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    if ([function isEqualToString:@"addCommentToPix"]) {
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, nil];
+        if (self.delegate) {
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+        }
+        [returnParams autorelease];
+    }    
+    else if ([function isEqualToString:@"addCommentToPixWithDetailViewController"]) {
+        DetailViewController * detailViewController = [savedInfo objectForKey:@"addCommentToPix_detailViewController"];        
+        NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, detailViewController, nil];
+        if (self.delegate) {
+            [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+        }
+        [returnParams autorelease];
     }
-    [returnParams autorelease];
     [self cleanup];
 }
 
@@ -369,6 +401,10 @@ static KumulosHelper *sharedKumulosHelper = nil;
         // if this happens while we are trying to load galleries, we need 
         // to decrement pendingContentCount
         // instead, redo
+        [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
+    }
+    else if ([function isEqualToString:@"addPixBelongsToUser"]) {
+        NSLog(@"addPixBelongsToUser failed!");
         [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
     }
 }

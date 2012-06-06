@@ -8,10 +8,13 @@
 
 #import "UserTagAggregator.h"
 
+#define OPTIMIZATION_HACK 0
+#define VERBOSE 0
+
 @implementation UserTagAggregator
 
 @synthesize k;
-@synthesize allUsernamesOfTagIDs, allTagIDs;
+@synthesize allUsernamesOfTagIDs, allTagIDs, usernameForOperations;
 @synthesize delegate;
 @synthesize aggregationQueue;
 
@@ -22,6 +25,8 @@
         [k setDelegate:self];
         allTagIDs = [[NSMutableArray alloc] init];
         allUsernamesOfTagIDs = [[NSMutableDictionary alloc] init];
+        usernameForOperations = [[NSMutableDictionary alloc] init];
+        userTagList = [[NSMutableDictionary alloc] init];
         
         // create queue of tagIDs to insert in background
         aggregationQueue = [[NSMutableArray alloc] init];
@@ -31,6 +36,7 @@
         followingCountLeftToAggregate = 0; // keep track of whether all friends have been aggregated
         isFirstTimeAggregating = YES;
         firstTimeAggregatingTrigger = 0;
+        aggregationGetTagRequested = NO;
     }
     return self;
 }
@@ -66,6 +72,28 @@
     [aggregationQueue addObjectsFromArray:theResults];
 }
 
+-(void)loadCachedUserTagListForUsers {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];    
+    [userTagList addEntriesFromDictionary:[defaults objectForKey:@"AggregateUserTags"]]; // gets the most recent tag for all friends
+    [allTagIDs addObjectsFromArray:[defaults objectForKey:@"AggregateTagIDs"]]; // gets the ordered list of friends' tags
+    if ([allTagIDs count] > 0 || [userTagList count] > 0) {
+        NSLog(@"Loaded cached user tag list with %d users, %d previously aggregated tagIDs", [userTagList count], [allTagIDs count]);
+        
+        const int TAGS_TO_LOAD = 5;
+        if (!aggregationGetTagRequested) {
+            for (int j=0; j<TAGS_TO_LOAD; j++) {
+                if ([allTagIDs count] > j) {
+                    // tell delegate to request a tag to start
+                    NSNumber * tagID = [allTagIDs objectAtIndex:([allTagIDs count] - 1 - j)];
+                    aggregationGetTagRequested = YES;
+                    NSLog(@"First time requesting a friend's tag: %d", [tagID intValue]);            
+                    [delegate didStartAggregationWithTagID:tagID];
+                }
+            }
+        }
+    }
+}
+    
 // TODO: first time aggregate happens, notify delegate
 
 -(void)aggregateNewTagIDs {
@@ -73,15 +101,29 @@
         NSLog(@"Trying to aggregate tagIDs for following list but user is not logged in!");
         return;
     }
-    NSMutableSet * allFollowing = [delegate getFollowingList];
+    NSMutableSet * allFollowing = [delegate getFollowingList];    
     NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:allFollowing];
     [followingSetWithMe addObject:[delegate getUsername]];
+    
     followingCountLeftToAggregate = [allFollowing count];
     NSLog(@"AggregateNewTagIDs: You are following %d people", [allFollowing count]);
+    int ct = 0;
+#if OPTIMIZATION_HACK
+    
+#endif
     for (NSString * name in followingSetWithMe) {
-        NSNumber * newestTagID = [NSNumber numberWithInt:idOfNewestTagAggregated]; //[allTagIDs objectAtIndex:0]; 
+        if (OPTIMIZATION_HACK) {
+            ct++;
+            if (ct == 20)
+                break;
+        }
+        //NSNumber * newestTagID = [NSNumber numberWithInt:idOfNewestTagAggregated]; //[allTagIDs objectAtIndex:0];
+        NSNumber * newestTagID = [userTagList objectForKey:name];
+#if VERBOSE
         NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
-        [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+#endif
+        KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+        //[usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     }    
     [followingSetWithMe release];
 }
@@ -106,8 +148,20 @@
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
     
-    NSLog(@"getNewPixBelongingToUser completed with %d results - %d users remaining", [theResults count], followingCountLeftToAggregate-1);
-    [aggregationQueue addObjectsFromArray:theResults];
+    if ([theResults count] > 0)
+    {
+        //NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
+        NSString * followName = [[theResults objectAtIndex:0] objectForKey:@"username"];
+#if 1 //VERBOSE
+        NSLog(@"getNewPixBelongingToUser %@ completed with %d results - %d users remaining", followName, [theResults count], followingCountLeftToAggregate-1);
+#endif
+        [aggregationQueue addObjectsFromArray:theResults];
+    }
+    else {
+#if 1 //VERBOSE
+        NSLog(@"getNewPixBelongingToUser returned no results for followingCount %d", followingCountLeftToAggregate-1);
+#endif
+    }
     
     followingCountLeftToAggregate--;
     if (followingCountLeftToAggregate == 0) {
@@ -116,6 +170,12 @@
             NSLog(@"UserAggregator setting trigger for firstTimeAggregating");
             firstTimeAggregatingTrigger = 1;
             isFirstTimeAggregating = NO;
+            
+            // call parse now 
+            [delegate didSetAggregationTrigger];
+        }
+        else {
+            NSLog(@"UserAggregator trigger is not first time aggregating");
         }
     }
 }
@@ -125,6 +185,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
                                              (unsigned long)NULL), ^(void) {
         
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     while (1) {
         if ([aggregationQueue count]>0) {
             // insert sorted
@@ -133,9 +194,17 @@
             NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
             if (d != nil) {
                 [aggregationQueue removeObject:d];
-                //NSString * username = [d valueForKey:@"username"];
+                NSString * username = [d valueForKey:@"username"];
                 NSNumber * tagID = [d valueForKey:@"tagID"];
-                NSLog(@"Aggregating queue now size %d tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
+#if VERBOSE
+                NSLog(@"Aggregating queue now size %d user %@ tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], username, [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
+#endif     
+                // update userTagList if new tagID is more recent 
+                if ([[userTagList objectForKey:username] intValue] < [tagID intValue]) {
+                    [userTagList setObject:tagID forKey:username];
+                    [defaults setObject:userTagList forKey:@"AggregateUserTags"];
+                    [defaults synchronize];
+                }
                 
                 id newObject = tagID;
                 NSComparator comparator = ^(id obj1, id obj2) {
@@ -164,6 +233,8 @@
                     idOfNewestTagAggregated = [tagID intValue];
                 }
                 
+                [defaults setObject:allTagIDs forKey:@"AggregateTagIDs"];
+                
                 if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
                     // triggers "completion" of aggregator initially
                     // the highest id in this should be the most recent tagID for this user's following list
@@ -173,6 +244,14 @@
                 }
 //                else
 //                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
+                
+                if (!aggregationGetTagRequested) {
+                    // tell delegate to request a tag to start
+                    aggregationGetTagRequested = YES;
+                    NSLog(@"First time requesting a friend's tag: %@ %d", username, [tagID intValue]);
+                    
+                    [delegate didStartAggregationWithTagID:tagID];
+                }
             }
         }
     }

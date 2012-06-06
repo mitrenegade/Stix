@@ -17,6 +17,7 @@
 #import "LoadingAnimationView.h"
 #import "VerticalFeedItemController.h"
 #import "CommentViewController.h"
+#import "ShareController.h"
 
 @class DetailViewController;
 
@@ -25,7 +26,7 @@
 -(void)didDismissZoom;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(NSString*)getUsername;
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
@@ -34,7 +35,7 @@
 -(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController *)detailController;
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;
@@ -69,16 +70,23 @@
     UIButton * buttonShareClose;
     int shareMenuOpenAnimation;
     int shareMenuCloseAnimation;
+    
+    Tag * tag;
+    ShareController * shareController;
+    BOOL newPixDidClickShare;
+    BOOL newPixDidFinishUpload;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
 //@property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
 @property (nonatomic, unsafe_unretained) NSObject<DetailViewDelegate> *delegate;
+@property (nonatomic, unsafe_unretained) NSObject<ShareControllerDelegate> *shareDelegate;
 @property (nonatomic) StixView * stixView;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic) IBOutlet UIImageView * logo;
 @property (nonatomic) NSString * tagUsername;
 @property (nonatomic) CommentViewController * commentView;
+@property (nonatomic) Tag * tag;
 
 -(IBAction)didClickBackButton:(id)sender;
 -(void)initDetailViewWithTag:(Tag *)tag;
@@ -91,4 +99,10 @@
 +(BOOL)openingDetailView;
 +(void)lockOpen;
 +(void)unlockOpen;
+
+// shareController
+-(void)displayShareController;
+-(void)addCommentDidFinish;
+-(void)doParallelNewPixShare;
+
 @end

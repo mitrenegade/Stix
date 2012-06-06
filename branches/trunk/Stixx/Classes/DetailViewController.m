@@ -19,9 +19,10 @@
 @synthesize logo;
 @synthesize tagUsername;
 @synthesize commentView;
+@synthesize shareDelegate;
+@synthesize tag;
 
 static BOOL openingDetailView;
-//static NSMutableSet * retainedViewsForDelegateCallGetAllHistory;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -44,6 +45,7 @@ static BOOL openingDetailView;
     tagID = [tag.tagID intValue];
     [self initFeedItemWithTag:tag];
     [self headerFromTag:tag];
+    [self setTag:tag];
 }
 
 // StixViewDelegate
@@ -407,14 +409,14 @@ static BOOL openingDetailView;
     NSString * name = [delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0) {
-        [delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [delegate didAddCommentFromDetailViewController:self withTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
         // reload all comments - clear old ones
         [names removeAllObjects];
         [comments removeAllObjects];
         [stixStringIDs removeAllObjects];
         [timestamps removeAllObjects];
         [rowHeights removeAllObjects];
-        [k getAllHistoryWithTagID:feedItem.tagID];
+        //[k getAllHistoryWithTagID:feedItem.tagID];
         
         // force retention of delegate call
         if ([delegate respondsToSelector:@selector(detailViewNeedsRetainForDelegateCall:)])
@@ -427,6 +429,10 @@ static BOOL openingDetailView;
          */
     }
     [self didCloseComments];
+}
+
+-(void)addCommentDidFinish {
+    [k getAllHistoryWithTagID:feedItem.tagID];
 }
 
 -(void)didCloseComments {
@@ -471,7 +477,7 @@ static BOOL openingDetailView;
     animation.delegate = self;
     shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
 }
-
+/*
 -(void)didClickShareViaFacebook {
     [self startActivityIndicator];
     dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
@@ -493,8 +499,10 @@ static BOOL openingDetailView;
     [shareSheet addSubview:activityIndicatorLarge];
     [activityIndicatorLarge startCompleteAnimation];
 }
+ */
 
 -(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
+#if 0
     CGRect frameInside = CGRectMake(16, 22, 289, 380);
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
     shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
@@ -519,6 +527,83 @@ static BOOL openingDetailView;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
+#else
+    [self doParallelNewPixShare];
+#endif
+}
+-(void)doParallelNewPixShare{
+    NSLog(@"NewPixShare: resetting toggles for new created pix");
+    newPixDidClickShare = NO;
+    newPixDidFinishUpload = NO;
+    shareController = [ShareController sharedShareController];
+    [shareController startUploadImage:tag withDelegate:self];
+    [self displayShareController];
+}
+
+-(void)displayShareController {
+#if 0
+    UIImage * result = [tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    [shareController setImage:result];
+    [shareController setPNG:png];
+    [shareController setTagID:[tag.tagID intValue]];
+#endif
+    
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
+    [self.view addSubview:shareController.view];
+    [shareController.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    }];
+    
+    // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [shareController reloadConnections];
+    [shareController viewDidAppear:YES]; 
+}
+
+-(void)uploadImageFinished {
+    // share controller stuff
+    if (newPixDidClickShare) {
+        NSLog(@"NewPixShare: Upload finished: Now time to share!");
+        [shareController doSharePix];
+    }
+    else {
+        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
+        newPixDidFinishUpload = YES;
+    }    
+}
+
+-(void)shouldCloseShareController:(BOOL)didClickDone {
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = shareController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    if (didClickDone) {
+        if (newPixDidFinishUpload) {
+            NSLog(@"NewPixShare: Did click done: upload already finished");
+            [shareController doSharePix];
+        }
+        else {
+            newPixDidClickShare = YES;
+            NSLog(@"NewPixShare: Clicked share; waiting for upload");
+        }
+        // check for caption - used as comment
+        NSString * caption = [shareController.caption text];
+        NSLog(@"Did add caption: %@", caption);
+        if (caption && [caption length] > 0) {
+            [delegate didAddCommentFromDetailViewController:self withTagID:tagID andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
+            //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
+        }
+    }    
+    
+    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [shareController.view removeFromSuperview];
+    }];
+    
 }
 
 -(void)sharePixDialogDidFinish {
@@ -581,9 +666,8 @@ static BOOL openingDetailView;
     //[self didAddNewComment:newComment withTagID:tagID];
     NSString * name = [delegate getUsername];
     //    if ([newComment length] > 0)
-    [delegate didAddCommentWithTagID:_tagID andUsername:name andComment:newComment andStixStringID:newType];
-
-    [k getAllHistoryWithTagID:feedItem.tagID];
+    [delegate didAddCommentFromDetailViewController:self withTagID:_tagID andUsername:name andComment:newComment andStixStringID:newType];
+    //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
 }
 
 

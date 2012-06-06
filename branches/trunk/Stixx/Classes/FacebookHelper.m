@@ -48,6 +48,9 @@ static NSString * appID;
     else if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"com.Neroh.Stix.Lite"]){
         appID = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"FACEBOOK_APP_ID_LITE"];
     }
+    else if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"com.neroh.stixx"]){
+        appID = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"FACEBOOK_APP_ID_STIXX"];
+    }
     NSLog(@"FacebookHelper: bundle %@ appID %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], appID);
 
     //facebook = [[Facebook alloc] initWithAppId:APP_ID andDelegate:self];
@@ -237,7 +240,6 @@ static NSString * appID;
     NSString * myFacebookID = [NSString stringWithFormat:@"%d", [delegate getUserFacebookID]];
     // the only message that shows up
     NSString * postname = @"Get Sticky with me...";
-//    NSString * caption = @"Get Sticky with me...";
     NSString * description = @"Let's remix our photos with fun, crazy, digital stickers.";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    @"stixmobile.com/", @"link", 

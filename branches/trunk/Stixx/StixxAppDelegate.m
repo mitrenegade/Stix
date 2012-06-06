@@ -1,4 +1,4 @@
-//
+    //
 //  StixxAppDelegate.m
 //  Stixx
 //
@@ -20,6 +20,7 @@
 //#import "Kiip.h"
 #import "QuartzCore/QuartzCore.h"
 #import <Crashlytics/Crashlytics.h>
+#import <Parse/Parse.h>
 
 #define START_ID 100
 #define TAG_LOAD_WINDOW 3 // load this many tags before or after current tag
@@ -45,7 +46,7 @@
 @synthesize timeStampOfMostRecentTag;
 @synthesize allUsers;
 @synthesize allUserPhotos;
-@synthesize allUserFacebookIDs, allUserEmails, allUserNames;
+@synthesize allUserFacebookIDs, allUserEmails, allUserNames, allUserIDs;
 @synthesize allStix;
 @synthesize allStixOrder;
 @synthesize allFollowers, allFollowing;
@@ -58,6 +59,7 @@
 @synthesize metricLogonTime;
 @synthesize lastKumulosErrorTimestamp;
 @synthesize allCommentHistories;
+
 #if USING_FACEBOOK
 @synthesize fbHelper;
 #endif
@@ -99,6 +101,8 @@ static dispatch_queue_t backgroundQueue;
 
     aggregator = [[UserTagAggregator alloc] init];
     [aggregator setDelegate:self];
+    
+    didGetFollowingLists = NO;
 
     /*** device id on pasteboard ***/
 	UIPasteboard *appPasteBoard = [UIPasteboard pasteboardWithName:@"StixAppPasteboard" create:YES];
@@ -186,7 +190,6 @@ static dispatch_queue_t backgroundQueue;
     
     [self checkVersion];
     
-    [self loadUserInfoFromDefaults];
     dispatch_async(backgroundQueue, ^{
         [BadgeView InitializeDefaultStixTypes];
         [BadgeView InitializePremiumStixTypes];
@@ -213,6 +216,7 @@ static dispatch_queue_t backgroundQueue;
     allFollowing = [[NSMutableSet alloc] init];
     allFollowers = [[NSMutableSet alloc] init];
     allUserFacebookIDs = [[NSMutableArray alloc] init];
+    allUserIDs = [[NSMutableDictionary alloc] init];
     allUserEmails = [[NSMutableArray alloc] init];
     allUserNames = [[NSMutableArray alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
@@ -246,10 +250,6 @@ static dispatch_queue_t backgroundQueue;
     // or, download all tags and when first time aggregation is triggered, filter by followingList
     //[self getNewerTagsThanID:idOfNewestTagReceived];
     
-    // get newest tag on server regardless of who is logged in
-    // when login completes, feed will filter 
-    [self getFirstTags];
-    
 	/***** create feed view *****/
     //[loadingMessage setText:@"Loading feed..."];
     
@@ -260,6 +260,15 @@ static dispatch_queue_t backgroundQueue;
     feedController.tabBarController = tabBarController;
     feedController.camera = camera; // hack: in order to present modal controllers that respond 
 
+    // get newest tag on server regardless of who is logged in
+    // when login completes, feed will filter 
+#if 0
+    [self getFirstTags];
+#else
+    // show activity indicator
+    [feedController startActivityIndicatorLarge];
+#endif
+    
     /***** create explore view *****/
     exploreController = [[ExploreViewController alloc] init];
     exploreController.delegate = self;
@@ -299,12 +308,13 @@ static dispatch_queue_t backgroundQueue;
     [camera setCameraOverlayView:tabBarController.view];
 #endif
     [self didPressTabButton:TABBAR_BUTTON_FEED];
-        
-    loggedIn = NO;
+
+    // Login process - first load cached user info from defaults
+    loggedIn = [self loadUserInfoFromDefaults];
     isLoggingIn = NO;
     loginSplashController = [[FacebookLoginController alloc] init];
     [loginSplashController setDelegate:self];
-    if (![fbHelper facebookHasSession] || myUserInfo_username == nil) // !myUserInfo_username || [myUserInfo_username length] == 0)
+    if (![fbHelper facebookHasSession] || !loggedIn) // !myUserInfo_username || [myUserInfo_username length] == 0)
     {
         NSLog(@"Could not log in: forcing new login screen!");
         isLoggingIn = YES;
@@ -323,6 +333,10 @@ static dispatch_queue_t backgroundQueue;
           //                                       (unsigned long)NULL), ^(void) {
         //[profileController loginWithUsername:myUserInfo_username];
         //});
+        
+        // preemptively do user login things
+        [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookID:[NSNumber numberWithInteger:myUserInfo->facebookID] andUserID:[NSNumber numberWithInteger:myUserInfo->userID] andStix:nil andTotalTags:myUserInfo->usertagtotal andBuxCount:myUserInfo->bux andStixOrder:nil];
+        
         [self doFacebookLogin];
     }   
 	
@@ -341,13 +355,14 @@ static dispatch_queue_t backgroundQueue;
     */
     
     // sharekit test
+    /*
     if (shareController == nil) {
         shareController = [[ShareController alloc] init];
         [shareController setDelegate:self];
     }
     [self.window addSubview:shareController.view];
     [shareController doShareKit];
-     
+     */
     return YES;
 }
 /*
@@ -494,7 +509,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [alertView release];
     */
     [fbHelper getFacebookInfo];
-
 }
 
 -(void)didLogoutFromFacebook {
@@ -613,6 +627,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSData *userphoto = UIImageJPEGRepresentation(myUserInfo_userphoto, 100);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
+    
+    // sharing
+    [defaults setBool:[shareController shareServiceIsConnected:@"Facebook"] forKey:@"FacebookIsConnected"];
+    [defaults setBool:[shareController shareServiceIsSharing:@"Facebook"] forKey:@"FacebookIsSharing"];
+    [defaults setBool:[shareController shareServiceIsConnected:@"Twitter"] forKey:@"TwitterIsConnected"];
+    [defaults setBool:[shareController shareServiceIsSharing:@"Twitter"] forKey:@"TwitterIsSharing"];
 
     [defaults synchronize];
 }
@@ -681,6 +701,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     // if there's a version string > 0.9, then we must have also saved username sometime
     myUserInfo_username = [defaults objectForKey:@"username"];
+    if (myUserInfo_username == nil)
+        return 0;
     myUserInfo_email = [defaults objectForKey:@"email"];
     myUserInfo->facebookID = [defaults integerForKey:@"facebookID"];
     myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
@@ -689,6 +711,21 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     myUserInfo_userphoto = [UIImage imageWithData:userphoto];
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
     
+    // load previous followers
+    NSData * followingData = [defaults objectForKey:@"allFollowing"];
+    if (followingData)
+        [allFollowing unionSet:[NSKeyedUnarchiver unarchiveObjectWithData:followingData]];
+    NSData * followerData = [defaults objectForKey:@"allFollowers"];
+    if (followerData)
+        [allFollowers unionSet:[NSKeyedUnarchiver unarchiveObjectWithData:followerData]];
+    NSLog(@"LoadUserInfo: following %d people, has %d followers", [allFollowing count], [allFollowers count]);
+    
+    [profileController didLogin]; 
+    
+    [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+    [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
+    [feedController.buttonProfile.layer setBorderWidth:1];
+
     return 1;
 }
 -(int)loadStixDataFromDefaults {
@@ -765,6 +802,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     else if (pos == TABBAR_BUTTON_FEED) {
         [exploreController didDismissZoom];
+        lastViewController = feedController;
         // doing this will cause two arrows to be displayed
 //        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
 //            [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
@@ -772,6 +810,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     else if (pos == TABBAR_BUTTON_EXPLORE) {
         [feedController didCloseComments];
+        lastViewController = exploreController;
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
             // force back to the feedview
             [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
@@ -885,6 +924,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
      */
     
     [self setMetricLogonTime: [NSDate date]];
+    
+    didGetFollowingLists = NO; // request update of following lists at some point
     
     [feedController updateFeedTimestamps];
 }
@@ -1009,19 +1050,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
      * In the background, we should also perform uploading to stixmobile.com
      */
     // display share options controller and start upload
-    newPixShareToggle = 0;
+    [self doParallelNewPixShare:newTag];
     
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
 
     NSString * loc = newTag.locationString;
-    //NSLog(@"Location: %@", newTag.locationString);
     if ([loc length] > 0)
-//        [self updateUserTagTotal];
         [self rewardLocation];
     
     [Appirater userDidSignificantEvent:YES];
+}
+-(void)doParallelNewPixShare:(Tag*)_tag {
+    NSLog(@"NewPixShare: resetting toggles for new created pix");
+    newPixDidClickShare = NO;
+    newPixDidFinishUpload = NO;
+    [shareController startUploadImage:_tag withDelegate:self];
+    [self displayShareController:_tag];
 }
 
 -(void)didReloadPendingPix:(Tag *)tag {
@@ -1038,8 +1084,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // send notification
     NSString * message = [NSString stringWithFormat:@"%@ added a new photo to remix.", myUserInfo_username];
-    NSString * channel = @"";
-    [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newRecordID];
+    NSString * channel = [NSString stringWithFormat:@"From%@", [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+    NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+    channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+    
+    // DO NOT SEND newpix NOTIFICATIONS for now
+    //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWPIX withTag:newRecordID];
+    
 /*
     // this tagID is necessary for the shareController to work - if we have a comment
     [newestTag setTagID:newRecordID];
@@ -1078,7 +1129,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
         [k addHighResPixWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
     }
-    [k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
+    // add tagID to pixBelongsToUser table, with error handling
+    //[k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects: myUserInfo_username, @"", newRecordID, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"addPixBelongsToUser" withParams:params withCallback:nil withDelegate:self];
     
     bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
     if (added)
@@ -1092,10 +1147,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // do not add scale and rotation - all saved in aux stix
     [self updateUserTagTotal];
     
-    // check for first time user experience
-    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
-        [self advanceFirstTimeUserMessage];
+}
+
+-(void)uploadImageFinished {
+    // share controller stuff
+    if (newPixDidClickShare) {
+        NSLog(@"NewPixShare: Upload finished: Now time to share!");
+        [shareController doSharePix];
     }
+    else {
+        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
+        newPixDidFinishUpload = YES;
+    }    
 }
 
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID {
@@ -1112,7 +1175,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // add comment to comment table
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], myUserInfo_username, @"", stixStringID, nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
-        [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+        [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(khCallback_addCommentToPixCompleted:) withDelegate:self];
     }
     
     // add to current tag
@@ -1176,6 +1239,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)processTagsWithIDRange:(NSArray*)theResults {
+    [feedController stopActivityIndicatorLarge];
+    
     // first, update from kumulos in case other people have added stix
     // to the same pix we are modifying
     {
@@ -1225,161 +1290,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         updatingNotifiedTagDoJump = NO;
         isUpdatingNotifiedTag = NO;
     }
-    
-    // we get here from didAddStixToPix
-    // so that we can add the new aux stix to the correct auxStix structure
-    /*
-    if (isUpdatingAuxStix) {
-        
-        // find the correct tag in allTags;
-        if ([theResults count] == 0)
-            return;
-        Tag * tag = nil;
-        for (NSMutableDictionary * d in theResults) {
-            Tag * t = [Tag getTagFromDictionary:d]; // MRC
-            if ([t.tagID intValue]== updatingAuxTagID) {
-                NSLog(@"Found tag %d", [t.tagID intValue]);
-                tag = t; // MRC: when we break, t is not released so tag is retaining t
-                break;
-            }
-        }
-        if (tag == nil)
-            return;
-        NSString * stixStringID = updatingAuxStixStringID;
-
-        // only uses these if not fire/ice 
-        CGPoint location = updatingAuxLocation;
-        //float scale = 1;//updatingAuxScale;
-        //float rotation = 0;//updatingAuxRotation;
-        CGAffineTransform transform = updatingAuxTransform;
-        float peelable = YES;
-        if ([tag.username isEqualToString:myUserInfo_username])
-            peelable = NO;
-        
-        // find local tag and sync with kumulos tag
-        Tag * localTag = nil;
-        for (int i=0; i<[allTags count]; i++) {
-            localTag = [allTags objectAtIndex:i];
-            if ([localTag.tagID intValue] == updatingAuxTagID)
-                break;
-        }
-        if (localTag == nil) {
-            return;            
-        }
-        // FIXME: in case of bad internet connections, updated stix from one user might
-        // not make it to kumulos before another user changes it. we have to make
-        // updating aux stix a parallel action so that multiple users can operate on 
-        // one pix without deleting the other users' progress.
-        // this can be done by creating an auxStix table where addition of a stix
-        // simply adds to that database instead of adding to a data structure that gets
-        // loaded to the pix in allTags
-        [tag addStix:stixStringID withLocation:location withTransform:transform withPeelable:peelable];
-#if 0
-        NSMutableData *theAuxStixData = [NSMutableData data];
-        NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
-        [encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
-        [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
-        [encoder encodeObject:tag.auxScales forKey:@"auxScales"]; // deprecated - keep encoding for backward compatibility
-        [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"]; // deprecated
-        [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
-        [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
-        [encoder finishEncoding];
-        
-        // update kumulos version of tag with most recent tags
-        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
-#else
-        [k addAuxiliaryStixToPixWithTagID:[tag.tagID intValue] andStixStringID:stixStringID andX:location.x andY:location.y andTransform:NSStringFromCGAffineTransform(transform)];
-#endif
-        // immediately notify
-        // if adding to own pix, do not notify or broadcast
-        if (![myUserInfo_username isEqualToString:tag.username]) {
-            NSString * stixStringDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-            NSString * article = @"a";
-            if ([stixStringDesc characterAtIndex:0] == 'A' ||
-                [stixStringDesc characterAtIndex:0] == 'E' ||
-                [stixStringDesc characterAtIndex:0] == 'I' ||
-                [stixStringDesc characterAtIndex:0] == 'O' ||
-                [stixStringDesc characterAtIndex:0] == 'U'
-                ) {
-                article = @"an";
-            }
-            NSString * message = [NSString stringWithFormat:@"%@ added %@ %@ to your Pix!", myUserInfo_username, article, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
-            [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID];
-        }
-        // replace old tag in allTags
-        [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
-                
-        //NSLog(@"Adding %@ stix to tag with id %d: new count %d.", stixStringID, [tag.tagID intValue], [self getStixCount:stixStringID]);
-        isUpdatingAuxStix = 0;
-        [feedController reloadCurrentPage];
-        
-    }
-    */
-    // we get here from didPerformPeelableAction
-    // so that we can modify the new peelable stix status to the correct tag structure
-    // we have to call getTag to download the most recent auxStix
-/*
-    if (isUpdatingPeelableStix) {
-        
-        // find the correct tag in allTags;
-        if ([theResults count] == 0)
-            return;
-        Tag * tag = nil;
-        for (NSMutableDictionary * d in theResults) {
-            Tag * t = [Tag getTagFromDictionary:d]; // MRC
-            if ([t.tagID intValue]== updatingPeelableTagID) {
-                tag = t; // MRC: when we break, t is not released so tag is retaining t
-                break;
-            }
-             // MRC
-        }
-        if (tag == nil)
-            return;
-        
-        // from FeedViewController: changes structure of most recently dowloaded tag
-        if (updatingPeelableAction == 0) { // peel stix
-            NSString * peeledAuxStixStringID = [[tag removeStixAtIndex:updatingPeelableAuxStixIndex] copy];
-            if (peeledAuxStixStringID) {
-                NSLog(@"Adding %@ (%@) stix to collection, taken from tag with id %d: new count %d.", peeledAuxStixStringID, [BadgeView getStixDescriptorForStixStringID:peeledAuxStixStringID], [tag.tagID intValue], [self getStixCount:peeledAuxStixStringID]);
-                
-                
-                // add to comment log - if comment == @"PEEL" then it is a peel action
-                //[k addCommentToPixWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"PEEL" andStixStringID:peeledAuxStixStringID];
-                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, myUserInfo_username, @"PEEL", peeledAuxStixStringID, nil];
-                KumulosHelper * kh = [[KumulosHelper alloc] init];
-                [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
-            }
-        }
-        
-        // find index in current tags
-        updatingPeelableTagIndex = -1;
-        for (int i=0; i<[allTags count]; i++) {
-            Tag * t = [allTags objectAtIndex:i];
-            if ([t.tagID intValue] == updatingPeelableTagID) {
-                updatingPeelableTagIndex = i;
-                break;
-            }
-        }        
-        [allTags replaceObjectAtIndex:updatingPeelableTagIndex withObject:tag];
-        feedController.allTags = allTags;
-        [feedController reloadCurrentPage];
-        
-        NSMutableData *theAuxStixData = [NSMutableData data];
-        NSKeyedArchiver *encoder = [[NSKeyedArchiver alloc] initForWritingWithMutableData:theAuxStixData];
-        [encoder encodeObject:tag.auxLocations forKey:@"auxLocations"];
-        [encoder encodeObject:tag.auxStixStringIDs forKey:@"auxStixStringIDs"];
-        [encoder encodeObject:tag.auxScales forKey:@"auxScales"]; // keep encoding for backward compatibility
-        [encoder encodeObject:tag.auxRotations forKey:@"auxRotations"];
-        [encoder encodeObject:tag.auxTransforms forKey:@"auxTransforms"];
-        [encoder encodeObject:tag.auxPeelable forKey:@"auxPeelable"];
-        [encoder finishEncoding];
-        [k updateStixOfPixWithAllTagID:[tag.tagID intValue] andAuxStix:theAuxStixData];
-        // send a notification to update for a peel/stick action, but no need to acknowledge or jump to the tag
-        [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID];
-        
-         // MRC
-    }
-    */
 }
 
 -(void)updateTagWithStix:(NSMutableArray *)theResults forTagID:(int)tagID{
@@ -1457,17 +1367,30 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             // manually renew
             NSLog(@"Newer tag already aggregated: %d is newer than last received %d", [aggregator getNewestTag], idOfNewestTagReceived);
             [self didFinishAggregation:NO];
-        }
+        } else {
         // kick off process to download new tags
-        @try {
+        //@try {
             [aggregator aggregateNewTagIDs];
             NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
-        } @catch (NSException * error) {
-            NSLog(@"Aggregate new tags failed! error %@", [error reason]);
+        //} @catch (NSException * error) {
+        //    NSLog(@"Aggregate new tags failed! error %@", [error reason]);
+        //}
         }
     }
     else{
         //NSLog(@"Duplicate call to getNewerTagsThanID: id %d", tagID);
+    }
+}
+
+-(void)didStartAggregationWithTagID:(NSNumber *)tagID {
+    NSLog(@"Requesting first tag: %@", tagID);
+    [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+}
+
+-(void)didSetAggregationTrigger {
+    // we've finished aggregation process so all parse is done
+    if (notificationDeviceToken) {
+        [self Parse_createSubscriptions];  
     }
 }
 
@@ -1487,6 +1410,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             NSLog(@"First time requesting aggregated tags: older tags %d", [tagID intValue]);
             [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
         }
+        
+        //if (notificationDeviceToken) {
+        //    [self Parse_createSubscriptions];  
+        //}
     }
     else {
         NSArray * newerTagsToGet = [aggregator getTagIDsGreaterThanTagID:idOfNewestTagReceived totalTags:-1];
@@ -1497,7 +1424,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         for (int i=0; i<[newerTagsToGet count]; i++) {
             int tID = [[newerTagsToGet objectAtIndex:i] intValue];
-            //NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
+            NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
             [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
         }
     }
@@ -1537,10 +1464,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
             else {
                 int tID = [[oldTagsToGet objectAtIndex:i] intValue];
-                //NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
+                NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
                 [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
-                
-                // 
             }
         }
     }
@@ -1617,7 +1542,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return allTags;
 }
 
--(void)addCommentToPixCompleted:(NSMutableArray*)params {
+-(void)khCallback_addCommentToPixCompleted:(NSMutableArray*)params {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -1628,16 +1553,45 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+-(void)khCallback_addCommentToPixWithDetailViewControllerCompleted:(NSMutableArray*)params {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    NSNumber * tagID = [params objectAtIndex:0];
+    if (tagID) {
+        //[self getCommentCount:[tagID intValue]];
+        [k getAllHistoryWithTagID:[tagID intValue]];
+    }
+    if ([params count] > 1) {
+        DetailViewController * detailViewController = [params objectAtIndex:1];
+        [detailViewController addCommentDidFinish];
+    }
+}
 
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
+-(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+    // simple version - no detailViewController
+    [self didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+}
+
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    
     KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
-    NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
-
+    if (detailViewController == nil) {
+        // regular comment
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
+        [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(khCallback_addCommentToPixCompleted:) withDelegate:self];
+        NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
+    }
+    else {
+        // comment from a detailViewController - must do a callback
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, detailViewController, nil];
+        [kh execute:@"addCommentToPixWithDetailViewController" withParams:params withCallback:@selector(khCallback_addCommentToPixWithDetailViewControllerCompleted:) withDelegate:self];
+        NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
+    }
+    
     if ([stixStringID isEqualToString:@"LIKE"]) {
         // comment from the Like Toolbar
         
@@ -1654,20 +1608,30 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         Tag * tag = [self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
-            if (![tag.username isEqualToString:[self getUsername]])
-                [self Parse_sendBadgedNotification:actionMsg OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID];
+            if (![tag.username isEqualToString:[self getUsername]]) {
+                NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
+                NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tagName] intValue]];
+                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                [self Parse_sendBadgedNotification:actionMsg OfType:NB_NEWCOMMENT toChannel:channel withTag:tag.tagID];  
+            }
         }
     }
     else if ([stixStringID isEqualToString:@"COMMENT"]) { //![comment isEqualToString:@""]) {
         // actual comment
-
+        
         // notify
         NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo_username, comment];
         Tag * tag = [self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
-            if (![tag.username isEqualToString:[self getUsername]])
-                [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:tag.username withTag:tag.tagID];
+            if (![tag.username isEqualToString:[self getUsername]]) {
+                NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
+                NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tagName] intValue]];
+                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:channel withTag:tag.tagID];
+            }
         }
         [self updateUserTagTotal];
         
@@ -1760,10 +1724,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    /*
-    NSString * message = [NSString stringWithFormat:@"%@ sent you a %@!", myUserInfo_username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
-    [self Parse_sendBadgedNotification:message OfType:NB_NEWGIFT toChannel:friendName withTag:nil];
-     */
 }
 
 //- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
@@ -1777,17 +1737,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allUsers removeAllObjects];
         [allUserPhotos removeAllObjects];
         [allUserFacebookIDs removeAllObjects];
+        [allUserIDs removeAllObjects];
         [allUserEmails removeAllObjects];
         [allUserNames removeAllObjects];
         for (NSMutableDictionary * d in theResults) {
             NSString * name = [d valueForKey:@"username"];
             UIImage * photo = [d valueForKey:@"photo"];
             NSNumber * facebookID = [d valueForKey:@"facebookID"];
+            NSNumber * userID = [d valueForKey:@"allUserID"];
             [allUsers setObject:d forKey:name];
             [allUserPhotos setObject:photo forKey:name];
             [allUserFacebookIDs addObject:[NSString stringWithFormat:@"%d", [facebookID intValue]]];
             [allUserEmails addObject:[d valueForKey:@"email"]];
             [allUserNames addObject:name];
+            [allUserIDs setObject:userID forKey:name];
+            //NSLog(@"AllUserIDS: %@ %d", userID, [userID intValue]);
         }
     });
 }
@@ -1802,6 +1766,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allUserFacebookIDs addObject:[NSString stringWithFormat:@"%d", [facebookID intValue]]];
         [allUserEmails addObject:[d valueForKey:@"email"]];
         [allUserNames addObject:name];
+        [allUserIDs setObject:[NSString stringWithFormat:@"%d", [facebookID intValue]] forKey:name];
     }    
 }
 
@@ -1847,7 +1812,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     if (followListsDidChangeDuringProfileView) {
         followListsDidChangeDuringProfileView = NO;
-        //[aggregator aggregateNewTagIDs];
         [aggregator resetFirstTimeState];
         [aggregator reaggregateTagIDs];
         [feedController followListsDidChange]; // tell feedController to redisplay all users that are in the feed but were unfriended
@@ -2046,7 +2010,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
+-(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -2075,16 +2039,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
     }
     
-    [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
+    // create shareController, share and connected lists for each service, and loads from default
+    [self initializeShareController];
     if (firstTime) {
         [k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
         [k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
         [k addFollowerWithUsername:@"William Ho" andFollowsUser:username];
         [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:username];
+
+        // first time facebook connects, set defaults to YES automatically
+        [shareController connectService:@"Facebook"];
     }
+    
+    [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -2111,40 +2081,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allStixOrder addEntriesFromDictionary:stixOrder];
         
         NSLog(@"DidLoginWithUsername: %@ allStix: %d stixOrder: %d", name, [allStix count], [stixOrder count]);
-
-        // debug
-        /*
-        NSEnumerator *e = [allStixOrder keyEnumerator];
-        id key;
-        while (key = [e nextObject]) {
-            int ct = [[allStixOrder objectForKey:key] intValue];
-            if (ct != 0) {
-                int order = [[allStixOrder objectForKey:key] intValue];
-                NSLog(@"Stix: %@ order %d", key, order); 
-            }
-        } 
-         */
     }  
     
-    // do consistency check on stix and stix order
-    //[self checkConsistency];
+    [aggregator loadCachedUserTagListForUsers];
     
-    /*
-    if (![friendsList isKindOfClass:[NSMutableSet class]]) {
-        [allFriends removeAllObjects];
-        [allFriends addObject:@"bobo"];
-        [allFriends addObject:@"willh103"];
-    }
-    else {
-        [friendsList retain];
-        [allFriends removeAllObjects];
-        [allFriends unionSet:friendsList];
-        [friendsList release];
-    }
-     */
     // get friends/follow relationships
-    [k getFollowListWithUsername:name];
-    [k getFollowersOfUserWithFollowsUser:name];
+    if (!didGetFollowingLists) {
+        [k getFollowListWithUsername:name];
+        [k getFollowersOfUserWithFollowsUser:name];
+        didGetFollowingLists = YES;
+    }
     
     loggedIn = YES;
     myUserInfo_username = name;
@@ -2153,12 +2099,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     myUserInfo->bux = bux;
     myUserInfo_email = email;
     myUserInfo->facebookID = [facebookID intValue];
-    [profileController viewDidAppear:YES]; // force reload of view if we logged into facebook from here - really only happens in simulator
+    myUserInfo->userID = [userID intValue];
+    [profileController didLogin]; 
     
     [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [feedController.buttonProfile.layer setBorderWidth:1];
-    
     NSLog(@"Username %@ with email %@ and facebookID %d", myUserInfo_username, email, [facebookID intValue]);
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
@@ -2167,23 +2113,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
     if (notificationDeviceToken) {
-        //[self Parse_subscribeToChannel:[self getUsername]];
-#if 0
-        NSString * channel_ = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-        //NSError * error;
-        //[PFPush subscribeToChannel:channel_ withError:&error];
-        [PFPush subscribeToChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
-            if (succeeded) {
-                NSLog(@"Parse subscribed to channel %@", channel_);
-            }
-            else
-            {
-                NSLog(@"Parse subscribe to channel %@ failed with error: %@", channel_, [error description]);
-            }
-        }];
-#else
-        [self Parse_createSubscriptions];  
-#endif
+        //[self Parse_createSubscriptions];  
     }
     else
         // try registering again
@@ -2199,11 +2129,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     });
         
     [self setMetricLogonTime:[NSDate date]];
-    //[self closeProfileView];
     
-    [aggregator aggregateNewTagIDs];
-    NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
-
     // only download badges after login is over
     /*
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
@@ -2217,7 +2143,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
     
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
-
 }
 
 /*
@@ -2374,12 +2299,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allFollowing addObject:friendName];
         NSLog(@"SetFollowing: you are now following %@ currentList %@", friendName, allFollowing );
         [k addFollowerWithUsername:[self getUsername] andFollowsUser:friendName];
-        //[aggregator aggregateNewTagIDs]; // 
-        //[feedController didFollowUser]; // tell feedController to redisplay all users that are in the feed but were unfriended
         followListsDidChangeDuringProfileView = YES;
         
         NSString * message = [NSString stringWithFormat:@"%@ is now following you on Stix.", [self getUsername]];
-        [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:friendName withTag:nil];
+        NSString * name = [friendName stringByReplacingOccurrencesOfString:@" " withString:@""];
+        NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:friendName] intValue]];//name];
+        //NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+        //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+        [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:channel withTag:nil];
+        //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWFOLLOWER withTag:nil];
+        
+        // subscribe to channel
+        //channel = [NSString stringWithFormat:@"From%@", friendName];
+        //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+        //[self Parse_subscribeToChannel:channel];
     }
     else {
         [allFollowing removeObject:friendName];
@@ -2397,6 +2330,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [aggregator resetFirstTimeState];
         }
          */
+        
+        // unsubscribe from that channel
+        //NSString * channel = [NSString stringWithFormat:@"From%@", friendName];
+        //NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+        //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+        //[self Parse_unsubscribeFromChannel:channel];
     }
     [profileController updateFollowCounts];
 }
@@ -2476,7 +2415,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // if adding to own pix, do not notify or broadcast
     if (![myUserInfo_username isEqualToString:tag.username]) {
         NSString * message = [NSString stringWithFormat:@"%@ added %@ to your Pix!", myUserInfo_username, [BadgeView getStixDescriptorForStixStringID:stixStringID]];
-        [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:tag.username withTag:tag.tagID];
+        NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
+        NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tag.username] intValue]];
+        NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+        channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+        [self Parse_sendBadgedNotification:message OfType:NB_NEWSTIX toChannel:channel withTag:tag.tagID];
     }
     
     //[k getAllTagsWithIDRangeWithId_min:[tag.tagID intValue]-1 andId_max:[tag.tagID intValue]+1];
@@ -2491,6 +2434,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     if (tagID < 0)
+        return;
+    if ([allTags count] == 0)
         return;
     Tag * tag = nil;
     for (int i=0; i<[allTags count]; i++) {
@@ -2517,7 +2462,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, myUserInfo_username, @"PEEL", peeledAuxStixStringID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(addCommentToPixCompleted:) withDelegate:self];
+    [kh execute:@"addCommentToPix" withParams:params withCallback:@selector(khCallback_addCommentToPixCompleted:) withDelegate:self];
 
     [self Parse_sendBadgedNotification:@"This is an automatic general notification!" OfType:NB_PEELACTION toChannel:@"" withTag:tag.tagID];
     
@@ -2565,6 +2510,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return myUserInfo_userphoto;
 }
 
+-(UIImage *)getUserPhotoForProfile {
+    // for profile view
+    if ([self isLoggedIn])
+        return [self getUserPhoto];
+    else
+        return [UIImage imageNamed:@"graphic_addpic.png"];
+}
+
 -(NSMutableDictionary * )getUserPhotos {
     return allUserPhotos;
 }
@@ -2604,6 +2557,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     //[self changeBuxCountByAmount:amount];
 }
+
 -(void)didEarnFacebookReward:(int)bux {
     if (bux == 10) {
         NSString * title = @"Invite Complete";
@@ -2712,24 +2666,55 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 #pragma mark shareController and share services
--(void)displayShareController:(Tag*)tag {
+-(void)initializeShareController {
     if (shareController == nil) {
-        shareController = [[ShareController alloc] init];
+        shareController = [ShareController sharedShareController];
         [shareController setDelegate:self];
-
-        serviceIsConnected = [[NSMutableDictionary alloc] init];
-        serviceIsSharing = [[NSMutableDictionary alloc] init];
-        
-        // check to see if each service is already sharing
-        if ([fbHelper facebookHasSession])
-            [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:@"Facebook"];
     }
     
+    //[[SHK currentHelper] setRootViewController:feedController];
+
+    // check to see if each service is already sharing - load from user defaults
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSNumber * connected, * sharing;
+         
+    // set whether facebook is connected based on session
+    //if ([fbHelper facebookHasSession]) {
+    BOOL bConnected = [fbHelper facebookHasSession];
+    [shareController shareServiceShouldConnect:bConnected forService:@"Facebook"];
+    // set whether facebook is sharing based on defaults
+    sharing = [defaults objectForKey:@"FacebookIsSharing"]; 
+    if (sharing) {
+        BOOL isSharing = [sharing boolValue];
+        [shareController shareServiceShouldShare:isSharing forService:@"Facebook"];
+    }
+    
+    // set whether twitter is connect based on defaults
+    connected = [defaults objectForKey:@"TwitterIsConnected"]; 
+    if (connected) 
+    {
+        BOOL bConnected = [connected boolValue];
+        NSLog(@"bConnected: %d", bConnected);
+        [shareController shareServiceShouldConnect:bConnected forService:@"Twitter"];
+    }
+    // set whether twitter is sharing based on defaults
+    sharing = [defaults objectForKey:@"TwitterIsSharing"]; 
+    if (sharing) {
+        BOOL bSharing = [sharing boolValue];
+        NSLog(@"bSharing: %d", bSharing);
+        [shareController shareServiceShouldShare:bSharing forService:@"Twitter"];
+    }
+}
+-(void)displayShareController:(Tag*)tag {
+#if 0
     UIImage * result = [tag tagToUIImage];
     NSData *png = UIImagePNGRepresentation(result);
-    //[shareController uploadImage:png];
+    [shareController setImage:result];
     [shareController setPNG:png];
-
+    [shareController setTagID:[tag.tagID intValue]];
+    [shareController setDelegate:self];
+#endif
+    
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
     [self.tabBarController.view addSubview:shareController.view];
@@ -2741,46 +2726,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
+    [shareController reloadConnections];
     [shareController viewDidAppear:YES]; 
-}
-
--(BOOL) shareServiceIsConnected:(NSString *)service {
-    NSNumber * connectionState = [serviceIsConnected objectForKey:service];
-    if (!connectionState) {
-        // check with each service to see if it's already connected
-        if ([service isEqualToString:@"Facebook"]) {
-            if (![fbHelper facebookHasSession])
-                return NO;
-            // hack: assume that if session is valid, user has given post permission
-            return YES;
-        }
-        else {
-            return NO;
-        }
-    }
-    return [connectionState boolValue];
-}
--(BOOL) shareServiceIsSharing:(NSString*)service {
-    NSNumber * sharingState = [serviceIsSharing objectForKey:service];
-    if (!sharingState)
-        return NO;
-    return [sharingState boolValue];
-}
--(void)shareServiceDidToggle:(NSString *)service {
-    NSLog(@"Toggling sharing service %@", service);
-    BOOL state = [self shareServiceIsSharing:service];
-    [serviceIsSharing setObject:[NSNumber numberWithBool:!state] forKey:service];
-}
-
--(void)connectService:(NSString *)service {
-    NSLog(@"Connecting sharing service %@", service);
-#if 0
-    [serviceIsConnected setObject:[NSNumber numberWithBool:YES] forKey:service];
-    [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:service]; // automatically start sharing after connect
-    [shareController didConnectService:service];
-#else
-    [self showAlertWithTitle:@"Connect for Share" andMessage:[NSString stringWithFormat:@"Connecting with %@ coming soon!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-#endif
 }
 
 -(void)didClickInviteButton {
@@ -2846,42 +2793,37 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)shouldCloseShareController:(BOOL)didClickDone {
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    CGRect frameOffscreen = userProfileController.view.frame;
+    CGRect frameOffscreen = shareController.view.frame;
     frameOffscreen.origin.x -= 330;
     
     if (didClickDone) {
-        // check for caption
+        if (newPixDidFinishUpload) {
+            NSLog(@"NewPixShare: Did click done: upload already finished");
+            [shareController doSharePix];
+        }
+        else {
+            newPixDidClickShare = YES;
+            NSLog(@"NewPixShare: Clicked share; waiting for upload");
+        }
+        
+        // check for caption - used as comment
         NSString * caption = [shareController.caption text];
         NSLog(@"Did add caption: %@", caption);
         if (caption && [caption length] > 0) {
-            int tagID = [newestTag.tagID intValue];
+            int tagID = [[shareController.tag tagID] intValue];
             [self didAddCommentWithTagID:tagID andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
         }
-        else {
-            caption = @"Get Sticky with me...";
-        }
-        
-        // check for share pix status
-        // upload finished and user confirmed share, do share
-        NSLog(@"Upload finished, do share!");
-        
-        // check for each service
-        NSEnumerator * e = [serviceIsSharing keyEnumerator];
-        id key;
-        while (key = [e nextObject]) {
-            NSLog(@"Sharing on service %@", key);
-            if ([key isEqualToString:@"Facebook"]) {
-                // facebook share without displaying share dialog
-                NSLog(@"Pix shared by %@ at %@", [self getUsername], [shareController shareURL]);
-                NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", [shareController shareURL]];
-                [fbHelper postToFacebookWithLink:[shareController shareURL] andPictureLink:[shareController shareImageURL] andTitle:@"Stix it!" andCaption:caption andDescription:fullmessage useDialog:NO];
-            }
-        }
-    }
-    
+    }    
+
     [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
         [shareController.view removeFromSuperview];
+
+        // check for first time user experience
+        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
+            [self advanceFirstTimeUserMessage];
+        }
     }];
+
 }
 
 #pragma mark twitter helper
@@ -2919,6 +2861,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 */
+
 // debug
 -(void)adminUpdateAllStixCountsToZero {
 #if DEBUGX==1
@@ -3202,53 +3145,63 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     /*** Parse service ***/
 #if 1
-    PFObject *testObject = [PFObject objectWithClassName:@"TestObject"];
-    [testObject setObject:myUserInfo_username forKey:@"foo"];
+    PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionRequests"];
+    [testObject setObject:myUserInfo_username forKey:@"username"];
     [testObject save];
 #endif
-
+    
+    Parse_subscribedChannels = [[NSMutableSet alloc] init];
+    /*
     [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
         NSEnumerator * e = [channels objectEnumerator];
         id element;
         NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
         while (element = [e nextObject]) {
-            [channelsString appendString:element];
-            [channelsString appendString:@" "];
-            [PFPush unsubscribeFromChannel:element withError:&error];
+            // add subscribed channels to array
+            [Parse_subscribedChannels addObject:element];
         }
-        NSLog(@"%@", channelsString);
-        //[channelsString autorelease]; // arc conversion
-        // subscribe
-        dispatch_async(backgroundQueue, ^{
-            NSError * err = nil;
-            [PFPush subscribeToChannel:@"" withError:&err];
-            [PFPush subscribeToChannel:@"StixUpdates" withError:&err];
-            if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
-            {
-                NSString * channel_ = [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""];
-                NSLog(@"Trying to subscribe to %@", channel_);
-                [PFPush subscribeToChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
-                    if (succeeded)
-                    {
-                        // display channels
-                        [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
-                            NSEnumerator * e = [channels objectEnumerator];
-                            id element;
-                            NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: subscribing this device to: "];
-                            while (element = [e nextObject]) {
-                                [channelsString appendString:element];
-                                [channelsString appendString:@" "];
-                            }
+     */
+        NSError * err = nil;
+        //dispatch_async(backgroundQueue, ^{
+            [self Parse_subscribeToChannel:@""];
+        //});
+        if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
+        {
+            // a To channel is where people send messages to
+            NSString * channelString = [NSString stringWithFormat:@"To%d", myUserInfo->userID];
+#if 1
+            [self Parse_subscribeToChannel:channelString]; // subscribe to my channel
+#else
+            NSLog(@"Trying to subscribe to %@", channelString);
+            [PFPush subscribeToChannelInBackground:channelString block:^(BOOL succeeded, NSError *error) {
+                if (succeeded)
+                {
+                    // display channels
+                    [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+                        NSEnumerator * e = [channels objectEnumerator];
+                        id element;
+                        NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: subscribing this device to: "];
+                        while (element = [e nextObject]) {
+                            [channelsString appendString:element];
+                            [channelsString appendString:@" "];
+                        }
+                        if (error)
+                            NSLog(@"%@ with error: %@", channelsString, [error description]);
+                        else {
                             NSLog(@"%@", channelsString);
-                            //[channelsString autorelease]; // arc conversion
-                        }];
-                    }
-                    else
-                        NSLog(@"Subscribing to channel: %@ returning with errors: %@", channel_, [error description]);
-                }];
-            }
-        });
-    }];
+                        }
+                        //[channelsString autorelease]; // arc conversion
+                    }];
+                }
+                else
+                    NSLog(@"Subscribing to channel: %@ returning with errors: %@", channel_, [error description]);
+            }];
+#endif
+            
+            // broadcast to everyone that you are online
+            //[self Parse_sendBadgedNotification:[self getUsername] OfType:NB_ONLINE toChannel:@"" withTag:nil];
+        } // if ([self username] !isEqualTo:@"anonymous")..
+    //}]; // subscribe in background
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
 #if DEBUGX==1
@@ -3257,10 +3210,32 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSString * channel_ = [channel stringByReplacingOccurrencesOfString:@" " withString:@"_"];
     NSLog(@"Parse: subscribing to channel <%@>", channel_);
     [PFPush subscribeToChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
-        if (succeeded) 
-            NSLog(@"Subscribed to channel <%@>", channel_);
+        if (succeeded) {
+            NSLog(@"Parse: Subscribed to channel <%@>", channel_);
+            [Parse_subscribedChannels addObject:channel];
+            PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionSuccess"];
+            [testObject setObject:myUserInfo_username forKey:@"username"];
+            [testObject save];
+        }
+        else {
+            NSLog(@"Parse: Could not subscribe to <%@>: error %@", channel_, [error localizedDescription]);
+            PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionFailure"];
+            [testObject setObject:myUserInfo_username forKey:@"username"];
+            [testObject save];
+        }
+    }];
+}
+
+-(void) Parse_unsubscribeFromChannel:(NSString*)channel {
+    NSString * channel_ = [channel stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    NSLog(@"Parse: unsubscribing from channel <%@>", channel_);
+    [PFPush unsubscribeFromChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
+        if (succeeded) {
+            NSLog(@"Parse: Unsubscribed from channel <%@>", channel_);
+            [Parse_subscribedChannels removeObject:channel];
+        }
         else
-            NSLog(@"Could not subscribe to <%@>: error %@", channel_, [error localizedDescription]);
+            NSLog(@"Parse: Could not unsubscribe to <%@>: error %@", channel_, [error localizedDescription]);
     }];
 }
 
@@ -3286,9 +3261,40 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [PFPush sendPushDataToChannelInBackground:channel_ withData:data];
 }
 
+-(void) Parse_sendNotificationToFollowers:(NSString*)message ofType:(int)type withTag:(NSNumber*)tagID {
+    NSMutableSet * followers = [self getFollowerList]; 
+    NSMutableArray * channels = [[NSMutableArray alloc] init];
+    
+    for (NSString * name in followers) {
+        NSString *channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:name] intValue]];//[[ name componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ]];
+        NSLog(@"Adding channel %@ for follower %@", channel, name); 
+        [channels addObject:channel];
+    }
+    NSLog(@"Parse: sending notification to %d channels with message: %@", [channels count], message);
+
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    if (type == NB_NEWCOMMENT || type == NB_NEWFOLLOWER || type == NB_NEWPIX)
+        [data setObject:message forKey:@"alert"];
+    [data setObject:myUserInfo_username forKey:@"sender"];
+    [data setObject:[NSNumber numberWithInt:type] forKey:@"nbType"]; //notificationBookmarkType
+    [data setObject:message forKey:@"message"];
+    if (tagID != nil)
+        [data setObject:tagID forKey:@"tagID"];    
+
+    PFPush *push = [[PFPush alloc] init];
+    [push setChannels:channels];
+    [push setPushToAndroid:false];
+    [push expireAfterTimeInterval:86400];
+    [push setData:data];
+    NSError * err;
+    [push sendPush:&err];
+    if (err)
+        NSLog(@"Parse: send to followers with error: %@", [err description]);
+}
+
 - (void)application:(UIApplication *)application 
 didReceiveRemoteNotification:(NSDictionary *)userInfo {
-#if 0
+#if 1
     [PFPush handlePush:userInfo];
 #else
 #if DEBUGX==1
@@ -3312,9 +3318,15 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
     if (notificationBookmarkType == NB_NEWSTIX || notificationBookmarkType == NB_NEWCOMMENT) 
         doAlert = YES;
     if (notificationBookmarkType == NB_NEWPIX && 
-        (![[userInfo objectForKey:@"sender"] isEqualToString:myUserInfo_username])) {
+        (![[userInfo objectForKey:@"sender"] isEqualToString:myUserInfo_username])) 
+    {
+        // get friend status
+        if ([self isFollowing:[userInfo objectForKey:@"sender"]])
             doAlert = YES;
+        else {
+            doAlert = NO;
         }
+    }
 #else
     switch (notificationBookmarkType) {
         case NB_NEWSTIX: 
@@ -3362,11 +3374,26 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         }
             break;
          
-        case NB_NEWPIX: {
+        case NB_NEWPIX: 
+        {
             notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
             doAlert = YES;
-            break;
         }
+            break;
+        case NB_ONLINE: 
+        {
+            // broadcast that a person is online
+            notificationTagID = -1;
+            doAlert = NO;
+        }
+            break;
+        case NB_ONLINEREPLY: 
+        {
+            // broadcast that a person is online
+            notificationTagID = -1;
+            doAlert = NO;
+        }
+            break;
         default:
             break;
     }
@@ -3401,6 +3428,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         if (notificationBookmarkType == NB_NEWFOLLOWER) {
             // only display message
             [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+            [k getFollowersOfUserWithFollowsUser:[self getUsername]]; // update own follower list
         }
         if (notificationBookmarkType == NB_INCREMENTBUX) {
             // only display message
@@ -3428,6 +3456,33 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             }
         }
          */
+        if (notificationBookmarkType == NB_ONLINE && ![message isEqualToString:[self getUsername]]) {
+            NSString * onlineUser = message;                
+            NSLog(@"%@ just came online!", onlineUser);
+            if ([self isFollowing:onlineUser]) {
+                NSString * channel = [NSString stringWithFormat:@"From%@", onlineUser];
+                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                [self Parse_subscribeToChannel:channel];
+            }
+            
+            // send notification right back in case that person is a subscriber
+            NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:onlineUser] intValue]];//onlineUser] stringByReplacingOccurrencesOfString:@" " withString:@""];
+            NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+            channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+            NSLog(@"Replying to online notice to channel %@", channel);
+            [self Parse_sendBadgedNotification:[self getUsername] OfType:NB_ONLINEREPLY toChannel:channel withTag:nil];
+        }
+        if (notificationBookmarkType == NB_ONLINEREPLY) {
+            NSString * onlineUser = message;
+            NSLog(@"%@ just replied that they are online!", onlineUser);
+            if ([self isFollowing:onlineUser]) {
+                NSString * channel = [NSString stringWithFormat:@"From%@", onlineUser];
+                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                [self Parse_subscribeToChannel:channel];
+            }
+        }
     }
     else {
         BOOL doUpdateTag = YES;
@@ -3734,7 +3789,13 @@ static bool isShowingAlerts = NO;
         if (![allFollowers containsObject:friendName] && ![friendName isEqualToString:[self getUsername]])
             [allFollowers addObject:friendName];
     }
-    NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);
+    // cache followers
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData * followerData = [NSKeyedArchiver archivedDataWithRootObject:allFollowers];
+    [defaults setObject:followerData forKey:@"allFollowers"];
+    [defaults synchronize];
+    [profileController updateFollowCounts];
+    NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);    
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
@@ -3744,13 +3805,21 @@ static bool isShowingAlerts = NO;
     for (NSMutableDictionary * d in theResults) {
         NSString * friendName = [d valueForKey:@"followsUser"];
         if (![allFollowing containsObject:friendName] && ![friendName isEqualToString:[self getUsername]]) {
-            NSLog(@"allFollowing adding %@", friendName);
+            //NSLog(@"allFollowing adding %@", friendName);
             [allFollowing addObject:friendName];
         }
     }
-    //[aggregator startAggregatingTagIDs];
-    [aggregator aggregateNewTagIDs];
+    
+    // cache followers
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData * followingData = [NSKeyedArchiver archivedDataWithRootObject:allFollowing];
+    [defaults setObject:followingData forKey:@"allFollowing"];
+    [defaults synchronize];
+    [profileController updateFollowCounts];
     NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
+    
+    // AGGREGATE FOR THE FIRST TIME HERE 
+    [aggregator aggregateNewTagIDs];
 }
 
 

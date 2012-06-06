@@ -18,7 +18,7 @@
 @protocol UserGalleryDelegate <NSObject>
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name;
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)name;
 -(void)shouldCloseUserPage;

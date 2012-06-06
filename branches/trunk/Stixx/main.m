@@ -23,17 +23,24 @@ int main(int argc, char *argv[])
     
     // remember, setting up parse also involves uploading an app certificate (.p12)
     
-    if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"Neroh"])
-    {
+//    if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"Neroh"])
+//    {
+    
+#if 1
+    // this is the Parse app that works with the apple store version of stix.
+    // it must be used with an Ad Hoc/Production version of the build, whether it is sent through test flight or through app store
         NSLog(@"Parse: Bundle identifier: %@ Parse APP ID %@ CLIENT ID %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID"]);
         [Parse setApplicationId: [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID"]
                       clientKey:[[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID"]];
-    }
-    else if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"com.Neroh.Stix.Lite"]){
-        NSLog(@"Parse: Bundle identifier: %@ Parse APP ID %@ CLIENT ID %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID_LITE"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID_LITE"]);
-        [Parse setApplicationId: [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID_LITE"]
-                      clientKey:[[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID_LITE"]];
-    }
+#else
+//    }
+//    else if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] isEqualToString:@"com.Neroh.Stix.Lite"]){
+        NSLog(@"Parse: Bundle identifier: %@ Parse APP ID %@ CLIENT ID %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID_DEV"], [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID_DEV"]);
+        [Parse setApplicationId: [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_APP_ID_DEV"] clientKey:[[[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSEnvironment"] objectForKey:@"PARSE_CLIENT_ID_DEV"]];
+    // Stix Development Parse account
+    //[Parse setApplicationId:@"zPxo37QJ9mtc1PfxmN3ToxmPvYhljdKsRf13Dscv" clientKey:@"2ot86krHvyCwvOzJsdXcZ8YYVckbC5V5cBr8MCjZ"];
+//    }
+#endif
     @autoreleasepool {
         int retVal = UIApplicationMain(argc, argv, nil, nil);
         return retVal;

@@ -12,7 +12,9 @@
 #import "SHKConfiguration.h"
 
 #define ROW_HEIGHT 44
-#define NUM_SERVICES 5
+#define NUM_SERVICES 2
+
+static ShareController *sharedShareController;
 
 @implementation ShareController
 
@@ -20,15 +22,26 @@
 @synthesize backButton, doneButton;
 @synthesize tableView;
 @synthesize delegate;
-@synthesize shareURL, shareImageURL, PNG, shareCaption;
+@synthesize shareURL, shareImageURL, shareCaption;
+@synthesize tag; // PNG, image, tagID;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        serviceIsConnected = [[NSMutableDictionary alloc] init];
+        serviceIsSharing = [[NSMutableDictionary alloc] init];
+        k = [[Kumulos alloc] init]; // no need for delegate
     }
     return self;
+}
++(ShareController*)sharedShareController 
+{
+	if (!sharedShareController){
+		sharedShareController = [[ShareController alloc] init];
+	}
+	return sharedShareController;
 }
 
 - (void)viewDidLoad
@@ -36,7 +49,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [self initializeServices];
-    [tableView setFrame:CGRectMake(20, 180, 280, 200)];
+    [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT * NUM_SERVICES - 20)];
     [tableView.layer setCornerRadius:10];
 }
 
@@ -49,6 +62,11 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [caption setText:@""];
+    
+}
+
+-(void)reloadConnections {
+    [self didConnectService:@"Twitter"]; // force reload of table
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -65,6 +83,8 @@
     
     names = [[NSMutableArray alloc] initWithObjects:@"Facebook", @"Twitter", @"Instagram", @"Tumblr", @"Pinterest", nil];
     NSMutableArray * imageNames = [[NSMutableArray alloc] initWithObjects:@"icon_share_facebook@2x.png", @"icon_share_twitter@2x.png", @"icon_share_instagram@2x.png", @"icon_share_tumblr@2x.png", @"icon_share_pinterest@2x.png", nil];
+    //names = [[NSMutableArray alloc] initWithObjects:@"Facebook", @"Twitter", nil];
+    //NSMutableArray * imageNames = [[NSMutableArray alloc] initWithObjects:@"icon_share_facebook@2x.png", @"icon_share_twitter@2x.png", nil];
     
     icons = [[NSMutableDictionary alloc] init];
     connectButtons = [[NSMutableDictionary alloc] init];
@@ -73,10 +93,10 @@
     for (int i=0; i<[self numberOfServices]; i++) {
         NSString * name = [names objectAtIndex:i];
         
-        UIImage * image = [UIImage imageNamed:[imageNames objectAtIndex:i]];
+        UIImage * img = [UIImage imageNamed:[imageNames objectAtIndex:i]];
         CGSize newSize = CGSizeMake(32, 32);
         UIGraphicsBeginImageContext(newSize);
-        [image drawInRect:CGRectMake(1, 1, 30, 30)];	
+        [img drawInRect:CGRectMake(1, 1, 30, 30)];	
         
         UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();	
@@ -130,7 +150,7 @@
     [cell.imageView setImage:[icons objectForKey:service]];
     [cell.imageView setFrame:CGRectMake(3, 3, 25, 25)];
     cell.accessoryType = UITableViewCellAccessoryNone;
-    if ([delegate shareServiceIsConnected:service]) {
+    if ([self shareServiceIsConnected:service]) {
         cell.accessoryView = [toggles objectForKey:service];
     }
     else {
@@ -169,49 +189,17 @@
     NSLog(@"Clicking done button!");
     
     [caption resignFirstResponder];
+    [self setShareCaption:[caption text]];
     
     if (!activityIndicatorLarge)
         activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
     [self.view addSubview:activityIndicatorLarge];
     [activityIndicatorLarge startCompleteAnimation];
-#if 0
-    /* for asynchronous upload
-    // check for lock in background
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
-                                             (unsigned long)NULL), ^(void) {
-        
-        while (uploadingImageLock) {
-            NSLog(@"Waiting for uploadingImageLock");
-            sleep(1);
-        }
-     
-        if (shareURL == nil) // from cancel or failed upload
-        {
-            dispatch_async(dispatch_get_main_queue(), ^(void) {
-                NSLog(@"ShareController starting share via various services");
-                if (activityIndicatorLarge) {
-                    [activityIndicatorLarge setHidden:YES];
-                    [activityIndicatorLarge stopCompleteAnimation];
-                    [activityIndicatorLarge removeFromSuperview];
-                }
-                [delegate shouldCloseShareController:NO];
-            });
-        }
-        dispatch_async(dispatch_get_main_queue(), ^(void) {
-            NSLog(@"ShareController starting share via various services");
-            if (activityIndicatorLarge) {
-                [activityIndicatorLarge setHidden:YES];
-                [activityIndicatorLarge stopCompleteAnimation];
-                [activityIndicatorLarge removeFromSuperview];
-            }
-            [delegate shouldCloseShareController:YES];
-        });
-    });
-     */
+
+#if 1
+    [delegate shouldCloseShareController:YES];
 #else
-    //[self uploadImage:PNG];
-    //[self doTwitterConnect];
-    [self doTwitterShare];
+    [self uploadImage:PNG];
 #endif
 }
 
@@ -236,16 +224,16 @@
     NSString * service = button.titleLabel.text;
     NSLog(@"Clicking toggle for %@", button.titleLabel.text);
     
-    int state = [delegate shareServiceIsSharing:service]; //button.tag;
+    int state = [self shareServiceIsSharing:service]; //button.tag;
     if (state == 0) {
         state = 1;
         [button setImage:[UIImage imageNamed:@"btn_share_switch_on@2x.png"] forState:UIControlStateNormal];
-        [delegate shareServiceDidToggle:service];
+        [self shareServiceDidToggle:service];
         //button.tag = state;
     } else {
         state = 0;
         [button setImage:[UIImage imageNamed:@"btn_share_switch_off@2x.png"] forState:UIControlStateNormal];
-        [delegate shareServiceDidToggle:service];
+        [self shareServiceDidToggle:service];
         //button.tag = state;
     }
 }
@@ -260,8 +248,8 @@
 
 -(void)uploadImage:(NSData *)dataPNG{
     NSLog(@"ShareController starting upload image!");
-    if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
-        [delegate sharePixDialogDidFinish];
+    //if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)])
+    //    [delegate sharePixDialogDidFinish];
     
     uploadingImageLock = YES;
     
@@ -276,22 +264,66 @@
     
 }
 
+-(void)startUploadImage:(Tag*)_tag withDelegate:(NSObject<ShareControllerDelegate> *)_delegate {
+    UIImage * result = [_tag tagToUIImage];
+    NSData *png = UIImagePNGRepresentation(result);
+    //[shareController setImage:result];
+    //[shareController setPNG:png];
+    //[shareController setTagID:[tag.tagID intValue]];
+    [self setTag:_tag];
+    [self setDelegate:_delegate];
+    [self uploadImage:png];
+}
+
+-(void)doSharePix {
+    [self didSharePixWithURL:[self shareURL] andImageURL:[self shareImageURL]];
+}
+
 -(void)didSharePixWithURL:(NSString *)url andImageURL:(NSString*)imageURL{
     NSLog(@"ShareController didSharePixWithURL %@", url);
 
-    [self setShareURL:url];
-    [self setShareImageURL:imageURL];
-    [self setShareCaption:[caption text]];
     uploadingImageLock = NO; // unlock, and wait for share dialog's DONE Button
 #if 1
-    // do everything synchronously
+    // do everything synchronously - do this after uploadimage is done
     NSLog(@"ShareController starting share via various services");
+#if DEBUGX==1
+    NSLog(@"Function: %s", __func__);
+#endif  
+    NSLog(@"Pix shared by %@ at %@", [delegate getUsername], url);
+    //NSString * subject = [NSString stringWithFormat:@"%@ wants to share and remix a photo!", [delegate getUsername]];
+    NSString * fullmessage = [NSString stringWithFormat:@"Let's remix photos with crazy, fun digital stickers... %@", url];
+    NSString * _caption = [NSString stringWithFormat:@"Get Sticky with me..."];
+    if ([shareCaption length] > 0) {
+        _caption = [NSString stringWithFormat:@"%@", shareCaption];
+    }
+
+    // Facebook - TODO: use sharekit
+    if ([self shareServiceIsSharing:@"Facebook"]) {
+        FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
+        [fbHelper postToFacebookWithLink:url andPictureLink:imageURL andTitle:@"See my Remixed Photo!" andCaption:_caption andDescription:fullmessage useDialog:NO]; // auto
+    }
+    
+    // Twitter
+    if ([self shareServiceIsSharing:@"Twitter"]) {
+        SHKTwitter * twitter = [[SHKTwitter alloc] init];
+        [twitter setShareDelegate:self];
+        SHKItem *item = [SHKItem text:fullmessage];
+        UIImage * image = [tag tagToUIImage];
+        [item setImage:image];
+        [item setTitle:_caption];
+        [twitter setItem:item];
+        [twitter share];
+    }
+    
+    //if ([delegate respondsToSelector:@selector(sharePixDialogDidFinish)]) // doesn't exist
+    //    [delegate sharePixDialogDidFinish];
+
     if (activityIndicatorLarge) {
         [activityIndicatorLarge setHidden:YES];
         [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
     }
-    [delegate shouldCloseShareController:YES];
+    //[delegate shouldCloseShareController:YES];
 #endif
 }
 
@@ -308,8 +340,8 @@
     NSRange range1 = [responseString rangeOfString:@"<meta shared_id"];
     if (range0.length == 0 || range1.length == 0) {
         NSLog(@"Create share page failed!");
-        if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
-            [delegate sharePixDialogDidFail:0];
+        //if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
+        //    [delegate sharePixDialogDidFail:0];
     }
     else {
         range0.location = range0.location + 15;
@@ -325,7 +357,15 @@
         imgSubstring = [responseString substringWithRange:imgRange];
         
         NSString * weburl = [NSString stringWithFormat:@"http://%@/%@", HOSTNAME,substring];
+
+        [self setShareURL:weburl];
+        [self setShareImageURL:imgSubstring];
+        NSLog(@"Setting share caption: %@", [self shareCaption]);
+#if 0
         [self didSharePixWithURL:weburl andImageURL:imgSubstring];
+#else
+        [delegate uploadImageFinished];
+#endif
     }
 }
 
@@ -334,12 +374,9 @@
     NSLog(@"%@", error);
     
     NSLog(@"ASIHttpRequest to upload image failed!");
-#if 0
+#if 1
     if ([delegate respondsToSelector:@selector(sharePixDialogDidFail:)])
         [delegate sharePixDialogDidFail:1];
-    shareURL = nil;
-    shareImageURL = nil;
-    uploadingImageLock = NO;
 #else
     [self uploadImage:PNG];
 #endif
@@ -365,20 +402,23 @@
     }
      */
     
+    // only do this to test oauth
     if ([SHKTwitter isServiceAuthorized])
-//        [SHKTwitter logout];
-        NSLog(@"Twitter already authorized!");
-
+    {
+        //[SHKTwitter logout];
+        NSLog(@"Twitter already authorized!");   
+    }
     SHKTwitter * twitter = [[SHKTwitter alloc] init];
     [twitter setShareDelegate:self];
     
-#if 0
+#if 1
     // try to connect only
-    if (![SHK connected]) { //![SHKTwitter isServiceAuthorized]) {
+    if ([SHK connected] // has internet
+        && ![SHKTwitter isServiceAuthorized]) { 
         SHKItem *item = [[SHKItem alloc] init];
         [item setShareType:SHKShareTypeUserInfo];
         [twitter setItem:item];
-        [twitter send];
+        [twitter share];
     } else {
         [self didTwitterConnect];
     }
@@ -392,7 +432,9 @@
 }
 
 -(void)didTwitterConnect {
-    [delegate connectService:@"Twitter"];
+    [self connectService:@"Twitter"];
+    
+    // todo: cause phone settings to be logged into twitter? or should oauth do that
 }
 
 -(void)doTwitterShare {
@@ -411,6 +453,9 @@
         NSLog(@"Finished sending: userinfo");
         [self didTwitterConnect];
     }
+
+    // only cause activityIndicator to go away when all sharers have finished? or just do in background?
+    /*
     if (activityIndicatorLarge) {
         [activityIndicatorLarge setHidden:YES];
         [activityIndicatorLarge stopCompleteAnimation];
@@ -418,9 +463,12 @@
     }
     //[delegate shouldCloseShareController:YES];
     [delegate shouldCloseShareController:NO];
+     */
 }
 - (void)sharer:(SHKSharer *)sharer failedWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin {
     NSLog(@"Failed with error: %@ shouldRelogin: %d", [error description], shouldRelogin);
+    
+    // todo: display duplicate status error - should not happen
 }
 - (void)sharerCancelledSending:(SHKSharer *)sharer {
     NSLog(@"Cancelled sending");
@@ -432,4 +480,80 @@
     NSLog(@"Other error");
 }
 
+
+-(BOOL) shareServiceIsConnected:(NSString *)service {
+    NSNumber * connectionState = [serviceIsConnected objectForKey:service];
+    if (!connectionState) {
+        // check with each service to see if it's already connected
+        if ([service isEqualToString:@"Facebook"]) {
+            FacebookHelper * fbHelper = [FacebookHelper sharedFacebookHelper];
+            if (![fbHelper facebookHasSession])
+                return NO;
+            // hack: assume that if session is valid, user has given post permission
+            return YES;
+        }
+        else {
+            return NO;
+        }
+    }
+    return [connectionState boolValue];
+}
+-(BOOL) shareServiceIsSharing:(NSString*)service {
+    NSLog(@"ServiceIsSharing: %d objects", [serviceIsSharing count]);
+    NSNumber * sharingState = [serviceIsSharing objectForKey:service];
+    if (!sharingState)
+        return NO;
+    NSLog(@"%@ exists and is sharing: %d", service, [sharingState boolValue]);
+    return [sharingState boolValue];
+}
+
+-(void)shareServiceDidToggle:(NSString *)service {
+    BOOL state = [self shareServiceIsSharing:service];
+    [serviceIsSharing setObject:[NSNumber numberWithBool:!state] forKey:service];
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString * connectedString = [NSString stringWithFormat:@"%@IsConnected", service]; // should not be not connected
+    NSString * sharingString = [NSString stringWithFormat:@"%@IsSharing", service];
+    BOOL isConnected = [[serviceIsConnected objectForKey:service] boolValue];
+    BOOL isSharing = [[serviceIsSharing objectForKey:service] boolValue];
+    
+    if (isSharing) {
+        [k addMetricWithDescription:@"ShareServiceToggle" andUsername:[delegate getUsername] andStringValue:[NSString stringWithFormat:@"SharingOn", service] andIntegerValue:0];
+    }
+    else {
+        [k addMetricWithDescription:@"ShareServiceToggle" andUsername:[delegate getUsername] andStringValue:[NSString stringWithFormat:@"SharingOn", service] andIntegerValue:0];
+    }    
+    NSLog(@"Toggling sharing service %@: %@ %d %@ %d", service, connectedString, isConnected, sharingString, isSharing);
+    [defaults setBool:isConnected forKey:connectedString];
+    [defaults setBool:isSharing forKey:sharingString];
+    [defaults synchronize];
+}
+
+-(void)connectService:(NSString *)service {
+    // only changes the serviceIsSharing toggle array and defaults to YES - actual connection happens in ShareController
+    NSLog(@"Connecting sharing service %@", service);
+    
+    [serviceIsConnected setObject:[NSNumber numberWithBool:YES] forKey:service];
+    [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:service]; // automatically start sharing after connect
+    [self didConnectService:service]; // just reloads table
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString * connectString = [NSString stringWithFormat:@"%@IsConnected", service];
+    NSString * shareString = [NSString stringWithFormat:@"%@IsSharing", service];
+    [defaults setBool:[[serviceIsConnected objectForKey:service] boolValue] forKey:connectString];
+    [defaults setBool:[[serviceIsSharing objectForKey:service] boolValue] forKey:shareString];
+    [defaults synchronize];
+    
+    [k addMetricWithDescription:@"ShareServiceConnect" andUsername:[delegate getUsername] andStringValue:service andIntegerValue:0];
+//    else {
+//        [self showAlertWithTitle:@"Connect for Share" andMessage:[NSString stringWithFormat:@"Connecting with %@ coming soon!", service] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+//    }
+}
+
+-(void)shareServiceShouldShare:(BOOL)doShare forService:(NSString *)service {
+    [serviceIsSharing setObject:[NSNumber numberWithBool:doShare] forKey:service]; // automatically start sharing after connect
+}
+-(void)shareServiceShouldConnect:(BOOL)doConnect forService:(NSString *)service {
+    [serviceIsConnected setObject:[NSNumber numberWithBool:doConnect] forKey:service]; // automatically start sharing after connect
+}
 @end

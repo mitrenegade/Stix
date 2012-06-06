@@ -215,6 +215,8 @@
     }
     if (isSearching)
         return;
+    if (![delegate isLoggedIn])
+        return;
     
     NSLog(@"Button find friends by Facebook!");
     isSearching = YES;
@@ -232,7 +234,9 @@
     }
     if (isSearching)
         return;
-    
+    if (![delegate isLoggedIn])
+        return;
+
     NSLog(@"Button find friends by Contacts!");
     isSearching = YES;
     resultType = RESULTS_SEARCH_CONTACTS;
@@ -249,7 +253,9 @@
     }
     if (isSearching) 
         return;
-    
+    if (![delegate isLoggedIn])
+        return;
+
     NSLog(@"Button find friends by Name!");
     isSearching = YES; 
     resultType = RESULTS_SEARCH_NAME;
@@ -259,6 +265,8 @@
     [self populateNameSearchResults];
 }
 -(void)didClickButtonMyPix {
+    if (![delegate isLoggedIn])
+        return;
     NSLog(@"Button show my pix!");
     UserGalleryController * myGalleryController = [[UserGalleryController alloc] init];
     [myGalleryController setDelegate:self];
@@ -285,9 +293,11 @@
 /***** modifying user photo *******/
 
 - (void)changePhoto:(id)sender {
-    [self.delegate didClickChangePhoto];
+    if ([delegate isLoggedIn])
+        [delegate didClickChangePhoto];
 }
 
+/* allow photo
 -(void)takeProfilePicture {
 #if !TARGET_IPHONE_SIMULATOR
     UIImagePickerController * cam = [[UIImagePickerController alloc] init];
@@ -336,12 +346,13 @@
     NSData * img = UIImagePNGRepresentation(rounded);
     NSLog(@"Adding photo of size %f %f to user %@", rounded.size.width, rounded.size.height, [delegate getUsername]);
     [photoButton setImage:rounded forState:UIControlStateNormal];
-    [self.delegate didChangeUserphoto:rounded];
+    [delegate didChangeUserphoto:rounded];
     
     // add to kumulos
     [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 }
+*/
 
 /*** other actions ****/
 -(IBAction)adminStixButtonPressed:(id)sender
@@ -401,15 +412,23 @@
     if ([[delegate getUsername] isEqualToString:@"anonymous"]) {
         // needs to try logging in again
         [delegate needFacebookLogin];
+        
+        if (!activityIndicatorLarge)
+            activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
+        [self.view addSubview:activityIndicatorLarge];
+        [activityIndicatorLarge startCompleteAnimation];
     }
-    if (1) //[delegate isLoggedIn])
-    {
-        NSLog(@"Profile view appearing with username: %@", [delegate getUsername]);
-        //[k getUserWithUsername:[delegate getUsername]];
-        [nameLabel setText:[delegate getUsername]];
-        [photoButton setImage:[delegate getUserPhoto] forState:UIControlStateNormal];
-        [photoButton setBackgroundColor:[UIColor blackColor]];
-    }    
+    else {
+        [self didLogin];
+    }
+}
+
+-(void)didLogin {
+    NSLog(@"Profile view appearing with username: %@", [delegate getUsername]);
+    //[k getUserWithUsername:[delegate getUsername]];
+    [nameLabel setText:[delegate getUsername]];
+    [photoButton setImage:[delegate getUserPhotoForProfile] forState:UIControlStateNormal];
+    [photoButton setBackgroundColor:[UIColor blackColor]];
     
     [self updateFollowCounts];
     isSearching = NO;
@@ -417,6 +436,9 @@
     //[searchResultsController.view removeFromSuperview];
     [self toggleMyButtons:YES];
     [self toggleMyInfo:YES];
+
+    [activityIndicatorLarge stopCompleteAnimation];
+    [activityIndicatorLarge removeFromSuperview];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -670,9 +692,6 @@
     return [searchFriendFacebookID objectAtIndex:index];
 }
 -(int)getFollowingUserStatus:(int)index {
-    // if Facebook friend is not on Stix, return -1
-    //NSMutableArray * allFacebookIDs = [self.delegate getAllUserFacebookIDs];
-    //if (![allFacebookIDs containsObject:[searchFriendFacebookID objectAtIndex:index]])
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
         return -1;
     
@@ -830,8 +849,8 @@
     NSLog(@"Query: %@", [_searchBar text]);
     NSArray *query = [[_searchBar text] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
    // NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
-    NSMutableArray * allUserNames = [self.delegate getAllUserNames];
-    NSMutableArray * allUserFacebookIDs = [self.delegate getAllUserFacebookIDs];
+    NSMutableArray * allUserNames = [delegate getAllUserNames];
+    NSMutableArray * allUserFacebookIDs = [delegate getAllUserFacebookIDs];
 
     NSLog(@"Searching for facebookID");
     // see if searching for facebook ID - yea right
@@ -927,12 +946,8 @@
 }
 
 #pragma UserGalleryDelegate
--(void)uploadImage:(NSData*)png withShareMethod:(int)buttonIndex
-{
-    [delegate uploadImage:png withShareMethod:buttonIndex];
-}
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
+    [delegate didAddCommentFromDetailViewController:detailViewController withTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
 -(void)doPointerAnimation {

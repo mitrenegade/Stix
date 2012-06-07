@@ -162,6 +162,7 @@
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * newname = [d valueForKey:@"username"];
     NSNumber * userID = [d valueForKey:@"allUserID"];
+    NSLog(@"Userid: %@", userID);
     if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
         return;
     UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
@@ -213,7 +214,7 @@
 
 #pragma mark IBOutlet button actions
 -(IBAction)didClickJoinButton:(id)sender {
-    [self.delegate doFacebookLogin];
+    [delegate doFacebookLogin];
     NSLog(@"Did click Facebook Login button");
     [self startActivityIndicator];
 }

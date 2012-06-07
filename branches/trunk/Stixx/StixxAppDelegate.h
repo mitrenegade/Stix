@@ -218,6 +218,7 @@ struct UserInfo {
     NSMutableSet * Parse_subscribedChannels;
     
     BOOL didGetFollowingLists;
+    BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
     
     // twitter helper
 //    TwitterHelper * twitterHelper;

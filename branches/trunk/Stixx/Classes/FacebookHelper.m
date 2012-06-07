@@ -277,6 +277,11 @@ static NSString * appID;
         NSLog(@"Repeating getFacebookInfo request");
         [self getFacebookInfo];
     }
+    if ([error code] == -1001) {
+        // the request timed out
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook login timed out. Try again when there is better connectivity!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
 }
 
 // response for requestWithGraphPath

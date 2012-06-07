@@ -49,4 +49,5 @@
 -(void)displayState;
 -(void)resetFirstTimeState;
 -(void)loadCachedUserTagListForUsers;
+-(void)insertNewTagID:(NSNumber*)tagID;
 @end

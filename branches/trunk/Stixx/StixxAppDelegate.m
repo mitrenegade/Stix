@@ -147,7 +147,7 @@ static dispatch_queue_t backgroundQueue;
     myUserInfo_email = nil;
     myUserInfo->facebookID = 0;
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
-
+    didStartFirstTimeMessage = NO;
     /*** Kiip service ***/
 #if USING_KIIP
     // Start and initialize when application starts
@@ -431,6 +431,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
     // Tell Parse about the device token.
+    NSLog(@"Storing parse device token");
     [PFPush storeDeviceToken:newDeviceToken];
     // Subscribe to the global broadcast channel.
 
@@ -438,6 +439,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // register for notifications on update channel
     
     notificationDeviceToken = newDeviceToken;
+    
+    if ([self isLoggedIn]) {
+        [self Parse_createSubscriptions];
+    }
 }
 
 /*** facebook delegates ***/
@@ -493,7 +498,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 
 -(void)doFacebookLogin {
     NSLog(@"Do facebook login");
-    int ret = [self.fbHelper facebookLogin];
+    int ret = [fbHelper facebookLogin];
 
     // if ret == 0, then we were already logged in
     if (ret == 0)
@@ -624,6 +629,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setInteger:myUserInfo->facebookID forKey:@"facebookID"];
     [defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
     [defaults setInteger:myUserInfo->bux forKey:@"bux"];
+    [defaults setInteger:myUserInfo->userID forKey:@"userID"];
     NSData *userphoto = UIImageJPEGRepresentation(myUserInfo_userphoto, 100);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
@@ -1082,6 +1088,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSNumber * newRecordID = [returnParams objectAtIndex:0];
     [k getNewlyCreatedPixWithAllTagID:[newRecordID intValue]];
     
+    // update aggregator
+    [aggregator insertNewTagID:newRecordID];
+    
     // send notification
     NSString * message = [NSString stringWithFormat:@"%@ added a new photo to remix.", myUserInfo_username];
     NSString * channel = [NSString stringWithFormat:@"From%@", [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]];
@@ -1131,7 +1140,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     // add tagID to pixBelongsToUser table, with error handling
     //[k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects: myUserInfo_username, @"", newRecordID, nil];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects: myUserInfo_username, newRecordID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"addPixBelongsToUser" withParams:params withCallback:nil withDelegate:self];
     
@@ -1389,9 +1398,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didSetAggregationTrigger {
     // we've finished aggregation process so all parse is done
-    if (notificationDeviceToken) {
-        [self Parse_createSubscriptions];  
-    }
+    //if (notificationDeviceToken) {
+        //[self Parse_createSubscriptions];  
+    //}
 }
 
 -(void)didFinishAggregation:(BOOL)isFirstTime {
@@ -1983,7 +1992,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSLog(@"Kumulos error: %@", theError);
+    NSLog(@"Kumulos error: %@ in op %@", theError, [operation description]);
 #if 0
     if (lastViewController == feedController) { // currently on feed controller
         NSLog(@"Kumulos error in feedController %x: %@ - probably failed while trying to check for updated tags", feedController, theError);
@@ -2050,7 +2059,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // first time facebook connects, set defaults to YES automatically
         [shareController connectService:@"Facebook"];
     }
-    
+
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
 }
 
@@ -2105,20 +2114,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [feedController.buttonProfile.layer setBorderWidth:1];
-    NSLog(@"Username %@ with email %@ and facebookID %d", myUserInfo_username, email, [facebookID intValue]);
+    NSLog(@"UserID: %d Username %@ with email %@ and facebookID %d", myUserInfo->userID, myUserInfo_username, email, [facebookID intValue]);
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
     // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
-    if (notificationDeviceToken) {
-        //[self Parse_createSubscriptions];  
-    }
-    else
-        // try registering again
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
-
     [self updateBuxCount];
     //[profileController updatePixCount];    
     
@@ -2138,11 +2140,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self initializeBadgesFromKumulos];
     });
      */
+    if (!didStartFirstTimeMessage) {
+        if (notificationDeviceToken) {
+            [self Parse_createSubscriptions];  
+        }
+        else {
+            // try registering again
+            //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+            // just wait
+            NSLog(@"No device token yet!");
+        }
+        [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
+        didStartFirstTimeMessage = YES;
+    }
     
     // check for premium
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
     
-    [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
 }
 
 /*
@@ -3145,6 +3159,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     /*** Parse service ***/
 #if 1
+    NSLog(@"Parse_createsubscriptions: creating request");
     PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionRequests"];
     [testObject setObject:myUserInfo_username forKey:@"username"];
     [testObject save];
@@ -3163,6 +3178,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
      */
         NSError * err = nil;
         //dispatch_async(backgroundQueue, ^{
+    NSLog(@"Parse_createsubscriptions: starting createsubscriptions");
             [self Parse_subscribeToChannel:@""];
         //});
         if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])

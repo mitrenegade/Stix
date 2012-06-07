@@ -123,7 +123,7 @@
         NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
 #endif
         KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
-        //[usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
+        [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     }    
     [followingSetWithMe release];
 }
@@ -148,10 +148,10 @@
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
     
+    NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
     if ([theResults count] > 0)
     {
-        //NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
-        NSString * followName = [[theResults objectAtIndex:0] objectForKey:@"username"];
+        //NSString * followName = [[theResults objectAtIndex:0] objectForKey:@"username"];
 #if 1 //VERBOSE
         NSLog(@"getNewPixBelongingToUser %@ completed with %d results - %d users remaining", followName, [theResults count], followingCountLeftToAggregate-1);
 #endif
@@ -159,7 +159,7 @@
     }
     else {
 #if 1 //VERBOSE
-        NSLog(@"getNewPixBelongingToUser returned no results for followingCount %d", followingCountLeftToAggregate-1);
+        NSLog(@"getNewPixBelongingToUser %@ returned no results for followingCount %d", followName, followingCountLeftToAggregate-1);
 #endif
     }
     
@@ -180,11 +180,51 @@
     }
 }
 
+-(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
+    NSLog(@"UserAggregator kumulos failed: op %@ error %@", [operation description], [theError description]);
+}
+
+-(void)insertNewTagID:(NSNumber*)tagID {
+    id newObject = tagID;
+    NSComparator comparator = ^(id obj1, id obj2) {
+        return [obj1 compare: obj2];
+    };
+    
+    if ([allTagIDs containsObject:tagID])
+        return;
+    
+    NSUInteger newIndex = [allTagIDs indexOfObject:newObject
+                                     inSortedRange:(NSRange){0, [allTagIDs count]}
+                                           options:NSBinarySearchingInsertionIndex
+                                   usingComparator:comparator];
+    if (newIndex < [allTagIDs count]) {
+        if ([[allTagIDs objectAtIndex:newIndex] intValue] != [tagID intValue])
+            [allTagIDs insertObject:newObject atIndex:newIndex];
+    }
+    else
+        [allTagIDs insertObject:newObject atIndex:newIndex];
+
+    
+    //NSLog(@"Aggregation queue: processed tagID %d username %@ index %d, remaining %d, allTagID size %d", [tagID intValue], username, newIndex, [aggregationQueue count], [allTagIDs count]);
+    
+    // set new most recent tagID
+    if ([tagID intValue] > idOfNewestTagAggregated) {
+        NSLog(@"Aggregator: newest tagID found: %d old newestTagID: %d", [tagID intValue], idOfNewestTagAggregated);
+        idOfNewestTagAggregated = [tagID intValue];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] setObject:allTagIDs forKey:@"AggregateTagIDs"];
+}
+
 -(void)processAggregationQueueInBackground {
     // run continuous while loop in separate background thread
+#if 1
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
                                              (unsigned long)NULL), ^(void) {
-        
+#else
+        // causes a hang
+    dispatch_async(dispatch_queue_create("com.Neroh.Stix.stixApp.aggregator.bgQueue", NULL), ^(void) {
+#endif
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     while (1) {
         if ([aggregationQueue count]>0) {
@@ -206,35 +246,10 @@
                     [defaults synchronize];
                 }
                 
-                id newObject = tagID;
-                NSComparator comparator = ^(id obj1, id obj2) {
-                    return [obj1 compare: obj2];
-                };
+                // insert into sorted array
+                [self insertNewTagID:tagID];
                 
-                if ([allTagIDs containsObject:tagID])
-                    continue;
-                
-                NSUInteger newIndex = [allTagIDs indexOfObject:newObject
-                                                 inSortedRange:(NSRange){0, [allTagIDs count]}
-                                                       options:NSBinarySearchingInsertionIndex
-                                               usingComparator:comparator];
-                if (newIndex < [allTagIDs count]) {
-                    if ([[allTagIDs objectAtIndex:newIndex] intValue] != [tagID intValue])
-                        [allTagIDs insertObject:newObject atIndex:newIndex];
-                }
-                else
-                    [allTagIDs insertObject:newObject atIndex:newIndex];
-                
-                //NSLog(@"Aggregation queue: processed tagID %d username %@ index %d, remaining %d, allTagID size %d", [tagID intValue], username, newIndex, [aggregationQueue count], [allTagIDs count]);
-                
-                // set new most recent tagID
-                if ([tagID intValue] > idOfNewestTagAggregated) {
-                    NSLog(@"Aggregator: newest tagID found: %d old newestTagID: %d", [tagID intValue], idOfNewestTagAggregated);
-                    idOfNewestTagAggregated = [tagID intValue];
-                }
-                
-                [defaults setObject:allTagIDs forKey:@"AggregateTagIDs"];
-                
+                NSLog(@"Aggregator queue: trigger %d queue size %d", firstTimeAggregatingTrigger, [aggregationQueue count]);
                 if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
                     // triggers "completion" of aggregator initially
                     // the highest id in this should be the most recent tagID for this user's following list
@@ -244,7 +259,8 @@
                 }
 //                else
 //                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
-                
+          /*      
+           // didStartAggregation is called in loadCached
                 if (!aggregationGetTagRequested) {
                     // tell delegate to request a tag to start
                     aggregationGetTagRequested = YES;
@@ -252,6 +268,7 @@
                     
                     [delegate didStartAggregationWithTagID:tagID];
                 }
+           */
             }
         }
     }

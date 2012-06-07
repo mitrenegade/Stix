@@ -103,6 +103,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"addPixBelongsToUser"]) {
         NSString * username = [inputParams objectAtIndex:0];
         NSNumber * tagID = [inputParams objectAtIndex:1];
+        NSLog(@"addPixBelongsToUser: %@ tagID %d", username, [tagID intValue]);
         [savedInfo setObject:username forKey:@"addPixBelongsToUser_username"];
         [savedInfo setObject:tagID forKey:@"addPixBelongsToUser_tagID"];
         [k addPixBelongsToUserWithUsername:username andTagID:[tagID intValue]];
@@ -304,6 +305,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addPixBelongsToUserDidCompleteWithResult:(NSNumber *)newRecordID {
+    NSString * username = [savedInfo objectForKey:@"addPixBelongsToUser_username"];
+    NSNumber * tagID = [savedInfo objectForKey:@"addPixBelongsToUser_tagID"];
+    NSLog(@"addPixBelongsToUser completed for user %@ tagID %d record id %d", username, [tagID intValue], [newRecordID intValue]);
     [self cleanup];
 }
 

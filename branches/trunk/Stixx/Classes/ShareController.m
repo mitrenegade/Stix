@@ -33,6 +33,9 @@ static ShareController *sharedShareController;
         serviceIsConnected = [[NSMutableDictionary alloc] init];
         serviceIsSharing = [[NSMutableDictionary alloc] init];
         k = [[Kumulos alloc] init]; // no need for delegate
+
+        // create buttons and arrays
+        [self initializeServices];
     }
     return self;
 }
@@ -48,7 +51,6 @@ static ShareController *sharedShareController;
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    [self initializeServices];
     [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT * NUM_SERVICES - 20)];
     [tableView.layer setCornerRadius:10];
 }
@@ -496,6 +498,7 @@ static ShareController *sharedShareController;
             return NO;
         }
     }
+    NSLog(@"%@ is connected: %d", service, [connectionState boolValue]);
     return [connectionState boolValue];
 }
 -(BOOL) shareServiceIsSharing:(NSString*)service {
@@ -552,6 +555,17 @@ static ShareController *sharedShareController;
 
 -(void)shareServiceShouldShare:(BOOL)doShare forService:(NSString *)service {
     [serviceIsSharing setObject:[NSNumber numberWithBool:doShare] forKey:service]; // automatically start sharing after connect
+    
+    // update image
+    NSLog(@"Share service should share: %d", doShare);
+    UIButton * toggle = [toggles objectForKey:service];
+    if (doShare) {
+        [toggle setImage:[UIImage imageNamed:@"btn_share_switch_on@2x.png"] forState:UIControlStateNormal];
+    }
+    else {
+        [toggle setImage:[UIImage imageNamed:@"btn_share_switch_off@2x.png"] forState:UIControlStateNormal];
+    }
+    [toggles setObject:toggle forKey:service];
 }
 -(void)shareServiceShouldConnect:(BOOL)doConnect forService:(NSString *)service {
     [serviceIsConnected setObject:[NSNumber numberWithBool:doConnect] forKey:service]; // automatically start sharing after connect

@@ -37,6 +37,7 @@
 
 #define CONTENT_HEIGHT 320
 #define HOSTNAME @"stix.herokuapp.com"
+#define USE_PLACEHOLDER 0
 
 @class VerticalFeedItemController;
 

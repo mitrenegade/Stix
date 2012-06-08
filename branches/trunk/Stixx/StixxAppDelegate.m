@@ -1,4 +1,4 @@
-    //
+        //
 //  StixxAppDelegate.m
 //  Stixx
 //
@@ -222,7 +222,7 @@ static dispatch_queue_t backgroundQueue;
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCarouselViews = [[NSMutableArray alloc] init];
     allCommentHistories = [[NSMutableDictionary alloc] init];
-
+    
 #if !TARGET_IPHONE_SIMULATOR
     [mainController presentModalViewController:camera animated:YES];
 #else
@@ -308,7 +308,9 @@ static dispatch_queue_t backgroundQueue;
     [camera setCameraOverlayView:tabBarController.view];
 #endif
     [self didPressTabButton:TABBAR_BUTTON_FEED];
-
+    
+    [self loadCachedTags];
+    
     // Login process - first load cached user info from defaults
     loggedIn = [self loadUserInfoFromDefaults];
     isLoggingIn = NO;
@@ -630,6 +632,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
     [defaults setInteger:myUserInfo->bux forKey:@"bux"];
     [defaults setInteger:myUserInfo->userID forKey:@"userID"];
+    NSLog(@"SaveUserInfo: userID %d name %@ facebookID %d", myUserInfo->userID, myUserInfo_username, myUserInfo->facebookID);
     NSData *userphoto = UIImageJPEGRepresentation(myUserInfo_userphoto, 100);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
@@ -639,6 +642,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setBool:[shareController shareServiceIsSharing:@"Facebook"] forKey:@"FacebookIsSharing"];
     [defaults setBool:[shareController shareServiceIsConnected:@"Twitter"] forKey:@"TwitterIsConnected"];
     [defaults setBool:[shareController shareServiceIsSharing:@"Twitter"] forKey:@"TwitterIsSharing"];
+    
+    // allStix and stixorder
+    NSData * allStixData = [NSKeyedArchiver archivedDataWithRootObject:allStix];
+    NSData * allStixOrderData = [NSKeyedArchiver archivedDataWithRootObject:allStixOrder];
+    [defaults setObject:allStixData forKey:@"allStix"];
+    [defaults setObject:allStixOrderData forKey:@"allStixOrder"];
 
     [defaults synchronize];
 }
@@ -696,6 +705,47 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     return 1;
 }
 
+
+-(void)saveCachedTags {
+    // archive most recent tags for faster loading
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray * cacheTags = [[NSMutableArray alloc] init];
+    if ([allTags count] == 0)
+        return;
+    int ct = MIN(20, [allTags count]);
+    for (int i=0; i<ct; i++) {
+        [cacheTags addObject:[allTags objectAtIndex:i]];
+    }
+    
+    NSData * cacheData = [NSKeyedArchiver archivedDataWithRootObject:cacheTags];
+    [defaults setObject:cacheData forKey:@"cachedTags"];
+    [defaults synchronize];
+    
+    NSLog(@"Cached %d tags", ct);
+}
+
+-(void)loadCachedTags {
+    
+    // load cached tags
+    // archive most recent tags for faster loading
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData * cacheData = [defaults objectForKey:@"cachedTags"];
+    if (!cacheData)
+        return;
+    NSMutableArray * cacheTags = [NSKeyedUnarchiver unarchiveObjectWithData:cacheData];
+    // don't add to allTags - force a getTagWithID call
+//    for (int i=0; i<[cacheTags count]; i++) {
+//        [allTags addObject:[cacheTags objectAtIndex:i]];
+//    }
+    NSLog(@"Loaded %d cached tags with ids:", [cacheTags count]);
+    for (int i=0; i<[cacheTags count]; i++) {
+        Tag * tag = [cacheTags objectAtIndex:i];
+        [allTagIDs setObject:tag forKey:tag.tagID];
+        NSLog(@"%d", [tag.tagID intValue]);
+    }
+     
+}
+
 -(int)loadUserInfoFromDefaults {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
@@ -713,6 +763,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     myUserInfo->facebookID = [defaults integerForKey:@"facebookID"];
     myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
     myUserInfo->bux = [defaults integerForKey:@"bux"];
+    myUserInfo->userID = [defaults integerForKey:@"userID"];
     NSData * userphoto = [defaults objectForKey:@"userphoto"];
     myUserInfo_userphoto = [UIImage imageWithData:userphoto];
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
@@ -726,6 +777,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [allFollowers unionSet:[NSKeyedUnarchiver unarchiveObjectWithData:followerData]];
     NSLog(@"LoadUserInfo: following %d people, has %d followers", [allFollowing count], [allFollowers count]);
     
+    // stix
+    NSData * allStixData = [defaults objectForKey:@"allStix"];
+    NSData * allStixOrderData = [defaults objectForKey:@"allStixData"];
+    //[allStix removeAllObjects];
+    //[allStixOrder removeAllObjects];
+    [allStix addEntriesFromDictionary:[NSKeyedUnarchiver unarchiveObjectWithData:allStixData]];
+    [allStixOrder addEntriesFromDictionary:[NSKeyedUnarchiver unarchiveObjectWithData:allStixOrderData]]; 
+                   
     [profileController didLogin]; 
     
     [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
@@ -869,23 +928,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    if (init == 2) {
-        //NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", myUserInfo_username);
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-          //                                       (unsigned long)NULL), ^(void) {
-            //[self saveDataToDisk];
-        //});
 
-        [self logMetricTimeInApp];
-    }
-
-#if USING_KIIP
-    // End the Kiip session when the app terminates
-    [[KPManager sharedManager] endSession];
-#endif
+    [self logMetricTimeInApp];
+    [self saveCachedTags];
 }
-
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {	// Get full path of possession archive 
@@ -893,21 +939,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
     
-    // archive username
-    if (init == 2) {
-        //NSString *path = [self coordinateArrayPath];
-        NSLog(@"Logging out and saving username %@", myUserInfo_username);
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
-        //[self saveDataToDisk];
-        //});
-    }
     [self logMetricTimeInApp];
-    
-#if USING_KIIP
-    // End the Kiip session when the user leaves the app
-    [[KPManager sharedManager] endSession];
-#endif
-    //[mainController dismissModalViewControllerAnimated:YES]; 
+    [self saveCachedTags];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -983,9 +1016,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         {
             // already exists, break
             alreadyExists = YES;
-            NSLog(@"Tag %d already exists at index %d: previous stix count %d", [currtag.tagID intValue], i, [currtag.auxStixStringIDs count]);
+            NSLog(@"Tag %d already exists at index %d: previous stix count %d current idOfNewestTagReceived %d idOfNewestTagOnServer %d", [currtag.tagID intValue], i, [currtag.auxStixStringIDs count], idOfNewestTagReceived, idOfNewestTagOnServer);
             [allTags replaceObjectAtIndex:i withObject:tag];
-            NSLog(@"Tag %d already exists at index %d: new stix count %d", [tag.tagID intValue], i, [tag.auxStixStringIDs count]);
             // force update of replaced tag
             [feedController reloadPage:i];
             break;
@@ -1006,6 +1038,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allTags insertObject:tag atIndex:i];
             [allTagIDs setObject:tag forKey:tag.tagID];
             [self getCommentCount:newID]; // store comment count for this tag
+            // force update to feedController.allTags
+            [feedController reloadPage:i];
             added = YES;
             break;
         }
@@ -1018,7 +1052,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             idOfOldestTagReceived = newID;
         if (1) { 
             [allTags insertObject:tag atIndex:i];
+            [allTagIDs setObject:tag forKey:tag.tagID];
             [self getCommentCount:newID]; // store comment count for this tag
+            // force update to feedController.allTags
+            [feedController reloadPage:i];
             added = YES;
         }
         else 
@@ -1307,7 +1344,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         Tag * tag = [allTags objectAtIndex:i];
         if ([[tag tagID] intValue] == tagID) {
             [tag populateWithAuxiliaryStix:theResults];
-            [feedController populateAllTagsDisplayedWithTag:tag];
+            [feedController populateAllTagsDisplayedWithTag:tag]; // also removes placeholder (formerly TODO)
             return;
         }
     }
@@ -1393,7 +1430,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didStartAggregationWithTagID:(NSNumber *)tagID {
     NSLog(@"Requesting first tag: %@", tagID);
+#if 0
     [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+#else
+    if ([allTags count] == 0 || [[feedController allTagsDisplayed] count] == 0)
+        [self getTagWithID:[tagID intValue]];
+#endif
 }
 
 -(void)didSetAggregationTrigger {
@@ -1412,12 +1454,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSLog(@"didFinishAggregation newestTagOnServer %d tagIDs aggregated %d", newestTagOnServer, [newerTagsToGet count]);
         for (NSNumber * tagID in newerTagsToGet) {
             NSLog(@"First time requesting aggregated tags: newer tags %d", [tagID intValue]);
+#if 0
             [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+#else
+            [self getTagWithID:[tagID intValue]];
+#endif
         }
         NSArray * olderTagsToGet = [aggregator getTagIDsLessThanTagID:newestTagOnServer totalTags:5];
         for (NSNumber * tagID in olderTagsToGet) {
             NSLog(@"First time requesting aggregated tags: older tags %d", [tagID intValue]);
+#if 0
             [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
+#else
+            [self getTagWithID:[tagID intValue]];
+#endif
         }
         
         //if (notificationDeviceToken) {
@@ -1434,7 +1484,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         for (int i=0; i<[newerTagsToGet count]; i++) {
             int tID = [[newerTagsToGet objectAtIndex:i] intValue];
             NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
+#if 0
             [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
+#else
+            [self getTagWithID:tID];
+#endif
         }
     }
 }
@@ -1463,12 +1517,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             return;            
         }
         
-        NSLog(@"Calling getOlderTagsThanID to get %d older tags than %d", [oldTagsToGet count], tagID);
         for (int i=0; i<[oldTagsToGet count]; i++) {
             NSNumber * tID = [oldTagsToGet objectAtIndex:i];
+            NSLog(@"getOlderTagsThanID to get %d older tags than %d: getTagWithID %d", [oldTagsToGet count], tagID, [tID intValue]);
+#if 0
             Tag * tag = [allTagIDs objectForKey:tID];
             if (tag) {
-                NSLog(@"Older tag with id %d already exists in allTags structure", tagID);
+                NSLog(@"Older tag with id %d already exists in allTagIDs structure", tID);
                 //bool didAddTag = [self addTagWithCheck:tag withID:tagID];
             }
             else {
@@ -1476,6 +1531,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
                 [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
             }
+#else
+            [self getTagWithID:[tID intValue]];
+#endif
         }
     }
     else{
@@ -1614,7 +1672,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             actionMsg = [NSString stringWithFormat:@"%@ winked at your Pix.", myUserInfo_username];
         if ([comment isEqualToString:@"LIKE_SHOCKED"])
             actionMsg = [NSString stringWithFormat:@"%@ is shocked by your Pix.", myUserInfo_username];
-        Tag * tag = [self getTagWithID:tagID];
+        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
@@ -1631,7 +1689,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         // notify
         NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo_username, comment];
-        Tag * tag = [self getTagWithID:tagID];
+        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
@@ -1686,9 +1744,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     if ([theResults count] == 0)
         return;
-    
+
     NSMutableDictionary * d = [theResults objectAtIndex:0];        
     NSNumber * tagID = [d valueForKey:@"tagID"]; 
+
     [allCommentHistories setObject:d forKey:tagID];
     int commentCount = 0;
     for (int i=0; i<[theResults count]; i++) {
@@ -1721,7 +1780,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"Checking for update photos");
-    if (1) // todo: check for updated users by id
+    if (1)
     {
         //[friendController setIndicator:YES];
         //[k getAllUsers];
@@ -2015,7 +2074,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ( compared == NSOrderedAscending )
     {
         [self setLastKumulosErrorTimestamp:now];
-        [self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+        //[self showAlertWithTitle:@"Network Error" andMessage:@"Your network connectivity is too weak. Connection to the servers failed!" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+        [self showAlertWithTitle:@"Low Connectivity" andMessage:@"Your network connectivity is weak. Stix may be unresponsive." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     }
 }
 
@@ -2390,9 +2450,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if ([t.tagID intValue] == [tagID intValue])
         {
             [allTags replaceObjectAtIndex:i withObject:tag];
+            [allTagIDs setObject:tag forKey:tagID];
+            [feedController reloadPage:i];
             break;
         }
-        //[feedController reloadCurrentPage];
     }
     
     // immediately add comment, update total, decrement stix count
@@ -3138,16 +3199,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self Parse_sendBadgedNotification:[NSString stringWithFormat:@"Your Bux have been incremented by %d", buxIncrement] OfType:NB_INCREMENTBUX toChannel:@"" withTag:nil];
 }
 
--(Tag*) getTagWithID:(int)tagID {
+-(void) getTagWithID:(int)tagID {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * t = [allTags objectAtIndex:i];
-        if ([[t tagID] intValue] == tagID)
-            return [allTags objectAtIndex:i];
+    NSLog(@"GetTagWithID: %d", tagID);
+    if ([allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]) {
+        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]];
+        NSMutableDictionary * dict = [Tag tagToDictionary:tag];
+        [self processTagsWithIDRange:[[NSMutableArray alloc] initWithObjects:dict, nil]];
+//        [feedController forceReloadWholeTableZOMG];
+        return;
     }
-    return nil;
+    else
+        [k getAllTagsWithIDRangeWithId_min:tagID-1 andId_max:tagID+1];
 }
 
 /***** Parse Notifications ****/
@@ -3534,7 +3599,11 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         }
         isUpdatingNotifiedTag = YES;
         if (doUpdateTag)
+#if 0
             [k getAllTagsWithIDRangeWithId_min:[notificationTagID intValue]-1 andId_max:[notificationTagID intValue]+1];
+#else
+            [self getTagWithID:[notificationTagID intValue]];
+#endif
     }
 }
 
@@ -3688,12 +3757,6 @@ static bool isShowingAlerts = NO;
     if ([allStixOrder valueForKey:stixStringID] == nil || [[allStixOrder valueForKey:stixStringID] intValue] == -1) {
         [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:stixStringID];
     }
-    // todo: check for consistency - the number of keys in allStixOrder should equal the largest value
-    /*
-    for (int i=0; i<[allCarouselViews count]; i++) {
-        [[allCarouselViews objectAtIndex:i] reloadAllStix];
-    }
-     */
     [self reloadAllCarousels];
     NSMutableData * stixData = [KumulosData dictionaryToData:allStix];
     [k addStixToUserWithUsername:[self getUsername] andStix:stixData];

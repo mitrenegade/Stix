@@ -19,6 +19,28 @@
 //@synthesize stixStringID;
 //@synthesize stixScale, stixRotation;
 
+-(void)encodeWithCoder:(NSCoder *)aCoder {
+    
+    [aCoder encodeObject:username forKey:@"username"];
+    [aCoder encodeObject:image forKey:@"image"];
+    [aCoder encodeObject:tagID forKey:@"tagID"];
+    [aCoder encodeObject:timestamp forKey:@"timestamp"];
+    [aCoder encodeObject:timestring forKey:@"timestring"];
+}
+
+-(id)initWithCoder:(NSCoder *)aDecoder {
+    
+    if ((self = [super init])) {
+        [self setUsername:[aDecoder decodeObjectForKey:@"username"]];
+        [self setImage:[aDecoder decodeObjectForKey:@"image"]];
+        [self setTagID:[aDecoder decodeObjectForKey:@"tagID"]];
+        [self setTimestamp:[aDecoder decodeObjectForKey:@"timestamp"]];
+        [self setTimestring:[aDecoder decodeObjectForKey:@"timestring"]];
+    }
+    return self;
+    
+}
+
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString *)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{        
     if (newUsername == nil)
         newUsername = @"";
@@ -95,6 +117,22 @@
     }
 }
 
++(NSMutableDictionary*)tagToDictionary:(Tag*)tag {
+    NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
+    [dict setObject:[tag username] forKey:@"username"];
+    if ([tag descriptor])
+        [dict setObject:[tag descriptor] forKey:@"descriptor"];
+    if ([tag comment])
+        [dict setObject:[tag comment] forKey:@"comment"];
+    if ([tag locationString])
+        [dict setObject:[tag locationString] forKey:@"locationString"];
+    [dict setObject: UIImagePNGRepresentation([tag image]) forKey:@"image"];
+    [dict setObject:[tag tagID] forKey:@"allTagID"];
+    [dict setObject:[tag timestamp] forKey:@"timeCreated"];
+    [dict setObject:[tag timestamp] forKey:@"timeUpdated"];
+    
+    return dict;
+}
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
     // loading a tag from kumulos
     

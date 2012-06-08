@@ -123,6 +123,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
         NSNumber * tagID = [inputParams objectAtIndex:0];
         [savedInfo setObject:tagID forKey:@"tagID"];
+        NSLog(@"KumulosHelper trying to getAuxiliaryStixOfTag for tagID %d", [tagID intValue]);
         [k getAllAuxiliaryStixWithTagID:[tagID intValue]];
     }
     else if ([function isEqualToString:@"removeAuxiliaryStix"]) {
@@ -163,6 +164,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllAuxiliaryStixDidCompleteWithResult:(NSArray *)theResults {
     if ([function isEqualToString:@"getAuxiliaryStixOfTag"]) {
+        NSLog(@"KumulosHelper getAuxiliaryStixOfTag for tagID %@ returned with %d results", [savedInfo objectForKey:@"tagID"], [theResults count]);
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:[savedInfo objectForKey:@"tagID"], theResults, nil];         
         [delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];        
         [returnParams autorelease];
@@ -405,6 +407,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         // if this happens while we are trying to load galleries, we need 
         // to decrement pendingContentCount
         // instead, redo
+        NSLog(@"KumulosHelper: getAuxiliaryStixOfTag failed for tagID %@", [savedInfo objectForKey:@"tagID"]);
         [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
     }
     else if ([function isEqualToString:@"addPixBelongsToUser"]) {

@@ -213,7 +213,7 @@
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas{
-    NSLog(@"Animation %d finished!", animationID);
+    //NSLog(@"Animation %d finished!", animationID);
      // animations autorelease the canvas they are sent
     /* reward animations */
     if (animationID == allAnimationIDs[0]) // first jump animation finished

@@ -97,10 +97,12 @@
     }
     
     if (showPlaceholder) {
+        NSLog(@"TogglePlaceHolder: showing placeholder for tagID %d", tagID);
         [stixView removeFromSuperview];
         [self.view insertSubview:placeholderView belowSubview:imageView];
     }
     else {
+        NSLog(@"TogglePlaceHolder: removing placeholder for tagID %d", tagID);
         [placeholderView removeFromSuperview];
         [self.view insertSubview:stixView belowSubview:imageView];
     }
@@ -125,6 +127,11 @@
     [stixView setIsPeelable:YES];
     [stixView setDelegate:self];
     [stixView initializeWithImage:imageData];
+    
+#if USE_PLACEHOLDER
+    [self togglePlaceholderView:YES];
+#else
+    NSLog(@"InitStixView for tag with id %d", [tag.tagID intValue]);
     int canShow = [stixView populateWithAuxStixFromTag:tag];
     if (canShow) {
         [self togglePlaceholderView:NO];
@@ -132,6 +139,7 @@
     else {
         [self togglePlaceholderView:YES];
     }
+#endif
     /*
     [shareButton removeFromSuperview];
     [self.view addSubview:shareButton];
@@ -176,7 +184,7 @@
     //[feedItem setReloadMessage:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_retry.png"]]];
 
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doSpin:reloadView forTime:20 withCompletion:^(BOOL finished){ 
+    [animation doSpin:reloadView forTime:30 withCompletion:^(BOOL finished){ 
         NSLog(@"Spin finished!");
         [self displayReloadView];
     }];
@@ -456,17 +464,21 @@
         [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
 }
 -(void)didReceiveAllRequestedMissingStix:(StixView*)_stixView {
+    NSLog(@"didReceiveAllRequestedMissingStix for id %d, isShowingPlaceHolder %d", tagID, stixView.isShowingPlaceholder);
+#if USE_PLACEHOLDER
     if (!stixView.isShowingPlaceholder)
-        return;
+    //    return;
+        NSLog(@"Placeholder for tagID %d already removed", tagID);
     
     //[placeholderView stopCompleteAnimation];
     [placeholderView removeFromSuperview];
+#endif
     
     NSLog(@"VerticalFeedItemController removing placeholder for StixView %d tagID %d", stixView.stixViewID, tagID);
-    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedItem.bgQueue", NULL), ^(void) {
-        [stixView populateWithAuxStixFromTag:tag];
+    //dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedItem.bgQueue", NULL), ^(void) {
+        //[stixView populateWithAuxStixFromTag:tag];
         [self.view insertSubview:stixView belowSubview:imageView];
-    });
+    //});
 #if 1
     // fade in
     StixAnimation * animation = [[StixAnimation alloc] init];

@@ -1,5 +1,3 @@
-
-//
 //  VerticalFeedController.m
 //  Stixx
 //
@@ -311,7 +309,7 @@
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     
     [carouselView resetBadgeLocations];
-    [self reloadCurrentPage];    
+    //[self reloadCurrentPage]; // done in didAddStixToPix
 }
 
 -(void)didCancelAddStix {
@@ -411,6 +409,7 @@
 //    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
     int index = button.tag;
     Tag * tag;
+#if 0
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
     else {
@@ -418,6 +417,29 @@
             return;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     }
+#else
+    BOOL found = NO;
+    for (int i=0; i<[allTagsPending count]; i++) {
+        Tag * t = [allTagsPending objectAtIndex:i];
+        if ([[t tagID] intValue] == index) {
+            tag = [allTagsPending objectAtIndex:i];
+            found = YES;
+            break;
+        }
+    }
+    if (!found) {
+        for (int i=0; i<[allTagsDisplayed count]; i++) {
+            Tag * t = [allTagsDisplayed objectAtIndex:i];
+            if ([[t tagID] intValue] == index) {
+                tag = [allTagsDisplayed objectAtIndex:i];
+                found = YES;
+                break;
+            }
+        }
+    }
+    if (!found)
+        return;
+#endif
     NSLog(@"Clicked on user photo %d in feed for user %@", button.tag, tag.username);
     [self shouldDisplayUserPage:tag.username];
 }
@@ -449,7 +471,7 @@
             [photoView setImage:[UIImage imageNamed:@"graphic_nopic.png"] forState:UIControlStateNormal];
             [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:NO] forKey:tag.tagID];
         }
-        [photoView setTag:index];
+        [photoView setTag:[tag.tagID intValue]];
         [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
         [headerView addSubview:photoView];
         
@@ -495,7 +517,7 @@
                 [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
                 [photoView.layer setBorderWidth: 2.0];
                 [photoView setImage:photo forState:UIControlStateNormal];
-                [photoView setTag:index];
+                [photoView setTag:[tag.tagID intValue]];
                 [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
                 [headerView addSubview:photoView];
                 [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:YES] forKey:tag.tagID];
@@ -519,7 +541,7 @@
             return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     }
-    NSLog(@"ReloadViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    NSLog(@"ReloadViewForItemAtIndex %d: - tag %d by user %@", index, [[tag tagID] intValue], tag.username);
 
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
@@ -532,8 +554,7 @@
     [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
-    //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-    //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+    [feedItem setTagID:[tag.tagID intValue]];
     UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
     {
@@ -545,7 +566,9 @@
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
     [feedItem initStixView:tag];
-    feedItem.tagID = [tag.tagID intValue];
+#if 1 //USE_PLACEHOLDER
+    [feedItem togglePlaceholderView:0];
+#endif
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];
     if (0) { //shouldExpand) {
@@ -607,7 +630,7 @@
             return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     }
-    NSLog(@"ViewForItemAtIndex: %d - tag %d", index, [[tag tagID] intValue]);
+    NSLog(@"ViewForItemAtIndex %d: - tag %d by %@", index, [[tag tagID] intValue], tag.username);
     VerticalFeedItemController * feedItem = nil;
     if (tag.tagID) {
         if (deallocatedIndices && [deallocatedIndices containsObject:tag.tagID]) {
@@ -626,58 +649,53 @@
         NSString * descriptor = tag.descriptor;
         NSString * comment = tag.comment;
         NSString * locationString = tag.locationString;
-        
+
         [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
         feedItemViewOffset = feedItem.view.frame.origin; // same offset
         [feedItem.view setBackgroundColor:[UIColor clearColor]];
         [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
-#if 0
-        [feedItem togglePlaceholderView:YES];
-        dispatch_async(backgroundQueue, ^{
+        [feedItem setTagID:[tag.tagID intValue]];
+        
+#if 1
+        [feedItem togglePlaceholderView:NO];
 #endif
-            //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-            //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
-            UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
-            if (photo)
-            {
-                //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
-                [feedItem populateWithUserPhoto:photo];
-                //[photo autorelease]; // arc conversion
-            }
-            //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
-            // add timestamp
-            [feedItem populateWithTimestamp:tag.timestamp];
-            // add badge and counts
-            [feedItem initStixView:tag];
-            if (tag.tagID) {
-                feedItem.tagID = [tag.tagID intValue];
-                int count = [self.delegate getCommentCount:feedItem.tagID];
-                [feedItem populateWithCommentCount:count];
-                
-                // populate comments for this tag
-                NSMutableArray * param = [[NSMutableArray alloc] init];
-                [param addObject:tag.tagID];
-                //[param autorelease]; // arc conversion
-                KumulosHelper * kh = [[KumulosHelper alloc] init];
-                [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
-            }
-            // create overlay for pending feedItem
-            if (index < [allTagsPending count]) {
-                //[feedItem.view setAlpha:.25];
-                [[feedItem stixView] setInteractionAllowed:NO];
-                [feedItem initReloadView];
-            }
+        
+        //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+        //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
+        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+        if (photo)
+        {
+            //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
+            [feedItem populateWithUserPhoto:photo];
+            //[photo autorelease]; // arc conversion
+        }
+        //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
+        // add timestamp
+        [feedItem populateWithTimestamp:tag.timestamp];
+        // add badge and counts
+        [feedItem initStixView:tag];
+        if (tag.tagID) {
+            feedItem.tagID = [tag.tagID intValue];
+            int count = [self.delegate getCommentCount:feedItem.tagID];
+            [feedItem populateWithCommentCount:count];
             
-            // this object must be retained so that the button actions can be used
-            if (tag.tagID)
-                [feedItems setObject:feedItem forKey:tag.tagID];
-            
-#if 0
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [feedItem togglePlaceholderView:NO];
-            });
-        });
-#endif
+            // populate comments for this tag
+            NSMutableArray * param = [[NSMutableArray alloc] init];
+            [param addObject:tag.tagID];
+            //[param autorelease]; // arc conversion
+            KumulosHelper * kh = [[KumulosHelper alloc] init];
+            [kh execute:@"getCommentHistory" withParams:param withCallback:@selector(didGetCommentHistoryWithResults:) withDelegate:self];
+        }
+        // create overlay for pending feedItem
+        if (index < [allTagsPending count]) {
+            //[feedItem.view setAlpha:.25];
+            [[feedItem stixView] setInteractionAllowed:NO];
+            [feedItem initReloadView];
+        }
+        
+        // this object must be retained so that the button actions can be used
+        if (tag.tagID)
+            [feedItems setObject:feedItem forKey:tag.tagID];
     } 
     else {
         // see what the dimensions were saved previously
@@ -691,7 +709,7 @@
 -(void)refreshViewForItemAtIndex:(int)index withTag:(Tag*)tag {
     // refreshes feedItem, without deleting it (so delegate function calls don't go haywire)
     // happens when peel stix causes feedItem to be deallocated
-    NSLog(@"RefreshViewForItemAtIndex: tag %d", [tag.tagID intValue]);
+    NSLog(@"RefreshViewForItemAtIndex %d: tag %d by user %@", index, [tag.tagID intValue], tag.username);
     [self startActivityIndicator];
     if (index>[allTagsDisplayed count])
         index = 0;
@@ -731,7 +749,7 @@
     [feedItem populateWithTimestamp:tag.timestamp];
     int count = [self.delegate getCommentCount:feedItem.tagID];
     [feedItem populateWithCommentCount:count];
-    
+
     // update stix
     [feedItem.stixView populateWithAuxStixFromTag:tag];
     
@@ -859,30 +877,27 @@
 
 -(void)reloadPage:(int)page {
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed
-    int section = page;
     [self populateAllTagsDisplayed];
-    //[activityIndicator startCompleteAnimation];
     [self startActivityIndicator];
-    if (section>[allTagsDisplayed count])
-        section = 0;
+    if (page>[allTagsDisplayed count])
+        page = 0;
     if ([allTagsDisplayed count] == 0) {
         [self stopActivityIndicator];
         return;
     }
-    [self reloadViewForItemAtIndex:section];
+    [self reloadViewForItemAtIndex:page];
 }
 
 -(void)reloadPageForTagID:(int)tagID {
-//#error Not implemented!
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == tagID) {
             [self reloadPage:i];
-            //[self refreshPage:i];
             return;
         }
     }
-    [self reloadCurrentPage];
+    if ([allTagsDisplayed count] == 0)
+        [self reloadCurrentPage];
 }
 
 -(void)reloadCurrentPage {
@@ -922,15 +937,26 @@
 
 -(void)populateAllTagsDisplayedWithTag:(Tag*)tag {
     // replaces an object with no auxStix with a new tag that has been populated with auxStix from kumulos
+    BOOL found = NO;
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * t = [allTagsDisplayed objectAtIndex:i];
         if (t.tagID == tag.tagID) {
             [allTagsDisplayed replaceObjectAtIndex:i withObject:tag];
             //[self reloadPageForTagID:[tag.tagID intValue]];
+            NSLog(@"PopulateAllTagsDisplayedWithTag with tagID: %d for allTagsDisplayed index %d", [tag.tagID intValue], i);
             [self refreshViewForItemAtIndex:i withTag:t];
+            
+            // remove placeholder
+            VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+            if (!feedItem)
+                NSLog(@"PopulateAllTagsDisplayedWithTag feeditem doesn't exist yet");
+            [feedItem didReceiveAllRequestedMissingStix:[feedItem stixView]];
+            found = YES;
             return;
         }
     }
+    if (!found)
+        NSLog(@"AllTagsDisplayed did not contain tagID %d", [tag.tagID intValue]);
 }
 
 -(void)populateAllTagsDisplayed {
@@ -976,7 +1002,6 @@
     if (!allTagsPending)
         allTagsPending = [[NSMutableArray alloc] init];
     [allTagsPending insertObject:tag atIndex:0];
-    //[self reloadPage:0];
     [self forceReloadWholeTableZOMG];
 }
 
@@ -1006,8 +1031,6 @@
     //for (int i=0; i<[feedItems count]; i++) {
     VerticalFeedItemController * curr = [feedItems objectForKey:[NSNumber numberWithInt:tagID]];
     [curr populateWithCommentCount:[self.delegate getCommentCount:tagID]];
-    
-//    [scrollView reloadPage:lastPageViewed];
 }
 
 /************** FeedItemDelegate ***********/

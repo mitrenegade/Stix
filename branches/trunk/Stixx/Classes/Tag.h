@@ -70,6 +70,7 @@
 //-(void)addAuxiliaryStixOfType:(NSString*)stringID withLocation:(CGPoint)location withScale:(float)scale withRotation:(float)rotation withPeelable:(bool)peelable;
 -(NSString*)removeStixAtIndex:(int)index;
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d;
++(NSMutableDictionary*)tagToDictionary:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
 -(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults;

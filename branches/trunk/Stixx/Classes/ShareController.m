@@ -115,8 +115,13 @@ static ShareController *sharedShareController;
         [toggle.titleLabel setText:name];
         [toggle.titleLabel setHidden:YES];
         [toggle addTarget:self action:@selector(didClickToggleButton:) forControlEvents:UIControlEventTouchUpInside];
-        [toggle setImage:[UIImage imageNamed:@"btn_share_switch_on@2x.png"] forState:UIControlStateNormal];
-        [toggle setTag:1]; // toggle tag is the state of the toggle
+        int state = [self shareServiceIsSharing:name]; //button.tag;
+        if (state == 0) {
+            [toggle setImage:[UIImage imageNamed:@"btn_share_switch_off@2x.png"] forState:UIControlStateNormal];
+        } else {
+            [toggle setImage:[UIImage imageNamed:@"btn_share_switch_on@2x.png"] forState:UIControlStateNormal];
+        }
+        //[toggle setTag:1]; // toggle tag is the state of the toggle
         [toggles setObject:toggle forKey:name];
     }
 }

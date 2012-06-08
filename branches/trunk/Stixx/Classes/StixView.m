@@ -277,6 +277,8 @@ static int currentStixViewID = 0;
     NSMutableArray * auxTransforms = tag.auxTransforms;
     auxPeelableByUser = [[NSMutableArray alloc] init]; // = tag.auxPeelable;
     auxStixViews = [[NSMutableArray alloc] init];
+    NSLog(@"Adding %d auxstix to tagID %d", [auxStixStringIDs count], [tag.tagID intValue]);
+    
     for (int i=0; i<[auxStixStringIDs count]; i++) {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];

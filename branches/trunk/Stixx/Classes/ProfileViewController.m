@@ -511,12 +511,12 @@
     NSMutableSet * followingList = [delegate getFollowingList];
     int followingCount = [followingList count];
     [myFollowingCount setText:[NSString stringWithFormat:@"%d", followingCount]];
-    NSLog(@"FollowingList: %@", followingList);
+    //NSLog(@"FollowingList: %@", followingList);
     
     NSMutableSet * followerList = [delegate getFollowerList];
     int followerCount = [followerList count];
     [myFollowersCount setText:[NSString stringWithFormat:@"%d", followerCount]];
-    NSLog(@"FollowerList: %@", followerList);
+    //NSLog(@"FollowerList: %@", followerList);
     //NSLog(@"UpdateFollowCount: updating following count to %d followercount to %d", followingCount, followerCount);
 }
 

@@ -220,9 +220,6 @@ struct UserInfo {
     BOOL didGetFollowingLists;
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
     
-    // twitter helper
-//    TwitterHelper * twitterHelper;
-//    UIViewController * twitterDialog;
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -248,7 +245,7 @@ struct UserInfo {
 //-(void)adminSaveFeed;
 -(void)adminResetAllStixOrders;
 
--(Tag*) getTagWithID:(int)tagID;
+-(void) getTagWithID:(int)tagID;
 
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_unsubscribeFromChannel:(NSString*)channel;
@@ -283,6 +280,9 @@ struct UserInfo {
 -(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;    
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
+
+-(void)loadCachedTags;
+-(void)saveCachedTags;
 
 //-(void)showTwitterDialog;
 

@@ -65,6 +65,10 @@
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
     [self forceReloadAll];
+    
+#if USING_FLURRY == 1
+    [FlurryAnalytics logPageView];
+#endif
 }
 
 - (void)viewDidUnload

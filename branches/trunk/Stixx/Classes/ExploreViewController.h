@@ -21,6 +21,8 @@
 #import "RaisedCenterTabBarController.h"
 #import "UserGalleryController.h"
 #import "KumulosHelper.h"
+#import "GlobalHeaders.h"
+#import "FlurryAnalytics.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;

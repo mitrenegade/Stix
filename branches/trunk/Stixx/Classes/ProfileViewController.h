@@ -20,6 +20,8 @@
 #import "UserGalleryController.h"
 #import "StixAnimation.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
+#import "GlobalHeaders.h"
+#import "FlurryAnalytics.h"
 
 #define DEFAULT_STIX_COUNT 2
 

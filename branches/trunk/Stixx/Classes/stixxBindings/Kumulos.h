@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on May 14, 2012
+//  Created by Kumulos Bindings Compiler on Jun  8, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -142,6 +142,10 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getSubcategoriesDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation lastUpdatedCategoriesDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addFeaturedUserDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getFeaturedUsersDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addFollowerDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -380,6 +384,11 @@
    
 -(KSAPIOperation*) lastUpdatedCategoriesWithTimeUpdated:(NSDate*)timeUpdated;
     
+   
+-(KSAPIOperation*) addFeaturedUserWithUsername:(NSString*)username andDescription:(NSString*)description;
+    
+   
+ -(KSAPIOperation*) getFeaturedUsers;
    
 -(KSAPIOperation*) addFollowerWithUsername:(NSString*)username andFollowsUser:(NSString*)followsUser;
     

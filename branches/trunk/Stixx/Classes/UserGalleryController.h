@@ -14,6 +14,8 @@
 #import "DetailViewController.h"
 #import "StixAnimation.h"
 #import "KumulosHelper.h"
+#import "GlobalHeaders.h"
+#import "FlurryAnalytics.h"
 
 @protocol UserGalleryDelegate <NSObject>
 

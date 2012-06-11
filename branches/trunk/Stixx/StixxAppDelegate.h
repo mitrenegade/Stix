@@ -9,10 +9,9 @@
 #define USING_KIIP 0
 #define USING_FACEBOOK 1
 #define USING_MKSTOREKIT 1
-#define OPTIMIZATION_HACK 1 // for parse subscription
 
 #import <UIKit/UIKit.h>
-
+#import "GlobalHeaders.h"
 #import "TagViewController.h"
 #import "ProfileViewController.h"
 #import "ExploreViewController.h"
@@ -37,6 +36,8 @@
 #import "ShareController.h"
 #import "SHK.h" // sharekit
 #import "VerticalFeedController.h"
+#import "FriendSuggestionController.h"
+#import "FlurryAnalytics.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -92,7 +93,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate> {
     
     UIWindow *window;
     
@@ -108,6 +109,7 @@ struct UserInfo {
     UserProfileViewController * userProfileController;
     ExploreViewController * exploreController;
     FacebookLoginController * loginSplashController;
+    FriendSuggestionController * friendSuggestionController;
     
     UIViewController * __weak lastViewController;
 
@@ -219,7 +221,7 @@ struct UserInfo {
     
     BOOL didGetFollowingLists;
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
-    
+    BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown   
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -284,6 +286,11 @@ struct UserInfo {
 -(void)loadCachedTags;
 -(void)saveCachedTags;
 
+-(void)initializeFriendSuggestionController;
+
+-(void)getFollowListsWithoutAggregation:(NSString*)name;
+-(void)getFollowListsForAggregation:(NSString*)name;
+
 //-(void)showTwitterDialog;
 
 @property (nonatomic) IBOutlet UIWindow *window;
@@ -297,6 +304,7 @@ struct UserInfo {
 //@property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic) ExploreViewController *exploreController;
 @property (nonatomic) FacebookLoginController * loginSplashController;
+@property (nonatomic) FriendSuggestionController * friendSuggestionController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, weak) UIViewController * lastViewController;
 @property (nonatomic) NSMutableArray * allTags;

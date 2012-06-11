@@ -69,6 +69,10 @@
     
     searchResultsController = nil;
     showPointer = NO;
+    
+#if USING_FLURRY
+    [FlurryAnalytics logPageView];
+#endif
 }
 
 -(void)startActivityIndicator {
@@ -179,6 +183,10 @@
 -(IBAction)buttonFollowingClicked:(id)sender {
     if (isSearching)
         return;
+
+    if ([delegate getFirstTimeUserStage] == 3) {
+        showPointer = NO;
+    }
     
     NSLog(@"Following clicked!");
     
@@ -194,6 +202,10 @@
 -(IBAction)buttonFollowersClicked:(id)sender {
     if (isSearching)
         return;
+
+    if ([delegate getFirstTimeUserStage] == 3) {
+        showPointer = NO;
+    }
     
     NSLog(@"Followers clicked!");
     
@@ -286,6 +298,10 @@
         [self toggleMyButtons:YES];
         [self toggleMyInfo:YES];
         isSearching = NO;
+        if ([delegate getFirstTimeUserStage] == 3) {
+            showPointer = YES;
+            [self doPointerAnimation];
+        }
     }
     showPointer = NO;
 }

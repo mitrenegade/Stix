@@ -68,6 +68,7 @@
 
 -(int)getFirstTimeUserStage;
 -(void)agitateFirstTimePointer;
+-(void)advanceFirstTimeUserMessage; // only called by cancel add stix - for convenience
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 -(void)didDisplayShareSheet;

@@ -23,6 +23,8 @@
 #import "ColumnTableController.h"
 #import "FriendSearchResultsController.h"
 #import "KumulosHelper.h"
+#import "FlurryAnalytics.h"
+#import "GlobalHeaders.h"
 
 @protocol UserProfileViewDelegate
 

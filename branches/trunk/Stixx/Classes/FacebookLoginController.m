@@ -206,9 +206,11 @@
      */
 //    [loginController.view removeFromSuperview];
     [self stopActivityIndicator];
+    // BOBBY here! we get here from userLogin...
+    // happens both when we have a facebook prompt (button) and when facebook
+    // automatically logs in. 
+    // need a method to determine whether it's the first time, and needs to display friendSuggestionController
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookID:[NSNumber numberWithInt:facebookID] andUserID:userID andStix:stix andTotalTags:totalTags andBuxCount:bux andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
-     // MRC
-     // MRC
 }
 
 

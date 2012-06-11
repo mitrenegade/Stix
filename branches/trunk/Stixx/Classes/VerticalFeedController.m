@@ -321,10 +321,16 @@
     [carouselView carouselTabDismiss:YES];
     [delegate didDismissSecondaryView];
     
+#if 0
     if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
         //[tabBarController displayFirstTimeUserProgress:FIRSTTIME_MESSAGE_02];
         [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
     }
+#else
+    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
+        [delegate advanceFirstTimeUserMessage];
+    }
+#endif
 }
 
 -(int)getStixCount:(NSString*)stixStringID {

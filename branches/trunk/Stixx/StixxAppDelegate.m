@@ -40,6 +40,7 @@
 @synthesize profileController, userProfileController;
 //@synthesize friendController;
 @synthesize loginSplashController;
+@synthesize friendSuggestionController;
 @synthesize myUserInfo;
 @synthesize lastViewController;
 @synthesize allTags, allTagIDs;
@@ -80,6 +81,10 @@ static dispatch_queue_t backgroundQueue;
 
     // call the Appirater class
     [Appirater appLaunched];
+
+    /* Flurry Analytics */
+    [FlurryAnalytics startSession:@"LKU9KSMBPR1GYZBCHQHV"];
+    //[FlurryAnalytics setDebugLogEnabled:YES];
     
     /*** Kumulos service ***/
     
@@ -118,10 +123,11 @@ static dispatch_queue_t backgroundQueue;
     else {
         NSLog(@"Unique device retrieved from pasteboard: %@", uniqueDeviceID);
     }
+#if !USING_FLURRY
     NSString * description = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
     NSString * string = @"Application started";
     [k addMetricWithDescription:description andUsername:@"" andStringValue:string andIntegerValue:0];
-    
+#endif
     // Override point for customization after application launch
     [loadingMessage setText:@"Connecting to Stix Server..."];
     
@@ -138,7 +144,7 @@ static dispatch_queue_t backgroundQueue;
 
     /* Crashlytics */
     [Crashlytics startWithAPIKey:@"747b4305662b69b595ac36f88f9c2abe54885ba3"];
-
+    
     myUserInfo = malloc(sizeof(struct UserInfo));
     myUserInfo_username = nil;
     myUserInfo_userphoto = nil;
@@ -205,6 +211,10 @@ static dispatch_queue_t backgroundQueue;
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
+    
+#if USING_FLURRY
+    [FlurryAnalytics logAllPageViews:tabBarController];
+#endif
     
     allTags = [[NSMutableArray alloc] init];
     allTagIDs = [[NSMutableDictionary alloc] init];
@@ -296,6 +306,9 @@ static dispatch_queue_t backgroundQueue;
 	[tabBarController setDelegate:self];
     [exploreController setTabBarController:tabBarController];
     
+    friendSuggestionController = [[FriendSuggestionController alloc] init];
+    [friendSuggestionController setDelegate:self];
+    
     lastViewController = feedController;
     
     //[tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
@@ -338,7 +351,9 @@ static dispatch_queue_t backgroundQueue;
         
         // preemptively do user login things
         [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookID:[NSNumber numberWithInteger:myUserInfo->facebookID] andUserID:[NSNumber numberWithInteger:myUserInfo->userID] andStix:nil andTotalTags:myUserInfo->usertagtotal andBuxCount:myUserInfo->bux andStixOrder:nil];
-        
+                
+        [self getFollowListsForAggregation:[self getUsername]];
+        didGetFollowingLists = YES;
         [self doFacebookLogin];
     }   
 	
@@ -442,9 +457,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     notificationDeviceToken = newDeviceToken;
     
-    if ([self isLoggedIn]) {
-        [self Parse_createSubscriptions];
-    }
+    //if ([self isLoggedIn]) {
+    //    [self Parse_createSubscriptions];
+    //}
 }
 
 /*** facebook delegates ***/
@@ -929,7 +944,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
 
+#if !USING_FLURRY
     [self logMetricTimeInApp];
+#else
+    [FlurryAnalytics endTimedEvent:@"TimeInAppInSeconds" withParameters:[NSMutableDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username",nil]];
+#endif
     [self saveCachedTags];
 }
 
@@ -939,7 +958,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
     
+#if !USING_FLURRY
     [self logMetricTimeInApp];
+#else
+    [FlurryAnalytics endTimedEvent:@"TimeInAppInSeconds" withParameters:[NSMutableDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username",nil]];
+#endif
     [self saveCachedTags];
 }
 
@@ -962,8 +985,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     });
      */
     
+#if !USING_FLURRY
     [self setMetricLogonTime: [NSDate date]];
-    
+#else
+    [FlurryAnalytics logEvent:@"TimeInApp" timed:YES];
+#endif
     didGetFollowingLists = NO; // request update of following lists at some point
     
     [feedController updateFeedTimestamps];
@@ -1165,10 +1191,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k touchPixToUpdateWithAllTagID:[newTag.tagID intValue]];
 
     // metrics
+#if !USING_FLURRY
     NSString * metricName = @"CreatePix";
-    //NSString * metricData = [NSString stringWithFormat:@"User: %@", [self getUsername]];
     [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:@"" andIntegerValue:[newRecordID intValue]];
-    
+#else
+    [FlurryAnalytics logEvent:@"CreatePix" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", newRecordID, @"tagID", nil]];
+#endif
     // save large image to large image database
     if (0) {
         UIImage * hiResImg = [[ImageCache sharedImageCache] imageForKey:@"largeImage"];
@@ -1440,9 +1468,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didSetAggregationTrigger {
     // we've finished aggregation process so all parse is done
-    //if (notificationDeviceToken) {
-        //[self Parse_createSubscriptions];  
-    //}
 }
 
 -(void)didFinishAggregation:(BOOL)isFirstTime {
@@ -1469,10 +1494,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self getTagWithID:[tagID intValue]];
 #endif
         }
-        
-        //if (notificationDeviceToken) {
-        //    [self Parse_createSubscriptions];  
-        //}
     }
     else {
         NSArray * newerTagsToGet = [aggregator getTagIDsGreaterThanTagID:idOfNewestTagReceived totalTags:-1];
@@ -1677,6 +1698,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
                 NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
+                NSLog(@"allUserIDs: %d objects Id %d for tagName %@", [allUserIDs count], [[allUserIDs objectForKey:tagName] intValue], tagName);
                 NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tagName] intValue]];
                 NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
                 channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
@@ -1688,15 +1710,23 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // actual comment
         
         // notify
-        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed: %@", myUserInfo_username, comment];
+        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed.", myUserInfo_username];
         Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
                 NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
-                NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tagName] intValue]];
-                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                NSNumber * userID = [allUserIDs objectForKey:tagName];
+                NSString * channel = [NSString stringWithFormat:@"To%d", [userID intValue]];
+                if (!userID || [userID intValue] == 0) {
+                    NSLog(@"Invalid user number being used for channel!");
+                    if (!userID)
+                        NSLog(@"User %@ has null userid! allUserIDs has %d objects", tagName, [allUserIDs count]);
+                    else
+                        NSLog(@"User %@ has id %d, allUserIDs has %d objects", tagName, [userID intValue], [allUserIDs count]);
+                }
+                //NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
+                //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
                 [self Parse_sendBadgedNotification:message OfType:NB_NEWCOMMENT toChannel:channel withTag:tag.tagID];
             }
         }
@@ -1707,9 +1737,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [k touchPixToUpdateWithAllTagID:tagID];
         
         // metrics
+#if !USING_FLURRY
         NSString * metricName = @"CommentAdded";
         //NSString * metricData = [NSString stringWithFormat:@"Comment: %@", comment];
         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:comment andIntegerValue:0];
+#else
+        [FlurryAnalytics logEvent:@"CommentAdded" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", comment, @"comment", nil]];
+#endif
     }
 }
 
@@ -2018,11 +2052,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)searchFriendsByFacebook {
+    NSLog(@"Requesting friends on facebook");
     [fbHelper requestFacebookFriends];
 }
 
 -(void)receivedFacebookFriends:(NSArray*)friendsArray {
     [profileController populateFacebookSearchResults:friendsArray];
+    if (friendSuggestionController)
+        [friendSuggestionController populateFacebookSearchResults:friendsArray];
 }
 
 -(NSMutableDictionary*)getAllUsers {
@@ -2083,54 +2120,76 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    
-    
+        
     NSLog(@"DidLoginFromSplashScreen: username %@ stix %d, stixOrder %d", username, [stix count], [stixOrder count]);
+
+#if USING_FLURRY
+    // only log to flurry here because every session eventually comes here; didLoginWithUsername can be called twice
+    [FlurryAnalytics logEvent:@"LoginWithUsername" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:username, @"username", nil]];
+    [FlurryAnalytics setUserID:username];
+#endif
     
     /***** if we used splash screen *****/
-    @try {
-        [self didDismissSecondaryView];
-    }
-    @catch (NSException * e) {
-        NSLog(@"Login from splash screen: dismiss secondary view broken! %@", [e reason]);
-    }
-    //[loginSplashController.view removeFromSuperview];
-    //[loginSplashController release];
-    
-    //[profileController loginWithUsername:myUserInfo_username];
+#if 0
+    [self didDismissSecondaryView];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
     [camera setCameraOverlayView:tabBarController.view];
 #endif
-    //[self.tabBarController didPressCenterButton:self];
-    [self.tabBarController setSelectedIndex:0];
-    if (firstTime) {
-        myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
+    [self.tabBarController setSelectedIndex:0];    
+#else
+    if (!didGetFollowingLists) {
+        // may be called after cached user login
+        [self getFollowListsWithoutAggregation:username];
+        didGetFollowingLists = YES;
+        isShowingFriendSuggestions = YES; // following lists are used to initialize friend suggestion page so we want to lock other functions
     }
+#endif
     
     // create shareController, share and connected lists for each service, and loads from default
     [self initializeShareController];
+
+    // check for user stage saved in UserDefaults
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"firstTimeUserStage"] == nil) {
+        myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
+    }
+    // first time facebook connects, set defaults to YES automatically
+    [shareController connectService:@"Facebook"];
+
     if (firstTime) {
+        // flag set if someone is added to Kumulos for the first time
         [k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
         [k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
         [k addFollowerWithUsername:@"William Ho" andFollowsUser:username];
         [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:username];
-
-        // first time facebook connects, set defaults to YES automatically
-        [shareController connectService:@"Facebook"];
     }
-
+    
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
+    
+    // login to parse only if facebook has correctly logged in. this ensures that the userID being saved to myUserInfo is the correct one
+    if (notificationDeviceToken) {
+        [self Parse_createSubscriptions];  
+    }
+    else {
+        // try registering again
+        //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+        // just wait
+        NSLog(@"No device token yet!");
+    }
 }
 
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+
+#if !USING_FLURRY
     NSString * metricName = @"LoginWithUsername";
     NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
     //NSString * string = [NSString stringWithFormat:@"User login: %@", name];
     [k addMetricWithDescription:metricName andUsername:name andStringValue:metricData andIntegerValue:0];
+#endif
 
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
@@ -2153,13 +2212,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }  
     
     [aggregator loadCachedUserTagListForUsers];
-    
+
+    // done by whoever calls didLoginWithUsername now
     // get friends/follow relationships
-    if (!didGetFollowingLists) {
-        [k getFollowListWithUsername:name];
-        [k getFollowersOfUserWithFollowsUser:name];
-        didGetFollowingLists = YES;
-    }
+    //if (!didGetFollowingLists) { 
+    //    [self getFollowLists];
+    //    didGetFollowingLists = YES;
+    //}
     
     loggedIn = YES;
     myUserInfo_username = name;
@@ -2190,8 +2249,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self saveUserInfoToDefaults]; // saves user name
     });
         
+#if !USING_FLURRY
     [self setMetricLogonTime:[NSDate date]];
-    
+#else
+    [FlurryAnalytics logEvent:@"TimeInApp" timed:YES];
+#endif
     // only download badges after login is over
     /*
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
@@ -2200,16 +2262,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self initializeBadgesFromKumulos];
     });
      */
-    if (!didStartFirstTimeMessage) {
-        if (notificationDeviceToken) {
-            [self Parse_createSubscriptions];  
-        }
-        else {
-            // try registering again
-            //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
-            // just wait
-            NSLog(@"No device token yet!");
-        }
+    if (!didStartFirstTimeMessage && !isShowingFriendSuggestions) {
         [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
         didStartFirstTimeMessage = YES;
     }
@@ -2461,16 +2514,22 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self updateUserTagTotal];        
     
     // metrics
+#if !USING_FLURRY
     NSString * metricName = @"StixTypesUsed";
     //NSString * metricData = [NSString stringWithFormat:@"StixType: %@", [self getUsername], stixStringID];
     [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:stixStringID andIntegerValue:0];
-
     // metrics - adding to another user's
     if (![[self getUsername] isEqualToString:tag.username]) {
         NSString * metricName = @"StixAddedToFriend";
         NSString * metricData = [NSString stringWithFormat:@"Friend: %@ Stix: %@", tag.username, stixStringID];
         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:0];
     }
+#else
+    [FlurryAnalytics logEvent:@"StixTypesUsed" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", stixStringID, @"stixStringID", nil]];
+    if (![[self getUsername] isEqualToString:tag.username]) {
+        [FlurryAnalytics logEvent:@"StixAddedToFriend" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", tag.username, @"friendName", stixStringID, @"stixStringID", nil]];
+    }
+#endif
 
     // second, correctly update tag by getting updates for this tag (new aux stix) from kumulos
     updatingAuxTagID = [tag.tagID intValue];
@@ -2805,6 +2864,46 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [shareController viewDidAppear:YES]; 
 }
 
+-(void)initializeFriendSuggestionController {
+    // starts requests for friends on facbook and featured users
+    // keeps the login screen up, and only dismisses when both have loaded
+    // calls displayFriendSuggestionController then
+    [friendSuggestionController initializeSuggestions];
+}
+
+-(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions { 
+    // used to be displayFriendSuggestionController
+    if (totalSuggestions == 0) {
+        [self didDismissSecondaryView]; // close login controller
+        [self shouldCloseFriendSuggestionControllerWithNames:nil];
+    }
+    else {
+        //isShowingFriendSuggestions = YES;
+        
+#if 1
+        [self didDismissSecondaryView];
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [camera setCameraOverlayView:tabBarController.view];
+        [self.tabBarController setSelectedIndex:0];    
+
+        // hack a way to display feedback view over camera: formerly presentModalViewController
+        CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+        [self.tabBarController.view addSubview:friendSuggestionController.view];
+        [friendSuggestionController.view setFrame:frameOffscreen];
+        
+        CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+        }];
+#else
+        [self didDismissSecondaryView];
+        CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+        [friendSuggestionController.view setFrame:frameOnscreen];
+        [tabBarController.view addSubview:friendSuggestionController.view];
+#endif
+    }        
+}
+
 -(void)didClickInviteButton {
     /*
 #if DEBUGX==1
@@ -2819,8 +2918,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(void)didClickInviteButtonByFacebook:(NSString *)username withFacebookID:(NSString *)fbID {
     //NSString * metricString = [NSString stringWithFormat:@"%@ invited %@", [self getUsername], username];
+#if !USING_FLURRY
     [k addMetricWithDescription:@"facebookInvite" andUsername:[self getUsername] andStringValue:username andIntegerValue:0];
-
+#else
+    [FlurryAnalytics logEvent:@"facebookInvite" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", username, @"invitedFriend", nil]];
+#endif
     [fbHelper sendInvite:username withFacebookID:fbID];
 //    [self rewardBux];
 }
@@ -2899,6 +3001,62 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }];
 
+}
+
+-(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray *)addedFriends {
+    isShowingFriendSuggestions = NO;
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+#if !TARGET_IPHONE_SIMULATOR
+    [camera setCameraOverlayView:tabBarController.view];
+#endif
+    [self.tabBarController setSelectedIndex:0];    
+
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = friendSuggestionController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    if (addedFriends) {
+        [allFollowing addObjectsFromArray:addedFriends];
+        NSLog(@"Friend Suggestion resulted in %d added friends, now following %d people", [addedFriends count], [allFollowing count]);
+        
+        for (NSString * name in addedFriends) {
+            [k addFollowerWithUsername:[self getUsername] andFollowsUser:name];
+        }
+    }
+    
+    [animation doViewTransition:friendSuggestionController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [friendSuggestionController.view removeFromSuperview];
+
+        isShowingFriendSuggestions = NO;
+        // check for first time user experience
+        if (!didStartFirstTimeMessage) {
+            if (notificationDeviceToken) {
+                [self Parse_createSubscriptions];  
+            }
+            else {
+                // try registering again
+                //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+                // just wait
+                NSLog(@"No device token yet!");
+            }
+            myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
+            [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
+            didStartFirstTimeMessage = YES;
+        }
+    }];
+    
+    // start first time message if needed
+    if (!didStartFirstTimeMessage) {
+        [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
+        didStartFirstTimeMessage = YES;
+    }
+    
+    // at this time, friend list should have been updated
+    // after adding users, then start aggregation
+    //[self getFollowListsForAggregation:[self getUsername]];        
+    [aggregator aggregateNewTagIDs];
 }
 
 #pragma mark twitter helper
@@ -3221,6 +3379,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
+    
+    //return;
     
     /*** Parse service ***/
 #if 1
@@ -3782,9 +3942,13 @@ static bool isShowingAlerts = NO;
     [self changeBuxCountByAmount:-5];
     
     // metric
+#if !USING_FLURRY
     NSString * metricName = @"GetStixFromStore";
     //NSString * metricData = [NSString stringWithFormat:@"User: %@ Stix: %@", [self getUsername], stixStringID];
     [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:stixStringID andIntegerValue:0];
+#else
+    [FlurryAnalytics logEvent:@"GetStixFromStore" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", stixStringID, @"stixStringID", nil]];
+#endif
 }
 
 -(void)showNoMoreMoneyMessage {
@@ -3854,30 +4018,68 @@ static bool isShowingAlerts = NO;
          NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
          [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
      }];
+    
 #endif
     
 #endif
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
-    // list of people who follow this user
-    // key: friendName value: username
-    [allFollowers removeAllObjects];
-    for (NSMutableDictionary * d in theResults) {
-        NSString * friendName = [d valueForKey:@"username"];
-        if (![allFollowers containsObject:friendName] && ![friendName isEqualToString:[self getUsername]])
-            [allFollowers addObject:friendName];
-    }
-    // cache followers
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSData * followerData = [NSKeyedArchiver archivedDataWithRootObject:allFollowers];
-    [defaults setObject:followerData forKey:@"allFollowers"];
-    [defaults synchronize];
-    [profileController updateFollowCounts];
-    NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);    
+-(void)getFollowListsWithoutAggregation:(NSString*)name {
+    // called if we only want the friend list
+    // called by FriendSuggestionController - if logging in for the first time
+    // friend list is needed by the suggestion controller, but
+    // we don't want to start aggregating yet because we don't know
+    // if the friend list will change after the controller closes
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:name, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"getFollowList" withParams:params withCallback:@selector(khCallback_didGetFollowList:) withDelegate:self];
+    NSMutableArray * params2 = [[NSMutableArray alloc] initWithObjects:name, nil];
+    KumulosHelper * kh2 = [[KumulosHelper alloc] init];
+    [kh2 execute:@"getFollowersOfUser" withParams:params2 withCallback:@selector(khCallback_didGetFollowers:) withDelegate:self];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
+-(void)getFollowListsForAggregation:(NSString*)name {
+    // called if we do not show the suggest friends page
+    // get follows list, immediately start aggregation
+    
+    //[k getFollowListWithUsername:name];
+    //[k getFollowersOfUserWithFollowsUser:name];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:name, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"getFollowList" withParams:params withCallback:@selector(khCallback_didGetFollowListWithAggregation:) withDelegate:self];
+    NSMutableArray * params2 = [[NSMutableArray alloc] initWithObjects:name, nil];
+    KumulosHelper * kh2 = [[KumulosHelper alloc] init];
+    [kh2 execute:@"getFollowersOfUser" withParams:params2 withCallback:@selector(khCallback_didGetFollowers:) withDelegate:self];
+}
+
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
+-(void)khCallback_didGetFollowList:(NSArray*)returnParams {
+    NSArray * theResults = returnParams; // objectAtIndex:0];
+    // list of people this user is following
+    // key: username value: friendName
+    [allFollowing removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"followsUser"];
+        if (![allFollowing containsObject:friendName] && ![friendName isEqualToString:[self getUsername]]) {
+            //NSLog(@"allFollowing adding %@", friendName);
+            [allFollowing addObject:friendName];
+        }
+    }
+    
+    // cache followers
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData * followingData = [NSKeyedArchiver archivedDataWithRootObject:allFollowing];
+    [defaults setObject:followingData forKey:@"allFollowing"];
+    [defaults synchronize];
+    [profileController updateFollowCounts];
+    NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
+    
+    // only initialize friend controller after we have followList
+    [self initializeFriendSuggestionController];
+}
+
+-(void)khCallback_didGetFollowListWithAggregation:(NSArray*)returnParams {
+    NSArray * theResults = returnParams; // objectAtIndex:0];
     // list of people this user is following
     // key: username value: friendName
     [allFollowing removeAllObjects];
@@ -3899,6 +4101,26 @@ static bool isShowingAlerts = NO;
     
     // AGGREGATE FOR THE FIRST TIME HERE 
     [aggregator aggregateNewTagIDs];
+}
+
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
+-(void)khCallback_didGetFollowers:(NSArray*)returnParams {
+    NSArray * theResults = returnParams; // objectAtIndex:0];
+    // list of people who follow this user
+    // key: friendName value: username
+    [allFollowers removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * friendName = [d valueForKey:@"username"];
+        if (![allFollowers containsObject:friendName] && ![friendName isEqualToString:[self getUsername]])
+            [allFollowers addObject:friendName];
+    }
+    // cache followers
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData * followerData = [NSKeyedArchiver archivedDataWithRootObject:allFollowers];
+    [defaults setObject:followerData forKey:@"allFollowers"];
+    [defaults synchronize];
+    [profileController updateFollowCounts];
+    NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);    
 }
 
 
@@ -4056,17 +4278,25 @@ static bool isShowingAlerts = NO;
          [tabBarController doPremiumPurchaseAnimation:stixPack]; 
 
          // metrics
+#if !USING_FLURRY
          NSString * metricName = @"PremiumPurchase";
          [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:stixPack andIntegerValue:0];     
+#else
+         [FlurryAnalytics logEvent:@"PremiumPurchase" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", stixPack, @"stixPack", nil]];
+#endif
          mkStoreKitSuccess = YES;
      }
                                     onCancelled:^
      {
          // User cancels the transaction, you can log this using any analytics software like Flurry.
+#if !USING_FLURRY
          NSString * metricName = @"CancelledPurchase";
          NSString * firstChar = [stixPackName substringToIndex:1];
          NSString * metricData = [[firstChar uppercaseString] stringByAppendingString:[stixPackName substringFromIndex:1]];
          [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:0];     
+#else
+         [FlurryAnalytics logEvent:@"CancelledPurchase" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", stixPackName, @"stixPack", nil]];
+#endif
          mkStoreKitSuccess = NO;
      }];
     return mkStoreKitSuccess;

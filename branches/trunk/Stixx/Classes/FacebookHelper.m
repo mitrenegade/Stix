@@ -232,7 +232,7 @@ static NSString * appID;
      NSLog(@"Friend %d id %@ name %@", i, fbID, name);
      }
      */
-    [self.delegate receivedFacebookFriends:friendsArray];
+    [delegate receivedFacebookFriends:friendsArray];
 }
 
 -(void)sendInvite:(NSString *)name withFacebookID:(NSString*)facebookID {

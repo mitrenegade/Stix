@@ -25,6 +25,7 @@ enum {
 };
 
 enum first_time_user_stage {
+    //FIRSTTIME_MESSAGE_00 = 0,
     FIRSTTIME_MESSAGE_01 = 0,
     FIRSTTIME_MESSAGE_02,
     FIRSTTIME_MESSAGE_03,

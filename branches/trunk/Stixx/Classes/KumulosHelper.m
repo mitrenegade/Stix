@@ -140,6 +140,14 @@ static KumulosHelper *sharedKumulosHelper = nil;
         //[kOP setDelegate:self];
         //[kOP setDebugMode:YES];
     }
+    else if ([function isEqualToString:@"getFollowList"]) {
+        NSString * name = [inputParams objectAtIndex:0];
+        [k getFollowListWithUsername:name];
+    }
+    else if ([function isEqualToString:@"getFollowersOfUser"]) {
+        NSString * name = [inputParams objectAtIndex:0];
+        [k getFollowersOfUserWithFollowsUser:name];
+    }
 }
 
 -(void)execute:(NSString*)_function {
@@ -376,6 +384,24 @@ static KumulosHelper *sharedKumulosHelper = nil;
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFacebookUserDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithArray:theResults];
+    if (self.delegate) {
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    }
+    [returnParams autorelease];
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithArray:theResults];
+    if (self.delegate) {
+        [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];
+    }
+    [returnParams autorelease];
+    [self cleanup];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowersOfUserDidCompleteWithResult:(NSArray *)theResults {
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithArray:theResults];
     if (self.delegate) {
         [self.delegate kumulosHelperDidCompleteWithCallback:self.callback andParams:returnParams];

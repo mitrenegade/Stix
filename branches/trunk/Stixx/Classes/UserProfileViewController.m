@@ -108,6 +108,10 @@
     [myFollowingLabel setHidden:!show];
     
     [pixTableController.view setHidden:!show];
+    
+#if USING_FLURRY == 1
+    [FlurryAnalytics logPageView];
+#endif
 }
 
 -(void)startActivityIndicator {

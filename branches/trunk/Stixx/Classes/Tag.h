@@ -24,6 +24,7 @@
 #import "BadgeView.h" // for BADGE_TYPE_MAX
 #import "KumulosData.h"
 #import <QuartzCore/QuartzCore.h>
+#import "GlobalHeaders.h"
 
 @interface Tag : NSObject {
     // elements saved by Kumulos
@@ -31,7 +32,10 @@
     NSString * descriptor;
     NSString * comment;
     NSString * locationString;
-    UIImage * image;
+    UIImage * image; // only the original image
+    UIImage * highResImage; // the high res image - not saved to kumulos via allTags
+    UIImage * stixLayer; // burned in stix and other decorations
+    NSNumber * highResImageID;
     
     // old primary stix info - not used
     /*
@@ -62,6 +66,27 @@
     NSDate * timestamp; // the timestamp as an NSDate
 }
 
+@property (nonatomic) NSString * username;
+@property (nonatomic) NSString * descriptor;
+@property (nonatomic) NSString * comment;
+@property (nonatomic) NSString * locationString;
+@property (nonatomic) UIImage * image;
+@property (nonatomic) UIImage * stixLayer;
+@property (nonatomic) UIImage * highResImage;
+@property (nonatomic) NSNumber * highResImageID;
+//@property (nonatomic, retain) ARCoordinate * coordinate;
+@property (nonatomic) NSNumber * tagID;
+@property (nonatomic) NSString * timestring;
+@property (nonatomic) NSDate * timestamp;
+@property (nonatomic) NSMutableArray * auxStixStringIDs;
+@property (nonatomic) NSMutableArray * auxLocations;
+@property (nonatomic) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
+@property (nonatomic) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
+@property (nonatomic) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
+@property (nonatomic) NSMutableArray * auxTransforms;
+@property (nonatomic) NSMutableArray * auxIDs;
+
+
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString*)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation;
 //- (void)addARCoordinate:(ARCoordinate*)ARCoordinate;
 - (void) addImage:(UIImage*)image;
@@ -73,32 +98,8 @@
 +(NSMutableDictionary*)tagToDictionary:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
+-(UIImage *)tagToUIImage:(BOOL)includeBaseImage useHighRes:(BOOL)useHighRes;
 -(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults;
 -(CGPoint)getLocationOfRemoveStixAtIndex:(int)index;
-
-@property (nonatomic) NSString * username;
-@property (nonatomic) NSString * descriptor;
-@property (nonatomic) NSString * comment;
-@property (nonatomic) NSString * locationString;
-@property (nonatomic) UIImage * image;
-//@property (nonatomic, retain) ARCoordinate * coordinate;
-@property (nonatomic) NSNumber * tagID;
-@property (nonatomic) NSString * timestring;
-@property (nonatomic) NSDate * timestamp;
-/*
-@property (nonatomic, assign) int badge_x; // center coordinate
-@property (nonatomic, assign) int badge_y; // center coordinate
-@property (nonatomic, assign) int badgeCount;
-@property (nonatomic, retain) NSString * stixStringID;
-@property (nonatomic, assign) float stixScale;
-@property (nonatomic, assign) float stixRotation;
-*/
-
-@property (nonatomic) NSMutableArray * auxStixStringIDs;
-@property (nonatomic) NSMutableArray * auxLocations;
-@property (nonatomic) NSMutableArray * auxScales; // a floating point, where 1 is original size of a regular badge in 300x275 image
-@property (nonatomic) NSMutableArray * auxRotations; // a floating point in radians, where 0 is original orientation (no rotation) - deprecated
-@property (nonatomic) NSMutableArray * auxPeelable; // boolean whether stix is peelable by its owner - deprecated
-@property (nonatomic) NSMutableArray * auxTransforms;
-@property (nonatomic) NSMutableArray * auxIDs;
+-(void)burnStixLayerImage;
 @end

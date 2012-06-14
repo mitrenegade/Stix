@@ -15,6 +15,8 @@
 @synthesize descriptor;
 @synthesize locationString;
 @synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable, auxTransforms, auxIDs;
+@synthesize highResImage, highResImageID;
+@synthesize stixLayer;
 //@synthesize badge_x, badge_y, badgeCount;
 //@synthesize stixStringID;
 //@synthesize stixScale, stixRotation;
@@ -26,6 +28,9 @@
     [aCoder encodeObject:tagID forKey:@"tagID"];
     [aCoder encodeObject:timestamp forKey:@"timestamp"];
     [aCoder encodeObject:timestring forKey:@"timestring"];
+    [aCoder encodeObject:descriptor forKey:@"descriptor"];
+    [aCoder encodeObject:highResImageID forKey:@"highResImageID"];
+    [aCoder encodeObject:stixLayer forKey:@"stixLayer"];
 }
 
 -(id)initWithCoder:(NSCoder *)aDecoder {
@@ -36,6 +41,9 @@
         [self setTagID:[aDecoder decodeObjectForKey:@"tagID"]];
         [self setTimestamp:[aDecoder decodeObjectForKey:@"timestamp"]];
         [self setTimestring:[aDecoder decodeObjectForKey:@"timestring"]];
+        [self setDescriptor:[aDecoder decodeObjectForKey:@"descriptor"]];
+        [self setHighResImageID:[aDecoder decodeObjectForKey:@"highResImageID"]];
+        [self setStixLayer:[aDecoder decodeObjectForKey:@"stixLayer"]];
     }
     return self;
     
@@ -120,17 +128,26 @@
 +(NSMutableDictionary*)tagToDictionary:(Tag*)tag {
     NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
     [dict setObject:[tag username] forKey:@"username"];
+    [dict setObject: UIImagePNGRepresentation([tag image]) forKey:@"image"];
+    [dict setObject:[tag tagID] forKey:@"allTagID"];
     if ([tag descriptor])
         [dict setObject:[tag descriptor] forKey:@"descriptor"];
     if ([tag comment])
         [dict setObject:[tag comment] forKey:@"comment"];
     if ([tag locationString])
         [dict setObject:[tag locationString] forKey:@"locationString"];
-    [dict setObject: UIImagePNGRepresentation([tag image]) forKey:@"image"];
-    [dict setObject:[tag tagID] forKey:@"allTagID"];
-    [dict setObject:[tag timestamp] forKey:@"timeCreated"];
-    [dict setObject:[tag timestamp] forKey:@"timeUpdated"];
-    
+    if ([tag highResImageID])
+        [dict setObject:[tag highResImageID] forKey:@"highResImageID"];
+    if ([tag stixLayer])
+        [dict setObject:UIImagePNGRepresentation([tag stixLayer]) forKey:@"stixLayer"];
+    if ([tag timestamp]) {
+        [dict setObject:[tag timestamp] forKey:@"timeCreated"];
+        [dict setObject:[tag timestamp] forKey:@"timeUpdated"];
+    }
+    else {
+        [dict setObject:[NSDate date] forKey:@"timeCreated"];
+        [dict setObject:[NSDate date] forKey:@"timeUpdated"];
+    }
     return dict;
 }
 +(Tag*)getTagFromDictionary:(NSMutableDictionary *)d {
@@ -141,11 +158,24 @@
     NSString * comment = [d valueForKey:@"comment"];
     NSString * locationString = [d valueForKey:@"locationString"];
     UIImage * image = [[UIImage alloc] initWithData:[d valueForKey:@"image"]];
-            
+    NSNumber * highResImageID = [d valueForKey:@"highResImageID"];
+    NSData * stixLayerData = [d valueForKey:@"stixLayer"];
+    NSData * highResImageData = [d valueForKey:@"highResImage"];
+    
+    NSLog(@"GetTagFromDictionary: id %@ username %@ descriptor %@ pendingID %@ highResID %@", [d valueForKey:@"tagID"], name, descriptor, [d valueForKey:@"pendingID"], [d valueForKey:@"highResImageID"]);
+        
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
-    
+    [tag setHighResImageID:highResImageID];
+    if (stixLayerData)
+        [tag setStixLayer:[UIImage imageWithData:stixLayerData]];
+    if (highResImageData)
+        [tag setHighResImage:[UIImage imageWithData:highResImageData]];
+    tag.tagID = [d valueForKey:@"allTagID"];
+    NSDate * timeCreated = [d valueForKey:@"timeCreated"];
+    NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
+    tag.timestamp = [timeCreated laterDate:timeUpdated];
     /*
     //NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
     //NSKeyedUnarchiver *decoder;
@@ -186,10 +216,6 @@
         }
     }
 
-    tag.tagID = [d valueForKey:@"allTagID"];
-    NSDate * timeCreated = [d valueForKey:@"timeCreated"];
-    NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
-    tag.timestamp = [timeCreated laterDate:timeUpdated];
     return tag;
 }
 
@@ -247,11 +273,33 @@
     return timeLabel;
 }
 
--(UIImage *)tagToUIImage {
-    CGSize newSize = [self.image size];
+-(void)burnStixLayerImage {
+    // returns the layer of only stix
+    [self setStixLayer:[self tagToUIImage:NO useHighRes:NO]];
+}
+
+-(UIImage*)tagToUIImage {
+    return [self tagToUIImage:YES useHighRes:NO];
+}
+-(UIImage *)tagToUIImage:(BOOL)includeBaseImage useHighRes:(BOOL)useHighRes {
+    CGSize newSize;
+    if (USE_HIGHRES_SHARE && useHighRes && self.highResImage) {
+        newSize = [self.highResImage size];
+    } 
+    else {
+        newSize = [self.image size];
+    }
+              
     CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);
     UIGraphicsBeginImageContext(newSize);
-    [self.image drawInRect:fullFrame];	
+    if (includeBaseImage) {
+        if (USE_HIGHRES_SHARE && self.highResImage) {
+            [self.highResImage drawInRect:fullFrame];
+        }
+        else {
+            [self.image drawInRect:fullFrame];	
+        }
+    }
     UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();	
     

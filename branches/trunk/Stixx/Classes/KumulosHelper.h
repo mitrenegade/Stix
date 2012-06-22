@@ -37,5 +37,6 @@
 -(void)execute:(NSString*)_function withParams:(NSMutableArray*)params withCallback:(SEL)_callback withDelegate:(NSObject<KumulosHelperDelegate>*)helperDelegate;
 -(void)execute:(NSString*)_function;
 //+(KumulosHelper*)sharedKumulosHelper;
+-(void)doCallback:(NSMutableArray*)returnParams;
 -(void)cleanup;
 @end

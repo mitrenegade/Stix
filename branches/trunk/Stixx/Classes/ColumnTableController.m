@@ -74,7 +74,7 @@
         columnPadding = 3;
         columnWidth = (frameWidth - 2 * borderWidth - columnPadding * 2) / 3;
     }
-    columnHeight = 282 / 314.0 * columnWidth;
+    columnHeight = PIX_HEIGHT / PIX_WIDTH * columnWidth;
 }
 -(int)getContentWidth {
     return columnWidth;

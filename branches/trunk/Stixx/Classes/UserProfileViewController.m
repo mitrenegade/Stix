@@ -228,14 +228,14 @@
 #endif
     //[photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
 
-    [buttonAddFriend setFrame:CGRectMake(100, 160-44, 120, 60)];
+    [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
     [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
     if ([[delegate getFollowingList] containsObject:username]) { 
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_following.png"] forState:UIControlStateNormal];
+        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
     }
     else
     {
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_follow.png"] forState:UIControlStateNormal];
+        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
     }
     [buttonAddFriend addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
     
@@ -342,12 +342,12 @@
     NSLog(@"Add friend button clicked!");
     if ([[delegate getFollowingList] containsObject:username]) { 
         [delegate setFollowing:username toState:NO];
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_follow.png"] forState:UIControlStateNormal];
+        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
     }
     else
     {
         [delegate setFollowing:username toState:YES];
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_following.png"] forState:UIControlStateNormal];
+        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
     }
 }
 
@@ -368,7 +368,7 @@
         CGRect frameOffscreen = self.view.frame;
         frameOffscreen.origin.x -= 330;
         StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
             [searchResultsController.view removeFromSuperview];
             isDisplayingFollowLists = NO;
             [self toggleMyButtons:YES];
@@ -474,14 +474,14 @@
         
         int contentWidth = [pixTableController getContentWidth];
         int targetWidth = contentWidth;
-        int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
+        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
-        [cview initializeWithImage:tag.image];
+        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
         
         // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
@@ -618,8 +618,8 @@
     [detailController.view setFrame:frameOffscreen];
     
     StixAnimation * animation = [[StixAnimation alloc] init];
-    //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+    //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
+    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
     }];
 }
 
@@ -631,7 +631,7 @@
     CGRect frameOffscreen = detailController.view.frame;
     frameOffscreen.origin.x -= 330;
     
-    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:_username];
     }];
@@ -786,6 +786,18 @@
     [myFollowingCount setText:followingString];
 }
 
-
+#pragma mark remix hack
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
+    // close detailView first - click came from here
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = detailController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        [detailController.view removeFromSuperview];
+        [delegate didClickRemixFromDetailViewWithTag:tagToRemix];
+    }];
+}
 
 @end

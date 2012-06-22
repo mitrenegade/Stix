@@ -43,9 +43,9 @@ static BOOL openingDetailView;
     //NSLog(@"DetailView: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
     
     tagID = [tag.tagID intValue];
+    [self setTag:tag];
     [self initFeedItemWithTag:tag];
     [self headerFromTag:tag];
-    [self setTag:tag];
 }
 
 // StixViewDelegate
@@ -54,7 +54,7 @@ static BOOL openingDetailView;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = CGRectMake(3+320, 0, 320, 480);
-    animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+    animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.25];
      */
 }
 
@@ -118,7 +118,7 @@ static BOOL openingDetailView;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = CGRectMake(-3-320, 0, 320, 480);
-    animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
+    animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.25];
     [DetailViewController unlockOpen];
 }
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
@@ -201,13 +201,20 @@ static BOOL openingDetailView;
     [commentsTable setDelegate:self];
     //[commentsTable configureRowsWithHeight:18 dividerVisible:NO fontSize:12 fontNameColor:[UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0] fontTextColor:[UIColor blackColor]];
     
-    NSLog(@"DetailView: header start %f height %f feedItem start %f height %f commentsTable start %f height %f scrollView start %f height %f", headerView.frame.origin.y, headerView.frame.size.height, feedItem.view.frame.origin.y, feedItem.view.frame.size.height, commentsTable.view.frame.origin.y, commentsTable.view.frame.size.height, scrollView.frame.origin.y, scrollView.frame.size.height);
+    //NSLog(@"DetailView: header start %f height %f feedItem start %f height %f commentsTable start %f height %f scrollView start %f height %f", headerView.frame.origin.y, headerView.frame.size.height, feedItem.view.frame.origin.y, feedItem.view.frame.size.height, commentsTable.view.frame.origin.y, commentsTable.view.frame.size.height, scrollView.frame.origin.y, scrollView.frame.size.height);
     int feedHeight = feedItem.view.frame.size.height;
     int tableHeight = commentsTable.rowHeight * [names count];
-    NSLog(@"DetailView: Setting scroll contentSize to %d %d", 320, feedHeight+ tableHeight+5);
+    //NSLog(@"DetailView: Setting scroll contentSize to %d %d", 320, feedHeight+ tableHeight+5);
     [scrollView setContentSize:CGSizeMake(320, feedHeight + tableHeight + 5)];
     [scrollView addSubview:feedItem.view];
     [scrollView addSubview:commentsTable.view];
+/*
+    if (!stixEditorController)
+    {
+        stixEditorController = [[StixEditorViewController alloc] init];
+        [stixEditorController setDelegate:self];
+    }
+ */
 }
 
 -(void)setScrollHeight:(int)height {
@@ -246,10 +253,10 @@ static BOOL openingDetailView;
             stixStringID = @"COMMENT";
         }
         
-        if ([stixStringID isEqualToString:@"COMMENT"])
+        if ([stixStringID isEqualToString:@"COMMENT"] || [stixStringID isEqualToString:@"LIKE"])
             trueCommentCount++;
 #if SHOW_COMMENTS_ONLY
-        if (![stixStringID isEqualToString:@"COMMENT"])
+        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"LIKE"])
             continue;
 #endif
         [names addObject:name];
@@ -260,14 +267,15 @@ static BOOL openingDetailView;
     }
     [commentsTable.tableView reloadData];
     
+#if VERBOSE
     NSLog(@"DetailView: getAllHistoryDidComplete for tag %d", tagID);
     NSLog(@"DetailView: loaded %d displayable comments", [names count]);
-
+#endif
     // resize scrollview
     int feedHeight = feedItem.view.frame.size.height;
     int tableHeight = commentsTable.rowHeight * [names count];
-    NSLog(@"DetailView: Resizing commentsTable to start %d height %d", feedHeight, tableHeight);
-    NSLog(@"DetailView: Resizing scroll contentSize to %d %d", 320, feedHeight+ tableHeight+5);
+    //NSLog(@"DetailView: Resizing commentsTable to start %d height %d", feedHeight, tableHeight);
+    //NSLog(@"DetailView: Resizing scroll contentSize to %d %d", 320, feedHeight+ tableHeight+5);
     [commentsTable.view setFrame:CGRectMake(0, feedHeight, 320, tableHeight)];
     [scrollView setContentSize:CGSizeMake(320, feedHeight + tableHeight + 5)];
     [self stopActivityIndicator];
@@ -276,13 +284,13 @@ static BOOL openingDetailView;
     [feedItem populateWithCommentCount:trueCommentCount];
 }
 
--(void)headerFromTag:(Tag*) tag{
+-(void)headerFromTag:(Tag*)_tag{
     
     headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, 40)];
     [headerView setBackgroundColor:[UIColor blackColor]];
     [headerView setAlpha:.75];
     
-    UIImage * photo = [self.delegate getUserPhotoForUsername:tag.username];
+    UIImage * photo = [self.delegate getUserPhotoForUsername:_tag.username];
     UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
     [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
     [photoView.layer setBorderWidth: 2.0];
@@ -294,21 +302,46 @@ static BOOL openingDetailView;
     [nameLabel setBackgroundColor:[UIColor clearColor]];
     [nameLabel setTextColor:[UIColor whiteColor]];
     [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]];
-    [nameLabel setText:tag.username];
+    [nameLabel setText:_tag.username];
     [headerView addSubview:nameLabel];
     
+#if 0
     UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
     [locLabel setBackgroundColor:[UIColor clearColor]];
     [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
     [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
     [locLabel setText:tag.locationString];
     [headerView addSubview:locLabel];    
+#else
+    UIButton * nameButton = [[UIButton alloc] initWithFrame:nameLabel.frame];
+    [nameButton setBackgroundColor:[UIColor clearColor]];
+    [nameButton setTag:[_tag.tagID intValue]];
+    [nameButton addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+    [headerView addSubview:nameButton];
+    
+    // the "Via..." label
+    if ((_tag.originalUsername != nil) && [_tag.originalUsername length] != 0 && ![_tag.originalUsername isEqualToString:_tag.username]) {
+        UILabel * subLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 21, 260, 15)];
+        [subLabel setBackgroundColor:[UIColor clearColor]];
+        [subLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
+        [subLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]];
+        //[locLabel setText:tag.locationString];
+        [subLabel setText:_tag.descriptor];
+        [headerView addSubview:subLabel];    
+        
+        UIButton * viaButton = [[UIButton alloc] initWithFrame:subLabel.frame];
+        [viaButton setTag:[_tag.tagID intValue]];
+        [viaButton setBackgroundColor:[UIColor clearColor]];
+        [viaButton addTarget:self action:@selector(didClickViaButton:) forControlEvents:UIControlEventTouchUpInside];
+        [headerView addSubview:viaButton];
+    }
+#endif
     
     UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
     [timeLabel setBackgroundColor:[UIColor clearColor]];
     [timeLabel setTextColor:[UIColor whiteColor]];
     [timeLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:9]];
-    [timeLabel setText:[Tag getTimeLabelFromTimestamp:tag.timestamp]];
+    [timeLabel setText:[Tag getTimeLabelFromTimestamp:_tag.timestamp]];
     [headerView addSubview:timeLabel];
 }
 
@@ -448,6 +481,11 @@ static BOOL openingDetailView;
     [delegate shouldDisplayUserPage:tagUsername];
     [DetailViewController unlockOpen];
 }
+-(void)didClickViaButton:(UIButton*)button {
+    NSLog(@"DetailViewController: Clicked via button for tag: original user %@", tag.originalUsername);
+    [delegate shouldDisplayUserPage:tag.originalUsername];
+    [DetailViewController unlockOpen];
+}
 
 -(void)shouldDisplayUserPage:(NSString *)username {
     NSLog(@"Multilayered display of profile view about to happen from DetailViewController!");
@@ -457,7 +495,7 @@ static BOOL openingDetailView;
     CGRect frameOffscreen = commentView.view.frame;
     frameOffscreen.origin.x -= 330;
     
-    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [commentView.view removeFromSuperview];
         [delegate shouldDisplayUserPage:username];
     }];
@@ -501,7 +539,7 @@ static BOOL openingDetailView;
 }
  */
 
--(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
+-(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
 #if 0
     CGRect frameInside = CGRectMake(16, 22, 289, 380);
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
@@ -541,14 +579,6 @@ static BOOL openingDetailView;
 }
 
 -(void)displayShareController {
-#if 0
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    [shareController setImage:result];
-    [shareController setPNG:png];
-    [shareController setTagID:[tag.tagID intValue]];
-#endif
-    
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
     [self.view addSubview:shareController.view];
@@ -556,7 +586,7 @@ static BOOL openingDetailView;
     
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -600,7 +630,7 @@ static BOOL openingDetailView;
         }
     }    
     
-    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [shareController.view removeFromSuperview];
     }];
     
@@ -670,5 +700,21 @@ static BOOL openingDetailView;
     //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
 }
 
+#pragma mark remix delegate functions
 
+-(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
+    NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", feedItem.tag.tagID, tagToRemix.tagID);
+
+    // hack: instead of doing this in the detailView and duplicating all the code to make the functionality work, we just jump to the feedview
+    [DetailViewController unlockOpen];
+    [delegate didClickRemixFromDetailViewWithTag:feedItem.tag];
+}
+
+-(BOOL)didClickNotesButton {
+// checks whether first time user message will allow it
+    return YES;
+}
+-(void)hideFirstTimeArrowForShareController {
+    return;
+}
 @end

@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jun  8, 2012
+//  Created by Kumulos Bindings Compiler on Jun 20, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -30,29 +30,6 @@
  }
 
 
--(KSAPIOperation*) addHighResImageWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:dataPNG forKey:@"dataPNG"];
-                    [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"addHighResImage" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: addHighResImageDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
 -(KSAPIOperation*) addHighResPixWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID{
 
     
@@ -76,11 +53,11 @@
     
 }
 
--(KSAPIOperation*) getHighResImageWithTagID:(NSInteger)tagID{
+-(KSAPIOperation*) getHighResImageWithAllPixHighReID:(NSUInteger)allPixHighReID{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+            [theParams setValue:[NSNumber numberWithInt:allPixHighReID] forKey:@"allPixHighReID"];
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getHighResImage" andParams:theParams];
     [newOp setDelegate:self];
@@ -89,6 +66,28 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getHighResImageDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) getHighResImageForTagIDWithTagID:(NSInteger)tagID{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getHighResImageForTagID" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getHighResImageForTagIDDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];
@@ -233,12 +232,11 @@
     
 }
 
--(KSAPIOperation*) adminDeleteTestDataWithDescriptor:(NSString*)descriptor{
+-(KSAPIOperation*) adminDeleteTestData{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:descriptor forKey:@"descriptor"];
-                        
+                
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminDeleteTestData" andParams:theParams];
     [newOp setDelegate:self];
     [newOp setUseSSL:useSSL];
@@ -298,16 +296,14 @@
     
 }
 
--(KSAPIOperation*) createNewPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andPendingID:(NSInteger)pendingID{
+-(KSAPIOperation*) createNewPixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andPendingID:(NSInteger)pendingID{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
             [theParams setValue:username forKey:@"username"];
-                    [theParams setValue:descriptor forKey:@"descriptor"];
                     [theParams setValue:comment forKey:@"comment"];
                     [theParams setValue:locationString forKey:@"locationString"];
                     [theParams setValue:image forKey:@"image"];
-                    [theParams setValue:tagCoordinate forKey:@"tagCoordinate"];
                     [theParams setValue:[NSNumber numberWithInt:pendingID] forKey:@"pendingID"];
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"createNewPix" andParams:theParams];
@@ -326,17 +322,16 @@
     
 }
 
--(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andAuxStix:(NSData*)auxStix{
+-(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andImage:(NSData*)image andStixLayer:(NSData*)stixLayer andPendingID:(NSInteger)pendingID andHighResImageID:(NSUInteger)highResImageID{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
             [theParams setValue:username forKey:@"username"];
                     [theParams setValue:descriptor forKey:@"descriptor"];
-                    [theParams setValue:comment forKey:@"comment"];
-                    [theParams setValue:locationString forKey:@"locationString"];
                     [theParams setValue:image forKey:@"image"];
-                    [theParams setValue:tagCoordinate forKey:@"tagCoordinate"];
-                    [theParams setValue:auxStix forKey:@"auxStix"];
+                    [theParams setValue:stixLayer forKey:@"stixLayer"];
+                    [theParams setValue:[NSNumber numberWithInt:pendingID] forKey:@"pendingID"];
+                    [theParams setValue:[NSNumber numberWithInt:highResImageID] forKey:@"highResImageID"];
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"createPix" andParams:theParams];
     [newOp setDelegate:self];
@@ -647,6 +642,52 @@
     
 }
 
+-(KSAPIOperation*) setHighResImageIDWithAllTagID:(NSUInteger)allTagID andHighResImageID:(NSUInteger)highResImageID{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
+                    [theParams setValue:[NSNumber numberWithInt:highResImageID] forKey:@"highResImageID"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"setHighResImageID" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: setHighResImageIDDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) setOriginalUsernameWithAllTagID:(NSUInteger)allTagID andOriginalUsername:(NSString*)originalUsername{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
+                    [theParams setValue:originalUsername forKey:@"originalUsername"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"setOriginalUsername" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: setOriginalUsernameDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
 -(KSAPIOperation*) touchPixWithAllTagID:(NSUInteger)allTagID andUsername:(NSString*)username{
 
     
@@ -692,12 +733,34 @@
     
 }
 
--(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID andDescriptor:(NSString*)descriptor{
+-(KSAPIOperation*) updateImageWithAllTagID:(NSUInteger)allTagID andImage:(NSData*)image{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
             [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
-                    [theParams setValue:descriptor forKey:@"descriptor"];
+                    [theParams setValue:image forKey:@"image"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updateImage" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: updateImageDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updatePixWithDescriptor" andParams:theParams];
     [newOp setDelegate:self];
@@ -706,6 +769,29 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: updatePixWithDescriptorDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) updateStixLayerWithAllTagID:(NSUInteger)allTagID andStixLayer:(NSData*)stixLayer{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:allTagID] forKey:@"allTagID"];
+                    [theParams setValue:stixLayer forKey:@"stixLayer"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"updateStixLayer" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: updateStixLayerDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];

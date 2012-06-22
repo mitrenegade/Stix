@@ -281,6 +281,42 @@ static int animationID = 1;
 #endif
 }
 
+-(void)doBounce:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time {
+    [view addSubview:canvas];
+    int centerX = canvas.center.x;
+    int centerY = canvas.center.y - pixels;
+    CGPoint endPoint = CGPointMake(centerX, centerY); 
+    //    [UIView transitionWithView:canvas 
+    //                      duration:time/2
+    [UIView animateWithDuration:time/2
+                          delay:0
+                        options:UIViewAnimationTransitionNone 
+                     animations: ^ { 
+                         [canvas setCenter:endPoint];
+                     } 
+                     completion:^(BOOL finished) { 
+                         int centerX = canvas.center.x; 
+                         int centerY = canvas.center.y + pixels;
+                         CGPoint endPoint = CGPointMake(centerX, centerY); 
+                         //                        [UIView transitionWithView:canvas 
+                         //                                          duration:time/2
+                         [UIView animateWithDuration:time/2
+                                               delay:0
+                                             options:UIViewAnimationTransitionNone 
+                                          animations: ^ { 
+                                              [canvas setCenter:endPoint];
+                                          } 
+                                          completion:^(BOOL finished) { 
+                                              [canvas removeFromSuperview];
+                                              [self doBounce:canvas inView:view forDistance:pixels forTime:time];
+                                          }
+                          ];    
+                     }
+     ];
+}
+
+
+
 /*
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.

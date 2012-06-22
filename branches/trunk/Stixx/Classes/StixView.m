@@ -8,6 +8,7 @@
 
 #import "StixView.h"
 #import <QuartzCore/QuartzCore.h>
+#define USE_STIXPANEL_VIEW 0
 
 @implementation StixView
 
@@ -24,6 +25,7 @@
 @synthesize tagID;
 @synthesize stixViewID;
 @synthesize isShowingPlaceholder;
+@synthesize bMultiStixMode;
 
 static NSMutableDictionary * requestDictionaryForStix;
 //static NSMutableSet * retainedDelegates;
@@ -46,28 +48,31 @@ static int currentStixViewID = 0;
 }
 
 // populates with the image data for the pix
--(void)initializeWithImage:(UIImage*)imageData {
+-(void)initializeWithImage:(UIImage *)imageData {
+    [self initializeWithImage:imageData andStixLayer:nil];
+}
+-(void)initializeWithImage:(UIImage*)imageData andStixLayer:(UIImage*)stixLayer {
     originalImageSize = imageData.size;
     CGRect frame = self.frame;
     frame.origin.x = 0;
     frame.origin.y = 0;
-    UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
-    [imageView setImage:imageData];
+    UIImageView * imageView;
+    if (stixLayer) {
+        CGSize newSize = self.frame.size;
+        UIGraphicsBeginImageContext(newSize);
+        [imageData drawInRect:frame];	
+        [stixLayer drawInRect:frame];
+        UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        imageView = [[UIImageView alloc] initWithImage:result];
+    }
+    else {
+        imageView = [[UIImageView alloc] initWithFrame:frame];
+        [imageView setImage:imageData];
+    }
     [self addSubview:imageView];
     _activeRecognizers = [[NSMutableSet alloc] init];
     isStillPeeling = NO;
-}
--(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame{
-    // context frame in which a stix will be dropped - different if we are dropping directly 
-    // onto stix View or dropping it from a feed or a live camera
-    originalImageSize = CGSizeMake(contextFrame.size.width, contextFrame.size.height);
-    CGRect frame = self.frame;
-    frame.origin.x = 0;
-    frame.origin.y = 0;
-    UIImageView * imageView = [[UIImageView alloc] initWithFrame:frame];
-    [imageView setImage:imageData];
-    [self addSubview:imageView];
-    _activeRecognizers = [[NSMutableSet alloc] init];
 }
 
 -(void)requestStixFromKumulos:(NSString *)stixStringID forStix:(UIImageView *)auxStix inStixView:(StixView *)stixView{ // andDelegate:(NSObject<StixViewDelegate> *)_delegate {
@@ -123,7 +128,11 @@ static int currentStixViewID = 0;
     
     NSMutableArray * viewsThatNeedThisStix = [requestDictionaryForStix objectForKey:stixStringID];
     //NSLog(@"StixView %d: GetStixDataByStixString for %@ = %@ returned", stixViewID, descriptor, stixStringID);
+#if USE_STIXPANEL_VIEW
+    UIImageView * stixExists = [[StixPanelView sharedStixPanelView]getStixWithStixStringID:stixStringID];
+#else
     UIImageView * stixExists = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
     if (stixExists.alpha == 0) {
         [BadgeView AddStixView:theResults];
         
@@ -187,7 +196,11 @@ static int currentStixViewID = 0;
     referenceTransform = CGAffineTransformIdentity;
     
     [self setSelectStixStringID:stixStringID];
+#if USE_STIXPANEL_VIEW
+    stix = [[StixPanelView sharedStixPanelView] getStixWithStixStringID:stixStringID];
+#else
     stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
     if (stix.alpha == 0) { // alpha is set to 0 by [BadgeView getBadgeForStixStringId]
         NSLog(@"Should not get here!");
         //[self requestStixFromKumulos:stixStringID forStixView:stix inSuperView:self andDelegate:delegate];
@@ -240,7 +253,6 @@ static int currentStixViewID = 0;
 
     // display transform box 
     showTransformCanvas = YES;
-    transformCanvas = nil;
     [self transformBoxShowAtFrame:stix.frame];
 }
 
@@ -248,7 +260,11 @@ static int currentStixViewID = 0;
     CGPoint center = stix.center;
     CGAffineTransform transform = stix.transform;
     [stix removeFromSuperview];
+#if USE_STIXPANEL_VIEW
+    stix = [[StixPanelView sharedStixPanelView] getStixWithStixStringID:stixStringID];
+#else
     stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
     if (transform.a==0 && transform.b==0 && transform.c == 0 && transform.d == 0 && transform.tx == 0 && transform.ty == 0) {
         NSLog(@"Invalid transform! Why is the stix blank?");
         transform = CGAffineTransformIdentity;
@@ -285,7 +301,11 @@ static int currentStixViewID = 0;
         CGAffineTransform auxTransform;
         NSString * transformString = [auxTransforms objectAtIndex:i];
         auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
+#if USE_STIXPANEL_VIEW
+        UIImageView * auxStix = [[StixPanelView sharedStixPanelView] getStixWithStixStringID:stixStringID];
+#else
         UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
         // hack: call update
         if (auxStix.alpha == 0) {
             [self requestStixFromKumulos:stixStringID forStix:auxStix inStixView:self];
@@ -413,8 +433,29 @@ static int currentStixViewID = 0;
 }
 
 -(void)transformBoxShowAtFrame:(CGRect)frame {
+    [self transformBoxShowAtFrame:frame withTransform:CGAffineTransformIdentity];
+}
+
+-(void)transformBoxShowAtFrame:(CGRect)frame withTransform:(CGAffineTransform)t {
+    if (transformCanvas) {
+        [transformCanvas removeFromSuperview];
+        transformCanvas = nil;
+    }
     int canvasOffset = 5;
+    if (!CGAffineTransformIsIdentity(t)) {
+        CGPoint center; 
+        center.x = frame.origin.x + frame.size.width / 2;
+        center.y = frame.origin.y + frame.size.height / 2;
+#if USE_STIXPANEL_VIEW
+        UIImageView * basicStix = [[StixPanelView sharedStixPanelView] getStixWithStixStringID:selectStixStringID];
+#else
+        UIImageView * basicStix = [BadgeView getBadgeWithStixStringID:selectStixStringID];
+#endif
+        [basicStix setCenter:center];
+        frame = basicStix.frame;
+    }    
     CGRect frameCanvas = frame;
+    NSLog(@"frameCanvas: %f %f", frameCanvas.size.width, frameCanvas.size.height);
     frameCanvas.origin.x -= canvasOffset;
     frameCanvas.origin.y -= canvasOffset;
     frameCanvas.size.width += 2*canvasOffset;
@@ -424,6 +465,7 @@ static int currentStixViewID = 0;
     frame.origin.x = canvasOffset;
     frame.origin.y = canvasOffset;
     CGRect frameInside = frame;
+    NSLog(@"frameInside: %f %f", frameInside.size.width, frameInside.size.height);
     frameInside.origin.x +=1;
     frameInside.origin.y +=1;
     frameInside.size.width -= 2;
@@ -441,7 +483,7 @@ static int currentStixViewID = 0;
     [transformCanvas addSubview:transformBoxShadow];
     [transformCanvas addSubview:transformBox];
     UIImage * corners = [UIImage imageNamed:@"dot_boundingbox.png"];
-    
+    /*
     UIImageView * dot1 = [[UIImageView alloc] initWithImage:corners];
     UIImageView * dot2 = [[UIImageView alloc] initWithImage:corners];
     UIImageView * dot3 = [[UIImageView alloc] initWithImage:corners];
@@ -461,23 +503,47 @@ static int currentStixViewID = 0;
     [dot2 setCenter:CGPointMake(frame.origin.x, frame.origin.y + frame.size.height)];
     [dot3 setCenter:CGPointMake(frame.origin.x+frame.size.width, frame.origin.y)];
     [dot4 setCenter:CGPointMake(frame.origin.x+frame.size.width, frame.origin.y+frame.size.height)];
-    
+     */
+
+    if (!CGAffineTransformIsIdentity(t))
+        [transformCanvas setTransform:t];
     [self addSubview:transformCanvas];
     
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    NSLog(@"Touch!");
     if (interactionAllowed == NO) { // skips interaction with stix for dragging
+        NSLog(@"interaction not allowed!");
         [super touchesBegan:touches withEvent:event];
         return;
     }
+    NSLog(@"Touch allowed!");
     
     isTouch = 1;
     if (isDragging) // will come here if a second finger touches
         return;
-    
 	UITouch *touch = [[event allTouches] anyObject];	
 	CGPoint location = [touch locationInView:self];
+    
+    /* TODO: enabling this seems to prevent touchesmoved
+    if (bMultiStixMode) {
+        // change current stix
+        for (int i=0; i<[auxStixViews count]; i++) {
+            UIImageView * currStix = [auxStixViews objectAtIndex:i];
+            CGRect frame = currStix.frame;
+            if (CGRectContainsPoint(frame, location)) {
+                [self multiStixSelectCurrent:i];
+                isTap = 1;
+                // point where finger clicked badge
+                offset_x = (location.x - stix.center.x);
+                offset_y = (location.y - stix.center.y);
+                
+                break;
+            }
+        }
+    }
+     */
 	isDragging = 0;
     CGRect frame = stix.frame;
     // add an allowance of touch
@@ -489,13 +555,13 @@ static int currentStixViewID = 0;
     if (CGRectContainsPoint(frame, location))
     {
         isTap = 1;
+        // point where finger clicked badge
+        offset_x = (location.x - stix.center.x);
+        offset_y = (location.y - stix.center.y);
+        
     }
     
-    // point where finger clicked badge
-    offset_x = (location.x - stix.center.x);
-    offset_y = (location.y - stix.center.y);
-    
-    //NSLog(@"Touches began: center %f %f touch location %f %f", stix.center.x, stix.center.y, location.x, location.y);
+    NSLog(@"Touches began: center %f %f touch location %f %f", stix.center.x, stix.center.y, location.x, location.y);
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -525,12 +591,12 @@ static int currentStixViewID = 0;
         
         stix.center = CGPointMake(centerX, centerY);
         if (stixCount != nil)
-            stixCount.center = CGPointMake(centerX - [BadgeView getOutlineOffsetX:0], centerY - [BadgeView getOutlineOffsetX:0]);
+            stixCount.center = CGPointMake(centerX + 3, centerY - 9); //[BadgeView getOutlineOffsetX:0], centerY - [BadgeView getOutlineOffsetX:0]);
         if (transformCanvas) {
             [transformCanvas setCenter:stix.center];
         }
-        //NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
 	}
+    NSLog(@"Touches moved: new center %f %f", stix.center.x, stix.center.y);
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -553,25 +619,21 @@ static int currentStixViewID = 0;
         
         if ([self.delegate respondsToSelector:@selector(didTouchInStixView:)])
             [self.delegate didTouchInStixView:self];
-#if 0
-        if (stix) {
-            if (showTransformCanvas) {
-                // hide transform canvas
-                showTransformCanvas = NO;
-                [transformCanvas setHidden:YES];
-            }
-            else
-            {
-                if (transformCanvas != nil) {
-                    showTransformCanvas = YES;
-                    [transformCanvas setHidden:NO];
-                }
-                else {
-                    [self transformBoxShowAtFrame:stix.frame];
+        
+        if (bMultiStixMode) {
+            UITouch *touch = [[event allTouches] anyObject];
+            CGPoint location = [touch locationInView:self];
+
+            // change current stix
+            for (int i=0; i<[auxStixViews count]; i++) {
+                UIImageView * currStix = [auxStixViews objectAtIndex:i];
+                CGRect frame = currStix.frame;
+                if (CGRectContainsPoint(frame, location)) {
+                    [self multiStixSelectCurrent:i];
+                    break;
                 }
             }
         }
-#endif
     }
 }
 
@@ -726,7 +788,11 @@ static int currentStixViewID = 0;
             
             // display action sheet
             NSString * stixStringID = [auxStixStringIDs objectAtIndex:lastStixView];
+#if USE_STIXPANEL_VIEW
+            NSString * stixDesc = [[StixPanelView sharedStixPanelView] getStixDescriptorForStixStringID:stixStringID];
+#else
             NSString * stixDesc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
+#endif
             NSString * title = [NSString stringWithFormat:@"What do you want to do with your %@", stixDesc];
             //stixPeelSelected = lastStixView;
             UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Peel", /*@"Stick", @"Move", */nil];
@@ -778,5 +844,241 @@ static int currentStixViewID = 0;
     }
 }
 
+#pragma mark Multi stix mode
 
+-(int)multiStixInitializeWithTag:(Tag *)tag useStixLayer:(BOOL)useStixLayer {
+    // clear all existing stix in the stixview
+    for (int i=0; i<[auxStixViews count]; i++) {
+        UIView * subview = [auxStixViews objectAtIndex:i];
+        [subview removeFromSuperview];
+    }
+    if (transformCanvas) {
+        [transformCanvas removeFromSuperview];
+        transformCanvas = nil;
+    }
+    [auxStixViews removeAllObjects];
+    [auxStixStringIDs removeAllObjects];
+    
+    tagUsername = [[tag username] copy];
+    tagID = tag.tagID;
+
+    auxStixViews = [[NSMutableArray alloc] init];
+    auxStixStringIDs = [[NSMutableArray alloc] init];
+    
+#if 0
+    [auxStixStringIDs addObjectsFromArray:tag.auxStixStringIDs];
+    NSMutableArray * auxLocations = tag.auxLocations;
+    NSMutableArray * auxTransforms = tag.auxTransforms;
+    
+    for (int i=0; i<[auxStixStringIDs count]; i++) {
+        NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
+        CGPoint location = [[auxLocations objectAtIndex:i] CGPointValue];
+        CGAffineTransform auxTransform;
+        NSString * transformString = [auxTransforms objectAtIndex:i];
+        auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
+#if USE_STIXPANEL_VIEW
+        UIImageView * auxStix = [[StixPanelView sharedStixPanel] getStixWithStixStringID:stixStringID];
+#else
+        UIImageView * auxStix = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
+        // hack: call update
+
+        //[stix setBackgroundColor:[UIColor whiteColor]]; // for debug
+        float centerX = location.x;
+        float centerY = location.y;
+        
+        // scale stix and label down to 270x270 which is the size of the feedViewItem
+        CGSize originalSize = originalImageSize;
+        CGSize targetSize = self.frame.size;
+        imageScale = targetSize.width / originalSize.width;
+        
+        CGRect stixFrameScaled = auxStix.frame;
+        stixFrameScaled.size.width *= imageScale;// * auxScale;
+        stixFrameScaled.size.height *= imageScale;// * auxScale;
+        centerX *= imageScale;
+        centerY *= imageScale;
+
+        [auxStix setFrame:stixFrameScaled];
+        [auxStix setCenter:CGPointMake(centerX, centerY)];
+        auxStix.transform = auxTransform;
+        //[auxStix setBackgroundColor:[UIColor blackColor]];
+        
+        [self addSubview:auxStix];
+        
+        [auxStixViews addObject:auxStix];
+    }
+#else
+    if (useStixLayer) {
+        // add stix layer
+        CGSize newSize = self.frame.size;
+        UIGraphicsBeginImageContext(newSize);
+        CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);
+        [tag.image drawInRect:fullFrame];	
+        [tag.stixLayer drawInRect:fullFrame];
+        UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        
+        UIImageView * srcImageView = [[UIImageView alloc] initWithImage:result];
+        [self addSubview:srcImageView];
+    }
+#endif
+    
+    // add pinch and rotate gesture recognizer
+    UIPinchGestureRecognizer * myPinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)]; //(pinchGestureHandler:)];
+    [myPinchRecognizer setDelegate:self];
+    
+    UIRotationGestureRecognizer *myRotateRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)]; //(pinchRotateHandler:)];
+    [myRotateRecognizer setDelegate:self];
+    
+    [self addGestureRecognizer:myPinchRecognizer];
+    [self addGestureRecognizer:myRotateRecognizer];   
+    
+    bMultiStixMode = YES;
+    multiStixCurrent = -1;
+    interactionAllowed = YES;
+    
+    NSLog(@"MultiStix initialize with tag with %d auxStix", [auxStixViews count]);
+    
+    return YES;
+}
+
+// this function creates a temporary stix object that can be manipulated
+-(void)multiStixAddStix:(NSString*)stixStringID atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation */{
+    NSLog(@"Adding stix %@ to %d %d", stixStringID, x, y);
+    CGRect frame = self.frame;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
+    
+    referenceTransform = CGAffineTransformIdentity;
+    
+    [self setSelectStixStringID:stixStringID];
+#if USE_STIXPANEL_VIEW
+    stix = [[StixPanelView sharedStixPanelView] getStixWithStixStringID:stixStringID];
+#else
+    stix = [BadgeView getBadgeWithStixStringID:stixStringID];
+#endif
+    float centerX = x;
+    float centerY = y;
+    
+    // scale stix and label down to 270x270 which is the size of the feedViewItem
+    CGSize originalSize = originalImageSize;
+	CGSize targetSize = self.frame.size;
+	
+    imageScale =  targetSize.width / originalSize.width;
+    
+	CGRect stixFrameScaled = stix.frame;
+	stixFrameScaled.size.width *= imageScale;// * stixScale;
+	stixFrameScaled.size.height *= imageScale;// * stixScale;
+    centerX *= imageScale;
+    centerY *= imageScale;
+
+    [stix setFrame:stixFrameScaled];
+    [stix setCenter:CGPointMake(centerX, centerY)];
+#if 0
+    [self addSubview:stix];
+    //[stix release];
+    // display transform box 
+    showTransformCanvas = YES;
+    [self transformBoxShowAtFrame:stix.frame];
+    
+    //multiStixCurrent = [auxStixViews count];
+    [self multiStixSelectCurrent:[auxStixViews count]];
+#else
+    [stix setAlpha:0];
+    [self addSubview:stix];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    //[animation doFade:stix inView:self toAlpha:1 forTime:.25];
+    [animation doFadeIn:stix forTime:1 withCompletion:^(BOOL finished) {
+        showTransformCanvas = YES;
+        [self transformBoxShowAtFrame:stix.frame];
+        
+        //multiStixCurrent = [auxStixViews count];
+        [self multiStixSelectCurrent:[auxStixViews count]];
+    }];
+#endif
+}
+
+-(void)multiStixSelectCurrent:(int)stixIndex {
+    NSLog(@"MultiStixSelectCurrent: currently editing %d, changing to index %d, total existing %d auxStix", multiStixCurrent, stixIndex, [auxStixViews count]);
+    if (stixIndex == -1)
+        return;
+    
+    // if a stix is already being manipulated, make sure to sync it with auxStix
+    if (multiStixCurrent == -1) {
+        // currently selected stix was a new stix; needs to be added to auxStix
+        if (selectStixStringID) {      
+            // only if a stix was actually added
+            [auxStixViews addObject:stix];
+            [auxStixStringIDs addObject:selectStixStringID];
+        }
+    }
+    else {
+        if (stix) {
+            // currently selected stix is an existing stix; sync
+            if (stixIndex < [auxStixViews count]) {
+                // replace
+                [auxStixViews replaceObjectAtIndex:multiStixCurrent withObject:stix];            
+            }
+            else if (stixIndex == [auxStixViews count]) {
+                // add
+                [auxStixViews addObject:stix];
+                [auxStixStringIDs addObject:selectStixStringID];
+            }
+        }
+    }
+    
+    stix = [auxStixViews objectAtIndex:stixIndex];
+    selectStixStringID = [auxStixStringIDs objectAtIndex:stixIndex];
+    multiStixCurrent = stixIndex;
+    //referenceTransform = stix.transform;
+    
+    NSLog(@"Switching to stix at index %d with frame %f %f %f %f and transform %@", stixIndex, stix.frame.origin.x, stix.frame.origin.y, stix.frame.size.width, stix.frame.size.height, NSStringFromCGAffineTransform( stix.transform ) );
+    
+    [self transformBoxShowAtFrame:stix.frame withTransform:stix.transform];
+}
+
+-(int) multiStixDeleteCurrentStix {
+    if (transformCanvas) {
+        [transformCanvas removeFromSuperview];
+        transformCanvas = nil;
+    }
+    if (multiStixCurrent != -1) {
+        stix = nil;
+        selectStixStringID = nil;
+        if (multiStixCurrent < [auxStixViews count]) {
+            [[auxStixViews objectAtIndex:multiStixCurrent] removeFromSuperview];
+            [auxStixViews removeObjectAtIndex:multiStixCurrent];
+            [auxStixStringIDs removeObjectAtIndex:multiStixCurrent];
+        }
+        //multiStixCurrent = -1;
+        [self multiStixSelectCurrent:[auxStixViews count]-1];
+    } else {
+        if (stix) {
+            [stix removeFromSuperview];
+            stix = nil;
+            selectStixStringID = nil;
+        }
+    }
+    return [auxStixStringIDs count];
+}
+
+-(void) multiStixClearAllStix {
+    if ([auxStixViews count] > 0) {
+        for (int i=0; i<[auxStixViews count]; i++) {
+            stix = [auxStixViews objectAtIndex:i];
+            [stix removeFromSuperview];
+        }
+        [auxStixViews removeAllObjects];
+        [auxStixStringIDs removeAllObjects];
+    }
+    if (stix) {
+        [stix removeFromSuperview];
+        stix = nil;
+        selectStixStringID = nil;
+    }
+    if (transformCanvas) {
+        [transformCanvas removeFromSuperview];
+        transformCanvas = nil;
+    }
+}
 @end

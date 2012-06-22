@@ -50,11 +50,11 @@
 -(NSString*)getUsernameOfApp;
 //-(void)didRequestStixFromKumulos:(NSString*)stixStringID withFeedItem:(VerticalFeedItemController*)feedItem;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
+-(void)didClickRemixWithFeedItem:(VerticalFeedItemController*)feedItem;
 @optional
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
-
--(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *)feedItem;
+-(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem;
 -(void)sharePixDialogDidFinish;
 -(void)sharePixDialogDidFail:(int)errorType;
 
@@ -63,6 +63,7 @@
 
 -(void)didClickLikeButton:(int)type withTagID:(int)tagID;
 -(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem;
+-(BOOL)didClickNotesButton; // checks whether first time user message will allow it
 @end
 
 
@@ -79,8 +80,9 @@
 	IBOutlet UIImageView * imageView;
     StixView * stixView;
     IBOutlet UIImageView * userPhotoView;
-    IBOutlet UIButton * addCommentButton;
-    IBOutlet UIButton * shareButton;
+    IBOutlet UIButton * buttonAddComment;
+    IBOutlet UIButton * buttonShare;
+    IBOutlet UIButton * buttonRemix;
     //IBOutlet UIButton * seeAllCommentsButton;
     
     NSObject<VerticalFeedItemDelegate> * __unsafe_unretained delegate;    
@@ -133,8 +135,9 @@
 @property (nonatomic) NSString * nameString;
 @property (nonatomic) NSString * commentString;
 @property (nonatomic) UIImage * imageData;
-@property (nonatomic) IBOutlet UIButton * addCommentButton;
-@property (nonatomic) IBOutlet UIButton * shareButton;
+@property (nonatomic) IBOutlet UIButton * buttonAddComment;
+@property (nonatomic) IBOutlet UIButton * buttonShare;
+@property (nonatomic) IBOutlet UIButton * buttonRemix;
 @property (nonatomic, assign) int tagID;
 @property (nonatomic) Tag * tag;
 @property (nonatomic, assign) int commentCount;
@@ -156,9 +159,9 @@
 -(void)initReloadView; // start the spin
 -(void)displayReloadView; // only display view
 
--(IBAction)didPressAddCommentButton:(id)sender;
--(IBAction)didPressShareButton:(id)sender;
--(IBAction)didPressSeeAllCommentsButton:(id)sender;
+-(IBAction)didClickAddCommentButton:(id)sender;
+-(IBAction)didClickShareButton:(id)sender;
+-(IBAction)didClickRemixButton:(id)sender;
 
 -(void)togglePlaceholderView:(BOOL)showPlaceholder;
 -(void)likeToolbarHide:(int)selected;

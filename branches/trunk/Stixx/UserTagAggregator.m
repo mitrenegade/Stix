@@ -7,9 +7,7 @@
 //
 
 #import "UserTagAggregator.h"
-
-#define OPTIMIZATION_HACK 0
-#define VERBOSE 0
+#import "GlobalHeaders.h"
 
 @implementation UserTagAggregator
 
@@ -102,6 +100,10 @@
         NSLog(@"Trying to aggregate tagIDs for following list but user is not logged in!");
         return;
     }
+   
+    // uncomment this line if you want to skip aggregation for testing
+    //return;
+    
     NSMutableSet * allFollowing = [delegate getFollowingList];    
     NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:allFollowing];
     [followingSetWithMe addObject:[delegate getUsername]];
@@ -109,15 +111,7 @@
     followingCountLeftToAggregate = [allFollowing count];
     NSLog(@"AggregateNewTagIDs: You are following %d people", [allFollowing count]);
     int ct = 0;
-#if OPTIMIZATION_HACK
-    
-#endif
     for (NSString * name in followingSetWithMe) {
-        if (OPTIMIZATION_HACK) {
-            ct++;
-            if (ct == 20)
-                break;
-        }
         //NSNumber * newestTagID = [NSNumber numberWithInt:idOfNewestTagAggregated]; //[allTagIDs objectAtIndex:0];
         NSNumber * newestTagID = [userTagList objectForKey:name];
 #if VERBOSE
@@ -198,6 +192,8 @@
     if ([allTagIDs containsObject:tagID])
         return;
     
+    isLocked = YES;
+    
     NSUInteger newIndex = [allTagIDs indexOfObject:newObject
                                      inSortedRange:(NSRange){0, [allTagIDs count]}
                                            options:NSBinarySearchingInsertionIndex
@@ -209,6 +205,8 @@
     else
         [allTagIDs insertObject:newObject atIndex:newIndex];
 
+    isLocked = NO;
+    
     //NSLog(@"Aggregation queue: processed tagID %d username %@ index %d, remaining %d, allTagID size %d", [tagID intValue], username, newIndex, [aggregationQueue count], [allTagIDs count]);
 #if VERBOSE
     if ([allTagIDs count]>=3)
@@ -241,6 +239,9 @@
 #endif
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     while (1) {
+        if (isLocked)
+            continue;
+        
         if ([aggregationQueue count]>0) {
             // insert sorted
             // assumes allTagIDs is sorted in ascending
@@ -261,7 +262,13 @@
                 }
                 
                 // insert into sorted array
-                [self insertNewTagID:tagID];
+                @try {
+                    [self insertNewTagID:tagID];
+                }
+                @catch (NSException *exception) {
+                    NSLog(@"UserTagAggregator: Caught enumeration error while inserting tagID %@", tagID);
+                    [FlurryAnalytics logEvent:@"AggregationError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", tagID, @"tagID", nil]];
+                }
 #if VERBOSE
                 NSLog(@"Aggregator queue: trigger %d queue size %d", firstTimeAggregatingTrigger, [aggregationQueue count]);
 #endif

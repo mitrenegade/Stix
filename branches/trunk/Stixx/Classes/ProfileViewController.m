@@ -1002,4 +1002,8 @@
     [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
 }
 
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
+    [delegate didClickRemixFromDetailViewWithTag:tagToRemix];
+}
+
 @end

@@ -24,6 +24,7 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)name;
 -(void)shouldCloseUserPage;
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
 @interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate, StixAnimationDelegate, KumulosHelperDelegate>

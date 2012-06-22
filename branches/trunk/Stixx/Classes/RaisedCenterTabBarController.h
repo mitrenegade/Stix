@@ -14,6 +14,7 @@
 
 -(void)didPressTabButton:(int)pos;
 -(void)didFinishRewardAnimation:(int)amount;
+-(void)didCloseFirstTimeMessage;
 //-(void)didCloseFirstTimeInstructions;
 @end
 
@@ -51,6 +52,7 @@ enum first_time_user_stage {
     int rewardValue;
     BOOL pointerWasDismissed;
     int agitatePointer;
+    BOOL instructionsDismissed;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
@@ -75,5 +77,6 @@ enum first_time_user_stage {
 
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage;
 -(void)agitateFirstTimePointer;
+-(void)flashFirstTimeInstructions;
 @end
 

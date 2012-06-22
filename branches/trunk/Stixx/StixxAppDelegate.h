@@ -38,6 +38,8 @@
 #import "VerticalFeedController.h"
 #import "FriendSuggestionController.h"
 #import "FlurryAnalytics.h"
+#import "StixPanelView.h"
+#import "StixEditorViewController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -51,6 +53,7 @@
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
+    NB_MESSAGE, 
     NB_NEWCOMMENT,
     NB_NEWGIFT,
     NB_PEELACTION,
@@ -93,7 +96,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate> {
     
     UIWindow *window;
     
@@ -133,7 +136,7 @@ struct UserInfo {
     
     NSMutableArray * allCarouselViews;
     
-    Tag * newestTag;
+    //Tag * newestTag;
     NSDate * timeStampOfMostRecentTag;
     int idOfNewestTagOnServer;
     int idOfOldestTagOnServer;
@@ -222,6 +225,13 @@ struct UserInfo {
     BOOL didGetFollowingLists;
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
     BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown   
+    
+    // sync flags for updating stix layers
+    // when a new pic is created, createPix is called while the stix layer is being edited
+    // when the editor is closed, readyToUploadPendingStixLayer must be set to something other than -1 for
+    // the delegate to call upload stix, otherwise it sets hasPendingStixLayerToUpload
+    BOOL hasPendingStixLayerToUpload;
+    int readyToUploadPendingStixLayer_tagID;
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -275,7 +285,7 @@ struct UserInfo {
 -(void)agitateFirstTimePointer;
 - (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
--(void)displayShareController:(Tag*)tag;
+-(void)displayShareController;
 -(void)uploadImage:(NSData *)dataPNG;
 -(void)initializeShareController;
 
@@ -292,6 +302,7 @@ struct UserInfo {
 -(void)getFollowListsForAggregation:(NSString*)name;
 
 //-(void)showTwitterDialog;
+-(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 
 @property (nonatomic) IBOutlet UIWindow *window;
 @property (nonatomic) UIViewController * emptyViewController;
@@ -305,6 +316,7 @@ struct UserInfo {
 @property (nonatomic) ExploreViewController *exploreController;
 @property (nonatomic) FacebookLoginController * loginSplashController;
 @property (nonatomic) FriendSuggestionController * friendSuggestionController;
+@property (nonatomic) StixEditorViewController * editorController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, weak) UIViewController * lastViewController;
 @property (nonatomic) NSMutableArray * allTags;

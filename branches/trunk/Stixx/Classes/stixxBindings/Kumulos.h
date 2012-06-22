@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jun  8, 2012
+//  Created by Kumulos Bindings Compiler on Jun 20, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -15,11 +15,11 @@
 @optional
 
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHighResImageDidCompleteWithResult:(NSArray*)theResults;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHighResPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getHighResImageDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getHighResImageForTagIDDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addCommentToPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -69,11 +69,19 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixCountDidCompleteWithResult:(NSNumber*)aggregateResult;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setHighResImageIDDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setOriginalUsernameDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation touchPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation touchPixToUpdateDidCompleteWithResult:(NSNumber*)affectedRows;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateImageDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updatePixWithDescriptorDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixLayerDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateStixOfPixDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -198,13 +206,13 @@
 -(Kumulos*)initWithAPIKey:(NSString*)APIKey andSecretKey:(NSString*)secretKey;
 
    
--(KSAPIOperation*) addHighResImageWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID;
-    
-   
 -(KSAPIOperation*) addHighResPixWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID;
     
    
--(KSAPIOperation*) getHighResImageWithTagID:(NSInteger)tagID;
+-(KSAPIOperation*) getHighResImageWithAllPixHighReID:(NSUInteger)allPixHighReID;
+    
+   
+-(KSAPIOperation*) getHighResImageForTagIDWithTagID:(NSInteger)tagID;
     
    
 -(KSAPIOperation*) addCommentToPixWithTagID:(NSInteger)tagID andUsername:(NSString*)username andComment:(NSString*)comment andStixStringID:(NSString*)stixStringID;
@@ -224,18 +232,17 @@
 -(KSAPIOperation*) addScaleAndRotationToPixWithAllTagID:(NSUInteger)allTagID;
     
    
--(KSAPIOperation*) adminDeleteTestDataWithDescriptor:(NSString*)descriptor;
-    
+ -(KSAPIOperation*) adminDeleteTestData;
    
  -(KSAPIOperation*) backupAllTags;
    
 -(KSAPIOperation*) clearAllTagsBeforeTagIDWithAllTagID:(NSUInteger)allTagID;
     
    
--(KSAPIOperation*) createNewPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andPendingID:(NSInteger)pendingID;
+-(KSAPIOperation*) createNewPixWithUsername:(NSString*)username andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andPendingID:(NSInteger)pendingID;
     
    
--(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocationString:(NSString*)locationString andImage:(NSData*)image andTagCoordinate:(NSData*)tagCoordinate andAuxStix:(NSData*)auxStix;
+-(KSAPIOperation*) createPixWithUsername:(NSString*)username andDescriptor:(NSString*)descriptor andImage:(NSData*)image andStixLayer:(NSData*)stixLayer andPendingID:(NSInteger)pendingID andHighResImageID:(NSUInteger)highResImageID;
     
    
 -(KSAPIOperation*) deleteTagWithAllTagID:(NSUInteger)allTagID;
@@ -276,13 +283,25 @@
 -(KSAPIOperation*) getUserPixCountWithUsername:(NSString*)username;
     
    
+-(KSAPIOperation*) setHighResImageIDWithAllTagID:(NSUInteger)allTagID andHighResImageID:(NSUInteger)highResImageID;
+    
+   
+-(KSAPIOperation*) setOriginalUsernameWithAllTagID:(NSUInteger)allTagID andOriginalUsername:(NSString*)originalUsername;
+    
+   
 -(KSAPIOperation*) touchPixWithAllTagID:(NSUInteger)allTagID andUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) touchPixToUpdateWithAllTagID:(NSUInteger)allTagID;
     
    
--(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID andDescriptor:(NSString*)descriptor;
+-(KSAPIOperation*) updateImageWithAllTagID:(NSUInteger)allTagID andImage:(NSData*)image;
+    
+   
+-(KSAPIOperation*) updatePixWithDescriptorWithAllTagID:(NSUInteger)allTagID;
+    
+   
+-(KSAPIOperation*) updateStixLayerWithAllTagID:(NSUInteger)allTagID andStixLayer:(NSData*)stixLayer;
     
    
 -(KSAPIOperation*) updateStixOfPixWithAllTagID:(NSUInteger)allTagID andAuxStix:(NSData*)auxStix;

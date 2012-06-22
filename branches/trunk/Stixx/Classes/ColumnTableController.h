@@ -9,9 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Tag.h"
 #import "EGORefreshTableHeaderView.h"
-
-#define LAZY_LOAD_BOUNDARY 0
-#define USE_PULL_TO_REFRESH 1
+#import "GlobalHeaders.h"
 
 @protocol ColumnTableControllerDelegate <NSObject>
 

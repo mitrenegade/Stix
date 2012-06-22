@@ -60,6 +60,7 @@
 @synthesize metricLogonTime;
 @synthesize lastKumulosErrorTimestamp;
 @synthesize allCommentHistories;
+@synthesize editorController;
 
 #if USING_FACEBOOK
 @synthesize fbHelper;
@@ -103,6 +104,8 @@ static dispatch_queue_t backgroundQueue;
 #endif
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+    
+    [[StixPanelView sharedStixPanelView] setDelegatePurchase:self];
 
     aggregator = [[UserTagAggregator alloc] init];
     [aggregator setDelegate:self];
@@ -309,6 +312,9 @@ static dispatch_queue_t backgroundQueue;
     friendSuggestionController = [[FriendSuggestionController alloc] init];
     [friendSuggestionController setDelegate:self];
     
+    editorController = [[StixEditorViewController alloc] init];
+    [editorController setDelegate:self];
+
     lastViewController = feedController;
     
     //[tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
@@ -351,7 +357,10 @@ static dispatch_queue_t backgroundQueue;
         
         // preemptively do user login things
         [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookID:[NSNumber numberWithInteger:myUserInfo->facebookID] andUserID:[NSNumber numberWithInteger:myUserInfo->userID] andStix:nil andTotalTags:myUserInfo->usertagtotal andBuxCount:myUserInfo->bux andStixOrder:nil];
-                
+        
+        // create shareController, share and connected lists for each service, and loads from default
+        [self initializeShareController];
+        
         [self getFollowListsForAggregation:[self getUsername]];
         didGetFollowingLists = YES;
         [self doFacebookLogin];
@@ -583,7 +592,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
                                              (unsigned long)NULL), ^(void) {
-        [feedController.carouselView reloadAllStix];
+        //[feedController.carouselView reloadAllStix];
     });
     NSLog(@"***** InitializeBadges Done: All %d Stix types initialized from kumulos! *****", [BadgeView totalStixTypes]);
     //init++;
@@ -653,11 +662,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
     
     // sharing
-    [defaults setBool:[shareController shareServiceIsConnected:@"Facebook"] forKey:@"FacebookIsConnected"];
-    [defaults setBool:[shareController shareServiceIsSharing:@"Facebook"] forKey:@"FacebookIsSharing"];
-    [defaults setBool:[shareController shareServiceIsConnected:@"Twitter"] forKey:@"TwitterIsConnected"];
-    [defaults setBool:[shareController shareServiceIsSharing:@"Twitter"] forKey:@"TwitterIsSharing"];
-    
+    if (shareController) {
+        [defaults setBool:[shareController shareServiceIsConnected:@"Facebook"] forKey:@"FacebookIsConnected"];
+        [defaults setBool:[shareController shareServiceIsSharing:@"Facebook"] forKey:@"FacebookIsSharing"];
+        [defaults setBool:[shareController shareServiceIsConnected:@"Twitter"] forKey:@"TwitterIsConnected"];
+        [defaults setBool:[shareController shareServiceIsSharing:@"Twitter"] forKey:@"TwitterIsSharing"];
+    }    
     // allStix and stixorder
     NSData * allStixData = [NSKeyedArchiver archivedDataWithRootObject:allStix];
     NSData * allStixOrderData = [NSKeyedArchiver archivedDataWithRootObject:allStixOrder];
@@ -782,6 +792,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSData * userphoto = [defaults objectForKey:@"userphoto"];
     myUserInfo_userphoto = [UIImage imageWithData:userphoto];
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
+#if ADMIN_TESTING_MODE
+    myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
+#endif
     
     // load previous followers
     NSData * followingData = [defaults objectForKey:@"allFollowing"];
@@ -874,6 +887,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [tabBarController setButtonStateSelected:pos]; // highlight button
 #if !TARGET_IPHONE_SIMULATOR
     if (pos == TABBAR_BUTTON_TAG) {
+        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
+            // force back to the feedview
+            [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
+            [tabBarController setButtonStateSelected:TABBAR_BUTTON_FEED];
+            [self agitateFirstTimePointer];
+            return;
+        }
         [self.camera setCameraOverlayView:tagViewController.view];
         
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
@@ -907,8 +927,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     NSLog(@"Function: %s", __func__);
 #endif  
     //[tabBarController setButtonStateNormal:TABBAR_BUTTON_TAG]; // highlight button
-    [feedController configureCarouselView];
-    [feedController.carouselView carouselTabDismiss:YES];
+    //[feedController configureCarouselView];
+    //[feedController.carouselView carouselTabDismiss:YES];
     if (lastViewController == feedController) {
         [self didPressTabButton:TABBAR_BUTTON_FEED];
         //[self.tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
@@ -1084,112 +1104,392 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [feedController reloadPage:i];
             added = YES;
         }
-        else 
+        else {
             added = NO;
+        }
     }
     return added;
 }
 
--(void)didCreateNewPix:(Tag *)newTag {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // when adding a tag, we add it to both our local tag structure, and to kumulos database
-
+#pragma mark tagview delegate
+-(void)didConfirmNewPix:(Tag*)newTag {
+    NSLog(@"Did confirm new pix ***********************************");
+    // user took a new picture - read to add stix
     [self didDismissSecondaryView];
     [tabBarController setSelectedIndex:0];
-    [feedController configureCarouselView];
-    [feedController.carouselView carouselTabDismiss:YES];
-        
+    
+    // display stix editor
+    NSLog(@"Displaying editor ***********************************" );
+    //if (editorController)
+    //    [editorController release];
+    //editorController = [[StixEditorViewController alloc] init];
+    //[editorController setDelegate:self];
+    
+#if 0
+    // display with an animation
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:editorController.view];
+    [editorController.view setFrame:frameOffscreen];
+    
+    // must initialize after imageView and stixView actually exist
+    [editorController initializeWithTag:newTag remixMode:REMIX_MODE_NEWPIC];
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+        // hack a way to display view over camera; formerly presentModalViewController
+        [editorController.view setFrame:frameOnscreen];
+    }];
+#else
+    [self shouldDisplayStixEditor:newTag withRemixMode:REMIX_MODE_NEWPIC];
+#endif
+
+    hasPendingStixLayerToUpload = NO;
+    readyToUploadPendingStixLayer_tagID = -1;
+
     // preemptively add to feed
     if (1)
     {
-        //[feedController.scrollView populateScrollPagesAtPage:0]; // force update first page
-        //[feedController.tableController populateScrollPagesAtPage:0];
         [feedController addTagForDisplay:newTag];
         [feedController didClickJumpButton:nil];
     }
-
-    // this function migrates toward not using the basic stix
-    newestTag = newTag;
     
+    // upload to kumulos in order to create a record ID
+    NSNumber * remixMode = [NSNumber numberWithInt:REMIX_MODE_NEWPIC];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, remixMode, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+    
+}
+
+#pragma mark StixEditor delegate
+-(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode {
+    if (!editorController)
+        NSLog(@"Error! EditorController is nil. If you try to load a nill overlay, you're gonna have a bad time.");
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [editorController.view setFrame:frameOnscreen];
+    //[self.tabBarController.view addSubview:editorController.view];
+    
+    // must initialize after imageView and stixView actually exist
+    [self.camera setCameraOverlayView:editorController.view];        
+    [editorController initializeWithTag:newTag remixMode:remixMode];
+}
+-(void)didCloseEditor {
+    [self didDismissSecondaryView];
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+        [tabBarController toggleFirstTimeInstructions:YES];
+        [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
+    }
+#if 0
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = editorController.view.frame;
+    
+    frameOffscreen.origin.x -= 330;
+    [animation doViewTransition:editorController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        [editorController.view removeFromSuperview];
+    }];
+#else
+    [editorController.view removeFromSuperview];
+    [camera setCameraOverlayView:tabBarController.view];
+#endif
+}
+
+-(void)didCloseEditorFromFeedController {
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+        [tabBarController toggleFirstTimeInstructions:YES];
+        [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
+    }
+}
+
+-(BOOL)canClickRemixButton {
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
+        return YES;
+    }
+    else if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03)) {
+        [self agitateFirstTimePointer];
+        return NO;
+    }
+    return YES;
+}
+
+-(BOOL)canClickNotesButton {
+    if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03)) {
+        [self agitateFirstTimePointer];
+        return NO;
+    }
+    return YES;
+}
+
+-(void)didClickRemixButton {
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
+        [self advanceFirstTimeUserMessage];
+        [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
+    }
+}
+
+-(void)didRemixNewPix:(Tag *)cameraTag remixMode:(int)remixMode {
+    
+    // cameraTag should have a stixLayer saved already
+
+    if (remixMode == REMIX_MODE_NEWPIC) {
+        [cameraTag setOriginalUsername:cameraTag.username];
+        // cameraTag has already been saved; just update the stixLayer
+        // at this point tag doesn't have a tagID!
+        // do not update stixlayer until a record id is created
+        if (readyToUploadPendingStixLayer_tagID != -1) {
+            //Tag * newTag = cameraTag; //.copy;
+            NSLog(@"Finished remixing and tag was already uploaded. cameraTag: %@ readyToUploadTag: %d", cameraTag.tagID, readyToUploadPendingStixLayer_tagID);
+            cameraTag.tagID = [NSNumber numberWithInt:readyToUploadPendingStixLayer_tagID];
+            if (cameraTag.stixLayer) {
+                NSData * stixLayerData = UIImagePNGRepresentation(cameraTag.stixLayer);
+                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:cameraTag, stixLayerData, nil];
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                [kh execute:@"updateStixLayer" withParams:params withCallback:@selector(khCallback_didUpdateStixLayer:) withDelegate:self];
+            }                
+            // reload - force stixLayer to appear on feed
+            [feedController reloadPageForTagID:readyToUploadPendingStixLayer_tagID];
+            
+            [self doParallelNewPixShare:cameraTag];
+        }
+        else {
+            // set this so that when the createNewPix call finishes, we upload a new stix
+            hasPendingStixLayerToUpload = YES;
+            
+            // do not share until upload is complete
+        }
+    }
+    else {
+        // cameraTag needs to update the username, but keep the original author as the descriptor and original username
+        // cameraTag is already a copy
+        Tag * newTag = cameraTag; // cameraTag.copy
+        NSLog(@"Camera username %@ original %@", cameraTag.username, cameraTag.originalUsername);
+        
+        if (![cameraTag.username isEqualToString:[self getUsername]]) {
+            // username is not cameraTag.username
+            [newTag setOriginalUsername:[cameraTag.username copy]]; // set original username to username
+            [newTag setUsername:[self getUsername]]; // change username if necessary
+            [newTag setDescriptor:[NSString stringWithFormat:@"via %@", newTag.originalUsername]];
+        }
+        else {
+            // username is cameraTag.username
+            if ([[self getUsername] isEqualToString:cameraTag.originalUsername]) {
+                [newTag setDescriptor:@""];
+                [newTag setUsername:[self getUsername]];
+            }
+            else {
+                // keep the original username
+                [newTag setUsername:[self getUsername]];
+                [newTag setDescriptor:[NSString stringWithFormat:@"via %@", newTag.originalUsername]];
+            }
+        }
+        NSLog(@"Saving remixed tag: original tagID %@ by %@, description %@, with highresID %@", newTag.tagID, newTag.username, newTag.descriptor, newTag.highResImageID);
+        
+        // if we clicked from exploreView, we need to:
+        if (lastViewController == exploreController) {
+            // close exploreView's detailview
+            [self didDismissSecondaryView];
+            // jump to feed
+            [self didPressTabButton:TABBAR_BUTTON_FEED];
+        }
+        
+        // must create preemptive tag in controller!
+        [feedController addTagForDisplay:newTag];
+        [feedController didClickJumpButton:nil];
+        
+        // upload to kumulos in order to create a DIFFERENT record ID
+        NSNumber * remixModeParam = [NSNumber numberWithInt:remixMode];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, remixModeParam, nil];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSLog(@"newTag: %@ from Tag: %@", newTag.tagID, cameraTag.tagID);
+        [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+        
+        // add to comment/history
+        NSString * name = [self getUsername];
+        NSString * newType = @"REMIX";
+        NSString * comment = @"Remixed this Pix";
+        [self didAddCommentFromDetailViewController:nil withTagID:[cameraTag.tagID intValue] andUsername:name andComment:comment andStixStringID:newType];
+    }
+    
+    // start share here: stix have been saved to tag
+    [self doParallelNewPixShare:cameraTag];
+}
+
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
+    // hack a way to do remix for all feedItem views, whether from the explore or profile
+    
+    // close profile or detail views
+    [self closeProfileView];
+    [self shouldCloseUserPage];
+    [self didDismissSecondaryView];
+    // jump to tab bar
+    [self didPressTabButton:TABBAR_BUTTON_FEED];
+    [self addTagWithCheck:tagToRemix withID:[tagToRemix.tagID intValue]];
+    
+    [feedController didClickRemixFromDetailView:tagToRemix];
+}
+
+-(void)doParallelNewPixShare:(Tag*)_tag {
+    NSLog(@"NewPixShare: resetting toggles for new created pix");
+    newPixDidClickShare = NO;
+    newPixDidFinishUpload = NO;
+    if (USE_HIGHRES_SHARE && (_tag.highResImage == nil)) {
+        // for now, skip high res share
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:_tag, nil];
+        [kh execute:@"getHighResImage" withParams:params withCallback:@selector(khCallback_didGetHighResImage:) withDelegate:self];        
+    } else {
+        // always does this: uploads the new, unstix'd tag in case
+        // user wants to just share that
+        NSLog(@"ShareController: %@", shareController);
+        [shareController startUploadImage:_tag withDelegate:self];
+    }
+    [self displayShareController];
+}
+
+-(void)khCallback_didGetHighResImage:(NSArray*)returnParams {
+    Tag * tag = [returnParams objectAtIndex:0];
+    UIImage * highResImage;
+    NSArray * theResults = [returnParams objectAtIndex:1];
+    if ([theResults count] == 0) { 
+        // high res or original picture does not exist, use tag image
+        highResImage = tag.image;
+    }
+    else {
+        NSMutableDictionary * d = [theResults objectAtIndex:0];
+        NSData * dataPNG = [d objectForKey:@"dataPNG"];
+        highResImage = [UIImage imageWithData:dataPNG];
+    }
+    [tag setHighResImage:highResImage];
+    [shareController startUploadImage:tag withDelegate:self];
+}
+
+-(void)khCallback_didUpdateStixLayer:(NSArray *)returnParams {
+    Tag * tag = [returnParams objectAtIndex:0];
+    NSLog(@"Did update stix layer for tag %@", tag.tagID);
+    readyToUploadPendingStixLayer_tagID = -1;
+    hasPendingStixLayerToUpload = NO;
+    // updates allTags and forces reload of page
+    [self addTagWithCheck:tag withID:[tag.tagID intValue] overwrite:YES];
+    [feedController jumpToPageWithTagID:[tag.tagID intValue]];
+    [feedController forceReloadWholeTableZOMG];
+}
+
+-(void)didReloadPendingPix:(Tag *)tag {
+    NSNumber * remixMode = [NSNumber numberWithInt:0];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag, remixMode, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+}
+
+-(void)khCallback_didCreateNewPix:(NSArray*)returnParams {
+    // created a new entry in allTags in Kumulos
+    
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
+        [self advanceFirstTimeUserMessage];
+    }
+    
+    // get that record and add to feed
+    NSNumber * newRecordID = [returnParams objectAtIndex:0];
+    Tag * newTag = [returnParams objectAtIndex:1]; // newTag should be a newly created tag
+    NSNumber * remixMode = [returnParams objectAtIndex:2];
+    NSNumber * oldID = newTag.tagID; // if it was a new pix, then the tagID is pendingID. 
+    
+    // we must create a new tag, because old tag is a pointer to the previous tag so if we are remixing
+    // a photo it will change the feed
+    //Tag * newTag = oldTag.copy;
+    NSLog(@"Tag's id: %@ recordID: %@", newTag.tagID, newRecordID);
+    
+    // must always update originalUsername for this tag regardless of remixMode
+    if (!newTag.originalUsername) // if not set
+        newTag.originalUsername = newTag.username;
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newRecordID, newTag.originalUsername, nil];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"setOriginalUsername" withParams:params withCallback:@selector(khCallback_didSetOriginalUsername:) withDelegate:self];
+
+    // If we have already finished editing/adding stix
+    if ( hasPendingStixLayerToUpload) {
+        // already finished modifying stix; ready to upload and share
+        // stix layer editing was finished before upload completed
+        
+        // must update the stix layer for all remix modes
+        NSData * stixLayerData = UIImagePNGRepresentation(newTag.stixLayer);
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, stixLayerData, nil];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"updateStixLayer" withParams:params withCallback:@selector(khCallback_didUpdateStixLayer:) withDelegate:self];   
+
+        // share since we have completed editing
+        [self doParallelNewPixShare:newTag];
+    }
+    // if we have not finished editing stix
+    else {
+        readyToUploadPendingStixLayer_tagID = [newRecordID intValue];        
+    }
+    
+    if ([remixMode intValue] != REMIX_MODE_NEWPIC) {
+        // add comment: "Remixed this Pix via..." to original tag
+        NSLog(@"NewTag: name %@ original %@ myname %@", newTag.username, newTag.originalUsername, [self getUsername]);
+        NSString * name = [self getUsername];
+        NSString * newType = @"REMIX";
+        NSString * comment;
+        if (newTag.originalUsername && [newTag.originalUsername length] > 0 && ![name isEqualToString:newTag.originalUsername]) {
+            comment = @"Remixed this Pix";
+            [self didAddCommentFromDetailViewController:nil withTagID:[oldID intValue] andUsername:name andComment:comment andStixStringID:newType];
+        }
+        // send remix notification if not own pix
+        if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
+            NSString * message = [NSString stringWithFormat:@"%@ remixed your Pix.", myUserInfo_username];
+            NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:newTag.originalUsername] intValue]];
+            [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newTag.tagID];  
+        }
+    }
+    
+    bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
+    // hack: addTagWithCheck changes a pendingID from a negative number (-1, -2...) to the actual number
+    // so we have to store it inside Tag in order for finishedCreateNewPix to remove it
+    if (added)
+    {
+        NSLog(@"Added new record to kumulos: tag id %@ with pending ID: %@", newRecordID, oldID);
+        [feedController finishedCreateNewPix:newTag withPendingID:[oldID intValue]];
+        //[feedController forceReloadWholeTableZOMG];
+    }
+    else {
+        NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
+        [feedController finishedCreateNewPix:newTag withPendingID:[oldID intValue]];
+    }    
     /*** automatic sharing and background uploading ***/
     /* New functionality: display the ShareController and allow user
      * to enter a caption and select automatic sharing options.
      * In the background, we should also perform uploading to stixmobile.com
      */
     // display share options controller and start upload
-    [self doParallelNewPixShare:newTag];
+    //[self doParallelNewPixShare:newTag];
     
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newTag, nil];
-    KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
-
-    NSString * loc = newTag.locationString;
-    if ([loc length] > 0)
-        [self rewardLocation];
-    
-    [Appirater userDidSignificantEvent:YES];
-}
--(void)doParallelNewPixShare:(Tag*)_tag {
-    NSLog(@"NewPixShare: resetting toggles for new created pix");
-    newPixDidClickShare = NO;
-    newPixDidFinishUpload = NO;
-    [shareController startUploadImage:_tag withDelegate:self];
-    [self displayShareController:_tag];
-}
-
--(void)didReloadPendingPix:(Tag *)tag {
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag, nil];
-    KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
-}
-
-//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createNewPixDidCompleteWithResult:(NSNumber *)newRecordID {
--(void)khCallback_didCreateNewPix:(NSArray*)returnParams {
-    // get that record and add to feed
-    NSNumber * newRecordID = [returnParams objectAtIndex:0];
-    [k getNewlyCreatedPixWithAllTagID:[newRecordID intValue]];
-    
-    // update aggregator
-    [aggregator insertNewTagID:newRecordID];
-    
-    // send notification
-    NSString * message = [NSString stringWithFormat:@"%@ added a new photo to remix.", myUserInfo_username];
-    NSString * channel = [NSString stringWithFormat:@"From%@", [[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]];
-    NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-    channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
-    
-    // DO NOT SEND newpix NOTIFICATIONS for now
-    //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWPIX withTag:newRecordID];
-    
-/*
-    // this tagID is necessary for the shareController to work - if we have a comment
-    [newestTag setTagID:newRecordID];
-    [newestTag setTimestamp:[NSDate date]]; // set a temporary date because we are adding newestTag that does not have a kumulos timestamp
-    [self displayShareController:newestTag];
- */
-}
-
--(void)kumulosHelperCreateNewPixDidFail:(Tag *)failedTag {
-    [feedController showReloadPendingPix:failedTag];
-}
-
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewlyCreatedPixDidCompleteWithResult:(NSArray *)theResults {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    
-    NSMutableDictionary * d = [theResults objectAtIndex:0];
-    Tag * newTag = [Tag getTagFromDictionary:d];
-    NSNumber * newRecordID = newTag.tagID;
-    NSNumber * pendingID = [d objectForKey:@"pendingID"];
-    NSLog(@"New pix created: id %d pendingID %d", [newRecordID intValue], [pendingID intValue]);
+    // save large image to large image database
+    if ([remixMode intValue] == REMIX_MODE_NEWPIC) {
+        // new picture; add high res pic to database
+        UIImage * hiResImg = newTag.highResImage;
+        if (hiResImg != nil) { //USE_HIGHRES_SHARE && (hiResImg != nil)) {
+            NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
+            NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:largeImgData, newRecordID, nil];
+            KumulosHelper * kh = [[KumulosHelper alloc] init];
+            [kh execute:@"addHighResPix" withParams:params withCallback:@selector(khCallback_didAddHighResPix:) withDelegate:self];
+        }
+    }
+    else {
+        NSNumber * highResID = [newTag highResImageID];
+        if (highResID) {
+            NSLog(@"No high res id set for tag %@!", newTag.tagID);
+            NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:highResID, newTag.tagID, nil];
+            NSLog(@"setHighResImageID: highresID: %@ newTagID: %@", highResID, newTag.tagID);
+            KumulosHelper * kh = [[KumulosHelper alloc] init];
+            [kh execute:@"setHighResImageID" withParams:params withCallback:@selector(khCallback_didSetHighResImageID:) withDelegate:self];
+        }
+    }
     
     // touch tag to indicate it was updated
     // force timeUpdated to exist - if there's no stix this will be 0 otherwise
-    [k touchPixToUpdateWithAllTagID:[newTag.tagID intValue]];
-
+    [k touchPixToUpdateWithAllTagID:[newRecordID intValue]];
+    
     // metrics
 #if !USING_FLURRY
     NSString * metricName = @"CreatePix";
@@ -1197,30 +1497,39 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #else
     [FlurryAnalytics logEvent:@"CreatePix" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", newRecordID, @"tagID", nil]];
 #endif
-    // save large image to large image database
-    if (0) {
-        UIImage * hiResImg = [[ImageCache sharedImageCache] imageForKey:@"largeImage"];
-        NSData * largeImgData = UIImageJPEGRepresentation(hiResImg, .95); 
-        [k addHighResPixWithDataPNG:largeImgData andTagID:[newRecordID intValue]];
-    }
+
+    [Appirater userDidSignificantEvent:YES];
+    
     // add tagID to pixBelongsToUser table, with error handling
-    //[k addPixBelongsToUserWithUsername:[self getUsername] andTagID:[newRecordID intValue]];
-    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects: myUserInfo_username, newRecordID, nil];
+    NSMutableArray * params2 = [[NSMutableArray alloc] initWithObjects: myUserInfo_username, newRecordID, nil];
+    KumulosHelper * kh2 = [[KumulosHelper alloc] init];
+    [kh2 execute:@"addPixBelongsToUser" withParams:params2 withCallback:nil withDelegate:self];
+    
+    // update aggregator
+    [aggregator insertNewTagID:newRecordID];
+        
+    [feedController forceReloadWholeTableZOMG];
+    [feedController jumpToPageWithTagID:[newRecordID intValue]];
+}
+
+-(void)khCallback_didSetOriginalUsername:(NSMutableArray*)returnParams {
+    //NSlog(@"DidSetOriginalUsername for tagID %@ to %@");
+    NSLog(@"Did set original usernamne!");
+}
+
+-(void)kumulosHelperCreateNewPixDidFail:(Tag *)failedTag {
+    [self showAlertWithTitle:@"Low Connectivity" andMessage:@"Stix is having trouble uploading your image." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    [feedController showReloadPendingPix:failedTag];
+}
+
+-(void)khCallback_didAddHighResPix:(NSMutableArray *)returnParams {
+    NSNumber * highResID = [returnParams objectAtIndex:0];
+    NSNumber * tagID = [returnParams objectAtIndex:1];
+    NSLog(@"High res pic for tagID %d uploaded! high res id %d", [tagID intValue], [highResID intValue]);
+    
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:highResID, tagID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
-    [kh execute:@"addPixBelongsToUser" withParams:params withCallback:nil withDelegate:self];
-    
-    bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
-    if (added)
-    {
-        NSLog(@"Added new record to kumulos: tag id %d", [newRecordID intValue]);
-        [feedController finishedCreateNewPix:newTag withPendingID:[pendingID intValue]];
-    }
-    else
-        NSLog(@"Error! New record has duplicate tag id: %d", [newRecordID intValue]);
-    
-    // do not add scale and rotation - all saved in aux stix
-    [self updateUserTagTotal];
-    
+    [kh execute:@"setHighResImageID" withParams:params withCallback:@selector(khCallback_didSetHighResImageID:) withDelegate:self];
 }
 
 -(void)uploadImageFinished {
@@ -1263,11 +1572,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             break;
         }
     }
-}
-
--(void) kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation addHighResImageDidCompleteWithResult:(NSArray *)theResults {
-    NSLog(@"High res pic uploaded!");
-    NSLog(@"TheResults: %d", [theResults count]);
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
@@ -1323,6 +1627,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // assume result is ordered by allTagID
         for (NSMutableDictionary * d in theResults) {
             Tag * tag = [Tag getTagFromDictionary:d]; // MRC
+            if ([tag.tagID intValue] == 5138)
+                NSLog(@"Tag %@: user %@ desc %@", tag.tagID, tag.username, tag.descriptor);
             int new_id = [tag.tagID intValue];
             didAddTag = [self addTagWithCheck:tag withID:new_id];
             if (didAddTag)
@@ -1356,7 +1662,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
         }
         [feedController reloadCurrentPage]; // allTags were already updated
-        [feedController configureCarouselView];
+        //[feedController configureCarouselView];
         [self updateCommentCount:[notificationTagID intValue]];
         if (notificationBookmarkType == NB_NEWCOMMENT) {
             [feedController openCommentForPageWithTagID:notificationTagID];
@@ -1398,11 +1704,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     if ([theResults count]>0) {
-        //dispatch_async(backgroundQueue, ^{
-            Tag * tag = [Tag getTagFromDictionary:[theResults objectAtIndex:0]] ;
-            NSLog(@"Processing tags with id: %d",[[tag tagID] intValue]);
-            [self processTagsWithIDRange:theResults];
-        //});
+        //Tag * tag = [Tag getTagFromDictionary:[theResults objectAtIndex:0]] ;
+        //NSLog(@"Processing tags with id: %d",[[tag tagID] intValue]);
+        [self processTagsWithIDRange:theResults];
     }
     else {
         NSLog(@"Processing results: none exist!");
@@ -1477,22 +1781,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         int newestTagOnServer = [aggregator getNewestTag];
         NSArray * newerTagsToGet = [aggregator getTagIDsGreaterThanTagID:newestTagOnServer-1 totalTags:-1];
         NSLog(@"didFinishAggregation newestTagOnServer %d tagIDs aggregated %d", newestTagOnServer, [newerTagsToGet count]);
-        for (NSNumber * tagID in newerTagsToGet) {
-            NSLog(@"First time requesting aggregated tags: newer tags %d", [tagID intValue]);
-#if 0
-            [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
-#else
-            [self getTagWithID:[tagID intValue]];
-#endif
+        if (newerTagsToGet && [newerTagsToGet count]>0) {
+            for (NSNumber * tagID in newerTagsToGet) {
+                NSLog(@"First time requesting aggregated tags: newer tags %d", [tagID intValue]);
+                [self getTagWithID:[tagID intValue]];
+            }
         }
         NSArray * olderTagsToGet = [aggregator getTagIDsLessThanTagID:newestTagOnServer totalTags:5];
-        for (NSNumber * tagID in olderTagsToGet) {
-            NSLog(@"First time requesting aggregated tags: older tags %d", [tagID intValue]);
-#if 0
-            [k getAllTagsWithIDRangeWithId_min:[tagID intValue]-1 andId_max:[tagID intValue]+1];
-#else
-            [self getTagWithID:[tagID intValue]];
-#endif
+        if (olderTagsToGet && [olderTagsToGet count] > 0) {
+            for (NSNumber * tagID in olderTagsToGet) {
+                NSLog(@"First time requesting aggregated tags: older tags %d", [tagID intValue]);
+                [self getTagWithID:[tagID intValue]];
+            }
         }
     }
     else {
@@ -1505,11 +1805,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         for (int i=0; i<[newerTagsToGet count]; i++) {
             int tID = [[newerTagsToGet objectAtIndex:i] intValue];
             NSLog(@"GetAllTagsWithIDRange called for single tag %d", tID);
-#if 0
-            [k getAllTagsWithIDRangeWithId_min:tID-1 andId_max:tID+1];
-#else
             [self getTagWithID:tID];
-#endif
         }
     }
 }
@@ -1680,6 +1976,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSLog(@"Kumulos: Adding comment to tagID %d", tagID);
     }
     
+    // notifications
     if ([stixStringID isEqualToString:@"LIKE"]) {
         // comment from the Like Toolbar
         
@@ -1698,14 +1995,28 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
                 NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
-                NSLog(@"allUserIDs: %d objects Id %d for tagName %@", [allUserIDs count], [[allUserIDs objectForKey:tagName] intValue], tagName);
-                NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tagName] intValue]];
-                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+                NSLog(@"allUserIDs: %d objects Id %d for tagName %@", [allUserIDs count], [[allUserIDs objectForKey:tag.username] intValue], tag.username);
+                NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tag.username] intValue]];
                 [self Parse_sendBadgedNotification:actionMsg OfType:NB_NEWCOMMENT toChannel:channel withTag:tag.tagID];  
             }
         }
+        [FlurryAnalytics logEvent:@"Liked" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", comment, @"likeType", nil]];
     }
+    /*
+    else if ([stixStringID isEqualToString:@"REMIX"]) { //![comment isEqualToString:@""]) {
+        // notify
+        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
+        if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
+        {
+            // todo: make an NB_REMIX notification type to jump to remixed photo
+            NSString * message = [NSString stringWithFormat:@"%@ remixed your Pix", myUserInfo_username];
+            NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:tag.username] intValue]];
+            [self Parse_sendBadgedNotification:message OfType:NB_MESSAGE toChannel:channel withTag:tag.tagID];
+        }
+        // metrics
+        [FlurryAnalytics logEvent:@"CommentAdded" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", comment, @"comment", nil]];
+    }
+     */
     else if ([stixStringID isEqualToString:@"COMMENT"]) { //![comment isEqualToString:@""]) {
         // actual comment
         
@@ -1716,7 +2027,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
                 NSString * tagName = [tag.username stringByReplacingOccurrencesOfString:@" " withString:@""];
-                NSNumber * userID = [allUserIDs objectForKey:tagName];
+                NSNumber * userID = [allUserIDs objectForKey:tag.username];
                 NSString * channel = [NSString stringWithFormat:@"To%d", [userID intValue]];
                 if (!userID || [userID intValue] == 0) {
                     NSLog(@"Invalid user number being used for channel!");
@@ -1787,7 +2098,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];        
         NSString * commentStixStringID = [d valueForKey:@"stixStringID"];
-        if ([commentStixStringID length] == 0 || [commentStixStringID isEqualToString:@"COMMENT"]) {
+        if ([commentStixStringID length] == 0 || [commentStixStringID isEqualToString:@"COMMENT"] || [commentStixStringID isEqualToString:@"LIKE"]) {
             // stix type is -1 or "COMMENT", so this must be a comment
             NSString * comment = [d valueForKey:@"comment"];
             if ([comment length] > 0) {
@@ -1853,7 +2164,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allUserEmails addObject:[d valueForKey:@"email"]];
             [allUserNames addObject:name];
             [allUserIDs setObject:userID forKey:name];
-            //NSLog(@"AllUserIDS: %@ %d", userID, [userID intValue]);
+            //NSLog(@"AllUserIDS: %@ %d", name, [userID intValue]);
         }
     });
 }
@@ -1895,7 +2206,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -1929,8 +2240,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self.camera setCameraOverlayView:self.tabBarController.view];
     
     frameOffscreen.origin.x -= 330;
-    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [profileController.view removeFromSuperview];
+        [feedController unlockProfile];
 //        [self.camera setCameraOverlayView:self.tabBarController.view];
     }];
     /*
@@ -2020,7 +2332,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }];
 #endif    
-    //NSData * img = UIImageJPEGRepresentation(rounded, .8);
     NSData * img = UIImagePNGRepresentation(rounded);
     [profileController.photoButton setImage:rounded forState:UIControlStateNormal];
     [self didChangeUserphoto:rounded];
@@ -2145,9 +2456,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         isShowingFriendSuggestions = YES; // following lists are used to initialize friend suggestion page so we want to lock other functions
     }
 #endif
-    
-    // create shareController, share and connected lists for each service, and loads from default
-    [self initializeShareController];
 
     // check for user stage saved in UserDefaults
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -2166,6 +2474,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookID:facebookID andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
+    
+    // create shareController, share and connected lists for each service, and loads from default
+    [self initializeShareController];
     
     // login to parse only if facebook has correctly logged in. this ensures that the userID being saved to myUserInfo is the correct one
     if (notificationDeviceToken) {
@@ -2484,8 +2795,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
    
-    [feedController configureCarouselView];
-    [feedController.carouselView carouselTabDismiss:YES];
+    //[feedController configureCarouselView];
+    //[feedController.carouselView carouselTabDismiss:YES];
     
     // touch tag to indicate it was updated
     [k touchPixToUpdateWithAllTagID:[tag.tagID intValue]];
@@ -2510,7 +2821,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     // immediately add comment, update total, decrement stix count
-    [self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
+    //[self didAddCommentWithTagID:[tag.tagID intValue] andUsername:myUserInfo_username andComment:@"" andStixStringID:stixStringID]; // this adds to history item
     [self updateUserTagTotal];        
     
     // metrics
@@ -2629,7 +2940,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (loggedIn == YES)
     {
         //NSLog(@"[delegate getUsername] returning %@", username);
-        return myUserInfo_username;
+        return [myUserInfo_username copy];
     }
     //NSLog(@"[delegate getUsername] returning anonymous");
     return @"anonymous";
@@ -2682,17 +2993,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)rewardBux {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
+    /*
     NSString * title = @"Active Stix User";
     int amount = 5;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
-    //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-    //[self changeBuxCountByAmount:amount];
+     */
 }
 
 -(void)didEarnFacebookReward:(int)bux {
+    /*
     if (bux == 10) {
         NSString * title = @"Invite Complete";
         [tabBarController doRewardAnimation:title withAmount:bux];
@@ -2701,6 +3010,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSString * title = @"Shared Picture";
         [tabBarController doRewardAnimation:title withAmount:bux];
     }
+     */
 }
 -(void)didFinishRewardAnimation:(int)amount {
 #if DEBUGX==1
@@ -2709,14 +3019,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self changeBuxCountByAmount:amount];
 }
 -(void)rewardLocation {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
+    /*
     NSString * title = @"Location Added";
     int amount = 1;
     [self.tabBarController doRewardAnimation:title withAmount:amount];
-    //[self showAlertWithTitle:@"Award!" andMessage:[NSString stringWithFormat:@"You have been awarded five Bux!"] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-    //[self changeBuxCountByAmount:amount];
+     */
 }
 
 -(void)updateUserTagTotal {
@@ -2726,10 +3033,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // update usertagtotal
     myUserInfo->usertagtotal += 1;
     [k updateTotalTagsWithUsername:myUserInfo_username andTotalTags:myUserInfo->usertagtotal];
-    if ((myUserInfo->usertagtotal % 5) == 0) {
-        [self rewardBux];
-        //[self reloadAllCarousels];
-    }
+    //if ((myUserInfo->usertagtotal % 5) == 0) {
+    //    [self rewardBux];
+    //}
 #if USING_KIIP
     [[KPManager sharedManager] updateScore:usertagtotal onLeaderboard:@"topDailyStixter"];
 #endif
@@ -2815,12 +3121,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // set whether facebook is connected based on session
     //if ([fbHelper facebookHasSession]) {
     BOOL bConnected = [fbHelper facebookHasSession];
+    NSLog(@"Facebook bConnected: %d", bConnected);
     [shareController shareServiceShouldConnect:bConnected forService:@"Facebook"];
-    // set whether facebook is sharing based on defaults
-    sharing = [defaults objectForKey:@"FacebookIsSharing"]; 
-    if (sharing) {
-        BOOL isSharing = [sharing boolValue];
-        [shareController shareServiceShouldShare:isSharing forService:@"Facebook"];
+    if (bConnected) {
+        // set whether facebook is sharing based on defaults
+        sharing = [defaults objectForKey:@"FacebookIsSharing"]; 
+        if (sharing) {
+            BOOL isSharing = [sharing boolValue];
+            [shareController shareServiceShouldShare:isSharing forService:@"Facebook"];
+        }
     }
     
     // set whether twitter is connect based on defaults
@@ -2828,27 +3137,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (connected) 
     {
         BOOL bConnected = [connected boolValue];
-        NSLog(@"bConnected: %d", bConnected);
+        NSLog(@"Twitter bConnected: %d", bConnected);
         [shareController shareServiceShouldConnect:bConnected forService:@"Twitter"];
-    }
-    // set whether twitter is sharing based on defaults
-    sharing = [defaults objectForKey:@"TwitterIsSharing"]; 
-    if (sharing) {
-        BOOL bSharing = [sharing boolValue];
-        NSLog(@"bSharing: %d", bSharing);
-        [shareController shareServiceShouldShare:bSharing forService:@"Twitter"];
+        if (bConnected) {
+            // set whether twitter is sharing based on defaults
+            sharing = [defaults objectForKey:@"TwitterIsSharing"]; 
+            if (sharing) {
+                BOOL bSharing = [sharing boolValue];
+                NSLog(@"bSharing: %d", bSharing);
+                [shareController shareServiceShouldShare:bSharing forService:@"Twitter"];
+            }
+        }
     }
 }
--(void)displayShareController:(Tag*)tag {
-#if 0
-    UIImage * result = [tag tagToUIImage];
-    NSData *png = UIImagePNGRepresentation(result);
-    [shareController setImage:result];
-    [shareController setPNG:png];
-    [shareController setTagID:[tag.tagID intValue]];
-    [shareController setDelegate:self];
-#endif
-    
+-(void)displayShareController {
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
     [self.tabBarController.view addSubview:shareController.view];
@@ -2856,7 +3158,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
@@ -2893,7 +3195,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
         StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+        [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
         }];
 #else
         [self didDismissSecondaryView];
@@ -2945,7 +3247,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:userProfileController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:userProfileController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];    // does not need delegate function
     // must force viewDidAppear because it doesn't happen when it's offscreen?
     [userProfileController viewDidAppear:YES]; 
@@ -2962,12 +3264,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[self.tabBarController.view addSubview:userProfileController.view];
     //[self.camera setCameraOverlayView:self.tabBarController.view];
     
-    [animation doViewTransition:userProfileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:userProfileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [userProfileController.view removeFromSuperview];
+        [feedController unlockProfile];
     }];
 }
 
 -(void)shouldCloseShareController:(BOOL)didClickDone {
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+        //[tabBarController toggleFirstTimeInstructions:YES];
+        [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
+    }
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = shareController.view.frame;
@@ -2975,10 +3282,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     if (didClickDone) {
         if (newPixDidFinishUpload) {
-            NSLog(@"NewPixShare: Did click done: upload already finished");
+            //NSLog(@"NewPixShare: Did click done: upload already finished");
             [shareController doSharePix];
         }
         else {
+            // wait for shareController to finish the update
             newPixDidClickShare = YES;
             NSLog(@"NewPixShare: Clicked share; waiting for upload");
         }
@@ -2992,7 +3300,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }    
 
-    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [shareController.view removeFromSuperview];
 
         // check for first time user experience
@@ -3001,6 +3309,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }];
 
+}
+
+-(void)sharePixDialogDidFail:(int)errorType {
+    [self didCloseShareSheet];
+    if (errorType == 0) {
+        // upload picture malfunction
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
+    else if (errorType == 1) {
+        // asihttp request timeout
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Low Connectivity" message:@"Could not complete your Share request. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
 }
 
 -(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray *)addedFriends {
@@ -3026,7 +3348,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
     
-    [animation doViewTransition:friendSuggestionController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:friendSuggestionController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [friendSuggestionController.view removeFromSuperview];
 
         isShowingFriendSuggestions = NO;
@@ -3071,7 +3393,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:twitterDialog.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:twitterDialog.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
 #else
     // Create the item to share (in this example, a url)
@@ -3088,7 +3410,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)twitterDialogDidFinish {
     CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [twitterDialog.view removeFromSuperview];
         twitterDialog = nil;
     }];
@@ -3163,6 +3485,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     [[CarouselView sharedCarouselView] reloadAllStix];
+    [[StixPanelView sharedStixPanelView] reloadAllStix];
 }
 
 -(void)didPressAdminEasterEgg:(NSString *)view {
@@ -3177,11 +3500,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self showAlertWithTitle:@"Authorized Access Only" andMessage:@"" andButton:@"Cancel" andOtherButton:@"Stix it to the Man" andAlertType:ALERTVIEW_PROMPT];
     }
     else if ([view isEqualToString:@"FeedView"]) {
-#if USING_KIIP
-        [[KPManager sharedManager] unlockAchievement:@"1"];
-#else
-        [self rewardLocation];
-#endif
     }
 }
 
@@ -3242,7 +3560,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self.tabBarController.view addSubview:buxPurchaseMenu];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    [animation doViewTransition:buxPurchaseMenu toFrame:frameInside forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:buxPurchaseMenu toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished){
         [self.window addSubview:[buxPurchaseButtons objectAtIndex:0]];
         [self.window addSubview:[buxPurchaseButtons objectAtIndex:1]];
         [self.window addSubview:[buxPurchaseButtons objectAtIndex:2]];
@@ -3271,7 +3589,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    [animation doViewTransition:buxPurchaseMenu toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:buxPurchaseMenu toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished){
         [buxPurchaseMenu removeFromSuperview];
         buxPurchaseMenu = nil;
         for (int i=0; i<3; i++) {
@@ -3362,8 +3680,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     NSLog(@"GetTagWithID: %d", tagID);
-    if ([allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]) {
-        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]];
+    Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]];
+    if (tag) {
         NSMutableDictionary * dict = [Tag tagToDictionary:tag];
         [self processTagsWithIDRange:[[NSMutableArray alloc] initWithObjects:dict, nil]];
 //        [feedController forceReloadWholeTableZOMG];
@@ -3379,69 +3697,59 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
-    
-    //return;
+#if ADMIN_TESTING_MODE
+    return;
+#endif
     
     /*** Parse service ***/
 #if 1
     NSLog(@"Parse_createsubscriptions: creating request");
     PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionRequests"];
     [testObject setObject:myUserInfo_username forKey:@"username"];
+    [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
     [testObject save];
 #endif
     
     Parse_subscribedChannels = [[NSMutableSet alloc] init];
-    /*
-    [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
-        NSEnumerator * e = [channels objectEnumerator];
-        id element;
-        NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: unsubscribing this device from: "];
-        while (element = [e nextObject]) {
-            // add subscribed channels to array
-            [Parse_subscribedChannels addObject:element];
-        }
-     */
-        NSError * err = nil;
-        //dispatch_async(backgroundQueue, ^{
+    NSError * err = nil;
     NSLog(@"Parse_createsubscriptions: starting createsubscriptions");
-            [self Parse_subscribeToChannel:@""];
-        //});
-        if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
-        {
-            // a To channel is where people send messages to
-            NSString * channelString = [NSString stringWithFormat:@"To%d", myUserInfo->userID];
+    [self Parse_subscribeToChannel:@""];
+    if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
+    {
+        // a To channel is where people send messages to
+        NSString * channelString = [NSString stringWithFormat:@"To%d", myUserInfo->userID];
 #if 1
-            [self Parse_subscribeToChannel:channelString]; // subscribe to my channel
+        [self Parse_subscribeToChannel:channelString]; // subscribe to my channel
 #else
-            NSLog(@"Trying to subscribe to %@", channelString);
-            [PFPush subscribeToChannelInBackground:channelString block:^(BOOL succeeded, NSError *error) {
-                if (succeeded)
-                {
-                    // display channels
-                    [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
-                        NSEnumerator * e = [channels objectEnumerator];
-                        id element;
-                        NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: subscribing this device to: "];
-                        while (element = [e nextObject]) {
-                            [channelsString appendString:element];
-                            [channelsString appendString:@" "];
-                        }
-                        if (error)
-                            NSLog(@"%@ with error: %@", channelsString, [error description]);
-                        else {
-                            NSLog(@"%@", channelsString);
-                        }
-                        //[channelsString autorelease]; // arc conversion
-                    }];
-                }
-                else
-                    NSLog(@"Subscribing to channel: %@ returning with errors: %@", channel_, [error description]);
-            }];
+        NSLog(@"Trying to subscribe to %@", channelString);
+        [PFPush subscribeToChannelInBackground:channelString block:^(BOOL succeeded, NSError *error) {
+            if (succeeded)
+            {
+                // display channels
+                [PFPush getSubscribedChannelsInBackgroundWithBlock:^(NSSet *channels, NSError *error) {
+                    NSEnumerator * e = [channels objectEnumerator];
+                    id element;
+                    NSMutableString * channelsString = [[NSMutableString alloc] initWithString:@"Parse: subscribing this device to: "];
+                    while (element = [e nextObject]) {
+                        [channelsString appendString:element];
+                        [channelsString appendString:@" "];
+                    }
+                    if (error)
+                        NSLog(@"%@ with error: %@", channelsString, [error description]);
+                    else {
+                        NSLog(@"%@", channelsString);
+                    }
+                    //[channelsString autorelease]; // arc conversion
+                }];
+            }
+            else
+                NSLog(@"Subscribing to channel: %@ returning with errors: %@", channel_, [error description]);
+        }];
 #endif
-            
-            // broadcast to everyone that you are online
-            //[self Parse_sendBadgedNotification:[self getUsername] OfType:NB_ONLINE toChannel:@"" withTag:nil];
-        } // if ([self username] !isEqualTo:@"anonymous")..
+        
+        // broadcast to everyone that you are online
+        //[self Parse_sendBadgedNotification:[self getUsername] OfType:NB_ONLINE toChannel:@"" withTag:nil];
+    } // if ([self username] !isEqualTo:@"anonymous")..
     //}]; // subscribe in background
 }
 -(void) Parse_subscribeToChannel:(NSString*) channel {
@@ -3452,16 +3760,26 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Parse: subscribing to channel <%@>", channel_);
     [PFPush subscribeToChannelInBackground:channel_ block:^(BOOL succeeded, NSError *error) {
         if (succeeded) {
-            NSLog(@"Parse: Subscribed to channel <%@>", channel_);
+            NSString * subscribeString = [NSString stringWithFormat:@"Parse: Subscribed to channel <%@>", channel_];
+            NSLog(@"%@", subscribeString);
+#if ADMIN_TESTING_MODE
+            [self showAlertWithTitle:@"Test" andMessage:subscribeString andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+#endif
             [Parse_subscribedChannels addObject:channel];
             PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionSuccess"];
             [testObject setObject:myUserInfo_username forKey:@"username"];
+            [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
+            [testObject setObject:channel_ forKey:@"channel"];
             [testObject save];
         }
         else {
-            NSLog(@"Parse: Could not subscribe to <%@>: error %@", channel_, [error localizedDescription]);
+            NSString * errorString = [NSString stringWithFormat:@"Parse: Could not subscribe to <%@>: error %@", channel_, [error localizedDescription]];
+            NSLog(@"%@", errorString);
+            [self showAlertWithTitle:@"Test" andMessage:errorString andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionFailure"];
             [testObject setObject:myUserInfo_username forKey:@"username"];
+            [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
+            [testObject setObject:channel_ forKey:@"channel"];
             [testObject save];
         }
     }];
@@ -3666,6 +3984,10 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
     NSLog(@"Function: %s", __func__);
 #endif  
     if (notificationTagID == nil) { //== -1) {
+        if (notificationBookmarkType == NB_MESSAGE) {
+            // only display message
+            [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+        }
         if (notificationBookmarkType == NB_NEWFOLLOWER) {
             // only display message
             [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
@@ -3890,12 +4212,11 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)updateBuxCount {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
+    /*
     // display bux on feed?
     [[feedController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
     [[exploreController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
+     */
 }
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
@@ -3939,7 +4260,7 @@ static bool isShowingAlerts = NO;
        // MRC  
     [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
     
-    [self changeBuxCountByAmount:-5];
+    //[self changeBuxCountByAmount:-5];
     
     // metric
 #if !USING_FLURRY
@@ -4133,8 +4454,13 @@ static bool isShowingAlerts = NO;
     [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
     [tabBarController toggleFirstTimeInstructions:NO];
 }
+-(void)hideFirstTimeArrowForShareController {
+    [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
+}
+
 -(void)agitateFirstTimePointer {
     [tabBarController agitateFirstTimePointer];
+    [tabBarController flashFirstTimeInstructions];
 }
 -(void)advanceFirstTimeUserMessage {
     myUserInfo->firstTimeUserStage++;
@@ -4142,8 +4468,15 @@ static bool isShowingAlerts = NO;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
     [defaults synchronize];
+    
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) 
+        [feedController forceReloadWholeTableZOMG];
 }
-
+-(void)didCloseFirstTimeMessage {
+    // if user clicks on the 2nd message (remix)
+    //if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)
+    //    [self advanceFirstTimeUserMessage];
+}
 #pragma mark share pix sheet
 
 -(void)didDisplayShareSheet {
@@ -4173,8 +4506,8 @@ static bool isShowingAlerts = NO;
     CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    //int buxAnimationClose = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameOutside forTime:.5];
-    [animation doViewTransition:buxInstructions toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished) {
+    //int buxAnimationClose = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameOutside forTime:.25];
+    [animation doViewTransition:buxInstructions toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished) {
         [buxInstructions removeFromSuperview];
         [buttonBuxStore removeFromSuperview];
         [buttonBuxInstructionsClose removeFromSuperview];
@@ -4213,8 +4546,8 @@ static bool isShowingAlerts = NO;
     [self.tabBarController.view addSubview:buxInstructions];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    //int buxAnimationOpen = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameInside forTime:.5];
-    [animation doViewTransition:buxInstructions toFrame:frameInside forTime:.5 withCompletion:^(BOOL finished) {
+    //int buxAnimationOpen = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameInside forTime:.25];
+    [animation doViewTransition:buxInstructions toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished) {
         // bux purchase menu
             //[self.tabBarController.view addSubview:buttonBuxStore];
             [self.tabBarController.view addSubview:buttonBuxInstructionsClose];   
@@ -4231,19 +4564,19 @@ static bool isShowingAlerts = NO;
             [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID]; 
         }
         
-        [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+        [[StixPanelView sharedStixPanelView] unlockPremiumPack:stixPackName usingStixStringID:nil];
     }
 }
 
--(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
-    NSLog(@"Did purchase premium pack: %@", stixPackName);
+-(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName usingStixStringID:(NSString*)stixStringID {
+    NSLog(@"Prompting to purchase premium pack: %@ after using stix %@", stixPackName, stixStringID);
     
 #if 0 // beta
     // add purchase to kumulos
     [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
     
     // force carouselview to update
-    [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+    [[StixPanelView sharedStixPanelView] unlockPremiumPack:stixPackName];
     
     // animate
     NSString *firstChar = [stixPackName substringToIndex:1];
@@ -4259,7 +4592,6 @@ static bool isShowingAlerts = NO;
     
 #if USING_MKSTOREKIT
     NSString * purchaseID = @"collection.Hipster";
-    mkStoreKitSuccess = NO;
     [[MKStoreManager sharedManager] buyFeature:purchaseID
                                     onComplete:^(NSString* purchasedFeature, NSData * data)
      {
@@ -4270,7 +4602,7 @@ static bool isShowingAlerts = NO;
          [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
          
          // force carouselview to update
-         [[CarouselView sharedCarouselView] unlockPremiumPack:stixPackName];
+         [[StixPanelView sharedStixPanelView] unlockPremiumPack:stixPackName usingStixStringID:stixStringID];
          
          // animate
          NSString *firstChar = [stixPackName substringToIndex:1];
@@ -4289,6 +4621,10 @@ static bool isShowingAlerts = NO;
                                     onCancelled:^
      {
          // User cancels the transaction, you can log this using any analytics software like Flurry.
+         
+         // clear the activity indicator
+         [[StixPanelView sharedStixPanelView] unlockPremiumPack:nil usingStixStringID:nil];
+         
 #if !USING_FLURRY
          NSString * metricName = @"CancelledPurchase";
          NSString * firstChar = [stixPackName substringToIndex:1];

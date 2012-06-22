@@ -23,7 +23,7 @@ static ShareController *sharedShareController;
 @synthesize tableView;
 @synthesize delegate;
 @synthesize shareURL, shareImageURL, shareCaption;
-@synthesize tag; // PNG, image, tagID;
+@synthesize tag, PNG, image;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -64,7 +64,9 @@ static ShareController *sharedShareController;
 
 -(void)viewDidAppear:(BOOL)animated {
     [caption setText:@""];
-    
+ 
+    // make sure first time instructions arrow is not showing
+    [delegate hideFirstTimeArrowForShareController];
 }
 
 -(void)reloadConnections {
@@ -272,11 +274,10 @@ static ShareController *sharedShareController;
 }
 
 -(void)startUploadImage:(Tag*)_tag withDelegate:(NSObject<ShareControllerDelegate> *)_delegate {
-    UIImage * result = [_tag tagToUIImage];
+    UIImage * result = [_tag tagToUIImageUsingBase:YES retainStixLayer:YES useHighRes:YES];
     NSData *png = UIImagePNGRepresentation(result);
-    //[shareController setImage:result];
-    //[shareController setPNG:png];
-    //[shareController setTagID:[tag.tagID intValue]];
+    [self setImage:result];
+    [self setPNG:png];
     [self setTag:_tag];
     [self setDelegate:_delegate];
     [self uploadImage:png];
@@ -314,9 +315,8 @@ static ShareController *sharedShareController;
     if ([self shareServiceIsSharing:@"Twitter"]) {
         SHKTwitter * twitter = [[SHKTwitter alloc] init];
         [twitter setShareDelegate:self];
-        SHKItem *item = [SHKItem text:fullmessage];
-        UIImage * image = [tag tagToUIImage];
-        [item setImage:image];
+        SHKItem *item = [SHKItem text:[NSString stringWithFormat:@"%@ %@", _caption, url]];
+        [item setImage:self.image];
         [item setTitle:_caption];
         [twitter setItem:item];
         [twitter share];
@@ -439,9 +439,25 @@ static ShareController *sharedShareController;
 }
 
 -(void)didTwitterConnect {
-    [self connectService:@"Twitter"];
+    NSString * service = @"Twitter";
     
-    // todo: cause phone settings to be logged into twitter? or should oauth do that
+    // set connect to true in defaults
+    [self connectService:service];
+    
+    // set sharing to true in share controller menu
+    [self shareServiceShouldShare:YES forService:service]; 
+
+    // saving to defaults
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString * connectedString = [NSString stringWithFormat:@"%@IsConnected", service]; // should not be not connected
+    NSString * sharingString = [NSString stringWithFormat:@"%@IsSharing", service];
+    BOOL isConnected = [[serviceIsConnected objectForKey:service] boolValue];
+    BOOL isSharing = [[serviceIsSharing objectForKey:service] boolValue];
+    NSLog(@"Toggling sharing service %@: %@ %d %@ %d", service, @"connected: ", isConnected, @"sharing: ", isSharing);
+    [defaults setBool:isConnected forKey:connectedString];
+    [defaults setBool:isSharing forKey:sharingString];
+    [defaults synchronize];
+
 }
 
 -(void)doTwitterShare {
@@ -562,7 +578,7 @@ static ShareController *sharedShareController;
     [serviceIsSharing setObject:[NSNumber numberWithBool:doShare] forKey:service]; // automatically start sharing after connect
     
     // update image
-    NSLog(@"Share service should share: %d", doShare);
+    NSLog(@"Share service %@ should share: %d", service, doShare);
     UIButton * toggle = [toggles objectForKey:service];
     if (doShare) {
         [toggle setImage:[UIImage imageNamed:@"btn_share_switch_on@2x.png"] forState:UIControlStateNormal];

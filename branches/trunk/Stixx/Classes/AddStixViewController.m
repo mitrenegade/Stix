@@ -107,7 +107,7 @@
     
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
-    [stixView initializeWithImage:imageData];
+    [stixView initializeWithImage:imageData andStixLayer:tag.stixLayer];
     [stixView populateWithAuxStixFromTag:tag];
     [self.view addSubview:stixView];
 }

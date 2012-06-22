@@ -15,12 +15,13 @@
 @synthesize delegate;
 //@synthesize buttonFeedback;
 @synthesize activityIndicator;
-@synthesize labelBuxCount;
+//@synthesize labelBuxCount;
 @synthesize buttonProfile;
 @synthesize tabBarController;
 @synthesize galleryUsername;
 @synthesize detailController;
-//@synthesize segmentedControl;
+@synthesize tagToRemix;
+@synthesize stixEditorController;
 
 #define EXPLORE_COL 3
 #define EXPLORE_ROW 2
@@ -117,6 +118,7 @@ static NSMutableSet * retainedDetailControllers;
     [exploreModeButtons addObject:buttonRandom];
     [self setExploreMode:buttonRecent];
 
+    /*
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -130,7 +132,15 @@ static NSMutableSet * retainedDetailControllers;
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
     [self.view insertSubview:labelBuxCount belowSubview:buttonProfile];
+     */
 
+    /*
+    if (!stixEditorController)
+    {
+        stixEditorController = [[StixEditorViewController alloc] init];
+        [stixEditorController setDelegate:self];
+    }
+     */
 }
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
@@ -234,13 +244,13 @@ static NSMutableSet * retainedDetailControllers;
         
         int contentWidth = [tableController getContentWidth];
         int targetWidth = contentWidth;
-        int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
+        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
-        [cview initializeWithImage:tag.image];
+        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
 
         // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
@@ -450,8 +460,8 @@ static NSMutableSet * retainedDetailControllers;
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    //openDetailAnimation = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
-    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+    //openDetailAnimation = [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
+    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
         [DetailViewController unlockOpen];
     }];
     
@@ -495,7 +505,7 @@ static NSMutableSet * retainedDetailControllers;
     CGRect frameOffscreen = detailController.view.frame;
     frameOffscreen.origin.x -= 330;
     
-    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:username];
     }];
@@ -535,7 +545,7 @@ static NSMutableSet * retainedDetailControllers;
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
+    //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
 
     UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
     if ([[delegate getUsername] isEqualToString:@"anonymous"]) {
@@ -594,6 +604,81 @@ static NSMutableSet * retainedDetailControllers;
     activityIndicator = nil;
 
     [super viewDidUnload];
+}
+
+#pragma mark stix editor
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tag {
+    //[delegate didClickRemixFromDetailViewWithTag:tagToRemix];
+    [self setTagToRemix:[tag copy]];
+    NSLog(@"Did click remix with with tagID %@ by %@, creating tagToRemix with ID %@", tag.tagID, tag.username, tagToRemix.tagID);
+    if (tagToRemix.stixLayer) {
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
+        //    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
+        [actionSheet showFromTabBar:tabBarController.tabBar];
+    }
+    else {
+        // close detail view first
+        /*
+]        StixAnimation * animation = [[StixAnimation alloc] init];
+        animation.delegate = self;
+        CGRect frameOffscreen = detailController.view.frame;
+        frameOffscreen.origin.x -= 330;
+        
+        [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+            [detailController.view removeFromSuperview];
+            [DetailViewController unlockOpen];
+        }];
+         */
+        [detailController.view removeFromSuperview];
+        [DetailViewController unlockOpen];
+        
+        // no previous stix exist, automatically choose original mode
+        [delegate shouldDisplayStixEditor:[detailController.tag copy] withRemixMode:REMIX_MODE_USEORIGINAL];
+    }
+    [delegate didClickRemixButton]; // just to advance first time message, metrics, etc
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    //    BOOL bUseOriginal = NO;
+    int remixMode;
+    if (buttonIndex == 0) {
+        // remixed photo
+        NSLog(@"Button 0");
+        remixMode = REMIX_MODE_ADDSTIX;
+    }
+    else if (buttonIndex == 1) {
+        // original photo
+        NSLog(@"Button 1");
+        remixMode = REMIX_MODE_USEORIGINAL;
+    }
+    else if (buttonIndex == 2) {
+        NSLog(@"Button 2");
+        tagToRemix = nil;
+        return;
+    }
+    
+    // close detailView first - click came from here
+    /*
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    animation.delegate = self;
+    CGRect frameOffscreen = detailController.view.frame;
+    frameOffscreen.origin.x -= 330;
+    
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        [detailController.view removeFromSuperview];
+        [DetailViewController unlockOpen];
+    }];
+*/
+    [detailController.view removeFromSuperview];
+    [DetailViewController unlockOpen];
+    
+    [delegate shouldDisplayStixEditor:[detailController.tag copy] withRemixMode:remixMode];
+}
+
+// first time message function calls from VerticalFeedItemController that shouldn't be needed here
+-(void)didCloseEditor {
+    [delegate didDismissSecondaryView];
+    //[stixEditorController.view removeFromSuperview];    
 }
 
 @end

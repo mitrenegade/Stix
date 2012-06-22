@@ -223,9 +223,9 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
     NSString * newComment = [commentField text];
-    if ([newComment length] > 0)
-        [delegate didAddNewComment:newComment withTagID:self.tagID];
-	NSLog(@"Comment entered: %@", [textField text]); 
+    //if ([newComment length] > 0)
+    //    [delegate didAddNewComment:newComment withTagID:self.tagID];
+	//NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
 

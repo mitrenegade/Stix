@@ -13,6 +13,7 @@
 #import <AudioToolbox/AudioServices.h>
 #import "StixAnimation.h"
 #import "Kumulos.h"
+#import "GlobalHeaders.h"
 
 //#define SHELF_STIX_X 0
 //#define SHELF_STIX_Y 340
@@ -23,32 +24,6 @@
 #define SHELF_SCROLL_OFFSET_FROM_TOP 108
 #define SHELF_LOWER_FROM_TOP 0
 #define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
-
-enum {
-    SHELF_CATEGORY_FIRST = 0,
-    //SHELF_CATEGORY_ALL = 0,
-    SHELF_CATEGORY_FACEFUN=0,
-    SHELF_CATEGORY_MEME,
-    SHELF_CATEGORY_CUTE,
-    SHELF_CATEGORY_ANIMALS,
-    SHELF_CATEGORY_COMICS,
-    SHELF_CATEGORY_VIDEOGAMES,
-//    SHELF_CATEGORY_ANIME,
-//    SHELF_CATEGORY_ART,
-//    SHELF_CATEGORY_COSTUMES,
-//    SHELF_CATEGORY_DECORATIONS,
-//    SHELF_CATEGORY_EVENTS,
-//    SHELF_CATEGORY_FASHION,
-//    SHELF_CATEGORY_FOODANDDRINK,
-//    SHELF_CATEGORY_GEEKY,
-//    SHELF_CATEGORY_HOLLYWOOD,
-//    SHELF_CATEGORY_NATURE,
-//    SHELF_CATEGORY_PRANKS,
-//    SHELF_CATEGORY_SPORTS,
-//    SHELF_CATEGORY_SYMBOLS,
-    SHELF_CATEGORY_HIPSTER,
-    SHELF_CATEGORY_MAX
-};
 
 @interface CarouselView : BadgeView <UIScrollViewDelegate, UIGestureRecognizerDelegate, StixAnimationDelegate, KumulosDelegate>{
 	
@@ -117,8 +92,8 @@ enum {
 -(void)didClickShelfCategory:(id)sender;
 -(void)requestStixFromKumulos:(NSString *)stixStringID;
 -(int)saveStixDataToDefaultsForStixStringID:(NSString*)stixStringID;
--(void)unlockPremiumPack:(NSString*)stixPackName;
 
+-(void)unlockPremiumPack:(NSString*)stixPackName;
 -(BOOL)isPremiumStix:(NSString*)stixStringID;
 -(BOOL)isPremiumStixPurchased:(NSString*)stixStringID;
 -(NSString*)getCurrentCategory;

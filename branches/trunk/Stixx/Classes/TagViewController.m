@@ -13,7 +13,6 @@
 //@synthesize overlayView;
 @synthesize camera;
 @synthesize descriptorIsOpen;
-@synthesize descriptorController;
 @synthesize needToShowCamera;
 @synthesize aperture;
 @synthesize cameraDeviceButton;
@@ -156,145 +155,8 @@
 	// Release any cached data, images, etc that aren't in use.
 }
 
+#pragma mark camera - imagepickercontroller delegate
 
-- (void)cameraDidTakePicture:(id)sender {
-	// set a title
-    descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
-    needToShowCamera = NO; // still not need to show camera
-    
-    UIImage * tmp = [[ImageCache sharedImageCache] imageForKey:@"newImage"];
-    cameraTag = [[Tag alloc] init]; 
-    [cameraTag addImage:tmp];
-    
-	// prompt for label: use TagDescriptorController
-    if (!descriptorController) {
-        descriptorController = [[AddStixViewController alloc] init];
-    }
-#if !TARGET_IPHONE_SIMULATOR
-    // hack a way to display view over camera; formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    [descriptorController.view setFrame:frameShifted];
-    [self.camera setCameraOverlayView:descriptorController.view];
-#endif
-    
-    // populate after view has been created
-    [descriptorController setDelegate:self];
-    [descriptorController initStixView:cameraTag];
-    [descriptorController configureCarouselView];
-    [descriptorController.carouselView carouselTabDismiss:NO]; // start tab at bottom
-    [descriptorController.carouselView carouselTabExpand:YES]; // animate expansion
-}
-
-- (void)clearTags {
-    //[arViewController removeAllCoordinates];
-}
-
--(void)didCancelAddStix {
-#if 0
-    // create Tag
-    NSString * username = [self.delegate getUsername];
-    if ([delegate isLoggedIn] == NO)
-    {
-        username = @"anonymous";
-    }
-    [cameraTag addUsername:username andDescriptor:@"" andComment:@"" andLocationString:@""];
-    [delegate didCreateNewPix:cameraTag];
-    [cameraTag release];
-    cameraTag = nil;
-#endif
-    
-    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
-    //[self.camera dismissModalViewControllerAnimated:YES];
-    [self.descriptorController.carouselView carouselTabDismiss:NO];
-    [self.camera setCameraOverlayView:self.view];
-    needToShowCamera = YES;
-    descriptorIsOpen = NO;
-    [self viewDidAppear:NO];    
-}
-
--(void)didAddDescriptor:(NSString*)descriptor andComment:(NSString*)comment andLocation:(NSString *)location
-{
-    //ARCoordinate * newCoord;
-    NSString * desc = descriptor;
-    NSString * com = comment;
-    NSString * loc = location;
-
-    NSLog(@"Entered: '%@' for description, '%@' for comment, and '%@' for location", descriptor, comment, location);
-	if ([descriptor length] > 0)
-	{
-        //desc = [NSString stringWithFormat:@"%@ @ %@", descriptor, location];
-        desc = descriptor;
-	}
-    else if ([descriptor length] == 0 && [comment length] > 0)
-    {
-        desc = comment;
-    }
-    else if ([descriptor length] == 0 && [comment length] == 0)
-    {
-        /*
-        NSDate *now = [NSDate date];
-        NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
-        [formatter setDateFormat:@"MMM dd"]; //NSDateFormatterShortStyle];
-        desc = [formatter stringFromDate:now];
-        com = @"";
-         */
-        desc = @"";
-        com = @"";
-    }
-    //newCoord = [arViewController createCoordinateWithLabel:desc];
-    
-    // create Tag
-    NSString * username = [delegate getUsername];
-    if ([delegate isLoggedIn] == NO)
-    {
-        username = @"anonymous";
-    }
-    [cameraTag addUsername:username andDescriptor:desc andComment:com andLocationString:loc];
-    //[cameraTag addImage:image];
-    //[tag addARCoordinate:newCoord];
-}
-
--(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
-    if (stixStringID != nil) {
-        [cameraTag addStix:stixStringID withLocation:location withTransform:transform withPeelable:NO];
-    }
-    [delegate didCreateNewPix:cameraTag];
-    cameraTag = nil;
-    needToShowCamera = YES;
-    descriptorIsOpen = NO;
-    [self viewDidAppear:NO];
-}
-
--(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
-    [self.delegate didPurchaseStixFromCarousel:stixStringID];
-}
-
--(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
-    // just pass on
-    return [delegate shouldPurchasePremiumPack:stixPackName];
-}
-
-- (void)addCoordinateOfTag:(Tag*)tag {
-    //if (tag.coordinate)
-    //    [arViewController addCoordinate:[tag coordinate]];
-    // this error is handled right now by adding a default ARCoordinate
-    //else
-    //    NSLog(@"Added invalid coordinate for tag: %i", [tag.tagID intValue]);
-    //else
-    //    [self.delegate failedToAddCoordinateOfTag:tag];
-}
-
-// ARViewDelegate
-- (void)failedToAddCoordinate {
-    
-}
-
--(IBAction)closeInstructions:(id)sender;
-{
-    [buttonInstructions setHidden:YES];
-}
-
-/*** camera delegate ***/
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     if (photoAlbumOpened) {
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
@@ -302,55 +164,14 @@
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
     }
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
-    //UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
-    UIImage * newPhoto; 
-    newPhoto = originalPhoto;
-    
-	UIImage *baseImage = newPhoto;//[info objectForKey:UIImagePickerControllerOriginalImage];
+	UIImage *baseImage = originalPhoto;
 	if (baseImage == nil) return;
     UIImageOrientation or = [baseImage imageOrientation];
     // orientation 3 is normal camera use, orientation 0 is landscape mode
 	    
-	// save composite
     // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
     // that means the actual image is 320x428.42 on the iphone
     
-    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
-    if (!photoAlbumOpened) {
-        // save high res version
-        CGSize newsize = CGSizeMake(1000, 1000*2592.0/1936.0);
-        if (or == 0 && !photoAlbumOpened)
-            newsize = CGSizeMake(2592.0/1936.0*1000, 1000);
-        
-        // scale to convert base image from 1936x2592 to 320x428 - iphone size
-        float baseScale2 =  newsize.width / baseImage.size.width;
-        CGRect scaledFrameImage2 = CGRectMake(0, 0, baseImage.size.width * baseScale2, baseImage.size.height * baseScale2);
-        UIGraphicsBeginImageContext(newsize);
-        [baseImage drawInRect:scaledFrameImage2];	
-        UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();	
-        // save edited image to photo album
-        CGRect frame = [self.rectView frame];
-        float scale2 = 1000 / frame.size.width;
-        frame.size.width *= scale2;
-        frame.size.height *= scale2;
-        
-        frame.origin.x *= scale2;
-        frame.origin.y *= scale2;
-        UIImage * cropped = [result croppedImage:frame];
-#if 0
-        UIImageWriteToSavedPhotosAlbum(cropped, nil, nil, nil); 
-#else
-        [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:cropped toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
-            if (error!=nil) {
-                NSLog(@"Could not write to library: error %@", [error description]);
-            }
-        }];
-#endif        
-        if ([[ImageCache sharedImageCache] imageForKey:@"largeImage"])
-            [[ImageCache sharedImageCache] deleteImageForKey:@"largeImage"];
-        [[ImageCache sharedImageCache] setImage:cropped forKey:@"largeImage"];
-    }
     int original_height = baseImage.size.height;
     int original_width = baseImage.size.width;
     CGSize screenContext = CGSizeMake(320, original_height*320/original_width);
@@ -412,23 +233,121 @@
         NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
     }
     
-	// hack: use the image cache in the easy way - just cache one image each time
-    CGSize fullSize = CGSizeMake(314, 282);
+    CGSize fullSize = CGSizeMake(PIX_WIDTH, PIX_HEIGHT);
     if (cropped)
         cropped = [cropped resizedImage:fullSize interpolationQuality:kCGInterpolationHigh];
-	if ([[ImageCache sharedImageCache] imageForKey:@"newImage"])
-		[[ImageCache sharedImageCache] deleteImageForKey:@"newImage"];
-	[[ImageCache sharedImageCache] setImage:cropped forKey:@"newImage"];
-    NSLog(@"Image dims: %f %f", cropped.size.width, cropped.size.height);
-	if ([self respondsToSelector:@selector(cameraDidTakePicture:)]) {
-		[self performSelector:@selector(cameraDidTakePicture:) withObject:self];
-	}
+	if ([[ImageCache sharedImageCache] imageForKey:@"originalImage"])
+		[[ImageCache sharedImageCache] deleteImageForKey:@"originalImage"];
+	[[ImageCache sharedImageCache] setImage:originalPhoto forKey:@"originalImage"];
 
+	// set a title
+    descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
+    needToShowCamera = NO; // still not need to show camera
+    
+    // create temporary tag with:
+    // - username
+    // - cropped image
+    // 
+    // high res image will be added on confirmation
+    // stix will be added after that
+    cameraTag = [[Tag alloc] init]; 
+    [cameraTag addImage:cropped];
+    [cameraTag setUsername:[delegate getUsername]];
+    [cameraTag setTimestamp:[NSDate date]]; // hack: since we don't reload the tag after creating it, we need to put in a temporary timestamp. next time the tag is actually loaded from kumulos the real one will exist
+    
+    // prompt for image confirmation
+    if (!previewController) {
+        previewController = [[PixPreviewController alloc] init];
+        [previewController setDelegate:self];
+    }
+    
+#if !TARGET_IPHONE_SIMULATOR
+    // hack a way to display view over camera; formerly presentModalViewController
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [previewController.view setFrame:frameShifted];
+    [self.camera setCameraOverlayView:previewController.view];
+#endif
+    
+    // populate after view has been created
+    [previewController initWithTag:cameraTag];
+    
     photoAlbumOpened = NO;
 }
+
 - (void)image:(UIImage*)image didFinishSavingWithError:(NSError *)error contextInfo:(NSDictionary*)info {
 	NSLog(@"Did finish saving with error!");
 }
+
+#pragma mark PixPreview delegate
+
+-(void)didConfirmPix {
+    UIImage * baseImage = [[ImageCache sharedImageCache] imageForKey:@"originalImage"];
+    if (baseImage == nil) return;
+    UIImageOrientation or = [baseImage imageOrientation];
+    // orientation 3 is normal camera use, orientation 0 is landscape mode
+    
+    // screenContext is the actual size in pixels shown on screen, ie stix pixels are scaled 1x1 to the captured image
+    if (!photoAlbumOpened) {
+        NSLog(@"Saving high res picture ***********************");
+        // save high res version
+        int highResWidth = PIX_WIDTH * 2;
+        CGSize newsize = CGSizeMake(highResWidth, highResWidth*2592.0/1936.0);
+        if (or == 0 && !photoAlbumOpened)
+            newsize = CGSizeMake(2592.0/1936.0*highResWidth, highResWidth);
+        
+        // scale to convert base image from 1936x2592 to 320x428 - iphone size
+        float baseScale2 =  newsize.width / baseImage.size.width;
+        CGRect scaledFrameImage2 = CGRectMake(0, 0, baseImage.size.width * baseScale2, baseImage.size.height * baseScale2);
+        UIGraphicsBeginImageContext(newsize);
+        [baseImage drawInRect:scaledFrameImage2];	
+        UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        
+        // save edited image to photo album
+        CGRect frame = [self.rectView frame];
+        float scale2 = highResWidth/ frame.size.width;
+        frame.size.width *= scale2;
+        frame.size.height *= scale2;
+        
+        frame.origin.x *= scale2;
+        frame.origin.y *= scale2;
+        UIImage * largeImage = [result croppedImage:frame];
+        [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:largeImage toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+            if (error!=nil) {
+                NSLog(@"Could not write to library: error %@", [error description]);
+                // retry one more time
+                [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:largeImage toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+                    if (error!=nil) {
+                        NSLog(@"Second attempt to write to library failed: error %@", [error description]);
+                    }
+                }];
+            }
+        }];
+        // just save to tag
+        /*
+        if ([[ImageCache sharedImageCache] imageForKey:@"largeImage"])
+            [[ImageCache sharedImageCache] deleteImageForKey:@"largeImage"];
+        [[ImageCache sharedImageCache] setImage:cropped forKey:@"largeImage"];
+         */
+        [cameraTag setHighResImage:largeImage];
+        NSLog(@"Done saving high res picture *************");
+    }
+    
+    [delegate didConfirmNewPix:cameraTag];
+    needToShowCamera = YES;
+    descriptorIsOpen = NO;
+    [self viewDidAppear:NO];
+    [previewController stopActivityIndicatorLarge];
+}
+
+-(void)didCancelPix {
+    [self.camera setCameraOverlayView:self.view];
+    needToShowCamera = YES;
+    descriptorIsOpen = NO;
+    [self viewDidAppear:NO];    
+}
+
+#pragma mark other tagView functions
 
 - (void)writeImageToDocuments:(UIImage*)image {
 	NSData *png = UIImagePNGRepresentation(image);
@@ -503,13 +422,18 @@
 
 -(IBAction)didClickTakePicture:(id)sender {
     NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
+    if (descriptorIsOpen)
+        return;
     [[self camera] takePicture];
 }
 
 -(IBAction)didClickImport:(id)sender {
     NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
+    if (descriptorIsOpen)
+        return;
+    
     UIImagePickerController * album = [[UIImagePickerController alloc] init];
-    album.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    album.sourceType = UIImagePickerControllerSourceTypePhotoLibrary; ////SavedPhotosAlbum;
     album.allowsEditing = NO;
     album.delegate = self;
     photoAlbumOpened = YES;
@@ -521,19 +445,5 @@
     photoAlbumOpened = NO;
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 }
-
--(int)getStixCount:(NSString*)stixStringID {
-    return [self.delegate getStixCount:stixStringID];
-}
-
--(int)getStixOrder:(NSString*)stixStringID;
-{
-    return [self.delegate getStixOrder:stixStringID];
-}
-
--(int)getBuxCount {
-    return [self.delegate getBuxCount];
-}
-
 
 @end

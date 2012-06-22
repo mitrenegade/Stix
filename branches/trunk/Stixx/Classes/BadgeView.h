@@ -18,6 +18,7 @@
 
 #import <UIKit/UIKit.h>
 #import "OutlineLabel.h"
+#import "GlobalHeaders.h"
 
 #define TOTAL_RANDOM_BADGES 50
 #define FREE_STIX_PER_CATEGORY 12
@@ -112,6 +113,7 @@ enum {
 +(void)InitializeFromDiskWithStixStringIDs:(NSMutableArray*) savedStixStringIDs andStixViews:(NSMutableDictionary *)savedStixViews andStixDescriptors:(NSMutableDictionary *)savedStixDescriptors andStixCategories:(NSMutableDictionary*)savedStixCategories;
 
 +(void)InitializeDefaultStixTypes;
++(void)InitializePremiumStixTypes;
 
 // returns stixStringID for given badge type. THIS IS DONE FOR BACKWARD COMPATIBILITY.
 // Type is still drawn from a static list by some old builds.
@@ -133,6 +135,5 @@ enum {
 +(NSMutableDictionary *)GetAllStixCategoriesForSave;
 +(void)AddStixView:(NSArray*)resultFromKumulos;
 +(NSMutableDictionary*)InitializeFirstTimeUserStix;
-+(void)InitializePremiumStixTypes;
 
 @end

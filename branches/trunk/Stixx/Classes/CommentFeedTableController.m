@@ -130,7 +130,7 @@
         [cell setBackgroundColor:[UIColor clearColor]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         if (showDivider)
-            [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]]];
+            [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider"]]];
         [cell.textLabel setTextColor:fontTextColor];
         UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 230, 12)];
         UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 24, 230, 14)];
@@ -207,7 +207,7 @@
         //[photoView setTag:index];
          // MRC
         
-        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"] && ![stixStringID isEqualToString:@"LIKE"]) {
+        if (![stixStringID isEqualToString:@"COMMENT"] && ![stixStringID isEqualToString:@"PEEL"] && ![stixStringID isEqualToString:@"SHARE"] && ![stixStringID isEqualToString:@"LIKE"] && ![stixStringID isEqualToString:@"REMIX"]) {
             UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
             [stix setFrame:CGRectMake(10,10,40,40)];
             cell.accessoryView = stix;
@@ -323,6 +323,7 @@
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID {
     
     NSString * str = @"";
+    // stixStringID is a type of Stix - deprecated
     if ([comment length] == 0) // add generic descriptor
     {
         NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
@@ -335,6 +336,7 @@
     else if ([comment isEqualToString:@"SHARE"]) {
         str = [NSString stringWithFormat:@"Shared this Pix at %@", comment];
     }
+    // stixStringID == LIKE
     else if ([comment isEqualToString:@"LIKE_SMILES"]) 
         str = [NSString stringWithFormat:@"Smiled at this Pix"];
     else if ([comment isEqualToString:@"LIKE_LOVE"]) 
@@ -343,7 +345,10 @@
         str = [NSString stringWithFormat:@"Winked at this Pix"];
     else if ([comment isEqualToString:@"LIKE_SHOCKED"]) 
         str = [NSString stringWithFormat:@"Is shocked by this Pix"];
-    else
+    else if ([stixStringID isEqualToString:@"REMIX"]) {
+        str = comment;
+    }
+    else // if ([comment isEqualToString:@"COMMENT"]) {
     {
         /* get first char */
         NSString *firstChar = [comment substringToIndex:1];

@@ -54,8 +54,18 @@
 
 -(IBAction)closeInstructions:(id)sender {
     [self toggleFirstTimeInstructions:NO];
+    //[myDelegate didCloseFirstTimeMessage];
 //    [self toggleFirstTimePointer:NO atStage:0];
 //    pointerWasDismissed = YES;
+    instructionsDismissed = YES;
+}
+
+-(void)flashFirstTimeInstructions {
+    // briefly show instructions again
+    if (instructionsDismissed) {
+        [self toggleFirstTimeInstructions:YES];
+        //[self performSelector:@selector(closeInstructions:) withObject:nil afterDelay:1.5];
+    }
 }
 
 -(void)addFirstTimeInstructions {
@@ -105,10 +115,13 @@
     agitatePointer = 0;
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
+    if (firstTimeUserStage == FIRSTTIME_MESSAGE_01 || firstTimeUserStage == FIRSTTIME_MESSAGE_03)
+        mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
 }
 
 -(void)doRewardAnimation:(NSString*)title withAmount:(int)amount {
+    return;
+    /*
     int width = 100;
     rewardValue = amount;
     UIImage * coinImage = [UIImage imageNamed:@"bux_coin.png"];
@@ -139,7 +152,8 @@
 
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
-    allAnimationIDs[0] = [animation doJump:rewardCanvas inView:self.view forDistance:15 forTime:.5];
+    allAnimationIDs[0] = [animation doJump:rewardCanvas inView:self.view forDistance:15 forTime:.25];
+     */
 }
 
 -(void)doPurchaseAnimation:(NSString*)stixStringID {
@@ -220,13 +234,13 @@
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        allAnimationIDs[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        allAnimationIDs[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.25];
     }
     else if (animationID == allAnimationIDs[1]) // second jump animation finished
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        allAnimationIDs[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        allAnimationIDs[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.25];
     }
     else if (animationID == allAnimationIDs[2]) // first animation finished
     {
@@ -250,6 +264,7 @@
             mallPointerAnimationID = [animation doJump:canvas inView:self.view forDistance:20 forTime:time];
         else {
             [canvas removeFromSuperview];
+//            canvas = nil;
         }
     }
     
@@ -257,12 +272,12 @@
     if (animationID == animationIDsPurchase[0]) { // fade in finished
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        animationIDsPurchase[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        animationIDsPurchase[1] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.25];
     }
     else if (animationID == animationIDsPurchase[1]) { // first jump finished
         StixAnimation * animation = [[StixAnimation alloc] init];
         animation.delegate = self;
-        animationIDsPurchase[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.5];
+        animationIDsPurchase[2] = [animation doJump:canvas inView:self.view forDistance:15 forTime:.25];
     }
     else if (animationID == animationIDsPurchase[2]) { // second jump finished
         StixAnimation * animation = [[StixAnimation alloc] init];
@@ -309,12 +324,12 @@
     
     if (showInstructions) {
         //[firstTimeInstructions setFrame:frameOffscreen];
-        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
         }];
     }
     else {
         //[firstTimeInstructions setFrame:frameOnscreen];
-        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         }];
     }
 //    [firstTimeInstructions setHidden:!showInstructions];
@@ -346,6 +361,7 @@
             // start new one
             [self toggleFirstTimeInstructions:YES];
             [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            instructionsDismissed = NO;
         }
             break;
             
@@ -362,6 +378,7 @@
             // start new one
             [self toggleFirstTimeInstructions:YES];
             [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            instructionsDismissed = NO;
         }
             break;
         
@@ -376,8 +393,9 @@
             [self toggleFirstTimeInstructions:NO];
             [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
             // start new one
-            [self toggleFirstTimeInstructions:YES];
-            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            //[self toggleFirstTimeInstructions:YES];
+            //[self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            instructionsDismissed = NO;
         }
             break;
             

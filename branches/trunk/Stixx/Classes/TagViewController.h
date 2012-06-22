@@ -12,18 +12,18 @@
 #import "BadgeView.h"
 #import "Tag.h"
 //#import "ARCoordinate.h"
-#import "AddStixViewController.h"
+//#import "AddStixViewController.h"
 #import "UIImage+Alpha.h"
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
-
-#define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
+#import "PixPreviewController.h"
+#import "GlobalHeaders.h"
 
 @protocol TagViewDelegate
 
 - (NSString *)getUsername;
--(void)didCreateNewPix:(Tag*)cameraTag;
+-(void)didConfirmNewPix:(Tag*)cameraTag;
 - (bool) isLoggedIn;
 
 -(int)getStixCount:(NSString*)stixStringID;
@@ -37,11 +37,11 @@
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;
--(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
+//-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 @end
 
 
-@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, AddStixViewControllerDelegate,UIImagePickerControllerDelegate, UINavigationControllerDelegate > {
+@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PixPreviewDelegate > {
 	
 	// layers of UIViewControllers
     UIImagePickerController * camera;
@@ -69,7 +69,8 @@
     Tag * cameraTag;
     
     //TagDescriptorController * descriptorController;
-    AddStixViewController * descriptorController;
+    //AddStixViewController * descriptorController;
+    PixPreviewController *previewController;
     bool descriptorIsOpen;
     bool needToShowCamera;
     bool photoAlbumOpened;
@@ -82,7 +83,7 @@
 @property (nonatomic) UIImagePickerController * camera;
 @property (nonatomic, assign) bool descriptorIsOpen;
 @property (nonatomic, assign) bool needToShowCamera;
-@property (nonatomic) AddStixViewController * descriptorController;
+@property (nonatomic) PixPreviewController * previewController;
 @property (nonatomic) IBOutlet UIImageView * aperture;
 @property (nonatomic) IBOutlet UIButton * flashModeButton;
 @property (nonatomic) IBOutlet UIButton * cameraDeviceButton;

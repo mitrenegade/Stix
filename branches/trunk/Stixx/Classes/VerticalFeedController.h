@@ -10,7 +10,7 @@
 #import "TagViewController.h"
 #import "FeedTableController.h"
 #import "VerticalFeedItemController.h"
-#import "CarouselView.h"
+//#import "CarouselView.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
 #import "AddStixViewController.h"
@@ -22,6 +22,7 @@
 #import "KumulosHelper.h"
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
+#import "StixEditorViewController.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -53,7 +54,7 @@
 -(void)didPressAdminEasterEgg:(NSString*)view;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
--(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
+//-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 -(void)didOpenProfileView;
 -(NSMutableSet*)getFollowingList;
 
@@ -88,13 +89,22 @@
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
+-(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
+
+// check for first time user state
+-(BOOL)canClickRemixButton; // test user stage
+-(BOOL)canClickNotesButton;
+-(void)didClickRemixButton; // advance user stage
+-(void)didCloseEditorFromFeedController; // advance user stage
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate> {
     
     NSMutableArray * allTags;
     NSMutableArray * allTagsPending;
     NSMutableArray * allTagsDisplayed;
+    NSMutableArray * firstTimeArrows;
+    UIView * firstTimeArrowCanvas[2];
     
     NSMutableSet * deallocatedIndices;
     
@@ -130,11 +140,6 @@
     //UserProfileViewController * userPageController;
     //NSString * galleryUsername;
     
-//    IBOutlet UIButton * buttonShowCarousel;
-//    IBOutlet UIImageView * carouselTab;
-//    int isShowingCarousel;
-//    NSString * stixSelected;
-    
     // stix purchase menu
     int buxAnimationOpen;
     int buxAnimationClose;
@@ -152,10 +157,12 @@
     RaisedCenterTabBarController * __weak tabBarController;
     
     NSMutableArray * feedItemsWithLikeToolbar;
+    StixEditorViewController * stixEditorController;
+    Tag * tagToRemix;
     
-    dispatch_queue_t backgroundQueue;
+    BOOL isOpeningProfile;
 }
-@property (nonatomic, weak) CarouselView * carouselView;
+//@property (nonatomic, weak) CarouselView * carouselView;
 @property (nonatomic) NSMutableDictionary * feedItems;
 @property (nonatomic) NSMutableDictionary * headerViews;
 @property (nonatomic) NSMutableDictionary * headerViewsDidLoadPhoto;
@@ -166,27 +173,25 @@
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedDelegate> * delegate;
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
-//@property (nonatomic, retain) IBOutlet UILabel * labelBuxCount;
-@property (nonatomic) OutlineLabel * labelBuxCount;
+//@property (nonatomic) OutlineLabel * labelBuxCount;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic) CommentViewController * commentView;
 @property (nonatomic) UIImagePickerController * camera;
-//@property (nonatomic, retain) IBOutlet UIButton * buttonShowCarousel;
-//@property (nonatomic, retain) IBOutlet UIImageView * carouselTab;
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 //@property (nonatomic, copy) NSString * galleryUsername;
 //@property (nonatomic) IBOutlet UITextField * statusMessage;
 @property (nonatomic, assign) int newestTagIDDisplayed;
 @property (nonatomic) IBOutlet UIImageView * logo;
+@property (nonatomic) Tag * tagToRemix;
 
 -(void)populateAllTagsDisplayed;
 -(void)populateAllTagsDisplayedWithTag:(Tag*)tag;
--(void)addTagForDisplay:(Tag*)tag;
+-(int)addTagForDisplay:(Tag*)tag;
 -(void)forceUpdateCommentCount:(int)tagID;
--(void)configureCarouselView;
+//-(void)configureCarouselView;
 -(void)reloadCurrentPage;
 -(void)reloadPage:(int)page;
 -(void)reloadPageForTagID:(int)tagID;
@@ -216,6 +221,8 @@
 -(void)startActivityIndicatorLarge;
 -(void)stopActivityIndicatorLarge;
 
+-(void)didClickRemixFromDetailView:(Tag*)tag;
+-(void)unlockProfile;
 @end
 
 

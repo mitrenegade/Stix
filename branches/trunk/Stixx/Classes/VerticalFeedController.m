@@ -10,7 +10,7 @@
 
 @implementation VerticalFeedController
 
-@synthesize carouselView;
+//@synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
 @synthesize activityIndicatorLarge;
@@ -22,17 +22,14 @@
 @synthesize tableController;
 @synthesize lastPageViewed;
 @synthesize commentView;
-//@synthesize buttonFeedback;
 @synthesize camera;
-//@synthesize buttonShowCarousel;
-//@synthesize carouselTab;
 @synthesize tabBarController;
-//@synthesize stixSelected;
 @synthesize buttonProfile;
-@synthesize labelBuxCount;
+//@synthesize labelBuxCount;
 //@synthesize statusMessage;
 @synthesize newestTagIDDisplayed;
 @synthesize logo;
+@synthesize tagToRemix;
 
 -(id)init
 {
@@ -95,7 +92,7 @@
 
     //[self startActivityIndicator];
     //[logo setHidden:YES];
-    
+    /*
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
     [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
     [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -109,7 +106,7 @@
     [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
     [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
     [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
-    
+    */
     // array to retain each FeedItemViewController as it is created so its callback
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
@@ -117,17 +114,20 @@
     headerViewsDidLoadPhoto = [[NSMutableDictionary alloc] init];
     feedSectionHeights = [[NSMutableDictionary alloc] init];
     
+    if (!stixEditorController)
+    {
+        stixEditorController = [[StixEditorViewController alloc] init];
+        [stixEditorController setDelegate:self];
+    }
+
     [self startActivityIndicator];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-    [self configureCarouselView];
-    [self.carouselView carouselTabDismiss:NO];
-
-    //[statusMessage setHidden:YES];
-
-    backgroundQueue = dispatch_queue_create("com.Neroh.Stix.stixApp.feedController.bgQueue", NULL);
+//    [self configureCarouselView];
+//    [self.carouselView carouselTabDismiss:NO];
 }
 
+/*
 -(void)configureCarouselView {
     // claim carousel for self
     NSLog(@"ConfigureCarouselView by VerticalFeedController");
@@ -142,7 +142,8 @@
     //[carouselView carouselTabDismiss:NO];
     [carouselView resetBadgeLocations];
 }
-
+*/
+ 
 - (void)viewWillAppear:(BOOL)animated
 {
 	[super viewWillAppear:animated];
@@ -153,9 +154,8 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-    //[self configureCarouselView];
-	[super viewDidAppear:animated];
-    [labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
+    [super viewDidAppear:animated];
+    //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
   
     // test spin
 //    StixAnimation * animation = [[StixAnimation alloc] init];
@@ -180,32 +180,22 @@
 	// Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
 	// For example: self.myOutlet = nil;
     
-    // arc conversion
-    /*
-    [activityIndicator release];
-    activityIndicator = nil;
-    
-    [carouselView release];
-    carouselView = nil;
-    [tableController release];
-    tableController = nil;
-    */
-    
     [super viewDidUnload];
 }
 
 
 
 /******* badge view delegate ******/
+/*
 -(void)didTapStixOfType:(NSString *)stixStringID {
     //[self.carouselView carouselTabDismissWithStix:badge];
     if ([allTagsDisplayed count]==0) {
-        [carouselView resetBadgeLocations];
-        [carouselView carouselTabDismiss:YES];
+    //    [carouselView resetBadgeLocations];
+    //    [carouselView carouselTabDismiss:YES];
         return;        
     }
     //[self.carouselView carouselTabDismiss:NO];
-    [self.carouselView setStixSelected:stixStringID];
+    //[self.carouselView setStixSelected:stixStringID];
     CGPoint center = self.view.center;
     center.y -= tableController.view.frame.origin.y; // remove tableController offset
     //[badge setCenter:center];
@@ -229,8 +219,8 @@
 
 -(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
     if ([allTagsDisplayed count]==0) {
-        [carouselView resetBadgeLocations];
-        [carouselView carouselTabDismiss:YES];
+    //    [carouselView resetBadgeLocations];
+    //    [carouselView carouselTabDismiss:YES];
         return;
     }
     CGPoint locationInSection = [tableController getContentPoint:badge.center inSection:lastPageViewed];
@@ -256,14 +246,16 @@
     NSLog(@"VerticalFeedController: didDropStix center %f %f size %f %f section %d", center.x,center.y, frame.size.width, frame.size.height, section);
     [self didDropStixByDrag:badge ofType:stixStringID];
 }
+ */
 
+/*
 -(void)addAuxStixOfType:(NSString*)stixStringID toTag:(Tag*) tag{ 
     // HACK: will be changed soon if we have an addStix button
     
     // input badge should have frame within the tag's frame
     if (tag == nil) {
         // nothing loaded yet
-        [carouselView resetBadgeLocations];
+        //[carouselView resetBadgeLocations];
         return;
     }
 
@@ -288,6 +280,7 @@
     //[auxView.carouselView.scrollView setContentOffset:carouselView.scrollView.contentOffset];
     //[auxView didTapStix:badge ofType:stixStringID]; // simulate pressing of that stix
 }
+*/
 
 -(void)didAddDescriptor:(NSString *)descriptor andComment:(NSString *)comment andLocation:(NSString *)location {
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
@@ -301,24 +294,24 @@
 -(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
-    [self configureCarouselView];
-    [self.carouselView carouselTabDismiss:YES];
+    //[self configureCarouselView];
+    //[self.carouselView carouselTabDismiss:YES];
     
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
     
-    [carouselView resetBadgeLocations];
+    //[carouselView resetBadgeLocations];
     //[self reloadCurrentPage]; // done in didAddStixToPix
 }
 
 -(void)didCancelAddStix {
     // hack a way to remove view over camera; formerly dismissModalViewController
-    [self configureCarouselView];
+    //[self configureCarouselView];
     //
-    NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
+    //NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
     //[carouselView carouselTabExpand:NO];
-    [carouselView carouselTabDismiss:YES];
+    //[carouselView carouselTabDismiss:YES];
     [delegate didDismissSecondaryView];
     
 #if 0
@@ -343,18 +336,16 @@
     return [delegate getBuxCount];
 }
 
--(void)didStartDrag {
-    [carouselView carouselTabDismiss:YES];
-}
-
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
     [self.delegate didPurchaseStixFromCarousel:stixStringID];
 }
 
+/*
 -(BOOL)shouldPurchasePremiumPack:(NSString *)stixPackName {
     // just pass on
     return [delegate shouldPurchasePremiumPack:stixPackName];
 }
+ */
 
 /*********** FeedTableView functions *******/
 
@@ -412,6 +403,9 @@
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {
+    if (isOpeningProfile)
+        return;
+    isOpeningProfile = YES;
 //    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
     int index = button.tag;
     Tag * tag;
@@ -448,6 +442,47 @@
 #endif
     NSLog(@"Clicked on user photo %d in feed for user %@", button.tag, tag.username);
     [self shouldDisplayUserPage:tag.username];
+}
+
+-(void)didClickViaButton:(UIButton*)button {
+    if (isOpeningProfile)
+        return;
+    isOpeningProfile = YES;
+    //    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
+    int index = button.tag;
+    Tag * tag;
+    BOOL found = NO;
+    for (int i=0; i<[allTagsPending count]; i++) {
+        Tag * t = [allTagsPending objectAtIndex:i];
+        if ([[t tagID] intValue] == index) {
+            tag = [allTagsPending objectAtIndex:i];
+            found = YES;
+            break;
+        }
+    }
+    if (!found) {
+        for (int i=0; i<[allTagsDisplayed count]; i++) {
+            Tag * t = [allTagsDisplayed objectAtIndex:i];
+            if ([[t tagID] intValue] == index) {
+                tag = [allTagsDisplayed objectAtIndex:i];
+                found = YES;
+                break;
+            }
+        }
+    }
+    if (!found)
+        return;
+    NSLog(@"Clicked on user photo %d in feed for original username <%@>", button.tag, tag.originalUsername);
+    if (!tag.originalUsername || [tag.originalUsername length] == 0) {
+        // backwards compatibility
+        // try to parse out
+        NSString * parsed = [tag.descriptor substringFromIndex:4];
+        NSLog(@"Parsed username: <%@>", parsed);
+        [self shouldDisplayUserPage:parsed];
+    }
+    else {
+        [self shouldDisplayUserPage:tag.originalUsername];
+    }
 }
 
 -(UIView*)headerForSection:(int)index {
@@ -493,17 +528,31 @@
             [nameLabel setText:tag.username];
         [headerView addSubview:nameLabel];
         
-       // UIbutton * nameButton [[[UIButton alloc] initWithFrame:CGRectMake(45, 0, 260, 30)] autorelease];
-        //[nameLabel setTag:index];
-        //[nameButton addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        UIButton * nameButton = [[UIButton alloc] initWithFrame:nameLabel.frame];
+        //[nameButton setTitle:tag.username forState:UIControlStateNormal];
+        //[nameButton.titleLabel setAlpha:0];
+        [nameButton setBackgroundColor:[UIColor clearColor]];
+        [nameButton setTag:[tag.tagID intValue]];
+        [nameButton addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        [headerView addSubview:nameButton];
         
-        UILabel * locLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 260, 15)];
-        [locLabel setBackgroundColor:[UIColor clearColor]];
-        [locLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
-        [locLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
-        [locLabel setText:tag.locationString];
-        [headerView addSubview:locLabel];    
+        // the "Via..." label
+        if ((tag.originalUsername != nil) && [tag.originalUsername length] != 0 && ![tag.originalUsername isEqualToString:tag.username]) {
+            UILabel * subLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 21, 260, 15)];
+            [subLabel setBackgroundColor:[UIColor clearColor]];
+            [subLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
+            [subLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]];
+            //[locLabel setText:tag.locationString];
+            [subLabel setText:tag.descriptor];
+            [headerView addSubview:subLabel];    
         
+            UIButton * viaButton = [[UIButton alloc] initWithFrame:subLabel.frame];
+            [viaButton setTag:[tag.tagID intValue]];
+            [viaButton setBackgroundColor:[UIColor clearColor]];
+            [viaButton addTarget:self action:@selector(didClickViaButton:) forControlEvents:UIControlEventTouchUpInside];
+            [headerView addSubview:viaButton];
+        }
+
         UILabel * timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(260, 5, 60, 20)];
         [timeLabel setBackgroundColor:[UIColor clearColor]];
         [timeLabel setTextColor:[UIColor whiteColor]];
@@ -547,8 +596,10 @@
             return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
     }
-    NSLog(@"ReloadViewForItemAtIndex %d: - tag %d by user %@", index, [[tag tagID] intValue], tag.username);
-
+    NSLog(@"ReloadViewForItemAtIndex %d: - tag %d by user %@ with descriptor %@", index, [[tag tagID] intValue], tag.username, tag.descriptor);
+    if ([tag.tagID intValue] == 5138) {
+        NSLog(@"HERE! user %@ desc %@", tag.username, tag.descriptor);
+    }
     VerticalFeedItemController * feedItem = [[VerticalFeedItemController alloc] init]; // do not autorelease
     [feedItem setDelegate:self];
     
@@ -610,6 +661,7 @@
     // create overlay for pending feedItem
     if (index < [allTagsPending count]) {
         //[feedItem.view setAlpha:.25];
+        NSLog(@"Calling initReloadView: index %d allTagsPending count %d", index, [allTagsPending count]);
         [[feedItem stixView] setInteractionAllowed:NO];
         [feedItem initReloadView];
     }
@@ -655,6 +707,12 @@
         NSString * descriptor = tag.descriptor;
         NSString * comment = tag.comment;
         NSString * locationString = tag.locationString;
+        
+        if ([tag.tagID intValue] == 5138) {
+            NSLog(@"HERE! user %@ desc %@", tag.username, tag.descriptor);
+        }
+        if ([descriptor length]!=0)
+            NSLog(@"Username: %@ descriptor: %@", name, descriptor);
 
         [feedItem.view setCenter:CGPointMake(160, feedItem.view.center.y+3)];
         feedItemViewOffset = feedItem.view.frame.origin; // same offset
@@ -694,11 +752,13 @@
         }
         // create overlay for pending feedItem
         if (index < [allTagsPending count]) {
+            Tag * tag = [allTagsPending objectAtIndex:0];
+            NSLog(@"index %d feedItem tag %@ allTagsPending first object: tagID: %@", index, feedItem.tag.tagID, tag.tagID);
             //[feedItem.view setAlpha:.25];
             [[feedItem stixView] setInteractionAllowed:NO];
             [feedItem initReloadView];
         }
-        
+                
         // this object must be retained so that the button actions can be used
         if (tag.tagID)
             [feedItems setObject:feedItem forKey:tag.tagID];
@@ -707,6 +767,39 @@
         // see what the dimensions were saved previously
         //NSLog(@"ViewForItem EXISTS:  feedItem ID %d index %d view %x height: %f ", feedItem.tagID, index, feedItem.view, feedItem.view.frame.size.height);
     }
+    
+    // first time user arrow
+    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
+        if (index % 2 == 0) {
+            if (!firstTimeArrowCanvas[0]) {
+                UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
+                CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
+                firstTimeArrowCanvas[0] = [[UIView alloc] initWithFrame:canvasFrame];
+                UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+                //[firstTimeArrowCanvas addSubview:pointer];
+                StixAnimation * animation = [[StixAnimation alloc] init];
+                animation.delegate = self;
+                [animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:1]; 
+            }
+            [firstTimeArrowCanvas[0] removeFromSuperview];
+            [feedItem.view addSubview:firstTimeArrowCanvas[0]];
+        }
+        else {
+            if (!firstTimeArrowCanvas[1]) {
+                UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
+                CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
+                firstTimeArrowCanvas[1] = [[UIView alloc] initWithFrame:canvasFrame];
+                UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+                //[firstTimeArrowCanvas addSubview:pointer];
+                StixAnimation * animation = [[StixAnimation alloc] init];
+                animation.delegate = self;
+                [animation doBounce:pointer inView:firstTimeArrowCanvas[1] forDistance:20 forTime:1]; 
+            }
+            [firstTimeArrowCanvas[1] removeFromSuperview];
+            [feedItem.view addSubview:firstTimeArrowCanvas[1]];
+        }
+    }
+    
     //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     //[feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
@@ -895,6 +988,7 @@
 }
 
 -(void)reloadPageForTagID:(int)tagID {
+    NSMutableArray * allTagsNew = [delegate getTags];
     for (int i=0; i<[allTagsDisplayed count]; i++) {
         Tag * tag = [allTagsDisplayed objectAtIndex:i];
         if ([tag.tagID intValue] == tagID) {
@@ -999,16 +1093,21 @@
     NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
 }
 
--(void)addTagForDisplay:(Tag *)tag {
+-(int)addTagForDisplay:(Tag *)tag {
     // add newly created tag so it appears in the feed
     // create temporary tag id and timestamps
-    tag.tagID = [NSNumber numberWithInt:tempTagID--]; // temp
+    int originalID = [tag.tagID intValue];
+    tag.tagID = [NSNumber numberWithInt:tempTagID]; // temp
+    tag.pendingID = tempTagID;
+    tempTagID--;
     tag.timestamp = [NSDate date];
     //[allTagsDisplayed insertObject:tag atIndex:0];
     if (!allTagsPending)
         allTagsPending = [[NSMutableArray alloc] init];
     [allTagsPending insertObject:tag atIndex:0];
+    NSLog(@"Tag original ID %d pending ID %d allTagsPending %d",originalID, tag.pendingID, [allTagsPending count]);
     [self forceReloadWholeTableZOMG];
+    return [tag.tagID intValue];
 }
 
 -(void)finishedCheckingForNewData:(bool)updated {
@@ -1042,10 +1141,11 @@
 /************** FeedItemDelegate ***********/
 // comes from feedItem instead of carousel
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
+    
+    return;  // no peeling
+    /*
     // location is the click location inside feeditem's frame
     CGPoint locationInStixView = location;
-    //locationInStixView.x -= feedItem.stixView.frame.origin.x;
-    //locationInStixView.y -= feedItem.stixView.frame.origin.y;
     int peelableFound = [[feedItem stixView] findPeelableStixAtLocation:locationInStixView];
     NSLog(@"VerticalFeedController: Click on table at position %f %f with tagID %d peelableFound: %d\n", location.x, location.y, feedItem.tagID, peelableFound);
     for (int i=0; i<[allTagsDisplayed count]; i++) {
@@ -1055,9 +1155,155 @@
             break;            
         }
     }
+     */
 }
 
-/*** verticalfeedItemDelegate ****/
+-(void)summonSubview:(UIView*)view {
+    // display with an animation
+    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
+    [self.view addSubview:view];
+    [view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+    }];
+}
+
+-(void)unsummonSubview:(UIView*)view {
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = view.frame;
+    
+    frameOffscreen.origin.x -= 330;
+    [animation doViewTransition:view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        [view removeFromSuperview];
+    }];    
+}
+
+-(void)displayEditorWithRemixMode:(int)remixMode {
+    [delegate didClickRemixButton];
+    
+    if (!stixEditorController)
+    {
+        stixEditorController = [[StixEditorViewController alloc] init];
+        [stixEditorController setDelegate:self];
+    }
+
+    // display with an animation
+    NSLog(@"Displaying editor with remix mode %d", remixMode);
+    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
+    [self.view addSubview:stixEditorController.view];
+    //[stixEditorController.view setFrame:frameOffscreen];
+    
+    // temporarily add to feed; also correctly assigns a pending tagID
+    //int oldID = [tagToRemix.tagID intValue];
+    //int pendingID = [self addTagForDisplay:tagToRemix];
+    //NSLog(@"Remixing new tag with pending ID %d from original tagID %d", pendingID, oldID);
+    
+#if 0
+    [stixEditorController initializeWithTag:tagToRemix remixMode:remixMode];    
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:stixEditorController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+        // hack a way to display view over camera; formerly presentModalViewController
+        [stixEditorController.view setFrame:frameOnscreen];
+        [self.camera setCameraOverlayView:stixEditorController.view];        
+    }];
+#else
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    [stixEditorController.view setFrame:frameOnscreen];
+    [self.camera setCameraOverlayView:stixEditorController.view];        
+    [stixEditorController initializeWithTag:tagToRemix remixMode:remixMode];
+#endif
+}
+
+-(void)didClickRemixFromDetailView:(Tag*)tag {
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
+    if (feedItem) {
+        NSLog(@"Calling didClickRemixFromDetailView with tagID %@", tag.tagID);
+        [self didClickRemixWithFeedItem:feedItem];
+    }
+}
+
+-(BOOL)didClickNotesButton {
+    // checks for first time user state
+    return [delegate canClickNotesButton];
+}
+
+-(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
+    BOOL okToAdvance = [delegate canClickRemixButton]; // just to advance first time message, metrics, etc
+    if (!okToAdvance)
+        return;
+    if (firstTimeArrowCanvas[0]) {
+        [firstTimeArrowCanvas[0] removeFromSuperview];
+        firstTimeArrowCanvas[0] = nil;
+    }
+    if (firstTimeArrowCanvas[1]) {
+        [firstTimeArrowCanvas[1] removeFromSuperview];
+        firstTimeArrowCanvas[1] = nil;
+    }
+    [self setTagToRemix:[feedItem.tag copy]];
+    NSLog(@"Did click remix with feedItem by %@ with tagID %@, creating tagToRemix with ID %@", feedItem.tag.username, feedItem.tag.tagID, tagToRemix.tagID);
+    if (tagToRemix.stixLayer) {
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
+        //    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
+        [actionSheet showFromTabBar:tabBarController.tabBar];
+    }
+    else {
+        // no previous stix exist, automatically choose original mode
+        [self displayEditorWithRemixMode:REMIX_MODE_USEORIGINAL];
+    }
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+//    BOOL bUseOriginal = NO;
+    int remixMode;
+    if (buttonIndex == 0) {
+        // remixed photo
+        NSLog(@"Button 0");
+        remixMode = REMIX_MODE_ADDSTIX;
+    }
+    else if (buttonIndex == 1) {
+        // original photo
+        NSLog(@"Button 1");
+        remixMode = REMIX_MODE_USEORIGINAL;
+    }
+    else if (buttonIndex == 2) {
+        NSLog(@"Button 2");
+        tagToRemix = nil;
+        return;
+    }
+    [self displayEditorWithRemixMode:remixMode];
+}
+
+-(void)didRemixNewPix:(Tag *)cameraTag remixMode:(int)remixMode{
+    [delegate didRemixNewPix:cameraTag remixMode:remixMode];
+}
+
+-(void)didGetHighResImage:(UIImage *)highResImage forTagID:(NSNumber *)tagID {
+    // optimization - only request high res image once
+    VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
+    Tag * t = feedItem.tag;
+    [t setHighResImage:highResImage];
+    
+    for (int i=0; i<[allTags count]; i++) {
+        Tag * t = [allTags objectAtIndex:i];
+        if ([[t tagID] intValue] == [tagID intValue]) {
+            NSLog(@"DidGetHighResImage: updating allTags at index %d", i);
+            [t setHighResImage:highResImage];
+            return;
+        }
+    }
+    for (int i=0; i<[allTagsDisplayed count]; i++) {
+        Tag * t = [allTagsDisplayed objectAtIndex:i];
+        if ([[t tagID] intValue] == [tagID intValue]) {
+            NSLog(@"DidGetHighResImage: updating allTagsDisplayed at index %d", i);
+            [t setHighResImage:highResImage];
+            return;
+        }
+    }
+}
+
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
@@ -1076,47 +1322,43 @@
     //[commentView setTagID:tagID];
     //[commentView setNameString:nameString];
     
-#if 0
-    // hack a way to display view over camera; formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    [commentView.view setFrame:frameShifted];
-    [self.camera setCameraOverlayView:commentView.view];
-#else
     // hack a way to display feedback view over camera: formerly presentModalViewController
+#if 0
     CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
     [self.view addSubview:commentView.view];
     [commentView.view setFrame:frameOffscreen];
     
     CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.5 withCompletion:^(BOOL finished){
+    [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
+#else
+    [self summonSubview:commentView.view];
+#endif
     
     // must force viewDidAppear because it doesn't happen when it's offscreen?
     [commentView viewDidAppear:YES];     
-#endif
 }
 
+#pragma mark StixEditorDelegate 
+
+-(void)didCloseEditor {
 #if 0
-- (void) shortenBlastTextUrls:(NSString*)url{
+    [delegate didDismissSecondaryView];
     
-    /*
-    // Create bit.ly helper if nil
-    if (self.bitlyHelper == nil) {
-        self.bitlyHelper = [[[BTBitlyHelper alloc] init] autorelease];
-        self.bitlyHelper.delegate = self;
-    }
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = stixEditorController.view.frame;
     
-    [self.bitlyHelper shortenURLSInText:url];
-     */
-}
-- (void) BTBitlyShortUrl: (NSString *) shortUrl receivedForOriginalUrl: (NSString *) originalUrl{
-    NSLog(@"URL %@ shortened to %@", originalUrl, shortUrl);
-}
-- (void) BTBitlyQueueStartedProcessing {}
-- (void) BTBitlyQueueFinishedProcessing {}
-
+    frameOffscreen.origin.x -= 330;
+    [animation doViewTransition:stixEditorController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        [stixEditorController.view removeFromSuperview];
+    }];
+#else
+    [delegate didDismissSecondaryView];
+    [stixEditorController.view removeFromSuperview];    
+    [delegate didCloseEditorFromFeedController];
 #endif
+}
 
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];
@@ -1126,7 +1368,7 @@
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID {
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
     if (feedItem != nil) {
-        [feedItem didPressAddCommentButton:self];
+        [feedItem didClickAddCommentButton:self];
         for (int i=0; i<[allTagsDisplayed count]; i++) {
             Tag * tag = [allTagsDisplayed objectAtIndex:i];
             if ([tag.tagID intValue] == [tagID intValue]) {
@@ -1139,17 +1381,17 @@
 
 /*** CommentViewDelegate ***/
 -(void)didCloseComments {
+#if 1
     // hack a way to remove view over camera; formerly dismissModalViewController
-#if 0
-    [self.delegate didDismissSecondaryView]; // same as aux view
-#else
     StixAnimation * animation = [[StixAnimation alloc] init];
     CGRect frameOffscreen = commentView.view.frame;
     
     frameOffscreen.origin.x -= 330;
-    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [commentView.view removeFromSuperview];
     }];
+#else
+    [self unsummonSubview:commentView.view];
 #endif
 }
 
@@ -1166,21 +1408,17 @@
     NSString * newType = @"LIKE";
     switch (type) {
         case 0:
-            //newComment = @"ME LIKEY";
             newComment = @"LIKE_SMILES";
             break;
         case 1:
-            //newComment = @"OMG LOVE IT";
             newComment = @"LIKE_LOVE";
             break;
         
         case 2:
-            //newComment = @" ;) HOW U DOIN";
             newComment = @"LIKE_WINK";
             break;
             
         case 3:
-            //newComment = @"OH NO U DIDNT *Z SNAP*";
             newComment = @"LIKE_SHOCKED";
             break;
             
@@ -1235,56 +1473,58 @@
     [delegate didPerformPeelableAction:action forTagWithID:[tag.tagID intValue] forAuxStix:index];
 }
 
--(IBAction)adminStixButtonPressed:(id)sender {
-    [self.delegate didPressAdminEasterEgg:@"FeedView"];
-}
-
+/*
 -(void)didDismissCarouselTab {
-    /*
-    CGRect newFrame = CGRectMake(0, 0, 320, 480);
-    [self.tabBarController.view setFrame:newFrame];
-     */
     if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
         [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
     }
 }
 -(void)didExpandCarouselTab {
-    /*
-    CGRect newFrame = self.tabBarController.view.frame;
-    newFrame.origin.y = 20;
-    newFrame.size.height += 80;
-    [self.tabBarController.view setFrame:newFrame];
-     */
     if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
         [tabBarController toggleFirstTimeInstructions:NO];
         [tabBarController toggleFirstTimePointer:NO atStage:FIRSTTIME_MESSAGE_02];
     }
 }
-
+*/
 
 #pragma mark UserGalleryDelegate
 
 -(void)shouldDisplayUserPage:(NSString *)username {
-    if ([delegate isShowingBuxInstructions])
+    if ([delegate isShowingBuxInstructions]) {
+        isOpeningProfile = NO;
+        return;        
+    }
+    if ([delegate isDisplayingShareSheet]) {
+        isOpeningProfile = NO;
         return;
-    if ([delegate isDisplayingShareSheet])
-        return;
+    }
     
+#if 1    // custom callbacks needed here
     //    [self.delegate shouldDisplayUserPage:username];
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = commentView.view.frame;
     frameOffscreen.origin.x -= 330;
     
-    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [commentView.view removeFromSuperview];
         [delegate shouldDisplayUserPage:username];
     }];
-}
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
+#else
+    [self unsummonSubview:commentView.view];
+#endif
 }
 
+-(void)unlockProfile {
+    isOpeningProfile = NO;
+}
+
+/*
+-(void)shouldCloseUserPage {
+// doesn't come here
+    [delegate shouldCloseUserPage];
+}
+*/
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
     // send through to StixAppDelegate to save to defaults
@@ -1311,7 +1551,7 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     //shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
-    [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished) {
         [self stopActivityIndicator];
         if (shareSheet) {
             shareSheet = nil;
@@ -1356,7 +1596,7 @@
     [self didCloseShareSheet];
 }
 */
--(void)didPressShareButtonForFeedItem:(VerticalFeedItemController *) feedItem {
+-(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
         return;
@@ -1392,7 +1632,7 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
 //    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
-    [animation doViewTransition:shareSheet toFrame:frameInside forTime:.5 withCompletion:^(BOOL finished) {
+    [animation doViewTransition:shareSheet toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished) {
         [self.view addSubview:buttonShareEmail];
         [self.view addSubview:buttonShareFacebook];
         [self.view addSubview:buttonShareClose];
@@ -1469,7 +1709,8 @@
     // remove from pending list
     for (int i=0; i<[allTagsPending count]; i++) {
         Tag * pendingTag = [allTagsPending objectAtIndex:i];
-        if ([pendingTag.tagID intValue] == pendingID) {
+        NSLog(@"allTagsPending tag %d: id %@ pendingID %d ",i, pendingTag.tagID, pendingTag.pendingID);
+        if (pendingTag.pendingID == pendingID) {
             NSLog(@"Founding pending tag in allTagsPending: pendingID %d index %d new record id %d", pendingID, i, [tag.tagID intValue]);
             
             // if we added a stix, save stix as comment history
@@ -1477,11 +1718,14 @@
             // any stix created in offline mode will still get saved to auxStixStringId and other structures
             // first time a Pix is added to Kumulos, we call addAuxiliaryStixToPix based on its auxStix structures.
             // when a Pix is downloaded, we generate auxStix structures from auxiliaryStixes table, not from the saved auxStix in the tag
+            /* // deprecated with stixeditor
             if ([pendingTag.auxStixStringIDs count] > 0) {
                 [delegate pendingTagDidHaveAuxiliaryStix:pendingTag withNewTagID:[tag.tagID intValue]];
-            }            
+            } 
+             */
 
             [allTagsPending removeObjectAtIndex:i];
+            NSLog(@"finishedCreateNewPix removed object: alltagsPending now %d", [allTagsPending count]);
             /*
             [tag setAuxStixStringIDs:pendingTag.auxStixStringIDs];
             [tag setAuxLocations:pendingTag.auxLocations];
@@ -1495,9 +1739,15 @@
    
     // force reload
     //[self populateAllTagsDisplayed];
+#if 1
     [headerViews removeAllObjects];
     [self reloadPageForTagID:[tag.tagID intValue]];
     [tableController.tableView reloadData];
+#else
+    [headerViews removeAllObjects];
+    [feedItems removeAllObjects];
+    [self forceReloadWholeTableZOMG];
+#endif
 
     NSLog(@"FeedController: finished create new pix: sharing ID %d", [tag.tagID intValue]);
     [self reloadPage:0];

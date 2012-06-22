@@ -25,7 +25,7 @@
 -(void)shouldCloseShareController:(BOOL)didClickDone;
 -(NSString*)getUsername;
 -(void)uploadImageFinished;
-
+-(void)hideFirstTimeArrowForShareController;
 @optional
 -(void)sharePixDialogDidFinish;
 -(void)sharePixDialogDidFail:(int)errorType;
@@ -51,10 +51,10 @@
     NSString * shareURL;
     NSString * shareImageURL;
     NSString * shareCaption;
+    NSData * PNG;
 #if 0
     UIImage * image;
     int tagID;
-    NSData * PNG;
 #else
     Tag * tag;
 #endif
@@ -74,13 +74,9 @@
 @property (nonatomic, retain) NSString * shareURL;
 @property (nonatomic, retain) NSString * shareImageURL;
 @property (nonatomic, retain) NSString * shareCaption;
-#if 0
 @property (nonatomic, retain) NSData * PNG;
 @property (nonatomic, retain) UIImage * image;
-@property (nonatomic, assign) int tagID;
-#else
 @property (nonatomic, retain) Tag * tag;
-#endif
 
 +(ShareController *) sharedShareController;
 

@@ -23,6 +23,7 @@
 #import "KumulosHelper.h"
 #import "GlobalHeaders.h"
 #import "FlurryAnalytics.h"
+#import "StixEditorViewController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -41,6 +42,11 @@
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
 -(void)didShowBuxInstructions;
+
+//-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+-(void)didClickRemixButton;
+-(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
+-(void)didDismissSecondaryView;
 @end
 
 enum {
@@ -50,7 +56,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate, KumulosHelperDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate, KumulosHelperDelegate, StixEditorDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -87,7 +93,7 @@ enum {
     UserGalleryController * galleryController;
     NSString * galleryUsername;
         
-    OutlineLabel * labelBuxCount;
+    //OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
     int openDetailAnimation;
     
@@ -98,6 +104,9 @@ enum {
     int pendingContentCount; // prevents multiple rows from being loaded because our latest tag is not set yet
     
     Kumulos * k;
+    
+    StixEditorViewController * stixEditorController;
+    Tag * tagToRemix;
 }
 
 @property (nonatomic) ColumnTableController * tableController;
@@ -105,11 +114,13 @@ enum {
 //@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
-@property (nonatomic) OutlineLabel * labelBuxCount;
+//@property (nonatomic) OutlineLabel * labelBuxCount;
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
 @property (nonatomic) DetailViewController * detailController;
+@property (nonatomic) StixEditorViewController * stixEditorController;
+@property (nonatomic) Tag * tagToRemix;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;
 -(void)startActivityIndicator;

@@ -159,13 +159,13 @@
         
         int contentWidth = [pixTableController getContentWidth];
         int targetWidth = contentWidth;
-        int targetHeight = 282 * targetWidth / 314.0    ; //tagImageSize.height * scale;
+        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
         CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
-        [cview initializeWithImage:tag.image];
+        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
         // sometimes requests just fail and never show up
         [cview populateWithAuxStixFromTag:tag];
         if (![isShowingPlaceholderView objectForKey:tagID]) {
@@ -312,8 +312,8 @@
     animation.delegate = self;
     CGRect frameOffscreen = self.view.frame;
     frameOffscreen.origin.x -= 330;
-    //dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.5];
-    [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.5 withCompletion:^(BOOL finished) {
+    //dismissAnimation = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.25];
+    [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [self.view removeFromSuperview];
     }];
 }
@@ -341,7 +341,7 @@
     [detailController.view setFrame:frameOffscreen];
     
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.5];
+    [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
 }
 
 -(void)shouldDisplayUserPage:(NSString *)name {
@@ -360,6 +360,7 @@
 -(void)didDismissZoom {
     //isZooming = NO;
     //[carouselView setUnderlay:scrollView];
+//    [DetailViewController unlockOpen];
     [detailController.view removeFromSuperview];
     detailController = nil;
 }
@@ -393,6 +394,12 @@
 #pragma kumulosHelper callback
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];
+}
+
+#pragma mark remix hack
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
+    [DetailViewController unlockOpen];
+    [delegate didClickRemixFromDetailViewWithTag:tagToRemix];
 }
 
 @end

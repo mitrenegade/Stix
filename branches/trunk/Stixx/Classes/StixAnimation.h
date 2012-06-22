@@ -28,4 +28,5 @@
 -(void)doShake:(UIView *)canvas angleInDegrees:(float)deg forTime:(float)time withCompletion:(void (^)(BOOL))_completion;
 -(void)doPulse:(UIView *)canvas forTime:(float)time repeatCount:(int)repeat withCompletion:(void (^)(BOOL))_completion;
 -(void)doSpin:(UIView *)canvas forTime:(float)time withCompletion:(void (^)(BOOL))_completion;
+-(void)doBounce:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time;
 @end

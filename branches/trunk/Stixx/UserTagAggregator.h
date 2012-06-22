@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Kumulos.h"
-
+#import "FlurryAnalytics.h"
 @protocol UserTagAggregatorDelegate <NSObject>
 
 -(NSMutableSet*)getFollowingList;
@@ -29,6 +29,8 @@
     
     BOOL aggregationGetTagRequested; // first time a friend's tag has been found, tell delegate to download that tag
     NSMutableDictionary * userTagList;
+    
+    BOOL isLocked; // lock aggregation queue while being enumerated
 }
 
 @property (nonatomic, retain) Kumulos * k;

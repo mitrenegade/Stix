@@ -74,6 +74,7 @@ enum {
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
 @interface ProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIWebViewDelegate>{

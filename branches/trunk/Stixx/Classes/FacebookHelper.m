@@ -302,11 +302,8 @@ static NSString * appID;
         //alert user of successful post
         NSLog(@"Facebook dialog completed!");
         if ([postType isEqualToString:@"inviteFriend"]) {
-            [delegate didEarnFacebookReward:10];
+            //[delegate didEarnFacebookReward:10];
         }
-        //else if ([postType isEqualToString:@"sharePix"]) {
-        //    [delegate didEarnFacebookReward:1];
-        //}
     } else {
         //user pressed "cancel"
         NSLog(@"Facebook dialog did not complete!");

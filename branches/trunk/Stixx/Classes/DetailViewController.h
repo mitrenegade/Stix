@@ -18,6 +18,7 @@
 #import "VerticalFeedItemController.h"
 #import "CommentViewController.h"
 #import "ShareController.h"
+//#import "StixEditorViewController.h"
 
 @class DetailViewController;
 
@@ -33,9 +34,13 @@
 @optional
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;
 -(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController *)detailController;
+
+// stixEditorViewController stuff
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate> //StixEditorDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;
@@ -75,6 +80,9 @@
     ShareController * shareController;
     BOOL newPixDidClickShare;
     BOOL newPixDidFinishUpload;
+
+    //StixEditorViewController * stixEditorController;
+    Tag * tagToRemix;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
 //@property (nonatomic, retain) IBOutlet UILabel * labelLocationString;

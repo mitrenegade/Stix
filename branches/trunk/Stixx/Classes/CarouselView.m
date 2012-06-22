@@ -310,22 +310,6 @@ static dispatch_queue_t backgroundQueue;
     NSLog(@"Purchase prompt returned %d", mkStoreKitSuccess);
 #endif
 }
-/*
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 0) { 
-        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
-        // cancel
-        return;
-    }
-    else if (buttonIndex == 1) {
-        NSLog(@"Purchase premium alert: button index %d", buttonIndex);
-        // mkStoreKitSuccess not used; comes here if we clickon the Add Collection button
-        // and success/cancel is handled in mkStoreKit call
-        BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:[self getCurrentCategory]]; // BOBBY
-    }
-    return;
-}
- */
 
 -(void)didClickPurchasePremiumPack:(UIButton*)sender {
     // does not come here because button does not have target
@@ -339,7 +323,7 @@ static dispatch_queue_t backgroundQueue;
     // mkStoreKitSuccess not used; comes here if we clickon the Add Collection button
     // and success/cancel is handled in mkStoreKit call
     BOOL mkStoreKitSuccess = [delegate shouldPurchasePremiumPack:categoryName]; // BOBBY
-
+    
     UIButton * button = [premiumPurchaseButtons objectForKey:categoryName];
     if (button) {
         [button removeFromSuperview];
@@ -731,7 +715,8 @@ static int lastContentOffsetY = 0;
     if (1) {
         [tabImage setAlpha:.9];
         [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
-        [buttonShowCarousel setFrame:tabButtonShow];
+        CGRect tabButtonShow = CGRectMake(14, 1, 80, 40);
+       [buttonShowCarousel setFrame:tabButtonShow];
         isShowingCarousel = YES;
         //[self setStixSelected:nil];
     }

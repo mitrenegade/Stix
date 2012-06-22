@@ -154,15 +154,16 @@
     int y = [indexPath section];
     //NSLog(@"Vertical Feed Table: Loading row %d total rows %d", y, [delegate numberOfSections]);
     UIView * view;
-    view = [self.delegate viewForItemAtIndex:y];
+    view = [delegate viewForItemAtIndex:y];
     //[cell.contentView removeFromSuperview];
     [cell.contentView addSubview:view];
-    [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
-    
+    if (view)
+        [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
+
     if (y == [delegate numberOfSections]-1) // last available row reached 
     {
         //NSLog(@"Reached last row in feed");
-        [self.delegate updateScrollPagesAtPage:[delegate numberOfSections]];
+        [delegate updateScrollPagesAtPage:[delegate numberOfSections]];
     }
     return cell;
 }

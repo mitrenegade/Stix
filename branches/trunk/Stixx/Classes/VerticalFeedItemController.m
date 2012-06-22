@@ -27,13 +27,12 @@
 @synthesize imageView;
 @synthesize nameString, commentString, imageData;
 @synthesize userPhotoView;
-@synthesize addCommentButton;
+@synthesize buttonAddComment, buttonShare, buttonRemix;
 @synthesize tagID, tag;
 @synthesize delegate;
 @synthesize commentCount;
 @synthesize stixView;
 @synthesize locationIcon;
-@synthesize shareButton;
 @synthesize reloadView, reloadMessage, reloadMessage2, reloadButton;
 //@synthesize seeAllCommentsButton;
 /*
@@ -63,7 +62,7 @@
 }
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString *)descriptor andWithComment:(NSString *)comment andWithLocationString:(NSString*)location {// andWithImage:(UIImage*)image {
-    //NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@\n", name, descriptor, comment, location);
+    NSLog(@"--PopulateWithName: %@ descriptor %@ comment %@ location %@\n", name, descriptor, comment, location);
     
     nameString = name;
     descriptorString = descriptor;
@@ -97,20 +96,26 @@
     }
     
     if (showPlaceholder) {
+#if VERBOSE
         NSLog(@"TogglePlaceHolder: showing placeholder for tagID %d", tagID);
+#endif
         [stixView removeFromSuperview];
         [self.view insertSubview:placeholderView belowSubview:imageView];
     }
     else {
+#if VERBOSE
         NSLog(@"TogglePlaceHolder: removing placeholder for tagID %d", tagID);
+#endif
         [placeholderView removeFromSuperview];
         [self.view insertSubview:stixView belowSubview:imageView];
     }
     stixView.isShowingPlaceholder = showPlaceholder;
-    [shareButton removeFromSuperview];
-    [self.view addSubview:shareButton];
-    [addCommentButton removeFromSuperview];
-    [self.view addSubview:addCommentButton];
+    [buttonShare removeFromSuperview];
+    [self.view addSubview:buttonShare];
+    [buttonRemix removeFromSuperview];
+    [self.view addSubview:buttonRemix];
+    [buttonAddComment removeFromSuperview];
+    [self.view addSubview:buttonAddComment];
     [labelCommentCount removeFromSuperview];
     [self.view addSubview:labelCommentCount];
 }
@@ -124,9 +129,9 @@
     CGRect frame = [imageView frame];
     stixView = [[StixView alloc] initWithFrame:frame];
     [stixView setInteractionAllowed:NO];
-    [stixView setIsPeelable:YES];
+    [stixView setIsPeelable:NO]; // no more peeling
     [stixView setDelegate:self];
-    [stixView initializeWithImage:imageData];
+    [stixView initializeWithImage:imageData andStixLayer:tag.stixLayer];
     
 #if USE_PLACEHOLDER
     [self togglePlaceholderView:YES];
@@ -140,12 +145,6 @@
         [self togglePlaceholderView:YES];
     }
 #endif
-    /*
-    [shareButton removeFromSuperview];
-    [self.view addSubview:shareButton];
-    [addCommentButton removeFromSuperview];
-    [self.view addSubview:addCommentButton];
-     */
 }
 
 -(void)displayReloadView {
@@ -205,11 +204,11 @@
     //if (count > 0)
     //    [addCommentButton setTitle:[NSString stringWithFormat:@"%d", commentCount] forState:UIControlStateNormal];
     if (count == 0) {
-        [addCommentButton setImage:[UIImage imageNamed:@"btn_comment.png"] forState:UIControlStateNormal];
+        [buttonAddComment setImage:[UIImage imageNamed:@"btn_feed_notes_empty@2x.png"] forState:UIControlStateNormal];
         [labelCommentCount setHidden:YES];
     }
     else {
-        [addCommentButton setImage:[UIImage imageNamed:@"btn_comment2.png"] forState:UIControlStateNormal];
+        [buttonAddComment setImage:[UIImage imageNamed:@"btn_feed_notes@2x.png"] forState:UIControlStateNormal];
         [labelCommentCount setHidden:NO];
         [labelCommentCount setText:[NSString stringWithFormat:@"%d", commentCount]];
     }
@@ -269,75 +268,20 @@
 }
 #endif
 
-/*
- - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllHistoryDidCompleteWithResult:(NSArray*)theResults {
- 
- for (NSMutableDictionary * d in theResults) {        
- NSString * name = [d valueForKey:@"username"];
- NSString * comment = [d valueForKey:@"comment"];
- NSString * stixStringID = [d valueForKey:@"stixStringID"];
- if ([stixStringID length] == 0)
- {
- // backwards compatibility
- stixStringID = @"COMMENT";
- }
- 
- [names addObject:name];
- [comments addObject:comment];
- [stixStringIDs addObject:stixStringID];
- }
- NSLog(@"GetHistory for feedItem %d completed: %d comments", self.tagID, [names count]);
- 
- // do automatically
- //[self.delegate didExpandFeedItem:self];
- }
- */
-/** commentTable controller delegate ***/
-/*** commentFeedTableDelegate ***/
+-(IBAction)didClickAddCommentButton:(id)sender {
+    BOOL okToAdvance = [delegate didClickNotesButton]; // just to advance first time message, metrics, etc
+    if (!okToAdvance)
+        return;
 
-/*
--(NSString* )getNameForIndex:(int)index {
-    return [names objectAtIndex:index];
-}
-
--(NSString *)getCommentForIndex:(int)index {
-    return [comments objectAtIndex:index];
-}
-
--(NSString*)getStixStringIDForIndex:(int)index {
-    NSString* type = [stixStringIDs objectAtIndex:index];
-    if ([type length] == 0) 
-        type = @"COMMENT";
-    return type;
-}
-
--(NSString*)getTimestampStringForIndex:(int)index {
-    NSDate * date = [timestamps objectAtIndex:index];
-    NSString * timeStampString = [Tag getTimeLabelFromTimestamp:date];
-    return timeStampString;
-}
-
--(int)getCount {
-    return [names count];
-}
-*/
-
--(IBAction)didPressAddCommentButton:(id)sender {
-#if 0
-    if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
-        [delegate displayCommentsOfTag:tagID andName:nameString];
-#else
     if (isDisplayingLikeToolbar) {
         [self likeToolbarHide:-1];
     }
     else {
         [self likeToolbarShow];
     }
-#endif
 }
--(void)didPressSeeAllCommentsButton:(id)sender {
-    if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
-        [delegate displayCommentsOfTag:tagID andName:nameString];
+-(IBAction)didClickRemixButton:(id)sender {
+    [delegate didClickRemixWithFeedItem:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -397,15 +341,11 @@
      */
 #endif
     
-    //[shareButton setHidden:YES];
-    //[seeAllCommentsButton setHidden:YES];
-    
     UITapGestureRecognizer * myDoubleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGestureHandler:)];
     [myDoubleTapRecognizer setNumberOfTapsRequired:2];
     [myDoubleTapRecognizer setNumberOfTouchesRequired:1];
     [myDoubleTapRecognizer setDelegate:self];
     
-    //if (isPeelable)
     [self.view addGestureRecognizer:myDoubleTapRecognizer];
 }
 
@@ -482,13 +422,13 @@
 #if 1
     // fade in
     StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doFadeIn:stixView forTime:.5 withCompletion:^(BOOL finished){  }];
-    //[animation doJump:stixView inView:self.view forDistance:50 forTime:.5];
+    [animation doFadeIn:stixView forTime:.25 withCompletion:^(BOOL finished){  }];
+    //[animation doJump:stixView inView:self.view forDistance:50 forTime:.25];
 #endif
     
     stixView.isShowingPlaceholder = NO;
-    [shareButton removeFromSuperview];
-    [self.view addSubview:shareButton];
+    [buttonShare removeFromSuperview];
+    [self.view addSubview:buttonShare];
     
     // hack: forced retain of delegate (if it is DetailView)
     delegatePointer = nil;
@@ -519,13 +459,13 @@
         CGPoint location = [touch locationInView:self.view];
         // hack: sometimes the share and comment buttons don't respond first
         // check for that first
-        if (CGRectContainsPoint([shareButton frame], location))
-            [self didPressShareButton:shareButton];
+        if (CGRectContainsPoint([buttonShare frame], location))
+            [self didClickShareButton:buttonShare];
             //return;
-        else if (CGRectContainsPoint([addCommentButton frame], location)) 
-            [self didPressAddCommentButton:addCommentButton];
-        //else if (CGRectContainsPoint([reloadButton frame], location))
-        //    [self didClickReloadButton:reloadButton];
+        else if (CGRectContainsPoint([buttonAddComment frame], location)) 
+            [self didClickAddCommentButton:buttonAddComment];
+        else if (CGRectContainsPoint([buttonRemix frame], location))
+            [self didClickRemixButton:buttonRemix];
             //return;
         else if (CGRectContainsPoint([likeIconSmiles frame], location)) 
             [self didClickLikeIconSmiles];
@@ -546,9 +486,9 @@
 
 #pragma mark sharing
 
--(IBAction)didPressShareButton:(id)sender {
-    if ([delegate respondsToSelector:@selector(didPressShareButtonForFeedItem:)])
-        [delegate didPressShareButtonForFeedItem:self];
+-(IBAction)didClickShareButton:(id)sender {
+    if ([delegate respondsToSelector:@selector(didClickShareButtonForFeedItem:)])
+        [delegate didClickShareButtonForFeedItem:self];
 }
 
 -(void)needsRetainForDelegateCall {
@@ -682,7 +622,7 @@
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {
     // warning: this gets recognized after single tap on a stix
     NSLog(@"Double tap!");
-    [self didPressAddCommentButton:nil];
+    [self didClickAddCommentButton:nil];
 }
 
 @end

@@ -10,13 +10,14 @@
 
 @implementation Tag
 
-@synthesize username, image, tagID, timestring, timestamp;
+@synthesize username, originalUsername, image, tagID, timestring, timestamp;
 @synthesize comment;
 @synthesize descriptor;
 @synthesize locationString;
 @synthesize auxStixStringIDs, auxLocations, auxScales, auxRotations, auxPeelable, auxTransforms, auxIDs;
 @synthesize highResImage, highResImageID;
 @synthesize stixLayer;
+@synthesize pendingID;
 //@synthesize badge_x, badge_y, badgeCount;
 //@synthesize stixStringID;
 //@synthesize stixScale, stixRotation;
@@ -24,6 +25,7 @@
 -(void)encodeWithCoder:(NSCoder *)aCoder {
     
     [aCoder encodeObject:username forKey:@"username"];
+    [aCoder encodeObject:username forKey:@"originalUsername"];
     [aCoder encodeObject:image forKey:@"image"];
     [aCoder encodeObject:tagID forKey:@"tagID"];
     [aCoder encodeObject:timestamp forKey:@"timestamp"];
@@ -37,6 +39,7 @@
     
     if ((self = [super init])) {
         [self setUsername:[aDecoder decodeObjectForKey:@"username"]];
+        [self setOriginalUsername:[aDecoder decodeObjectForKey:@"originalUsername"]];
         [self setImage:[aDecoder decodeObjectForKey:@"image"]];
         [self setTagID:[aDecoder decodeObjectForKey:@"tagID"]];
         [self setTimestamp:[aDecoder decodeObjectForKey:@"timestamp"]];
@@ -130,6 +133,8 @@
     [dict setObject:[tag username] forKey:@"username"];
     [dict setObject: UIImagePNGRepresentation([tag image]) forKey:@"image"];
     [dict setObject:[tag tagID] forKey:@"allTagID"];
+    if ([tag originalUsername])
+        [dict setObject:[tag originalUsername] forKey:@"originalUsername"];
     if ([tag descriptor])
         [dict setObject:[tag descriptor] forKey:@"descriptor"];
     if ([tag comment])
@@ -154,6 +159,7 @@
     // loading a tag from kumulos
     
     NSString * name = [d valueForKey:@"username"];
+    NSString * originalUsername = [d valueForKey:@"originalUsername"];
     NSString * descriptor = [d valueForKey:@"descriptor"];
     NSString * comment = [d valueForKey:@"comment"];
     NSString * locationString = [d valueForKey:@"locationString"];
@@ -168,6 +174,8 @@
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];
 	[tag addImage:image];
     [tag setHighResImageID:highResImageID];
+    if (originalUsername)
+        [tag setOriginalUsername:originalUsername];
     if (stixLayerData)
         [tag setStixLayer:[UIImage imageWithData:stixLayerData]];
     if (highResImageData)
@@ -275,13 +283,15 @@
 
 -(void)burnStixLayerImage {
     // returns the layer of only stix
-    [self setStixLayer:[self tagToUIImage:NO useHighRes:NO]];
+    [self setStixLayer:[self tagToUIImageUsingBase:NO retainStixLayer:NO useHighRes:NO]];
 }
 
 -(UIImage*)tagToUIImage {
-    return [self tagToUIImage:YES useHighRes:NO];
+    return [self tagToUIImageUsingBase:YES retainStixLayer:YES useHighRes:NO];
 }
--(UIImage *)tagToUIImage:(BOOL)includeBaseImage useHighRes:(BOOL)useHighRes {
+-(UIImage *)tagToUIImageUsingBase:(BOOL)includeBaseImage retainStixLayer:(BOOL)retainStixLayer useHighRes:(BOOL)useHighRes {
+    
+    // set size of canvas
     CGSize newSize;
     if (USE_HIGHRES_SHARE && useHighRes && self.highResImage) {
         newSize = [self.highResImage size];
@@ -289,9 +299,10 @@
     else {
         newSize = [self.image size];
     }
-              
-    CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);
     UIGraphicsBeginImageContext(newSize);
+     
+    // draw base image
+    CGRect fullFrame = CGRectMake(0, 0, newSize.width, newSize.height);
     if (includeBaseImage) {
         if (USE_HIGHRES_SHARE && self.highResImage) {
             [self.highResImage drawInRect:fullFrame];
@@ -300,18 +311,20 @@
             [self.image drawInRect:fullFrame];	
         }
     }
+    
+    // draw previous stix image
+    if (stixLayer && retainStixLayer)
+        [stixLayer drawInRect:fullFrame];
+    
     UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();	
-    
+
+    // add all stix that are currently in auxStix lists
     for (int i=0; i<[auxStixStringIDs count]; i++) {
-    //int i = 0; {
         NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
         NSString * transformString = [auxTransforms objectAtIndex:i];
         CGAffineTransform auxTransform = CGAffineTransformFromString(transformString); // if fails, returns identity
         UIImageView * stix = [BadgeView getBadgeWithStixStringID:stixStringID];
-        //CGPoint center = [[auxLocations objectAtIndex:i] CGPointValue];
-        //[stix setCenter:center];
-        //CGPoint location = stix.frame.origin;
         
         // resize and rotate stix image source to correct auxTransform
         CGSize stixSize = stix.frame.size;
@@ -346,6 +359,21 @@
     }    
     // save edited image to photo album
     return result;
+}
+
+-(Tag*)copy {
+    Tag * t = [[Tag alloc] init];
+    [t setUsername:[self.username copy]];
+    [t setOriginalUsername:[self.originalUsername copy]]; // needs some attention
+    [t setImage:[self.image copy]];
+    [t setTagID:[self.tagID copy]];
+    [t setTimestamp:[NSDate date]];
+    [t setTimestring:[Tag getTimeLabelFromTimestamp:[t timestamp]]];
+    [t setDescriptor:[self.descriptor copy]];
+    [t setHighResImageID:[self.highResImageID copy]];
+    [t setHighResImage:[self.highResImage copy]];
+    [t setStixLayer:[self.stixLayer copy]];
+    return t;
 }
 
 @end

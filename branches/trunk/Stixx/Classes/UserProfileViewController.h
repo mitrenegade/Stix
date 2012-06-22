@@ -38,6 +38,7 @@
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(NSMutableDictionary *) getUserPhotos;
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate>{

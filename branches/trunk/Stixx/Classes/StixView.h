@@ -14,6 +14,7 @@
 #import "Tag.h"
 #import "Kumulos.h"
 #import "StixAnimation.h"
+//#import "StixPanelView.h" // cannot use this because of circular headers
 
 @class StixView;
 
@@ -30,6 +31,9 @@
 -(void)didTouchInStixView:(StixView*)stixViewTouched;
 -(void)needsRetainForDelegateCall;
 -(void)doneWithAsynchronousDelegateCall;
+
+// multiple stix
+-(void)didSelectStixInMultiStixView;
 @end
 
 @interface StixView : UIView <UIGestureRecognizerDelegate, UIActionSheetDelegate, KumulosDelegate>
@@ -82,6 +86,11 @@
     BOOL isShowingPlaceholder;
     
     BOOL isStillPeeling;
+    
+    // multi stix mode
+    BOOL bMultiStixMode;
+    int multiStixCurrent;
+    NSMutableArray * transformBoxes;
 }
 
 @property (nonatomic) UIImageView * stix;
@@ -98,9 +107,10 @@
 @property (nonatomic) NSNumber * tagID;
 @property (nonatomic, assign) int stixViewID;
 @property (nonatomic, assign) BOOL isShowingPlaceholder;
+@property (nonatomic, assign) BOOL bMultiStixMode;
 
 -(void)initializeWithImage:(UIImage*)imageData;
--(void)initializeWithImage:(UIImage*)imageData withContextFrame:(CGRect)contextFrame;
+-(void)initializeWithImage:(UIImage*)imageData andStixLayer:(UIImage*)stixLayer;
 -(int)populateWithAuxStixFromTag:(Tag*)tag;
 -(void)populateWithStixForManipulation:(NSString*)stixStringID withCount:(int)count atLocationX:(int)x andLocationY:(int)y /*andScale:(float)scale andRotation:(float)rotation*/;
 -(void)updateStixForManipulation:(NSString*)stixStringID;
@@ -110,7 +120,15 @@
 
 -(int)findPeelableStixAtLocation:(CGPoint)location;
 -(void)transformBoxShowAtFrame:(CGRect)frame;
+-(void)transformBoxShowAtFrame:(CGRect)frame withTransform:(CGAffineTransform)t;
 -(void)addPeelableAnimationToStix:(UIImageView*)canvas;
+
+// multi stix views
+-(void)multiStixSelectCurrent:(int)stixIndex;
+-(int)multiStixInitializeWithTag:(Tag *)tag useStixLayer:(BOOL)useStixLayer;
+-(void)multiStixAddStix:(NSString*)stixStringID atLocationX:(int)x andLocationY:(int)y;
+-(int) multiStixDeleteCurrentStix;
+-(void) multiStixClearAllStix;
 
 
 // on demand stix download

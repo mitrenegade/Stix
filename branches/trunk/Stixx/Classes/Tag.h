@@ -29,6 +29,7 @@
 @interface Tag : NSObject {
     // elements saved by Kumulos
     NSString * username;
+    NSString * originalUsername;
     NSString * descriptor;
     NSString * comment;
     NSString * locationString;
@@ -61,12 +62,14 @@
     
     // unique kumulos id number for each object added
     NSNumber * tagID;
+    int pendingID;
     
     NSString* timestring; // the timestamp for the most recent tag, in string format (unused)
     NSDate * timestamp; // the timestamp as an NSDate
 }
 
 @property (nonatomic) NSString * username;
+@property (nonatomic) NSString * originalUsername;
 @property (nonatomic) NSString * descriptor;
 @property (nonatomic) NSString * comment;
 @property (nonatomic) NSString * locationString;
@@ -76,6 +79,7 @@
 @property (nonatomic) NSNumber * highResImageID;
 //@property (nonatomic, retain) ARCoordinate * coordinate;
 @property (nonatomic) NSNumber * tagID;
+@property (nonatomic) int pendingID;
 @property (nonatomic) NSString * timestring;
 @property (nonatomic) NSDate * timestamp;
 @property (nonatomic) NSMutableArray * auxStixStringIDs;
@@ -98,7 +102,7 @@
 +(NSMutableDictionary*)tagToDictionary:(Tag*)tag;
 +(NSString*) getTimeLabelFromTimestamp:(NSDate*) timestamp;
 -(UIImage *)tagToUIImage;
--(UIImage *)tagToUIImage:(BOOL)includeBaseImage useHighRes:(BOOL)useHighRes;
+-(UIImage *)tagToUIImageUsingBase:(BOOL)includeBaseImage retainStixLayer:(BOOL)retainStixLayer useHighRes:(BOOL)useHighRes;
 -(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults;
 -(CGPoint)getLocationOfRemoveStixAtIndex:(int)index;
 -(void)burnStixLayerImage;

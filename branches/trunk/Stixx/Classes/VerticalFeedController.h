@@ -98,13 +98,11 @@
 -(void)didCloseEditorFromFeedController; // advance user stage
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate, StixAnimationDelegate> {
     
     NSMutableArray * allTags;
     NSMutableArray * allTagsPending;
     NSMutableArray * allTagsDisplayed;
-    NSMutableArray * firstTimeArrows;
-    UIView * firstTimeArrowCanvas[2];
     
     NSMutableSet * deallocatedIndices;
     
@@ -161,6 +159,10 @@
     Tag * tagToRemix;
     
     BOOL isOpeningProfile;
+
+    UIView * firstTimeArrowCanvas[2];
+    int agitatePointer[2];
+    int animationID[2];
 }
 //@property (nonatomic, weak) CarouselView * carouselView;
 @property (nonatomic) NSMutableDictionary * feedItems;
@@ -223,6 +225,7 @@
 
 -(void)didClickRemixFromDetailView:(Tag*)tag;
 -(void)unlockProfile;
+-(void)agitatePointer;
 @end
 
 

@@ -3703,16 +3703,47 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     /*** Parse service ***/
 #if 1
-    NSLog(@"Parse_createsubscriptions: creating request");
+    NSString * msg = @"Parse_createsubscriptions: creating request";
+    NSLog(msg);
+#if ADMIN_TESTING_MODE
+    [self showAlertWithTitle:@"Test" andMessage:msg andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+#endif
     PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionRequests"];
     [testObject setObject:myUserInfo_username forKey:@"username"];
-    [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
+    NSString* newStr = [NSString stringWithFormat:@"%@", notificationDeviceToken];
+    NSRange range = (NSRange){1, 9};
+    NSString *substr = [newStr substringWithRange:range];
+    NSLog(@"newStr: %@ token: %@", substr, notificationDeviceToken);
+    [testObject setObject:substr forKey:@"deviceTokenValue"];
     [testObject save];
 #endif
     
     Parse_subscribedChannels = [[NSMutableSet alloc] init];
     NSError * err = nil;
     NSLog(@"Parse_createsubscriptions: starting createsubscriptions");
+    
+#if ADMIN_TESTING_MODE
+    // first, unsubscribe from everything
+    [Parse_subscribedChannels unionSet:[PFPush getSubscribedChannels:&err]];
+    NSString * unsubscribeStr = @"unsubscribing from: ";
+    for (NSString * channel in Parse_subscribedChannels) {
+        [PFPush unsubscribeFromChannel:channel error:&err];
+        NSLog(@"unsubscribing from %@", channel);
+        unsubscribeStr = [NSString stringWithFormat:@"%@ %@", unsubscribeStr, channel];
+    }
+    [self showAlertWithTitle:@"Test" andMessage:unsubscribeStr andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    
+    /*
+    [self Parse_subscribeToChannel:@"letsSEE"];
+    [self Parse_subscribeToChannel:@"testChannel"];
+    [self Parse_subscribeToChannel:@"To500"];
+    [self Parse_subscribeToChannel:@"anotherChannel"];
+    [self Parse_subscribeToChannel:@"lastTest"];
+    
+    return;
+     */
+#endif
+    
     [self Parse_subscribeToChannel:@""];
     if ([self getUsername] != nil && ![[self getUsername] isEqualToString:@"anonymous"])
     {
@@ -3768,7 +3799,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [Parse_subscribedChannels addObject:channel];
             PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionSuccess"];
             [testObject setObject:myUserInfo_username forKey:@"username"];
-            [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
+            NSString* newStr = [NSString stringWithFormat:@"%@", notificationDeviceToken];
+            NSRange range = (NSRange){1, 9};
+            NSString *substr = [newStr substringWithRange:range];
+            NSLog(@"newStr: %@ token: %@", substr, notificationDeviceToken);
+            [testObject setObject:substr forKey:@"deviceTokenValue"];
             [testObject setObject:channel_ forKey:@"channel"];
             [testObject save];
         }
@@ -3778,7 +3813,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [self showAlertWithTitle:@"Test" andMessage:errorString andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             PFObject *testObject = [PFObject objectWithClassName:@"SubscriptionFailure"];
             [testObject setObject:myUserInfo_username forKey:@"username"];
-            [testObject setObject:notificationDeviceToken forKey:@"deviceToken"];
+            NSString* newStr = [NSString stringWithFormat:@"%@", notificationDeviceToken];
+            NSRange range = (NSRange){1, 9};
+            NSString *substr = [newStr substringWithRange:range];
+            NSLog(@"newStr: %@ token: %@", substr, notificationDeviceToken);
+            [testObject setObject:substr forKey:@"deviceTokenValue"];
             [testObject setObject:channel_ forKey:@"channel"];
             [testObject save];
         }
@@ -4460,7 +4499,10 @@ static bool isShowingAlerts = NO;
 
 -(void)agitateFirstTimePointer {
     [tabBarController agitateFirstTimePointer];
-    [tabBarController flashFirstTimeInstructions];
+    if (myUserInfo->firstTimeUserStage != FIRSTTIME_MESSAGE_02)
+        [tabBarController flashFirstTimeInstructions];
+    else 
+        [feedController agitatePointer];
 }
 -(void)advanceFirstTimeUserMessage {
     myUserInfo->firstTimeUserStage++;

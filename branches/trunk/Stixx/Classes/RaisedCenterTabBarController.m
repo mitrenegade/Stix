@@ -62,10 +62,12 @@
 
 -(void)flashFirstTimeInstructions {
     // briefly show instructions again
+    /*
     if (instructionsDismissed) {
         [self toggleFirstTimeInstructions:YES];
-        //[self performSelector:@selector(closeInstructions:) withObject:nil afterDelay:1.5];
+        [self performSelector:@selector(closeInstructions:) withObject:nil afterDelay:1.5];
     }
+     */
 }
 
 -(void)addFirstTimeInstructions {

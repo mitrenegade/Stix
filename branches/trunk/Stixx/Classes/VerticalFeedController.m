@@ -770,39 +770,55 @@
     
     // first time user arrow
     if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
-        if (index % 2 == 0) {
-            if (!firstTimeArrowCanvas[0]) {
-                UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
-                CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
-                firstTimeArrowCanvas[0] = [[UIView alloc] initWithFrame:canvasFrame];
-                UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
-                //[firstTimeArrowCanvas addSubview:pointer];
-                StixAnimation * animation = [[StixAnimation alloc] init];
-                animation.delegate = self;
-                [animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:1]; 
+        int i = index % 2;
+        if (!firstTimeArrowCanvas[i]) {
+            UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
+            CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
+            firstTimeArrowCanvas[i] = [[UIView alloc] initWithFrame:canvasFrame];
+            UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
+            //[firstTimeArrowCanvas addSubview:pointer];
+            StixAnimation * animation = [[StixAnimation alloc] init];
+            animation.delegate = self;
+            if (agitatePointer[i] > 0) {
+                animationID[i] = [animation doJump:pointer inView:firstTimeArrowCanvas[i] forDistance:20 forTime:.15];
+                //[animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:.15];
+//                agitatePointer[i]--;
             }
-            [firstTimeArrowCanvas[0] removeFromSuperview];
-            [feedItem.view addSubview:firstTimeArrowCanvas[0]];
-        }
-        else {
-            if (!firstTimeArrowCanvas[1]) {
-                UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
-                CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
-                firstTimeArrowCanvas[1] = [[UIView alloc] initWithFrame:canvasFrame];
-                UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
-                //[firstTimeArrowCanvas addSubview:pointer];
-                StixAnimation * animation = [[StixAnimation alloc] init];
-                animation.delegate = self;
-                [animation doBounce:pointer inView:firstTimeArrowCanvas[1] forDistance:20 forTime:1]; 
+            else {
+                animationID[i] = [animation doJump:pointer inView:firstTimeArrowCanvas[i] forDistance:20 forTime:1];
+                //[animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:1]; 
             }
-            [firstTimeArrowCanvas[1] removeFromSuperview];
-            [feedItem.view addSubview:firstTimeArrowCanvas[1]];
         }
-    }
-    
+        [firstTimeArrowCanvas[i] removeFromSuperview];
+        [feedItem.view addSubview:firstTimeArrowCanvas[i]];
+    }    
     //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     //[feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
+}
+
+-(void)agitatePointer {
+    agitatePointer[0] = 3;
+    agitatePointer[1] = 3;
+}
+
+-(void)didFinishAnimation:(int)_animationID withCanvas:(UIView *)canvas {
+    for (int i=0; i<2; i++) {
+        if (_animationID == animationID[i]) // first jump animation finished
+        {
+            StixAnimation * animation = [[StixAnimation alloc] init];
+            animation.delegate = self;
+            float time = 1;
+            if (agitatePointer[i] > 0) {
+                agitatePointer[i]--;
+                time = .15;
+                animationID[i] = [animation doJump:canvas inView:firstTimeArrowCanvas[i] forDistance:20 forTime:time];
+            }
+            else {
+                animationID[i] = [animation doJump:canvas inView:firstTimeArrowCanvas[i] forDistance:20 forTime:time];
+            }
+        }
+    }
 }
 
 -(void)refreshViewForItemAtIndex:(int)index withTag:(Tag*)tag {
@@ -1694,14 +1710,6 @@
         // asihttp request timeout
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connectivity Failed" message:@"Could not contact Stix Share pages due to low internet connectivity. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alertView show];
-    }
-}
-
--(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
-    // share menu
-    if (animationID == shareMenuOpenAnimation) {
-    }
-    else if (animationID == shareMenuCloseAnimation) {
     }
 }
 

@@ -9,11 +9,8 @@
 #import "ExploreViewController.h"
 
 @implementation ExploreViewController
-//@synthesize carouselView;
-//@synthesize scrollView;
 @synthesize tableController;
 @synthesize delegate;
-//@synthesize buttonFeedback;
 @synthesize activityIndicator;
 //@synthesize labelBuxCount;
 @synthesize buttonProfile;
@@ -481,7 +478,6 @@ static NSMutableSet * retainedDetailControllers;
 
 -(void)didDismissZoom {
     isZooming = NO;
-    //[carouselView setUnderlay:scrollView];
     if (detailController) {
         [detailController.view removeFromSuperview];
         detailController = nil;
@@ -599,8 +595,6 @@ static NSMutableSet * retainedDetailControllers;
 
 -(void)viewDidUnload {
     
-    //[carouselView release];
-    //carouselView = nil;
     activityIndicator = nil;
 
     [super viewDidUnload];

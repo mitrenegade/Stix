@@ -11,8 +11,6 @@
 #import "ImageCache.h"
 #import "BadgeView.h"
 #import "Tag.h"
-//#import "ARCoordinate.h"
-//#import "AddStixViewController.h"
 #import "UIImage+Alpha.h"
 #import "UIImage+Resize.h"
 #import "UIImage+RoundedCorner.h"
@@ -68,8 +66,6 @@
     
     Tag * cameraTag;
     
-    //TagDescriptorController * descriptorController;
-    //AddStixViewController * descriptorController;
     PixPreviewController *previewController;
     bool descriptorIsOpen;
     bool needToShowCamera;

@@ -53,7 +53,6 @@
 @synthesize allFollowers, allFollowing;
 @synthesize k;
 @synthesize allCommentCounts;
-@synthesize allCarouselViews;
 @synthesize loadingMessage;
 @synthesize alertQueue;
 @synthesize camera;
@@ -233,7 +232,6 @@ static dispatch_queue_t backgroundQueue;
     allUserEmails = [[NSMutableArray alloc] init];
     allUserNames = [[NSMutableArray alloc] init];
     allCommentCounts = [[NSMutableDictionary alloc] init];
-    allCarouselViews = [[NSMutableArray alloc] init];
     allCommentHistories = [[NSMutableDictionary alloc] init];
     
 #if !TARGET_IPHONE_SIMULATOR
@@ -588,12 +586,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // initialize stix types for all badge views
     [BadgeView InitializeStixTypes:theResults];
     [self saveStixTypesToDefaults];
-    //[feedController configureCarouselView]; // force start of download of first stix in carouselview
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                             (unsigned long)NULL), ^(void) {
-        //[feedController.carouselView reloadAllStix];
-    });
     NSLog(@"***** InitializeBadges Done: All %d Stix types initialized from kumulos! *****", [BadgeView totalStixTypes]);
     //init++;
     if (0) //(stixViewsLoadedFromDisk)
@@ -926,9 +919,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    //[tabBarController setButtonStateNormal:TABBAR_BUTTON_TAG]; // highlight button
-    //[feedController configureCarouselView];
-    //[feedController.carouselView carouselTabDismiss:YES];
     if (lastViewController == feedController) {
         [self didPressTabButton:TABBAR_BUTTON_FEED];
         //[self.tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
@@ -1662,7 +1652,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
         }
         [feedController reloadCurrentPage]; // allTags were already updated
-        //[feedController configureCarouselView];
         [self updateCommentCount:[notificationTagID intValue]];
         if (notificationBookmarkType == NB_NEWCOMMENT) {
             [feedController openCommentForPageWithTagID:notificationTagID];
@@ -2795,9 +2784,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
    
-    //[feedController configureCarouselView];
-    //[feedController.carouselView carouselTabDismiss:YES];
-    
     // touch tag to indicate it was updated
     [k touchPixToUpdateWithAllTagID:[tag.tagID intValue]];
     
@@ -3054,7 +3040,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    [allCarouselViews addObject:newBadgeView];
+    //[allCarouselViews addObject:newBadgeView];
 }
 
 -(void)didClickFeedbackButton:(NSString *)fromView {
@@ -3484,7 +3470,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    [[CarouselView sharedCarouselView] reloadAllStix];
     [[StixPanelView sharedStixPanelView] reloadAllStix];
 }
 
@@ -4617,7 +4602,7 @@ static bool isShowingAlerts = NO;
     // add purchase to kumulos
     [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
     
-    // force carouselview to update
+    // force stixPanel to update
     [[StixPanelView sharedStixPanelView] unlockPremiumPack:stixPackName];
     
     // animate
@@ -4643,7 +4628,7 @@ static bool isShowingAlerts = NO;
          // add purchase to kumulos
          [k didPurchasePremiumPackWithUsername:myUserInfo_username andStixPackName:stixPackName];
          
-         // force carouselview to update
+         // force stixPanel to update
          [[StixPanelView sharedStixPanelView] unlockPremiumPack:stixPackName usingStixStringID:stixStringID];
          
          // animate

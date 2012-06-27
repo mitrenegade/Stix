@@ -134,7 +134,6 @@ struct UserInfo {
     NSMutableArray * allTags;
     NSMutableDictionary * allCommentCounts;
     
-    NSMutableArray * allCarouselViews;
     
     //Tag * newestTag;
     NSDate * timeStampOfMostRecentTag;
@@ -336,7 +335,6 @@ struct UserInfo {
 @property (nonatomic) Kumulos * k;
 @property (nonatomic) NSMutableDictionary * allCommentCounts;
 @property (nonatomic) NSMutableDictionary * allCommentHistories;
-@property (nonatomic) NSMutableArray * allCarouselViews;
 @property (nonatomic) IBOutlet UITextField * loadingMessage;
 @property (nonatomic) NSMutableArray * alertQueue;
 @property (nonatomic) UIImagePickerController * camera;

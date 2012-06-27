@@ -638,8 +638,6 @@
 }
 
 -(void)didDismissZoom {
-    //isZooming = NO;
-    //[carouselView setUnderlay:scrollView];
     [detailController.view removeFromSuperview];
     detailController = nil;
 }

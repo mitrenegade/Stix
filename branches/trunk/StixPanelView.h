@@ -49,7 +49,6 @@
     NSMutableDictionary * stixCategories; // key: category name value: array of stixStringIDs
     int totalStixTypes;
     
-    // from carouselview
     UIScrollView * stixScroll;
     UIScrollView * categoryScroll;
     

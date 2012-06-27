@@ -10,13 +10,10 @@
 #import "TagViewController.h"
 #import "FeedTableController.h"
 #import "VerticalFeedItemController.h"
-//#import "CarouselView.h"
 #import "LoadingAnimationView.h"
 #import "CommentViewController.h"
-#import "AddStixViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
-//#import "BTBitlyHelper.h"
 #import "ProfileViewController.h"
 #import "OutlineLabel.h"
 #import "KumulosHelper.h"
@@ -98,7 +95,7 @@
 -(void)didCloseEditorFromFeedController; // advance user stage
 @end
 
-@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, AddStixViewControllerDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate, StixAnimationDelegate> {
+@interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate, StixAnimationDelegate> {
     
     NSMutableArray * allTags;
     NSMutableArray * allTagsPending;
@@ -150,7 +147,6 @@
     int shareMenuOpenAnimation;
     int shareMenuCloseAnimation;
     VerticalFeedItemController * shareFeedItem;
-    AddStixViewController * auxView;
     
     RaisedCenterTabBarController * __weak tabBarController;
     
@@ -164,7 +160,6 @@
     int agitatePointer[2];
     int animationID[2];
 }
-//@property (nonatomic, weak) CarouselView * carouselView;
 @property (nonatomic) NSMutableDictionary * feedItems;
 @property (nonatomic) NSMutableDictionary * headerViews;
 @property (nonatomic) NSMutableDictionary * headerViewsDidLoadPhoto;
@@ -173,9 +168,7 @@
 @property (nonatomic) NSMutableArray * allTagsPending;
 @property (nonatomic) FeedTableController *tableController;
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedDelegate> * delegate;
-//@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
-//@property (nonatomic) OutlineLabel * labelBuxCount;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
@@ -193,11 +186,9 @@
 -(void)populateAllTagsDisplayedWithTag:(Tag*)tag;
 -(int)addTagForDisplay:(Tag*)tag;
 -(void)forceUpdateCommentCount:(int)tagID;
-//-(void)configureCarouselView;
 -(void)reloadCurrentPage;
 -(void)reloadPage:(int)page;
 -(void)reloadPageForTagID:(int)tagID;
-//-(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickJumpButton:(id)sender;
 -(BOOL)jumpToPageWithTagID:(int)tagID;
 -(void)openCommentForPageWithTagID:(NSNumber*)tagID;

@@ -10,7 +10,6 @@
 
 @implementation VerticalFeedController
 
-//@synthesize carouselView;
 @synthesize delegate;
 @synthesize activityIndicator; // initially is active
 @synthesize activityIndicatorLarge;
@@ -25,7 +24,6 @@
 @synthesize camera;
 @synthesize tabBarController;
 @synthesize buttonProfile;
-//@synthesize labelBuxCount;
 //@synthesize statusMessage;
 @synthesize newestTagIDDisplayed;
 @synthesize logo;
@@ -123,27 +121,8 @@
     [self startActivityIndicator];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-//    [self configureCarouselView];
-//    [self.carouselView carouselTabDismiss:NO];
 }
 
-/*
--(void)configureCarouselView {
-    // claim carousel for self
-    NSLog(@"ConfigureCarouselView by VerticalFeedController");
-    [self setCarouselView:[CarouselView sharedCarouselView]];
-    [carouselView setDelegate:self];
-    [carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
-    [carouselView setExpandedTabY:5-STATUS_BAR_SHIFT+SHELF_LOWER_FROM_TOP];
-    [carouselView setAllowTap:YES];
-    //[carouselView removeFromSuperview];
-    [self.view insertSubview:carouselView aboveSubview:tableController.view];
-    [carouselView setUnderlay:tableController.view];
-    //[carouselView carouselTabDismiss:NO];
-    [carouselView resetBadgeLocations];
-}
-*/
- 
 - (void)viewWillAppear:(BOOL)animated
 {
 	[super viewWillAppear:animated];
@@ -183,105 +162,6 @@
     [super viewDidUnload];
 }
 
-
-
-/******* badge view delegate ******/
-/*
--(void)didTapStixOfType:(NSString *)stixStringID {
-    //[self.carouselView carouselTabDismissWithStix:badge];
-    if ([allTagsDisplayed count]==0) {
-    //    [carouselView resetBadgeLocations];
-    //    [carouselView carouselTabDismiss:YES];
-        return;        
-    }
-    //[self.carouselView carouselTabDismiss:NO];
-    //[self.carouselView setStixSelected:stixStringID];
-    CGPoint center = self.view.center;
-    center.y -= tableController.view.frame.origin.y; // remove tableController offset
-    //[badge setCenter:center];
-    int section = [tableController getCurrentSectionAtPoint:center];
-    lastPageViewed = section;
-    [self didDropStixByTapOfType:stixStringID];
-}
-
--(void)didDropStixByTapOfType:(NSString*)stixStringID {
-    // tap inside the feed to add a stix
-    Tag * tag;
-    if (lastPageViewed < [allTagsPending count]) {
-        tag = [allTagsPending objectAtIndex:lastPageViewed];
-    }
-    else
-    {
-        tag = [allTagsDisplayed objectAtIndex:lastPageViewed - [allTagsPending count]]; // lastPageViewed set by didTapStix
-    }
-    [self addAuxStixOfType:stixStringID toTag:tag];
-}
-
--(void)didDropStixByDrag:(UIImageView *) badge ofType:(NSString*)stixStringID {
-    if ([allTagsDisplayed count]==0) {
-    //    [carouselView resetBadgeLocations];
-    //    [carouselView carouselTabDismiss:YES];
-        return;
-    }
-    CGPoint locationInSection = [tableController getContentPoint:badge.center inSection:lastPageViewed];
-    locationInSection.y -= tableController.view.frame.origin.y; // remove tableController offset
-    [badge setCenter:locationInSection];
-    NSLog(@"VerticalFeedController: didDropStixByDrag: section found %d locationInSection origin %f %f center %f %f size %f %f", lastPageViewed, badge.frame.origin.x, badge.frame.origin.y, badge.center.x, badge.center.y, badge.frame.size.width, badge.frame.size.height);
-    Tag * tag = [allTagsDisplayed objectAtIndex:lastPageViewed]; // lastPageViewed set by didDropStix
-    [self addAuxStixOfType:stixStringID toTag:tag];
-}
-
--(void)didDropStix:(UIImageView *)badge ofType:(NSString*)stixStringID {
-    // comes here through carousel delegate
-    // the frame of the badge is in the carousel frame
-    // contains no information about which feedItem it was
-    [self.carouselView carouselTabDismiss:YES];
-    
-    CGPoint center = badge.center;
-    CGRect frame = badge.frame;
-    // this was for drag and drop 
-    //center.y -= tableController.view.frame.origin.y;
-    int section = [tableController getCurrentSectionAtPoint:center];
-    lastPageViewed = section;
-    NSLog(@"VerticalFeedController: didDropStix center %f %f size %f %f section %d", center.x,center.y, frame.size.width, frame.size.height, section);
-    [self didDropStixByDrag:badge ofType:stixStringID];
-}
- */
-
-/*
--(void)addAuxStixOfType:(NSString*)stixStringID toTag:(Tag*) tag{ 
-    // HACK: will be changed soon if we have an addStix button
-    
-    // input badge should have frame within the tag's frame
-    if (tag == nil) {
-        // nothing loaded yet
-        //[carouselView resetBadgeLocations];
-        return;
-    }
-
-    CGPoint location = CGPointMake(160,216);
-    auxView = [[AddStixViewController alloc] init];
-    
-    // hack a way to display view over camera; formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    [auxView.view setFrame:frameShifted];
-    [self.camera setCameraOverlayView:auxView.view];
-    
-    auxView.delegate = self;
-    [auxView initStixView:tag];
-    //[auxView addNewAuxStix:badge ofType:stixStringID atLocation:location];
-    [auxView configureCarouselView];
-    [auxView addStixToStixView:stixStringID atLocation:location];
-    //[auxView toggleCarouselView:NO];
-    //[carouselView setExpandedTabY:5-STATUS_BAR_SHIFT]; // hack: a bit lower
-    //[carouselView setDismissedTabY:375-STATUS_BAR_SHIFT];
-    //[auxView.carouselView carouselTabExpand:NO];
-    [auxView.carouselView carouselTabDismiss:YES];
-    //[auxView.carouselView.scrollView setContentOffset:carouselView.scrollView.contentOffset];
-    //[auxView didTapStix:badge ofType:stixStringID]; // simulate pressing of that stix
-}
-*/
-
 -(void)didAddDescriptor:(NSString *)descriptor andComment:(NSString *)comment andLocation:(NSString *)location {
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     if ([descriptor length] > 0) {
@@ -294,24 +174,14 @@
 -(void)didAddStixWithStixStringID:(NSString *)stixStringID withLocation:(CGPoint)location withTransform:(CGAffineTransform)transform {
     // hack a way to remove view over camera; formerly dismissModalViewController
     [self.delegate didDismissSecondaryView];
-    //[self configureCarouselView];
-    //[self.carouselView carouselTabDismiss:YES];
     
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
-    
-    //[carouselView resetBadgeLocations];
-    //[self reloadCurrentPage]; // done in didAddStixToPix
 }
 
 -(void)didCancelAddStix {
     // hack a way to remove view over camera; formerly dismissModalViewController
-    //[self configureCarouselView];
-    //
-    //NSLog(@"Is carousel showing? %d", [carouselView isShowingCarousel]);
-    //[carouselView carouselTabExpand:NO];
-    //[carouselView carouselTabDismiss:YES];
     [delegate didDismissSecondaryView];
     
 #if 0
@@ -725,7 +595,6 @@
 #endif
         
         //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-        //[carouselView setSizeOfStixContext:feedItem.imageView.frame.size.width];
         UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
         if (photo)
         {

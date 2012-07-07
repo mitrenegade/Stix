@@ -35,7 +35,7 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(int)getNewestTagID;
--(int)getBuxCount;
+//-(int)getBuxCount;
 -(NSString*)getUsername;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
@@ -106,6 +106,12 @@ enum {
     
     StixEditorViewController * stixEditorController;
     Tag * tagToRemix;
+    
+    BOOL bHasView;
+    BOOL bHasTable;
+    BOOL bShowedTable;
+    
+    int indexPointer; // pointer to location in allTagIDs currently being populated with a random tag
 }
 
 @property (nonatomic) ColumnTableController * tableController;

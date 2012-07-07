@@ -11,7 +11,7 @@
 #import "JSON.h"
 #import "FBConnect.h"
 #import "SMWebRequest.h"
-#import "SMXMLDocument.h"
+//#import "SMXMLDocument.h"
 
 // NOW defined in Stixx-info.plist
 // for Stix
@@ -27,7 +27,7 @@
 -(void)didLogoutFromFacebook;
 -(void)didCancelFacebookLogin;
 -(void)receivedFacebookFriends:(NSArray*)friendsArray;
--(int)getUserFacebookID;
+-(NSString*)getUserFacebookString;
 -(void)didEarnFacebookReward:(int)bux;
 //-(void)facebookLoginIsOffline;
 @end
@@ -53,6 +53,6 @@
 -(int)facebookHasSession;
 -(void)postToFacebookWithLink:(NSString*)link andPictureLink:(NSString*)pictureLink andTitle:(NSString*)title andCaption:(NSString*)caption andDescription:(NSString*)description useDialog:(BOOL)useDialog;
 -(void)requestFacebookFriends;
--(void)sendInvite:(NSString*)name withFacebookID:(NSString*)facebookID;
+-(void)sendInvite:(NSString*)name withFacebookString:(NSString*)facebookString;
 +(FacebookHelper*)sharedFacebookHelper;
 @end

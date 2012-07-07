@@ -7,42 +7,55 @@
 //
 
 #import <UIKit/UIKit.h>
-//#import "LoginViewController.h"
+#import "LoginViewController.h"
 #import "LoadingAnimationView.h"
 #import "KumulosData.h"
 #import "Kumulos.h"
 #import "BadgeView.h"
 #import "KumulosHelper.h"
+#import "SignupViewController.h"
+#import "CreateFacebookUsernameController.h"
 
 #define NEW_USER_BUX 100
 
 @protocol FacebookLoginDelegate <NSObject>
 -(void)didDismissSecondaryView;
 -(void)doFacebookLogin;
-- (void)didLoginFromSplashScreenWithUsername:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime;
+- (void)didLoginFromSplashScreenWithUsername:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime;
 -(void)didAddNewUserWithResult:(NSArray*)theResults;
 @end
 
-@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate>
+@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate, SignupViewDelegate, LoginViewDelegate, CreateFacebookUsernameDelegate>
 {
     BOOL isFirstTimeUser;
 }
 
 @property (nonatomic) IBOutlet UIButton * loginButton;
-//@property (nonatomic, retain) LoginViewController * loginController;
+@property (nonatomic) IBOutlet UIButton * signInButton;
+@property (nonatomic) IBOutlet UIButton * signUpButton;
 @property (nonatomic, unsafe_unretained) NSObject<FacebookLoginDelegate> *delegate;
-//@property (nonatomic, assign) UIImagePickerController * camera;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic, copy) NSString * facebookName;
 @property (nonatomic, copy) NSString * facebookEmail;
-@property (nonatomic, assign) int facebookID;
+@property (nonatomic) NSString* facebookString;
 @property (nonatomic) Kumulos * k;
+@property (nonatomic) UINavigationController * navController;
+@property (nonatomic, assign) UIImagePickerController * camera;
+@property (nonatomic) NSString * usersFacebookUsername;
+@property (nonatomic) NSData * usersFacebookPhotoData;
+@property (nonatomic) SignupViewController * signupController;
+@property (nonatomic) LoginViewController * loginController;
+@property (nonatomic) CreateFacebookUsernameController * usernameController;
 
--(IBAction)didClickJoinButton:(id)sender;
--(void)didGetFacebookName:(NSString*)name andEmail:(NSString*)email andID:(int)facebookID;
+-(IBAction)didClickFacebookLoginButton:(id)sender;
+-(void)didGetFacebookName:(NSString*)name andEmail:(NSString*)email andFacebookString:(NSString*)facebookString;
 -(void)addUser;
 -(void)loginUser;
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
 
+// new login functions
+-(IBAction)didClickSignIn:(id)sender;
+-(IBAction)didClickSignUp:(id)sender;
+-(void)shouldShowButtons;
 @end

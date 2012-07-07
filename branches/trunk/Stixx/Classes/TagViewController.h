@@ -31,11 +31,13 @@
 -(void)didDismissSecondaryView;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
--(int)getBuxCount;
+//-(int)getBuxCount;
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;
+-(void)redisplayFirstTimeUserMessage01;
 //-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
+-(NSMutableSet*)getFollowingList;
 @end
 
 

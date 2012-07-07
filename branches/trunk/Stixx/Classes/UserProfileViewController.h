@@ -14,7 +14,7 @@
 #import "KumulosData.h"
 #import "FriendSearchResultsController.h"
 #import "SMWebRequest.h"
-#import "SMXMLDocument.h"
+//#import "SMXMLDocument.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
 #import "UserGalleryController.h"
@@ -63,7 +63,7 @@
     BOOL isDisplayingFollowLists;
     NSMutableArray * searchFriendName;
     NSMutableArray * searchFriendEmail;
-    NSMutableArray * searchFriendFacebookID;
+    NSMutableArray * searchFriendFacebookString;
     NSMutableArray * searchFriendIsStix;
     
     NSMutableSet * allFollowers;

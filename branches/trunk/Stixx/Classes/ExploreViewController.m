@@ -70,6 +70,10 @@ static NSMutableSet * retainedDetailControllers;
     k = [[Kumulos alloc]init];
     [k setDelegate:self];    
 
+    bHasView = NO;
+    bHasTable = NO;
+    bShowedTable = NO;
+    
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
 
     return self;
@@ -85,7 +89,7 @@ static NSMutableSet * retainedDetailControllers;
     isShowingPlaceholderView = [[NSMutableDictionary alloc] init];
     
     newRandomTags = [[NSMutableDictionary alloc] init];
-    
+    indexPointer = 0;
     pendingContentCount = 0;
     [self initializeTable];
     
@@ -193,16 +197,25 @@ static NSMutableSet * retainedDetailControllers;
     tableController.delegate = self;
     numColumns = EXPLORE_COL;
     [tableController setNumberOfColumns:numColumns andBorder:4];
-    [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+    if (bHasView) {
+        NSLog(@"HasView and HasTable! ShowedTable!");
+        [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+        bShowedTable = YES;
+    }
+    else {
+        NSLog(@"NoHasView and HasTable!");
+        bHasTable = YES;
+        bShowedTable = NO;
+    }
 }
 
 -(int)numberOfRows {
     int total = [allTagIDs count];
-    //NSLog(@"allTagIDs has %d items", total);
+    NSLog(@"allTagIDs has %d items", total);
     return total / numColumns;
 }
 
--(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key andTagID:(NSNumber*)tagID{
+-(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key {
 #if 1
     UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
     [placeholderView setCenter:cview.center];
@@ -232,11 +245,8 @@ static NSMutableSet * retainedDetailControllers;
     if (index >= [allTagIDs count])
         return nil;
     
-    NSNumber * tagID = [allTagIDs objectAtIndex:index];
     //NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
     if ([contentViews objectForKey:key] == nil) {
-        Tag * tag = [allTags objectForKey:tagID];
-        
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
         
         int contentWidth = [tableController getContentWidth];
@@ -247,18 +257,24 @@ static NSMutableSet * retainedDetailControllers;
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
-        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
 
-        // sometimes requests just fail and never show up
-        [cview populateWithAuxStixFromTag:tag];
-        if (![isShowingPlaceholderView objectForKey:tagID]) {
+        // populate with tags
+        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+            NSNumber * tagID = [allTagIDs objectAtIndex:index];
+            Tag * tag = [allTags objectForKey:tagID];
+            [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
+
+            // sometimes requests just fail and never show up
+            [cview populateWithAuxStixFromTag:tag];
+        }
+        if (![isShowingPlaceholderView objectForKey:key]) {
             cview.isShowingPlaceholder = YES;
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:tagID];
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:key];//tagID];
 
-            [self createPlaceholderViewForStixView:cview andKey:key andTagID:tagID];
+            [self createPlaceholderViewForStixView:cview andKey:key];
         }
         else {
-            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:tagID] boolValue];
+            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:key/*tagID*/] boolValue];
         }
         [contentViews setObject:cview forKey:key];
     }
@@ -283,7 +299,8 @@ static NSMutableSet * retainedDetailControllers;
         NSLog(@"Trying to load past row %d: still waiting on %d pending contents", row, pendingContentCount);
         return;
     }
-    //NSLog(@"Loading row %d of total %d for gallery", row, [self numberOfRows]); 
+    
+    NSLog(@"Loading row %d of total %d for gallery", row, [self numberOfRows]); 
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     switch (exploreMode) {
@@ -292,14 +309,22 @@ static NSMutableSet * retainedDetailControllers;
                 // load initial row(s)
                 NSDate * now = [NSDate date]; // now
                 [k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+                for (int i=0; i<numColumns * 5; i++)
+                    [allTagIDs addObject:[NSNull null]];
                 pendingContentCount += numColumns + 5;
             }
             else {
-                NSNumber * tagID = [allTagIDs lastObject];
-                Tag * tag = [allTags objectForKey:tagID];
-                NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
-                [k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
-                pendingContentCount += numColumns + 5;
+                if (indexPointer > 0)
+                //if ([allTagIDs lastObject] != [NSNull null])
+                {
+                    NSNumber * tagID = [allTagIDs objectAtIndex:indexPointer-1];
+                    Tag * tag = [allTags objectForKey:tagID];
+                    NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
+                    [k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+                    for (int i=0; i<numColumns * 5; i++)
+                        [allTagIDs addObject:[NSNull null]];
+                    pendingContentCount += numColumns + 5;
+                }
             }
             break;
             
@@ -312,6 +337,7 @@ static NSMutableSet * retainedDetailControllers;
                 NSInteger num = arc4random() % maxID;
                 // kick off kumulos requests
                 [k getAllTagsWithIDRangeWithId_min:num-1 andId_max:num+1];
+                [allTagIDs addObject:[NSNull null]];
             }
         }
         default:
@@ -326,7 +352,8 @@ static NSMutableSet * retainedDetailControllers;
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
-        [allTagIDs addObject:newtag.tagID]; // save in order 
+        //[allTagIDs addObject:newtag.tagID]; // save in order 
+        [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
         
         // new system of auxiliary stix: request from auxiliaryStixes table
@@ -378,7 +405,8 @@ static NSMutableSet * retainedDetailControllers;
         id key;
         while (key = [e nextObject]) {
             Tag * newtag = [newRandomTags objectForKey:key];
-            [allTagIDs addObject:newtag.tagID]; // save in order 
+            //[allTagIDs addObject:newtag.tagID]; // save in order 
+            [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
             [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
 
             // new system of auxiliary stix: request from auxiliaryStixes table
@@ -406,15 +434,18 @@ static NSMutableSet * retainedDetailControllers;
         Tag * tag = [allTags objectForKey:tagID];
         if (tag) {
             [tag populateWithAuxiliaryStix:theResults];
+            NSNumber * key = nil;
             for (int i=0; i<[allTagIDs count]; i++) {
                 NSNumber * tID = [allTagIDs objectAtIndex:i];
                 if (tID == tagID) {
                     // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
-                    [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
+                    key = [NSNumber numberWithInt:i];
+                    [contentViews removeObjectForKey:key];
                     break;
                 }
             }
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:tagID];
+            if (key)
+                [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
             [tableController.tableView reloadData];
             return;
         }
@@ -429,6 +460,8 @@ static NSMutableSet * retainedDetailControllers;
     [placeholderViews removeAllObjects];
     [isShowingPlaceholderView removeAllObjects];
     pendingContentCount = 0;
+    indexPointer = 0;
+    [self.tableController.tableView reloadData];
     [self loadContentPastRow:-1];
     isZooming = NO;
     [self startActivityIndicator];
@@ -541,8 +574,7 @@ static NSMutableSet * retainedDetailControllers;
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-    //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
-
+    
     UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
     if ([[delegate getUsername] isEqualToString:@"anonymous"]) {
         photo = [UIImage imageNamed:@"nav_profilebutton.png"];
@@ -555,6 +587,15 @@ static NSMutableSet * retainedDetailControllers;
     //if (detailController)
     //    detailController = nil;
     //[DetailViewController unlockOpen]; 
+    bHasView = YES;
+    if (bHasTable && !bShowedTable) {
+        NSLog(@"HasView and HadTable! ShowedTable!");
+        [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+        bShowedTable = YES;
+    }
+    else {
+        NSLog(@"HasView! NoHasTable!");
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

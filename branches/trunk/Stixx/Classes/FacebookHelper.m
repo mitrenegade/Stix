@@ -219,7 +219,7 @@ static NSString * appID;
     
     NSDictionary *jsonDict = [responseString JSONValue];
     // facebook JSON Data has two elements: data and paging
-    // data is an array containing key-value pairs of fbID and name
+    // data is an array containing key-value pairs of facebookString and name
     NSArray *friendsArray = [jsonDict objectForKey:@"data"];
 #else
     NSArray * friendsArray = [responseData objectForKey:@"data"];
@@ -227,24 +227,24 @@ static NSString * appID;
     /*
      for (int i=0; i<[friendsArray count]; i++) {
      NSDictionary * d = [friendsArray objectAtIndex:i];
-     NSString * fbID = [d objectForKey:@"id"];
+     NSString * facebookString = [d objectForKey:@"id"];
      NSString * name = [d objectForKey:@"name"];
-     NSLog(@"Friend %d id %@ name %@", i, fbID, name);
+     NSLog(@"Friend %d id %@ name %@", i, facebookString, name);
      }
      */
     [delegate receivedFacebookFriends:friendsArray];
 }
 
--(void)sendInvite:(NSString *)name withFacebookID:(NSString*)facebookID {
+-(void)sendInvite:(NSString *)name withFacebookString:(NSString*)facebookString {
     postType = @"inviteFriend";
-    NSString * myFacebookID = [NSString stringWithFormat:@"%d", [delegate getUserFacebookID]];
+    NSString * myFacebookString = [delegate getUserFacebookString];
     // the only message that shows up
     NSString * postname = @"Get Sticky with me...";
     NSString * description = @"Let's remix our photos with fun, crazy, digital stickers.";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    @"stixmobile.com/", @"link", 
-                                   facebookID, @"to",
-                                   myFacebookID, @"from",
+                                   facebookString, @"to",
+                                   myFacebookString, @"from",
                                    postname, @"name",
                                    //caption, @"caption", 
                                    description, @"description",

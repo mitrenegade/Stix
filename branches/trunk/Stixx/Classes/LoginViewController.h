@@ -14,56 +14,33 @@
 #import "LoadingAnimationView.h"
 #import "KumulosData.h"
 
-#define NEW_USER_BUX 50
-
 @protocol LoginViewDelegate
-
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
-- (void)didCancelLogin;
+-(void)showAlert:(NSString*)alertMessage;
+-(void)shouldDismissSecondaryViewWithTransition:(UIView*)viewToDismiss;
 @end
 
-@interface LoginViewController : UIViewController <UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
-    IBOutlet UITextField * loginName;
-    IBOutlet UITextField * loginPassword;
-    IBOutlet UITextField * loginEmail;
-    IBOutlet UIImageView * loginEmailBG;
-    IBOutlet UIButton * addPhoto;
-    IBOutlet UIButton * loginButton;
-    IBOutlet UIButton * joinButton;
-    IBOutlet UIButton * cancelButton;
+@interface LoginViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate> {
     LoadingAnimationView * activityIndicator;
-
-    UIImage * newUserImage;
-    bool newUserImageSet;
-    
-	id<LoginViewDelegate, NSObject> delegate;
-    
-    bool bJoinOrLogin; // 0 for join, 1 for login
-    
+    IBOutlet UITableView * tableView;
+    IBOutlet UIButton * buttonLogin;
+    IBOutlet UIButton * buttonBack;
+    NSMutableArray * inputFields;
     Kumulos * k;
+    NSObject<LoginViewDelegate> * __unsafe_unretained delegate;
 }
 
-@property (nonatomic, retain) IBOutlet UITextField * loginName;
-@property (nonatomic, retain) IBOutlet UITextField * loginPassword;
-@property (nonatomic, retain) IBOutlet UITextField * loginEmail;
-@property (nonatomic, retain) IBOutlet UIImageView * loginEmailBG;
-@property (nonatomic, retain) IBOutlet UIButton * addPhoto;
-@property (nonatomic, retain) IBOutlet UIButton * loginButton;
-@property (nonatomic, retain) IBOutlet UIButton * joinButton;
-@property (nonatomic, retain) IBOutlet UIButton * cancelButton;
-@property (nonatomic, assign) id<LoginViewDelegate, NSObject> delegate;
-@property (nonatomic, retain) LoadingAnimationView * activityIndicator;
-@property (nonatomic, assign) bool bJoinOrLogin; 
-@property (nonatomic, retain) UIImage * userImage;
+@property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic) IBOutlet UITableView * tableView;
+@property (nonatomic) IBOutlet UIButton * buttonLogin;
+@property (nonatomic) NSMutableArray * inputFields;
+@property (nonatomic) Kumulos * k;
+@property (nonatomic, unsafe_unretained) NSObject<LoginViewDelegate> *delegate;
+@property (nonatomic) IBOutlet UIButton * buttonBack;
 
-- (IBAction)loginButtonPressed:(id)sender; 
-- (IBAction)joinButtonPressed:(id)sender;
-- (IBAction)cancelButtonPressed:(id)sender;
-- (IBAction)addPhotoPressed:(id)sender;
--(void)addUser;
--(void)doLogin;
-
--(void)continueLogin;
--(void)continueJoin;
+-(IBAction)didClickLogin:(id)sender;
+-(void)startActivityIndicator;
+-(void)stopActivityIndicator;
+-(IBAction)didClickBackButton:(id)sender;
 
 @end

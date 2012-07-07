@@ -573,12 +573,12 @@
     if (!searchFriendName) {
         searchFriendName = [[NSMutableArray alloc] init];
         searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
+        searchFriendID = [[NSMutableArray alloc] init];
         searchFriendIsStix = [[NSMutableArray alloc] init]; // whether they are using Stix already
     }
     [searchFriendName removeAllObjects];
     [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
+    [searchFriendID removeAllObjects];
     [searchFriendIsStix removeAllObjects];
 }
 
@@ -594,24 +594,23 @@
     NSMutableArray * searchFriendNotStixID = [[NSMutableArray alloc] init];
     NSMutableArray * searchFriendNotStix = [[NSMutableArray alloc] init];
     
-    NSMutableArray * allFacebookIDs = [delegate getAllUserFacebookIDs];
+    NSMutableArray * allFacebookStrings = [delegate getAllUserFacebookStrings];
     for (NSMutableDictionary * d in facebookFriendArray) {
-        NSString * fbID = [d valueForKey:@"id"];
-        NSString * fbName = [d valueForKey:@"name"];
-        //NSLog(@"fbID: %@ fbName: %@", fbID, fbName);
-        if ([allFacebookIDs containsObject:fbID]) {
-            [searchFriendName addObject:fbName];
-            [searchFriendFacebookID addObject:fbID];
+        NSString * _facebookString = [d valueForKey:@"id"];
+        NSString * _facebookName = [d valueForKey:@"name"];
+        if ([allFacebookStrings containsObject:_facebookString]) {
+            [searchFriendName addObject:_facebookName];
+            [searchFriendID addObject:_facebookString];
             [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
         } else {
-            [searchFriendNotStixName addObject:fbName];
-            [searchFriendNotStixID addObject:fbID];
+            [searchFriendNotStixName addObject:_facebookName];
+            [searchFriendNotStixID addObject:_facebookString];
             [searchFriendNotStix addObject:[NSNumber numberWithBool:NO]];
         }
     }
 
     [searchFriendName addObjectsFromArray:searchFriendNotStixName];
-    [searchFriendFacebookID addObjectsFromArray:searchFriendNotStixID];
+    [searchFriendID addObjectsFromArray:searchFriendNotStixID];
     [searchFriendIsStix addObjectsFromArray:searchFriendNotStix];
     
     [self stopActivityIndicator];
@@ -653,8 +652,8 @@
             //NSLog(@"Friends from contact found by name: %@ withEmail %@", cName, cEmail);
             [searchFriendName addObject:cName];
             [searchFriendEmail addObject:cEmail]; 
-            [searchFriendFacebookID addObject:cID];
-            [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookID to contact them
+            [searchFriendID addObject:cID];
+            [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookString to contact them
         }
         else {
             // search by email(s)
@@ -666,8 +665,8 @@
                     //NSLog(@"Friends from contact found from email: %@ name %@", cEmail, cName);
                     [searchFriendName addObject:cName];
                     [searchFriendEmail addObject:cEmail]; 
-                    [searchFriendFacebookID addObject:cID];
-                    [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookID to contact them
+                    [searchFriendID addObject:cID];
+                    [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookString to contact them
                     break;
                 }        
             }
@@ -697,15 +696,16 @@
 }
 -(UIImage*)getUserPhotoForUser:(int)index {
     NSString * friendName = [searchFriendName objectAtIndex:index];
-    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:friendName]];
+    //UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:friendName]];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:friendName];
     return userPhoto;
 }
 -(NSString*)getUserEmailForUser:(int)index {
     //NSString * friendName = [searchFriendName objectAtIndex:index];
     return @""; //[[[delegate getAllUsers] objectForKey:friendName] objectForKey:@"email"];
 }
--(NSString*)getFacebookIDForUser:(int)index {
-    return [searchFriendFacebookID objectAtIndex:index];
+-(NSString*)getIDForUser:(int)index {
+    return [searchFriendID objectAtIndex:index];
 }
 -(int)getFollowingUserStatus:(int)index {
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
@@ -717,7 +717,8 @@
     return [[delegate getFollowingList] containsObject:friendName];
 }
 -(UIImage*)getUserPhotoForUsername:(NSString *)name {
-    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:name]];
+    //UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:name]];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:name];
     return userPhoto;
 }
 
@@ -738,8 +739,8 @@
     }
     else {
         // invite
-        NSString * fbID = [self getFacebookIDForUser:index]; // fbEmail does not exist
-        [delegate didClickInviteButtonByFacebook:username withFacebookID:fbID];
+        NSString * _facebookString = [self getIDForUser:index]; 
+        [delegate didClickInviteButtonByFacebook:username withFacebookString:_facebookString];
     }
     [[searchResultsController tableView] reloadData];
 }
@@ -866,13 +867,13 @@
     NSArray *query = [[_searchBar text] componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
    // NSMutableArray * allUserEmails = [self.delegate getAllUserEmails];
     NSMutableArray * allUserNames = [delegate getAllUserNames];
-    NSMutableArray * allUserFacebookIDs = [delegate getAllUserFacebookIDs];
+    NSMutableArray * allUserFacebookStrings = [delegate getAllUserFacebookStrings];
 
-    NSLog(@"Searching for facebookID");
-    // see if searching for facebook ID - yea right
-    BOOL isFacebookID = [allUserFacebookIDs containsObject:[_searchBar text]];
-    if (isFacebookID) {
-        int index = [allUserFacebookIDs indexOfObject:[_searchBar text]];
+    NSLog(@"Searching for facebookString");
+    // see if searching for facebook String - probably will not happen
+    BOOL isFacebookString = [allUserFacebookStrings containsObject:[_searchBar text]];
+    if (isFacebookString) {
+        int index = [allUserFacebookStrings indexOfObject:[_searchBar text]];
         [searchFriendName addObject:[allUserNames objectAtIndex:index]];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
         [searchResultsController.tableView reloadData];

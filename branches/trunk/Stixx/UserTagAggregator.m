@@ -100,6 +100,8 @@
         NSLog(@"Trying to aggregate tagIDs for following list but user is not logged in!");
         return;
     }
+    showDebugMessageAfterStartAggregation = YES;
+    [self aggregationDebugMessage];
    
     // uncomment this line if you want to skip aggregation for testing
     //return;
@@ -110,7 +112,8 @@
     
     followingCountLeftToAggregate = [allFollowing count];
     NSLog(@"AggregateNewTagIDs: You are following %d people", [allFollowing count]);
-    int ct = 0;
+/*
+ int ct = 0;
     for (NSString * name in followingSetWithMe) {
         //NSNumber * newestTagID = [NSNumber numberWithInt:idOfNewestTagAggregated]; //[allTagIDs objectAtIndex:0];
         NSNumber * newestTagID = [userTagList objectForKey:name];
@@ -121,6 +124,30 @@
         [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     }    
     [followingSetWithMe release];
+ */
+    [self getUserPixForUsers:followingSetWithMe];
+}
+
+-(void)getUserPixForUsers:(NSMutableSet*)followingSetWithMe {
+    if (!pauseAggregation) {
+        NSEnumerator * enumerator = [followingSetWithMe objectEnumerator];
+        NSString * name = [enumerator nextObject];
+
+        [followingSetWithMe removeObject:name];
+        NSNumber * newestTagID = [userTagList objectForKey:name];
+        
+#if VERBOSE
+        NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
+#endif
+        
+        KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+        [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
+    } else {
+        NSLog(@"getUserPixForUsers paused!");
+    }
+    
+    if ([followingSetWithMe count] > 0)
+        [self performSelector:@selector(getUserPixForUsers:) withObject:followingSetWithMe afterDelay:.1];
 }
 
 -(void)reaggregateTagIDs {
@@ -150,17 +177,34 @@
 #if VERBOSE
         NSLog(@"getNewPixBelongingToUser %@ completed with %d results - %d users remaining, queue size %d", followName, [theResults count], followingCountLeftToAggregate-1, [aggregationQueue count]);
 #endif
+        isLocked = YES;
         [aggregationQueue addObjectsFromArray:theResults];
+        isLocked = NO;
+
+        /*
+        if (isFirstTimeAggregating) {
+            NSLog(@"UserAggregator setting trigger for firstTimeAggregating");
+            firstTimeAggregatingTrigger = 1;
+            isFirstTimeAggregating = NO;
+            
+            // call parse now 
+            [delegate didSetAggregationTrigger];
+        }
+         */
     }
     else {
 #if VERBOSE
-        NSLog(@"getNewPixBelongingToUser %@ returned no results for followingCount %d - queue size %d", followName, followingCountLeftToAggregate-1, [aggregationQueue count]);
+        if (!isLocked) 
+            NSLog(@"getNewPixBelongingToUser %@ returned no results for followingCount %d - queue size %d", followName, followingCountLeftToAggregate-1, [aggregationQueue count]);
 #endif
     }
     
     followingCountLeftToAggregate--;
     if (followingCountLeftToAggregate == 0) {
+        // we've added all tags for any user to the queue
+        // that means we can start downloading those tags
         [delegate dismissAggregateIndicator]; // if used pull to refresh, dismiss that
+        
         if (isFirstTimeAggregating) {
             NSLog(@"UserAggregator setting trigger for firstTimeAggregating");
             firstTimeAggregatingTrigger = 1;
@@ -172,7 +216,7 @@
         else {
             NSLog(@"UserAggregator trigger is not first time aggregating");
         }
-        
+         
         if ([aggregationQueue count] == 0) {
             NSLog(@"No new aggregation to do! trigger something here!");
         }
@@ -230,73 +274,71 @@
 
 -(void)processAggregationQueueInBackground {
     // run continuous while loop in separate background thread
-#if 1
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 
-                                             (unsigned long)NULL), ^(void) {
-#else
-        // causes a hang
-    dispatch_async(dispatch_queue_create("com.Neroh.Stix.stixApp.aggregator.bgQueue", NULL), ^(void) {
-#endif
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    while (1) {
-        if (isLocked)
-            continue;
-        
-        if ([aggregationQueue count]>0) {
-            // insert sorted
-            // assumes allTagIDs is sorted in ascending
-            //NSLog(@"Current aggregationQueue count %d", [aggregationQueue count]);
-            NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
-            if (d != nil) {
-                [aggregationQueue removeObject:d];
-                NSString * username = [d valueForKey:@"username"];
-                NSNumber * tagID = [d valueForKey:@"tagID"];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, (unsigned long)NULL), ^(void) 
+    {
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        while (1) {
+            if (isLocked)
+                continue;
+            
+            if ([aggregationQueue count]>0) {
+                // insert sorted
+                // assumes allTagIDs is sorted in ascending
+                //NSLog(@"Current aggregationQueue count %d", [aggregationQueue count]);
+                NSMutableDictionary * d = [[aggregationQueue objectAtIndex:0] retain];
+                if (d != nil) {
+                    [aggregationQueue removeObject:d];
+                    NSString * username = [d valueForKey:@"username"];
+                    NSNumber * tagID = [d valueForKey:@"tagID"];
 #if VERBOSE
-                NSLog(@"Aggregating queue now size %d user %@ tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], username, [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
+                    NSLog(@"Aggregating queue now size %d user %@ tagID %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count], username, [tagID intValue], idOfNewestTagAggregated, firstTimeAggregatingTrigger);
 #endif     
-                // update userTagList if new tagID is more recent 
-                if ([[userTagList objectForKey:username] intValue] < [tagID intValue]) {
-                    [userTagList setObject:tagID forKey:username];
-                    [defaults setObject:userTagList forKey:@"AggregateUserTags"];
-                    [defaults synchronize];
-                }
-                
-                // insert into sorted array
-                @try {
-                    [self insertNewTagID:tagID];
-                }
-                @catch (NSException *exception) {
-                    NSLog(@"UserTagAggregator: Caught enumeration error while inserting tagID %@", tagID);
-                    [FlurryAnalytics logEvent:@"AggregationError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", tagID, @"tagID", nil]];
-                }
-#if VERBOSE
-                NSLog(@"Aggregator queue: trigger %d queue size %d", firstTimeAggregatingTrigger, [aggregationQueue count]);
-#endif
-                if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
-                    // triggers "completion" of aggregator initially
-                    // the highest id in this should be the most recent tagID for this user's following list
-                    NSLog(@"FirstTimeAggregatingTrigger fired; allTagIDs now %d", [allTagIDs count]);
-                    [delegate didFinishAggregation:YES];
-                    firstTimeAggregatingTrigger = 0;
-                }
-//                else
-//                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
-                
-                // if there are no cached tagIDs, then we will start loading the first of our friends
-                if (!aggregationGetTagRequested) {
-                    // tell delegate to request a tag to start
-                    aggregationGetTagRequested = YES;
-                    NSLog(@"First time requesting a friend's tag: %@ %d", username, [tagID intValue]);
+                    // update userTagList if new tagID is more recent 
+                    if ([[userTagList objectForKey:username] intValue] < [tagID intValue]) {
+                        [userTagList setObject:tagID forKey:username];
+                        [defaults setObject:userTagList forKey:@"AggregateUserTags"];
+                        [defaults synchronize];
+                    }
                     
-                    [delegate didStartAggregationWithTagID:tagID];
+                    // insert into sorted array
+                    @try {
+                        [self insertNewTagID:tagID];
+                    }
+                    @catch (NSException *exception) {
+                        NSLog(@"UserTagAggregator: Caught enumeration error while inserting tagID %@", tagID);
+                        [FlurryAnalytics logEvent:@"AggregationError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", tagID, @"tagID", nil]];
+                    }
+#if VERBOSE
+                    NSLog(@"Aggregator queue: trigger %d queue size %d", firstTimeAggregatingTrigger, [aggregationQueue count]);
+#endif
+                    if (firstTimeAggregatingTrigger == 1 && [aggregationQueue count] == 0) {
+                        // triggers "completion" of aggregator initially
+                        // the highest id in this should be the most recent tagID for this user's following list
+                        NSLog(@"FirstTimeAggregatingTrigger fired; allTagIDs now %d", [allTagIDs count]);
+                        [delegate didFinishAggregation:YES];
+                        firstTimeAggregatingTrigger = 0;
+                        showDebugMessageAfterStartAggregation = NO;
+                    }
+                    //                else
+                    //                    NSLog(@"ProcessAggregationQueue: aggregation queue object is nil! Error??");
+                    
+                    // if there are no cached tagIDs, then we will start loading the first of our friends
+                    if (!aggregationGetTagRequested) {
+                        // tell delegate to request a tag to start
+                        aggregationGetTagRequested = YES;
+                        NSLog(@"First time requesting a friend's tag: %@ %d", username, [tagID intValue]);
+                        
+                        [delegate didStartAggregationWithTagID:tagID];
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self delayAggregationForTime:1.5]; // 1.5 seconds should be enough for the first tag to get downloaded
+                        });
+                        //[self performSelector:@selector(continueAggregation) withObject:self afterDelay:5];
+                    }
                 }
             }
         }
-    }
-        
-        
     }); // end of dispatch_async
-
 }
 
 -(void)displayState {
@@ -416,6 +458,23 @@
     }
     return nil;
 }
+ 
+-(void)aggregationDebugMessage {
+    // shows debug message every 5 seconds, even without Verbose
+    NSLog(@"AggregationDebugMessage: Aggregating queue now size %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count],  idOfNewestTagAggregated, firstTimeAggregatingTrigger);
+    if (showDebugMessageAfterStartAggregation)
+        [self performSelector:@selector(aggregationDebugMessage) withObject:self afterDelay:5];
+}
 
+-(void)continueAggregation {
+    NSLog(@"Unpausing aggregation!");
+    pauseAggregation = NO;
+}
+
+-(void)delayAggregationForTime:(float)timeInSec {
+    pauseAggregation = YES;
+    NSLog(@"Pausing aggregation for %f seconds", timeInSec);
+    [self performSelector:@selector(continueAggregation) withObject:self afterDelay:timeInSec];
+}
 
 @end

@@ -23,6 +23,36 @@
 #define ADMIN_TESTING_MODE 0
 #define VERBOSE 0
 
+enum notification_bookmarks {
+    NB_NEWSTIX = 0,
+    NB_MESSAGE, 
+    NB_NEWCOMMENT,
+    NB_NEWGIFT,
+    NB_PEELACTION,
+    NB_UPDATECAROUSEL,
+    NB_INCREMENTBUX,
+    NB_NEWFOLLOWER,
+    NB_ONLINE,
+    NB_ONLINEREPLY,
+    NB_NEWPIX
+};
+
+enum alertview_actions {
+    ALERTVIEW_SIMPLE = 0,
+    ALERTVIEW_UPGRADE,
+    ALERTVIEW_NOTIFICATION,
+    ALERTVIEW_PROMPT,
+    ALERTVIEW_GOTOSTORE,
+    ALERTVIEW_BUYBUX
+};
+
+enum actionsheet_tags {
+    ACTIONSHEET_TAG_ADMIN = 1000,
+    ACTIONSHEET_TAG_SHAREPIX,
+    ACTIONSHEET_TAG_BUYBUX,
+    ACTIONSHEET_TAG_MAX
+};
+
 // for remixing
 enum {
     REMIX_MODE_NEWPIC, // adding stix to the original pix

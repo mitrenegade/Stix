@@ -13,7 +13,7 @@
 -(NSString*)getUsernameForUser:(int)index;
 -(UIImage*)getUserPhotoForUser:(int)index;
 -(NSString*)getUserEmailForUser:(int)index;
--(NSString*)getFacebookIDForUser:(int)index;
+-(NSString*)getFacebookStringForUser:(int)index;
 //-(BOOL)isFollowingUser:(int)index;
 -(int)getFollowingUserStatus:(int)index;
 -(int)getNumOfUsers;

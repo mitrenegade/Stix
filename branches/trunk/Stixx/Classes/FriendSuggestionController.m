@@ -49,14 +49,23 @@
 }
 
 -(void)initializeHeaderViews {
-    if (!headerViews)
+    if (!headerViews) {
         headerViews = [[NSMutableArray alloc] init];
-    UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
-    [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
+        for (int i=0; i<SUGGESTIONS_SECTION_MAX; i++) {
+            [headerViews addObject:[NSNull null]];
+        }
+    }
     UIImageView * featuredHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
     [featuredHeader setImage:[UIImage imageNamed:@"header_featuredstixsters@2x.png"]];
-    [headerViews addObject:featuredHeader];
-    [headerViews addObject:friendHeader];
+    [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
+    if ([friends count] == 0) {
+        [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
+    }
+    else {
+        UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
+        [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
+        [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
+    }
 }
 
 -(void)initializeSuggestions {
@@ -68,7 +77,7 @@
     didGetFeaturedUsers = NO;
     didGetFacebookFriends = NO;
     [k getFeaturedUsers];
-    [delegate searchFriendsByFacebook];
+    [delegate searchFriendsOnStix];
         
     [self initializeHeaderViews];
     isEditing = NO;
@@ -196,7 +205,12 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return SUGGESTIONS_SECTION_MAX;
+    // hack: assume that featured header always exists and is at index 0
+    int ret = SUGGESTIONS_SECTION_MAX;
+    if ([friends count] == 0)
+        ret = 1;
+    NSLog(@"Returning number of sections: %d", ret);
+    return ret;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -238,12 +252,21 @@
     
     if (section == SUGGESTIONS_SECTION_FRIENDS) {
         [friends removeObjectAtIndex:row];
+        if ([friends count] == 0) {
+            [self initializeHeaderViews];
+//            [tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationTop];
+            //[headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+        }
     }
     else if (section == SUGGESTIONS_SECTION_FEATURED) {
         [featured removeObjectAtIndex:row];
         [featuredDesc removeObjectAtIndex:row];
     }
+    
     [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
+    if (section == SUGGESTIONS_SECTION_FRIENDS && [friends count] == 0) {
+        [tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationTop];
+    }
     [tableView reloadData];
 }
 
@@ -254,23 +277,26 @@
     //[friendsIDs removeAllObjects];
     NSMutableSet * alreadyFollowing = [delegate getFollowingList];
     
-    NSMutableArray * allFacebookIDs = [delegate getAllUserFacebookIDs];
+    NSMutableArray * allFacebookStrings = [delegate getAllUserFacebookStrings];
     for (NSMutableDictionary * d in facebookFriendArray) {
-        NSString * fbID = [d valueForKey:@"id"];
-        NSString * fbName = [d valueForKey:@"name"];
-        //NSLog(@"fbID: %@ fbName: %@", fbID, fbName);
-        if ([alreadyFollowing containsObject:fbName])
+        NSString * _facebookString = [d valueForKey:@"id"];
+        NSString * _facebookName = [d valueForKey:@"name"];
+        if ([alreadyFollowing containsObject:_facebookName])
             continue; // skip those already following
-        if ([fbName isEqualToString:[delegate getUsername]])
+        if ([_facebookName isEqualToString:[delegate getUsername]])
             continue; // skip self
-        if ([allFacebookIDs containsObject:fbID]) {
-            [friends addObject:fbName];
-            //[friendsIDs addObject:fbID];
+        if ([allFacebookStrings containsObject:_facebookString]) {
+            NSString * stixName = [delegate getNameForFacebookString:_facebookString];
+            [friends addObject:stixName];
+            NSLog(@"Adding facebook friend already on stix: %@ with id %@ and stix name %@", _facebookName, _facebookString, stixName);
         }
     }
     
     NSLog(@"Loaded %d Facebook friends already on Stix, %d featured", [friends count], [featured count]);
     // todo: filter out existing friends, if any
+    if ([friends count] > 0) {
+        [self initializeHeaderViews]; // reload in case initializeHeaderViews was called before this appeared
+    }
     
     //[tableView reloadData];
     int total = [featured count] + [friends count];
@@ -338,6 +364,10 @@
 
 -(IBAction)didClickButtonRefresh:(id)sender {
     [k getFeaturedUsers];
-    [delegate searchFriendsByFacebook];
+    [delegate searchFriendsOnStix   ];
+}
+
+-(void)refreshUserPhotos {
+    [tableView reloadData];
 }
 @end

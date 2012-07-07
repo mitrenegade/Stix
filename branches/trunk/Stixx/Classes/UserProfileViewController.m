@@ -219,7 +219,7 @@
     //[photoButton setBackgroundColor:[UIColor clearColor]];
 #if 1
     //NSString * friendName = username;
-    UIImage * userPhoto = [UIImage imageWithData:[[delegate getUserPhotos] objectForKey:username]];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:username];//[UIImage imageWithData:[[delegate getUserPhotos] objectForKey:username]];
     [photoButton setImage:userPhoto];
     if (!userPhoto)
         [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
@@ -391,8 +391,8 @@
     //NSString * friendName = [searchFriendName objectAtIndex:index];
     return @""; //[[[delegate getAllUsers] objectForKey:friendName] objectForKey:@"email"];
 }
--(NSString*)getFacebookIDForUser:(int)index {
-    return [searchFriendFacebookID objectAtIndex:index];
+-(NSString*)getFacebookStringForUser:(int)index {
+    return [searchFriendFacebookString objectAtIndex:index];
 }
 -(int)getFollowingUserStatus:(int)index {
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
@@ -425,9 +425,6 @@
     }
     else {
         // cannot invite!
-        // invite
-        //NSString * fbID = [self getFacebookIDForUser:index]; // fbEmail does not exist
-        //[delegate didClickInviteButtonByFacebook:name withFacebookID:fbID];
     }
     [[searchResultsController tableView] reloadData];
 }
@@ -692,12 +689,12 @@
     if (!searchFriendName) {
         searchFriendName = [[NSMutableArray alloc] init];
         searchFriendEmail = [[NSMutableArray alloc] init];
-        searchFriendFacebookID = [[NSMutableArray alloc] init];
+        searchFriendFacebookString = [[NSMutableArray alloc] init];
         searchFriendIsStix = [[NSMutableArray alloc] init]; // whether they are using Stix already
     }
     [searchFriendName removeAllObjects];
     [searchFriendEmail removeAllObjects];
-    [searchFriendFacebookID removeAllObjects];
+    [searchFriendFacebookString removeAllObjects];
     [searchFriendIsStix removeAllObjects];
 }
 -(void)populateFollowingList {

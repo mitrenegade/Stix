@@ -19,7 +19,7 @@
 #import "Tag.h"
 #import "BadgeView.h"
 #import "RaisedCenterTabBarController.h"
-#import "LoadingViewController.h"
+//#import "LoadingViewController.h"
 #import "FeedbackViewController.h"
 #import <Parse/Parse.h>
 #import "AlertPrompt.h"
@@ -40,6 +40,7 @@
 #import "FlurryAnalytics.h"
 #import "StixPanelView.h"
 #import "StixEditorViewController.h"
+#import "Admin.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -51,43 +52,13 @@
 #import "MKStoreObserver.h"
 #endif
 
-enum notification_bookmarks {
-    NB_NEWSTIX = 0,
-    NB_MESSAGE, 
-    NB_NEWCOMMENT,
-    NB_NEWGIFT,
-    NB_PEELACTION,
-    NB_UPDATECAROUSEL,
-    NB_INCREMENTBUX,
-    NB_NEWFOLLOWER,
-    NB_ONLINE,
-    NB_ONLINEREPLY,
-    NB_NEWPIX
-};
-
-enum alertview_actions {
-    ALERTVIEW_SIMPLE = 0,
-    ALERTVIEW_UPGRADE,
-    ALERTVIEW_NOTIFICATION,
-    ALERTVIEW_PROMPT,
-    ALERTVIEW_GOTOSTORE,
-    ALERTVIEW_BUYBUX
-};
-
-enum actionsheet_tags {
-    ACTIONSHEET_TAG_ADMIN = 1000,
-    ACTIONSHEET_TAG_SHAREPIX,
-    ACTIONSHEET_TAG_BUYBUX,
-    ACTIONSHEET_TAG_MAX
-};
-
 struct UserInfo {
 //    NSString * username;
 //    UIImage * userphoto;
 //    NSString * email;
-    int facebookID;
-    int usertagtotal;
-    int bux;
+//    NSString * facebookString;
+    //int usertagtotal;
+    //int bux;
     int firstTimeUserStage;
     int userID;
 
@@ -122,6 +93,7 @@ struct UserInfo {
     NSString * myUserInfo_username;
     UIImage * myUserInfo_userphoto;
     NSString * myUserInfo_email;
+    NSString * myUserInfo_facebookString;
 
     bool stixViewsLoadedFromDisk;
     bool fbLoginIsJoin;
@@ -252,7 +224,7 @@ struct UserInfo {
 -(void) adminSetAllUsersBuxCounts;
 -(void)adminEasterEggShowMenu:(NSString*)password;
 -(void)updateUserTagTotal;
--(void)changeBuxCountByAmount:(int)change;
+//-(void)changeBuxCountByAmount:(int)change;
 //-(void)adminSaveFeed;
 -(void)adminResetAllStixOrders;
 
@@ -268,21 +240,21 @@ struct UserInfo {
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
--(void)rewardBux;
--(void)rewardLocation;
+//-(void)rewardBux;
+//-(void)rewardLocation;
 -(void)logMetricTimeInApp;
 //-(void)checkConsistency;
--(void)updateBuxCountFromKumulos;
+//-(void)updateBuxCountFromKumulos;
 -(void)didDismissSecondaryView;
 // former store methods
--(void)updateBuxCount;
+//-(void)updateBuxCount;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
 -(void)didPurchaseBux:(int)buxPurchased;
 
 -(void)hideFirstTimeUserMessage;
 -(void)advanceFirstTimeUserMessage;
 -(void)agitateFirstTimePointer;
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookID:(NSNumber*)facebookID andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
 -(void)displayShareController;
 -(void)uploadImage:(NSData *)dataPNG;
@@ -328,7 +300,7 @@ struct UserInfo {
 //@property (nonatomic, retain) NSMutableSet * allFriends;
 @property (nonatomic) NSMutableSet * allFollowers;
 @property (nonatomic) NSMutableSet * allFollowing;
-@property (nonatomic) NSMutableArray * allUserFacebookIDs;
+@property (nonatomic) NSMutableArray * allUserFacebookStrings;
 @property (nonatomic) NSMutableArray * allUserEmails;
 @property (nonatomic) NSMutableArray * allUserNames;
 @property (nonatomic) NSMutableDictionary * allUserIDs;

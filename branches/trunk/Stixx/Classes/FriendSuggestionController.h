@@ -19,13 +19,14 @@ enum {
 
 @protocol FriendSuggestionDelegate <NSObject>
 
--(void)searchFriendsByFacebook;
--(NSMutableArray*)getAllUserFacebookIDs;
+-(void)searchFriendsOnStix;
+-(NSMutableArray*)getAllUserFacebookStrings;
 -(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray*)addedFriends;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 -(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions;
 -(NSMutableSet*)getFollowingList;
 -(NSString*)getUsername;
+-(NSString*)getNameForFacebookString:(NSString*)_facebookString;
 @end
 
 @interface FriendSuggestionController : UIViewController  <UITableViewDelegate, UITableViewDataSource, KumulosDelegate>
@@ -63,4 +64,5 @@ enum {
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray;
 -(void)initializeSuggestions;
 -(IBAction)didClickButtonRefresh:(id)sender;
+-(void)refreshUserPhotos;
 @end

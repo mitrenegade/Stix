@@ -31,6 +31,8 @@
     NSMutableDictionary * userTagList;
     
     BOOL isLocked; // lock aggregation queue while being enumerated
+    BOOL showDebugMessageAfterStartAggregation;
+    BOOL pauseAggregation;
 }
 
 @property (nonatomic, retain) Kumulos * k;

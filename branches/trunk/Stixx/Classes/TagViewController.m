@@ -415,7 +415,12 @@
 -(IBAction)didClickCloseButton:(id)sender {
     if ([delegate getFirstTimeUserStage] == 0) {
         // advance to next
-        [delegate advanceFirstTimeUserMessage];
+        // this is to make the users/developers not have to take a picture each time
+        if ([[delegate getFollowingList] count] > 0)
+            [delegate advanceFirstTimeUserMessage];
+        // if no followers, force them to take a photo so they can remix it
+        else 
+            [delegate redisplayFirstTimeUserMessage01];
     }
     [delegate didDismissSecondaryView];
 }

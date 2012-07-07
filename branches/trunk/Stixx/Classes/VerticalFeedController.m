@@ -129,6 +129,7 @@
     
     //[self populateAllTagsDisplayed];
     //[tableController.tableView reloadData];
+    //[self.buttonProfile setImage:[delegate getUserPhotoForUsername:[delegate getUsername]] forState:UIControlStateNormal];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -202,9 +203,11 @@
 -(int)getStixOrder:(NSString*)stixStringID {
     return [delegate getStixOrder:stixStringID];
 }
+/*
 -(int)getBuxCount {
     return [delegate getBuxCount];
 }
+ */
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
     [self.delegate didPurchaseStixFromCarousel:stixStringID];
@@ -370,7 +373,7 @@
         [headerView setBackgroundColor:[UIColor blackColor]];
         [headerView setAlpha:.75];
         
-        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
+        UIImage * photo = [delegate getUserPhotoForUsername:tag.username]; //[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
         UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
         [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
         [photoView.layer setBorderWidth: 2.0];
@@ -436,7 +439,7 @@
     else {
         if ([[headerViewsDidLoadPhoto objectForKey:tag.tagID] boolValue] == NO) {
             // try to reload header photo
-            UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
+            UIImage * photo = [delegate getUserPhotoForUsername:tag.username];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:tag.username]];
             if (photo) {
                 UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(3, 5, 30, 30)];
                 [photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
@@ -482,7 +485,7 @@
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
     [feedItem setTagID:[tag.tagID intValue]];
-    UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+    UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
     {
         //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
@@ -595,7 +598,7 @@
 #endif
         
         //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
-        UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+        UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
         if (photo)
         {
             //NSLog(@"User %@ has photo of size %f %f\n", name, photo.size.width, photo.size.height);
@@ -726,7 +729,7 @@
     NSString * locationString = tag.locationString;
     
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];
-    UIImage * photo = [[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
+    UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
         [feedItem populateWithUserPhoto:photo];
     // add timestamp
@@ -909,6 +912,9 @@
             index = i;
         }
     }
+    [headerViews removeAllObjects];
+    [headerViewsDidLoadPhoto removeAllObjects];
+    
     [tableController.view removeFromSuperview];
     [tableController.tableView reloadData];
     [self.view insertSubview:tableController.view atIndex:index];
@@ -1156,6 +1162,7 @@
     else if (buttonIndex == 2) {
         NSLog(@"Button 2");
         tagToRemix = nil;
+        [self reloadCurrentPage];
         return;
     }
     [self displayEditorWithRemixMode:remixMode];
@@ -1438,6 +1445,7 @@
     //shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
     [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished) {
         [self stopActivityIndicator];
+        [self stopActivityIndicatorLarge];
         if (shareSheet) {
             shareSheet = nil;
             [buttonShareEmail removeFromSuperview];

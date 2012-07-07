@@ -94,9 +94,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
         [savedInfo setObject:detailViewController forKey:@"addCommentToPix_detailViewController"];
     }
     else if ([function isEqualToString:@"getFacebookUser"]) {
-        NSNumber * fbID = [inputParams objectAtIndex:0];
-        NSLog(@"Calling kumulos getFaceBookUser with id %d", [fbID intValue]);
-        kOp = [k getFacebookUserWithFacebookID:[fbID intValue]];
+        NSNumber * facebookString = [inputParams objectAtIndex:0];
+        NSLog(@"Calling kumulos getFaceBookUser with facebookString %@", facebookString);
+        kOp = [k getFacebookUserWithFacebookID:[facebookString longLongValue]];
     }
     else if ([function isEqualToString:@"addPixBelongsToUser"]) {
         NSString * username = [inputParams objectAtIndex:0];
@@ -190,6 +190,18 @@ static KumulosHelper *sharedKumulosHelper = nil;
         kOp = [k setOriginalUsernameWithAllTagID:[tagID intValue] andOriginalUsername:username];
         //[savedInfo setObject:tagID forKey:@"tagID"];
         //[savedInfo setObject:tagID forKey:@"username"];
+    }
+    else if ([function isEqualToString:@"updateFacebookString"]) {
+        for (NSMutableDictionary * d in params) {
+            NSString * name = [d valueForKey:@"username"];
+            NSString * email = [d valueForKey:@"email"];
+            NSNumber * facebookID = [d valueForKey:@"facebookID"];
+            NSString * facebookString = [NSString stringWithFormat:@"%@", facebookID];
+            NSLog(@"Updating facebookString for email %@ to %@", email, facebookString);
+            [savedInfo setObject:name forKey:@"username"];
+            //kOp = [k setFacebookStringForUserWithEmail:email andFacebookString:facebookString];
+            [k setFacebookStringForUserWithEmail:email andFacebookString:facebookString];
+        }
     }
     
     if (!kOp) 
@@ -346,6 +358,12 @@ static KumulosHelper *sharedKumulosHelper = nil;
     Tag * tag = [savedInfo objectForKey:@"tag"];
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects: tag, nil];
     [self doCallback:returnParams];
+}
+
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation setFacebookStringForUserDidCompleteWithResult:(NSNumber *)affectedRows {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation setFacebookStringForUserDidCompleteWithResult:(NSNumber *)affectedRows {
+    NSLog(@"SetFacebookString completed for %@", [savedInfo objectForKey:@"username"]);
+    [self cleanup];
 }
 
 #pragma mark error handling for kumulos helper

@@ -14,7 +14,7 @@
 #import "KumulosData.h"
 #import "FriendSearchResultsController.h"
 #import "SMWebRequest.h"
-#import "SMXMLDocument.h"
+//#import "SMXMLDocument.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
 #import "UserGalleryController.h"
@@ -35,7 +35,8 @@ enum {
 
 @protocol ProfileViewDelegate
 
--(NSMutableDictionary *)getUserPhotos;
+//-(NSMutableDictionary *)getUserPhotos;
+-(UIImage*)getUserPhotoForUsername:(NSString*)username;
 - (NSString *)getUsername;
 - (UIImage *)getUserPhoto;
 - (UIImage *)getUserPhotoForProfile;
@@ -43,7 +44,7 @@ enum {
 - (bool)isLoggedIn;
 - (void)didChangeUserphoto:(UIImage*)photo;
 -(NSMutableDictionary*)getAllUsers;
--(NSMutableArray*)getAllUserFacebookIDs;
+-(NSMutableArray*)getAllUserFacebookStrings;
 -(NSMutableArray*)getAllUserEmails;
 -(NSMutableArray*)getAllUserNames;
 -(int)getStixCount:(NSString*)stixStringID;
@@ -70,7 +71,7 @@ enum {
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID;
--(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookID:(NSString*)fbID;
+-(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookString:(NSString*)_facebookString;
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;
@@ -116,7 +117,7 @@ enum {
     
     NSMutableArray * searchFriendName;
     NSMutableArray * searchFriendEmail;
-    NSMutableArray * searchFriendFacebookID;
+    NSMutableArray * searchFriendID;
     NSMutableArray * searchFriendIsStix;
     
     int dismissAnimation;

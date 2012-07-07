@@ -176,7 +176,7 @@
      }
      */
     int row = [indexPath row];
-    //NSLog(@"Column table: populating row %d", row);
+    NSLog(@"Column table: populating row %d", row);
     if ([self hasHeaderRow]) {
         if (row == 0) {
             // row 0 is header

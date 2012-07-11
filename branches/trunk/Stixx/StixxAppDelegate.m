@@ -75,6 +75,7 @@ static dispatch_queue_t backgroundQueue;
     NSLog(@"Function: %s", __func__);
 #endif  
     versionStringStable = @"1.0"; // must change this on next release
+    //versionStringStable = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]; //@"0.7.7.4";
     
     metricLogonTime = nil;

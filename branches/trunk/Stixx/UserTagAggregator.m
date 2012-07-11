@@ -177,7 +177,7 @@
         KSAPIOperation * kOp = [k getSomeNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue] andMaxPix:[NSNumber numberWithInt:50]];
         [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     } else {
-        NSLog(@"getUserPixForUsers paused!");
+        //NSLog(@"getUserPixForUsers paused!");
         [self performSelector:@selector(getUserPixForUsers) withObject:nil afterDelay:1];
     }
     

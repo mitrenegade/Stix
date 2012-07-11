@@ -343,6 +343,7 @@ static NSMutableSet * retainedDetailControllers;
         default:
             break;
     }
+    [tableController.tableView reloadData];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray *)theResults {
@@ -579,6 +580,7 @@ static NSMutableSet * retainedDetailControllers;
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
+    [delegate pauseAggregation];
     
     UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
     if ([[delegate getUsername] isEqualToString:@"anonymous"]) {

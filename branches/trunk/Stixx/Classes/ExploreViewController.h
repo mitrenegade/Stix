@@ -46,6 +46,7 @@
 -(void)didClickRemixButton;
 -(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 -(void)didDismissSecondaryView;
+-(void)pauseAggregation;
 @end
 
 enum {

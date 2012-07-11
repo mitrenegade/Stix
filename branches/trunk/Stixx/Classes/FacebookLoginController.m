@@ -288,7 +288,8 @@
         username = usersFacebookUsername;
     isFirstTimeUser = YES;
 
-    [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:facebookName, @"SignupByFacebook", nil]];
+    if (!IS_ADMIN_USER(facebookName))
+        [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:facebookName, @"SignupByFacebook", nil]];
     
     [self didSelectUsername:username withResults:theResults];
     [delegate didAddNewUserWithResult:theResults];
@@ -333,7 +334,8 @@
                 NSLog(@"Username %d: %@", ct++, username); 
             }
             if ([theResults count] > 1) {
-                [FlurryAnalytics logEvent:@"Bug_MultipleUsernames" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:facebookString, @"facebookString", nil]];
+                if (!IS_ADMIN_USER(facebookName))
+                    [FlurryAnalytics logEvent:@"Bug_MultipleUsernames" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:facebookString, @"facebookString", nil]];
             }
         }
     } else {
@@ -363,7 +365,8 @@
     else {
         NSLog(@"%d results found", [theResults count]);
         if ([theResults count] > 1) {
-            [FlurryAnalytics logEvent:@"Bug_MultipleUsernames" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:facebookEmail, @"facebookEmail", nil]];
+            if (!IS_ADMIN_USER(facebookName))
+                [FlurryAnalytics logEvent:@"Bug_MultipleUsernames" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:facebookEmail, @"facebookEmail", nil]];
         }
         for (NSMutableDictionary * d in theResults) {
             [self setFacebookName:[d objectForKey:@"username"]];
@@ -388,7 +391,8 @@
         
         [self setFacebookString:_facebookString];
         
-        [FlurryAnalytics logEvent:@"UpdateRitaPelosiFBString" withParameters:newUser];
+        if (!IS_ADMIN_USER(newUser))
+            [FlurryAnalytics logEvent:@"UpdateRitaPelosiFBString" withParameters:newUser];
         
         isFirstTimeUser = YES;
     }
@@ -455,7 +459,8 @@
     
     //[self dismissModalViewControllerAnimated:NO];
     //[self dismissNavControllerWithTransition];
-    [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:email, @"SignupByEmail", nil]];
+    if (!IS_ADMIN_USER(username))
+        [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:email, @"SignupByEmail", nil]];
     if (!photo)
         photo = [UIImage imageNamed:@"graphic_nopic"];
     NSMutableDictionary * d = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
@@ -499,7 +504,8 @@
 -(void)didLoginFromLoginScreen:(NSString*)username withResults:(NSMutableArray*)theResults {
 //    [self dismissModalViewControllerAnimated:NO];
 //    [self dismissNavControllerWithTransition];
-    [FlurryAnalytics logEvent:@"Login" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:username, @"LoginByUsername", nil]];
+    if (!IS_ADMIN_USER(username))
+        [FlurryAnalytics logEvent:@"Login" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:username, @"LoginByUsername", nil]];
     if ([theResults count]) {
 //        [alert setTitle:@"Success"];
 //        [alert setMessage:@"You are now logged in"];
@@ -545,7 +551,8 @@
     // from CreateFacebookUsernameController
 //    [self dismissModalViewControllerAnimated:NO];
     //[self dismissNavControllerWithTransition];
-    [FlurryAnalytics logEvent:@"AddUsernameToFacebook" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:fbUsername, @"NewUsername", facebookName, @"FacebookName", nil]];
+    if (!IS_ADMIN_USER(fbUsername))
+        [FlurryAnalytics logEvent:@"AddUsernameToFacebook" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:fbUsername, @"NewUsername", facebookName, @"FacebookName", nil]];
     
     [self setUsersFacebookUsername:fbUsername];
     [self setUsersFacebookPhotoData:photoData];

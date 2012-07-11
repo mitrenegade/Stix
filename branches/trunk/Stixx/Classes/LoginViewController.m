@@ -199,7 +199,7 @@ static bool usernameExists;
             NSString * passwordMD5 = [d objectForKey:@"password"];
             NSString * facebookString = [d objectForKey:@"facebookString"];
             
-            if (facebookString && ![facebookString isEqualToString:@"0"]) {
+            if (facebookString && ![facebookString isEqualToString:@"0"] && ![facebookString isEqualToString:username]) {
                 NSLog(@"This username associated with a facebook account, please login via our facebook option! Name %@ email %@ facebook %@", username, email, facebookString);
                 [delegate showAlert:@"This username associated with a facebook account, please login via our facebook option!"];
                 return;

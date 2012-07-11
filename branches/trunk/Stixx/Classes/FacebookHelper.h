@@ -23,7 +23,7 @@
 @protocol FacebookHelperDelegate <NSObject>
 
 -(void)didGetFacebookInfo:(NSDictionary *)results;
--(void)didLoginToFacebook;
+-(void)didLoginToFacebook:(BOOL)needInfo;
 -(void)didLogoutFromFacebook;
 -(void)didCancelFacebookLogin;
 -(void)receivedFacebookFriends:(NSArray*)friendsArray;
@@ -39,6 +39,8 @@
 
     NSString * currentRequest;
     NSString * postType;
+    
+    BOOL getTokenForShare;
 }
 
 @property (nonatomic) Facebook * facebook;
@@ -47,6 +49,7 @@
 -(void)initFacebook;
 -(int)facebookLogin;
 -(void)facebookLogout;
+-(int)facebookLoginForShare;
 -(void)getFacebookInfo;
 -(NSString*)getAccessToken;
 -(BOOL)handleOpenURL:(NSURL*)url;

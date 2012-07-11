@@ -228,13 +228,15 @@
     if (![self NSStringIsValidEmail:[email text]]) {
         NSLog(@"Invalid email format!");
         [delegate showAlert:@"Invalid email format!"];
-        [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[email text], @"InvalidEmail", nil]];
+        if (!IS_ADMIN_USER(username))
+            [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[email text], @"InvalidEmail", nil]];
         return;
     }
     if ([[username text] length] == 0) {
         NSLog(@"Invalid username!");
         [delegate showAlert:@"Please enter a username."];
-        [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[username text], @"InvalidName", nil]];
+        if (!IS_ADMIN_USER(username))
+            [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[username text], @"InvalidName", nil]];
         return;
     }
     if ([[password text] length] == 0) {
@@ -244,7 +246,8 @@
     if ([[password text] length] == 0) {
         NSLog(@"Password must not be blank!");
         [delegate showAlert:@"Password must not be blank!"];
-        [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", @"BlankPassword", nil]];
+        if (!IS_ADMIN_USER(username))
+            [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", @"BlankPassword", nil]];
         return;
     }
     

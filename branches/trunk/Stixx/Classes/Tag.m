@@ -168,7 +168,7 @@
     NSData * stixLayerData = [d valueForKey:@"stixLayer"];
     NSData * highResImageData = [d valueForKey:@"highResImage"];
     
-    NSLog(@"GetTagFromDictionary: id %@ username %@ descriptor %@ pendingID %@ highResID %@", [d valueForKey:@"tagID"], name, descriptor, [d valueForKey:@"pendingID"], [d valueForKey:@"highResImageID"]);
+    NSLog(@"GetTagFromDictionary: id %@ username %@ descriptor %@ pendingID %@ highResID %@", [d valueForKey:@"allTagID"], name, descriptor, [d valueForKey:@"pendingID"], [d valueForKey:@"highResImageID"]);
         
     Tag * tag = [[Tag alloc] init]; 
     [tag addUsername:name andDescriptor:descriptor andComment:comment andLocationString:locationString];

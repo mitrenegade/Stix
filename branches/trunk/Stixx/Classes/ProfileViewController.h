@@ -124,6 +124,8 @@ enum {
     BOOL showPointer;
     
     LoadingAnimationView * activityIndicatorLarge;
+    
+    BOOL waitingForFacebookLogin;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> *delegate;
@@ -177,6 +179,9 @@ enum {
 -(void)populateFollowersList;
 -(void)doPointerAnimation;
 -(void)didLogin;
+
+-(void)didLoginToFacebook;
+-(void)didCancelFacebookLogin;
 // deprecated
 /*
  -(IBAction)showLogoutScreen:(id)sender;

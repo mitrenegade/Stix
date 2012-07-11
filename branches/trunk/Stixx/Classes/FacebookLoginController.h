@@ -15,6 +15,7 @@
 #import "KumulosHelper.h"
 #import "SignupViewController.h"
 #import "CreateFacebookUsernameController.h"
+#import "GlobalHeaders.h"
 
 #define NEW_USER_BUX 100
 

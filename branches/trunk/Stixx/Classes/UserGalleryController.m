@@ -67,7 +67,8 @@
     [self forceReloadAll];
     
 #if USING_FLURRY == 1
-    [FlurryAnalytics logPageView];
+    if (!IS_ADMIN_USER([self getUsernameOfApp]))
+        [FlurryAnalytics logPageView];
 #endif
 }
 

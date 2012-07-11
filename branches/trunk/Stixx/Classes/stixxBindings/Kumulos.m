@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul  6, 2012
+//  Created by Kumulos Bindings Compiler on Jul 10, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -2027,6 +2027,30 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getNewPixBelongingToUserDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) getSomeNewPixBelongingToUserWithUsername:(NSString*)username andTagID:(NSInteger)tagID andMaxPix:(NSNumber*)maxPix{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:username forKey:@"username"];
+                    [theParams setValue:[NSNumber numberWithInt:tagID] forKey:@"tagID"];
+                    [theParams setValue:maxPix forKey:@"maxPix"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getSomeNewPixBelongingToUser" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getSomeNewPixBelongingToUserDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];

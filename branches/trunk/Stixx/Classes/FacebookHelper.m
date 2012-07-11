@@ -104,6 +104,10 @@ static NSString * appID;
         return 0; // already loggedin
     }
 }
+-(int)facebookLoginForShare {
+    getTokenForShare = YES; // only do login for sharing permissions, not login
+    [self facebookLogin];
+}
 -(void)getFacebookInfo {
     NSLog(@"FacebookHelper getFacebookInfo: requesting graph path: ME");
     [facebook requestWithGraphPath:@"me" andDelegate:self];  
@@ -123,7 +127,8 @@ static NSString * appID;
     [defaults synchronize];
     
     NSLog(@"Access token: %@", [facebook accessToken]);
-    [self.delegate didLoginToFacebook];
+    BOOL needFacebookInfo = !getTokenForShare; // if we are not trying to login the user but only want post permission
+    [self.delegate didLoginToFacebook:needFacebookInfo];
 }
 
 - (void) fbDidLogout {

@@ -82,7 +82,6 @@
 
 -(IBAction) didClickBackButton:(id)sender;
 -(IBAction) didClickDoneButton:(id)sender;
--(void)didConnectService:(NSString*)name;
 -(void)initializeServices;
 -(int)numberOfServices;
 -(void)uploadImage:(NSData *)dataPNG;
@@ -91,7 +90,8 @@
 -(void)doTwitterConnect;
 -(void)reloadConnections;
 -(void)doSharePix;
-
+-(void)didCancelFacebookConnect;
+-(void)didConnect:(NSString*)service;
 /* former delegate functions */
 -(void)connectService:(NSString*)service;
 -(BOOL)shareServiceIsConnected:(NSString*)service;

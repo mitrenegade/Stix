@@ -211,7 +211,7 @@ static NSMutableSet * retainedDetailControllers;
 
 -(int)numberOfRows {
     int total = [allTagIDs count];
-    NSLog(@"allTagIDs has %d items", total);
+    //NSLog(@"allTagIDs has %d items", total);
     return total / numColumns;
 }
 
@@ -353,8 +353,10 @@ static NSMutableSet * retainedDetailControllers;
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
         //[allTagIDs addObject:newtag.tagID]; // save in order 
-        [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
-        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+        if ([allTags objectForKey:newtag.tagID] == nil) {
+            [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
+            [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+        }
         
         // new system of auxiliary stix: request from auxiliaryStixes table
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
@@ -406,9 +408,11 @@ static NSMutableSet * retainedDetailControllers;
         while (key = [e nextObject]) {
             Tag * newtag = [newRandomTags objectForKey:key];
             //[allTagIDs addObject:newtag.tagID]; // save in order 
-            [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
-            [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
-
+            if ([allTags objectForKey:newtag.tagID] == nil) {
+                [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
+            }
+            
             // new system of auxiliary stix: request from auxiliaryStixes table
             NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
             KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -429,7 +433,7 @@ static NSMutableSet * retainedDetailControllers;
     NSNumber * tagID = [returnParams objectAtIndex:0];
     NSMutableArray * theResults = [returnParams objectAtIndex:1];
     
-    NSLog(@"Got auxiliary stix of tag %d with %d stix!", [tagID intValue], [theResults count]);
+    //NSLog(@"Got auxiliary stix of tag %d with %d stix!", [tagID intValue], [theResults count]);
 //    if ([theResults count] > 0) {
         Tag * tag = [allTags objectForKey:tagID];
         if (tag) {
@@ -501,7 +505,8 @@ static NSMutableSet * retainedDetailControllers;
     //[k addMetricHitWithDescription:metricName andStringValue:metricData andIntegerValue:0];
     [k addMetricWithDescription:metricName andUsername:[delegate getUsername] andStringValue:exploreMode == EXPLORE_RECENT?@"Recent":@"Random" andIntegerValue:[tagID intValue]];
 #else
-    [FlurryAnalytics logEvent:@"ExplorePix" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", exploreMode == EXPLORE_RECENT?@"Recent":@"Random", @"ExploreMode", tagID, @"tagID", nil]];
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logEvent:@"ExplorePix" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", exploreMode == EXPLORE_RECENT?@"Recent":@"Random", @"ExploreMode", tagID, @"tagID", nil]];
 #endif
 }
 
@@ -587,7 +592,6 @@ static NSMutableSet * retainedDetailControllers;
     //if (detailController)
     //    detailController = nil;
     //[DetailViewController unlockOpen]; 
-    bHasView = YES;
     if (bHasTable && !bShowedTable) {
         NSLog(@"HasView and HadTable! ShowedTable!");
         [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
@@ -596,6 +600,10 @@ static NSMutableSet * retainedDetailControllers;
     else {
         NSLog(@"HasView! NoHasTable!");
     }
+    if (bHasView == NO) {
+        [self forceReloadAll];
+    }
+    bHasView = YES;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

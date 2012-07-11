@@ -18,6 +18,7 @@
 -(void)dismissAggregateIndicator;
 -(NSString*)getUsername;
 -(BOOL)isLoggedIn;
+-(NSMutableSet *) getFeaturedUserSet;
 @end
 
 @interface UserTagAggregator : NSObject <KumulosDelegate>
@@ -33,6 +34,10 @@
     BOOL isLocked; // lock aggregation queue while being enumerated
     BOOL showDebugMessageAfterStartAggregation;
     BOOL pauseAggregation;
+    int aggregationDebugMessageIdleCount;
+    
+    NSMutableSet * featuredUsers;
+    NSMutableSet * remainderSet;
 }
 
 @property (nonatomic, retain) Kumulos * k;
@@ -54,4 +59,5 @@
 -(void)resetFirstTimeState;
 -(void)loadCachedUserTagListForUsers;
 -(void)insertNewTagID:(NSNumber*)tagID;
+-(void)delayAggregationForTime:(float)timeInSec;
 @end

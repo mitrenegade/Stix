@@ -27,6 +27,7 @@ enum {
 -(NSMutableSet*)getFollowingList;
 -(NSString*)getUsername;
 -(NSString*)getNameForFacebookString:(NSString*)_facebookString;
+-(void)didGetFeaturedUsers:(NSArray*)featured;
 @end
 
 @interface FriendSuggestionController : UIViewController  <UITableViewDelegate, UITableViewDataSource, KumulosDelegate>

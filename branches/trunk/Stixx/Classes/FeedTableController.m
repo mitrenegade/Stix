@@ -160,6 +160,9 @@
     if (view)
         [cellDictionary setObject:view forKey:[NSNumber numberWithInt:cell.hash]];
 
+    if (y == 0) 
+        [delegate updateScrollPagesAtPage:-1];
+    
     if (y == [delegate numberOfSections]-1) // last available row reached 
     {
         //NSLog(@"Reached last row in feed");

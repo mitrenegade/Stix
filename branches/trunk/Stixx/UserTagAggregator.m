@@ -57,7 +57,7 @@
     [followingSetWithMe addObject:[delegate getUsername]];
     NSLog(@"StartAggregatingTagIDs: You are following %d people", [allFollowing count]);
     for (NSString * name in followingSetWithMe) {
-        NSLog(@"Aggregating tags for followed user: %@", name);
+        //NSLog(@"Aggregating tags for followed user: %@", name);
         //[self aggregateTagIDsForUser:name];
         [k getAllPixBelongingToUserWithUsername:name];
     }
@@ -66,7 +66,7 @@
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getAllPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
     
-    NSLog(@"getAllPixBelongingToUser completed with %d results", [theResults count]);
+    //NSLog(@"getAllPixBelongingToUser completed with %d results", [theResults count]);
     [aggregationQueue addObjectsFromArray:theResults];
 }
 
@@ -96,10 +96,12 @@
 // TODO: first time aggregate happens, notify delegate
 
 -(void)aggregateNewTagIDs {
+    NSLog(@"Starting aggregateNewTagIDs");
     if (![delegate isLoggedIn]) {
         NSLog(@"Trying to aggregate tagIDs for following list but user is not logged in!");
         return;
     }
+    aggregationDebugMessageIdleCount = 0;
     showDebugMessageAfterStartAggregation = YES;
     [self aggregationDebugMessage];
    
@@ -125,29 +127,66 @@
     }    
     [followingSetWithMe release];
  */
-    [self getUserPixForUsers:followingSetWithMe];
+    // if any of the followingSet is a featured user, separate that out
+    NSLog(@"FollowingSetWithMe has %d elements initially", [followingSetWithMe count]);
+    if (!featuredUsers)
+        featuredUsers = [[NSMutableSet alloc] init];
+    [featuredUsers unionSet:[delegate getFeaturedUserSet]];
+    [featuredUsers addObject:@"William Ho"];
+    [featuredUsers addObject:[delegate getUsername]];     
+    NSLog(@"FeaturedUsers has %d elements: %@", [featuredUsers count], featuredUsers);
+    [featuredUsers intersectSet:followingSetWithMe];
+    NSLog(@"FeaturedUsers and FollowingSetWithMe has %d intersections, %@", [featuredUsers count], featuredUsers);
+    [followingSetWithMe minusSet:featuredUsers];
+    NSLog(@"FollowingSetWithMe minus FeaturedUsers has %d elements", [followingSetWithMe count]);
+    if (remainderSet == nil) 
+        remainderSet = [[NSMutableSet alloc] init];
+    [remainderSet unionSet:followingSetWithMe];
+    [self getUserPixForUsers]; 
 }
 
--(void)getUserPixForUsers:(NSMutableSet*)followingSetWithMe {
+-(void)getUserPixForUsers { //:(NSMutableSet*)followingSetWithMe {
     if (!pauseAggregation) {
-        NSEnumerator * enumerator = [followingSetWithMe objectEnumerator];
-        NSString * name = [enumerator nextObject];
-
-        [followingSetWithMe removeObject:name];
+        // hack: download for will ho or featured users first
+        
+        NSString * name = nil;
+        if ([featuredUsers count] > 0) {
+            NSEnumerator * enumerator = [featuredUsers objectEnumerator];
+            name = [enumerator nextObject];
+            [featuredUsers removeObject:name];
+            NSLog(@"Aggregating new tags for featured user %@", name);
+        }
+        else {
+            NSLog(@"Featured users left: %d remainderSet: %d", [featuredUsers count], [remainderSet count]);
+            NSEnumerator * enumerator = [remainderSet objectEnumerator];
+            name = [enumerator nextObject];
+            if (name)
+                [remainderSet removeObject:name];
+        }
+        
+        if (!name)
+            return;
+        
         NSNumber * newestTagID = [userTagList objectForKey:name];
         
 #if VERBOSE
         NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, [newestTagID intValue]);
 #endif
         
-        KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+        //KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
+        KSAPIOperation * kOp = [k getSomeNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue] andMaxPix:[NSNumber numberWithInt:50]];
         [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     } else {
         NSLog(@"getUserPixForUsers paused!");
+        [self performSelector:@selector(getUserPixForUsers) withObject:nil afterDelay:1];
     }
     
-    if ([followingSetWithMe count] > 0)
-        [self performSelector:@selector(getUserPixForUsers:) withObject:followingSetWithMe afterDelay:.1];
+    //if ([remainderSet count] > 0)
+    //    [self performSelector:@selector(getUserPixForUsers:) withObject:remainderSet afterDelay:.1];
+    
+    //[remainderSet autorelease];
+    
+    // todo: call next friend only after kumulos has returned
 }
 
 -(void)reaggregateTagIDs {
@@ -162,14 +201,14 @@
     NSLog(@"ReaggregatingTagIDs: You are following %d people", [allFollowing count]);
     for (NSString * name in followingSetWithMe) {
         int newestTagID = -1; //[allTagIDs objectAtIndex:0]; 
-        NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, newestTagID);
+        //NSLog(@"Aggregating new tags for followed user: %@ newer than %d", name, newestTagID);
         [k getNewPixBelongingToUserWithUsername:name andTagID:newestTagID];
     }    
     [followingSetWithMe release];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
-    
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getSomeNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
     NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
     if ([theResults count] > 0)
     {
@@ -221,6 +260,10 @@
             NSLog(@"No new aggregation to do! trigger something here!");
         }
     }
+    
+    // hack: start next user
+    if ([remainderSet count] > 0)
+        [self performSelector:@selector(getUserPixForUsers) withObject:remainderSet afterDelay:0];
 }
 
 -(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
@@ -280,6 +323,8 @@
         while (1) {
             if (isLocked)
                 continue;
+            if (pauseAggregation)
+                continue;
             
             if ([aggregationQueue count]>0) {
                 // insert sorted
@@ -302,11 +347,15 @@
                     
                     // insert into sorted array
                     @try {
+                        // hack: tagID 9999 was a debug/test number, not valid
+                        if ([tagID intValue] == 9999)
+                            continue;
                         [self insertNewTagID:tagID];
                     }
                     @catch (NSException *exception) {
                         NSLog(@"UserTagAggregator: Caught enumeration error while inserting tagID %@", tagID);
-                        [FlurryAnalytics logEvent:@"AggregationError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", tagID, @"tagID", nil]];
+                        if (!IS_ADMIN_USER([delegate getUsername]))
+                            [FlurryAnalytics logEvent:@"AggregationError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", tagID, @"tagID", nil]];
                     }
 #if VERBOSE
                     NSLog(@"Aggregator queue: trigger %d queue size %d", firstTimeAggregatingTrigger, [aggregationQueue count]);
@@ -357,6 +406,7 @@
     
     // allTagIDs are ordered ascending
     // debug
+    NSLog(@"GetTagIDGreaterThan %d, requesting %d tags in AllTagIDs with %d elements", tagID, numTags, [allTagIDs count]); 
     //NSLog(@"GetTagIDGreaterThan %d in AllTagIDs: %@", tagID, allTagIDs);
 
     NSUInteger newIndex = [allTagIDs indexOfObject:[NSNumber numberWithInt:tagID]
@@ -409,11 +459,11 @@
         return nil;
     
     // debug
-    //NSLog(@"GetTagIDLessThan %d in AllTagIDs: %@", tagID, allTagIDs);
+    NSLog(@"GetTagIDLessThan %d in AllTagIDs: %@", tagID, allTagIDs);
     
     // allTagIDs are ordered ascending
     
-#if 0 //VERBOSE
+#if VERBOSE
     for (int i=0; i<[allTagIDs count]; i++) {
         NSLog(@"AllTagIDs %d: %d", i, [[allTagIDs objectAtIndex:i] intValue]);
     }
@@ -461,14 +511,23 @@
  
 -(void)aggregationDebugMessage {
     // shows debug message every 5 seconds, even without Verbose
-    NSLog(@"AggregationDebugMessage: Aggregating queue now size %d idOfNewestTagAggregated %d trigger %d", [aggregationQueue count],  idOfNewestTagAggregated, firstTimeAggregatingTrigger);
-    if (showDebugMessageAfterStartAggregation)
+    NSLog(@"AggregationDebugMessage: Aggregating queue now size %d idOfNewestTagAggregated %d trigger %d idle count %d", [aggregationQueue count],  idOfNewestTagAggregated, firstTimeAggregatingTrigger, aggregationDebugMessageIdleCount);
+    if ([aggregationQueue count] > 0)
+        aggregationDebugMessageIdleCount = 0;
+    if (showDebugMessageAfterStartAggregation && ([aggregationQueue count] > 0 || aggregationDebugMessageIdleCount < 5)) {
         [self performSelector:@selector(aggregationDebugMessage) withObject:self afterDelay:5];
+        if ([aggregationQueue count] == 0)
+            aggregationDebugMessageIdleCount++;
+    }
+    else 
+        aggregationDebugMessageIdleCount++; // if queue count is 0, give it some more time to aggregate more numbers for debug display
 }
 
 -(void)continueAggregation {
     NSLog(@"Unpausing aggregation!");
     pauseAggregation = NO;
+    showDebugMessageAfterStartAggregation = YES;
+    aggregationDebugMessageIdleCount = 0;
 }
 
 -(void)delayAggregationForTime:(float)timeInSec {

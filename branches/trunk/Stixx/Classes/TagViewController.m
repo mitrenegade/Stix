@@ -311,16 +311,22 @@
         
         frame.origin.x *= scale2;
         frame.origin.y *= scale2;
+        [delegate pauseAggregation];
         UIImage * largeImage = [result croppedImage:frame];
+        NSLog(@"*******************************Writing to stix album*******************************");
+        UIImageWriteToSavedPhotosAlbum(largeImage, nil, nil, nil); 
         [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:largeImage toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
             if (error!=nil) {
-                NSLog(@"Could not write to library: error %@", [error description]);
+                NSLog(@"*******************************Could not write to library: error %@*******************************", [error description]);
                 // retry one more time
                 [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:largeImage toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
                     if (error!=nil) {
                         NSLog(@"Second attempt to write to library failed: error %@", [error description]);
                     }
                 }];
+            }
+            else {
+                NSLog(@"*******************************Wrote to stix album*******************************");
             }
         }];
         // just save to tag

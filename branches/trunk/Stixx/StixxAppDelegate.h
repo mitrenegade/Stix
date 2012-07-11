@@ -148,6 +148,7 @@ struct UserInfo {
     
     NSMutableDictionary * allUsers;
     int idOfMostRecentUser;
+    NSMutableSet * featuredUsers;
     
     IBOutlet UITextField * loadingMessage;
 
@@ -203,6 +204,7 @@ struct UserInfo {
     // the delegate to call upload stix, otherwise it sets hasPendingStixLayerToUpload
     BOOL hasPendingStixLayerToUpload;
     int readyToUploadPendingStixLayer_tagID;
+    BOOL addAutomaticFollows; // friendSuggestionController causes the followList to be cleared, so set this to force the automatically followed users to stay in the list
 }
 
 -(void)initializeBadgesFromKumulos;
@@ -223,7 +225,7 @@ struct UserInfo {
 -(void)adminIncrementAllUsersBuxCounts;
 -(void) adminSetAllUsersBuxCounts;
 -(void)adminEasterEggShowMenu:(NSString*)password;
--(void)updateUserTagTotal;
+//-(void)updateUserTagTotal;
 //-(void)changeBuxCountByAmount:(int)change;
 //-(void)adminSaveFeed;
 -(void)adminResetAllStixOrders;
@@ -304,6 +306,7 @@ struct UserInfo {
 @property (nonatomic) NSMutableArray * allUserEmails;
 @property (nonatomic) NSMutableArray * allUserNames;
 @property (nonatomic) NSMutableDictionary * allUserIDs;
+@property (nonatomic) NSMutableSet * featuredUsers;
 @property (nonatomic) Kumulos * k;
 @property (nonatomic) NSMutableDictionary * allCommentCounts;
 @property (nonatomic) NSMutableDictionary * allCommentHistories;

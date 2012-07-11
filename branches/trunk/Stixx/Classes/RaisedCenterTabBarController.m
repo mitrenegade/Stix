@@ -395,8 +395,8 @@
             [self toggleFirstTimeInstructions:NO];
             [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
             // start new one
-            //[self toggleFirstTimeInstructions:YES];
-            //[self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            [self toggleFirstTimeInstructions:YES];
+            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
             instructionsDismissed = NO;
         }
             break;

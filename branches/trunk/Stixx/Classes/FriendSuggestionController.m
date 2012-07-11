@@ -32,7 +32,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
 #if USING_FLURRY
-    [FlurryAnalytics logPageView];
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logPageView];
 #endif
 }
 
@@ -59,13 +60,19 @@
     [featuredHeader setImage:[UIImage imageNamed:@"header_featuredstixsters@2x.png"]];
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
     if ([friends count] == 0) {
-        [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
+        //[headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
+        [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
     }
     else {
+        if ([headerViews count] < SUGGESTIONS_SECTION_MAX) {
+            // could have deleted friend section initially
+            [headerViews addObject:[NSNull null]];
+        }
         UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
         [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
         [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
     }
+    NSLog(@"After initializing header views: %d sections", [headerViews count]);
 }
 
 -(void)initializeSuggestions {
@@ -206,9 +213,10 @@
 {
     // Return the number of sections.
     // hack: assume that featured header always exists and is at index 0
-    int ret = SUGGESTIONS_SECTION_MAX;
-    if ([friends count] == 0)
-        ret = 1;
+    //int ret = SUGGESTIONS_SECTION_MAX;
+    //if ([friends count] == 0)
+    int ret = [headerViews count];
+//        ret = 1;
     NSLog(@"Returning number of sections: %d", ret);
     return ret;
 }
@@ -245,29 +253,28 @@
     return NO;
 }
 
--(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+-(void)tableView:(UITableView *)_tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     int section = [indexPath section];
     int row = [indexPath row];
     NSLog(@"Deleting row at section %d index %d", section, row);
     
     if (section == SUGGESTIONS_SECTION_FRIENDS) {
         [friends removeObjectAtIndex:row];
-        if ([friends count] == 0) {
-            [self initializeHeaderViews];
-//            [tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationTop];
-            //[headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
-        }
     }
     else if (section == SUGGESTIONS_SECTION_FEATURED) {
         [featured removeObjectAtIndex:row];
         [featuredDesc removeObjectAtIndex:row];
     }
-    
-    [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
-    if (section == SUGGESTIONS_SECTION_FRIENDS && [friends count] == 0) {
-        [tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationTop];
+    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    if (section == SUGGESTIONS_SECTION_FRIENDS && [friends count] == 0){
+        [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+        [_tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationNone];
     }
-    [tableView reloadData];
+    //[_tableView reloadData];
+    
+    if ([friends count] == 0 && [featured count] == 0) {
+        [self didClickButtonNext:nil];
+    }
 }
 
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray {
@@ -331,6 +338,7 @@
     
     //[tableView reloadData];
     didGetFeaturedUsers = YES;
+    [delegate didGetFeaturedUsers:theResults];
     int total = [featured count] + [friends count];
     if (didGetFacebookFriends)
         [delegate friendSuggestionControllerFinishedLoading:total];
@@ -349,7 +357,8 @@
     }
     
 #if USING_FLURRY
-    [FlurryAnalytics logEvent:@"FriendSuggestionsEdited" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", nil]];
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logEvent:@"FriendSuggestionsEdited" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", nil]];
 #endif
 
 }

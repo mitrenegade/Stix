@@ -820,7 +820,7 @@
 -(void)didPullToRefresh {
     [self updateScrollPagesAtPage:-1];
     [delegate checkAggregatorStatus];
-    [self checkForUpdatedStix];
+    //[self checkForUpdatedStix];
     [self updateFeedTimestamps];
 }
 -(void)didPullToRefreshDoActivityIndicator {

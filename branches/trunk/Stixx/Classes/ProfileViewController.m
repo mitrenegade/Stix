@@ -71,14 +71,15 @@
     showPointer = NO;
     
 #if USING_FLURRY
-    [FlurryAnalytics logPageView];
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logPageView];
 #endif
 }
 
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
-    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:10];
+    [self performSelector:@selector(stopActivityIndicatorAfterTimeout) withObject:nil afterDelay:60];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
@@ -230,15 +231,41 @@
     if (![delegate isLoggedIn])
         return;
     
+    if (![[FacebookHelper sharedFacebookHelper] facebookHasSession]) {
+        int newlogin = [[FacebookHelper sharedFacebookHelper] facebookLoginForShare];
+        waitingForFacebookLogin = YES;
+    }
+    else {
+        NSLog(@"Button find friends by Facebook!");
+        isSearching = YES;
+        resultType = RESULTS_SEARCH_FACEBOOK;
+        [self startActivityIndicator];
+        [activityIndicatorLarge startCompleteAnimation];
+        [self toggleMyButtons:NO];
+        [self toggleMyInfo:NO];
+        
+        [delegate searchFriendsByFacebook];
+    }
+}
+
+-(void)didLoginToFacebook {
+    waitingForFacebookLogin = NO;
     NSLog(@"Button find friends by Facebook!");
     isSearching = YES;
     resultType = RESULTS_SEARCH_FACEBOOK;
     [self startActivityIndicator];
+    [activityIndicatorLarge startCompleteAnimation];
     [self toggleMyButtons:NO];
     [self toggleMyInfo:NO];
-
-    [delegate searchFriendsByFacebook];
+    
+    [delegate searchFriendsByFacebook];    
 }
+-(void)didCancelFacebookLogin {
+    waitingForFacebookLogin = NO;
+    [activityIndicatorLarge stopCompleteAnimation];
+    // do nothing?
+}
+
 -(void)didClickButtonContacts {
     if ([delegate getFirstTimeUserStage] == 3) {
         showPointer = NO;
@@ -312,63 +339,6 @@
     if ([delegate isLoggedIn])
         [delegate didClickChangePhoto];
 }
-
-/* allow photo
--(void)takeProfilePicture {
-#if !TARGET_IPHONE_SIMULATOR
-    UIImagePickerController * cam = [[UIImagePickerController alloc] init];
-    cam.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
-    cam.allowsEditing = YES;
-    cam.delegate = self;
-    [self presentModalViewController:cam animated:YES];
-#endif
-}
-
-- (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
-    //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
-    //    [picker release];    
-    [self dismissModalViewControllerAnimated:YES];
-}
-
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
-    UIImage * editedPhoto = [info objectForKey:UIImagePickerControllerEditedImage];
-    UIImage * newPhoto; 
-    //newPhoto = [UIImage imageNamed:@"friend1.png"];
-    if (editedPhoto)
-        newPhoto = editedPhoto;
-    else
-        newPhoto = originalPhoto; 
-    
-    NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
-    [self dismissModalViewControllerAnimated:TRUE];
-    
-    // scale down photo
-	CGSize targetSize = CGSizeMake(90, 90);		
-    UIImage * result = [newPhoto resizedImage:targetSize interpolationQuality:kCGInterpolationDefault];
-    UIImage * rounded = [result roundedCornerImage:0 borderSize:2];
-    
-    // save to album
-#if 0
-    UIImageWriteToSavedPhotosAlbum(rounded, nil, nil, nil); 
-#else
-    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:rounded toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
-        if (error!=nil) {
-            NSLog(@"Could not write to library: error %@", [error description]);
-        }
-    }];
-#endif
-    //NSData * img = UIImageJPEGRepresentation(rounded, .8);
-    NSData * img = UIImagePNGRepresentation(rounded);
-    NSLog(@"Adding photo of size %f %f to user %@", rounded.size.width, rounded.size.height, [delegate getUsername]);
-    [photoButton setImage:rounded forState:UIControlStateNormal];
-    [delegate didChangeUserphoto:rounded];
-    
-    // add to kumulos
-    [k addPhotoWithUsername:[delegate getUsername] andPhoto:img];
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
-}
-*/
 
 /*** other actions ****/
 -(IBAction)adminStixButtonPressed:(id)sender
@@ -584,9 +554,9 @@
 
 /*** results of facebook search from delegate ***/
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray {
+    [activityIndicatorLarge stopCompleteAnimation];
     if (resultType != RESULTS_SEARCH_FACEBOOK)
-        return;
-    
+        return;    
 
     [self initSearchResultLists];
 

@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "SHKTwitter.h"
 #import "SHKConfiguration.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
 #define ROW_HEIGHT 44
 #define NUM_SERVICES 2
@@ -70,7 +71,8 @@ static ShareController *sharedShareController;
 }
 
 -(void)reloadConnections {
-    [self didConnectService:@"Twitter"]; // force reload of table
+    // called by delegate or detailView after isConnected:service has changed states
+    [tableView reloadData];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -221,11 +223,25 @@ static ShareController *sharedShareController;
         // enable twitter
         [self doTwitterConnect];
     }
+    
+    // todo: connect if facebook as well
+    if ([button.titleLabel.text isEqualToString:@"Facebook"]) {
+        if (![[FacebookHelper sharedFacebookHelper] facebookHasSession]) {
+            int newlogin = [[FacebookHelper sharedFacebookHelper] facebookLoginForShare];
+            //if (newlogin) {
+            //    [self didConnect:@"Facebook"];
+            //}
+        }
+        else {
+            NSLog(@"How come facebook share button is on Connect if we already have a session?");
+        }
+    }
 }
 
--(void)didConnectService:(NSString*)name {
-    // called by delegate after isConnected:service has changed states
-    [tableView reloadData];
+
+-(void)didCancelFacebookConnect {
+    NSLog(@"Facebook connect didn't work...need to cancel");
+    // todo: change share options, button back
 }
 
 -(void)didClickToggleButton:(id)sender {
@@ -281,6 +297,22 @@ static ShareController *sharedShareController;
     [self setTag:_tag];
     [self setDelegate:_delegate];
     [self uploadImage:png];
+
+    NSLog(@"*******************************Writing to stix album*******************************");
+    [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+        if (error!=nil) {
+            NSLog(@"*******************************Could not write to library: error %@*******************************", [error description]);
+            // retry one more time
+            [[ALAssetsLibrary sharedALAssetsLibrary] saveImage:result toAlbum:@"Stix Album" withCompletionBlock:^(NSError *error) {
+                if (error!=nil) {
+                    NSLog(@"Second attempt to write to library failed: error %@", [error description]);
+                }
+            }];
+        }
+        else {
+            NSLog(@"*******************************Wrote to stix album*******************************");
+        }
+    }];
 }
 
 -(void)doSharePix {
@@ -427,7 +459,7 @@ static ShareController *sharedShareController;
         [twitter setItem:item];
         [twitter share];
     } else {
-        [self didTwitterConnect];
+        [self didConnect:@"Twitter"];
     }
 #else
     // do a full share
@@ -438,8 +470,8 @@ static ShareController *sharedShareController;
 #endif
 }
 
--(void)didTwitterConnect {
-    NSString * service = @"Twitter";
+-(void)didConnect:(NSString*)service {
+    //NSString * service = @"Twitter";
     
     // set connect to true in defaults
     [self connectService:service];
@@ -474,7 +506,7 @@ static ShareController *sharedShareController;
 - (void)sharerFinishedSending:(SHKSharer *)sharer {
     if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
         NSLog(@"Finished sending: userinfo");
-        [self didTwitterConnect];
+        [self didConnnect:@"Twitter"];
     }
 
     // only cause activityIndicator to go away when all sharers have finished? or just do in background?
@@ -559,7 +591,7 @@ static ShareController *sharedShareController;
     
     [serviceIsConnected setObject:[NSNumber numberWithBool:YES] forKey:service];
     [serviceIsSharing setObject:[NSNumber numberWithBool:YES] forKey:service]; // automatically start sharing after connect
-    [self didConnectService:service]; // just reloads table
+    [self reloadConnections]; // just reloads table
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString * connectString = [NSString stringWithFormat:@"%@IsConnected", service];

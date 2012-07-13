@@ -12,6 +12,7 @@
 
 @synthesize buttonOK, buttonCancel, imageView;
 @synthesize delegate;
+@synthesize activityIndicatorLarge;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -54,9 +55,10 @@
 
 -(IBAction)didClickOK:(id)sender {
     NSLog(@"PixPreview did click ok **************");
-    if (!activityIndicatorLarge)
+    if (!activityIndicatorLarge) {
         activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
+        [self.view addSubview:activityIndicatorLarge];
+    }
     [activityIndicatorLarge startCompleteAnimation];
     [delegate performSelector:@selector(didConfirmPix) withObject:delegate afterDelay:0];
     //[delegate didConfirmPix];

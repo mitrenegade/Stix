@@ -16,7 +16,7 @@
 @synthesize activityIndicatorLarge;
 @synthesize feedItems;
 @synthesize headerViews, headerViewsDidLoadPhoto;
-@synthesize allTags;
+@synthesize allTags; 
 @synthesize allTagsDisplayed;
 @synthesize allTagsPending;
 @synthesize tableController;
@@ -24,7 +24,9 @@
 @synthesize commentView;
 @synthesize camera;
 @synthesize tabBarController;
+#if HAS_PROFILE_BUTTON
 @synthesize buttonProfile;
+#endif
 //@synthesize statusMessage;
 @synthesize newestTagIDDisplayed;
 @synthesize logo;
@@ -58,8 +60,11 @@
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
     tableController.delegate = self;
+#if HAS_PROFILE_BUTTON
     [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
-
+#else
+    [self.view addSubview:tableController.view];
+#endif
 }
 
 -(void)startActivityIndicator {
@@ -814,6 +819,7 @@
     [tableController.tableView scrollToRowAtIndexPath:targetIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
 }
 
+#if HAS_PROFILE_BUTTON
 -(IBAction)didClickProfileButton:(id)sender {
     if ([delegate isShowingBuxInstructions])
         return;
@@ -822,6 +828,7 @@
     
     [delegate didOpenProfileView];
 }
+#endif
 
 -(void)didPullToRefresh {
     [self updateScrollPagesAtPage:-1];
@@ -1107,7 +1114,7 @@
         [self.camera setCameraOverlayView:stixEditorController.view];        
     }];
 #else
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [stixEditorController.view setFrame:frameOnscreen];
     [self.camera setCameraOverlayView:stixEditorController.view];        
     [stixEditorController initializeWithTag:tagToRemix remixMode:remixMode];
@@ -1469,32 +1476,6 @@
     [self didCloseShareSheet];
     [delegate didCloseShareSheet];
 }
-/*
--(void)didClickShareViaFacebook {
-    [self startActivityIndicator];
-    if (!activityIndicatorLarge)
-        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
-    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
-        [shareFeedItem didClickShareViaFacebook];
-    });
-    [self didCloseShareSheet];
-}
-
--(void)didClickShareViaEmail {
-    [self startActivityIndicator];
-    [self didCloseShareSheet];
-    if (!activityIndicatorLarge)
-        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
-    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
-        [shareFeedItem didClickShareViaEmail];
-    });
-    [self didCloseShareSheet];
-}
-*/
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
@@ -1551,9 +1532,10 @@
 }
 
 -(void)startActivityIndicatorLarge {
-    if (!activityIndicatorLarge)
+    if (!activityIndicatorLarge) {
         activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
+        [self.view addSubview:activityIndicatorLarge];
+    }
     [activityIndicatorLarge startCompleteAnimation];
 }
 

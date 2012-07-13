@@ -23,6 +23,7 @@
 @synthesize bgFollowers, bgFollowing;
 @synthesize searchBar;
 @synthesize bottomBackground;
+@synthesize buttonBack, buttonAbout;
 @synthesize myFollowersCount, myFollowersLabel, myFollowingCount, myFollowingLabel;
 @synthesize myPixCount, myPixLabel, myStixCount, myStixLabel;
 //@synthesize followersCount, followingCount;
@@ -157,6 +158,8 @@
     [bottomBackground setHidden:!showMyButtons];
     
     if (show) {
+        [buttonBack setHidden:show];
+        [buttonAbout setHidden:!show];
         // showing main view, so dismiss any other views
         //[bottomBackground setFrame:CGRectMake(0, 160, 320, 320)];
         [searchResultsController.view removeFromSuperview];
@@ -349,6 +352,8 @@
 -(IBAction)aboutButtonClicked:(id)sender {
     UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"About Stix"   delegate:self cancelButtonTitle:@"Close" destructiveButtonTitle:nil otherButtonTitles:@"Terms of Service", @"Contact Us", nil];
     [actionSheet showInView:self.view];
+    [buttonBack setHidden:NO];
+    [buttonAbout setHidden:YES];
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -399,9 +404,10 @@
         // needs to try logging in again
         [delegate needFacebookLogin];
         
-        if (!activityIndicatorLarge)
+        if (!activityIndicatorLarge) {
             activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-        [self.view addSubview:activityIndicatorLarge];
+            [self.view addSubview:activityIndicatorLarge];
+        }
         [activityIndicatorLarge startCompleteAnimation];
     }
     else {
@@ -556,6 +562,9 @@
     [searchFriendEmail removeAllObjects];
     [searchFriendID removeAllObjects];
     [searchFriendIsStix removeAllObjects];
+
+    [buttonBack setHidden:NO];
+    [buttonAbout setHidden:YES];
 }
 
 /*** results of facebook search from delegate ***/

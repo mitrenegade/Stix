@@ -20,8 +20,10 @@
 
 enum {
     TABBAR_BUTTON_FEED = 0,
-    TABBAR_BUTTON_TAG,
     TABBAR_BUTTON_EXPLORE,
+    TABBAR_BUTTON_TAG,
+    TABBAR_BUTTON_NEWS,
+    TABBAR_BUTTON_PROFILE,
     TABBAR_BUTTON_MAX
 };
 
@@ -33,13 +35,15 @@ enum first_time_user_stage {
     FIRSTTIME_DONE
 };
 
+#define BUTTON_HEIGHT 40
+
 @interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *__unsafe_unretained myDelegate;
     
-    UIButton * button[3];
-    UIImage * bgNormal[3];
-    UIImage * bgSelected[3];
+    UIButton * button[TABBAR_BUTTON_MAX];
+    UIImage * bgNormal[TABBAR_BUTTON_MAX];
+    UIImage * bgSelected[TABBAR_BUTTON_MAX];
     
     UIButton * firstTimeInstructions;
     bool showMallPointer;
@@ -57,9 +61,7 @@ enum first_time_user_stage {
 
 @property (nonatomic, unsafe_unretained) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
 
-
-// Create a view controller and setup it's tab bar item with a title and image
--(UIViewController*) viewControllerWithTabTitle:(NSString*)title image:(UIImage*)image;
+-(void)initializeCustomButtons;
 
 // Create a custom UIButton and add it to the center of our tab bar
 -(void) addButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage atPosition:(int)pos;

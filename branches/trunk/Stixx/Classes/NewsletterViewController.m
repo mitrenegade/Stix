@@ -15,6 +15,12 @@
 
 @synthesize tableView;
 @synthesize delegate;
+@synthesize activityIndicator;
+#if USE_PULL_TO_REFRESH
+@synthesize reloading=_reloading;
+@synthesize refreshHeaderView;
+@synthesize hasHeaderRow;
+#endif
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -23,6 +29,7 @@
         // Custom initialization
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
+        activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X + 20, 9, 25, 25)];
     }
     return self;
 }
@@ -31,6 +38,16 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    [self.view addSubview:activityIndicator];
+#if USE_PULL_TO_REFRESH
+    if (refreshHeaderView == nil) {
+        refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];
+        refreshHeaderView.backgroundColor = [UIColor colorWithWhite:0 alpha:.85]; //[UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
+        refreshHeaderView.bottomBorderThickness = 1.0;
+        [self.tableView addSubview:refreshHeaderView];
+        self.tableView.showsVerticalScrollIndicator = YES;
+    }
+#endif
 }
 
 - (void)viewDidUnload
@@ -40,22 +57,44 @@
     // e.g. self.myOutlet = nil;
 }
 
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+-(void)startActivityIndicator {
+    [activityIndicator startCompleteAnimation];
+}
+-(void)stopActivityIndicator {
+    [activityIndicator stopCompleteAnimation];
+}
+
 -(void)initializeNewsletter {
-    [k getNewsWithUsername:[delegate getUsername]];
+    [self startActivityIndicator];
     
-    agentArray = [[NSMutableArray alloc] init];
-    newsArray = [[NSMutableArray alloc] init];
-    thumbnailArray = [[NSMutableArray alloc] init];
+    [k getNewsWithUsername:[delegate getUsername]];
+    if (!agentArray) {
+        agentArray = [[NSMutableArray alloc] init];
+        newsArray = [[NSMutableArray alloc] init];
+        thumbnailArray = [[NSMutableArray alloc] init];
+    }
+    else {
+        [agentArray removeAllObjects];
+        [newsArray removeAllObjects];
+        [thumbnailArray removeAllObjects];
+    }
 }
 
 -(void)initializeHeaderViews {
     if (!headerViews) {
         headerViews = [[NSMutableArray alloc] init];
+    }
+    else {
+        [headerViews removeAllObjects];
     }
     UIView * header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
     [header setBackgroundColor:[UIColor blackColor]];
@@ -97,6 +136,7 @@
     }
     
     [self initializeHeaderViews];
+    [self stopActivityIndicator];
     [tableView reloadData];
 }
 
@@ -120,8 +160,9 @@
         [cell.textLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:30]];
         [cell setBackgroundColor:[UIColor clearColor]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 22, 230, 12)];
-        UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 22, 230, 12)];
+        [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider"]]];
+        UILabel * nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 20, 230, 12)];
+        UILabel * commentTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 20, 230, 12)];
         nameLabel.textColor = [UIColor colorWithRed:153/255.0 green:51.0/255.0 blue:0.0 alpha:1.0];
 		nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
         [nameLabel setBackgroundColor:[UIColor clearColor]];
@@ -217,6 +258,89 @@
 
 -(void)refreshUserPhotos {
     [tableView reloadData];
+}
+
+#if USE_PULL_TO_REFRESH
+#pragma mark ScrollView Callbacks
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{	
+	
+	if (scrollView.isDragging) {
+		if (refreshHeaderView.state == EGOOPullRefreshPulling && scrollView.contentOffset.y > -65.0f && scrollView.contentOffset.y < 0.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to normal");
+			[refreshHeaderView setState:EGOOPullRefreshNormal];
+		} else if (refreshHeaderView.state == EGOOPullRefreshNormal && scrollView.contentOffset.y < -65.0f && !_reloading) {
+            NSLog(@"ScrollView: EGO refreshHeaderView going to pulling");
+			[refreshHeaderView setState:EGOOPullRefreshPulling];
+		}
+	}
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+	
+	if (scrollView.contentOffset.y <= - 65.0f && !_reloading) {
+		_reloading = YES;
+        //[delegate didPullToRefreshDoActivityIndicator];
+        [refreshHeaderView setState:EGOOPullRefreshLoading];
+        [UIView animateWithDuration:.5
+                              delay:0
+                            options: UIViewAnimationCurveLinear
+                         animations:^{
+                             [self.tableView setContentInset:UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0)];
+                         } 
+                         completion:^(BOOL finished){
+                             NSLog(@"EGO Refresh view: content inset at 60 - calling reloadTableViewDataSource");
+                             [self reloadTableViewDataSource];
+                             [UIView animateWithDuration:0.2
+                                                   delay:1
+                                                 options: UIViewAnimationCurveLinear
+                                              animations:^{
+                                                  [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                                              }
+                                              completion:^(BOOL finished) {
+                                                  NSLog(@"EGO Refresh view: content inset at 0");
+                                                  [refreshHeaderView setState:EGOOPullRefreshNormal];
+                                                  _reloading = NO;
+                                              }
+                              ];
+                         }
+         ];
+	}
+}
+
+#pragma mark -
+#pragma mark refreshHeaderView Methods
+
+- (void)dataSourceDidFinishLoadingNewData{
+    
+    [self.tableView reloadData];
+    if (_reloading) {
+    	[UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:.3];
+        [self.tableView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+        [UIView commitAnimations];
+        
+        [refreshHeaderView setState:EGOOPullRefreshNormal];
+        
+    }
+	_reloading = NO;
+}
+
+- (void) reloadTableViewDataSource
+{
+//    [self.delegate didPullToRefresh];
+    [self initializeNewsletter];
+}
+#endif
+
+-(void)didClickUserPhoto:(UIButton*)button {
+    // DO NOTHING
+#if 0
+    //NSLog(@"Button titleLabel: %@", button.titleLabel.text);
+    int row = [button.titleLabel.text intValue]; //[indexPath row]; //button.tag - PHOTO_TAG;
+    NSString * name = [delegate getNameForIndex:row];
+    NSLog(@"CommentFeedTable: did click on user's photo %d, username = %@", row, name);
+    [delegate shouldDisplayUserPage:name];
+#endif
 }
 
 @end

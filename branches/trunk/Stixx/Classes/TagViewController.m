@@ -263,7 +263,7 @@
     
 #if !TARGET_IPHONE_SIMULATOR
     // hack a way to display view over camera; formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [previewController.view setFrame:frameShifted];
     [self.camera setCameraOverlayView:previewController.view];
 #endif

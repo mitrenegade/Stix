@@ -202,9 +202,10 @@ static ShareController *sharedShareController;
     [caption resignFirstResponder];
     [self setShareCaption:[caption text]];
     
-    if (!activityIndicatorLarge)
+    if (!activityIndicatorLarge) {
         activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self.view addSubview:activityIndicatorLarge];
+        [self.view addSubview:activityIndicatorLarge];
+    }
     [activityIndicatorLarge startCompleteAnimation];
 
 #if 1

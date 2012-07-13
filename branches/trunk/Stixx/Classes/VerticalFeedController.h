@@ -14,7 +14,9 @@
 #import "CommentViewController.h"
 #import "RaisedCenterTabBarController.h"
 #import "KumulosHelper.h"
+#if HAS_PROFILE_BUTTON
 #import "ProfileViewController.h"
+#endif
 #import "OutlineLabel.h"
 #import "KumulosHelper.h"
 #import "UserProfileViewController.h"
@@ -52,7 +54,9 @@
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
 //-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
+#if HAS_PROFILE_BUTTON
 -(void)didOpenProfileView;
+#endif
 -(NSMutableSet*)getFollowingList;
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
@@ -168,7 +172,9 @@
 @property (nonatomic) NSMutableArray * allTagsPending;
 @property (nonatomic) FeedTableController *tableController;
 @property (nonatomic, unsafe_unretained) NSObject<VerticalFeedDelegate> * delegate;
+#if HAS_PROFILE_BUTTON
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
+#endif
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
@@ -199,7 +205,9 @@
 //-(void)didDropStixByTap:(UIImageView *) badge ofType:(NSString*)stixStringID;
 -(void)addAuxStixOfType:(NSString*)stixStringID toTag:(Tag*)tag;
 //- (void) shortenBlastTextUrls:(NSString*)url;
+#if HAS_PROFILE_BUTTON
 -(IBAction)didClickProfileButton:(id)sender;
+#endif
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
 -(void)followListsDidChange;

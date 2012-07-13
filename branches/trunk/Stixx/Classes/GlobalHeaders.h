@@ -9,7 +9,9 @@
 #ifndef Stixx_GlobalHeaders_h
 #define Stixx_GlobalHeaders_h
 
-#define STATUS_BAR_SHIFT 20 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
+#define STATUS_BAR_SHIFT 0 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
+// status_bar_shift disappears if tabbarcontroller is manually sized
+#define STATUS_BAR_SHIFT_OVERLAY 20 // for views that become camera's overlay, we need this 20 px shift: pixPreview, stixEditor, tabbarcontroller
 #define USING_FLURRY 1
 
 #define LAZY_LOAD_BOUNDARY 0
@@ -20,6 +22,8 @@
 #define PIX_WIDTH 314.0
 #define PIX_HEIGHT 282.0
 
+#define HAS_PROFILE_BUTTON 0
+
 #define ADMIN_TESTING_MODE 0
 #define VERBOSE 0
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
@@ -29,6 +33,10 @@
 #define RIGHT_LABEL_TAG 1002000
 #define TIME_LABEL_TAG 1003000
 #define PHOTO_TAG 1004000 // tag is going to be combined with comment index...hack: most comments possible: 999
+
+// hack to make camera fill screen for a custom (shorter) tab bar
+#define CAMERA_TRANSFORM_X 1.12412
+#define CAMERA_TRANSFORM_Y 1.12412
 
 enum notification_bookmarks {
     NB_NEWSTIX = 0,

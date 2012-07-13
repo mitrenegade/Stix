@@ -169,22 +169,23 @@ static dispatch_queue_t backgroundQueue;
     
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
-//    dispatch_async(backgroundQueue, ^{
-        camera = [[UIImagePickerController alloc] init];
-        camera.navigationBarHidden = YES;
-        camera.toolbarHidden = YES; // prevents bottom bar from being displayed
-        camera.allowsEditing = NO;
-        camera.wantsFullScreenLayout = NO;
+    camera = [[UIImagePickerController alloc] init];
+    camera.navigationBarHidden = YES;
+    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
+    camera.allowsEditing = NO;
+    camera.wantsFullScreenLayout = YES;
 #if !TARGET_IPHONE_SIMULATOR
-        camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-        camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto; 
-        camera.showsCameraControls = NO;
+    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto; 
+    camera.showsCameraControls = NO;
 #else
-        camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 #endif    
-        // create an empty main controller in order to turn on camera
-        mainController = [[UIViewController alloc] init];
-        [window addSubview:mainController.view];
+    
+    camera.cameraViewTransform = CGAffineTransformScale(camera.cameraViewTransform, CAMERA_TRANSFORM_X, CAMERA_TRANSFORM_Y);
+    // create an empty main controller in order to turn on camera
+    mainController = [[UIViewController alloc] init];
+    [window addSubview:mainController.view];
 
     /* load stix types, stix views, user info, and check for version */
     
@@ -279,6 +280,11 @@ static dispatch_queue_t backgroundQueue;
     //friendController.delegate = self;
     [self checkForUpdatePhotos];
     
+    /***** create news feed *****/
+    // show newsfeed, for now
+    newsController = [[NewsletterViewController alloc] init];
+    [newsController setDelegate:self];
+    
 	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
@@ -291,9 +297,10 @@ static dispatch_queue_t backgroundQueue;
 	//UIImage * i = [UIImage imageNamed:@"tab_camera.png"];
 	//[tbi setImage:i];
     //[tbi setTitle:@"Stix"];
-	NSArray * viewControllers = [NSArray arrayWithObjects: feedController, emptyViewController, exploreController, nil];
+	NSArray * viewControllers = [NSArray arrayWithObjects: feedController,  exploreController, emptyViewController, newsController, profileController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
+    [tabBarController initializeCustomButtons];
     [exploreController setTabBarController:tabBarController];
     
     friendSuggestionController = [[FriendSuggestionController alloc] init];
@@ -303,11 +310,6 @@ static dispatch_queue_t backgroundQueue;
     [editorController setDelegate:self];
 
     lastViewController = feedController;
-    
-    //[tabBarController addCenterButtonWithImage:[UIImage imageNamed:@"tab_addstix.png"] highlightImage:[UIImage imageNamed:@"tab_addstix_on.png"]];
-    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_feed2.png"] highlightImage:[UIImage imageNamed:@"tab_feed2_on.png"] atPosition:TABBAR_BUTTON_FEED];
-    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_explore2.png"] highlightImage:[UIImage imageNamed:@"tab_explore2_on.png"] atPosition:TABBAR_BUTTON_EXPLORE];
-    [tabBarController addButtonWithImage:[UIImage imageNamed:@"tab_camera2.png"] highlightImage:nil atPosition:TABBAR_BUTTON_TAG];
     
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR
@@ -912,7 +914,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [exploreController didDismissZoom];
         lastViewController = feedController;
 
-//        [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+#if HAS_PROFILE_BUTTON
         if (!myUserInfo_userphoto) {
             UIImage * photo = [self getUserPhotoForUsername:[self getUsername]];
             [feedController.buttonProfile setImage:photo forState:UIControlStateNormal];
@@ -921,6 +923,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         }
         [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
         [feedController.buttonProfile.layer setBorderWidth:1];
+#endif
         // doing this will cause two arrows to be displayed
 //        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
 //            [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
@@ -2295,7 +2298,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (isDisplayingShareSheet)
         return;
     if (isLoggingIn) {
-//        [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+#if HAS_PROFILE_BUTTON
         if (!myUserInfo_userphoto) {
             UIImage * photo = [self getUserPhotoForUsername:[self getUsername]];
             [feedController.buttonProfile setImage:photo forState:UIControlStateNormal];
@@ -2304,6 +2307,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
         [feedController.buttonProfile.layer setBorderWidth:1];
+#endif
     }
     
     // hack a way to display feedback view over camera: formerly presentModalViewController
@@ -2448,12 +2452,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //else if (lastViewController == exploreController)
     //    [self didPressTabButton:2];
     //[self closeProfileView];
+#if HAS_PROFILE_BUTTON
     [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [feedController.buttonProfile.layer setBorderWidth:1];
     [exploreController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [exploreController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [exploreController.buttonProfile.layer setBorderWidth:1];
+#endif
 }
 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPhotoDidCompleteWithResult:(NSNumber*)affectedRows;
@@ -2626,6 +2632,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //NSString * string = [NSString stringWithFormat:@"User login: %@", name];
     [k addMetricWithDescription:metricName andUsername:name andStringValue:metricData andIntegerValue:0];
 #endif
+    
+    [newsController initializeNewsletter];
 
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
@@ -2673,7 +2681,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     myUserInfo->userID = [userID intValue];
     [profileController didLogin]; 
     
-//    [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
+#if HAS_PROFILE_BUTTON
     if (!myUserInfo_userphoto) {
         UIImage * photo = [self getUserPhotoForUsername:[self getUsername]];
         [feedController.buttonProfile setImage:photo forState:UIControlStateNormal];
@@ -2682,6 +2690,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [feedController.buttonProfile.layer setBorderWidth:1];
+#endif
     NSLog(@"UserID: %d Username %@ with email %@ and facebookString %@", myUserInfo->userID, myUserInfo_username, email, myUserInfo_facebookString);
             
     // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
@@ -2719,24 +2728,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // check for premium
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
-
-    // show newsfeed, for now
-    if (newsController == nil) {
-        newsController = [[NewsletterViewController alloc] init];
-        [newsController setDelegate:self];
-    }
-    [newsController initializeNewsletter];
-    
-    // hack: show newsletter like a modal screen
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-    [self.tabBarController.view addSubview:newsController.view];
-    [shareController.view setFrame:frameOffscreen];
-    
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:newsController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-    
 }
 
 /*
@@ -3339,11 +3330,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(void)displayShareController {
     // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [self.tabBarController.view addSubview:shareController.view];
     [shareController.view setFrame:frameOffscreen];
     
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];

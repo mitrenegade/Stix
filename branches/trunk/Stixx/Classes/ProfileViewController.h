@@ -94,7 +94,8 @@ enum {
     NSObject<ProfileViewDelegate> *__unsafe_unretained delegate;
     Kumulos * k;
 //    bool friendViewIsDisplayed;
-    IBOutlet UIButton * logo;
+    IBOutlet UIButton * buttonBack;
+    IBOutlet UIButton * buttonAbout;
     
 //    UIImagePickerController * camera;
 
@@ -133,6 +134,8 @@ enum {
 @property (nonatomic) IBOutlet UIButton * photoButton;
 @property (nonatomic) IBOutlet UIButton * bgFollowers;
 @property (nonatomic) IBOutlet UIButton * bgFollowing;
+@property (nonatomic) IBOutlet UIButton * buttonBack;
+@property (nonatomic) IBOutlet UIButton * buttonAbout;
 @property (nonatomic) Kumulos * k;
 @property (nonatomic) UIImageView * bottomBackground;
 @property (nonatomic) OutlineLabel * myFollowersCount;

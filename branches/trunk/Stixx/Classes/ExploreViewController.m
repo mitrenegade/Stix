@@ -13,7 +13,9 @@
 @synthesize delegate;
 @synthesize activityIndicator;
 //@synthesize labelBuxCount;
+#if HAS_PROFILE_BUTTON
 @synthesize buttonProfile;
+#endif
 @synthesize tabBarController;
 @synthesize galleryUsername;
 @synthesize detailController;
@@ -74,7 +76,7 @@ static NSMutableSet * retainedDetailControllers;
     bHasTable = NO;
     bShowedTable = NO;
     
-    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X + 30, 9, 25, 25)];
 
     return self;
     
@@ -128,31 +130,8 @@ static NSMutableSet * retainedDetailControllers;
     [exploreModeButtons addObject:buttonRecent];
     [exploreModeButtons addObject:buttonRandom];
     [self setExploreMode:buttonPopular];
-
-    /*
-    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
-    [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
-    [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view insertSubview:buttonBux belowSubview:tableController.view];
-    
-    CGRect labelFrame = CGRectMake(28, 5, 58, 38);
-    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    //[labelBuxCount setBackgroundColor:[UIColor redColor]];
-    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
-    [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
-    [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
-    [self.view insertSubview:labelBuxCount belowSubview:buttonProfile];
-     */
-
-    /*
-    if (!stixEditorController)
-    {
-        stixEditorController = [[StixEditorViewController alloc] init];
-        [stixEditorController setDelegate:self];
-    }
-     */
 }
+
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
@@ -195,9 +174,11 @@ static NSMutableSet * retainedDetailControllers;
 #endif
 }
 
+#if HAS_PROFILE_BUTTON
 -(IBAction)didClickProfileButton:(id)sender {
     [self.delegate didOpenProfileView];
 }
+#endif
 
 - (void) sliderValueChanged:(UISlider *)sender {  
     int value = [sender value];
@@ -223,7 +204,9 @@ static NSMutableSet * retainedDetailControllers;
     [tableController setNumberOfColumns:numColumns andBorder:4];
     if (bHasView) {
         NSLog(@"HasView and HasTable! ShowedTable!");
+#if HAS_PROFILE_BUTTON
         [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+#endif
         bShowedTable = YES;
     }
     else {
@@ -701,6 +684,7 @@ static NSMutableSet * retainedDetailControllers;
 	[super viewDidAppear:animated];
     [delegate pauseAggregation];
     
+#if HAS_PROFILE_BUTTON
     UIImage * photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
     if ([[delegate getUsername] isEqualToString:@"anonymous"]) {
         photo = [UIImage imageNamed:@"nav_profilebutton.png"];
@@ -708,14 +692,18 @@ static NSMutableSet * retainedDetailControllers;
     [buttonProfile setImage:photo forState:UIControlStateNormal];
     [buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [buttonProfile.layer setBorderWidth:1];
-    
+#endif
     // if we opened detail controller, then switched to a different tab, then switched back, unlock it
     //if (detailController)
     //    detailController = nil;
     //[DetailViewController unlockOpen]; 
     if (bHasTable && !bShowedTable) {
         NSLog(@"HasView and HadTable! ShowedTable!");
+#if HAS_PROFILE_BUTTON
         [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+#else
+        [self.view addSubview:tableController.view];
+#endif
         bShowedTable = YES;
     }
     else {

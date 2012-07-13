@@ -30,7 +30,9 @@
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 //-(void)sharePix:(int)tagID;
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+#if HAS_PROFILE_BUTTON
 -(void)didOpenProfileView;
+#endif
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
@@ -64,8 +66,9 @@ enum {
     ColumnTableController * tableController;
     NSObject<ExploreViewDelegate> * __unsafe_unretained delegate;
     
-//    IBOutlet UIButton * buttonFeedback;
+#if HAS_PROFILE_BUTTON
     IBOutlet UIButton * buttonProfile;
+#endif
     LoadingAnimationView * activityIndicator;
     LoadingAnimationView * activityIndicatorLarge;
     
@@ -121,7 +124,9 @@ enum {
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 //@property (nonatomic, retain) UISegmentedControl * segmentedControl;
 //@property (nonatomic) OutlineLabel * labelBuxCount;
+#if HAS_PROFILE_BUTTON
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
+#endif
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
 @property (nonatomic) DetailViewController * detailController;
@@ -133,7 +138,9 @@ enum {
 -(void)stopActivityIndicator;
 -(void)initializeTable;
 -(void)forceReloadAll;
+#if HAS_PROFILE_BUTTON
 -(IBAction)didClickProfileButton:(id)sender;
+#endif
 -(void) setExploreMode:(UIButton*)button;
 -(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber*)tagID;
 @end

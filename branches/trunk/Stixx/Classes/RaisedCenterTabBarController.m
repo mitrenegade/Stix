@@ -12,12 +12,34 @@
 
 @synthesize myDelegate;
 
-// Create a view controller and setup it's tab bar item with a title and image
--(UIViewController*) viewControllerWithTabTitle:(NSString*) title image:(UIImage*)image
-{
-    UIViewController* viewController = [[UIViewController alloc] init];
-    viewController.tabBarItem = [[UITabBarItem alloc] initWithTitle:title image:image tag:0];
-    return viewController;
+-(void)initializeCustomButtons {
+    // hide actual tabbar
+    
+    for(UIView *view in self.view.subviews)
+    {
+        if([view isKindOfClass:[UITabBar class]])
+        {
+            view.hidden = YES;
+            break;
+        }
+    } 
+     
+    [self.view setBackgroundColor:[UIColor redColor]];
+
+    // hack: the tabbar is always 49px at the bottom. we need a 40px space at the bottom for the custom buttons. so extend the whole frame of the tabBarController by 9 pixels
+    // but when frame height is manually changed it seems to ignore the status bar so we have to manually increase the y origin. in the end, the screen needs to be shrunk 10 pix (net increase 1 pix) and shifted down 20 pix, 
+    CGRect frame = self.view.frame;
+    frame.size.height += 1; // cannot be 0 because then status bar shift doesn't occur
+    frame.origin.y += STATUS_BAR_SHIFT_OVERLAY;
+    [self.view setFrame:frame];
+     
+    [self addButtonWithImage:[UIImage imageNamed:@"tab_feed"] highlightImage:[UIImage imageNamed:@"tab_feed_on"] atPosition:TABBAR_BUTTON_FEED];
+    [self addButtonWithImage:[UIImage imageNamed:@"tab_popular"] highlightImage:[UIImage imageNamed:@"tab_popular_on"] atPosition:TABBAR_BUTTON_EXPLORE];
+    [self addButtonWithImage:[UIImage imageNamed:@"tab_newsletter"] highlightImage:[UIImage imageNamed:@"tab_newsletter_on"] atPosition:TABBAR_BUTTON_NEWS];
+    [self addButtonWithImage:[UIImage imageNamed:@"tab_profile"] highlightImage:[UIImage imageNamed:@"tab_profile_on"] atPosition:TABBAR_BUTTON_PROFILE];
+    // add camera last
+    [self addButtonWithImage:[UIImage imageNamed:@"tab_camera"] highlightImage:nil atPosition:TABBAR_BUTTON_TAG];
+     
 }
 
 // Create a custom UIButton and add it to the center of our tab bar
@@ -35,20 +57,20 @@
     if (highlightImage)
         [button[pos] setBackgroundImage:bgSelected[pos] forState:UIControlStateHighlighted];
     
-    CGPoint center = self.tabBar.center;
-    if (pos == TABBAR_BUTTON_FEED)
-        center.x = buttonImage.size.width/2;
-    else if (pos == TABBAR_BUTTON_EXPLORE)
-        center.x = 320 - buttonImage.size.width/2;    
-    else if (pos == TABBAR_BUTTON_TAG) {
-        center.y = center.y - 3;
+    CGPoint center = CGPointMake(320/2, 480-(BUTTON_HEIGHT/2)-20); // hack: the 20 accounts for the status bar shift when the view is changed, see above
+    if (pos < TABBAR_BUTTON_TAG) { 
+        center.x = buttonImage.size.width * pos + buttonImage.size.width / 2;
+    }
+    else if (pos > TABBAR_BUTTON_TAG) {
+        center.x = 320 - (buttonImage.size.width * (TABBAR_BUTTON_MAX - pos)) + buttonImage.size.width / 2;
     }
     button[pos].center = center;
     [button[pos] setTag:pos];
     [button[pos] addTarget:self
                action:@selector(didPressTabButton:)
      forControlEvents:UIControlEventTouchDown];
-
+    CGRect frame = button[pos].frame;
+    NSLog(@"Button %d: frame %f %f %f %f", pos, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
     [self.view addSubview:button[pos]];
 }
 
@@ -306,7 +328,7 @@
 
 // these functions are called by the app delegate - when the tabbar state changes
 -(void)setButtonStateSelected:(int)pos {
-    for (int i=0; i<3; i++){
+    for (int i=0; i<TABBAR_BUTTON_MAX; i++){
         if (pos == i)
             [button[i] setBackgroundImage:bgSelected[i] forState:UIControlStateNormal];        
         else

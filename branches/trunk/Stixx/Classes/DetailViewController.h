@@ -18,6 +18,7 @@
 #import "VerticalFeedItemController.h"
 #import "CommentViewController.h"
 #import "ShareController.h"
+#import "KumulosHelper.h"
 //#import "StixEditorViewController.h"
 
 @class DetailViewController;
@@ -40,7 +41,7 @@
 
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate> //StixEditorDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate, KumulosHelperDelegate> //StixEditorDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;

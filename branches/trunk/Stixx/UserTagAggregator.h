@@ -45,7 +45,9 @@
 @property (nonatomic, retain) NSMutableDictionary * allUsernamesOfTagIDs;
 @property (nonatomic, assign) NSObject<UserTagAggregatorDelegate> * delegate;
 @property (nonatomic, retain) NSMutableArray * aggregationQueue;
-@property (nonatomic, retain) NSMutableDictionary * usernameForOperations;
+@property (nonatomic, retain) NSMutableDictionary * usernameForOperations; 
+@property (nonatomic, retain) NSMutableSet * featuredUsers;
+@property (nonatomic, retain) NSMutableSet * remainderSet;
 
 -(void)processAggregationQueueInBackground;
 -(void)startAggregatingTagIDs;

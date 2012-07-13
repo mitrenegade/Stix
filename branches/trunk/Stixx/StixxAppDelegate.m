@@ -39,6 +39,7 @@
 @synthesize feedController;
 @synthesize profileController, userProfileController;
 //@synthesize friendController;
+@synthesize newsController;
 @synthesize loginSplashController;
 @synthesize friendSuggestionController;
 @synthesize myUserInfo;
@@ -137,24 +138,6 @@ static dispatch_queue_t backgroundQueue;
     
     [window makeKeyAndVisible];
     
-    /*
-    NSMutableArray * test = [[NSMutableArray alloc] init];
-    [test addObject:nil];
-    id test2 = [test objectAtIndex:2];
-     */
-    /*
-    //dispatch_async(backgroundQueue, ^{
-        [self continueInit];
-    //});
-    return YES;
-}
-
--(BOOL)continueInit {
-     */
-
-    /* Crashlytics */
-    [Crashlytics startWithAPIKey:@"747b4305662b69b595ac36f88f9c2abe54885ba3"];
-    
     myUserInfo = malloc(sizeof(struct UserInfo));
     myUserInfo_username = nil;
     myUserInfo_userphoto = nil;
@@ -179,6 +162,8 @@ static dispatch_queue_t backgroundQueue;
     [fbHelper setDelegate:self];
     [fbHelper initFacebook];
     
+    [Crashlytics startWithAPIKey:@"747b4305662b69b595ac36f88f9c2abe54885ba3"];
+
     /***** create first view controller: the TagViewController *****/
     [loadingMessage setText:@"Initializing camera..."];
     
@@ -386,6 +371,7 @@ static dispatch_queue_t backgroundQueue;
     [self.window addSubview:shareController.view];
     [shareController doShareKit];
      */
+    
     return YES;
 }
 /*
@@ -676,8 +662,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //[defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
     //[defaults setInteger:myUserInfo->bux forKey:@"bux"];
     [defaults setInteger:myUserInfo->userID forKey:@"userID"];
+    [defaults setInteger:myUserInfo->hasPhoto forKey:@"hasPhoto"];
     NSLog(@"SaveUserInfo: userID %d name %@ facebookString %@", myUserInfo->userID, myUserInfo_username, myUserInfo_facebookString);
-    NSData *userphoto = UIImageJPEGRepresentation(myUserInfo_userphoto, 100);
+    NSData *userphoto = UIImagePNGRepresentation(myUserInfo_userphoto);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
     
@@ -809,6 +796,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     //myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
     //myUserInfo->bux = [defaults integerForKey:@"bux"];
     myUserInfo->userID = [defaults integerForKey:@"userID"];
+    myUserInfo->hasPhoto = [defaults integerForKey:@"hasPhoto"];
     NSData * userphoto = [defaults objectForKey:@"userphoto"];
     UIImage * newphoto = [UIImage imageWithData:userphoto];
     myUserInfo_userphoto = newphoto;
@@ -851,8 +839,11 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         
         // beta v0.9.6 is where on disk stix exist
         NSString * stixDataVersionString = [defaults objectForKey:@"stixDataVersion"];
-        if (!stixDataVersionString || [stixDataVersionString compare:@"0.9.6"] == NSOrderedAscending) {
-            NSLog(@"LoadUserFromDefaults: old version");
+        if (!stixDataVersionString) {
+            NSLog(@"LoadStixDataFromDefaults: no stix data");
+        }
+        else if ([stixDataVersionString compare:@"0.9.6"] == NSOrderedAscending) {
+            NSLog(@"LoadStixDataFromDefaults: old version");
             return 0;
         }
         
@@ -936,6 +927,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 //        }
     }
     else if (pos == TABBAR_BUTTON_EXPLORE) {
+#if 0
+        // testing crashlytics
+        [[Crashlytics sharedInstance] crash];
+        NSMutableArray * test = [[NSMutableArray alloc] init];
+        [test addObject:nil];
+        id test2 = [test objectAtIndex:2];
+        int * x = NULL;
+        * x = 42;
+#endif
+        
         [feedController didCloseComments];
         lastViewController = exploreController;
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
@@ -1298,7 +1299,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         
         if (![cameraTag.username isEqualToString:[self getUsername]]) {
             // username is not cameraTag.username
-            [newTag setOriginalUsername:[cameraTag.username copy]]; // set original username to username
+            if (remixMode == REMIX_MODE_ADDSTIX) {
+                // original name is tag's author
+                [newTag setOriginalUsername:[cameraTag.username copy]]; // set original username to username
+            }
+            else {
+                // original name is tag's original author if it exists
+                if ([cameraTag.originalUsername length]>0)
+                    [newTag setOriginalUsername:[cameraTag.originalUsername copy]];
+                else {
+                    [newTag setOriginalUsername:[cameraTag.username copy]]; // set original username to username
+                }
+            }
             [newTag setUsername:[self getUsername]]; // change username if necessary
             [newTag setDescriptor:[NSString stringWithFormat:@"via %@", newTag.originalUsername]];
         }
@@ -1334,12 +1346,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSLog(@"newTag: %@ from Tag: %@", newTag.tagID, cameraTag.tagID);
         [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
-        
-        // add to comment/history
-        NSString * name = [self getUsername];
-        NSString * newType = @"REMIX";
-        NSString * comment = @"Remixed this Pix";
-        [self didAddCommentFromDetailViewController:nil withTagID:[cameraTag.tagID intValue] andUsername:name andComment:comment andStixStringID:newType];
     }
     
     // start share here: stix have been saved to tag
@@ -1484,19 +1490,27 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([remixMode intValue] != REMIX_MODE_NEWPIC) {
         // add comment: "Remixed this Pix via..." to original tag
         NSLog(@"NewTag: name %@ original %@ myname %@", newTag.username, newTag.originalUsername, [self getUsername]);
+        /*
+         // do not add Remixed comment
         NSString * name = [self getUsername];
         NSString * newType = @"REMIX";
         NSString * comment;
         if (newTag.originalUsername && [newTag.originalUsername length] > 0 && ![name isEqualToString:newTag.originalUsername]) {
             comment = @"Remixed this Pix";
-            [self didAddCommentFromDetailViewController:nil withTagID:[oldID intValue] andUsername:name andComment:comment andStixStringID:newType];
+            [self didAddCommentFromDetailViewController:nil withTagID:[newRecordID intValue] andUsername:name andComment:comment andStixStringID:newType];
         }
+         */
         // send remix notification if not own pix
         if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
             NSString * message = [NSString stringWithFormat:@"%@ remixed your Pix.", myUserInfo_username];
             NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:newTag.originalUsername] intValue]];
             [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newTag.tagID];  
         }
+
+        // update popularity for REMIX
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
+        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
     }
     
     bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
@@ -2033,17 +2047,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // notifications
     if ([stixStringID isEqualToString:@"LIKE"]) {
         // comment from the Like Toolbar
+
+        // update popularity for LIKE
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], nil];
+        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
         
         // notify
         NSString * actionMsg;
+        NSString * shortMsg;
         if ([comment isEqualToString:@"LIKE_SMILES"])
-            actionMsg = [NSString stringWithFormat:@"%@ smiled at your Pix.", myUserInfo_username];
+            shortMsg = @"smiled at your Pix.";
         if ([comment isEqualToString:@"LIKE_LOVE"])
-            actionMsg = [NSString stringWithFormat:@"%@ loves your Pix.", myUserInfo_username];
+            shortMsg = @"loves your Pix.";
         if ([comment isEqualToString:@"LIKE_WINK"])
-            actionMsg = [NSString stringWithFormat:@"%@ winked at your Pix.", myUserInfo_username];
+            shortMsg = @"winked at your Pix.";
         if ([comment isEqualToString:@"LIKE_SHOCKED"])
-            actionMsg = [NSString stringWithFormat:@"%@ is shocked by your Pix.", myUserInfo_username];
+            shortMsg = @"is shocked by your Pix.";
+        actionMsg = [NSString stringWithFormat:@"%@ %@.", myUserInfo_username, shortMsg];
         Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
@@ -2056,6 +2077,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         if (!IS_ADMIN_USER(myUserInfo_username))
             [FlurryAnalytics logEvent:@"Liked" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", comment, @"likeType", nil]];
+        
+        NSData * thumbData = UIImagePNGRepresentation([tag thumbnail]);
+        [k addNewsWithUsername:tag.username andAgentName:[self getUsername] andNews:shortMsg andThumbnail:thumbData andTagID:[tag.tagID intValue]];
     }
     /*
     else if ([stixStringID isEqualToString:@"REMIX"]) { //![comment isEqualToString:@""]) {
@@ -2075,6 +2099,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     else if ([stixStringID isEqualToString:@"COMMENT"]) { //![comment isEqualToString:@""]) {
         // actual comment
         
+        // update popularity for COMMENT
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], nil];
+        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
+
         // notify
         NSString * message = [NSString stringWithFormat:@"%@ commented on your feed.", myUserInfo_username];
         Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
@@ -2233,13 +2262,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
         [feedController forceReloadWholeTableZOMG];
         [friendSuggestionController refreshUserPhotos];
+        [newsController refreshUserPhotos];
     });
 }
 
 -(void)didAddNewUserWithResult:(NSArray *)theResults {
     for (NSMutableDictionary * d in theResults) {
         NSString * name = [d valueForKey:@"username"];
-        UIImage * photo = [UIImage imageWithData:[d valueForKey:@"photo"]];
+        UIImage * photo;
+        if ([d valueForKey:@"photo"])
+            photo = [UIImage imageWithData:[d valueForKey:@"photo"]];
+        else 
+            photo = [UIImage imageNamed:@"graphic_nopic"];
         NSString * facebookString = [d valueForKey:@"facebookString"];
         [allUsers setObject:d forKey:name];
         [allUserPhotos setObject:photo forKey:name];
@@ -2557,8 +2591,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self setFollowing:@"William Ho" toState:YES];
         [self setFollowing:@"Bobby Ren" toState:YES];
         addAutomaticFollows = YES;
+        
     }
 #endif
+    if (photo != nil) {
+        myUserInfo->hasPhoto = 1;
+    }
     
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
     
@@ -2618,6 +2656,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //    didGetFollowingLists = YES;
     //}
     
+    if (photo) {
+        myUserInfo->hasPhoto = 1;
+    }
+    else {
+        myUserInfo->hasPhoto = 0;
+    }
+    
     loggedIn = YES;
     myUserInfo_username = name;
     myUserInfo_userphoto = photo;
@@ -2674,6 +2719,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // check for premium
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
+
+    // show newsfeed, for now
+    if (newsController == nil) {
+        newsController = [[NewsletterViewController alloc] init];
+        [newsController setDelegate:self];
+    }
+    [newsController initializeNewsletter];
+    
+    // hack: show newsletter like a modal screen
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:newsController.view];
+    [shareController.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:newsController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+    }];
+    
 }
 
 /*
@@ -2781,6 +2844,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
     myUserInfo_userphoto = photo;
+    myUserInfo->hasPhoto = 1;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setInteger:myUserInfo->hasPhoto forKey:@"hasPhoto"];
+    NSData *userphoto = UIImagePNGRepresentation(myUserInfo_userphoto);
+    [defaults setObject:userphoto forKey:@"userphoto"];
+    [defaults synchronize];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -3056,9 +3125,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // for profile view
     if ([self isLoggedIn]) {
         UIImage * userphoto = [self getUserPhoto];
+        if (myUserInfo->hasPhoto == 0) {
+            // if default no_pic photo is saved as myUserInfo->photo from first time login
+            //return [UIImage imageNamed:@"graphic_addpic"];
+            return nil;
+        }
         if (!userphoto) {
             //return [UIImage imageNamed:@"graphic_addpic.png"];
-            return [UIImage imageNamed:@"graphic_nopic"]; // addpic shows up black
+            //return [UIImage imageNamed:@"graphic_addpic"]; 
+            return nil;
         }
         return userphoto;
     }
@@ -3412,6 +3487,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             NSLog(@"TagID: %d username %@", tagID, [self getUsername]);
             [self didAddCommentWithTagID:tagID andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
         }
+
+        // update popularity for SHARE
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:shareController.tag.tagID, nil];
+        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
     }    
 
     [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {

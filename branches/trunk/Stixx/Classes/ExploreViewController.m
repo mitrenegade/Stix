@@ -96,28 +96,38 @@ static NSMutableSet * retainedDetailControllers;
     [self.view addSubview:activityIndicator];
     //DetailViewController = [[DetailViewController alloc] init];
     isZooming = NO;
-    [self forceReloadAll];
+    //[self forceReloadAll];
 
     exploreModeButtons = [[NSMutableArray alloc] init];
+    
+    UIButton * buttonPopular = [[UIButton alloc] init];
+    [buttonPopular setImage:[UIImage imageNamed:@"txt_popular"] forState:UIControlStateNormal];
+    [buttonPopular setImage:[UIImage imageNamed:@"txt_popular_on"] forState:UIControlStateSelected];
+    [buttonPopular setFrame:CGRectMake(20, 50, 84, 26)];
+    [buttonPopular addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
+    [buttonPopular setTag:EXPLORE_POPULAR];
+    [self.view addSubview:buttonPopular];
+
     UIButton * buttonRecent = [[UIButton alloc] init];
-    [buttonRecent setImage:[UIImage imageNamed:@"recent.png"] forState:UIControlStateNormal];
-    [buttonRecent setImage:[UIImage imageNamed:@"recent_on.png"] forState:UIControlStateSelected];
-    [buttonRecent setFrame:CGRectMake(30, 50, 130, 30)];
+    [buttonRecent setImage:[UIImage imageNamed:@"recent"] forState:UIControlStateNormal];
+    [buttonRecent setImage:[UIImage imageNamed:@"recent_on"] forState:UIControlStateSelected];
+    [buttonRecent setFrame:CGRectMake(118, 50, 84, 26)];
     [buttonRecent addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
     [buttonRecent setTag:EXPLORE_RECENT];
     [self.view addSubview:buttonRecent];
 
     UIButton * buttonRandom = [[UIButton alloc] init];
-    [buttonRandom setImage:[UIImage imageNamed:@"random.png"] forState:UIControlStateNormal];
-    [buttonRandom setImage:[UIImage imageNamed:@"random_on.png"] forState:UIControlStateSelected];
-    [buttonRandom setFrame:CGRectMake(150, 50, 130, 30)];
+    [buttonRandom setImage:[UIImage imageNamed:@"random"] forState:UIControlStateNormal];
+    [buttonRandom setImage:[UIImage imageNamed:@"random_on"] forState:UIControlStateSelected];
+    [buttonRandom setFrame:CGRectMake(216, 50, 84, 26)];
     [buttonRandom addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
     [buttonRandom setTag:EXPLORE_RANDOM];
     [self.view addSubview:buttonRandom];
     
+    [exploreModeButtons addObject:buttonPopular];
     [exploreModeButtons addObject:buttonRecent];
     [exploreModeButtons addObject:buttonRandom];
-    [self setExploreMode:buttonRecent];
+    [self setExploreMode:buttonPopular];
 
     /*
     UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
@@ -169,6 +179,20 @@ static NSMutableSet * retainedDetailControllers;
     
     exploreMode = [button tag];
     [self forceReloadAll];
+    
+#if USING_FLURRY
+    if (didInitialSetExploreMode && !IS_ADMIN_USER([delegate getUsername])) {
+        NSString * modeString;
+        if (exploreMode == EXPLORE_POPULAR) 
+            modeString = @"Popular";
+        else if (exploreMode == EXPLORE_RECENT) 
+            modeString = @"Recent";
+        else if (exploreMode == EXPLORE_RANDOM)
+            modeString = @"Random";
+        [FlurryAnalytics logEvent:@"ChangeExploreMode" withParameters:[NSDictionary dictionaryWithObject:modeString forKey:@"Mode"]];
+    }
+    didInitialSetExploreMode = YES;
+#endif
 }
 
 -(IBAction)didClickProfileButton:(id)sender {
@@ -211,7 +235,7 @@ static NSMutableSet * retainedDetailControllers;
 
 -(int)numberOfRows {
     int total = [allTagIDs count];
-    //NSLog(@"allTagIDs has %d items", total);
+    //NSLog(@"allTagIDs has %d items, returning %d rows", total, total/numColumns);
     return total / numColumns;
 }
 
@@ -245,10 +269,18 @@ static NSMutableSet * retainedDetailControllers;
     if (index >= [allTagIDs count])
         return nil;
     
-    //NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
+    if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+        NSNumber * tagID = [allTagIDs objectAtIndex:index]; 
+        NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
+    }
     if ([contentViews objectForKey:key] == nil) {
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
-        
+        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+            NSLog(@"Creating contentView for index %d with tagID %d", index, [[allTagIDs objectAtIndex:index] intValue]); 
+        }
+        else {
+            NSLog(@"Creating contentView for index %d with NULL", index); 
+        }
         int contentWidth = [tableController getContentWidth];
         int targetWidth = contentWidth;
         int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
@@ -294,6 +326,12 @@ static NSMutableSet * retainedDetailControllers;
     return [contentViews objectForKey:key];
 }
 
+-(void)didReachLastRow {
+    if (exploreMode != EXPLORE_POPULAR) {
+        [self loadContentPastRow:[self numberOfRows]];
+    }
+}
+
 -(void)loadContentPastRow:(int)row {
     if (pendingContentCount > 0) {
         NSLog(@"Trying to load past row %d: still waiting on %d pending contents", row, pendingContentCount);
@@ -304,14 +342,30 @@ static NSMutableSet * retainedDetailControllers;
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     switch (exploreMode) {
+        case EXPLORE_POPULAR:
+            if (row == -1) {
+                int numPix = numColumns * 8;
+                [k getPixByPopularityWithNumPix:[NSNumber numberWithInt:numPix]];
+                for (int i=0; i<numPix; i++)
+                    [allTagIDs addObject:[NSNull null]];
+                pendingContentCount += numPix;
+                NSLog(@"Pending content count: %d", pendingContentCount);
+            }
+            else {
+                NSLog(@"No need!");
+            }
+            break;
+            
         case EXPLORE_RECENT:
             if (row == -1) {
                 // load initial row(s)
                 NSDate * now = [NSDate date]; // now
-                [k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 5]];
-                for (int i=0; i<numColumns * 5; i++)
+                //[k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+                int numPix = numColumns * 5;
+                [k getPixByRecentWithTimeCreated:now andNumPix:[NSNumber numberWithInt:numPix]];
+                for (int i=0; i<numPix; i++)
                     [allTagIDs addObject:[NSNull null]];
-                pendingContentCount += numColumns + 5;
+                pendingContentCount += numPix;
             }
             else {
                 if (indexPointer > 0)
@@ -320,10 +374,12 @@ static NSMutableSet * retainedDetailControllers;
                     NSNumber * tagID = [allTagIDs objectAtIndex:indexPointer-1];
                     Tag * tag = [allTags objectForKey:tagID];
                     NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
-                    [k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+                    //[k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+                    int numPix = numColumns * 5;
+                    [k getPixByRecentWithTimeCreated:lastUpdated andNumPix:[NSNumber numberWithInt:numPix]];
                     for (int i=0; i<numColumns * 5; i++)
                         [allTagIDs addObject:[NSNull null]];
-                    pendingContentCount += numColumns + 5;
+                    pendingContentCount += numColumns * 5;
                 }
             }
             break;
@@ -346,7 +402,44 @@ static NSMutableSet * retainedDetailControllers;
     [tableController.tableView reloadData];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPixByPopularityDidCompleteWithResult:(NSArray *)theResults {
+    if (exploreMode != EXPLORE_POPULAR)
+        return;
+    
+    NSLog(@"Received %d popular results", [theResults count]);
+
+    for (int i=0; i<[theResults count]; i++) {
+        NSMutableDictionary * d = [theResults objectAtIndex:i];
+        Tag * newtag = [Tag getTagFromDictionary:d];
+        //[allTagIDs addObject:newtag.tagID]; // save in order 
+        if ([allTags objectForKey:newtag.tagID] == nil) {
+            [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
+            [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+            NSLog(@"Adding tag %d", [newtag.tagID intValue]);
+        }
+        
+        // even though we don't have aux stix, we need this to switch out of the placeholder
+#if 0
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
+#else
+        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+#endif
+        // don't know why this happens but sometimes it does!
+        pendingContentCount--;
+        if (pendingContentCount < 0)
+            pendingContentCount = 0;
+        
+    }
+    if ([theResults count]>0)
+        [tableController dataSourceDidFinishLoadingNewData];
+    [self stopActivityIndicator];
+    //[activityIndicator stopCompleteAnimation];
+}
+
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPixByRecentDidCompleteWithResult:(NSArray *)theResults {
     if (exploreMode != EXPLORE_RECENT)
         return;
     
@@ -360,9 +453,14 @@ static NSMutableSet * retainedDetailControllers;
         }
         
         // new system of auxiliary stix: request from auxiliaryStixes table
+        // even though we don't have aux stix, we need this to switch out of the placeholder
+#if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
+#else
+        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+#endif
 
         // don't know why this happens but sometimes it does!
         pendingContentCount--;
@@ -427,6 +525,27 @@ static NSMutableSet * retainedDetailControllers;
             [tableController dataSourceDidFinishLoadingNewData];
         [self stopActivityIndicator];
         //[activityIndicator stopCompleteAnimation];
+    }
+}
+
+-(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
+    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
+    Tag * tag = [allTags objectForKey:tagID];
+    if (tag) {
+        //[tag populateWithAuxiliaryStix:theResults];
+        NSNumber * key = nil;
+        for (int i=0; i<[allTagIDs count]; i++) {
+            NSNumber * tID = [allTagIDs objectAtIndex:i];
+            if (tID == tagID) {
+                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
+                key = [NSNumber numberWithInt:i];
+                [contentViews removeObjectForKey:key];
+                break;
+            }
+        }
+        if (key)
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
+        [tableController.tableView reloadData];
     }
 }
 
@@ -603,7 +722,7 @@ static NSMutableSet * retainedDetailControllers;
         NSLog(@"HasView! NoHasTable!");
     }
     if (bHasView == NO) {
-        [self forceReloadAll];
+        //[self forceReloadAll];
     }
     bHasView = YES;
 }

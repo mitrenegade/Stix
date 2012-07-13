@@ -15,7 +15,7 @@
 @synthesize allUsernamesOfTagIDs, allTagIDs, usernameForOperations;
 @synthesize delegate;
 @synthesize aggregationQueue;
-
+@synthesize featuredUsers, remainderSet;
 -(id)init {
     self = [super init];
     if (self) {
@@ -150,14 +150,18 @@
         // hack: download for will ho or featured users first
         
         NSString * name = nil;
+        //NSLog(@"Featured users left: %@ remainderSet left: %d", featuredUsers, [remainderSet count]);
         if ([featuredUsers count] > 0) {
             NSEnumerator * enumerator = [featuredUsers objectEnumerator];
             name = [enumerator nextObject];
-            [featuredUsers removeObject:name];
-            NSLog(@"Aggregating new tags for featured user %@", name);
+            if (name) {
+                [featuredUsers removeObject:name];
+                // next line causes crash but only in debug mode...???
+                NSLog(@"Aggregating new tags for featured user %@", name);
+            }
         }
         else {
-            NSLog(@"Featured users left: %d remainderSet: %d", [featuredUsers count], [remainderSet count]);
+            //NSLog(@"Featured users left: %d remainderSet: %d", [featuredUsers count], [remainderSet count]);
             NSEnumerator * enumerator = [remainderSet objectEnumerator];
             name = [enumerator nextObject];
             if (name)
@@ -178,7 +182,7 @@
         [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     } else {
         //NSLog(@"getUserPixForUsers paused!");
-        [self performSelector:@selector(getUserPixForUsers) withObject:nil afterDelay:1];
+        [self performSelector:@selector(getUserPixForUsers) withObject:self afterDelay:1];
     }
     
     //if ([remainderSet count] > 0)
@@ -262,8 +266,8 @@
     }
     
     // hack: start next user
-    if ([remainderSet count] > 0)
-        [self performSelector:@selector(getUserPixForUsers) withObject:remainderSet afterDelay:0];
+    if ([remainderSet count] > 0 || [featuredUsers count] > 0)
+        [self performSelector:@selector(getUserPixForUsers) withObject:self afterDelay:0];
 }
 
 -(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
@@ -459,7 +463,7 @@
         return nil;
     
     // debug
-    NSLog(@"GetTagIDLessThan %d in AllTagIDs: %@", tagID, allTagIDs);
+    //NSLog(@"GetTagIDLessThan %d in AllTagIDs: %@", tagID, allTagIDs);
     
     // allTagIDs are ordered ascending
     

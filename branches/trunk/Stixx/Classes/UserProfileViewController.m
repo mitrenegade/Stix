@@ -110,7 +110,7 @@
     [pixTableController.view setHidden:!show];
     
 #if USING_FLURRY == 1
-    if (!IS_ADMIN_USER([self getUsernameOfApp]))
+    if (!IS_ADMIN_USER([self getUsername]))
         [FlurryAnalytics logPageView];
 #endif
 }
@@ -619,6 +619,11 @@
     //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
     }];
+
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logEvent:@"DetailViewFromUserGallery" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", tagID, @"tagID", nil]];
+#endif
 }
 
 -(void)shouldDisplayUserPage:(NSString*)_username {

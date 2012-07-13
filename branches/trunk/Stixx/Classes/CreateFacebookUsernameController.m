@@ -268,8 +268,11 @@
         UIButton * photoButton = [inputFields objectAtIndex:1];
         NSString * fbUsername = login.text;
         NSData * photoData = nil;
-        if (didChangePhoto)
-            photoData = UIImagePNGRepresentation(userphoto);
+        //if (didChangePhoto)
+        photoData = UIImagePNGRepresentation(userphoto);
+        //else {
+        //    NSLog(@"nil photo!");
+        //}
         
         [self startActivityIndicator];
         [delegate didAddFacebookUsername:fbUsername andPhoto:photoData];

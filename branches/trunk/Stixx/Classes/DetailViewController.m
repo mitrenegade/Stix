@@ -39,13 +39,20 @@ static BOOL openingDetailView;
     //[self.view setFrame:CGRectMake(160, 0, 320, 480)];
 }
 
--(void)initDetailViewWithTag:(Tag*)tag {
+-(void)initDetailViewWithTag:(Tag*)_tag {
     //NSLog(@"DetailView: Creating stix view of size %f %f", tag.image.size.width, tag.image.size.height);
     
-    tagID = [tag.tagID intValue];
-    [self setTag:tag];
-    [self initFeedItemWithTag:tag];
-    [self headerFromTag:tag];
+    [self setTag:_tag];
+    tagID = [_tag.tagID intValue];
+    [self initFeedItemWithTag:_tag];
+    [self headerFromTag:_tag];
+    
+    // any time detailView is opened, increment that tag's popularity
+    
+    // update popularity for REMIX
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil];
+    [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
 }
 
 // StixViewDelegate

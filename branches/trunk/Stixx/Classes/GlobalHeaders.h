@@ -25,6 +25,11 @@
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
 #define IS_ADMIN_USER(x) [ADMIN_USER_SET containsObject:x]
 
+#define LEFT_LABEL_TAG 1001000
+#define RIGHT_LABEL_TAG 1002000
+#define TIME_LABEL_TAG 1003000
+#define PHOTO_TAG 1004000 // tag is going to be combined with comment index...hack: most comments possible: 999
+
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
     NB_MESSAGE, 

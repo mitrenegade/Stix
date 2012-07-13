@@ -25,7 +25,7 @@
 -(void)encodeWithCoder:(NSCoder *)aCoder {
     
     [aCoder encodeObject:username forKey:@"username"];
-    [aCoder encodeObject:username forKey:@"originalUsername"];
+    [aCoder encodeObject:originalUsername forKey:@"originalUsername"];
     [aCoder encodeObject:image forKey:@"image"];
     [aCoder encodeObject:tagID forKey:@"tagID"];
     [aCoder encodeObject:timestamp forKey:@"timestamp"];
@@ -49,7 +49,6 @@
         [self setStixLayer:[aDecoder decodeObjectForKey:@"stixLayer"]];
     }
     return self;
-    
 }
 
 - (void)addUsername:(NSString*)newUsername andDescriptor:(NSString *)newDescriptor andComment:(NSString*)newComment andLocationString:(NSString*)newLocation{        
@@ -183,7 +182,8 @@
     tag.tagID = [d valueForKey:@"allTagID"];
     NSDate * timeCreated = [d valueForKey:@"timeCreated"];
     NSDate * timeUpdated = [d valueForKey:@"timeUpdated"];
-    tag.timestamp = [timeCreated laterDate:timeUpdated];
+    // we don't want to make old pictures more recent because of updates due to popularity or commenting
+    tag.timestamp = timeCreated; //[timeCreated laterDate:timeUpdated];
     /*
     //NSMutableData *theData = (NSMutableData*)[d valueForKey:@"tagCoordinate"];
     //NSKeyedUnarchiver *decoder;
@@ -284,6 +284,12 @@
 -(void)burnStixLayerImage {
     // returns the layer of only stix
     [self setStixLayer:[self tagToUIImageUsingBase:NO retainStixLayer:NO useHighRes:NO]];
+}
+
+-(UIImage*)thumbnail {
+    UIImage * largeImage = [self tagToUIImage];
+    UIImage * result = [largeImage resizedImage:CGSizeMake(40, 40) interpolationQuality:kCGInterpolationHigh];
+    return result;
 }
 
 -(UIImage*)tagToUIImage {

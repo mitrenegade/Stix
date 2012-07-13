@@ -25,6 +25,8 @@
 #import "KumulosData.h"
 #import <QuartzCore/QuartzCore.h>
 #import "GlobalHeaders.h"
+#import "UIImage+Resize.h"
+#import "UIImage+RoundedCorner.h"
 
 @interface Tag : NSObject {
     // elements saved by Kumulos
@@ -106,4 +108,5 @@
 -(void)populateWithAuxiliaryStix:(NSMutableArray*)theResults;
 -(CGPoint)getLocationOfRemoveStixAtIndex:(int)index;
 -(void)burnStixLayerImage;
+-(UIImage*)thumbnail;
 @end

@@ -170,7 +170,12 @@
     NSLog(@"Userid: %@", userID);
     if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
         return;
-    UIImage * newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
+    UIImage * newPhoto = nil;
+    if ([d valueForKey:@"photo"])
+        newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
+    else {
+        NSLog(@"nil photo");
+    }
     // badge count array
     NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
     // total badge count
@@ -461,15 +466,19 @@
     //[self dismissNavControllerWithTransition];
     if (!IS_ADMIN_USER(username))
         [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:email, @"SignupByEmail", nil]];
-    if (!photo)
-        photo = [UIImage imageNamed:@"graphic_nopic"];
     NSMutableDictionary * d = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                username, @"username",
                                @"0", @"facebookString",
                                email, @"email",
-                               UIImagePNGRepresentation(photo), @"photo",
+//                               UIImagePNGRepresentation(photo), @"photo",
                                nil
                                ];
+    if (photo) {
+        [d setObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
+    }
+    else {
+        NSLog(@"Nil photo");
+    }
     [delegate didAddNewUserWithResult:[NSArray arrayWithObject:d]];
     isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:[NSArray arrayWithObject:d]];

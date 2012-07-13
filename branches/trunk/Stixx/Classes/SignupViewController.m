@@ -260,7 +260,7 @@
     UIButton * photoButton = [inputFields objectAtIndex:3];
     NSData * photoData = nil;
     if (didChangePhoto)
-        photoData = UIImageJPEGRepresentation([[photoButton imageView] image], .9);
+        photoData = UIImagePNGRepresentation([photoButton imageView] image]);
     [k createEmailUserWithUsername:[username text] andPassword:[k md5:[password text]] andEmail:[email text] andPhoto:photoData];
     
 #endif

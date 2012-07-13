@@ -25,12 +25,14 @@
 -(void)didClickAtLocation:(CGPoint)location;
 -(UIView*)headerForSection:(NSInteger)section;
 -(int)heightForHeader;
+-(void)didReachLastRow;
 @end
 
 @interface ColumnTableController : UITableViewController <UITableViewDelegate, UITableViewDataSource>
 {
     NSObject<ColumnTableControllerDelegate> * delegate;
     NSMutableDictionary * cellDictionary;
+    NSMutableDictionary * cellLastRow;
 
 #if USE_PULL_TO_REFRESH
 	EGORefreshTableHeaderView *refreshHeaderView;

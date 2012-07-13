@@ -63,6 +63,7 @@
 		9E28C1F8156AA1AD00E56AB4 /* btn_share_switch_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E28C1F2156AA1AB00E56AB4 /* btn_share_switch_on@2x.png */; };
 		9E28C1F9156AA1AD00E56AB4 /* btn_share_connect.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E28C1F3156AA1AC00E56AB4 /* btn_share_connect.png */; };
 		9E28C1FA156AA1AD00E56AB4 /* btn_share_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E28C1F4156AA1AD00E56AB4 /* btn_share_connect@2x.png */; };
+		9E3915D615AE76480033AB2B /* txt_popular.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E3915D515AE76480033AB2B /* txt_popular.png */; };
 		9E3BE07A1463673200F7B763 /* MainWindow_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3BE0761463673200F7B763 /* MainWindow_iPhone.xib */; };
 		9E3BE07B1463673200F7B763 /* StixxAppDelegate_iPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */; };
 		9E43DAA91538C0E000B39F4A /* bux_rewards.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E43DAA81538C0E000B39F4A /* bux_rewards.png */; };
@@ -152,6 +153,9 @@
 		9E75E74314E721F80017DC3D /* graphic_bux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E75E74214E721F80017DC3D /* graphic_bux.png */; };
 		9E7E9BEB14C650870009A2E3 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E7E9BEA14C650860009A2E3 /* MainWindow.xib */; };
 		9E80C6691505896D0051D64C /* KumulosHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E80C6681505896B0051D64C /* KumulosHelper.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9E8112E315AF89150080AAC3 /* txt_popular_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8112E215AF89150080AAC3 /* txt_popular_on.png */; };
+		9E8112E815AFACF30080AAC3 /* NewsletterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8112E615AFACF30080AAC3 /* NewsletterViewController.m */; };
+		9E8112E915AFACF30080AAC3 /* NewsletterViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E8112E715AFACF30080AAC3 /* NewsletterViewController.xib */; };
 		9E8343B31561B5A200FA40E0 /* txt_hipster_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8343B11561B5A100FA40E0 /* txt_hipster_selected.png */; };
 		9E8343B41561B5A200FA40E0 /* txt_hipster.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E8343B21561B5A100FA40E0 /* txt_hipster.png */; };
 		9E8343B61561B5B300FA40E0 /* hipster.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E8343B51561B5B300FA40E0 /* hipster.bundle */; };
@@ -276,6 +280,15 @@
 		9ED2452D152A6D6C003886CD /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED2452B152A6D6B003886CD /* UserProfileViewController.m */; };
 		9ED2452E152A6D6C003886CD /* UserProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9ED2452C152A6D6C003886CD /* UserProfileViewController.xib */; };
 		9ED24532152B7E47003886CD /* btn_following.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ED24530152B7E47003886CD /* btn_following.png */; };
+		9EDD0F7F15B083F200EEBE0A /* tab_camera@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7615B083F200EEBE0A /* tab_camera@2x.png */; };
+		9EDD0F8015B083F200EEBE0A /* tab_profile_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7715B083F200EEBE0A /* tab_profile_on@2x.png */; };
+		9EDD0F8115B083F200EEBE0A /* tab_profile@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7815B083F200EEBE0A /* tab_profile@2x.png */; };
+		9EDD0F8215B083F200EEBE0A /* tab_newsletter_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7915B083F200EEBE0A /* tab_newsletter_on@2x.png */; };
+		9EDD0F8315B083F200EEBE0A /* tab_newsletter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7A15B083F200EEBE0A /* tab_newsletter@2x.png */; };
+		9EDD0F8415B083F200EEBE0A /* tab_popular_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7B15B083F200EEBE0A /* tab_popular_on@2x.png */; };
+		9EDD0F8515B083F200EEBE0A /* tab_popular@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7C15B083F200EEBE0A /* tab_popular@2x.png */; };
+		9EDD0F8615B083F200EEBE0A /* tab_feed_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7D15B083F200EEBE0A /* tab_feed_on@2x.png */; };
+		9EDD0F8715B083F200EEBE0A /* tab_feed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDD0F7E15B083F200EEBE0A /* tab_feed@2x.png */; };
 		9EDE3FB7153A4DC4005DC12E /* stixster_shop.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDE3FB5153A4DC4005DC12E /* stixster_shop.png */; };
 		9EDE3FB8153A4DC4005DC12E /* share_actions.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDE3FB6153A4DC4005DC12E /* share_actions.png */; };
 		9EDE3FC0153A5E88005DC12E /* loading_01.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EDE3FBA153A5E88005DC12E /* loading_01.png */; };
@@ -445,6 +458,7 @@
 		9E28C1F3156AA1AC00E56AB4 /* btn_share_connect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_share_connect.png; sourceTree = "<group>"; };
 		9E28C1F4156AA1AD00E56AB4 /* btn_share_connect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_share_connect@2x.png"; sourceTree = "<group>"; };
 		9E2CE0701562E89A0069BCB4 /* icon_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon_114.png; path = Stixx/images/icon_114.png; sourceTree = "<group>"; };
+		9E3915D515AE76480033AB2B /* txt_popular.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_popular.png; sourceTree = "<group>"; };
 		9E3BE0771463673200F7B763 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow_iPhone.xib; sourceTree = "<group>"; };
 		9E3BE0781463673200F7B763 /* StixxAppDelegate_iPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixxAppDelegate_iPhone.h; sourceTree = "<group>"; };
 		9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixxAppDelegate_iPhone.m; sourceTree = "<group>"; };
@@ -550,6 +564,10 @@
 		9E7E9BEA14C650860009A2E3 /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		9E80C6671505896A0051D64C /* KumulosHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosHelper.h; sourceTree = "<group>"; };
 		9E80C6681505896B0051D64C /* KumulosHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = KumulosHelper.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		9E8112E215AF89150080AAC3 /* txt_popular_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_popular_on.png; sourceTree = "<group>"; };
+		9E8112E515AFACF30080AAC3 /* NewsletterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewsletterViewController.h; sourceTree = "<group>"; };
+		9E8112E615AFACF30080AAC3 /* NewsletterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewsletterViewController.m; sourceTree = "<group>"; };
+		9E8112E715AFACF30080AAC3 /* NewsletterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NewsletterViewController.xib; sourceTree = "<group>"; };
 		9E8343B11561B5A100FA40E0 /* txt_hipster_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_hipster_selected.png; sourceTree = "<group>"; };
 		9E8343B21561B5A100FA40E0 /* txt_hipster.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = txt_hipster.png; sourceTree = "<group>"; };
 		9E8343B51561B5B300FA40E0 /* hipster.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = hipster.bundle; path = images/hipster.bundle; sourceTree = "<group>"; };
@@ -708,6 +726,15 @@
 		9ED2452B152A6D6B003886CD /* UserProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserProfileViewController.m; sourceTree = "<group>"; };
 		9ED2452C152A6D6C003886CD /* UserProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserProfileViewController.xib; sourceTree = "<group>"; };
 		9ED24530152B7E47003886CD /* btn_following.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_following.png; sourceTree = "<group>"; };
+		9EDD0F7615B083F200EEBE0A /* tab_camera@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_camera@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7715B083F200EEBE0A /* tab_profile_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_profile_on@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7815B083F200EEBE0A /* tab_profile@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_profile@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7915B083F200EEBE0A /* tab_newsletter_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_newsletter_on@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7A15B083F200EEBE0A /* tab_newsletter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_newsletter@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7B15B083F200EEBE0A /* tab_popular_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_popular_on@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7C15B083F200EEBE0A /* tab_popular@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_popular@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7D15B083F200EEBE0A /* tab_feed_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_feed_on@2x.png"; sourceTree = "<group>"; };
+		9EDD0F7E15B083F200EEBE0A /* tab_feed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_feed@2x.png"; sourceTree = "<group>"; };
 		9EDE3FB5153A4DC4005DC12E /* stixster_shop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stixster_shop.png; sourceTree = "<group>"; };
 		9EDE3FB6153A4DC4005DC12E /* share_actions.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_actions.png; sourceTree = "<group>"; };
 		9EDE3FBA153A5E88005DC12E /* loading_01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = loading_01.png; sourceTree = "<group>"; };
@@ -835,6 +862,16 @@
 				9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */,
 			);
 			path = iPhone;
+			sourceTree = "<group>";
+		};
+		9E8112E415AFACB30080AAC3 /* Newsletter */ = {
+			isa = PBXGroup;
+			children = (
+				9E8112E515AFACF30080AAC3 /* NewsletterViewController.h */,
+				9E8112E615AFACF30080AAC3 /* NewsletterViewController.m */,
+				9E8112E715AFACF30080AAC3 /* NewsletterViewController.xib */,
+			);
+			name = Newsletter;
 			sourceTree = "<group>";
 		};
 		9E88A41E148A8D8000E67864 /* External */ = {
@@ -1194,6 +1231,7 @@
 		9EB031B1142C01260019F2BD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				9E8112E415AFACB30080AAC3 /* Newsletter */,
 				9E940CE4159AEAAC00F53687 /* Utilities */,
 				9E940CE3159AEA6A00F53687 /* Sharing */,
 				9E940CE2159AEA4D00F53687 /* Kumulos Helpers */,
@@ -1221,6 +1259,17 @@
 		9EB031FF142C01340019F2BD /* images */ = {
 			isa = PBXGroup;
 			children = (
+				9EDD0F7615B083F200EEBE0A /* tab_camera@2x.png */,
+				9EDD0F7715B083F200EEBE0A /* tab_profile_on@2x.png */,
+				9EDD0F7815B083F200EEBE0A /* tab_profile@2x.png */,
+				9EDD0F7915B083F200EEBE0A /* tab_newsletter_on@2x.png */,
+				9EDD0F7A15B083F200EEBE0A /* tab_newsletter@2x.png */,
+				9EDD0F7B15B083F200EEBE0A /* tab_popular_on@2x.png */,
+				9EDD0F7C15B083F200EEBE0A /* tab_popular@2x.png */,
+				9EDD0F7D15B083F200EEBE0A /* tab_feed_on@2x.png */,
+				9EDD0F7E15B083F200EEBE0A /* tab_feed@2x.png */,
+				9E8112E215AF89150080AAC3 /* txt_popular_on.png */,
+				9E3915D515AE76480033AB2B /* txt_popular.png */,
 				9E940CEF159AEEC900F53687 /* Login */,
 				9E69E900158FF47900050488 /* firsttime_message_02.png */,
 				9E69E901158FF47900050488 /* firsttime_message_02@2x.png */,
@@ -1809,6 +1858,18 @@
 				9E9E7028159C552E00EF996F /* Default.png in Resources */,
 				9E9E702A159C553700EF996F /* Default@2x.png in Resources */,
 				9E5E55A4159D945200274C98 /* CreateFacebookUsernameController.xib in Resources */,
+				9E3915D615AE76480033AB2B /* txt_popular.png in Resources */,
+				9E8112E315AF89150080AAC3 /* txt_popular_on.png in Resources */,
+				9E8112E915AFACF30080AAC3 /* NewsletterViewController.xib in Resources */,
+				9EDD0F7F15B083F200EEBE0A /* tab_camera@2x.png in Resources */,
+				9EDD0F8015B083F200EEBE0A /* tab_profile_on@2x.png in Resources */,
+				9EDD0F8115B083F200EEBE0A /* tab_profile@2x.png in Resources */,
+				9EDD0F8215B083F200EEBE0A /* tab_newsletter_on@2x.png in Resources */,
+				9EDD0F8315B083F200EEBE0A /* tab_newsletter@2x.png in Resources */,
+				9EDD0F8415B083F200EEBE0A /* tab_popular_on@2x.png in Resources */,
+				9EDD0F8515B083F200EEBE0A /* tab_popular@2x.png in Resources */,
+				9EDD0F8615B083F200EEBE0A /* tab_feed_on@2x.png in Resources */,
+				9EDD0F8715B083F200EEBE0A /* tab_feed@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1920,6 +1981,7 @@
 				9E9E701F159C4C4900EF996F /* SignupViewController.m in Sources */,
 				9E5E55A3159D945200274C98 /* CreateFacebookUsernameController.m in Sources */,
 				9E73BCF415A7359D00B84C7C /* Admin.m in Sources */,
+				9E8112E815AFACF30080AAC3 /* NewsletterViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2083,7 +2145,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Bobby Ren";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Bobby Ren";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../../Downloads\"",
@@ -2115,7 +2177,7 @@
 				);
 				PRODUCT_NAME = Stix;
 				PROVISIONING_PROFILE = "1D18EC3C-305A-4008-9A3C-15ECCB2777C9";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1D18EC3C-305A-4008-9A3C-15ECCB2777C9";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
 				VALID_ARCHS = "armv6 armv7";

@@ -8,10 +8,6 @@
 
 #import "CommentFeedTableController.h"
 #import <QuartzCore/QuartzCore.h>
-#define LEFT_LABEL_TAG 1001000
-#define RIGHT_LABEL_TAG 1002000
-#define TIME_LABEL_TAG 1003000
-#define PHOTO_TAG 1004000 // tag is going to be combined with comment index...hack: most comments possible: 999
 
 @implementation CommentFeedTableController
 

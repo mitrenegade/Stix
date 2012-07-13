@@ -111,7 +111,7 @@ enum {
     BOOL bHasView;
     BOOL bHasTable;
     BOOL bShowedTable;
-    
+    BOOL didInitialSetExploreMode;
     int indexPointer; // pointer to location in allTagIDs currently being populated with a random tag
 }
 
@@ -135,5 +135,5 @@ enum {
 -(void)forceReloadAll;
 -(IBAction)didClickProfileButton:(id)sender;
 -(void) setExploreMode:(UIButton*)button;
-
+-(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber*)tagID;
 @end

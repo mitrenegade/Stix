@@ -67,7 +67,7 @@
     [self forceReloadAll];
     
 #if USING_FLURRY == 1
-    if (!IS_ADMIN_USER([self getUsernameOfApp]))
+    if (!IS_ADMIN_USER([self getUsername]))
         [FlurryAnalytics logPageView];
 #endif
 }
@@ -343,6 +343,11 @@
     
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
+
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logEvent:@"DetailViewFromMyGallery" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", tagID, @"tagID", nil]];
+#endif
 }
 
 -(void)shouldDisplayUserPage:(NSString *)name {

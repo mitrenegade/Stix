@@ -41,6 +41,7 @@
 #import "StixPanelView.h"
 #import "StixEditorViewController.h"
 #import "Admin.h"
+#import "NewsletterViewController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -61,13 +62,14 @@ struct UserInfo {
     //int bux;
     int firstTimeUserStage;
     int userID;
+    int hasPhoto;
 
     // user info
 //    bool isFirstTimeUser;
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate> {
     
     UIWindow *window;
     
@@ -84,6 +86,7 @@ struct UserInfo {
     ExploreViewController * exploreController;
     FacebookLoginController * loginSplashController;
     FriendSuggestionController * friendSuggestionController;
+    NewsletterViewController * newsController;
     
     UIViewController * __weak lastViewController;
 
@@ -289,6 +292,7 @@ struct UserInfo {
 @property (nonatomic) ExploreViewController *exploreController;
 @property (nonatomic) FacebookLoginController * loginSplashController;
 @property (nonatomic) FriendSuggestionController * friendSuggestionController;
+@property (nonatomic) NewsletterViewController * newsController;
 @property (nonatomic) StixEditorViewController * editorController;
 @property (nonatomic, assign) struct UserInfo * myUserInfo;
 @property (nonatomic, weak) UIViewController * lastViewController;

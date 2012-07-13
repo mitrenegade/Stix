@@ -413,9 +413,15 @@
     NSLog(@"Profile view appearing with username: %@", [delegate getUsername]);
     //[k getUserWithUsername:[delegate getUsername]];
     [nameLabel setText:[delegate getUsername]];
-    [photoButton setImage:[delegate getUserPhotoForProfile] forState:UIControlStateNormal];
-    [photoButton setBackgroundColor:[UIColor blackColor]];
-    
+    UIImage * photoImage = [delegate getUserPhotoForProfile];
+    if (photoImage) {
+        [photoButton setImage:photoImage forState:UIControlStateNormal];
+        [photoButton setBackgroundColor:[UIColor blackColor]];
+    }
+    else {
+        [photoButton setImage:[UIImage imageNamed:@"graphic_addpic"] forState:UIControlStateNormal];
+        [photoButton setBackgroundColor:[UIColor clearColor]];
+    }
     [self updateFollowCounts];
     isSearching = NO;
 

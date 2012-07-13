@@ -10,6 +10,7 @@
 #import "KumulosHelper.h"
 #import "GlobalHeaders.h"
 #import "LoadingAnimationView.h"
+#import "StixAnimation.h"
 
 #define SHELF_STIX_SIZE 70
 #define SHELF_HEIGHT 300

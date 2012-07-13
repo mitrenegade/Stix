@@ -10,7 +10,6 @@
 #import <Foundation/Foundation.h>
 #import "Kumulos.h"
 #import "Tag.h"
-#import "DetailViewController.h"
 
 @protocol KumulosHelperDelegate <NSObject>
 

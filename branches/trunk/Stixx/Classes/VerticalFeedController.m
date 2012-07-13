@@ -7,6 +7,7 @@
 //
 
 #import "VerticalFeedController.h"
+#import <Crashlytics/Crashlytics.h>
 
 @implementation VerticalFeedController
 
@@ -58,6 +59,7 @@
     [tableController.view setBackgroundColor:[UIColor clearColor]];
     tableController.delegate = self;
     [self.view insertSubview:tableController.view belowSubview:self.buttonProfile];
+
 }
 
 -(void)startActivityIndicator {
@@ -366,6 +368,10 @@
         if ([allTagsDisplayed count] <= index - [allTagsPending count])
             return nil;
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
+    }
+    if ([tag.tagID intValue] == 6019) {
+        NSLog(@"here");
+        NSLog(@"Tag username %@ comment %@ descriptor %@ original username %@", tag.username, tag.comment, tag.descriptor, tag.originalUsername);
     }
     UIView * headerView = [headerViews objectForKey:tag.tagID];
     if (!headerView) {

@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul 10, 2012
+//  Created by Kumulos Bindings Compiler on Jul 13, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -61,6 +61,10 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getNewlyCreatedPixDidCompleteWithResult:(NSArray*)theResults;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getPixByPopularityDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getPixByRecentDidCompleteWithResult:(NSArray*)theResults;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixByTimeDidCompleteWithResult:(NSArray*)theResults;
@@ -68,6 +72,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixByUpdateTimeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixCountDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation incrementPopularityDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setHighResImageIDDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -183,6 +189,10 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addMetricHitDidCompleteWithResult:(NSNumber*)newRecordID;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewsDidCompleteWithResult:(NSNumber*)newRecordID;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getNewsDidCompleteWithResult:(NSArray*)theResults;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPixBelongsToUserDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation backupPixBelongingToUsersDidCompleteWithResult:(NSArray*)theResults;
@@ -289,6 +299,12 @@
 -(KSAPIOperation*) getNewlyCreatedPixWithAllTagID:(NSUInteger)allTagID;
     
    
+-(KSAPIOperation*) getPixByPopularityWithNumPix:(NSNumber*)numPix;
+    
+   
+-(KSAPIOperation*) getPixByRecentWithTimeCreated:(NSDate*)timeCreated andNumPix:(NSNumber*)numPix;
+    
+   
 -(KSAPIOperation*) getUpdatedPixByTimeWithTimeUpdated:(NSDate*)timeUpdated andNumPix:(NSNumber*)numPix;
     
    
@@ -299,6 +315,9 @@
     
    
 -(KSAPIOperation*) getUserPixCountWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) incrementPopularityWithAllTagID:(NSUInteger)allTagID;
     
    
 -(KSAPIOperation*) setHighResImageIDWithAllTagID:(NSUInteger)allTagID andHighResImageID:(NSUInteger)highResImageID;
@@ -466,6 +485,12 @@
     
    
 -(KSAPIOperation*) addMetricHitWithDescription:(NSString*)description andStringValue:(NSString*)stringValue andIntegerValue:(NSInteger)integerValue;
+    
+   
+-(KSAPIOperation*) addNewsWithUsername:(NSString*)username andAgentName:(NSString*)agentName andNews:(NSString*)news andThumbnail:(NSData*)thumbnail andTagID:(NSInteger)tagID;
+    
+   
+-(KSAPIOperation*) getNewsWithUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) addPixBelongsToUserWithUsername:(NSString*)username andTagID:(NSInteger)tagID;

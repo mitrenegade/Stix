@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "BadgeView.h"
+#import "GlobalHeaders.h"
 
 @protocol CommentFeedTableDelegate 
 -(NSString *)getNameForIndex:(int)index;

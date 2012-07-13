@@ -16,6 +16,7 @@
 #import "SignupViewController.h"
 #import "CreateFacebookUsernameController.h"
 #import "GlobalHeaders.h"
+#import "StixAnimation.h"
 
 #define NEW_USER_BUX 100
 

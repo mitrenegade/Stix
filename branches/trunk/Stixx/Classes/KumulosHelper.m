@@ -87,7 +87,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSString * name = [inputParams objectAtIndex:1];
         NSString * comment = [inputParams objectAtIndex:2];
         NSString * stixStringID = [inputParams objectAtIndex:3];
-        DetailViewController * detailViewController = [inputParams objectAtIndex:4];
+        id detailViewController = [inputParams objectAtIndex:4];
         [k addCommentToPixWithTagID:[tagID intValue] andUsername:name andComment:comment andStixStringID:stixStringID];
         
         [savedInfo setObject:tagID forKey:@"addCommentToPix_tagID"];
@@ -203,6 +203,11 @@ static KumulosHelper *sharedKumulosHelper = nil;
             [k setFacebookStringForUserWithEmail:email andFacebookString:facebookString];
         }
     }
+    else if ([function isEqualToString:@"incrementPopularity"]) {
+        // incremented when commented, shared, remixed, viewed from explore, liked
+        NSNumber * tagID = [params objectAtIndex:0];
+        kOp = [k incrementPopularityWithAllTagID:[tagID intValue]];
+    }
     
     if (!kOp) 
         NSLog(@"KumulosHelper finished executing %@", _function);
@@ -303,7 +308,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         [self doCallback:returnParams];
     }    
     else if ([function isEqualToString:@"addCommentToPixWithDetailViewController"]) {
-        DetailViewController * detailViewController = [savedInfo objectForKey:@"addCommentToPix_detailViewController"];        
+        id detailViewController = [savedInfo objectForKey:@"addCommentToPix_detailViewController"];        
         NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects:tagID, detailViewController, nil];
         [self doCallback:returnParams];
     }
@@ -358,6 +363,10 @@ static KumulosHelper *sharedKumulosHelper = nil;
     Tag * tag = [savedInfo objectForKey:@"tag"];
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects: tag, nil];
     [self doCallback:returnParams];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation incrementPopularityDidCompleteWithResult:(NSNumber *)affectedRows {
+    [self cleanup];
 }
 
 //-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation setFacebookStringForUserDidCompleteWithResult:(NSNumber *)affectedRows {

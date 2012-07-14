@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul 13, 2012
+//  Created by Kumulos Bindings Compiler on Jul 14, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -2040,6 +2040,29 @@
     
 }
 
+-(KSAPIOperation*) countUnseenNewsWithUsername:(NSString*)username andHasBeenSeen:(BOOL)hasBeenSeen{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:username forKey:@"username"];
+                    [theParams setValue:[NSNumber numberWithBool:hasBeenSeen] forKey:@"hasBeenSeen"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"countUnseenNews" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: countUnseenNewsDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
 -(KSAPIOperation*) getNewsWithUsername:(NSString*)username{
 
     
@@ -2053,6 +2076,29 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getNewsDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) hasSeenNewsWithNewsfeedID:(NSUInteger)newsfeedID andHasBeenSeen:(BOOL)hasBeenSeen{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:[NSNumber numberWithInt:newsfeedID] forKey:@"newsfeedID"];
+                    [theParams setValue:[NSNumber numberWithBool:hasBeenSeen] forKey:@"hasBeenSeen"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"hasSeenNews" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: hasSeenNewsDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];

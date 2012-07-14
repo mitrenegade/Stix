@@ -11,6 +11,7 @@
 @implementation RaisedCenterTabBarController
 
 @synthesize myDelegate;
+@synthesize newsCount;
 
 -(void)initializeCustomButtons {
     // hide actual tabbar
@@ -40,6 +41,13 @@
     // add camera last
     [self addButtonWithImage:[UIImage imageNamed:@"tab_camera"] highlightImage:nil atPosition:TABBAR_BUTTON_TAG];
      
+    // news counter
+    CGRect newsFrame = CGRectMake(230, 420, 20, 20);
+    newsCount = [[OutlineLabel alloc] initWithFrame:newsFrame];
+    [newsCount setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
+    [newsCount setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
+    [newsCount setFontSize:20];
+    [self.view addSubview:newsCount];
 }
 
 // Create a custom UIButton and add it to the center of our tab bar
@@ -128,13 +136,13 @@
         canvasFrame = CGRectMake(50-pointerImg.size.width/2, 335, pointerImg.size.width, pointerImg.size.height);
     }
     else if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
-        canvasFrame = CGRectMake(295-pointerImg.size.width/2, 75, pointerImg.size.width, pointerImg.size.height);
+        canvasFrame = CGRectMake(290-pointerImg.size.width/2, 375, pointerImg.size.width, pointerImg.size.height);
     }
     UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
     UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
-    if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
-        pointer.transform = CGAffineTransformMakeRotation(3.141592);
-    }
+    //if (firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+    //    pointer.transform = CGAffineTransformMakeRotation(3.141592);
+    //}
     [pointerCanvas addSubview:pointer];
     agitatePointer = 0;
     StixAnimation * animation = [[StixAnimation alloc] init];
@@ -156,10 +164,10 @@
     CGRect rewardNameFrame = CGRectMake(0, 60, width, 15);
     CGRect rewardAmountFrame = CGRectMake(0, 70, width, 35);
     OutlineLabel * rewardName = [[OutlineLabel alloc] initWithFrame:rewardNameFrame];
-    OutlineLabel * rewardAmount = [[OutlineLabel alloc] initWithFrame:rewardAmountFrame];
     [rewardName setTextColor:[UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
     [rewardName setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
     [rewardName setFontSize:12];
+     OutlineLabel * rewardAmount = [[OutlineLabel alloc] initWithFrame:rewardAmountFrame];
     [rewardAmount setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
     [rewardAmount setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
     [rewardAmount setFontSize:20];
@@ -430,6 +438,16 @@
 
 -(void)agitateFirstTimePointer {
     agitatePointer = 3;
+}
+
+#pragma mark news count
+-(void)setNewsCountValue:(int)newCount {
+    if (newCount == 0)
+        [newsCount setHidden:YES];
+    else {
+        [newsCount setHidden:NO];
+        [newsCount setText:[NSString stringWithFormat:@"%d", newCount]];
+    }
 }
 @end
 

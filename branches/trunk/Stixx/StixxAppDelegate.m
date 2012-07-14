@@ -455,6 +455,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+#if ADMIN_TESTING_MODE
+    [self showAlertWithTitle:@"Test" andMessage:@"Registered for remote notifications" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+#endif
     // Tell Parse about the device token.
     NSLog(@"Storing parse device token");
     [PFPush storeDeviceToken:newDeviceToken];
@@ -803,7 +806,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     UIImage * newphoto = [UIImage imageWithData:userphoto];
     myUserInfo_userphoto = newphoto;
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
 #endif
     
@@ -950,6 +953,18 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             return;
         }
     }
+    else if (pos == TABBAR_BUTTON_PROFILE) {
+        if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)) {
+            [self agitateFirstTimePointer];
+            return;
+        }
+        
+        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
+            [self advanceFirstTimeUserMessage];
+            [self hideFirstTimeUserMessage];
+            [profileController doPointerAnimation];
+        }
+    }
 #endif
 }
 
@@ -1051,6 +1066,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+#if ADMIN_TESTING_MODE
+    [self showAlertWithTitle:@"Test" andMessage:[NSString stringWithFormat:@"failed to register: %@", [error description]] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+#endif
     if ([error code] == 3010) {
         NSLog(@"Push notifications don't work in the simulator!");
     } else {
@@ -1196,7 +1214,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode {
     if (!editorController)
         NSLog(@"Error! EditorController is nil. If you try to load a nill overlay, you're gonna have a bad time.");
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    // OVERLAY shift needed if coming from tagview
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [editorController.view setFrame:frameOnscreen];
     //[self.tabBarController.view addSubview:editorController.view];
     
@@ -1514,6 +1533,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newRecordID, nil];
         [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
+        
+        // add to newsletter
+        if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
+            [k addNewsWithUsername:newTag.originalUsername andAgentName:[self getUsername] andNews:@"remixed your pix" andThumbnail:UIImagePNGRepresentation([newTag thumbnail]) andTagID:[newTag.tagID intValue]];
+        }
     }
     
     bool added = [self addTagWithCheck:newTag withID:[newRecordID intValue]];
@@ -2633,7 +2657,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k addMetricWithDescription:metricName andUsername:name andStringValue:metricData andIntegerValue:0];
 #endif
     
-    [newsController initializeNewsletter];
+    [self getNewsCount];
 
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
@@ -2899,6 +2923,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
         [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:channel withTag:nil];
         //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWFOLLOWER withTag:nil];
+        
+        // add to newsletter
+        [k addNewsWithUsername:friendName andAgentName:[self getUsername] andNews:@"is now following you" andThumbnail:nil andTagID:-1];
         
         // subscribe to channel
         //channel = [NSString stringWithFormat:@"From%@", friendName];
@@ -3330,11 +3357,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(void)displayShareController {
     // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
     [self.tabBarController.view addSubview:shareController.view];
     [shareController.view setFrame:frameOffscreen];
     
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
@@ -3823,7 +3850,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
     return;
 #endif
     
@@ -3975,6 +4002,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX || type == NB_NEWFOLLOWER || type == NB_NEWPIX)
         [data setObject:message forKey:@"alert"];
+    if (type == NB_NEWPIX || type == NB_NEWFOLLOWER || type == NB_NEWCOMMENT) {
+        [data setObject:[NSString stringWithFormat:@"%d", 1] forKey:@"badge"];
+    }
     [data setObject:myUserInfo_username forKey:@"sender"];
     //[data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
     [data setObject:[NSNumber numberWithInt:type] forKey:@"nbType"]; //notificationBookmarkType
@@ -4638,6 +4668,11 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)agitateFirstTimePointer {
+#if USING_FLURRY
+    // first do logs on flurry
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logEvent:@"FirstTimeUser Agigtate" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:myUserInfo->firstTimeUserStage], @"Stage", nil]];
+#endif
     [tabBarController agitateFirstTimePointer];
     if (myUserInfo->firstTimeUserStage != FIRSTTIME_MESSAGE_02)
         [tabBarController flashFirstTimeInstructions];
@@ -4649,6 +4684,11 @@ static bool isShowingAlerts = NO;
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
 }
 -(void)advanceFirstTimeUserMessage {
+#if USING_FLURRY
+    // first do logs on flurry
+    if (!IS_ADMIN_USER([self getUsername]))
+        [FlurryAnalytics logEvent:@"FirstTimeUser Advanced" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:myUserInfo->firstTimeUserStage], @"Stage", nil]];
+#endif
     myUserInfo->firstTimeUserStage++;
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -4657,6 +4697,14 @@ static bool isShowingAlerts = NO;
     
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) 
         [feedController forceReloadWholeTableZOMG];
+    
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([self getUsername]))
+        if (myUserInfo->firstTimeUserStage > FIRSTTIME_MESSAGE_03) {
+            [FlurryAnalytics logEvent:@"FirstTimeUser Finished" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"Username", nil]];
+        }
+#endif
+
 }
 -(void)didCloseFirstTimeMessage {
     // if user clicks on the 2nd message (remix)
@@ -4828,4 +4876,30 @@ static bool isShowingAlerts = NO;
 
 #endif
 }
+
+#pragma mark newsFeed badging
+-(void)getNewsCount {
+    // count how many news pieces are unseen
+    [k countUnseenNewsWithUsername:[self getUsername] andHasBeenSeen:NO];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation countUnseenNewsDidCompleteWithResult:(NSNumber *)aggregateResult {
+    
+    NSLog(@"%d pieces of news have not been seen!", [aggregateResult intValue]);
+
+    // start download news
+    [newsController initializeNewsletter];
+    
+    // create news badge
+    [tabBarController setNewsCountValue:[aggregateResult intValue]];
+}
+
+-(void)didGetNews {
+    // reset application badge
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+    
+    // reset tab bar badge
+    [tabBarController setNewsCountValue:0];
+}
+
 @end

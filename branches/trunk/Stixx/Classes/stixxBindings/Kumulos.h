@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul 13, 2012
+//  Created by Kumulos Bindings Compiler on Jul 14, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -191,7 +191,11 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewsDidCompleteWithResult:(NSNumber*)newRecordID;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation countUnseenNewsDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getNewsDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation hasSeenNewsDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addPixBelongsToUserDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -490,7 +494,13 @@
 -(KSAPIOperation*) addNewsWithUsername:(NSString*)username andAgentName:(NSString*)agentName andNews:(NSString*)news andThumbnail:(NSData*)thumbnail andTagID:(NSInteger)tagID;
     
    
+-(KSAPIOperation*) countUnseenNewsWithUsername:(NSString*)username andHasBeenSeen:(BOOL)hasBeenSeen;
+    
+   
 -(KSAPIOperation*) getNewsWithUsername:(NSString*)username;
+    
+   
+-(KSAPIOperation*) hasSeenNewsWithNewsfeedID:(NSUInteger)newsfeedID andHasBeenSeen:(BOOL)hasBeenSeen;
     
    
 -(KSAPIOperation*) addPixBelongsToUserWithUsername:(NSString*)username andTagID:(NSInteger)tagID;

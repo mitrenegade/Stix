@@ -59,6 +59,7 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    [delegate didGetNews];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -112,18 +113,24 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewsDidCompleteWithResult:(NSArray *)theResults {
-    NSLog(@"Newsfeed for %@ returned %d results", [delegate getUsername], [theResults count]);
- 
+    NSLog(@"Newsfeed for %@ returned %d results", [delegate getUsername], [theResults count]); 
     for (NSMutableDictionary * d in theResults) {
         NSString * agentName = [d objectForKey:@"agentName"];
         NSString * news = [d objectForKey:@"news"];
         NSData * data = [d objectForKey:@"thumbnail"];
         [agentArray addObject:agentName];
         [newsArray addObject:news];
-        if (data)
+        NSLog(@"%@ %@", agentName, news);
+        if ([data length] > 0)
             [thumbnailArray addObject:[UIImage imageWithData:data]];
         else {
             [thumbnailArray addObject:[NSNull null]];
+        }
+        
+        NSNumber * hasBeenSeen = [d objectForKey:@"hasBeenSeen"];
+        NSNumber * newsFeedID = [d objectForKey:@"newsfeedID"];
+        if ([hasBeenSeen boolValue] == NO) {
+            [k hasSeenNewsWithNewsfeedID:[newsFeedID unsignedIntValue] andHasBeenSeen:YES];
         }
     }
     

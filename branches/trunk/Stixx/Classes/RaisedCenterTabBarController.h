@@ -57,9 +57,12 @@ enum first_time_user_stage {
     BOOL pointerWasDismissed;
     int agitatePointer;
     BOOL instructionsDismissed;
+    
+    OutlineLabel * newsCount;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
+@property (nonatomic) OutlineLabel * newsCount;
 
 -(void)initializeCustomButtons;
 
@@ -80,5 +83,6 @@ enum first_time_user_stage {
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage;
 -(void)agitateFirstTimePointer;
 -(void)flashFirstTimeInstructions;
+-(void)setNewsCountValue:(int)newCount;
 @end
 

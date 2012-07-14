@@ -16,7 +16,7 @@
 
 -(NSString*)getUsername;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
-
+-(void)didGetNews;
 @end
 
 @interface NewsletterViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, KumulosDelegate>

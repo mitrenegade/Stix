@@ -141,27 +141,11 @@
         [cell.contentView addSubview:topLabel];
         [cell.contentView addSubview:bottomLabel];
         [cell addSubview:cell.contentView];
-        
     }
     
     int y = [indexPath row];
     
     NSLog(@"Cell for row %d", y);
-    
-    //UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(80,0,180,60)];
-    //label.textColor = [UIColor colorWithRed:0.25 green:0.0 blue:0.0 alpha:1.0];
-    //label.highlightedTextColor = label.textColor;//[UIColor colorWithRed:1.0 green:1.0 blue:0.9 alpha:1.0];
-    //[label setBackgroundColor:[UIColor clearColor]];    
-    // CATEGORY_TYPE_STIX
-    
-    UIImageView * bgimage = [[UIImageView alloc] init];
-    [bgimage setBackgroundColor:[UIColor blackColor]];
-    if (y % 2 == 0)
-        [bgimage setAlpha:.3];
-    else
-        [bgimage setAlpha:.15];
-    [cell setBackgroundView:bgimage];
-     // MRC
     
     UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
     UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
@@ -170,7 +154,7 @@
     [bottomLabel setText:[self.delegate getUserEmailForUser: y]];
     
     if ([userPhotos objectForKey:username] == nil) {
-        UIImage * photo = [delegate getUserPhotoForUser:y];
+        UIImage * photo = [delegate getUserPhotoForUserAtIndex:y];
         if (!photo)
             photo = [UIImage imageNamed:@"graphic_nopic.png"];
         CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);

@@ -116,6 +116,7 @@ enum {
     BOOL bShowedTable;
     BOOL didInitialSetExploreMode;
     int indexPointer; // pointer to location in allTagIDs currently being populated with a random tag
+    NSDate * lastDate;
 }
 
 @property (nonatomic) ColumnTableController * tableController;

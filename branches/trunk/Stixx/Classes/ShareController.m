@@ -193,6 +193,10 @@ static ShareController *sharedShareController;
     shareImageURL = nil;
     uploadingImageLock = NO;
     
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Share", @"Method Of Quitting", nil]];
+#endif
     [delegate shouldCloseShareController:NO];
 }
 
@@ -208,11 +212,12 @@ static ShareController *sharedShareController;
     }
     [activityIndicatorLarge startCompleteAnimation];
 
-#if 1
-    [delegate shouldCloseShareController:YES];
-#else
-    [self uploadImage:PNG];
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Completed Share", @"Method Of Quitting", [self shareServiceIsSharing:@"Twitter"]?@"TwitterOn":@"TwitterOff", @"TwitterShare", [self shareServiceIsSharing:@"Facebook"]?@"FacebookOn":@"FacebookOff", nil]];
 #endif
+
+    [delegate shouldCloseShareController:YES];
 }
 
 -(void)didClickConnectButton:(id)sender {

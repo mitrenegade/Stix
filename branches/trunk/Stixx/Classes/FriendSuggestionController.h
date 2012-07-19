@@ -10,12 +10,7 @@
 #import "Kumulos.h"
 #import "GlobalHeaders.h"
 #import "FlurryAnalytics.h"
-
-enum {
-    SUGGESTIONS_SECTION_FEATURED = 0,
-    SUGGESTIONS_SECTION_FRIENDS = 1,
-    SUGGESTIONS_SECTION_MAX
-};
+#import "FriendSearchTableViewController.h"
 
 @protocol FriendSuggestionDelegate <NSObject>
 
@@ -30,9 +25,11 @@ enum {
 -(void)didGetFeaturedUsers:(NSArray*)featured;
 @end
 
-@interface FriendSuggestionController : UIViewController  <UITableViewDelegate, UITableViewDataSource, KumulosDelegate>
+@interface FriendSuggestionController : UIViewController  <FriendSearchTableDelegate, KumulosDelegate>
 {    
-    IBOutlet UITableView * tableView;
+    NSObject<FriendSuggestionDelegate>* __unsafe_unretained delegate;
+    
+    FriendSearchTableViewController * tableViewController;
     IBOutlet UIButton * buttonEdit;
     IBOutlet UIButton * buttonNext;
 
@@ -46,8 +43,6 @@ enum {
     NSMutableDictionary * userPhotos;
     Kumulos * k;
     
-    NSObject<FriendSuggestionDelegate>* __unsafe_unretained delegate;
-    
     NSMutableArray * headerViews;
     
     BOOL didGetFeaturedUsers;
@@ -55,7 +50,7 @@ enum {
     BOOL isEditing;
 }
 @property (nonatomic, unsafe_unretained) NSObject<FriendSuggestionDelegate> *delegate;
-@property (nonatomic) IBOutlet UITableView * tableView;
+@property (nonatomic) FriendSearchTableViewController * tableView;
 @property (nonatomic) IBOutlet UIButton * buttonEdit;
 @property (nonatomic) IBOutlet UIButton * buttonNext;
 @property (nonatomic) IBOutlet UIButton * refresh;

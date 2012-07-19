@@ -14,14 +14,12 @@
 #import "KumulosData.h"
 #import "FriendSearchResultsController.h"
 #import "SMWebRequest.h"
-//#import "SMXMLDocument.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
 #import "UserGalleryController.h"
 #import "DetailViewController.h"
 #import "StixAnimation.h"
 #import "ColumnTableController.h"
-#import "FriendSearchResultsController.h"
 #import "KumulosHelper.h"
 #import "FlurryAnalytics.h"
 #import "GlobalHeaders.h"
@@ -41,7 +39,7 @@
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, FriendSearchResultsDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate>{
     
     Kumulos * k;
     IBOutlet UIButton * logo;

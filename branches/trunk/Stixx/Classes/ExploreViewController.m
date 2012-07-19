@@ -328,7 +328,11 @@ static NSMutableSet * retainedDetailControllers;
         case EXPLORE_POPULAR:
             if (row == -1) {
                 int numPix = numColumns * 8;
-                [k getPixByPopularityWithNumPix:[NSNumber numberWithInt:numPix]];
+                [allTagIDs removeAllObjects];
+                [allTags removeAllObjects];
+                NSDate * twoWeeksAgo = [[NSDate date] dateByAddingTimeInterval:-3600*24*14];
+                lastDate = twoWeeksAgo;
+                [k getPopularPixInTimeRangeWithTimeStart:twoWeeksAgo andTimeEnd:[NSDate date] andNumPix:[NSNumber numberWithInt:numPix]];
                 for (int i=0; i<numPix; i++)
                     [allTagIDs addObject:[NSNull null]];
                 pendingContentCount += numPix;
@@ -385,12 +389,11 @@ static NSMutableSet * retainedDetailControllers;
     [tableController.tableView reloadData];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPixByPopularityDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPopularPixInTimeRangeDidCompleteWithResult:(NSArray *)theResults {
     if (exploreMode != EXPLORE_POPULAR)
         return;
     
     NSLog(@"Received %d popular results", [theResults count]);
-
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
@@ -400,7 +403,6 @@ static NSMutableSet * retainedDetailControllers;
             [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
             NSLog(@"Adding tag %d", [newtag.tagID intValue]);
         }
-        
         // even though we don't have aux stix, we need this to switch out of the placeholder
 #if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
@@ -409,11 +411,17 @@ static NSMutableSet * retainedDetailControllers;
 #else
         [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
 #endif
-        // don't know why this happens but sometimes it does!
         pendingContentCount--;
-        if (pendingContentCount < 0)
-            pendingContentCount = 0;
-        
+        if (pendingContentCount <= 0) {
+            //pendingContentCount = 0;
+            // we've received more than enough
+            break;
+        }        
+    }
+    if (pendingContentCount > 0) {
+        NSDate * twoWeeksAgo = [lastDate dateByAddingTimeInterval:-3600*24*14];
+        [k getPopularPixInTimeRangeWithTimeStart:twoWeeksAgo andTimeEnd:lastDate andNumPix:[NSNumber numberWithInt:numColumns * 5]];
+        lastDate = twoWeeksAgo;
     }
     if ([theResults count]>0)
         [tableController dataSourceDidFinishLoadingNewData];

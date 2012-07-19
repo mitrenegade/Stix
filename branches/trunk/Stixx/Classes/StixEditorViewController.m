@@ -234,12 +234,21 @@
     if (isLoadingPixSource)
         return;
     [self saveRemixedPix];
+    
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Saved Edits", @"Method Of Quitting", nil]];
+#endif
 }
 -(IBAction)didClickButtonClose:(id)sender {
     NSLog(@"Did click close stix editor");
     if (isLoadingPixSource)
         return;
     [delegate didCloseEditor];
+#if USING_FLURRY
+    if (!IS_ADMIN_USER([delegate getUsername]))
+        [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Edits", @"Method Of Quitting", nil]];
+#endif
 }
 
 -(void)startActivityIndicator {

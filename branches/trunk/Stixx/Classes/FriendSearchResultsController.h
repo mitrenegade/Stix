@@ -11,7 +11,7 @@
 @protocol FriendSearchResultsDelegate 
 @optional
 -(NSString*)getUsernameForUser:(int)index;
--(UIImage*)getUserPhotoForUser:(int)index;
+-(UIImage*)getUserPhotoForUserAtIndex:(int)index;
 -(NSString*)getUserEmailForUser:(int)index;
 -(NSString*)getFacebookStringForUser:(int)index;
 //-(BOOL)isFollowingUser:(int)index;
@@ -23,7 +23,8 @@
 @end
 
 @interface FriendSearchResultsController : UITableViewController 
-
+{
+}
 @property ( nonatomic) NSMutableDictionary * userPhotos;
 //@property (retain, nonatomic) NSMutableArray * usernames;
 //@property (retain, nonatomic) NSMutableDictionary * userEmails;

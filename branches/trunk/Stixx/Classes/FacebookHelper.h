@@ -26,7 +26,7 @@
 -(void)didLoginToFacebook:(BOOL)needInfo;
 -(void)didLogoutFromFacebook;
 -(void)didCancelFacebookLogin;
--(void)receivedFacebookFriends:(NSArray*)friendsArray;
+-(void)didReceiveFacebookFriends:(NSArray*)friendsArray;
 -(NSString*)getUserFacebookString;
 -(void)didEarnFacebookReward:(int)bux;
 //-(void)facebookLoginIsOffline;

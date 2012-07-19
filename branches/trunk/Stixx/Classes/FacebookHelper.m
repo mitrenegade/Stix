@@ -229,15 +229,16 @@ static NSString * appID;
 #else
     NSArray * friendsArray = [responseData objectForKey:@"data"];
 #endif
-    /*
-     for (int i=0; i<[friendsArray count]; i++) {
-     NSDictionary * d = [friendsArray objectAtIndex:i];
-     NSString * facebookString = [d objectForKey:@"id"];
-     NSString * name = [d objectForKey:@"name"];
-     NSLog(@"Friend %d id %@ name %@", i, facebookString, name);
-     }
-     */
-    [delegate receivedFacebookFriends:friendsArray];
+    
+/*    
+    for (int i=0; i<[friendsArray count]; i++) {
+        NSDictionary * d = [friendsArray objectAtIndex:i];
+        NSString * facebookString = [d objectForKey:@"id"];
+        NSString * name = [d objectForKey:@"name"];
+        NSLog(@"Friend %d id %@ name %@", i, facebookString, name);
+    }
+*/     
+    [delegate didReceiveFacebookFriends:friendsArray];
 }
 
 -(void)sendInvite:(NSString *)name withFacebookString:(NSString*)facebookString {

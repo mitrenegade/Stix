@@ -17,6 +17,7 @@
 #import "Kumulos.h"
 #import "FacebookHelper.h"
 #import "Tag.h"
+#import "FlurryAnalytics.h"
 
 #define HOSTNAME @"stix.herokuapp.com"
 

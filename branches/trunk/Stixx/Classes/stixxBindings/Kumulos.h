@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul 14, 2012
+//  Created by Kumulos Bindings Compiler on Jul 19, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -64,6 +64,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getPixByPopularityDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getPixByRecentDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getPopularPixInTimeRangeDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray*)theResults;
  
@@ -307,6 +309,9 @@
     
    
 -(KSAPIOperation*) getPixByRecentWithTimeCreated:(NSDate*)timeCreated andNumPix:(NSNumber*)numPix;
+    
+   
+-(KSAPIOperation*) getPopularPixInTimeRangeWithTimeStart:(NSDate*)timeStart andTimeEnd:(NSDate*)timeEnd andNumPix:(NSNumber*)numPix;
     
    
 -(KSAPIOperation*) getUpdatedPixByTimeWithTimeUpdated:(NSDate*)timeUpdated andNumPix:(NSNumber*)numPix;

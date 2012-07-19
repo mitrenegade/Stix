@@ -8,11 +8,6 @@
 
 #import "FriendSuggestionController.h"
 
-#define TOP_LABEL_TAG 1001
-#define BOTTOM_LABEL_TAG 1002
-#define ROW_HEIGHT 45
-#define PICTURE_HEIGHT 33
-
 @implementation FriendSuggestionController
 @synthesize delegate;
 
@@ -23,6 +18,9 @@
         // Custom initialization
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
+        
+        tableViewController = [[FriendSearchTableViewController alloc] init];
+        [tableViewController setDelegate:self];
     }
     return self;
 }
@@ -58,6 +56,9 @@
     }
     UIImageView * featuredHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
     [featuredHeader setImage:[UIImage imageNamed:@"header_featuredstixsters@2x.png"]];
+    if ([featured count] == 0) {
+        [featuredHeader setFrame:CGRectMake(0, 0, 320, 1)];
+    }
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
     if ([friends count] == 0) {
         //[headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
@@ -90,193 +91,6 @@
     isEditing = NO;
 }
 
-#pragma mark - Table view data source
-
--(float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 24;
-}
--(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return ROW_HEIGHT;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString *CellIdentifier = @"Cell";
-    
-    UITableViewCell * cell = (UITableViewCell *) [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        cell.backgroundView = [[UIImageView alloc] init];
-        cell.selectedBackgroundView = [[UIImageView alloc] init];
-        
-		//cell.selectionStyle = UITableViewCellSelectionStyleBlue;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        [cell.textLabel setHighlightedTextColor:[cell.textLabel textColor]];
-        cell.textLabel.numberOfLines = 1;
-        UIImageView * divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]];
-        CGRect dFrame = divider.frame;
-        dFrame.size.width +=50;
-        dFrame.origin.x -= 50;
-        [divider setFrame:dFrame];
-        [cell.contentView addSubview:divider]; 
-        UILabel * topLabel = [[UILabel alloc] initWithFrame:CGRectMake(55, 5, 170, 40)];
-        UILabel * bottomLabel = [[UILabel alloc] initWithFrame:CGRectMake(55, 23, 170, 20)];
-		topLabel.textColor = [UIColor blackColor]; //[UIColor colorWithRed:102/255.0 green:0.0 blue:0.0 alpha:1.0];
-		topLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize]-4];
-		bottomLabel.textColor = [UIColor blackColor]; //[UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
-		bottomLabel.font = [UIFont fontWithName:@"Helvetica" size:[UIFont labelFontSize] - 7];
-        //NSLog(@"%@", [UIFont fontNamesForFamilyName:@"Helvetica"]);
-        [cell.contentView setBackgroundColor:[UIColor clearColor]];
-        [topLabel setBackgroundColor:[UIColor clearColor]];
-        [bottomLabel setBackgroundColor:[UIColor clearColor]];
-        topLabel.tag = TOP_LABEL_TAG;
-        bottomLabel.tag = BOTTOM_LABEL_TAG;
-        [cell.contentView addSubview:topLabel];
-        [cell.contentView addSubview:bottomLabel];
-        [cell addSubview:cell.contentView];
-        
-    }
-    
-    // Configure the cell...
-    int section = [indexPath section];
-    int index = [indexPath row];
-#if 0
-    UIImageView * bgimage = [[UIImageView alloc] init];
-    [bgimage setBackgroundColor:[UIColor blackColor]];
-    if (index % 2 == 0)
-        [bgimage setAlpha:.3];
-    else
-        [bgimage setAlpha:.15];
-    [cell setBackgroundView:bgimage];
-#endif
-    
-    NSString * username;
-    if (section == SUGGESTIONS_SECTION_FRIENDS) {
-        // Friends
-        if (index > [friends count])
-            [cell.textLabel setText:@"NIL"];
-        else {
-            username = [friends objectAtIndex:index];
-            UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
-            UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
-            [topLabel setText:[friends objectAtIndex:index]];
-            [topLabel setFrame:CGRectMake(55, 5, 170, 35)]; // bottom label doesn't exist; set topLabel in middle of cell
-            [bottomLabel setText:@""];
-        }
-    }
-    else if (section == SUGGESTIONS_SECTION_FEATURED) {
-        // Featured
-        if (index > [featured count])
-            [cell.textLabel setText:@"NIL"];
-        else {
-            UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
-            UILabel * bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
-            username = [featured objectAtIndex: index];
-            NSString * desc = [featuredDesc objectAtIndex:index];
-            [topLabel setText:username];
-            [bottomLabel setText:desc];
-            [topLabel setFrame:CGRectMake(55, 5, 170, 25)]; // bottom label exists so set topLabel higher
-        }
-    }
-    
-    // photo
-    if ([userPhotos objectForKey:username] == nil) {
-        UIImage * photo = [delegate getUserPhotoForUsername:username];
-        if (!photo)
-            photo = [UIImage imageNamed:@"graphic_nopic.png"];
-        CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
-        UIGraphicsBeginImageContext(newSize);
-        [photo drawInRect:CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT)];	
-        
-        // add border
-        CGContextRef ctx = UIGraphicsGetCurrentContext();
-        CGContextSetLineWidth(ctx, 1);
-        CGContextSetRGBStrokeColor(ctx, 0,0,0, 1.000);
-        
-        CGRect borderRect = CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT);
-        CGContextStrokeRect(ctx, borderRect);
-        
-        UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();	
-        [userPhotos setObject:imageView forKey:username];
-    }
-    for (UIView * subview in cell.imageView.subviews) {
-        [subview removeFromSuperview];
-    }
-    UIImage * userPhoto = [userPhotos objectForKey:username];
-    [cell.imageView setImage:userPhoto];
-    
-    return cell;
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-    // Return the number of sections.
-    // hack: assume that featured header always exists and is at index 0
-    //int ret = SUGGESTIONS_SECTION_MAX;
-    //if ([friends count] == 0)
-    int ret = [headerViews count];
-//        ret = 1;
-    NSLog(@"Returning number of sections: %d", ret);
-    return ret;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    // Return the number of rows in the section.
-    if (section == SUGGESTIONS_SECTION_FRIENDS) {
-        NSLog(@"Number of rows for Friends section: %d", [friends count]);
-        return [friends count];
-    }
-    else if (section == SUGGESTIONS_SECTION_FEATURED) {
-        NSLog(@"Number of rows for Featured section: %d", [featured count]);
-        return [featured count];
-    }
-    return 0;
-}
-
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    if (section < [headerViews count])
-        return [headerViews objectAtIndex:section];
-    return nil;
-}
-
--(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
-}
-
--(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return UITableViewCellEditingStyleDelete;
-}
-
--(BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NO;
-}
-
--(void)tableView:(UITableView *)_tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    int section = [indexPath section];
-    int row = [indexPath row];
-    NSLog(@"Deleting row at section %d index %d", section, row);
-    
-    if (section == SUGGESTIONS_SECTION_FRIENDS) {
-        [friends removeObjectAtIndex:row];
-    }
-    else if (section == SUGGESTIONS_SECTION_FEATURED) {
-        [featured removeObjectAtIndex:row];
-        [featuredDesc removeObjectAtIndex:row];
-    }
-    [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-    if (section == SUGGESTIONS_SECTION_FRIENDS && [friends count] == 0){
-        [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
-        [_tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationNone];
-    }
-    //[_tableView reloadData];
-    
-    if ([friends count] == 0 && [featured count] == 0) {
-        [self didClickButtonNext:nil];
-    }
-}
-
 -(void)populateFacebookSearchResults:(NSArray*)facebookFriendArray {
 //    [self initSearchResultLists];
         
@@ -306,6 +120,14 @@
     }
     
     //[tableView reloadData];
+    // filter out existing friends, if any
+    if ([featured count] > 0) {
+        for (NSString * name in featured) {
+            if ([friends containsObject:name])
+                [friends removeObject:name];
+        }
+    }
+
     int total = [featured count] + [friends count];
     didGetFacebookFriends = YES;
     if (didGetFeaturedUsers)
@@ -337,6 +159,16 @@
     NSLog(@"Loaded %d Featured friends", [featured count]);
     
     //[tableView reloadData];
+    if ([friends count] > 0) {
+        for (NSString * name in featured) {
+            if ([friends containsObject:name])
+                [friends removeObject:name];
+        }
+    }
+
+    if ([featured count] == 0) {
+        [self initializeHeaderViews];
+    }
     didGetFeaturedUsers = YES;
     [delegate didGetFeaturedUsers:theResults];
     int total = [featured count] + [friends count];
@@ -348,11 +180,11 @@
 
 -(IBAction)didClickButtonEdit:(id)sender {
     if (!isEditing) {
-        [tableView setEditing:YES animated:YES];
+        [tableViewController startEditing];
         isEditing = YES;
     }
     else {
-        [tableView setEditing:NO animated:YES];
+        [tableViewController stopEditing];
         isEditing = NO;
     }
     
@@ -377,6 +209,73 @@
 }
 
 -(void)refreshUserPhotos {
-    [tableView reloadData];
+    [tableViewController.tableView reloadData];
+}
+
+#pragma mark FriendSearchTableDelegate
+-(int)friendsCount {
+    return [friends count];
+}
+-(int)featuredCount {
+    return [featured count];
+}
+-(NSString*)getFriendAtIndex:(int)index {
+    if (index >= [friends count])
+        return nil;
+    return [friends objectAtIndex:index];
+}
+-(NSString*)getFeaturedAtIndex:(int)index {
+    if (index >= [featured count])
+        return nil;
+    return [featured objectAtIndex:index];
+}
+-(NSString*)getFeaturedDescriptorAtIndex:(int)index {
+    if (index >= [featuredDesc count])
+        return nil;
+    return [featuredDesc objectAtIndex:index];
+}
+-(UIImage *)getUserPhotoForUser:(NSString *)username {
+    if ([userPhotos objectForKey:username] == nil) {
+        UIImage * photo = [delegate getUserPhotoForUsername:username];
+        if (!photo)
+            photo = [UIImage imageNamed:@"graphic_nopic.png"];
+        CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
+        UIGraphicsBeginImageContext(newSize);
+        [photo drawInRect:CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT)];	
+        
+        // add border
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
+        CGContextSetLineWidth(ctx, 1);
+        CGContextSetRGBStrokeColor(ctx, 0,0,0, 1.000);
+        
+        CGRect borderRect = CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT);
+        CGContextStrokeRect(ctx, borderRect);
+        
+        UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        [userPhotos setObject:imageView forKey:username];
+    }
+    return [userPhotos objectForKey:username];
+}
+-(int)numberOfSections {
+    return [headerViews count];
+}
+-(UIView*)headerViewForSection:(int)section {
+    return [headerViews objectAtIndex:section];
+}
+
+-(void)removeFriendAtRow:(int)row {
+    if (row < [friends count])
+        [friends removeObjectAtIndex:row];
+}
+-(void)removeFeaturedAtRow:(int)row {
+    if (row < [featured count]) {
+        [featured removeObjectAtIndex:row];
+        [featuredDesc removeObjectAtIndex:row];
+    }
+}
+-(void)removeFriendsHeader {
+    [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
 }
 @end
+

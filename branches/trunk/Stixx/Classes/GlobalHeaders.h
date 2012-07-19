@@ -38,6 +38,12 @@
 #define CAMERA_TRANSFORM_X 1.12412
 #define CAMERA_TRANSFORM_Y 1.12412
 
+enum {
+    SUGGESTIONS_SECTION_FEATURED = 0,
+    SUGGESTIONS_SECTION_FRIENDS = 1,
+    SUGGESTIONS_SECTION_MAX
+};
+
 enum notification_bookmarks {
     NB_NEWSTIX = 0,
     NB_MESSAGE, 
@@ -86,6 +92,19 @@ enum {
     SHELF_CATEGORY_HIPSTER,
     SHELF_CATEGORY_MAX
 };
+
+// profile users search
+enum profile_search_mode {
+    PROFILE_SEARCHMODE_FIND,
+    PROFILE_SEARCHMODE_INVITE,
+    PROFILE_SEARCHMODE_SEARCHBAR
+};
+enum profile_service {
+    PROFILE_SERVICE_FACEBOOK,
+    PROFILE_SERVICE_TWITTER,
+    PROFILE_SERVICE_CONTACTS
+};
+
 
 #define STIX_ANIMALS @"babychick.png", @"baldeagle.png", @"bluecrab.png", @"brownbunny.png", @"butterfly2.png", @"butterfly3.png", @"capuchin.png", @"cat.png", @"cheladamonkeyface.png", @"chipmunk.png", @"dog_cleo.png", @"duck.png", @"fatlizard.png", @"fly.png", @"frog.png", @"frog2.png", @"giraffehead.png", @"goldfish.png", @"judgementalcat.png", @"kitten.png", @"kittenface.png", @"lazydog.png", @"lemurhead.png", @"lion.png", @"lioness.png", @"mallard.png", @"meerkat.png", @"monkeyface.png", @"monkeyface2.png", @"ostrichhead.png", @"owl.png", @"parrothead.png", @"peacock.png", @"penguin.png", @"redcardinal.png", @"rhino.png", @"shybear.png", @"sittingmonkey.png", @"snowowl.png", @"spider.png", @"spottedbunny.png", @"squirrel1.png", @"squirrel2.png", @"squirrel3.png", @"swan.png", @"zebra.png"
 #define STIX_DESC_ANIMALS @"Baby Chick", @"Bald Eagle", @"Blue Crab", @"Brown Bunny", @"Butterfly", @"Butterfly", @"Capuchin", @"Cat", @"Chelada Monkeyface", @"Chipmunk", @"Golden Retriever", @"Duck", @"Fat Lizard", @"Fly", @"Frog", @"Frog", @"Giraffe Head", @"Gold Fish", @"Judgmental Cat", @"Kitten", @"Kitty Face", @"Lazy Dog", @"Lemur Head", @"Lion", @"Lioness", @"Mallard", @"Meerkat", @"Monkey Face", @"Monkey Face", @"Ostrich Head", @"Owl", @"Parrot Head", @"Peacock", @"Penguin", @"Red Cardinal", @"Rhino", @"Shy Bear", @"Sitting Monkey", @"Snow Owl", @"Spider", @"Spotted Bunny", @"Squirrel", @"Squirrel", @"Squirrel", @"Swan", @"Zebra"

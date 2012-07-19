@@ -383,7 +383,7 @@
 -(NSString*)getUsernameForUser:(int)index {
     return [searchFriendName objectAtIndex:index];
 }
--(UIImage*)getUserPhotoForUser:(int)index {
+-(UIImage*)getUserPhotoForUserAtIndex:(int)index {
     NSString * friendName = [searchFriendName objectAtIndex:index];
     UIImage * userPhoto = [delegate getUserPhotoForUsername:friendName];
     return userPhoto;

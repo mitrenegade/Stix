@@ -827,7 +827,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [allStix addEntriesFromDictionary:[NSKeyedUnarchiver unarchiveObjectWithData:allStixData]];
     [allStixOrder addEntriesFromDictionary:[NSKeyedUnarchiver unarchiveObjectWithData:allStixOrderData]]; 
                    
-    [profileController didLogin]; 
+    //[profileController didLogin]; 
     
     return 1;
 }
@@ -916,6 +916,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (pos == TABBAR_BUTTON_FEED) {
         [exploreController didDismissZoom];
         lastViewController = feedController;
+
+        // update feed with changes in friends
+        if (followListsDidChangeDuringProfileView) {
+            followListsDidChangeDuringProfileView = NO;
+            [aggregator resetFirstTimeState];
+            [aggregator reaggregateTagIDs];
+            [feedController followListsDidChange]; // tell feedController to redisplay all users that are in the feed but were unfriended
+            idOfOldestTagReceived = idOfNewestTagReceived;
+            idOfNewestTagReceived = feedController.newestTagIDDisplayed; //-1;
+        }
 
 #if HAS_PROFILE_BUTTON
         if (!myUserInfo_userphoto) {
@@ -1669,18 +1679,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [tag setAuxPeelable:pendingTag.auxPeelable];
             break;
         }
-    }
-}
-
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"Updated user tag totals: affect rows %d\n", [affectedRows intValue]);
-    @try {
-        [profileController updatePixCount];
-    } @catch (NSException * e) {
-        NSLog(@"exception: %@", [e reason]);
     }
 }
 
@@ -2466,7 +2464,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
     
     NSData * img = UIImagePNGRepresentation(rounded);
-    [profileController.photoButton setImage:rounded forState:UIControlStateNormal];
+    //[profileController.photoButton setImage:rounded forState:UIControlStateNormal];
     [self didChangeUserphoto:rounded];
     
     // add to kumulos
@@ -2508,11 +2506,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self searchFriendsByFacebook];
     else 
         // if not logged into facebook, simulate 0 friends
-        [self receivedFacebookFriends:[NSArray arrayWithObjects: nil]];
+        [self didReceiveFacebookFriends:[NSArray arrayWithObjects: nil]];
 }
 
--(void)receivedFacebookFriends:(NSArray*)friendsArray {
-    [profileController populateFacebookSearchResults:friendsArray];
+-(void)didReceiveFacebookFriends:(NSArray*)friendsArray {
+    [profileController didGetFacebookFriends:friendsArray];
     if (friendSuggestionController && isShowingFriendSuggestions)
         [friendSuggestionController populateFacebookSearchResults:friendsArray];
 }
@@ -2703,7 +2701,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     myUserInfo_email = email;
     myUserInfo_facebookString = facebookString;
     myUserInfo->userID = [userID intValue];
-    [profileController didLogin]; 
+    //[profileController didLogin]; 
     
 #if HAS_PROFILE_BUTTON
     if (!myUserInfo_userphoto) {
@@ -2722,8 +2720,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
-    //[self updateBuxCount];
-    //[profileController updatePixCount];    
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
                                              (unsigned long)NULL), ^(void) {
@@ -2905,7 +2901,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(BOOL)isFollowing:(NSString*)name {
     if ([allFollowing count] == 0)
-        return YES;
+        return NO;
     return [allFollowing containsObject:name];
 }
 
@@ -2955,7 +2951,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
         //[self Parse_unsubscribeFromChannel:channel];
     }
-    [profileController updateFollowCounts];
+    //[profileController updateFollowCounts];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
@@ -4599,7 +4595,7 @@ static bool isShowingAlerts = NO;
     NSData * followingData = [NSKeyedArchiver archivedDataWithRootObject:allFollowing];
     [defaults setObject:followingData forKey:@"allFollowing"];
     [defaults synchronize];
-    [profileController updateFollowCounts];
+    //[profileController updateFollowCounts];
     NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
     
     // only initialize friend controller after we have followList
@@ -4610,11 +4606,12 @@ static bool isShowingAlerts = NO;
     NSArray * theResults = returnParams; // objectAtIndex:0];
     // list of people this user is following
     // key: username value: friendName
+    NSLog(@"You are following %d users", [theResults count]);
     if (!addAutomaticFollows)
         [allFollowing removeAllObjects];
     for (NSMutableDictionary * d in theResults) {
         NSString * friendName = [d valueForKey:@"followsUser"];
-        if (![allFollowing containsObject:friendName] && ![friendName isEqualToString:[self getUsername]]) {
+        if (![friendName isEqualToString:[self getUsername]]) {
             //NSLog(@"allFollowing adding %@", friendName);
             [allFollowing addObject:friendName];
         }
@@ -4625,7 +4622,7 @@ static bool isShowingAlerts = NO;
     NSData * followingData = [NSKeyedArchiver archivedDataWithRootObject:allFollowing];
     [defaults setObject:followingData forKey:@"allFollowing"];
     [defaults synchronize];
-    [profileController updateFollowCounts];
+    //[profileController updateFollowCounts];
     NSLog(@"Get follow list returned: %@ is following %d people", [self getUsername], [allFollowing count]);
     
     // AGGREGATE FOR THE FIRST TIME HERE 
@@ -4649,7 +4646,7 @@ static bool isShowingAlerts = NO;
     NSData * followerData = [NSKeyedArchiver archivedDataWithRootObject:allFollowers];
     [defaults setObject:followerData forKey:@"allFollowers"];
     [defaults synchronize];
-    [profileController updateFollowCounts];
+    //[profileController updateFollowCounts];
     NSLog(@"Get followers returned: %@ has %d followers", [self getUsername], [allFollowers count]);    
 }
 

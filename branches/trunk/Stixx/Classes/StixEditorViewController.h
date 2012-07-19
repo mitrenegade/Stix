@@ -17,6 +17,7 @@
 #import "UIImage+Alpha.h"
 #import "UIImage+RoundedCorner.h"
 #import "LoadingAnimationView.h"
+#import "FlurryAnalytics.h"
 
 @protocol StixEditorDelegate <NSObject>
 
@@ -27,7 +28,7 @@
 // for optimization
 -(void)didGetHighResImage:(UIImage*)highResImage forTagID:(NSNumber*)tagID;
 -(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
-
+-(NSString*)getUsername;
 @end
 
 @interface StixEditorViewController : UIViewController <StixPanelDelegate, StixViewDelegate, KumulosHelperDelegate, UIAlertViewDelegate>

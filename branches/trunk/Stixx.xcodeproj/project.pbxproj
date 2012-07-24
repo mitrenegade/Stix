@@ -225,6 +225,7 @@
 		9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D21524DD8500BEA5D1 /* btn_mypix.png */; };
 		9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */; };
 		9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */; };
+		9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E98EBE915B7B2AC00D720C4 /* TwitterHelper.m */; };
 		9E9A877A158694510067957A /* PixPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9A8778158694510067957A /* PixPreviewController.m */; };
 		9E9A877B158694510067957A /* PixPreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9A8779158694510067957A /* PixPreviewController.xib */; };
 		9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9C5E00151CCBF90048CDED /* FacebookLoginController.m */; };
@@ -676,6 +677,8 @@
 		9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserGalleryController.h; sourceTree = "<group>"; };
 		9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserGalleryController.m; sourceTree = "<group>"; };
 		9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserGalleryController.xib; sourceTree = "<group>"; };
+		9E98EBE815B7B2AC00D720C4 /* TwitterHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwitterHelper.h; sourceTree = "<group>"; };
+		9E98EBE915B7B2AC00D720C4 /* TwitterHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TwitterHelper.m; sourceTree = "<group>"; };
 		9E9A8777158694510067957A /* PixPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixPreviewController.h; sourceTree = "<group>"; };
 		9E9A8778158694510067957A /* PixPreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PixPreviewController.m; sourceTree = "<group>"; };
 		9E9A8779158694510067957A /* PixPreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PixPreviewController.xib; sourceTree = "<group>"; };
@@ -1188,6 +1191,15 @@
 			name = Login;
 			sourceTree = "<group>";
 		};
+		9E98EBE715B7B29B00D720C4 /* Twitter */ = {
+			isa = PBXGroup;
+			children = (
+				9E98EBE815B7B2AC00D720C4 /* TwitterHelper.h */,
+				9E98EBE915B7B2AC00D720C4 /* TwitterHelper.m */,
+			);
+			name = Twitter;
+			sourceTree = "<group>";
+		};
 		9EA17D3A143BFF8700CD710C /* stixxBindings */ = {
 			isa = PBXGroup;
 			children = (
@@ -1298,6 +1310,7 @@
 		9EB031B1142C01260019F2BD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				9E98EBE715B7B29B00D720C4 /* Twitter */,
 				9E8112E415AFACB30080AAC3 /* Newsletter */,
 				9E940CE4159AEAAC00F53687 /* Utilities */,
 				9E940CE3159AEA6A00F53687 /* Sharing */,
@@ -2106,6 +2119,7 @@
 				9E5D440C15B4A830000C58F1 /* FriendServicesViewController.m in Sources */,
 				9E5D446815B51192000C58F1 /* SearchByNameController.m in Sources */,
 				9E5D446C15B517E8000C58F1 /* StixUsersViewController.m in Sources */,
+				9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

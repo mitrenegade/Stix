@@ -82,20 +82,12 @@
         [featuredHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
+    UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
+    [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
     if ([suggestedFriends count] == 0) {
-        //[headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
-        if ([headerViews count] == SUGGESTIONS_SECTION_MAX)
-            [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+        [friendHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
-    else {
-        if ([headerViews count] < SUGGESTIONS_SECTION_MAX) {
-            // could have deleted friend section initially
-            [headerViews addObject:[NSNull null]];
-        }
-        UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
-        [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
-        [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
-    }
+    [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
     NSLog(@"After initializing header views: %d sections", [headerViews count]);
     
     int newHeight = ROW_HEIGHT * ([suggestedFriends count] + [suggestedFeatured count]) + 24 * [headerViews count];
@@ -258,8 +250,10 @@
         [allFacebookFriendNames addObject:_facebookName];
         [allFacebookFriendStrings addObject:_facebookString];
         
-        if ([alreadyFollowing containsObject:_facebookName])
+        if ([alreadyFollowing containsObject:_facebookName]) {
+            NSLog(@"Already following %@", _facebookName);
             continue; // skip those already following
+        }
         if ([_facebookName isEqualToString:[delegate getUsername]])
             continue; // skip self
         if ([allFacebookStrings containsObject:_facebookString]) {
@@ -330,6 +324,33 @@
     }
 }
 
+-(void)didGetTwitterFriends:(NSArray*)friendArray {
+    // from FriendServicesViewController or ShareController
+    if (allTwitterFriendNames == nil) {
+        allTwitterFriendNames = [[NSMutableArray alloc] init];
+        allTwitterFriendScreennames = [[NSMutableArray alloc] init];
+        allTwitterFriendStrings = [[NSMutableArray alloc] init];
+    }
+    else {
+        [allTwitterFriendNames removeAllObjects];
+        [allTwitterFriendScreennames removeAllObjects];
+        [allTwitterFriendStrings removeAllObjects];
+    }
+    
+    for (NSMutableDictionary * d in friendArray) {
+        NSString * twitterString = [d objectForKey:@"id_str"];
+        NSString * name = [d objectForKey:@"name"];
+        NSString * screenname = [d objectForKey:@"screen_name"];
+        NSLog(@"Adding twitter user %@ with screenname %@", name, screenname);
+        // if needed in future
+        NSString * profile_image_url = [d objectForKey:@"profile_image_url"];         
+        [allTwitterFriendNames addObject:name];
+        [allTwitterFriendScreennames addObject:screenname]; // people may use same screenname for twitter and stix
+        [allTwitterFriendStrings addObject:twitterString];
+    }
+    didGetTwitterFriends = YES;
+}
+
 
 #pragma mark FriendSearchTableDelegate 
 -(int)friendsCount {
@@ -366,17 +387,29 @@
 }
 
 -(void)removeFriendAtRow:(int)row {
+    // unlike FriendSuggestionController, friends here get removed from the list when they are added/followed
+    [self followUser:[suggestedFriends objectAtIndex:row]];
+
     if (row < [suggestedFriends count])
         [suggestedFriends removeObjectAtIndex:row];
+    if ([suggestedFriends count] == 0)
+        [self initializeHeaderViews];
+    
 }
 -(void)removeFeaturedAtRow:(int)row {
+    // unlike FriendSuggestionController, friends here get removed from the list when they are added/followed
+    [self followUser:[suggestedFeatured objectAtIndex:row]];
+    
     if (row < [suggestedFeatured count]) {
         [suggestedFeatured removeObjectAtIndex:row];
         [suggestedFeaturedDesc removeObjectAtIndex:row];
     }
+    if ([suggestedFeatured count] == 0)
+        [self initializeHeaderViews];
+    
 }
 -(void)removeFriendsHeader {
-    [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+    //[headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
 }
 
 #pragma mark tableViewDelegate for buttons
@@ -553,6 +586,19 @@
     return allFacebookFriendStrings;
 }
 
+// twitter friends
+-(NSMutableArray*)getAllTwitterFriendNames {
+    return allTwitterFriendNames;
+}
+
+-(NSMutableArray*)getAllTwitterFriendScreennames {
+    return allTwitterFriendScreennames;
+}
+
+-(BOOL)hasTwitterFriends {
+    return didGetTwitterFriends;
+}
+
 /*
 -(void)addFriendFromList:(int)index {
     NSString * username = [self getUsernameForUser:index];
@@ -572,23 +618,31 @@
     //[[searchResultsController tableView] reloadData];
 }
  */
+
 -(void)followUser:(NSString*)name {
     [delegate setFollowing:name toState:YES];
+    // todo: if friend lists are changed elsewhere, this needs to be updated
 }
 -(void)unfollowUser:(NSString*)name {
     [delegate setFollowing:name toState:NO];
+    // todo: if friend lists are changed elsewhere, this needs to be updated
 }
--(void)inviteUser:(NSString*)name {
+-(void)inviteUser:(NSString*)name withService:(int)service{
     // invite
     //NSLog(@"allFacebookFriendNames objects: %d object1: %@ string %@ searching for name %@", [allFacebookFriendNames count], [allFacebookFriendNames objectAtIndex:0], [allFacebookFriendStrings objectAtIndex:0], name);
-    if ([allFacebookFriendNames containsObject:name]) {
-        int index = [allFacebookFriendNames indexOfObject:name];
-        NSLog(@"index: %u", index);
-        NSString * _facebookString = [allFacebookFriendStrings objectAtIndex:index];
-        [delegate didClickInviteButtonByFacebook:name withFacebookString:_facebookString];
+    if (service == PROFILE_SERVICE_FACEBOOK) {
+        if ([allFacebookFriendNames containsObject:name]) {
+            int index = [allFacebookFriendNames indexOfObject:name];
+            NSLog(@"index: %u", index);
+            NSString * _facebookString = [allFacebookFriendStrings objectAtIndex:index];
+            [delegate didClickInviteButtonByFacebook:name withFacebookString:_facebookString];
+        }
+        else {
+            NSLog(@"Cannot invite someone without a facebook ID");
+        }
     }
-    else {
-        NSLog(@"Cannot invite someone without a facebook ID");
+    else if (service == PROFILE_SERVICE_TWITTER) {
+        NSLog(@"friend services view is taking care of it!");
     }
 }
 

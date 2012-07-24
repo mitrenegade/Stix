@@ -32,6 +32,7 @@
     FriendSearchTableViewController * tableViewController;
     IBOutlet UIButton * buttonEdit;
     IBOutlet UIButton * buttonNext;
+    IBOutlet UIImageView * tabGraphic;
 
     // debug
     IBOutlet UIButton * refresh;
@@ -50,7 +51,7 @@
     BOOL isEditing;
 }
 @property (nonatomic, unsafe_unretained) NSObject<FriendSuggestionDelegate> *delegate;
-@property (nonatomic) FriendSearchTableViewController * tableView;
+@property (nonatomic) FriendSearchTableViewController * tableViewController;
 @property (nonatomic) IBOutlet UIButton * buttonEdit;
 @property (nonatomic) IBOutlet UIButton * buttonNext;
 @property (nonatomic) IBOutlet UIButton * refresh;

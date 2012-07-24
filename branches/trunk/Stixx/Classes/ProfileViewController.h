@@ -44,7 +44,7 @@
 -(void)shouldCloseUserPage;
 @end
 
-@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UserGalleryDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate>
+@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UserGalleryDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate>
 {
     IBOutlet UIScrollView * scrollView;
     
@@ -64,12 +64,11 @@
     
     NSMutableArray * headerViews;
 
-    BOOL waitingForFacebookLogin;
-    
     BOOL showPointer;
     BOOL didGetFacebookFriends;
     BOOL didGetFeaturedUsers;
     BOOL isSearching;
+    BOOL didGetTwitterFriends;
     
     // facebook friends
     NSMutableArray * allFacebookFriendNames;
@@ -77,6 +76,12 @@
     
     // contact friends
     NSMutableArray * allContacts;
+    
+    // twitter friends
+    BOOL waitingForTwitterLogin;
+    NSMutableArray * allTwitterFriendNames;
+    NSMutableArray * allTwitterFriendScreennames;
+    NSMutableArray * allTwitterFriendStrings;
     
     NSObject<ProfileViewDelegate> * __unsafe_unretained delegate;
     LoadingAnimationView * activityIndicator;

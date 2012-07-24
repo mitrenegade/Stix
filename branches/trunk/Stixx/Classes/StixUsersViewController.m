@@ -61,14 +61,17 @@
     if (mode == PROFILE_SEARCHMODE_FIND) {
         [logo setImage:[UIImage imageNamed:@"txt_findfriends"]];
         [logo setFrame:CGRectMake(108, 12, 105, 25)];
+        [buttonAll setImage:[UIImage imageNamed:@"btn_followall"] forState:UIControlStateNormal];
     }
     else if (mode == PROFILE_SEARCHMODE_INVITE) {
         [logo setImage:[UIImage imageNamed:@"txt_invitefriends"]];
         [logo setFrame:CGRectMake(103, 12, 115, 25)];
+        [buttonAll setImage:[UIImage imageNamed:@"btn_inviteall"] forState:UIControlStateNormal];
     }
     else if (mode == PROFILE_SEARCHMODE_SEARCHBAR) {
         [logo setImage:[UIImage imageNamed:@"logo"]];
         [logo setFrame:CGRectMake(131, 2, 59, 38)];
+        [buttonAll setImage:[UIImage imageNamed:@"btn_followall"] forState:UIControlStateNormal];
     }
 }
 

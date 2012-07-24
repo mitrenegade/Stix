@@ -229,17 +229,18 @@
 #endif
     //[photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
 
-    [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
-    [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
-    if ([[delegate getFollowingList] containsObject:username]) { 
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
-    }
-    else
-    {
-        [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
-    }
-    [buttonAddFriend addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
-    
+    if (![username isEqualToString:[delegate getUsername]]) {
+        [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
+        [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
+        if ([[delegate getFollowingList] containsObject:username]) { 
+            [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
+        }
+        [buttonAddFriend addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
+    }    
     [bgFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
     [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
 

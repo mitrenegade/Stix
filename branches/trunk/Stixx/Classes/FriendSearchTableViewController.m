@@ -220,28 +220,23 @@
         [delegate removeFeaturedAtRow:row];
     }
     [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    /*
+     // happens in removeFriend/removeFeaturedAtRow
     if (section == SUGGESTIONS_SECTION_FRIENDS && [delegate friendsCount] == 0){
         [delegate removeFriendsHeader];
-        [_tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationNone];
+        //[_tableView deleteSections:[NSIndexSet indexSetWithIndex:SUGGESTIONS_SECTION_FRIENDS] withRowAnimation:UITableViewRowAnimationNone];
     }
-    
-    //if ([delegate friendsCount] == 0 && [delegate featuredCount] == 0) {
-    //    [self didClickButtonNext:nil];
-    //}
+    */
+    if ([delegate friendsCount] == 0 && [delegate featuredCount] == 0) {
+        if ([delegate respondsToSelector:@selector(didDeleteAllEntries)])
+            [delegate didDeleteAllEntries];
+    }
 }
 
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
-    
     if (showAccessoryButton) {
         [delegate didSelectFriendSearchIndexPath:indexPath];
     }

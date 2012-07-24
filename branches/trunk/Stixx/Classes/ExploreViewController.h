@@ -30,9 +30,6 @@
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 //-(void)sharePix:(int)tagID;
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
-#if HAS_PROFILE_BUTTON
--(void)didOpenProfileView;
-#endif
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 

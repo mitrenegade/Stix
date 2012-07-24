@@ -18,6 +18,7 @@
 #import "FacebookHelper.h"
 #import "Tag.h"
 #import "FlurryAnalytics.h"
+#import "TwitterHelper.h"
 
 #define HOSTNAME @"stix.herokuapp.com"
 
@@ -33,7 +34,7 @@
 
 @end
 
-@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate, SHKSharerDelegate>
+@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate, TwitterHelperDelegate, SHKSharerDelegate>
 {
     IBOutlet UIButton * backButton;
     IBOutlet UIButton * doneButton;

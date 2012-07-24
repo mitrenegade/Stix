@@ -9,10 +9,11 @@
 #import "ShareController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "SHKTwitter.h"
+#import "SHKiOS5Twitter.h"
 #import "SHKConfiguration.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
-#define ROW_HEIGHT 44
+#define ROW_HEIGHT_SHARE 44
 #define NUM_SERVICES 2
 
 static ShareController *sharedShareController;
@@ -52,7 +53,7 @@ static ShareController *sharedShareController;
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT * NUM_SERVICES - 20)];
+    [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT_SHARE * NUM_SERVICES)];
     [tableView.layer setCornerRadius:10];
 }
 
@@ -65,6 +66,9 @@ static ShareController *sharedShareController;
 
 -(void)viewDidAppear:(BOOL)animated {
     [caption setText:@""];
+
+    [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT_SHARE * NUM_SERVICES)];
+    [tableView.layer setCornerRadius:10];
  
     // make sure first time instructions arrow is not showing
     [delegate hideFirstTimeArrowForShareController];
@@ -82,9 +86,6 @@ static ShareController *sharedShareController;
 
 -(void)initializeServices {
     
-    // configuring sharekit
-    DefaultSHKConfigurator *configurator = [[MySHKConfigurator alloc] init];
-    [SHKConfiguration sharedInstanceWithConfigurator:configurator];
     //[[SHK currentHelper] setCurrentView:self]; // dont do this or auth screen won't work
     
     names = [[NSMutableArray alloc] initWithObjects:@"Facebook", @"Twitter", @"Instagram", @"Tumblr", @"Pinterest", nil];
@@ -138,7 +139,7 @@ static ShareController *sharedShareController;
 #pragma mark - Table view data source
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return ROW_HEIGHT;
+    return ROW_HEIGHT_SHARE;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -351,7 +352,11 @@ static ShareController *sharedShareController;
     
     // Twitter
     if ([self shareServiceIsSharing:@"Twitter"]) {
+#if 0
         SHKTwitter * twitter = [[SHKTwitter alloc] init];
+#else
+        TwitterHelper * twitter = [[TwitterHelper alloc] init];
+#endif
         [twitter setShareDelegate:self];
         SHKItem *item = [SHKItem text:[NSString stringWithFormat:@"%@ %@", _caption, url]];
         [item setImage:self.image];
@@ -430,7 +435,6 @@ static ShareController *sharedShareController;
 #pragma mark sharekit
 
 -(void)doTwitterConnect {
-	[SHK setRootViewController:self];
     /*
     For Twitter with iOS 5, it will not autoshare. If you want twitter to autoshare on iOS 5, remove the iOS 5 support from the SHKTwitter.m file.
     
@@ -446,34 +450,15 @@ static ShareController *sharedShareController;
         return YES;
     }
      */
+	[SHK setRootViewController:self];
+    TwitterHelper * twitter = [[TwitterHelper alloc] init];
+    [twitter setHelperDelegate:self];
     
-    // only do this to test oauth
-    if ([SHKTwitter isServiceAuthorized])
-    {
-        //[SHKTwitter logout];
-        NSLog(@"Twitter already authorized!");   
-    }
-    SHKTwitter * twitter = [[SHKTwitter alloc] init];
-    [twitter setShareDelegate:self];
-    
-#if 1
-    // try to connect only
-    if ([SHK connected] // has internet
-        && ![SHKTwitter isServiceAuthorized]) { 
-        SHKItem *item = [[SHKItem alloc] init];
-        [item setShareType:SHKShareTypeUserInfo];
-        [twitter setItem:item];
-        [twitter share];
+    if ([SHK connected] && ![twitter isAuthorized]) { 
+        [twitter doInitialConnect];
     } else {
         [self didConnect:@"Twitter"];
     }
-#else
-    // do a full share
-    // Create the item to share (in this example, a url)
-    SHKItem *item = [SHKItem text:@"Twitter from stix"];
-    [twitter setItem:item];
-    [twitter share];
-#endif
 }
 
 -(void)didConnect:(NSString*)service {
@@ -498,22 +483,16 @@ static ShareController *sharedShareController;
 
 }
 
--(void)doTwitterShare {
-    SHKTwitter * twitter = [[SHKTwitter alloc] init];
-    [twitter setShareDelegate:self];
-    SHKItem *item = [SHKItem text:@"Twitter from stix"];
-    [twitter setItem:item];
-    [twitter share];
-}
-
 - (void)sharerStartedSending:(SHKSharer *)sharer {
     NSLog(@"Started sending");
 }
 - (void)sharerFinishedSending:(SHKSharer *)sharer {
-    if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
-        NSLog(@"Finished sending: userinfo");
-        [self didConnnect:@"Twitter"];
-    }
+    NSLog(@"SHKSharer finished twitter sharing!");
+}
+
+-(void)twitterHelperDidConnect {
+    // will be sent back by twitterHelper 
+    [self didConnect:@"Twitter"];
 
     // only cause activityIndicator to go away when all sharers have finished? or just do in background?
     /*

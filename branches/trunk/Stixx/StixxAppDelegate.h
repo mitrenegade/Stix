@@ -34,7 +34,6 @@
 #import "Appirater.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
 #import "ShareController.h"
-#import "SHK.h" // sharekit
 #import "VerticalFeedController.h"
 #import "FriendSuggestionController.h"
 #import "FlurryAnalytics.h"
@@ -42,6 +41,11 @@
 #import "StixEditorViewController.h"
 #import "Admin.h"
 #import "NewsletterViewController.h"
+
+#import "SHK.h" // sharekit
+#import "SHKConfiguration.h"
+#import "MySHKConfigurator.h"
+#import "SHKSharer.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"

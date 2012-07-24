@@ -107,6 +107,11 @@ static dispatch_queue_t backgroundQueue;
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
     
+    /*** sharekit ***/
+    // configuring sharekit so both sharekit and twitter connect can work
+    DefaultSHKConfigurator *configurator = [[MySHKConfigurator alloc] init];
+    [SHKConfiguration sharedInstanceWithConfigurator:configurator];
+    
     [[StixPanelView sharedStixPanelView] setDelegatePurchase:self];
 
     aggregator = [[UserTagAggregator alloc] init];
@@ -809,6 +814,18 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if 0 && ADMIN_TESTING_MODE
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
 #endif
+    
+    // to invalidate twitter and force a new login each time:
+    BOOL isConnected = NO;
+    NSString * connectedString = @"TwitterIsConnected";
+    NSString * sharingString = @"TwitterIsSharing";
+    NSLog(@"According to defaults, Twitter is connected %@ is sharing %@", [defaults objectForKey:connectedString], [defaults objectForKey:sharingString]);
+    if ([defaults objectForKey:connectedString]) {
+        isConnected = [[defaults objectForKey:connectedString] boolValue];
+    }
+    if (!isConnected) {
+        [TwitterHelper logout];
+    }
     
     // load previous followers
     NSData * followingData = [defaults objectForKey:@"allFollowing"];
@@ -2259,7 +2276,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[Admin adminUpdateAllUserFacebookStrings:theResults];
     
     NSLog(@"kumulosHelper getAllUsers did complete with %d users", [theResults count]);
-    dispatch_async(backgroundQueue, ^{
+//    dispatch_async(backgroundQueue, ^{
         [allUsers removeAllObjects];
         [allUserPhotos removeAllObjects];
         [allUserFacebookStrings removeAllObjects];
@@ -2288,7 +2305,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [feedController forceReloadWholeTableZOMG];
         [friendSuggestionController refreshUserPhotos];
         [newsController refreshUserPhotos];
-    });
+//    });
 }
 
 -(void)didAddNewUserWithResult:(NSArray *)theResults {
@@ -2310,47 +2327,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 /**** LoginSplashController delegate ****/
-
-/**** ProfileViewController and login functions ****/
--(void)didOpenProfileView {
-    if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)) {
-        [self agitateFirstTimePointer];
-        return;
-    }
-    if (isDisplayingShareSheet)
-        return;
-    if (isLoggingIn) {
-#if HAS_PROFILE_BUTTON
-        if (!myUserInfo_userphoto) {
-            UIImage * photo = [self getUserPhotoForUsername:[self getUsername]];
-            [feedController.buttonProfile setImage:photo forState:UIControlStateNormal];
-        } else {
-            [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
-        }
-        [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
-        [feedController.buttonProfile.layer setBorderWidth:1];
-#endif
-    }
-    
-    // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-    [self.tabBarController.view addSubview:profileController.view];
-    [profileController.view setFrame:frameOffscreen];
-
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:profileController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-    
-    // must force viewDidAppear because it doesn't happen when it's offscreen?
-    [profileController viewDidAppear:YES]; 
-
-    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
-        [self advanceFirstTimeUserMessage];
-        [self hideFirstTimeUserMessage];
-        [profileController doPointerAnimation];
-    }
-}
 
 -(void)closeProfileView {
 #if DEBUGX==1
@@ -3437,10 +3413,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self agitateFirstTimePointer];
         return;
     }
+    /*
     if ([name isEqualToString:[self getUsername]]) {
-        [self didOpenProfileView];
+        //[self didOpenProfileView];
+        [self didPressTabButton:TABBAR_BUTTON_PROFILE];
         return;
     }
+     */
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameOffscreen = CGRectMake(-330, STATUS_BAR_SHIFT, 320, 480);
     [self.tabBarController.view addSubview:userProfileController.view];

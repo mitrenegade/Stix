@@ -574,13 +574,13 @@
     // we want a side to side transition
     // so we have to use the hack for navController.view in addition to presentmodalview
     
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
 //    [self presentModalViewController:_navController animated:NO];
     [self.view addSubview:controller.view];
     [controller.view setFrame:frameOffscreen];
     
     // must initialize after imageView and stixView actually exist
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:controller.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];

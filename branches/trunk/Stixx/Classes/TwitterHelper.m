@@ -1,0 +1,357 @@
+//
+//  TwitterHelper.m
+//  Stixx
+//
+//  Created by Bobby Ren on 7/18/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//
+//  Notes on hacking ShareKit's twitter class to also do regular requests like friends:
+//  We use this in order to take advantage of the built in OAuth library. TwitterHelper is a subclass so that we can access consumer key, etc.
+//  Authentication functions (authorize and logout) are based on class name (SHKTwitter, SHKFacebook, or TwitterHelper in our case). So whenever logout or authorize are called, they must be done on the same class, ie TwitterHelper.
+//  For some reason, if we are using SHKTwitter calls inside TwitterHelper, after authorize happens, the screen/prompt doesn't appear. 
+
+#import "TwitterHelper.h"
+
+@implementation TwitterHelper
+
+@synthesize helperDelegate;
+@synthesize currentTopViewController;
+
+-(void)doInitialConnect {
+    SHKItem *newitem = [[SHKItem alloc] init];
+    [newitem setShareType:SHKShareTypeUserInfo];
+#if 0
+    // use original SHKTwitter class
+    SHKTwitter * twitter = [[SHKTwitter alloc] init];
+    [twitter setShareDelegate:self];
+    [twitter setItem:newitem];
+    [twitter setShareDelegate:self]; // for initial connect, be the sharerDelegate 
+    [twitter share];
+#else
+    [self setItem:newitem];
+    [self setShareDelegate:self]; // for initial connect, be the sharerDelegate 
+    [self share];
+#endif
+}
+
+-(void)doInitialConnectWithCallback:(SEL) callback withParams:(id)params {
+    CALLBACK_FUNC = callback;
+    callbackParams = params;
+    [self doInitialConnect];
+}
+
+-(void)sharerStartedSending:(SHKSharer *)sharer {
+    if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
+        if ([helperDelegate respondsToSelector:@selector(twitterHelperStartedInitialConnect)])
+            [helperDelegate twitterHelperStartedInitialConnect];
+    }
+}
+
+// comes here after a successful SHKShareTypeUserInfo
+- (void)sharerFinishedSending:(SHKSharer *)sharer {
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
+        NSLog(@"Finished sending: userinfo");
+        if (CALLBACK_FUNC) {
+            [helperDelegate twitterHelperDidReturnWithCallback:CALLBACK_FUNC andParams:callbackParams];
+        }
+        else
+            [helperDelegate didInitialLoginForTwitter];
+    }
+}
+
+-(void)sharer:(SHKSharer *)sharer failedWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin {
+    NSLog(@"Sharer failed with error: %@ shouldRelogin: %d", [error description], shouldRelogin);
+}
+
+- (void)followMe:(NSString*)name
+{
+	// remove it so in case of other failures this doesn't get hit again
+	[item setCustomValue:nil forKey:@"followMe"];
+	
+	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/friendships/create/%@.json", name]]
+                                                                    consumer:consumer
+                                                                       token:accessToken
+                                                                       realm:nil
+                                                           signatureProvider:nil];
+	
+	[oRequest setHTTPMethod:@"POST"];
+	
+	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
+                                                                                          delegate:self
+                                                                                 didFinishSelector:@selector(didFinish)
+                                                                                   didFailSelector:@selector(didFail)];	
+	
+	[fetcher start];
+}
+
+- (void)getFriendsForUser:(NSString*)name
+{
+    requestType = @"getFriendsForUser";
+    OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/friends/ids.json?screen_name=%@", name]]
+                                                                    consumer:consumer
+                                                                       token:accessToken
+                                                                       realm:nil
+                                                           signatureProvider:nil];	
+    [oRequest setHTTPMethod:@"GET"];
+    OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
+                                                                                          delegate:self
+                                                                                 didFinishSelector:@selector(getRequest:didFinishWithData:)
+                                                                                   didFailSelector:@selector(getRequest:didFailWithError:)];		
+    [fetcher start];
+    //[oRequest release];
+}
+
+-(void)getMyCredentials {
+
+    requestType = @"getMyCredentials";
+    OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/account/verify_credentials.json"]]
+                                                                    consumer:consumer
+                                                                       token:accessToken
+                                                                       realm:nil
+                                                           signatureProvider:nil];	
+    [oRequest setHTTPMethod:@"GET"];
+    OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
+                                                                                          delegate:self
+                                                                                 didFinishSelector:@selector(getRequest:didFinishWithData:)
+                                                                                   didFailSelector:@selector(getRequest:didFailWithError:)];		
+    [fetcher start];
+    //[oRequest release];
+}
+
+-(void)getNamesForIDs:(NSArray*)twitterStrings {
+     
+    requestType = @"getNamesForIDs";
+    NSString * urlString = @"https://api.twitter.com/1/users/lookup.json?user_id=";
+    for (int i=0; i<[twitterStrings count]; i++) {
+        NSString * userID = [twitterStrings objectAtIndex:i];
+        if (i == [twitterStrings count]-1) { 
+            // last object
+            urlString = [NSString stringWithFormat:@"%@%@", urlString, userID];
+        }
+        else {
+            urlString = [NSString stringWithFormat:@"%@%@,", urlString, userID];
+        }
+    }
+    NSLog(@"URL String: %@", urlString);
+    OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlString]
+                                                                    consumer:consumer
+                                                                       token:accessToken
+                                                                       realm:nil
+                                                           signatureProvider:nil];	
+    [oRequest setHTTPMethod:@"GET"];
+    OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
+                                                                                          delegate:self
+                                                                                 didFinishSelector:@selector(getRequest:didFinishWithData:)
+                                                                                   didFailSelector:@selector(getRequest:didFailWithError:)];		
+    [fetcher start];
+    //[oRequest release];
+}
+
+-(void)didFinish {
+    NSLog(@"Here!");
+}
+-(void)didFail {
+    NSLog(@"Here!");
+}
+-(void)getRequest:(OAServiceTicket *)ticket didFailWithError:(NSError*) error {
+    NSLog(@"Failure error! error: %@", error);
+    NSLog(@"ticket failed: %@", [ticket debugDescription]);
+}
+-(void)getRequest:(OAServiceTicket *)ticket didFinishWithData:(NSData *)data 
+{	
+    if (ticket.didSucceed) {
+        NSError *jsonError;
+        id results = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:&jsonError];            
+        
+        if (results) {                          
+            // at this point, we have an object that we can parse
+            //NSLog(@"%@", results);
+            
+            if ([requestType isEqualToString:@"getMyCredentials"]) {
+                // return dictionary of user info
+                NSDictionary * returnDict = results;
+                if ([helperDelegate respondsToSelector:@selector(didGetTwitterCredentials:)])
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterCredentials:) andParams:returnDict];
+            }
+            else if ([requestType isEqualToString:@"getFriendsForUser"]) {
+                NSArray * friendsIDs = [self parseResponse:data forKey:@"ids"];
+                if ([helperDelegate respondsToSelector:@selector(didGetTwitterFriendsIDs:)])
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsIDs:) andParams:friendsIDs];
+            }
+            else if ([requestType isEqualToString:@"getNamesForIDs"]) {
+                NSArray * friendArray = results; // array of dictionaries
+                if ([helperDelegate respondsToSelector:@selector(didGetTwitterFriendsFromIDs:)])
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsFromIDs:) andParams:friendArray];
+            }
+            else if ([requestType isEqualToString:@"directMessage"]) {
+                NSLog(@"Direct message done!");
+            }
+        } 
+        else { 
+            // inspect the contents of jsonError
+            NSLog(@"%@", jsonError);
+        }
+    }
+    else {
+        NSLog(@"ticket failed: %@", [ticket debugDescription]);
+		NSLog(@"Twitter Send Status Error: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+        // if this happens twitter has authenticated but the request returned an error.
+        // if the user does the same request, or it is redone automatically, things should work.
+        // todo: display message to try again later?
+    }
+}
+
+#pragma mark twitter response parser
+-(id)parseResponse:(NSData*)response forKey:(NSString*)key {
+    NSError *jsonError;
+    NSDictionary *results = [NSJSONSerialization JSONObjectWithData:response options:NSJSONReadingMutableLeaves error:&jsonError];  
+    NSEnumerator * e = [results keyEnumerator];
+    for (NSString * k in e)
+        NSLog(@"Key: %@ value: %@", k, [results objectForKey:k]);
+    return [results objectForKey:key];
+}
+
++(BOOL)hasiOS5TwitterCredentials {
+    //  First, we need to obtain the account instance for the user's Twitter account
+    ACAccountStore *store = [[ACAccountStore alloc] init];
+    ACAccountType *twitterAccountType = [store accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    
+    //  Request permission from the user to access the available Twitter accounts
+    NSArray *twitterAccounts = 
+    [store accountsWithAccountType:twitterAccountType];
+    
+    if ([twitterAccounts count] > 0) {
+        return YES;
+    }
+    return NO;
+}     
+
+// these are calls done by the superclasses, and because token access settings are key/value pairs with the class type, they must be called with SHKTwitter as the class
++(void)logout {
+#if 0
+    [SHKTwitter logout];
+#else
+    [super logout];
+#endif
+}
+
+-(BOOL)isAuthorized {
+#if 0
+    SHKTwitter * twitterHelperHelper = [[SHKTwitter alloc] init];
+    return [twitterHelperHelper isAuthorized];
+#else
+    return [super isAuthorized];
+#endif
+}
+
+-(void)inviteFriendToTwitter:(NSString*)username {
+    //[item setShareType:SHKShareTypeText];
+    //NSString * shareText = [NSString stringWithFormat:@"d %@ Come check out Stix! http://stixmobile.com", username];
+    //[item setText:shareText];
+    [self directMessage:username];
+}
+
+-(void)directMessage:(NSString*)name {
+    requestType = @"directMessage";
+#if 0
+    //@"https://api.twitter.com/1/direct_messages/new.json"]]
+	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/1/statuses/update.json"]
+                                                                    consumer:consumer
+                                                                       token:accessToken
+                                                                       realm:nil
+                                                           signatureProvider:nil];
+	
+    NSString * statusWithDirectMessage = [NSString stringWithFormat:@"D %@ testText", name];
+	OARequestParameter *statusParam = [[OARequestParameter alloc] initWithName:@"status"
+                                                                         value:statusWithDirectMessage];
+    //OARequestParameter *textParam = [[OARequestParameter alloc] initWithName:@"text"
+    //                                                                   value:@"testText"];
+	NSArray *params = [NSArray arrayWithObjects:statusParam, nil];
+	[oRequest setParameters:params];
+    
+
+    // use the weird and somewhat bulky OARequestParameter
+	//[oRequest setParameters:[NSArray arrayWithObjects:nameParam, textParam, nil]];
+    //[oRequest setHTTPMethod:@"POST"];
+    [oRequest setHTTPMethod:@"POST"];
+    
+    OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
+                                                                                          delegate:self
+                                                                                 didFinishSelector:@selector(getRequest:didFinishWithData:) 
+                                                                                   didFailSelector:@selector(getRequest:didFailWithError:)];	
+    
+    [fetcher start];
+#else
+//    SHKItem *item = [SHKItem text:[NSString stringWithFormat:@"%@ %@", _caption, url]];
+    [item setTitle:@"newStatus"];
+    [item setText:@"newText"];
+    [self share];
+#endif
+}
+
+-(void)postToTwitter { 
+    /*
+    TWTweetComposeViewController *composer = [[TWTweetComposeViewController alloc] init];
+    
+    [composer addImage:self.item.image];    
+    [composer addURL:self.item.URL];
+    
+    if (self.item.shareType == SHKShareTypeText) 
+    {
+        NSUInteger textLength = [item.text length] > 140 ? 140 : [item.text length];
+        
+        while ([composer setInitialText:[item.text substringToIndex:textLength]] == NO && textLength > 0)
+        {
+            textLength--;
+        }
+    } 
+    else 
+    {
+        NSUInteger titleLength = [item.title length] > 140 ? 140 : [item.title length];      
+        
+        while ([composer setInitialText:[item.title substringToIndex:titleLength]] == NO && titleLength > 0)
+        {
+            titleLength--;
+        }
+    }
+    
+    composer.completionHandler = ^(TWTweetComposeViewControllerResult result) 
+    {
+        [self.currentTopViewController dismissViewControllerAnimated:YES completion:^{                                                                           
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:SHKHideCurrentViewFinishedNotification object:nil];
+            }];
+        }];
+        
+        switch (result) {
+                
+            case TWTweetComposeViewControllerResultDone:
+                [self sendDidFinish];
+                break;
+                
+            case TWTweetComposeViewControllerResultCancelled:
+                [self sendDidCancel];                
+                
+            default:
+                break;
+        }
+    };   
+    
+    currentTopViewController = [[SHK currentHelper] rootViewForCustomUIDisplay];
+    [currentTopViewController presentViewController:composer animated:YES completion:nil];
+     */
+    
+}
+
+-(void)sendDidStart {
+    NSLog(@"Twitter post did start");
+}
+-(void)sendDidFinish {
+    NSLog(@"Twitter post did finish");
+}
+-(void)sendDidCancel {
+    NSLog(@"Twitter post did cancel");
+}
+
+@end

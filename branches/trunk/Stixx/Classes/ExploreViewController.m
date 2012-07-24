@@ -174,12 +174,6 @@ static NSMutableSet * retainedDetailControllers;
 #endif
 }
 
-#if HAS_PROFILE_BUTTON
--(IBAction)didClickProfileButton:(id)sender {
-    [self.delegate didOpenProfileView];
-}
-#endif
-
 - (void) sliderValueChanged:(UISlider *)sender {  
     int value = [sender value];
     [self.tableController setNumberOfColumns:value andBorder:4];

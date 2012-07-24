@@ -27,8 +27,9 @@
 -(UIView*)headerViewForSection:(int)section;
 -(void)removeFriendAtRow:(int)row;
 -(void)removeFeaturedAtRow:(int)row;
--(void)removeFriendsHeader;
 -(void)didSelectFriendSearchIndexPath:(NSIndexPath*)indexPath;
+@optional
+-(void)didDeleteAllEntries;
 @end
 @interface FriendSearchTableViewController : UITableViewController
 {

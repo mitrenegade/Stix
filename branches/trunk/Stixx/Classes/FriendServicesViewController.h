@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "GlobalHeaders.h"
 #import "StixUsersViewController.h"
+#import "TwitterHelper.h"
+#import "LoadingAnimationView.h"
 
 @protocol FriendServicesDelegate <NSObject>
 
@@ -27,10 +29,15 @@
 
 -(void)followUser:(NSString*)name;
 -(void)unfollowUser:(NSString*)name;
--(void)inviteUser:(NSString*)name;
+-(void)inviteUser:(NSString*)name withService:(int)service;
+
+-(void)didGetTwitterFriends:(NSArray*)friendArray;
+-(NSMutableArray*)getAllTwitterFriendNames;
+-(NSMutableArray*)getAllTwitterFriendScreennames;
+-(BOOL)hasTwitterFriends;
 @end
 
-@interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate>
+@interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate, TwitterHelperDelegate>
 {
     NSObject<FriendServicesDelegate> * __unsafe_unretained delegate;
     IBOutlet UITableView * tableView;
@@ -40,6 +47,7 @@
     NSMutableArray * buttonIcons;
     
     int mode; // 0 = find, 1 = invite, 2 = search
+    int service;
     
     IBOutlet UISearchBar * searchBar;
     StixUsersViewController * stixUsersController;;
@@ -49,7 +57,10 @@
     NSMutableArray * searchFriendID;
     NSMutableArray * searchFriendIsStix;
     NSMutableArray * searchFriendPhone; // only for contact list
+    
+    LoadingAnimationView * activityIndicatorLarge;
 
+    BOOL waitingForTwitter; // find or invite users requested twitter service but twitter was not connected - need to resume populateWithTwitter
 }
 @property (nonatomic) IBOutlet UITableView * tableView;
 @property (nonatomic, unsafe_unretained) NSObject<FriendServicesDelegate> * delegate;
@@ -57,7 +68,13 @@
 @property (nonatomic) IBOutlet UIImageView * logo;
 @property (nonatomic) IBOutlet UISearchBar * searchBar;
 @property (nonatomic, assign) int mode;
+@property (nonatomic) StixUsersViewController * stixUsersController;;
+
+
+-(void)startActivityIndicatorLarge;
+-(void)stopActivityIndicatorLarge;
 
 -(void)initializeForMode:(int)_mode;
 -(IBAction)didClickBackButton:(id)sender;
+
 @end

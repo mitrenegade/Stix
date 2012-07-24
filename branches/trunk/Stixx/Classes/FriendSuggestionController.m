@@ -10,6 +10,8 @@
 
 @implementation FriendSuggestionController
 @synthesize delegate;
+@synthesize tableViewController;
+@synthesize buttonEdit;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -19,8 +21,6 @@
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
         
-        tableViewController = [[FriendSearchTableViewController alloc] init];
-        [tableViewController setDelegate:self];
     }
     return self;
 }
@@ -33,6 +33,12 @@
     if (!IS_ADMIN_USER([delegate getUsername]))
         [FlurryAnalytics logPageView];
 #endif
+
+    tableViewController = [[FriendSearchTableViewController alloc] init];
+    [tableViewController setDelegate:self];
+    [tableViewController.view setFrame:CGRectMake(0, 44, 320, 480-44-80)];
+    [tableViewController.view setBackgroundColor:[UIColor clearColor]];
+    [self.view insertSubview:tableViewController.view belowSubview:tabGraphic];
 }
 
 - (void)viewDidUnload
@@ -60,19 +66,12 @@
         [featuredHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
+    UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
+    [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
     if ([friends count] == 0) {
-        //[headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:[NSNull null]];
-        [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+        [friendHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
-    else {
-        if ([headerViews count] < SUGGESTIONS_SECTION_MAX) {
-            // could have deleted friend section initially
-            [headerViews addObject:[NSNull null]];
-        }
-        UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
-        [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
-        [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
-    }
+    [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
     NSLog(@"After initializing header views: %d sections", [headerViews count]);
 }
 
@@ -119,7 +118,8 @@
         [self initializeHeaderViews]; // reload in case initializeHeaderViews was called before this appeared
     }
     
-    //[tableView reloadData];
+//    NSLog(@"TableViewController: %x %x", self.tableViewController, self.tableViewController.tableView);
+    [self.tableViewController.tableView reloadData];
     // filter out existing friends, if any
     if ([featured count] > 0) {
         for (NSString * name in featured) {
@@ -158,8 +158,8 @@
     
     NSLog(@"Loaded %d Featured friends", [featured count]);
     
-    //[tableView reloadData];
-    if ([friends count] > 0) {
+    [self.tableViewController.tableView reloadData];
+    if ([friends count] > 0 && [featured count] > 0) {
         for (NSString * name in featured) {
             if ([friends containsObject:name])
                 [friends removeObject:name];
@@ -193,6 +193,10 @@
         [FlurryAnalytics logEvent:@"FriendSuggestionsEdited" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[delegate getUsername], @"username", nil]];
 #endif
 
+}
+
+-(void)didDeleteAllEntries {
+    [self didClickButtonNext:nil];
 }
 
 -(IBAction)didClickButtonNext:(id)sender {
@@ -234,7 +238,8 @@
         return nil;
     return [featuredDesc objectAtIndex:index];
 }
--(UIImage *)getUserPhotoForUser:(NSString *)username {
+-(UIImage *)getUserPhotoForUsername:(NSString *)username {
+#if 0
     if ([userPhotos objectForKey:username] == nil) {
         UIImage * photo = [delegate getUserPhotoForUsername:username];
         if (!photo)
@@ -256,6 +261,10 @@
         [userPhotos setObject:imageView forKey:username];
     }
     return [userPhotos objectForKey:username];
+#else
+    // FriendSearchTableViewController resizes the photos
+    return [delegate getUserPhotoForUsername:username];
+#endif
 }
 -(int)numberOfSections {
     return [headerViews count];
@@ -267,15 +276,16 @@
 -(void)removeFriendAtRow:(int)row {
     if (row < [friends count])
         [friends removeObjectAtIndex:row];
+    if ([friends count] == 0)
+        [self initializeHeaderViews];
 }
 -(void)removeFeaturedAtRow:(int)row {
     if (row < [featured count]) {
         [featured removeObjectAtIndex:row];
         [featuredDesc removeObjectAtIndex:row];
     }
-}
--(void)removeFriendsHeader {
-    [headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
+    if ([featured count] == 0)
+        [self initializeHeaderViews];
 }
 @end
 

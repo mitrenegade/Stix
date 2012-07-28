@@ -10,6 +10,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import "StixAnimation.h"
 
+#define USE_SORTED 1
+
 @interface FriendServicesViewController ()
 
 @end
@@ -37,13 +39,18 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    [tableView setFrame:CGRectMake(0, 40, 320, 200)];
+    [tableView setFrame:CGRectMake(0, 45, 320, 200)];
     [tableView.layer setCornerRadius:10];
     [tableView setDelegate:self];
     [tableView setBackgroundColor:[UIColor clearColor]];
 
     buttonNames = [[NSMutableArray alloc] initWithObjects:@"Facebook Friends", @"Twitter Friends", @"Contact List", nil];
     buttonIcons = [[NSMutableArray alloc] initWithObjects:[UIImage imageNamed:@"icon_share_facebook"], [UIImage imageNamed:@"icon_share_twitter"], [UIImage imageNamed:@"icon_contactlist"], nil];
+
+    stixUsersController = [[StixUsersViewController alloc] init];
+    [stixUsersController setDelegate:self];
+    [self.view addSubview:stixUsersController.view];
+    [stixUsersController.view setHidden:YES];
 }
 
 - (void)viewDidUnload
@@ -112,6 +119,10 @@
 }
 
 - (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)section {
+    if (mode == PROFILE_SEARCHMODE_FIND)
+        return 3;
+    if (mode == PROFILE_SEARCHMODE_INVITE)
+        return 2;
     return 3;
 }
 
@@ -125,8 +136,7 @@
         cell.textLabel.numberOfLines = 1;
         [cell setBackgroundColor:[UIColor whiteColor]];
         [cell.backgroundView setAlpha:.5];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
     
     // Configure the cell...
@@ -134,8 +144,18 @@
     int index = [indexPath row];
     
     [cell.textLabel setText:[buttonNames objectAtIndex:index]];
+#if 0
     [cell.imageView setImage:[buttonIcons objectAtIndex:index]];
-    [cell.imageView setFrame:CGRectMake(3, 3, 25, 25)];
+#else
+    UIImage * photo = [buttonIcons objectAtIndex:index];
+    CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
+    UIGraphicsBeginImageContext(newSize);
+    [photo drawInRect:CGRectMake(3, 4, ROW_HEIGHT-8, ROW_HEIGHT-8)];	
+    
+    UIImage* userPhoto = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();	
+    [cell.imageView setImage:userPhoto];    
+#endif
     cell.accessoryType = UITableViewCellAccessoryNone;
     return cell;
 }
@@ -175,13 +195,24 @@
             waitingForTwitter = YES;
         }
     }
-        else {
+    else {
+        if ([[FacebookHelper sharedFacebookHelper] facebookHasSession]) {
             if (mode == PROFILE_SEARCHMODE_FIND)
                 [self findFriendsForService:[NSNumber numberWithInt:service]];
             else if (mode == PROFILE_SEARCHMODE_INVITE) 
                 [self inviteFriendsForService:[NSNumber numberWithInt:service]];
-
         }
+        else {
+            [self startActivityIndicatorLarge];
+            waitingForFacebook = YES;
+            int newlogin = [[FacebookHelper sharedFacebookHelper] facebookLoginForShare];
+            if (newlogin == 0) {
+                // already logged in - continue process
+                [[FacebookHelper sharedFacebookHelper] getFacebookInfo];
+            }   
+        }
+    }
+    [tableView reloadData];
 }
 
 -(void)findFriendsForService:(NSNumber*)_service {
@@ -200,9 +231,17 @@
             //NSLog(@"i %d Facebook name: %@ facebook string: %@", i, _facebookName, _facebookString);
             // only need friends who are already on list
             if ([allFacebookStrings containsObject:_facebookString]) {
+                if ([_facebookName isEqualToString:[delegate getUsername]] || [_facebookString isEqualToString:[delegate getFacebookString]])
+                    continue;
+#if USE_SORTED
+                int newIndex = [self insertNameSorted:_facebookName];
+                [searchFriendID insertObject:_facebookString atIndex:newIndex];
+                [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
                 [searchFriendName addObject:_facebookName];
                 [searchFriendID addObject:_facebookString];
                 [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+#endif
             }
         }
         [self finishPopulateStixUsersView];
@@ -220,15 +259,18 @@
                 NSString * _username = [allTwitterFriendNames objectAtIndex:i];
                 NSString * screenname = [allTwitterFriendScreennames objectAtIndex:i];
                 // only need friends who are already on list
-                if ([allUsernames containsObject:_username]) {
+                if ([_username isEqualToString:[delegate getUsername]] || [screenname isEqualToString:[delegate getUsername]])
+                    continue;
+                if ([allUsernames containsObject:_username] || [allUsernames containsObject:screenname]) {
+#if USE_SORTED
+                    int newIndex = [self insertNameSorted:_username];
+                    [searchFriendScreenname insertObject:screenname atIndex:newIndex];
+                    [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
                     [searchFriendName addObject:_username];
-//                    [searchFriendID addObject:allTwitterFriendStrings];
+                    [searchFriendScreenname addObject:screenname];
                     [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
-                    found = YES;
-                }
-                else if ([allUsernames containsObject:screenname]) {
-                    [searchFriendName addObject:screenname];
-                    [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+#endif
                     found = YES;
                 }
                 NSLog(@"i %d real name: %@ screenname: %@ found: %d", i, _username, screenname, found);
@@ -257,15 +299,24 @@
             NSString * cName = [d valueForKey:@"name"];
             NSArray * arEmail = [d valueForKey:@"email"];
             NSString * cID = [d valueForKey:@"id"];
+            if ([cName isEqualToString:[delegate getUsername]])
+                continue;
             
             // search by full name
             if ([allUsers objectForKey:cName] != nil) {
                 NSString * cEmail = [[allUsers objectForKey:cName] objectForKey:@"email"];
                 //NSLog(@"Friends from contact found by name: %@ withEmail %@", cName, cEmail);
+#if USE_SORTED
+                int newIndex = [self insertNameSorted:cName];
+                [searchFriendEmail insertObject:cEmail atIndex:newIndex];
+                [searchFriendID insertObject:cID atIndex:newIndex];
+                [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
                 [searchFriendName addObject:cName];
                 [searchFriendEmail addObject:cEmail]; 
                 [searchFriendID addObject:cID];
                 [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookString to contact them
+#endif
             }
             else {
                 // search by email(s)
@@ -275,10 +326,17 @@
                         int index = [allUserEmails indexOfObject:cEmail];
                         cName = [allUserNames objectAtIndex:index];
                         //NSLog(@"Friends from contact found from email: %@ name %@", cEmail, cName);
+#if USE_SORTED
+                        int newIndex = [self insertNameSorted:cName];
+                        [searchFriendEmail insertObject:cEmail atIndex:newIndex];
+                        [searchFriendID insertObject:cID atIndex:newIndex];
+                        [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
                         [searchFriendName addObject:cName];
                         [searchFriendEmail addObject:cEmail]; 
                         [searchFriendID addObject:cID];
                         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]]; // only displays members in contact who are already on Stix because we have no facebookString to contact them
+#endif
                         break;
                     }        
                 }
@@ -296,10 +354,50 @@
     // start activity indicator running
     // do not show stix users view controller yet
     // ask twitter for credentials
+#if 0
     TwitterHelper * twHelper = [[TwitterHelper alloc] init];
     [twHelper setHelperDelegate:self];
     [twHelper getMyCredentials];
     [self startActivityIndicatorLarge];
+#else
+    TwitterHelper * twHelper = [[TwitterHelper alloc] init];
+    if ([twHelper isAuthorized]) { // needs to do this to renew token?
+        [self startActivityIndicatorLarge];
+        [twHelper setHelperDelegate:self];
+        [twHelper getMyCredentials];
+        waitingForTwitter = YES;
+    }
+    else 
+        NSLog(@"After login still not working!");
+#endif
+    
+}
+
+-(void)didInitialLoginForFacebook {
+    if (waitingForFacebook) {
+        [[FacebookHelper sharedFacebookHelper] requestFacebookFriends];
+    }
+}
+
+-(void)didCancelFacebookConnect {
+    [self stopActivityIndicatorLarge];
+    if (waitingForFacebook) {
+        waitingForFacebook = NO;
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connect" message:@"Facebook connect cancelled! Please try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
+}
+
+-(void)didGetFacebookFriends {
+    if (waitingForFacebook) {
+        waitingForFacebook = NO;
+        [self stopActivityIndicatorLarge];
+        
+        if (mode == PROFILE_SEARCHMODE_FIND)
+            [self findFriendsForService:[NSNumber numberWithInt:service]];
+        else if (mode == PROFILE_SEARCHMODE_INVITE) 
+            [self inviteFriendsForService:[NSNumber numberWithInt:service]];
+    }
 }
 
 -(void)inviteFriendsForService:(NSNumber*)_service {
@@ -315,12 +413,20 @@
         for (int i=0; i<[allFacebookFriendStrings count]; i++) {
             NSString * _facebookString = [allFacebookFriendStrings objectAtIndex:i];
             NSString * _facebookName = [allFacebookFriendNames objectAtIndex:i];
+            if ([_facebookName isEqualToString:[delegate getUsername]])
+                continue;
             //NSLog(@"i %d Facebook name: %@ facebook string: %@", i, _facebookName, _facebookString);
             // ONLY display friends NOT on stix
             if (![allFacebookStrings containsObject:_facebookString]) {
+#if USE_SORTED
+                int newIndex = [self insertNameSorted:_facebookName];
+                [searchFriendID insertObject:_facebookString atIndex:newIndex];
+                [searchFriendIsStix insertObject:[NSNumber numberWithBool:NO] atIndex:newIndex];
+#else
                 [searchFriendName addObject:_facebookName];
                 [searchFriendID addObject:_facebookString];
                 [searchFriendIsStix addObject:[NSNumber numberWithBool:NO]];
+#endif
             }
         }
         [self finishPopulateStixUsersView];
@@ -337,12 +443,21 @@
                 BOOL found = YES;
                 NSString * _username = [allTwitterFriendNames objectAtIndex:i];
                 NSString * screenname = [allTwitterFriendScreennames objectAtIndex:i];
+                if ([_username isEqualToString:[delegate getUsername]] || [screenname isEqualToString:[delegate getUsername]])
+                    continue;
                 //NSLog(@"i %d Facebook name: %@ facebook string: %@", i, _facebookName, _facebookString);
                 // only need friends who are already on list
                 if (![allUsernames containsObject:_username] && ![allUsernames containsObject:screenname]) {
+#if USE_SORTED
+                    int newIndex = [self insertNameSorted:_username];
+                    [searchFriendScreenname insertObject:screenname atIndex:newIndex];
+                    [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
                     [searchFriendName addObject:_username];
+                    [searchFriendScreenname addObject:screenname];
                     //                    [searchFriendID addObject:allTwitterFriendStrings];
                     [searchFriendIsStix addObject:[NSNumber numberWithBool:NO]];
+#endif
                     found = NO;
                 }
                 NSLog(@"i %d real name: %@ screenname: %@ found: %d", i, _username, screenname, found);
@@ -385,12 +500,14 @@
         searchFriendEmail = [[NSMutableArray alloc] init];
         searchFriendID = [[NSMutableArray alloc] init];
         searchFriendPhone = [[NSMutableArray alloc] init];
+        searchFriendScreenname = [[NSMutableArray alloc] init];
         searchFriendIsStix = [[NSMutableArray alloc] init]; // whether they are using Stix already
     }
     [searchFriendName removeAllObjects];
     [searchFriendEmail removeAllObjects];
     [searchFriendID removeAllObjects];
     [searchFriendIsStix removeAllObjects];
+    [searchFriendScreenname removeAllObjects];
     [searchFriendPhone removeAllObjects];
     [self.view addSubview:stixUsersController.view];
 //    [stixUsersController.view setHidden:YES];
@@ -399,14 +516,18 @@
 -(void)finishPopulateStixUsersView {
     NSLog(@"FinishPopulatingStixUsersView: showing users results with mode %d and %d users: view %x", mode, [searchFriendName count], stixUsersController.view);
     [self stopActivityIndicatorLarge];
-//    if (!stixUsersController) {
-//        stixUsersController = [[StixUsersViewController alloc] init];
-//        [stixUsersController setDelegate:self];
-//    }
     NSLog(@"Mode: %d", mode);
-//    [stixUsersController.view setHidden:NO];
     [stixUsersController setLogoWithMode:mode];
     [stixUsersController.tableView reloadData];
+    [stixUsersController.view setHidden:NO];
+}
+
+-(void)switchToInviteMode {
+//    [self didClickBackButton:nil];
+//    [delegate switchToInviteMode];
+    [self setMode:PROFILE_SEARCHMODE_INVITE];
+    [self viewWillAppear:NO];
+    [self.tableView reloadData];
 }
 
 #pragma mark search bar
@@ -427,8 +548,13 @@
     BOOL isFacebookString = [allUserFacebookStrings containsObject:[_searchBar text]];
     if (isFacebookString) {
         int index = [allUserFacebookStrings indexOfObject:[_searchBar text]];
+#if USE_SORTED
+        int newIndex = [self insertNameSorted:[allUserNames objectAtIndex:index]];
+        [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
         [searchFriendName addObject:[allUserNames objectAtIndex:index]];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+#endif
         [stixUsersController.tableView reloadData];
         return;
     }
@@ -452,8 +578,13 @@
     for (NSString * name in namesResults) {
         if ([name isEqualToString:[delegate getUsername]])
             continue;
+#if USE_SORTED
+        int newIndex = [self insertNameSorted:name];
+        [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+#else
         [searchFriendName addObject:name];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
+#endif
     }
 //    [stixUsersController.tableView reloadData];
     //[self stopActivityIndicator];
@@ -510,14 +641,17 @@
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate followUser:name];
     [stixUsersController.tableView reloadData];
+    [delegate reloadSuggestions];
 }
 -(void)unfollowUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate unfollowUser:name];
     [stixUsersController.tableView reloadData];
+    [delegate reloadSuggestions];
 }
 -(void)inviteUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
+    NSString * screen_name = [searchFriendName objectAtIndex:index];
     [delegate inviteUser:name withService:service];
     
     // if twitter invite, we need access to top level view
@@ -526,16 +660,44 @@
         TwitterHelper * twHelper = [[TwitterHelper alloc] init];
         [twHelper setHelperDelegate:self];
         [twHelper setCurrentTopViewController:stixUsersController];
-        [twHelper directMessage:@"name"];
+        [twHelper sendInviteMessage:name];
     }
 }
 
 -(void)followAllUsers {
     for (int i=0; i<[searchFriendName count]; i++) {
         NSString * name = [searchFriendName objectAtIndex:i];
-        [delegate followUser:name];
+        if (![delegate isFollowing:name])
+            [delegate followUser:name];
     }
     [stixUsersController.tableView reloadData];
+    [delegate reloadSuggestions];
+}
+-(void)inviteAllUsers {
+    if (service == PROFILE_SERVICE_FACEBOOK) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Invites" message:@"Sorry, I can't invite all of your Facebook friends at once...yet" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
+    else if (service == PROFILE_SERVICE_TWITTER) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Twitter Invites" message:@"Are you sure you want to send an invite to these people?" delegate:nil cancelButtonTitle:@"Not Now" otherButtonTitles:@"Yes, tweet on!", nil];
+        [alertView setTag:1];
+        [alertView setDelegate:self];
+        [alertView show];
+    }
+    
+}
+
+-(void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (alertView.tag == 1) {
+        NSLog(@"Button: %d", buttonIndex);
+        if (buttonIndex == 1) {
+            TwitterHelper * twHelper = [[TwitterHelper alloc] init];
+            [twHelper setHelperDelegate:self];
+            [twHelper setCurrentTopViewController:stixUsersController];
+            NSLog(@"SearchFriendScreenname: %x %d", searchFriendScreenname, [searchFriendScreenname count]);
+            [twHelper sendMassInviteMessage:searchFriendScreenname];
+        }
+    }
 }
 
 #pragma mark twitterHelperDelegate
@@ -547,6 +709,18 @@
     NSNumber * _service = params;
     NSLog(@"connecting to twitter from friendServices worked! params: %@", _service);
     [self performSelector:callback withObject:_service afterDelay:0];
+}
+-(void)twitterHelperDidFailWithRequestType:(NSString *)requestType {
+    if ([requestType isEqualToString:@"directMessage"]) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Twitter Timeout" message:@"Your invite failed due to connectivity issues...please try again later!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+        [self stopActivityIndicatorLarge];
+    }
+    else if ([requestType isEqualToString:@"initialConnect"] || [requestType isEqualToString:@"getMyCredentials"]) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Twitter Timeout" message:@"Twitter is taking too long and can't connect...please try again later!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+        [self stopActivityIndicatorLarge];
+    }
 }
 
 -(void)didGetTwitterCredentials:(NSDictionary*)results {
@@ -588,5 +762,30 @@
         }
         [self finishPopulateStixUsersView];
     }
+}
+
+-(void)shouldDisplayUserPage:(NSString *)name {
+    if (mode == PROFILE_SEARCHMODE_INVITE)
+        return;
+    [delegate shouldDisplayUserPage:name];
+}
+
+-(int)getUserID {
+    return [delegate getUserID];
+}
+
+-(int)insertNameSorted:(NSString*)name {
+    // inserts name into searchFriendName; returns its new index
+    id newObject = name;
+    NSComparator comparator = ^(id obj1, id obj2) {
+        return [obj1 compare: obj2];
+    };
+    
+    NSUInteger newIndex = [searchFriendName indexOfObject:newObject
+                                     inSortedRange:(NSRange){0, [searchFriendName count]}
+                                           options:NSBinarySearchingInsertionIndex
+                                   usingComparator:comparator];
+    [searchFriendName insertObject:newObject atIndex:newIndex];
+    return newIndex;
 }
 @end

@@ -191,7 +191,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         //[savedInfo setObject:tagID forKey:@"tagID"];
         //[savedInfo setObject:tagID forKey:@"username"];
     }
-    else if ([function isEqualToString:@"updateFacebookString"]) {
+    else if ([function isEqualToString:@"setFacebookString"]) {
         for (NSMutableDictionary * d in params) {
             NSString * name = [d valueForKey:@"username"];
             NSString * email = [d valueForKey:@"email"];
@@ -207,6 +207,12 @@ static KumulosHelper *sharedKumulosHelper = nil;
         // incremented when commented, shared, remixed, viewed from explore, liked
         NSNumber * tagID = [params objectAtIndex:0];
         kOp = [k incrementPopularityWithAllTagID:[tagID intValue]];
+    }
+    else if ([function isEqualToString:@"setTwitterString"]) {
+        NSNumber * userID = [inputParams objectAtIndex:0];
+        NSString * twitterString = [inputParams objectAtIndex:1];
+        NSLog(@"Setting twitterString %@ for user %@", twitterString, userID);
+        kOp = [k setTwitterStringForUserWithAllUserID:[userID intValue] andTwitterString:twitterString];
     }
     
     if (!kOp) 
@@ -382,7 +388,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
     // retry if desired
     if ([function isEqualToString:@"getFacebookUser"]) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(kumulosHelperGetFacebookUserDidFail)])
-            [self.delegate kumulosHelperGetFacebookUserDidFail];
+            [delegate kumulosHelperGetFacebookUserDidFail];
     }
     else if ([function isEqualToString:@"getAllUsersForUpdatePhotos"]) {
         [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];

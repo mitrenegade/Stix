@@ -196,19 +196,19 @@ static NSMutableArray * premiumCategoryNames;
         [button0 addTarget:self action:@selector(didClickShelfCategory:) forControlEvents: UIControlEventTouchUpInside];
         int letters = [[buttonCategoriesNotSelected objectAtIndex:i] length] - 8;
         float width = 20 + letters * 12;
-        [button0 setFrame:CGRectMake(currentContentOrigin,10,width,50)];
+        [button0 setFrame:CGRectMake(currentContentOrigin,20,width,50)];
         //[button0 setBackgroundColor:[UIColor greenColor]];
         currentContentOrigin = currentContentOrigin + width+5;
         [buttonCategories addObject:button0];
     }
     
-    categoryScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(5, 40, 300, 70)];
+    categoryScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 40, 320, 70)];
     categoryScroll.scrollEnabled = YES;
     categoryScroll.directionalLockEnabled = YES; // only allow horizontal scroll
     [categoryScroll setContentSize:CGSizeMake(currentContentOrigin+20, 70)];
     [categoryScroll setDelegate:self];    
     
-    tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open.png"]];
+    tabImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tab_open"]];
     [tabImage setAlpha:.75];
     carouselTab = [[UIView alloc] initWithFrame:tabImage.frame];
     [carouselTab addSubview:tabImage];
@@ -536,9 +536,9 @@ static NSMutableArray * premiumCategoryNames;
 
 -(void)carouselTabDismiss:(BOOL)doAnimation {
     CGRect tabFrameHidden = CGRectMake(0, dismissedTabY, 320, 400);
-    CGRect tabButtonHidden = CGRectMake(14, 1, 80, 40);
+    CGRect tabButtonHidden = CGRectMake(5,20,60,40);//(14, 1, 80, 40);
     if (1) {
-        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
+        //[buttonShowCarousel setImage:[UIImage imageNamed:@"tab_open_icon.png"] forState:UIControlStateNormal];
         [buttonShowCarousel setFrame:tabButtonHidden];
         isShowingCarousel = NO;
     }
@@ -560,12 +560,12 @@ static NSMutableArray * premiumCategoryNames;
 
 -(void)carouselTabExpand:(BOOL)doAnimation {
     CGRect tabFrameShow = CGRectMake(0, expandedTabY, 320, 400);
-    CGRect tabButtonShow = CGRectMake(14, 1, 80, 40);
+    CGRect tabButtonShow = CGRectMake(5, 20, 60, 40);
     NSLog(@"ExpandedTabY: %d", expandedTabY);
     if (1) {
         [self setAlpha:.9];
         [tabImage setAlpha:.9];
-        [buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
+        //[buttonShowCarousel setImage:[UIImage imageNamed:@"tab_close_icon.png"] forState:UIControlStateNormal];
         [buttonShowCarousel setFrame:tabButtonShow];
         isShowingCarousel = YES;
     }

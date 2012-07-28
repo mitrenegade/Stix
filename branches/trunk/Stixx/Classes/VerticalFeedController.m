@@ -807,6 +807,9 @@
             }
         }
     }
+    if (exists == NO) {
+        [delegate requestTagWithTagID:tagID];
+    }
     return exists;
 }
 
@@ -1150,8 +1153,9 @@
     NSLog(@"Did click remix with feedItem by %@ with tagID %@, creating tagToRemix with ID %@", feedItem.tag.username, feedItem.tag.tagID, tagToRemix.tagID);
     if (tagToRemix.stixLayer) {
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
-        //    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
-        [actionSheet showFromTabBar:tabBarController.tabBar];
+        [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
+        [actionSheet setActionSheetStyle:UIActionSheetStyleBlackOpaque];
+        //[actionSheet showFromTabBar:tabBarController.tabBar];
     }
     else {
         // no previous stix exist, automatically choose original mode

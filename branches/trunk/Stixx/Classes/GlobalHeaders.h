@@ -28,6 +28,7 @@
 #define VERBOSE 0
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
 #define IS_ADMIN_USER(x) [ADMIN_USER_SET containsObject:x]
+#define ADMIN_FBID @"701860"
 
 #define LEFT_LABEL_TAG 1001000
 #define RIGHT_LABEL_TAG 1002000

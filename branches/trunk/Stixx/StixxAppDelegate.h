@@ -122,6 +122,7 @@ struct UserInfo {
     int idOfOldestTagReceived;
     int idOfLastTagChecked;
     int idOfCurrentTag; // current tag being displayed
+    int jumpPendingTagID;
     
     int pageOfLastNewerTagsRequest;
     int pageOfLastOlderTagsRequest;
@@ -311,6 +312,7 @@ struct UserInfo {
 @property (nonatomic) NSMutableSet * allFollowers;
 @property (nonatomic) NSMutableSet * allFollowing;
 @property (nonatomic) NSMutableArray * allUserFacebookStrings;
+@property (nonatomic) NSMutableArray * allUserTwitterStrings;
 @property (nonatomic) NSMutableArray * allUserEmails;
 @property (nonatomic) NSMutableArray * allUserNames;
 @property (nonatomic) NSMutableDictionary * allUserIDs;

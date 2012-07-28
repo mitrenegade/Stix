@@ -22,7 +22,7 @@
 
 @protocol FacebookHelperDelegate <NSObject>
 
--(void)didGetFacebookInfo:(NSDictionary *)results;
+-(void)didGetFacebookInfo:(NSDictionary *)results forShareOnly:(BOOL)gotTokenForShare;
 -(void)didLoginToFacebook:(BOOL)needInfo;
 -(void)didLogoutFromFacebook;
 -(void)didCancelFacebookLogin;

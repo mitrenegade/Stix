@@ -167,7 +167,12 @@
     NSMutableDictionary * d = [theResults objectAtIndex:0];
     NSString * newname = [d valueForKey:@"username"];
     NSNumber * userID = [d valueForKey:@"allUserID"];
-    NSLog(@"Userid: %@", userID);
+    NSString * email = [d valueForKey:@"email"];
+    NSLog(@"Userid: %@ email: %@", userID, email);
+    if (!email) {
+        NSLog(@"No email! facebookString %@ facebookEmail %@", facebookString, facebookEmail);
+        email = facebookEmail;
+    }
     if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
         return;
     UIImage * newPhoto = nil;
@@ -220,7 +225,7 @@
     // happens both when we have a facebook prompt (button) and when facebook
     // automatically logs in. 
     // need a method to determine whether it's the first time, and needs to display friendSuggestionController
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:facebookEmail andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:0 andBuxCount:0 andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:0 andBuxCount:0 andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
 }
 
 #pragma mark IBOutlet button actions
@@ -392,7 +397,7 @@
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSMutableArray * params = [[NSMutableArray alloc] init];
         [params addObject:newUser];
-        [kh execute:@"updateFacebookString" withParams:params withCallback:nil withDelegate:nil];
+        [kh execute:@"setFacebookString" withParams:params withCallback:nil withDelegate:nil];
         
         [self setFacebookString:_facebookString];
         
@@ -412,8 +417,14 @@
 
 // the only didFail function in kumulos helper delegate
 -(void)kumulosHelperGetFacebookUserDidFail {
+#if 0
     NSLog(@"Facebook login failed! Kumulos had some error. trying to login again");
     [self didGetFacebookName:facebookName andEmail:facebookEmail andFacebookString:facebookString];
+#else
+    // also in requestFailed in FacebookHelper for error -1001
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook login timed out. Try again when there is better connectivity!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alertView show];
+#endif
 }
 
 #pragma mark nonfacebook signup/login use chain
@@ -460,7 +471,7 @@
 */
 -(void)didLoginFromEmailSignup:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString *)email andUserID:(NSNumber *)userID {
     
-    //NSLog(@"Username: %@ email %@ userid %@ photo %x", username, email, userID, photo);
+    NSLog(@"Email signup: Username: %@ email %@ userid %@ photo %x", username, email, userID, photo);
     
     //[self dismissModalViewControllerAnimated:NO];
     //[self dismissNavControllerWithTransition];
@@ -470,6 +481,8 @@
                                username, @"username",
                                @"0", @"facebookString",
                                email, @"email",
+                               userID, @"allUserID",
+                               @"", @"twitterString",
 //                               UIImagePNGRepresentation(photo), @"photo",
                                nil
                                ];
@@ -482,6 +495,9 @@
     [delegate didAddNewUserWithResult:[NSArray arrayWithObject:d]];
     isFirstTimeUser = YES;
     [self didSelectUsername:username withResults:[NSArray arrayWithObject:d]];
+    
+    // since it's an email login, force invalidation of the token
+    [[[FacebookHelper sharedFacebookHelper] facebook] logout];
 }
 
 -(IBAction)didClickSignIn:(id)sender {

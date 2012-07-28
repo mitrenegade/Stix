@@ -45,6 +45,8 @@ enum first_time_user_stage {
     UIImage * bgNormal[TABBAR_BUTTON_MAX];
     UIImage * bgSelected[TABBAR_BUTTON_MAX];
     
+    UIButton * profileButton;
+    
     UIButton * firstTimeInstructions;
     bool showMallPointer;
     UIButton * buttonClose;
@@ -84,5 +86,7 @@ enum first_time_user_stage {
 -(void)agitateFirstTimePointer;
 -(void)flashFirstTimeInstructions;
 -(void)setNewsCountValue:(int)newCount;
+
+-(void)didGetProfilePhoto:(UIImage*)photo;
 @end
 

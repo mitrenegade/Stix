@@ -114,7 +114,7 @@
             KumulosHelper * kh = [[KumulosHelper alloc] init];
             NSMutableArray * params = [[NSMutableArray alloc] init];
             [params addObject:d];
-            [kh execute:@"updateFacebookString" withParams:params withCallback:nil withDelegate:nil];
+            [kh execute:@"setFacebookString" withParams:params withCallback:nil withDelegate:nil];
             ct++;
             //break;
         }

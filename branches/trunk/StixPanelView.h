@@ -16,7 +16,7 @@
 #define SHELF_HEIGHT 300
 #define USE_VERTICAL_GESTURE 0
 #define STIX_PER_ROW 4
-#define SHELF_SCROLL_OFFSET_FROM_TOP 108
+#define SHELF_SCROLL_OFFSET_FROM_TOP 103
 #define SHELF_LOWER_FROM_TOP 0
 #define NUM_STIX_FOR_BORDER 0 // put an empty stix on the edge of the content so stix isn't always at the very edge of the screen
 

@@ -32,6 +32,10 @@
 -(void)unfollowUserAtIndex:(int)index;
 -(void)inviteUserAtIndex:(int)index;
 -(void)followAllUsers;
+-(void)inviteAllUsers;
+
+-(void)shouldDisplayUserPage:(NSString*)name;
+-(void)switchToInviteMode;
 @end
 
 @interface StixUsersViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
@@ -42,6 +46,9 @@
     IBOutlet UIImageView * logo;
     IBOutlet UITableView * tableView;
     
+    IBOutlet UILabel * noFriendsLabel;
+    IBOutlet UIButton * noFriendsButton;
+    
     NSMutableDictionary * userButtons;
     NSMutableDictionary * userPhotos;
 
@@ -51,6 +58,8 @@
 @property (nonatomic) IBOutlet UIButton * buttonAll;
 @property (nonatomic) IBOutlet UIImageView * logo;
 @property (nonatomic) IBOutlet UITableView * tableView;
+@property (nonatomic) IBOutlet UILabel * noFriendsLabel;
+@property (nonatomic) IBOutlet UIButton * noFriendsButton;
 @property (nonatomic, unsafe_unretained) NSObject<StixUsersViewDelegate> * delegate;
 @property (nonatomic) NSMutableDictionary * userButtons;
 @property (nonatomic) NSMutableDictionary * userPhotos;
@@ -58,5 +67,6 @@
 
 -(IBAction)didClickBackButton:(id)sender;
 -(IBAction)didClickAllButton:(id)sender;
+-(IBAction)goToInvite;
 -(void)setLogoWithMode:(int)_mode;
 @end

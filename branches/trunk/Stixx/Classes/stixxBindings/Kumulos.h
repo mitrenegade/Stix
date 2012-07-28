@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Jul 19, 2012
+//  Created by Kumulos Bindings Compiler on Jul 28, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -147,6 +147,8 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setFacebookStringForUserDidCompleteWithResult:(NSNumber*)affectedRows;
  
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation setTwitterStringForUserDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateAuxiliaryDataDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateTotalTagsDidCompleteWithResult:(NSNumber*)affectedRows;
@@ -194,6 +196,10 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addNewsDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation countUnseenNewsDidCompleteWithResult:(NSNumber*)aggregateResult;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation deleteNewsDidCompleteWithResult:(NSNumber*)affectedRows;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation deleteNewsByIDDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getNewsDidCompleteWithResult:(NSArray*)theResults;
  
@@ -432,6 +438,9 @@
 -(KSAPIOperation*) setFacebookStringForUserWithEmail:(NSString*)email andFacebookString:(NSString*)facebookString;
     
    
+-(KSAPIOperation*) setTwitterStringForUserWithAllUserID:(NSUInteger)allUserID andTwitterString:(NSString*)twitterString;
+    
+   
 -(KSAPIOperation*) updateAuxiliaryDataWithUsername:(NSString*)username andAuxiliaryData:(NSData*)auxiliaryData;
     
    
@@ -500,6 +509,12 @@
     
    
 -(KSAPIOperation*) countUnseenNewsWithUsername:(NSString*)username andHasBeenSeen:(BOOL)hasBeenSeen;
+    
+   
+-(KSAPIOperation*) deleteNewsWithNews:(NSString*)news;
+    
+   
+-(KSAPIOperation*) deleteNewsByIDWithNewsfeedID:(NSUInteger)newsfeedID;
     
    
 -(KSAPIOperation*) getNewsWithUsername:(NSString*)username;

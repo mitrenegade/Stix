@@ -49,6 +49,7 @@
 @synthesize allUsers;
 @synthesize allUserPhotos;
 @synthesize allUserFacebookStrings, allUserEmails, allUserNames, allUserIDs;
+@synthesize allUserTwitterStrings;
 @synthesize allStix;
 @synthesize allStixOrder;
 @synthesize allFollowers, allFollowing;
@@ -75,8 +76,8 @@ static dispatch_queue_t backgroundQueue;
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    versionStringStable = @"1.0"; // must change this on next release
-    //versionStringStable = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    //versionStringStable = @"1.0"; // must change this on next release
+    versionStringStable = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]; //@"0.7.7.4";
     
     metricLogonTime = nil;
@@ -222,6 +223,7 @@ static dispatch_queue_t backgroundQueue;
     allFollowing = [[NSMutableSet alloc] init];
     allFollowers = [[NSMutableSet alloc] init];
     allUserFacebookStrings = [[NSMutableArray alloc] init];
+    allUserTwitterStrings = [[NSMutableArray alloc] init];
     allUserIDs = [[NSMutableDictionary alloc] init];
     allUserEmails = [[NSMutableArray alloc] init];
     allUserNames = [[NSMutableArray alloc] init];
@@ -293,6 +295,7 @@ static dispatch_queue_t backgroundQueue;
 	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
+    [profileController setCamera:camera];
     userProfileController = [[UserProfileViewController alloc] init];
     userProfileController.delegate = self;
     
@@ -342,6 +345,7 @@ static dispatch_queue_t backgroundQueue;
             // logged in but still need facebook info
             [self doFacebookLogin];
         }
+        
     }
     else if (![fbHelper facebookHasSession] || !loggedIn) // !myUserInfo_username || [myUserInfo_username length] == 0)
     {
@@ -487,7 +491,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     return [self.fbHelper handleOpenURL:url]; 
 }
 
--(void)didGetFacebookInfo:(NSDictionary *)results {
+-(void)didGetFacebookInfo:(NSDictionary *)results forShareOnly:(BOOL)gotTokenForShare {
+    // come here after logging in to facebook
     NSLog(@"Did get facebook info!");
     NSEnumerator *e = [results keyEnumerator];
     NSString * name = @"";
@@ -516,8 +521,34 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             facebookString = [results valueForKey:key];
         }
     }
-    
-    [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+    if (!gotTokenForShare) {
+        [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+        
+        // update facebookString on kumulos
+        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:name, @"username", email, @"email", facebookString, @"facebookID", nil];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] init];
+        [params addObject:newUser];
+        [kh execute:@"setFacebookString" withParams:params withCallback:nil withDelegate:nil];
+    }
+    else {
+        // assume we only get here through facebook connecting in ShareController or FriendSearch
+        // user is already logged in
+
+        // update facebookString on kumulos
+        NSLog(@"Already logged in user: %@ %@ %@", myUserInfo_username, myUserInfo_email, facebookString);
+        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:myUserInfo_username, @"username", myUserInfo_email, @"email", facebookString, @"facebookID", nil];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] init];
+        [params addObject:newUser];
+        [kh execute:@"setFacebookString" withParams:params withCallback:nil withDelegate:nil];
+
+        // save facebook info
+        myUserInfo_facebookString = facebookString;
+    }
+
+    [shareController didConnect:@"Facebook"];
+    [profileController didConnectToFacebook];
 }
 
 -(FacebookHelper*)getFacebookHelper {
@@ -538,32 +569,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [fbHelper getFacebookInfo];
 }
 
-// functions called by fbHelper
--(void)didLoginToFacebook:(BOOL)needInfo {
-    NSLog(@"Did login to facebook");
-    /*
-    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Success" message:@"You have been logged into facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-    [alertView show];
-    [alertView release];
-    */
-    if (needInfo)
-        [fbHelper getFacebookInfo];
-    else {
-        // do nothing, which includes saving the facebook ID. this way the user can be a nonfacebook
-        // user and only use facebook to share
-        // todo: save facebook id under myuserinfo_facebookShareString?
-        [profileController didLoginToFacebook];
-    }
-    
-    // todo: add facebook info to defaults, but keep as email login
-    // todo: update share controller
-    [shareController didConnect:@"Facebook"];
-}
-
 -(void)didLogoutFromFacebook {
     NSLog(@"Did logout from facebook");
+    /*
     UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Logout Success" message:@"You have been logged out of facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
     [alertView show];
+     */
 }
 
 -(void)didCancelFacebookLogin {
@@ -571,7 +582,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     // force permissions to be reset?
     [loginSplashController shouldShowButtons];
     [shareController didCancelFacebookConnect];
-    [profileController didCancelFacebookLogin];
+    [profileController didCancelFacebookConnect];
 }
 
 -(void)initializeBadgesFromKumulos {
@@ -815,6 +826,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
 #endif
     
+    NSLog(@"Loading cached user info for user: %@ email %@ facebook %@", myUserInfo_username, myUserInfo_email, myUserInfo_facebookString);
+    
     // to invalidate twitter and force a new login each time:
     BOOL isConnected = NO;
     NSString * connectedString = @"TwitterIsConnected";
@@ -823,7 +836,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if ([defaults objectForKey:connectedString]) {
         isConnected = [[defaults objectForKey:connectedString] boolValue];
     }
-    if (!isConnected) {
+    if (1) { //(!isConnected) {
+        [defaults setObject:[NSNumber numberWithBool:NO] forKey:connectedString];        // hack to test twitter
+        [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"FacebookIsConnected"];        // hack to test twitter
+        [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"FacebookIsSharing"];        // hack to test twitter
         [TwitterHelper logout];
     }
     
@@ -912,6 +928,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (isDisplayingBuxMenu)
         return;
     
+    [profileController closeTOS];
+    
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setSelectedIndex:pos];
     [tabBarController setButtonStateSelected:pos]; // highlight button
@@ -992,6 +1010,12 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             [profileController doPointerAnimation];
         }
     }
+    else if (pos == TABBAR_BUTTON_NEWS) {
+        lastViewController = newsController;
+    }
+    else if (pos == TABBAR_BUTTON_PROFILE) {
+        lastViewController = profileController;
+    }
 #endif
 }
 
@@ -1001,15 +1025,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif  
     if (lastViewController == feedController) {
         [self didPressTabButton:TABBAR_BUTTON_FEED];
-        //[self.tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
     }
     else if (lastViewController == exploreController) {
         [self didPressTabButton:TABBAR_BUTTON_EXPLORE];
-        //[self.tabBarController setSelectedIndex:2];
     }
-    //else if (lastViewController == profileController) {
-    //    [self.tabBarController setSelectedIndex:4];
-    //}
+    else if (lastViewController == newsController) {
+        [self didPressTabButton:TABBAR_BUTTON_NEWS];
+    }
+    else if (lastViewController == profileController) {
+        [self didPressTabButton:TABBAR_BUTTON_PROFILE];
+    }
 #if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:tabBarController.view];
 #endif
@@ -1562,8 +1587,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
         
         // add to newsletter
-        if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
-            [k addNewsWithUsername:newTag.originalUsername andAgentName:[self getUsername] andNews:@"remixed your pix" andThumbnail:UIImagePNGRepresentation([newTag thumbnail]) andTagID:[newTag.tagID intValue]];
+        NSString * targetName = newTag.originalUsername;
+        NSString * agentName = [self getUsername];
+        if (![targetName isEqualToString:agentName]) {
+            [k addNewsWithUsername:targetName andAgentName:agentName andNews:@"remixed your pix" andThumbnail:UIImagePNGRepresentation([newTag thumbnail]) andTagID:[newRecordID intValue]];
         }
     }
     
@@ -1782,6 +1809,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         updatingNotifiedTagDoJump = NO;
         isUpdatingNotifiedTag = NO;
     }
+    
+    if (jumpPendingTagID != 0) {
+        [feedController jumpToPageWithTagID:jumpPendingTagID];
+        [feedController stopActivityIndicator];
+        jumpPendingTagID = 0;
+    }
+}
+
+-(void)jumpToPageWithTagID:(int)tagID {
+    // called by newsletter
+    [self didPressTabButton:TABBAR_BUTTON_FEED];
+    if (tagID == -1)
+        return;
+    [feedController jumpToPageWithTagID:tagID];
 }
 
 -(void)updateTagWithStix:(NSMutableArray *)theResults forTagID:(int)tagID{
@@ -2120,8 +2161,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (!IS_ADMIN_USER(myUserInfo_username))
             [FlurryAnalytics logEvent:@"Liked" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", comment, @"likeType", nil]];
         
-        NSData * thumbData = UIImagePNGRepresentation([tag thumbnail]);
-        [k addNewsWithUsername:tag.username andAgentName:[self getUsername] andNews:shortMsg andThumbnail:thumbData andTagID:[tag.tagID intValue]];
+        // add to newsletter
+        NSString * targetName = tag.username;
+        NSString * agentName = [self getUsername];
+        if (![targetName isEqualToString:agentName]) {
+            NSData * thumbData = UIImagePNGRepresentation([tag thumbnail]);
+            [k addNewsWithUsername:targetName andAgentName:agentName andNews:shortMsg andThumbnail:thumbData andTagID:[tag.tagID intValue]];
+        }
+#if USING_FLURRY
+        if ([tag.tagID intValue]==0) {
+            // log flurry error
+            NSString * name = [NSString stringWithFormat:@"<%@>",tag.username];
+            [FlurryAnalytics logEvent:@"NewsletterError" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:tag.username, @"username", [self getUsername], @"agentName", shortMsg, @"news", nil] ];
+        }
+#endif
     }
     /*
     else if ([stixStringID isEqualToString:@"REMIX"]) { //![comment isEqualToString:@""]) {
@@ -2147,7 +2200,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
 
         // notify
-        NSString * message = [NSString stringWithFormat:@"%@ commented on your feed.", myUserInfo_username];
+        NSString * message = [NSString stringWithFormat:@"%@ commented on your pix.", myUserInfo_username];
         Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
@@ -2168,6 +2221,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
         }
         //[self updateUserTagTotal];
+        
+        // add to newsletter
+        NSString * targetName = tag.username;
+        NSString * agentName = [self getUsername];
+        if (![targetName isEqualToString:agentName]) {
+            NSData * thumbData = UIImagePNGRepresentation([tag thumbnail]);
+            [k addNewsWithUsername:targetName andAgentName:agentName andNews:@"commented on your pix." andThumbnail:thumbData andTagID:[tag.tagID intValue]];
+        }
         
         // don't updateCommentCount;
         // touch tag to indicate it was updated
@@ -2276,36 +2337,37 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[Admin adminUpdateAllUserFacebookStrings:theResults];
     
     NSLog(@"kumulosHelper getAllUsers did complete with %d users", [theResults count]);
-//    dispatch_async(backgroundQueue, ^{
-        [allUsers removeAllObjects];
-        [allUserPhotos removeAllObjects];
-        [allUserFacebookStrings removeAllObjects];
-        [allUserIDs removeAllObjects];
-        [allUserEmails removeAllObjects];
-        [allUserNames removeAllObjects];
-        for (NSMutableDictionary * d in theResults) {
-            NSString * name = [d valueForKey:@"username"];
-            id photoData = [d valueForKey:@"photo"];
-            //NSLog(@"photoData class: %@", [photoData class]);
-            UIImage * photo = [UIImage imageWithData:photoData];
-            if (photo == nil) {
-                //NSLog(@"name %@ photo %x photoData %x", name, photo, photoData);
-                photo = [UIImage imageNamed:@"graphic_nopic.png"];
-            }
-            NSString * facebookString = [d valueForKey:@"facebookString"];
-            NSNumber * userID = [d valueForKey:@"allUserID"];
-            [allUsers setObject:d forKey:name];
-            [allUserPhotos setObject:photo forKey:name];
-            [allUserFacebookStrings addObject:facebookString];
-            [allUserEmails addObject:[d valueForKey:@"email"]];
-            [allUserNames addObject:name];
-            [allUserIDs setObject:userID forKey:name];
-            //NSLog(@"AllUserIDS: %@ %d", name, [userID intValue]);
+    [allUsers removeAllObjects];
+    [allUserPhotos removeAllObjects];
+    [allUserFacebookStrings removeAllObjects];
+    [allUserTwitterStrings removeAllObjects];
+    [allUserIDs removeAllObjects];
+    [allUserEmails removeAllObjects];
+    [allUserNames removeAllObjects];
+    for (NSMutableDictionary * d in theResults) {
+        NSString * name = [d valueForKey:@"username"];
+        id photoData = [d valueForKey:@"photo"];
+        //NSLog(@"photoData class: %@", [photoData class]);
+        UIImage * photo = [UIImage imageWithData:photoData];
+        if (photo == nil) {
+            //NSLog(@"name %@ photo %x photoData %x", name, photo, photoData);
+            photo = [UIImage imageNamed:@"graphic_nopic.png"];
         }
-        [feedController forceReloadWholeTableZOMG];
-        [friendSuggestionController refreshUserPhotos];
-        [newsController refreshUserPhotos];
-//    });
+        NSString * facebookString = [d valueForKey:@"facebookString"];
+        NSString * twitterString = [d valueForKey:@"twitterString"];
+        NSNumber * userID = [d valueForKey:@"allUserID"];
+        [allUsers setObject:d forKey:name];
+        [allUserPhotos setObject:photo forKey:name];
+        [allUserFacebookStrings addObject:facebookString];
+        [allUserTwitterStrings addObject:twitterString];
+        [allUserEmails addObject:[d valueForKey:@"email"]];
+        [allUserNames addObject:name];
+        [allUserIDs setObject:userID forKey:name];
+        //NSLog(@"AllUserIDS: %@ %d", name, [userID intValue]);
+    }
+    [feedController forceReloadWholeTableZOMG];
+    [friendSuggestionController refreshUserPhotos];
+    [newsController refreshUserPhotos];
 }
 
 -(void)didAddNewUserWithResult:(NSArray *)theResults {
@@ -2317,12 +2379,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         else 
             photo = [UIImage imageNamed:@"graphic_nopic"];
         NSString * facebookString = [d valueForKey:@"facebookString"];
+        NSString * twitterString = [d valueForKey:@"twitterString"];
         [allUsers setObject:d forKey:name];
         [allUserPhotos setObject:photo forKey:name];
         [allUserFacebookStrings addObject:facebookString];
+        [allUserTwitterStrings addObject:twitterString];
         [allUserEmails addObject:[d valueForKey:@"email"]];
         [allUserNames addObject:name];
-        [allUserIDs setObject:facebookString forKey:name];
+        //[allUserIDs setObject:facebookString forKey:name];
+        
+        [TwitterHelper logout];
     }    
 }
 
@@ -2498,6 +2564,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(NSMutableArray*)getAllUserFacebookStrings {
     return allUserFacebookStrings;
 }
+-(NSMutableArray*)getAllUserTwitterStrings {
+    return allUserTwitterStrings;
+}
 -(NSMutableArray*)getAllUserEmails {
     return allUserEmails;
 }
@@ -2557,7 +2626,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #else
     [camera setCameraOverlayView:tabBarController.view];
 #endif
-    NSLog(@"DidLoginFromSplashScreen: username %@ stix %d, stixOrder %d", username, [stix count], [stixOrder count]);
+    NSLog(@"DidLoginFromSplashScreen: username %@ userID %@ facebookString %@ email %@", username, userID, facebookString, email);
 
 #if USING_FLURRY
     // only log to flurry here because every session eventually comes here; didLoginWithUsername can be called twice
@@ -2631,8 +2700,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k addMetricWithDescription:metricName andUsername:name andStringValue:metricData andIntegerValue:0];
 #endif
     
-    [self getNewsCount];
-
     if (![stix isKindOfClass:[NSMutableDictionary class]]) {
         stix = nil;
         [allStix removeAllObjects];
@@ -2664,6 +2731,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     if (photo) {
         myUserInfo->hasPhoto = 1;
+        [tabBarController didGetProfilePhoto:photo];
     }
     else {
         myUserInfo->hasPhoto = 0;
@@ -2696,6 +2764,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
+
+    [self getNewsCount];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
                                              (unsigned long)NULL), ^(void) {
@@ -2884,7 +2954,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow {
     if (shouldFollow) {
         [allFollowing addObject:friendName];
-        NSLog(@"SetFollowing: you are now following %@ currentList %@", friendName, allFollowing );
+        NSLog(@"SetFollowing: you are now following %@.", friendName); // currentList %@", friendName, allFollowing );
         [k addFollowerWithUsername:myUserInfo_username andFollowsUser:friendName];
         followListsDidChangeDuringProfileView = YES;
         
@@ -2897,8 +2967,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWFOLLOWER withTag:nil];
         
         // add to newsletter
-        [k addNewsWithUsername:friendName andAgentName:[self getUsername] andNews:@"is now following you" andThumbnail:nil andTagID:-1];
-        
+        NSString * targetName = friendName;
+        NSString * agentName = [self getUsername];
+        if (![targetName isEqualToString:agentName]) {
+            [k addNewsWithUsername:targetName andAgentName:agentName andNews:@"is now following you" andThumbnail:nil andTagID:-1];
+        }
         // subscribe to channel
         //channel = [NSString stringWithFormat:@"From%@", friendName];
         //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
@@ -2928,6 +3001,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self Parse_unsubscribeFromChannel:channel];
     }
     //[profileController updateFollowCounts];
+    [profileController reloadSuggestions];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
@@ -3102,6 +3176,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return @"anonymous";
 }
 
+-(NSString *)getFacebookString {
+    if (loggedIn)
+        return myUserInfo_facebookString;
+    return @"";
+}
+
+-(int)getUserID {
+    NSLog(@"loggedIn: %d myUserInfo ID: %d", loggedIn, myUserInfo->userID);
+    return myUserInfo->userID;
+}
+
 -(UIImage *) getUserPhoto {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -3149,8 +3234,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(NSString*)getNameForFacebookString:(NSString*)_facebookString {
+    if ([_facebookString intValue] == 0)
+        return @"";
     for (int i=0; i<[allUserFacebookStrings count]; i++) {
         if ([_facebookString isEqualToString:[allUserFacebookStrings objectAtIndex:i]]) {
+            return [allUserNames objectAtIndex:i];
+        }
+    }
+    return nil;
+}
+-(NSString*)getNameForTwitterString:(NSString*)_twitterString {
+    if ([_twitterString intValue] == 0)
+        return @"";
+    for (int i=0; i<[allUserTwitterStrings count]; i++) {
+        if ([_twitterString isEqualToString:[allUserTwitterStrings objectAtIndex:i]]) {
             return [allUserNames objectAtIndex:i];
         }
     }
@@ -3241,12 +3338,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Feedback button clicked from %@", fromView);
     feedbackController = [[FeedbackViewController alloc] init];
     [feedbackController setDelegate:self];
+    lastViewController = profileController;
     // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [feedbackController.view setFrame:frameShifted];
-#if !TARGET_IPHONE_SIMULATOR
     [self.camera setCameraOverlayView:feedbackController.view];
-#endif
 }
 
 -(void)didCancelFeedback {
@@ -3299,6 +3395,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //if ([fbHelper facebookHasSession]) {
     BOOL bConnected = [fbHelper facebookHasSession];
     NSLog(@"Facebook bConnected: %d", bConnected);
+    // bobby
+    bConnected = NO;
     [shareController shareServiceShouldConnect:bConnected forService:@"Facebook"];
     if (bConnected) {
         // set whether facebook is sharing based on defaults
@@ -3404,7 +3502,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [FlurryAnalytics logEvent:@"facebookInvite" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[self getUsername], @"username", username, @"invitedFriend", nil]];
 #endif
     [fbHelper sendInvite:username withFacebookString:_facebookString];
-//    [self rewardBux];
 }
 
 -(void)shouldDisplayUserPage:(NSString *)name {
@@ -3799,6 +3896,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(NSMutableSet*)getFeaturedUserSet {
     return featuredUsers;
+}
+
+-(void)requestTagWithTagID:(int)tagID {
+    // called by VerticalFeedController if a jump to tagID fails
+    [self getTagWithID:tagID];
+    jumpPendingTagID = tagID;
+    [feedController startActivityIndicator];
 }
 
 -(void) getTagWithID:(int)tagID {
@@ -4239,7 +4343,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
                     doUpdateTag = NO;
                 }
             }
-        } else if (notificationBookmarkType == NB_NEWPIX) {
+        } else if (notificationBookmarkType == NB_NEWPIX || notificationBookmarkType == NB_NEWCOMMENT) {
             // user should be prompted to jump to new pix
             updatingNotifiedTagDoJump = YES;
             doUpdateTag = YES;
@@ -4856,6 +4960,7 @@ static bool isShowingAlerts = NO;
 #pragma mark newsFeed badging
 -(void)getNewsCount {
     // count how many news pieces are unseen
+    NSLog(@"Getting unseen news for %@", [self getUsername]);
     [k countUnseenNewsWithUsername:[self getUsername] andHasBeenSeen:NO];
 }
 
@@ -4868,6 +4973,16 @@ static bool isShowingAlerts = NO;
     
     // create news badge
     [tabBarController setNewsCountValue:[aggregateResult intValue]];
+}
+
+-(void)clearNewsCount {
+    [tabBarController setNewsCountValue: 0];
+}
+
+-(void)decrementNewsCount {
+    int newCount = MAX(0, [[tabBarController newsCount].text intValue]-1);
+    NSLog(@"Decrementing to %d", newCount);
+    [tabBarController setNewsCountValue:newCount];
 }
 
 -(void)didGetNews {

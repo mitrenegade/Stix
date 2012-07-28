@@ -91,6 +91,7 @@
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
 -(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
+-(void)requestTagWithTagID:(int)tagID;
 
 // check for first time user state
 -(BOOL)canClickRemixButton; // test user stage

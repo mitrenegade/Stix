@@ -17,6 +17,11 @@
 -(NSString*)getUsername;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(void)didGetNews;
+-(void)shouldDisplayUserPage:(NSString*)username;
+-(void)getNewsCount;
+-(void)jumpToPageWithTagID:(int)tagID;
+-(void)clearNewsCount;
+-(void)decrementNewsCount;
 @end
 
 @interface NewsletterViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, KumulosDelegate>
@@ -28,7 +33,11 @@
     
     NSMutableArray * agentArray;
     NSMutableArray * newsArray;
+    NSMutableArray * newsFeedIDs;
     NSMutableArray * thumbnailArray;
+    NSMutableArray * thumbnailTagID;
+    NSMutableDictionary * userIsFollowing;
+    NSMutableArray * thumbnailButtons;
 
     LoadingAnimationView * activityIndicator;
 #if USE_PULL_TO_REFRESH

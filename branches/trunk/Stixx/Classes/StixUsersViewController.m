@@ -7,6 +7,7 @@
 //
 
 #import "StixUsersViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface StixUsersViewController ()
 
@@ -20,6 +21,7 @@
 @synthesize delegate;
 @synthesize userButtons, userPhotos;
 @synthesize mode;
+@synthesize noFriendsLabel, noFriendsButton;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -73,6 +75,20 @@
         [logo setFrame:CGRectMake(131, 2, 59, 38)];
         [buttonAll setImage:[UIImage imageNamed:@"btn_followall"] forState:UIControlStateNormal];
     }
+    
+    [buttonAll setAlpha:1];
+    [buttonAll setEnabled:YES];
+    [tableView setHidden:NO];
+    [noFriendsLabel setHidden:YES];
+    [noFriendsButton setHidden:YES];
+    if ([delegate getNumOfUsers] < 0) {
+        // no results
+        [noFriendsLabel setHidden:NO];
+        [noFriendsButton setHidden:NO];
+        [buttonAll setAlpha:.5];
+        [buttonAll setEnabled:NO];
+        [tableView setHidden:YES];
+    }
 }
 
 #pragma mark - Table view data source
@@ -87,7 +103,7 @@
 {
     int numRows = [delegate getNumOfUsers];
     NSLog(@"FriendSearchResults: numRows %d", numRows);
-    return numRows;;
+    return numRows;
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -114,12 +130,13 @@
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         [cell.textLabel setHighlightedTextColor:[cell.textLabel textColor]];
         cell.textLabel.numberOfLines = 1;
-        UIImageView * divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]];
-        [cell.contentView addSubview:divider]; 
+//        UIImageView * divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider.png"]];
+//        [cell.contentView addSubview:divider]; 
+        [cell addSubview:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_divider"]]];
         UILabel * topLabel = [[UILabel alloc] initWithFrame:CGRectMake(50, 5, 170, 35)];
         //UILabel * bottomLabel = [[UILabel alloc] initWithFrame:CGRectMake(75, 38, 170, 20)];
-		topLabel.textColor = [UIColor colorWithRed:102/255.0 green:0.0 blue:0.0 alpha:1.0];
-		topLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize]];
+		topLabel.textColor = [UIColor blackColor];//[UIColor colorWithRed:102/255.0 green:0.0 blue:0.0 alpha:1.0];
+		topLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
 		//bottomLabel.textColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
 		//bottomLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize] - 2];
         //NSLog(@"%@", [UIFont fontNamesForFamilyName:@"Helvetica"]);
@@ -132,6 +149,12 @@
         //[cell.contentView addSubview:bottomLabel];
         [cell addSubview:cell.contentView];
         
+        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(5, 5, ROW_HEIGHT-10, ROW_HEIGHT-10)];
+		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        [photoView.layer setBorderWidth: 2.0];
+        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        photoView.tag = PHOTO_TAG; // + [indexPath row];
+        [cell.contentView addSubview:photoView];
     }
     
     int y = [indexPath row];
@@ -147,6 +170,7 @@
     for (UIView * subview in cell.imageView.subviews) {
         [subview removeFromSuperview];
     }
+    /*
     if ([userPhotos objectForKey:username] == nil) {
         UIImage * photo = [delegate getUserPhotoForUserAtIndex:y];
         if (!photo)
@@ -167,9 +191,15 @@
         UIGraphicsEndImageContext();	
         [userPhotos setObject:imageView forKey:username];
     }
-    UIImage * userPhoto = [userPhotos objectForKey:username];
-    //cell.imageView = userPhoto; //addSubview:userPhoto];
-    [cell.imageView setImage:userPhoto];
+     //UIImage * userPhoto = [userPhotos objectForKey:username];
+     //[cell.imageView setImage:userPhoto];
+     */
+
+    UIImage * photo = [delegate getUserPhotoForUserAtIndex:y];
+    UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG]; // + index];
+    [photoView setImage:photo forState:UIControlStateNormal];
+    photoView.titleLabel.text = [NSString stringWithFormat:@"%d", indexPath.row];
+    photoView.titleLabel.hidden = YES;
     
     // the button: if user is not on stix, it is an invite button
     // if user is already on stix and you are not following, then it is a follow button
@@ -183,8 +213,8 @@
         [addFriendButton addTarget:self action:@selector(didAddFriend:) forControlEvents:UIControlEventTouchUpInside];
         
         UIButton * alreadyFriendedButton = [[UIButton alloc] init];
-        [alreadyFriendedButton setImage:[UIImage imageNamed:@"check.png"] forState:UIControlStateNormal];
-        [alreadyFriendedButton setFrame:CGRectMake(-5, 0, 70, 70)];
+        [alreadyFriendedButton setFrame:CGRectMake(-5, 0, 91, 30)];
+        [alreadyFriendedButton setImage:[UIImage imageNamed:@"btn_following"] forState:UIControlStateNormal];
         [alreadyFriendedButton setTag:y];
         [alreadyFriendedButton addTarget:self action:@selector(didRemoveFriend:) forControlEvents:UIControlEventTouchUpInside];
         
@@ -232,15 +262,23 @@
 
 -(IBAction)didClickBackButton:(id)sender {
     NSLog(@"Clicked BACK Button!");
-    [self.view removeFromSuperview];
+//    [self.view removeFromSuperview];
+    [self.view setHidden:YES];
 }
 
 -(IBAction)didClickAllButton:(id)sender {
     NSLog(@"Clicked ALL button!");
-    [self.view removeFromSuperview];
+//    [self.view removeFromSuperview];
     
     if (mode == PROFILE_SEARCHMODE_FIND) {
-        
+        // follow all
+        [delegate followAllUsers];
+    }
+    else if (mode == PROFILE_SEARCHMODE_INVITE) {
+        [delegate inviteAllUsers];
+    }
+    else if (mode == PROFILE_SEARCHMODE_SEARCHBAR) {
+        [delegate followAllUsers];
     }
 }
 
@@ -260,4 +298,15 @@
     [delegate inviteUserAtIndex:sender.tag];
 }
 
+-(void)didClickUserPhoto:(UIButton*)button {
+    int row = [button.titleLabel.text intValue];
+    NSString * name = [delegate getUsernameForUserAtIndex:row];
+    NSLog(@"CommentFeedTable: did click on user's photo %d, username = %@", row, name);
+    [delegate shouldDisplayUserPage:name];
+}
+
+-(void)goToInvite {
+    [self didClickBackButton:nil];
+    [delegate switchToInviteMode];
+}
 @end

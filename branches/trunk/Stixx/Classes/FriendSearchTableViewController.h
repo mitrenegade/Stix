@@ -12,6 +12,7 @@
 #import "GlobalHeaders.h"
 
 #define ROW_HEIGHT 45
+#define HEADER_HEIGHT 24
 #define TOP_LABEL_TAG 1001
 #define BOTTOM_LABEL_TAG 1002
 #define PICTURE_HEIGHT 33
@@ -30,6 +31,7 @@
 -(void)didSelectFriendSearchIndexPath:(NSIndexPath*)indexPath;
 @optional
 -(void)didDeleteAllEntries;
+-(void)shouldDisplayUserPage:(NSString*)name;
 @end
 @interface FriendSearchTableViewController : UITableViewController
 {

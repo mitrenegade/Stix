@@ -17,11 +17,14 @@
 //#import "SearchByNameController.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
+
 @protocol ProfileViewDelegate
 -(NSMutableSet*)getFollowingList;
 -(BOOL)isFollowing:(NSString*)name;
 -(NSMutableArray*)getAllUserFacebookStrings;
 -(NSString*)getUsername;
+-(NSString*)getFacebookString;
+-(int)getUserID;
 -(NSString*)getNameForFacebookString:(NSString*)facebookString;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 
@@ -42,9 +45,10 @@
 
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)shouldCloseUserPage;
+-(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
-@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UserGalleryDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate>
+@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UserGalleryDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
 {
     IBOutlet UIScrollView * scrollView;
     
@@ -90,6 +94,10 @@
     
     //UINavigationController * navController;
     FriendServicesViewController * servicesController;
+    UIImagePickerController * __unsafe_unretained camera;
+    UIWebView * webView;
+    
+    
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> * delegate;
@@ -97,11 +105,18 @@
 //@property (nonatomic) IBOutlet UITableView * buttonsTableView;
 @property (nonatomic) FriendServicesViewController * servicesController;
 @property (nonatomic) IBOutlet UIScrollView * scrollView;
+@property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
+@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
+@property (nonatomic, retain) IBOutlet UIButton * buttonAbout;
+@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
 
+-(IBAction)didClickFeedbackButton:(id)sender;
+-(IBAction)didClickAboutButton:(id)sender;
 -(void)didGetFacebookFriends:(NSArray*)facebookFriendArray;
--(void)didLoginToFacebook;
--(void)didCancelFacebookLogin;
+-(void)didConnectToFacebook;
+-(void)didCancelFacebookConnect;
 -(void)didLogin;
 -(void)doPointerAnimation;
-
+-(IBAction)closeTOS;
+-(void)reloadSuggestions;
 @end

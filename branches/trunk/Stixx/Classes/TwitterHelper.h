@@ -10,17 +10,20 @@
 #import <Twitter/Twitter.h>
 #import <Accounts/Accounts.h>
 #import "SHKTwitter.h"
+#import "KumulosHelper.h"
 
 @protocol TwitterHelperDelegate <NSObject>
 
--(void)twitterHelperDidConnect;
+//-(void)twitterHelperDidConnect;
 -(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params;
+-(int)getUserID;
 @optional
 -(void)twitterHelperStartedInitialConnect; 
 -(void)didInitialLoginForTwitter;
+-(void)twitterHelperDidFailWithRequestType:(NSString*)requestType;
 @end
 
-@interface TwitterHelper : SHKTwitter <SHKSharerDelegate>
+@interface TwitterHelper : SHKTwitter <SHKSharerDelegate, KumulosHelperDelegate>
 {
     NSObject<TwitterHelperDelegate> * __unsafe_unretained helperDelegate;
     
@@ -47,6 +50,6 @@
 - (void)getFriendsForUser:(NSString*)name;
 -(void)getMyCredentials;
 -(void)getNamesForIDs:(NSArray*)twitterStrings;
--(void)postToTwitter;
--(void)directMessage:(NSString*)name;
+-(void)sendInviteMessage:(NSString*)screen_name;
+-(void)sendMassInviteMessage:(NSMutableArray*)screen_names;
 @end

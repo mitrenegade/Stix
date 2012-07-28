@@ -433,8 +433,15 @@ static NSMutableSet * retainedDetailControllers;
         Tag * newtag = [Tag getTagFromDictionary:d];
         //[allTagIDs addObject:newtag.tagID]; // save in order 
         if ([allTags objectForKey:newtag.tagID] == nil) {
-            [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
-            [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+            int newindex = indexPointer++;
+            if (newindex < [allTagIDs count]) {
+                [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+            }
+            else {
+                [allTagIDs addObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID];
+            }
         }
         
         // new system of auxiliary stix: request from auxiliaryStixes table

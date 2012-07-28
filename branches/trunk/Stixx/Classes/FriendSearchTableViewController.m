@@ -7,6 +7,7 @@
 //
 
 #import "FriendSearchTableViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface FriendSearchTableViewController ()
 
@@ -57,7 +58,15 @@
 #pragma mark - Table view data source
 
 -(float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 24;
+    if (section == SUGGESTIONS_SECTION_FEATURED) {
+        if ([delegate featuredCount] == 0)
+            return 0;
+    }
+    else if (section == SUGGESTIONS_SECTION_FRIENDS) {
+        if ([delegate friendsCount] == 0)
+            return 0;
+    }
+    return HEADER_HEIGHT;
 }
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     return ROW_HEIGHT;
@@ -89,6 +98,14 @@
 		topLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:[UIFont labelFontSize]-4];
 		bottomLabel.textColor = [UIColor blackColor]; //[UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
 		bottomLabel.font = [UIFont fontWithName:@"Helvetica" size:[UIFont labelFontSize] - 7];
+
+        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(5, 5, ROW_HEIGHT-10, ROW_HEIGHT-10)];
+		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
+        [photoView.layer setBorderWidth: 2.0];
+        [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        photoView.tag = PHOTO_TAG; // + [indexPath row];
+        [cell.contentView addSubview:photoView];
+        
         //NSLog(@"%@", [UIFont fontNamesForFamilyName:@"Helvetica"]);
         [cell.contentView setBackgroundColor:[UIColor clearColor]];
         [topLabel setBackgroundColor:[UIColor clearColor]];
@@ -107,7 +124,7 @@
     NSString * username;
     if (section == SUGGESTIONS_SECTION_FRIENDS) {
         // Friends
-        if (index > [delegate friendsCount])
+        if (index >= [delegate friendsCount])
             [cell.textLabel setText:@"NIL"];
         else {
             username = [delegate getFriendAtIndex:index];
@@ -120,7 +137,7 @@
     }
     else if (section == SUGGESTIONS_SECTION_FEATURED) {
         // Featured
-        if (index > [delegate featuredCount])
+        if (index >= [delegate featuredCount])
             [cell.textLabel setText:@"NIL"];
         else {
             UILabel * topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
@@ -134,6 +151,7 @@
     }
     
     // photo
+#if 0
     for (UIView * subview in cell.imageView.subviews) {
         [subview removeFromSuperview];
     }
@@ -141,7 +159,7 @@
     CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
     UIGraphicsBeginImageContext(newSize);
     [photo drawInRect:CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT)];	
-    
+
     // add border
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetLineWidth(ctx, 1);
@@ -152,7 +170,14 @@
     
     UIImage* userPhoto = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();	
-    [cell.imageView setImage:userPhoto];
+    [cell.imageView setImage:userPhoto];    
+#else
+    UIImage * photo = [delegate getUserPhotoForUsername:username];
+    UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG]; // + index];
+    [photoView setImage:photo forState:UIControlStateNormal];
+    photoView.titleLabel.text = username;
+    photoView.titleLabel.hidden = YES;
+#endif
     
     if (showAccessoryButton) {
         UIImageView * addFriendButton = [[UIImageView alloc] initWithFrame:CGRectMake(-5, 0, 91, 30)];
@@ -191,8 +216,10 @@
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    if (section < [delegate numberOfSections])
+    if (section < [delegate numberOfSections]) {
+        NSLog(@"Section %d Number of sections: %d", section, [delegate numberOfSections]);
         return [delegate headerViewForSection:section];
+    }
     return nil;
 }
 
@@ -240,6 +267,12 @@
     if (showAccessoryButton) {
         [delegate didSelectFriendSearchIndexPath:indexPath];
     }
+}
+
+-(void)didClickUserPhoto:(UIButton*)button {
+    NSString * name = button.titleLabel.text;
+    if ([delegate respondsToSelector:@selector(shouldDisplayUserPage:)])
+        [delegate shouldDisplayUserPage:name];
 }
 
 @end

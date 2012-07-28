@@ -18,6 +18,7 @@
 @synthesize currentTopViewController;
 
 -(void)doInitialConnect {
+    requestType = @"initialConnect";
     SHKItem *newitem = [[SHKItem alloc] init];
     [newitem setShareType:SHKShareTypeUserInfo];
 #if 0
@@ -49,14 +50,17 @@
 
 // comes here after a successful SHKShareTypeUserInfo
 - (void)sharerFinishedSending:(SHKSharer *)sharer {
+    // doesn't come here
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
         NSLog(@"Finished sending: userinfo");
+        /*
         if (CALLBACK_FUNC) {
             [helperDelegate twitterHelperDidReturnWithCallback:CALLBACK_FUNC andParams:callbackParams];
         }
         else
             [helperDelegate didInitialLoginForTwitter];
+         */
     }
 }
 
@@ -157,6 +161,9 @@
 -(void)getRequest:(OAServiceTicket *)ticket didFailWithError:(NSError*) error {
     NSLog(@"Failure error! error: %@", error);
     NSLog(@"ticket failed: %@", [ticket debugDescription]);
+    NSLog(@"Request type: %@", requestType);
+    if ([helperDelegate respondsToSelector:@selector(twitterHelperDidFailWithRequestType:)])
+        [helperDelegate twitterHelperDidFailWithRequestType:requestType];
 }
 -(void)getRequest:(OAServiceTicket *)ticket didFinishWithData:(NSData *)data 
 {	
@@ -173,6 +180,15 @@
                 NSDictionary * returnDict = results;
                 if ([helperDelegate respondsToSelector:@selector(didGetTwitterCredentials:)])
                     [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterCredentials:) andParams:returnDict];
+                
+                // add credentials
+                NSString * twitterString = [results objectForKey:@"id_str"];
+                int userID = [helperDelegate getUserID];
+                // add credentials to kumulos
+                KumulosHelper * kh = [[KumulosHelper alloc] init];
+                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:userID], twitterString, nil];
+                [kh execute:@"setTwitterString" withParams:params withCallback:@selector(khCallback_didGetFacebookUser:) withDelegate:self];
+
             }
             else if ([requestType isEqualToString:@"getFriendsForUser"]) {
                 NSArray * friendsIDs = [self parseResponse:data forKey:@"ids"];
@@ -245,110 +261,36 @@
 #endif
 }
 
--(void)inviteFriendToTwitter:(NSString*)username {
-    //[item setShareType:SHKShareTypeText];
-    //NSString * shareText = [NSString stringWithFormat:@"d %@ Come check out Stix! http://stixmobile.com", username];
-    //[item setText:shareText];
-    [self directMessage:username];
-}
-
--(void)directMessage:(NSString*)name {
+-(void)sendInviteMessage:(NSString*)screen_name {
     requestType = @"directMessage";
-#if 0
-    //@"https://api.twitter.com/1/direct_messages/new.json"]]
-	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/1/statuses/update.json"]
-                                                                    consumer:consumer
-                                                                       token:accessToken
-                                                                       realm:nil
-                                                           signatureProvider:nil];
-	
-    NSString * statusWithDirectMessage = [NSString stringWithFormat:@"D %@ testText", name];
-	OARequestParameter *statusParam = [[OARequestParameter alloc] initWithName:@"status"
-                                                                         value:statusWithDirectMessage];
-    //OARequestParameter *textParam = [[OARequestParameter alloc] initWithName:@"text"
-    //                                                                   value:@"testText"];
-	NSArray *params = [NSArray arrayWithObjects:statusParam, nil];
-	[oRequest setParameters:params];
-    
-
-    // use the weird and somewhat bulky OARequestParameter
-	//[oRequest setParameters:[NSArray arrayWithObjects:nameParam, textParam, nil]];
-    //[oRequest setHTTPMethod:@"POST"];
-    [oRequest setHTTPMethod:@"POST"];
-    
-    OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
-                                                                                          delegate:self
-                                                                                 didFinishSelector:@selector(getRequest:didFinishWithData:) 
-                                                                                   didFailSelector:@selector(getRequest:didFailWithError:)];	
-    
-    [fetcher start];
-#else
-//    SHKItem *item = [SHKItem text:[NSString stringWithFormat:@"%@ %@", _caption, url]];
-    [item setTitle:@"newStatus"];
-    [item setText:@"newText"];
+    // hack: all messages sent to hackstarbobo for now
+    NSString * shareText = [NSString stringWithFormat:@"d uxrewind %@, Come check out Stix! http://stixmobile.com", screen_name];
+    SHKItem *_item = [SHKItem text:shareText];
+    [self setItem:_item];
     [self share];
-#endif
 }
-
--(void)postToTwitter { 
-    /*
-    TWTweetComposeViewController *composer = [[TWTweetComposeViewController alloc] init];
-    
-    [composer addImage:self.item.image];    
-    [composer addURL:self.item.URL];
-    
-    if (self.item.shareType == SHKShareTypeText) 
-    {
-        NSUInteger textLength = [item.text length] > 140 ? 140 : [item.text length];
-        
-        while ([composer setInitialText:[item.text substringToIndex:textLength]] == NO && textLength > 0)
-        {
-            textLength--;
-        }
-    } 
-    else 
-    {
-        NSUInteger titleLength = [item.title length] > 140 ? 140 : [item.title length];      
-        
-        while ([composer setInitialText:[item.title substringToIndex:titleLength]] == NO && titleLength > 0)
-        {
-            titleLength--;
-        }
+-(void)sendMassInviteMessage:(NSMutableArray*)screen_names {
+    requestType = @"directMessage";
+    // hack: all messages sent to hackstarbobo for now
+    for (NSString * screen_name in screen_names) {
+        NSString * shareText = [NSString stringWithFormat:@"d uxrewind %@, Come check out Stix! http://stixmobile.com", screen_name];
+        SHKItem *_item = [SHKItem text:shareText];
+        [self setItem:_item];
+        [self share];
     }
-    
-    composer.completionHandler = ^(TWTweetComposeViewControllerResult result) 
-    {
-        [self.currentTopViewController dismissViewControllerAnimated:YES completion:^{                                                                           
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:SHKHideCurrentViewFinishedNotification object:nil];
-            }];
-        }];
-        
-        switch (result) {
-                
-            case TWTweetComposeViewControllerResultDone:
-                [self sendDidFinish];
-                break;
-                
-            case TWTweetComposeViewControllerResultCancelled:
-                [self sendDidCancel];                
-                
-            default:
-                break;
-        }
-    };   
-    
-    currentTopViewController = [[SHK currentHelper] rootViewForCustomUIDisplay];
-    [currentTopViewController presentViewController:composer animated:YES completion:nil];
-     */
-    
 }
 
 -(void)sendDidStart {
-    NSLog(@"Twitter post did start");
+    NSLog(@"Twitter post did start. Request Type: %@", requestType);
 }
 -(void)sendDidFinish {
-    NSLog(@"Twitter post did finish");
+    NSLog(@"Twitter post did finish. Request Type: %@", requestType);
+    if ([requestType isEqualToString:@"initialConnect"]) {
+        // for some reason, twitter connect through findFriends comes here
+        if ([helperDelegate respondsToSelector:@selector(didInitialLoginForTwitter)])
+            [helperDelegate didInitialLoginForTwitter];
+
+    }
 }
 -(void)sendDidCancel {
     NSLog(@"Twitter post did cancel");

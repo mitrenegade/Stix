@@ -214,8 +214,15 @@ static ShareController *sharedShareController;
     [activityIndicatorLarge startCompleteAnimation];
 
 #if USING_FLURRY
-    if (!IS_ADMIN_USER([delegate getUsername]))
-        [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Completed Share", @"Method Of Quitting", [self shareServiceIsSharing:@"Twitter"]?@"TwitterOn":@"TwitterOff", @"TwitterShare", [self shareServiceIsSharing:@"Facebook"]?@"FacebookOn":@"FacebookOff", nil]];
+    if (!IS_ADMIN_USER([delegate getUsername])) {
+        NSString * twitterShare = @"TwitterOff";
+        NSString * facebookShare = @"FacebookOff";
+        if ([self shareServiceIsSharing:@"Twitter"])
+            twitterShare = @"TwitterOn";
+        if ([self shareServiceIsSharing:@"Facebook"])
+            facebookShare = @"FacebookOn";
+        [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Completed Share", @"Method Of Quitting", twitterShare, @"TwitterShare", facebookShare, @"FacebookShare", nil]];
+    }
 #endif
 
     [delegate shouldCloseShareController:YES];
@@ -225,22 +232,22 @@ static ShareController *sharedShareController;
     UIButton * button = (UIButton*)sender;
     NSLog(@"Clicking connect for %@", button.titleLabel.text);
 
-    //[delegate connectService:button.titleLabel.text];
     if ([button.titleLabel.text isEqualToString:@"Twitter"]) {
         // enable twitter
         [self doTwitterConnect];
     }
     
-    // todo: connect if facebook as well
     if ([button.titleLabel.text isEqualToString:@"Facebook"]) {
         if (![[FacebookHelper sharedFacebookHelper] facebookHasSession]) {
             int newlogin = [[FacebookHelper sharedFacebookHelper] facebookLoginForShare];
-            //if (newlogin) {
-            //    [self didConnect:@"Facebook"];
-            //}
+            if (newlogin == 0) {
+                // already logged in - continue process
+                [[FacebookHelper sharedFacebookHelper] getFacebookInfo];
+            }   
         }
         else {
             NSLog(@"How come facebook share button is on Connect if we already have a session?");
+            [self didConnect:@"Facebook"];
         }
     }
 }
@@ -490,20 +497,17 @@ static ShareController *sharedShareController;
     NSLog(@"SHKSharer finished twitter sharing!");
 }
 
--(void)twitterHelperDidConnect {
+//-(void)twitterHelperDidConnect {
+-(void)didInitialLoginForTwitter {
     // will be sent back by twitterHelper 
     [self didConnect:@"Twitter"];
 
-    // only cause activityIndicator to go away when all sharers have finished? or just do in background?
-    /*
-    if (activityIndicatorLarge) {
-        [activityIndicatorLarge setHidden:YES];
-        [activityIndicatorLarge stopCompleteAnimation];
-        [activityIndicatorLarge removeFromSuperview];
+    // do a getCredentials to save twitter info
+    TwitterHelper * twHelper = [[TwitterHelper alloc] init];
+    if ([twHelper isAuthorized]) { // needs to do this to renew token?
+        [twHelper setHelperDelegate:self];
+        [twHelper getMyCredentials];
     }
-    //[delegate shouldCloseShareController:YES];
-    [delegate shouldCloseShareController:NO];
-     */
 }
 - (void)sharer:(SHKSharer *)sharer failedWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin {
     NSLog(@"Failed with error: %@ shouldRelogin: %d", [error description], shouldRelogin);
@@ -607,5 +611,9 @@ static ShareController *sharedShareController;
 }
 -(void)shareServiceShouldConnect:(BOOL)doConnect forService:(NSString *)service {
     [serviceIsConnected setObject:[NSNumber numberWithBool:doConnect] forKey:service]; // automatically start sharing after connect
+}
+
+-(int)getUserID {
+    return [delegate getUserID];
 }
 @end

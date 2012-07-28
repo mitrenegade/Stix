@@ -138,6 +138,7 @@
         [inputField setPlaceholder:@"example@example.com"];
         [inputField setTag:TAG_EMAIL];
         [inputField setTextAlignment:UITextAlignmentLeft];
+        [inputField setKeyboardType:UIKeyboardTypeEmailAddress]; 
         inputField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;       
         [inputField setDelegate:self];
         UIView * view = [[UIView alloc] initWithFrame:CGRectMake(10, 0, 300, 54)];

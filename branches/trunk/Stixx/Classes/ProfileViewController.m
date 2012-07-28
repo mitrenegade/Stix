@@ -13,9 +13,10 @@
 
 @synthesize delegate;
 @synthesize activityIndicator;
-//@synthesize buttonsTableView;
 @synthesize servicesController;
 @synthesize scrollView;
+@synthesize buttonAbout, buttonFeedback, buttonBack;
+@synthesize camera;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -38,6 +39,7 @@
     buttonsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 480) style:UITableViewStyleGrouped];
     [buttonsTableView setDelegate:self];
     [buttonsTableView setDataSource:self];
+    [buttonAbout setHidden:YES];
     
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     
@@ -74,26 +76,51 @@
         headerViews = [[NSMutableArray alloc] init];
         for (int i=0; i<SUGGESTIONS_SECTION_MAX; i++) {
             [headerViews addObject:[NSNull null]];
+            //NSLog(@"Headerview %d = null!", i);
         }
     }
-    UIImageView * featuredHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
+    UIImageView * featuredHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, HEADER_HEIGHT)];
     [featuredHeader setImage:[UIImage imageNamed:@"header_featuredstixsters@2x.png"]];
+    /*
     if ([suggestedFeatured count] == 0) {
         [featuredHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
+     */
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FEATURED withObject:featuredHeader];
-    UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 24)];
+    UIImageView * friendHeader = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, HEADER_HEIGHT)];
     [friendHeader setImage:[UIImage imageNamed:@"header_friendsonstix@2x.png"]];
+    /*
     if ([suggestedFriends count] == 0) {
         [friendHeader setFrame:CGRectMake(0, 0, 320, 1)];
     }
+     */
     [headerViews replaceObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS withObject:friendHeader];
+    /*
     NSLog(@"After initializing header views: %d sections", [headerViews count]);
-    
-    int newHeight = ROW_HEIGHT * ([suggestedFriends count] + [suggestedFeatured count]) + 24 * [headerViews count];
+    if ([headerViews objectAtIndex:0] == [NSNull null])
+        NSLog(@"HeaderView 0 = null!");
+    if ([headerViews objectAtIndex:1] == [NSNull null])
+        NSLog(@"HeaderView 1 = null!");
+    */
+    int totalFriends = [suggestedFriends count] + [suggestedFeatured count];
+    int newHeight = ROW_HEIGHT * (totalFriends) + HEADER_HEIGHT * [headerViews count];
     [friendsTableView.view setFrame:CGRectMake(friendsTableView.view.frame.origin.x, friendsTableView.view.frame.origin.y, friendsTableView.view.frame.size.width, newHeight)];
     [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, friendsTableView.view.frame.origin.y + friendsTableView.view.frame.size.height)];
-    [scrollView setScrollEnabled:YES];
+    if (totalFriends > 2)
+        [scrollView setScrollEnabled:YES];
+    else {
+        [scrollView setScrollEnabled:NO];
+    }
+    if ([suggestedFriends count] + [suggestedFeatured count] > 0) {
+        [friendsTableView.view setHidden:NO];
+    } else {
+        [friendsTableView.view setHidden:YES];
+    }
+    [friendsTableView.tableView reloadData];
+}
+
+-(void)reloadSuggestions {
+    [self initializeSuggestions];
 }
 
 -(void)initializeSuggestions {
@@ -109,11 +136,10 @@
     
     [self initializeHeaderViews];
     //isEditing = NO;
-    
-    [buttonsTableView setFrame:CGRectMake(0, 10, 320, 220)];
+    [buttonsTableView setFrame:CGRectMake(0, -3, 320, 300)];
     [buttonsTableView.layer setCornerRadius:10];
     [buttonsTableView setBackgroundColor:[UIColor clearColor]];
-    [friendsTableView.view setFrame:CGRectMake(0, 240, 320, 190)];
+    [friendsTableView.view setFrame:CGRectMake(0, 220, 320, 190)];
     [friendsTableView.view setBackgroundColor:[UIColor clearColor]];
 
     [buttonsTableView setScrollEnabled:NO];
@@ -121,7 +147,7 @@
     
     [scrollView addSubview:buttonsTableView];
     [scrollView addSubview:friendsTableView.view];
-    
+    [friendsTableView.view setHidden:YES];
     /*
     [buttonsTableView setBackgroundColor:[UIColor greenColor]];
     [friendsTableView.view setBackgroundColor:[UIColor redColor]];
@@ -268,6 +294,7 @@
     if ([suggestedFeatured count] > 0) {
         for (NSString * name in suggestedFeatured) {
             if ([suggestedFriends containsObject:name])
+                NSLog(@"Removing friend name %@ because featured contains it: %d", name, [suggestedFeatured count]);
                 [suggestedFriends removeObject:name];
         }
     }
@@ -276,11 +303,14 @@
     }
     didGetFacebookFriends = YES;
     if (didGetFeaturedUsers && [suggestedFeatured count] + [suggestedFriends count] == 0) {
-        [friendsTableView.view removeFromSuperview];
+        //[friendsTableView.view removeFromSuperview];
+        [friendsTableView.view setHidden:YES];
     } 
     else {
         [friendsTableView.tableView reloadData];
     }
+    
+    [servicesController didGetFacebookFriends];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFeaturedUsersDidCompleteWithResult:(NSArray *)theResults {
@@ -317,7 +347,8 @@
         [self initializeHeaderViews]; // reload in case initializeHeaderViews was called before this appeared
     }
     if (didGetFacebookFriends && [suggestedFeatured count] + [suggestedFriends count] == 0) {
-        [friendsTableView.view removeFromSuperview];
+//        [friendsTableView.view removeFromSuperview];
+        [friendsTableView.view setHidden:YES];
     } 
     else {
         [friendsTableView.tableView reloadData];
@@ -452,8 +483,7 @@
         cell.textLabel.numberOfLines = 1;
         [cell setBackgroundColor:[UIColor whiteColor]];
         [cell.backgroundView setAlpha:.5];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
     
     // Configure the cell...
@@ -464,11 +494,25 @@
         index = index + 3; // 3 indices already in section 0
     }
     [cell.textLabel setText:[buttonNames objectAtIndex:index]];
+#if 0
     [cell.imageView setImage:[buttonIcons objectAtIndex:index]];
-    [cell.imageView setFrame:CGRectMake(3, 3, 25, 25)];
+#else
+    UIImage * photo = [buttonIcons objectAtIndex:index];
+    CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
+    UIGraphicsBeginImageContext(newSize);
+    [photo drawInRect:CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT)];	
+    
+    UIImage* userPhoto = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();	
+    [cell.imageView setImage:userPhoto];    
+#endif
     cell.accessoryType = UITableViewCellAccessoryNone;
     return cell;
 }
+
+//-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    return ROW_HEIGHT_PROFILE;
+//}
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -494,15 +538,21 @@
     }
     [self.view addSubview:searchByNameController.view];
     */
+    
+    // MY PIX
     if (indexPath.section == 1) {
         // MY PIX
         if (![delegate isLoggedIn])
             return;
         NSLog(@"Button show my pix!");
+#if 0
         UserGalleryController * myGalleryController = [[UserGalleryController alloc] init];
         [myGalleryController setDelegate:self];
         [myGalleryController setUsername:[delegate getUsername]];
         [self.view addSubview:myGalleryController.view];
+#else
+        [self shouldDisplayUserPage:[delegate getUsername]];
+#endif
     }
     else if (indexPath.row == 0) {
         //[navController pushViewController:servicesController animated:YES];
@@ -515,12 +565,13 @@
     else if (indexPath.row == 2) {
         [self showSearchFriends];
     }
+    [tableView reloadData];
 }
 
 -(void)doPointerAnimation {
     //showPointer = YES;
     UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
-    CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 160, pointerImg.size.width, pointerImg.size.height);
+    CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 20, pointerImg.size.width, pointerImg.size.height);
     UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
     UIButton * pointer = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, pointerImg.size.width, pointerImg.size.height)];
     [pointer setImage:pointerImg forState:UIControlStateNormal];
@@ -541,6 +592,14 @@
 
 -(NSString*)getUsername {
     return [delegate getUsername];
+}
+
+-(NSString*)getFacebookString {
+    return [delegate getFacebookString];
+}
+
+-(int)getUserID {
+    return [delegate getUserID];
 }
 
 -(BOOL)isFollowing:(NSString*)name {
@@ -620,11 +679,14 @@
  */
 
 -(void)followUser:(NSString*)name {
-    [delegate setFollowing:name toState:YES];
+    NSLog(@"Profile: starting to follow name: %@", name);
+    if (![delegate isFollowing:name])
+        [delegate setFollowing:name toState:YES];
     // todo: if friend lists are changed elsewhere, this needs to be updated
 }
 -(void)unfollowUser:(NSString*)name {
-    [delegate setFollowing:name toState:NO];
+    if ([delegate isFollowing:name])
+        [delegate setFollowing:name toState:NO];
     // todo: if friend lists are changed elsewhere, this needs to be updated
 }
 -(void)inviteUser:(NSString*)name withService:(int)service{
@@ -660,7 +722,7 @@
 
 -(void)shouldDisplayUserPage:(NSString *)name {
     if ([name isEqualToString:[delegate getUsername]]) {
-        //[self didClickBackButton:nil];
+        [delegate shouldDisplayUserPage:name];
     }
     else {
         [delegate shouldDisplayUserPage:name];
@@ -683,6 +745,15 @@
 
 -(void)didLogin {
     NSLog(@"Here!");
+}
+
+-(void)didConnectToFacebook {
+    // tell friendTableController in case we were waiting
+    [servicesController didInitialLoginForFacebook];
+}
+
+-(void)didCancelFacebookConnect {
+    [servicesController didCancelFacebookConnect];
 }
 
 -(void)showInviteFriends {
@@ -763,10 +834,72 @@
     if ([suggestedFeatured count] == 0 || [suggestedFriends count] == 0) {
         [self initializeHeaderViews];
     }
-    if ([suggestedFriends count] + [suggestedFeatured count] == 0)
-        [friendsTableView.tableView removeFromSuperview];
-    else
+    if ([suggestedFriends count] + [suggestedFeatured count] == 0) {
+        //[friendsTableView.tableView removeFromSuperview];
+        [friendsTableView.view setHidden:YES];
+    }
+    else {
         [friendsTableView.tableView reloadData];
+    }
+}
+
+-(IBAction)didClickFeedbackButton:(id)sender {
+    [delegate didClickFeedbackButton:@"Profile View"];
+}
+-(IBAction)didClickAboutButton:(id)sender {
+    CGRect frameOnscreen = CGRectMake(0, 44, 320, 480-44);
+    CGRect frameOffscreen = CGRectMake(-320, 44, 320, 480-44);
+    if (!webView) {
+        webView = [[UIWebView alloc] initWithFrame:frameOnscreen];
+        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.stixmobile.com/tos"]]];
+        [webView setDelegate:self];
+        [webView setBackgroundColor:[UIColor clearColor]];
+        [self.view addSubview:webView];
+        [webView setFrame:frameOffscreen];
+        [buttonFeedback setHidden:YES];
+        [buttonAbout setHidden:YES];
+        [buttonBack setHidden:NO];
+
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        [animation doViewTransition:webView toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+        }];
+    }
+    else {
+        [self closeTOS];
+    }
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSLog(@"Webview loaded");
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    NSLog(@"Webview error: %@", [error description]);
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [buttonBack setHidden:YES];
+}
+
+-(IBAction)closeTOS {
+    CGRect frameOnscreen = CGRectMake(0, 44, 320, 480-44-40);
+    CGRect frameOffscreen = CGRectMake(-320, 44, 320, 480-44-40);
+    [buttonFeedback setHidden:NO];
+    [buttonAbout setHidden:NO];
+    [buttonBack setHidden:YES];
+    if (webView) {
+
+        [webView setFrame:frameOnscreen];
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        
+        //CGRect frameOffscreen = webView.frame;
+        //frameOffscreen.origin.x -= 330;
+        [animation doViewTransition:webView toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+            [webView removeFromSuperview];
+            webView = nil;
+        }];
+    }
 }
 
 @end

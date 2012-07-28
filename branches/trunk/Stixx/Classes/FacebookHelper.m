@@ -89,6 +89,7 @@ static NSString * appID;
                                 @"user_photos",
                                 //@"user_likes", 
                                 //@"read_stream",
+                                //@"read_mailbox",
                                 @"publish_stream", // post to friend's stream
                                 @"email",
                                 nil];
@@ -104,11 +105,30 @@ static NSString * appID;
         return 0; // already loggedin
     }
 }
+
 -(int)facebookLoginForShare {
     getTokenForShare = YES; // only do login for sharing permissions, not login
-    [self facebookLogin];
+    if (![facebook isSessionValid]) {
+        // authorize the session and request permissions
+        NSArray *permissions = [[NSArray alloc] initWithObjects:
+                                @"user_about_me",
+                                @"user_photos",
+                                @"publish_stream", // post to friend's stream
+                                nil];
+        if ([permissions count] == 0) {
+            [facebook authorize:nil];
+        }
+        else {
+            [facebook authorize:permissions];
+        }
+        return 1; // logged in anew
+    }
+    else {
+        return 0; // already loggedin
+    }
 }
 -(void)getFacebookInfo {
+    // request all information about me
     NSLog(@"FacebookHelper getFacebookInfo: requesting graph path: ME");
     [facebook requestWithGraphPath:@"me" andDelegate:self];  
     currentRequest = @"requestGraphPathMe";
@@ -128,7 +148,8 @@ static NSString * appID;
     
     NSLog(@"Access token: %@", [facebook accessToken]);
     BOOL needFacebookInfo = !getTokenForShare; // if we are not trying to login the user but only want post permission
-    [self.delegate didLoginToFacebook:needFacebookInfo];
+    //[delegate didLoginToFacebook:needFacebookInfo];
+    [self getFacebookInfo];
 }
 
 - (void) fbDidLogout {
@@ -256,15 +277,8 @@ static NSString * appID;
                                    description, @"description",
                                    appID, @"app_id",
                                    nil];
-#if 0
-    // send app request dialog
-    [facebook dialog:@"apprequests"
-           andParams:params
-         andDelegate:self];
-#else
     // post to wall
     [facebook dialog:@"feed" andParams:params andDelegate:self];
-#endif
 }
 
 #pragma mark FBRequestDelegate
@@ -288,6 +302,11 @@ static NSString * appID;
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook login timed out. Try again when there is better connectivity!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alertView show];
     }
+    if ([error code] == -1009) {
+        // the request timed out
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook could not login. You must be connected to the internet." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
 }
 
 // response for requestWithGraphPath
@@ -295,7 +314,7 @@ static NSString * appID;
     NSDictionary * dictionary = result;
     //NSLog(@"Result: %@", result);
     if ([currentRequest isEqualToString:@"requestGraphPathMe"])
-        [delegate didGetFacebookInfo:dictionary];
+        [delegate didGetFacebookInfo:dictionary forShareOnly:getTokenForShare];
     else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])
         [self requestFacebookFriendsFinished:result];
 }

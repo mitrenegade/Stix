@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "GlobalHeaders.h"
 #import "StixUsersViewController.h"
+#import "FacebookHelper.h"
 #import "TwitterHelper.h"
 #import "LoadingAnimationView.h"
 
@@ -16,6 +17,8 @@
 
 -(void)shouldCloseFriendServices;
 -(NSString*)getUsername;
+-(NSString*)getFacebookString;
+-(int)getUserID;
 
 -(NSMutableDictionary*)getAllUsers;
 -(NSMutableArray*)getAllUserNames;
@@ -35,9 +38,12 @@
 -(NSMutableArray*)getAllTwitterFriendNames;
 -(NSMutableArray*)getAllTwitterFriendScreennames;
 -(BOOL)hasTwitterFriends;
+-(void)reloadSuggestions;
+
+-(void)shouldDisplayUserPage:(NSString*)name;
 @end
 
-@interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate, TwitterHelperDelegate>
+@interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate, TwitterHelperDelegate, UIAlertViewDelegate, FacebookHelperDelegate>
 {
     NSObject<FriendServicesDelegate> * __unsafe_unretained delegate;
     IBOutlet UITableView * tableView;
@@ -56,11 +62,13 @@
     NSMutableArray * searchFriendEmail;
     NSMutableArray * searchFriendID;
     NSMutableArray * searchFriendIsStix;
+    NSMutableArray * searchFriendScreenname; // twitter only, or other services with unique handles
     NSMutableArray * searchFriendPhone; // only for contact list
     
     LoadingAnimationView * activityIndicatorLarge;
 
     BOOL waitingForTwitter; // find or invite users requested twitter service but twitter was not connected - need to resume populateWithTwitter
+    BOOL waitingForFacebook;
 }
 @property (nonatomic) IBOutlet UITableView * tableView;
 @property (nonatomic, unsafe_unretained) NSObject<FriendServicesDelegate> * delegate;
@@ -77,4 +85,7 @@
 -(void)initializeForMode:(int)_mode;
 -(IBAction)didClickBackButton:(id)sender;
 
+-(void)didInitialLoginForFacebook;
+-(void)didGetFacebookFriends;
+-(void)didCancelFacebookConnect;
 @end

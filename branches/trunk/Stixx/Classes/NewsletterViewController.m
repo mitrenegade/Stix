@@ -9,7 +9,7 @@
 #import "NewsletterViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
-#define ROW_HEIGHT 45
+#define ROW_HEIGHT_NEWS 45
 
 @implementation NewsletterViewController
 
@@ -81,12 +81,20 @@
     if (!agentArray) {
         agentArray = [[NSMutableArray alloc] init];
         newsArray = [[NSMutableArray alloc] init];
+        newsFeedIDs = [[NSMutableArray alloc] init];
         thumbnailArray = [[NSMutableArray alloc] init];
+        thumbnailTagID = [[NSMutableArray alloc] init];
+        userIsFollowing = [[NSMutableDictionary alloc] init];
+        thumbnailButtons = [[NSMutableArray alloc] init];
     }
     else {
         [agentArray removeAllObjects];
         [newsArray removeAllObjects];
+        [newsFeedIDs removeAllObjects];
         [thumbnailArray removeAllObjects];
+        [thumbnailTagID removeAllObjects];
+        [userIsFollowing removeAllObjects];
+        [thumbnailButtons removeAllObjects];
     }
 }
 
@@ -105,7 +113,7 @@
     [headerLabel setTextColor:[UIColor whiteColor]];
     [headerLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:15]];
     [headerLabel setBackgroundColor:[UIColor clearColor]];
-    [headerLabel setText:@"All news"];
+    [headerLabel setText:@"All News"];
     [header addSubview:headerLabel];
     [headerViews addObject:header];
     
@@ -115,28 +123,62 @@
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewsDidCompleteWithResult:(NSArray *)theResults {
     NSLog(@"Newsfeed for %@ returned %d results", [delegate getUsername], [theResults count]); 
     for (NSMutableDictionary * d in theResults) {
+        NSNumber * hasBeenSeen = [d objectForKey:@"hasBeenSeen"];
+        NSNumber * newsFeedID = [d objectForKey:@"newsfeedID"];
+
         NSString * agentName = [d objectForKey:@"agentName"];
         NSString * news = [d objectForKey:@"news"];
         NSData * data = [d objectForKey:@"thumbnail"];
+        NSNumber * tagID = [d objectForKey:@"tagID"];
+        if ([agentName isEqualToString:[delegate getUsername]]) {
+            [k deleteNewsByIDWithNewsfeedID:[newsFeedID intValue]];
+            continue;
+            /*
+            agentName = @"You";
+            if ([news isEqualToString:@"loves your Pix."]) {
+                news = @"love your Pix.";
+            }
+            if ([news isEqualToString:@"is shocked by your Pix."]) {
+                news = @"are shocked by your Pix.";
+            }
+            if ([news isEqualToString:@"is now following you"]) {
+                continue;
+            }
+             */
+        }
+        if ([news isEqualToString:@"is now following you"]) {
+            if ([userIsFollowing objectForKey:agentName]) {
+                [k deleteNewsByIDWithNewsfeedID:[newsFeedID intValue]];
+                continue;
+            }
+            [userIsFollowing setObject:[NSNumber numberWithBool:YES] forKey:agentName];
+        }
+
         [agentArray addObject:agentName];
         [newsArray addObject:news];
-        NSLog(@"%@ %@", agentName, news);
-        if ([data length] > 0)
-            [thumbnailArray addObject:[UIImage imageWithData:data]];
+        [thumbnailTagID addObject:tagID];
+        [newsFeedIDs addObject:newsFeedID];
+        NSLog(@"Newsletter: %@ %@ %@", agentName, news, tagID);
+        if ([data length] > 0) {
+            UIImage * thumbnail = [UIImage imageWithData:data];
+            [thumbnailArray addObject:thumbnail];
+            CGRect frame = CGRectMake(5, 5, ROW_HEIGHT_NEWS-10, ROW_HEIGHT_NEWS-10);
+            UIButton * accessoryView = [[UIButton alloc] initWithFrame:frame];
+            [accessoryView setImage:thumbnail forState:UIControlStateNormal];
+            [accessoryView addTarget:self action:@selector(didClickThumbnail:) forControlEvents:UIControlEventTouchDown];
+            [accessoryView setTag:[tagID intValue]];
+            [accessoryView setTag:[tagID intValue]];
+            [thumbnailButtons addObject:accessoryView];
+        }
         else {
             [thumbnailArray addObject:[NSNull null]];
-        }
-        
-        NSNumber * hasBeenSeen = [d objectForKey:@"hasBeenSeen"];
-        NSNumber * newsFeedID = [d objectForKey:@"newsfeedID"];
-        if ([hasBeenSeen boolValue] == NO) {
-            [k hasSeenNewsWithNewsfeedID:[newsFeedID unsignedIntValue] andHasBeenSeen:YES];
+            [thumbnailButtons addObject:[NSNull null]];
         }
     }
     
     if ([agentArray count] == 0) {
         NSString * agentName = [delegate getUsername];
-        NSString * news = @"has no news";
+        NSString * news = @"Welcome to Stix!";
         [agentArray addObject:agentName];
         [newsArray addObject:news];
         [thumbnailArray addObject:[NSNull null]];
@@ -153,7 +195,7 @@
     return 24;
 }
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return ROW_HEIGHT;
+    return ROW_HEIGHT_NEWS;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -177,16 +219,17 @@
 		commentTextLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
         [commentTextLabel setBackgroundColor:[UIColor clearColor]];
         
-        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(5, 5, ROW_HEIGHT-10, ROW_HEIGHT-10)];
+        UIButton * photoView = [[UIButton alloc] initWithFrame:CGRectMake(5, 5, ROW_HEIGHT_NEWS-10, ROW_HEIGHT_NEWS-10)];
 		[photoView.layer setBorderColor: [[UIColor blackColor] CGColor]];
         [photoView.layer setBorderWidth: 2.0];
         [photoView addTarget:self action:@selector(didClickUserPhoto:) forControlEvents:UIControlEventTouchUpInside];
+        photoView.tag = PHOTO_TAG; // + [indexPath row];
+        [cell.contentView addSubview:photoView];
+
         nameLabel.tag = LEFT_LABEL_TAG;
         commentTextLabel.tag = RIGHT_LABEL_TAG;
-        photoView.tag = PHOTO_TAG; // + [indexPath row];
         [cell.contentView addSubview:nameLabel];
         [cell.contentView addSubview:commentTextLabel];
-        [cell.contentView addSubview:photoView];
         [cell addSubview:cell.contentView];
     }
     
@@ -194,9 +237,13 @@
     int index = [indexPath row];
     if (index < [agentArray count])
     {
+        NSLog(@"Displaying news at row %d", index);
         NSString * name = [agentArray objectAtIndex:index];
         NSString * news = [newsArray objectAtIndex:index];
         UIImage * photo = [delegate getUserPhotoForUsername:name];
+        if ([name isEqualToString:@"You"]) {
+            photo = [delegate getUserPhotoForUsername:[delegate getUsername]];
+        }
         
         UILabel * nameLabel = (UILabel *)[cell viewWithTag:LEFT_LABEL_TAG];
         UILabel * newsLabel = (UILabel *)[cell viewWithTag:RIGHT_LABEL_TAG];
@@ -207,7 +254,7 @@
         [newsLabel setText:news];
 
         // resize newslabel
-        CGSize maximumLabelSize = CGSizeMake(320,ROW_HEIGHT);
+        CGSize maximumLabelSize = CGSizeMake(320,ROW_HEIGHT_NEWS);
         CGSize expectedLabelSize = [name sizeWithFont:nameLabel.font
                                     constrainedToSize:maximumLabelSize 
                                               lineBreakMode:nameLabel.lineBreakMode];
@@ -224,16 +271,20 @@
         photoView.titleLabel.hidden = YES;
         
         if ([thumbnailArray objectAtIndex:index] != [NSNull null] ) {
-            UIView * accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, ROW_HEIGHT, ROW_HEIGHT)];
-            UIImageView * thumbnailView = [[UIImageView alloc] initWithImage:[thumbnailArray objectAtIndex:index]];
-            [thumbnailView setFrame:CGRectMake(5,5,ROW_HEIGHT-10,ROW_HEIGHT-10)];
-            [accessoryView addSubview:thumbnailView];
+            UIButton * accessoryView = [thumbnailButtons objectAtIndex:index];
+            //UIImageView * thumbnailView = [[UIImageView alloc] initWithImage:[thumbnailArray objectAtIndex:index]];
+            //[thumbnailView setFrame:CGRectMake(5,5,ROW_HEIGHT_NEWS-10,ROW_HEIGHT_NEWS-10)];
+            //[accessoryView addSubview:thumbnailView];
             cell.accessoryView = accessoryView;
             cell.accessoryType = UITableViewCellAccessoryNone;
             //[cell.contentView setBackgroundColor:[UIColor blueColor]];
         }
         else
             cell.accessoryView = nil;
+        
+        // count it as seen
+        [k hasSeenNewsWithNewsfeedID:[[newsFeedIDs objectAtIndex:index] intValue] andHasBeenSeen:YES];
+        [delegate decrementNewsCount];
     }
     return cell;
 }
@@ -265,6 +316,12 @@
 
 -(void)refreshUserPhotos {
     [tableView reloadData];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation hasSeenNewsDidCompleteWithResult:(NSNumber *)affectedRows {
+    // do nothing
+    //[delegate getNewsCount];
+    //[delegate clearNewsCount];
 }
 
 #if USE_PULL_TO_REFRESH
@@ -340,14 +397,18 @@
 #endif
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    // DO NOTHING
-#if 0
-    //NSLog(@"Button titleLabel: %@", button.titleLabel.text);
-    int row = [button.titleLabel.text intValue]; //[indexPath row]; //button.tag - PHOTO_TAG;
-    NSString * name = [delegate getNameForIndex:row];
+    int row = [button.titleLabel.text intValue];
+    NSString * name = [agentArray objectAtIndex:row];
+    if ([name isEqualToString:@"You"])
+        name = [delegate getUsername];
     NSLog(@"CommentFeedTable: did click on user's photo %d, username = %@", row, name);
     [delegate shouldDisplayUserPage:name];
-#endif
+}
+
+-(void)didClickThumbnail:(UIButton*)button {
+    int tagID = button.tag;
+    NSLog(@"Clicking on thumbnail with tagID: %d", tagID);
+    [delegate jumpToPageWithTagID:tagID];
 }
 
 @end

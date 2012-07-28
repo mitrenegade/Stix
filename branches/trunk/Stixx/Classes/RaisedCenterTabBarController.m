@@ -82,6 +82,25 @@
     [self.view addSubview:button[pos]];
 }
 
+-(void)didGetProfilePhoto:(UIImage *)photo {
+    CGPoint center = CGPointMake(320/2, 480-(BUTTON_HEIGHT/2)-20);
+    CGRect buttonFrame = button[TABBAR_BUTTON_PROFILE].frame;
+    int width = buttonFrame.size.width;
+    buttonFrame.size.height -= 10;
+    buttonFrame.size.width = buttonFrame.size.height;
+    center.x = 320 - (width * (TABBAR_BUTTON_MAX - TABBAR_BUTTON_PROFILE)) + width / 2;
+    if (!profileButton) {
+        profileButton = [[UIButton alloc] init];
+        [self.view addSubview:profileButton];
+    }
+    [profileButton setFrame:buttonFrame];
+    [profileButton setCenter:center];
+    [profileButton setImage:photo forState:UIControlStateNormal];
+    [profileButton setTag:TABBAR_BUTTON_PROFILE];
+    [profileButton addTarget:self action:@selector(didPressTabButton:) forControlEvents:UIControlEventTouchUpInside];
+    [profileButton setAdjustsImageWhenHighlighted:NO];
+}
+
 -(IBAction)closeInstructions:(id)sender {
     [self toggleFirstTimeInstructions:NO];
     //[myDelegate didCloseFirstTimeMessage];

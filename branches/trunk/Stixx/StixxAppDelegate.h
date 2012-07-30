@@ -77,7 +77,8 @@ struct UserInfo {
     
     UIWindow *window;
     
-    UIViewController * mainController;
+    UIViewController * rootController;
+    UINavigationController * nav;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
 	//UITabBarController * tabBarController; 	

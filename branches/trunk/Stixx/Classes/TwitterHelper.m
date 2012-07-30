@@ -264,7 +264,7 @@
 -(void)sendInviteMessage:(NSString*)screen_name {
     requestType = @"directMessage";
     // hack: all messages sent to hackstarbobo for now
-    NSString * shareText = [NSString stringWithFormat:@"d uxrewind %@, Come check out Stix! http://stixmobile.com", screen_name];
+    NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Come check out Stix! http://stixmobile.com", screen_name];
     SHKItem *_item = [SHKItem text:shareText];
     [self setItem:_item];
     [self share];
@@ -273,7 +273,7 @@
     requestType = @"directMessage";
     // hack: all messages sent to hackstarbobo for now
     for (NSString * screen_name in screen_names) {
-        NSString * shareText = [NSString stringWithFormat:@"d uxrewind %@, Come check out Stix! http://stixmobile.com", screen_name];
+        NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Come check out Stix! http://stixmobile.com", screen_name];
         SHKItem *_item = [SHKItem text:shareText];
         [self setItem:_item];
         [self share];

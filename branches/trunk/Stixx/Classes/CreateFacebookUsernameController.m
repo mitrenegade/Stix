@@ -176,11 +176,7 @@
 
     camera = [[UIImagePickerController alloc] init];
     camera.allowsEditing = YES;
-#if 0
-    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-#else
     camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-#endif
     camera.delegate = self;
     /*
      camera.navigationBarHidden = YES;

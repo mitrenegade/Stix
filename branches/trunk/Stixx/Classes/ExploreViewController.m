@@ -58,16 +58,6 @@ static NSMutableSet * retainedDetailControllers;
 {
 	self = [super initWithNibName:@"ExploreViewController" bundle:nil];
 	
-	// create tab bar item to become a tab view
-	//UITabBarItem *tbi = [self tabBarItem];
-	
-	// give it a label
-	//[tbi setTitle:@"Explore"];
-	
-	// add an image
-	//UIImage * i = [UIImage imageNamed:@"tab_find.png"];
-	//[tbi setImage:i];
-    
     k = nil;
     k = [[Kumulos alloc]init];
     [k setDelegate:self];    

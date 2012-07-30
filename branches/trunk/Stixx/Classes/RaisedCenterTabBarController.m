@@ -8,6 +8,11 @@
 
 #import "RaisedCenterTabBarController.h"
 
+// predefined although the buttons should be the correct size
+#define BUTTON_WIDTH_CENTER 71
+#define BUTTON_WIDTH 63
+#define BUTTON_HEIGHT 40 
+
 @implementation RaisedCenterTabBarController
 
 @synthesize myDelegate;
@@ -61,19 +66,24 @@
     button[pos] = [UIButton buttonWithType:UIButtonTypeCustom];
     button[pos].autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
     button[pos].frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
+    NSLog(@"Button %d size: %f %f image %x %f %f", pos, buttonImage.size.width, buttonImage.size.height, buttonImage, buttonImage.size.width, buttonImage.size.height);
+    [button[pos] setBackgroundColor:[UIColor blackColor]];
     bgNormal[pos] = buttonImage;
     bgSelected[pos] = highlightImage;
     [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
     if (highlightImage)
         [button[pos] setBackgroundImage:bgSelected[pos] forState:UIControlStateHighlighted];
-    
-    CGPoint center = CGPointMake(320/2, 480-(BUTTON_HEIGHT/2)-20); // hack: the 20 accounts for the status bar shift when the view is changed, see above
-    if (pos < TABBAR_BUTTON_TAG) { 
-        center.x = buttonImage.size.width * pos + buttonImage.size.width / 2;
+
+    CGPoint center;
+    if (pos < TABBAR_BUTTON_TAG) {
+        center = CGPointMake(BUTTON_WIDTH * pos + BUTTON_WIDTH/2, 480-(BUTTON_HEIGHT/2));
+        NSLog(@"Center %d: %f %f", pos, center.x, center.y);
     }
-    else if (pos > TABBAR_BUTTON_TAG) {
-        center.x = 320 - (buttonImage.size.width * (TABBAR_BUTTON_MAX - pos)) + buttonImage.size.width / 2;
+    if (pos > TABBAR_BUTTON_TAG) {
+        center = CGPointMake(320 - BUTTON_WIDTH * (TABBAR_BUTTON_MAX - pos) + BUTTON_WIDTH/2, 480 - (BUTTON_HEIGHT/2));
     }
+    if (pos == TABBAR_BUTTON_TAG) 
+        center = CGPointMake(160, 480 - (BUTTON_HEIGHT/2));
     button[pos].center = center;
     [button[pos] setTag:pos];
     [button[pos] addTarget:self

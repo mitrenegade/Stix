@@ -38,8 +38,6 @@ enum first_time_user_stage {
     FIRSTTIME_DONE
 };
 
-#define BUTTON_HEIGHT 40
-
 @interface RaisedCenterTabBarController : UITabBarController <StixAnimationDelegate>
 {
     NSObject<RaisedCenterTabBarControllerDelegate> *__unsafe_unretained myDelegate;

@@ -32,24 +32,22 @@
 @synthesize logo;
 @synthesize tagToRemix;
 
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        lastPageViewed = -1;
+    }
+    return self;
+}
+/*
 -(id)init
 {
 	self = [super initWithNibName:@"VerticalFeedController" bundle:nil];
-	
-	// create tab bar item to become a tab view
-	UITabBarItem *tbi = [self tabBarItem];
-	
-	// give it a label
-	//[tbi setTitle:@"Feed"];
-	
-	// add an image
-	UIImage * i = [UIImage imageNamed:@"tab_feed.png"];
-	[tbi setImage:i];
-    
-    lastPageViewed = -1;
-    
     return self;
 }
+*/
 
 -(void)initializeTable
 {

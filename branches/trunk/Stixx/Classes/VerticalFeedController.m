@@ -655,37 +655,84 @@
     if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
         int i = index % 2;
         if (!firstTimeArrowCanvas[i]) {
-            UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
-            CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 240, pointerImg.size.width, pointerImg.size.height);
+            UIImage * calloutImg = [UIImage imageNamed:@"graphic_FTUE_callout"];
+            CGRect canvasFrame = CGRectMake(160-calloutImg.size.width/2, 210, calloutImg.size.width, calloutImg.size.height);
             firstTimeArrowCanvas[i] = [[UIView alloc] initWithFrame:canvasFrame];
-            UIImageView * pointer = [[UIImageView alloc] initWithImage:pointerImg];
-            //[firstTimeArrowCanvas addSubview:pointer];
+            UIImageView * callout = [[UIImageView alloc] initWithImage:calloutImg];
+            CGRect labelFrame = CGRectMake(0, 0, calloutImg.size.width, calloutImg.size.height-30);
+            UILabel * calloutLabel = [[UILabel alloc] initWithFrame:labelFrame];
+            [calloutLabel setTextColor:[UIColor whiteColor]];
+            [calloutLabel setTextAlignment:UITextAlignmentCenter];
+            [calloutLabel setBackgroundColor:[UIColor clearColor]];
+            [calloutLabel setFont:[UIFont boldSystemFontOfSize:15]];
+            [calloutLabel setText:@"Remix anyone's Pix"];
+            [firstTimeArrowCanvas[i] addSubview:callout];
+            [firstTimeArrowCanvas[i] addSubview:calloutLabel]; 
+            /*
             StixAnimation * animation = [[StixAnimation alloc] init];
             animation.delegate = self;
             if (agitatePointer[i] > 0) {
                 animationID[i] = [animation doJump:pointer inView:firstTimeArrowCanvas[i] forDistance:20 forTime:.15];
-                //[animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:.15];
-//                agitatePointer[i]--;
             }
             else {
                 animationID[i] = [animation doJump:pointer inView:firstTimeArrowCanvas[i] forDistance:20 forTime:1];
-                //[animation doBounce:pointer inView:firstTimeArrowCanvas[0] forDistance:20 forTime:1]; 
             }
+             */
         }
-        [firstTimeArrowCanvas[i] removeFromSuperview];
-        [feedItem.view addSubview:firstTimeArrowCanvas[i]];
+        //[firstTimeArrowCanvas[i] removeFromSuperview];
+        //[feedItem.view addSubview:firstTimeArrowCanvas[i]];
+        [self showFirstTimeArrowCanvas:i onFeedItem:(VerticalFeedItemController*)feedItem];
     }    
     //NSLog(@"ViewForItem: feedItem ID %d index %d view %x frame %f %f %f %f", feedItem.tagID, index, feedItem.view, feedItem.view.frame.origin.x, feedItem.view.frame.origin.y, feedItem.view.frame.size.width, feedItem.view.frame.size.height);
     //[feedSectionHeights setObject:[NSNumber numberWithInt:feedItem.view.frame.size.height] forKey:tag.tagID];
     return feedItem.view;
 }
 
+-(void)hideFirstTimeArrowCanvas:(int)i showAfterDelay:(float)delay{
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFadeOut:firstTimeArrowCanvas[i] forTime:.5 withCompletion:^(BOOL finished) {
+        if (delay == 0)
+            [firstTimeArrowCanvas[i] removeFromSuperview];
+    }];
+    if (delay != 0) {
+        [self performSelector:@selector(redisplayFirstTimeArrowCanvas:) withObject:[NSNumber numberWithInt:i] afterDelay:delay];
+    }
+}
+-(void)redisplayFirstTimeArrowCanvas:(NSNumber *)number {
+    // doesn't change superview
+    int i = [number intValue];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFadeIn:firstTimeArrowCanvas[i] forTime:.5 withCompletion:^(BOOL finished) {
+    }];
+}
+
+-(void)showFirstTimeArrowCanvas:(int)i onFeedItem:(VerticalFeedItemController*)feedItem {
+    // at this point this should already be offscreen
+    [firstTimeArrowCanvas[i] removeFromSuperview];
+    [feedItem.view addSubview:firstTimeArrowCanvas[i]];
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doFadeIn:firstTimeArrowCanvas[i] forTime:.5 withCompletion:^(BOOL finished) {
+    }];
+}
+
+-(BOOL)hasFirstTimeUserMessageStage2 {
+    return [delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02;
+}
+
+-(void)didClickFirstTimeUserMessage {
+    [self hideFirstTimeArrowCanvas:0 showAfterDelay:FTUE_REDISPLAY_TIMER];
+    [self hideFirstTimeArrowCanvas:1 showAfterDelay:FTUE_REDISPLAY_TIMER];
+}
+
+#if SHOW_ARROW
 -(void)agitatePointer {
     agitatePointer[0] = 3;
     agitatePointer[1] = 3;
 }
+#endif
 
 -(void)didFinishAnimation:(int)_animationID withCanvas:(UIView *)canvas {
+#if SHOW_ARROW
     for (int i=0; i<2; i++) {
         if (_animationID == animationID[i]) // first jump animation finished
         {
@@ -702,6 +749,7 @@
             }
         }
     }
+#endif
 }
 
 -(void)refreshViewForItemAtIndex:(int)index withTag:(Tag*)tag {
@@ -1142,11 +1190,13 @@
     if (!okToAdvance)
         return;
     if (firstTimeArrowCanvas[0]) {
-        [firstTimeArrowCanvas[0] removeFromSuperview];
+        [self hideFirstTimeArrowCanvas:0 showAfterDelay:0];
+        //[firstTimeArrowCanvas[0] removeFromSuperview];
         firstTimeArrowCanvas[0] = nil;
     }
     if (firstTimeArrowCanvas[1]) {
-        [firstTimeArrowCanvas[1] removeFromSuperview];
+        [self hideFirstTimeArrowCanvas:1 showAfterDelay:0];
+        //[firstTimeArrowCanvas[1] removeFromSuperview];
         firstTimeArrowCanvas[1] = nil;
     }
     [self setTagToRemix:[feedItem.tag copy]];
@@ -1214,10 +1264,12 @@
 }
 
 -(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
+#if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
         return;
     }
+#endif
     if ([delegate isDisplayingShareSheet])
         return;
     if ([delegate isShowingBuxInstructions])
@@ -1382,20 +1434,6 @@
     [delegate didPerformPeelableAction:action forTagWithID:[tag.tagID intValue] forAuxStix:index];
 }
 
-/*
--(void)didDismissCarouselTab {
-    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
-        [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
-    }
-}
--(void)didExpandCarouselTab {
-    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
-        [tabBarController toggleFirstTimeInstructions:NO];
-        [tabBarController toggleFirstTimePointer:NO atStage:FIRSTTIME_MESSAGE_02];
-    }
-}
-*/
-
 #pragma mark UserGalleryDelegate
 
 -(void)shouldDisplayUserPage:(NSString *)username {
@@ -1481,10 +1519,12 @@
     [delegate didCloseShareSheet];
 }
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
+#if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
         return;
     }
+#endif
     if ([delegate isShowingBuxInstructions])
         return;
     if ([delegate isDisplayingShareSheet])

@@ -15,7 +15,7 @@
 #if USE_PULL_TO_REFRESH
 @synthesize reloading=_reloading;
 @synthesize refreshHeaderView;
-@synthesize hasHeaderRow;
+//@synthesize hasHeaderRow;
 #endif
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -23,7 +23,7 @@
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
-        hasHeaderRow = NO;
+        //hasHeaderRow = NO;
     }
     return self;
 }
@@ -141,8 +141,8 @@
 }
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (hasHeaderRow && [indexPath row] == 0)
-        return 180;
+    //if (hasHeaderRow && [indexPath row] == 0)
+    //    return 180;
     return columnHeight + columnPadding;
 }
 
@@ -173,6 +173,7 @@
 
     int row = [indexPath row];
     NSLog(@"Column table: populating row %d", row);
+    /*
     if ([self hasHeaderRow]) {
         if (row == 0) {
             // row 0 is header
@@ -217,6 +218,7 @@
         }        
     }
     else
+     */
     {
         // all rows are normal
         
@@ -236,7 +238,7 @@
                  */
                 [cellOldView removeFromSuperview];
             }
-            UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns + col]; 
+            UIView * elementView = [delegate viewForItemAtIndex:row * numColumns + col]; 
             if (elementView != nil) {
                 [elementView setFrame:frame];
                 [cell addSubview:elementView];

@@ -464,7 +464,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
     [self showAlertWithTitle:@"Test" andMessage:@"Registered for remote notifications" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
 #endif
     // Tell Parse about the device token.
@@ -822,7 +822,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     UIImage * newphoto = [UIImage imageWithData:userphoto];
     myUserInfo_userphoto = newphoto;
     myUserInfo->firstTimeUserStage = [defaults integerForKey:@"firstTimeUserStage"];
-#if 0 && ADMIN_TESTING_MODE
+#if 1 && ADMIN_TESTING_MODE
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
 #endif
     
@@ -935,6 +935,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [tabBarController setButtonStateSelected:pos]; // highlight button
 #if !TARGET_IPHONE_SIMULATOR
     if (pos == TABBAR_BUTTON_TAG) {
+#if SHOW_ARROW
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
             // force back to the feedview
             [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
@@ -942,6 +943,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             [self agitateFirstTimePointer];
             return;
         }
+#endif
         [self.camera setCameraOverlayView:tagViewController.view];
         
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
@@ -990,6 +992,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         
         [feedController didCloseComments];
         lastViewController = exploreController;
+#if SHOW_ARROW
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
             // force back to the feedview
             [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
@@ -997,17 +1000,19 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             [self agitateFirstTimePointer];
             return;
         }
+#endif
     }
     else if (pos == TABBAR_BUTTON_PROFILE) {
+#if SHOW_ARROW
         if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)) {
             [self agitateFirstTimePointer];
             return;
         }
-        
+#endif
         if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
-            [self advanceFirstTimeUserMessage];
             [self hideFirstTimeUserMessage];
-            [profileController doPointerAnimation];
+            [self advanceFirstTimeUserMessage]; // must come after hide!
+            //[profileController doPointerAnimation];
         }
     }
     else if (pos == TABBAR_BUTTON_NEWS) {
@@ -1304,6 +1309,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(BOOL)canClickRemixButton {
+#if SHOW_ARROW
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
         return YES;
     }
@@ -1311,21 +1317,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self agitateFirstTimePointer];
         return NO;
     }
+#endif
     return YES;
 }
 
 -(BOOL)canClickNotesButton {
+#if SHOW_ARROW
     if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03)) {
         [self agitateFirstTimePointer];
         return NO;
     }
+#endif
     return YES;
 }
 
 -(void)didClickRemixButton {
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
         [self advanceFirstTimeUserMessage];
-        [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
+        //[tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
     }
 }
 
@@ -2787,7 +2796,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self initializeBadgesFromKumulos];
     });
      */
-    if (!didStartFirstTimeMessage && !isShowingFriendSuggestions) {
+    if (!didStartFirstTimeMessage && !isShowingFriendSuggestions && [self tabBarIsVisible]) {
         [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
         didStartFirstTimeMessage = YES;
     }
@@ -3446,6 +3455,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // keeps the login screen up, and only dismisses when both have loaded
     // calls displayFriendSuggestionController then
     [friendSuggestionController initializeSuggestions];
+#if ADMIN_TESTING_MODE
+    [self friendSuggestionControllerFinishedLoading:0];
+#endif
 }
 
 -(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions { 
@@ -3506,10 +3518,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)shouldDisplayUserPage:(NSString *)name {
     NSLog(@"ShouldDisplayUserPage: %@", name);
+#if SHOW_ARROW
     if (myUserInfo->firstTimeUserStage < FIRSTTIME_DONE) {
         [self agitateFirstTimePointer];
         return;
     }
+#endif
     /*
     if ([name isEqualToString:[self getUsername]]) {
         //[self didOpenProfileView];
@@ -3929,7 +3943,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif
-#if 0 && ADMIN_TESTING_MODE
+#if 1 && ADMIN_TESTING_MODE
     return;
 #endif
     
@@ -4740,14 +4754,17 @@ static bool isShowingAlerts = NO;
     return myUserInfo->firstTimeUserStage;
 }
 -(void)hideFirstTimeUserMessage {
-    [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
+    //[tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
     [tabBarController toggleFirstTimeInstructions:NO];
 }
+#if SHOW_ARROW
 -(void)hideFirstTimeArrowForShareController {
     [tabBarController toggleFirstTimePointer:NO atStage:myUserInfo->firstTimeUserStage];
 }
+#endif
 
 -(void)agitateFirstTimePointer {
+#if SHOW_ARROW
 #if USING_FLURRY
     // first do logs on flurry
     if (!IS_ADMIN_USER([self getUsername]))
@@ -4758,6 +4775,7 @@ static bool isShowingAlerts = NO;
         [tabBarController flashFirstTimeInstructions];
     else 
         [feedController agitatePointer];
+#endif
 }
 -(void)redisplayFirstTimeUserMessage01 {
     // called by TagView if person has no friends
@@ -4770,6 +4788,7 @@ static bool isShowingAlerts = NO;
         [FlurryAnalytics logEvent:@"FirstTimeUser Advanced" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:myUserInfo->firstTimeUserStage], @"Stage", nil]];
 #endif
     myUserInfo->firstTimeUserStage++;
+    NSLog(@"New FTUE stage: %d", myUserInfo->firstTimeUserStage);
     [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
@@ -4777,6 +4796,9 @@ static bool isShowingAlerts = NO;
     
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) 
         [feedController forceReloadWholeTableZOMG];
+    
+    if (myUserInfo->firstTimeUserStage >= FIRSTTIME_DONE)
+        [tabBarController displayNewsCount];
     
 #if USING_FLURRY
     if (!IS_ADMIN_USER([self getUsername]))
@@ -4791,6 +4813,10 @@ static bool isShowingAlerts = NO;
     //if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)
     //    [self advanceFirstTimeUserMessage];
 }
+-(BOOL)canDisplayNewsCount {
+    return (myUserInfo->firstTimeUserStage == FIRSTTIME_DONE);
+}
+
 #pragma mark share pix sheet
 
 -(void)didDisplayShareSheet {
@@ -4830,10 +4856,12 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)didShowBuxInstructions {
+#if SHOW_ARROW
     if ([self getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [self agitateFirstTimePointer];
         return;
     }
+#endif
     if ([self isDisplayingShareSheet])
         return;
     
@@ -4973,6 +5001,8 @@ static bool isShowingAlerts = NO;
     
     // create news badge
     [tabBarController setNewsCountValue:[aggregateResult intValue]];
+    if ([self canDisplayNewsCount])
+        [tabBarController displayNewsCount];
 }
 
 -(void)clearNewsCount {
@@ -4980,7 +5010,7 @@ static bool isShowingAlerts = NO;
 }
 
 -(void)decrementNewsCount {
-    int newCount = MAX(0, [[tabBarController newsCount].text intValue]-1);
+    int newCount = MAX(0, [tabBarController newsCount]-1);
     NSLog(@"Decrementing to %d", newCount);
     [tabBarController setNewsCountValue:newCount];
 }
@@ -4991,6 +5021,10 @@ static bool isShowingAlerts = NO;
     
     // reset tab bar badge
     [tabBarController setNewsCountValue:0];
+}
+
+-(BOOL)tabBarIsVisible {
+    return (camera.cameraOverlayView == tabBarController.view);
 }
 
 @end

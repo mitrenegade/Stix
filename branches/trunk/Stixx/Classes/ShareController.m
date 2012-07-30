@@ -69,9 +69,10 @@ static ShareController *sharedShareController;
 
     [tableView setFrame:CGRectMake(20, 180, 280, ROW_HEIGHT_SHARE * NUM_SERVICES)];
     [tableView.layer setCornerRadius:10];
- 
+#if SHOW_ARROW
     // make sure first time instructions arrow is not showing
     [delegate hideFirstTimeArrowForShareController];
+#endif
 }
 
 -(void)reloadConnections {

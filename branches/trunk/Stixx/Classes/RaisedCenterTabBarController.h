@@ -16,6 +16,9 @@
 -(void)didFinishRewardAnimation:(int)amount;
 -(void)didCloseFirstTimeMessage;
 //-(void)didCloseFirstTimeInstructions;
+-(BOOL)canDisplayNewsCount;
+-(BOOL)tabBarIsVisible;
+-(int)getFirstTimeUserStage;
 @end
 
 enum {
@@ -50,6 +53,8 @@ enum first_time_user_stage {
     UIButton * firstTimeInstructions;
     bool showMallPointer;
     UIButton * buttonClose;
+    CGRect firstTimeInstructionsFrame;
+    UILabel * firstTimeInstructionsLabel;
     
     int allAnimationIDs[4];
     int mallPointerAnimationID;
@@ -60,11 +65,15 @@ enum first_time_user_stage {
     int agitatePointer;
     BOOL instructionsDismissed;
     
-    OutlineLabel * newsCount;
+    //OutlineLabel * newsCount;
+    int newsCount;
+    UIButton * newsCallout;
+    UILabel * newsCountLabel;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<RaisedCenterTabBarControllerDelegate> *myDelegate;
-@property (nonatomic) OutlineLabel * newsCount;
+@property (nonatomic) UIButton * newsCallout;
+@property (nonatomic, assign) int newsCount;
 
 -(void)initializeCustomButtons;
 
@@ -85,7 +94,9 @@ enum first_time_user_stage {
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage;
 -(void)agitateFirstTimePointer;
 -(void)flashFirstTimeInstructions;
+
 -(void)setNewsCountValue:(int)newCount;
+-(void)displayNewsCount;
 
 -(void)didGetProfilePhoto:(UIImage*)photo;
 @end

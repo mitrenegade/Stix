@@ -53,12 +53,18 @@
         CGRect frame = CGRectMake(0,44, 320, 460-44);
         pixTableController = [[ColumnTableController alloc] init];
         [pixTableController.view setFrame:frame];
-        [pixTableController.view setBackgroundColor:[UIColor clearColor]];
+        [pixTableController.view setBackgroundColor:[UIColor blueColor]];
         pixTableController.delegate = self;
         numColumns = 3;
         [pixTableController setNumberOfColumns:numColumns andBorder:4];
-        [self.view addSubview:pixTableController.view];
+        [scrollView addSubview:pixTableController.view];
     }
+    
+    // user info
+    [self populateUserInfo];
+    [self populateFollowCounts];
+
+    
     k = [[Kumulos alloc] init];
     [k setDelegate:self];
 
@@ -86,6 +92,80 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+-(void)populateUserInfo {
+    NSLog(@"Profile view appearing with username: %@", username);
+    [nameLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:15]];
+    [nameLabel setBackgroundColor:[UIColor clearColor]];
+    [nameLabel setFrame:CGRectMake(115, 68-44, 132, 33)];
+    [nameLabel setText:username];
+    
+    [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:username];
+    [photoButton setImage:userPhoto];
+    if (!userPhoto)
+        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
+    
+    CGRect frameAddFriend = CGRectMake(85, 160-44, 153, 44);
+    if (![username isEqualToString:[delegate getUsername]]) {
+        [buttonAddFriend setFrame:frameAddFriend];
+        [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
+        if ([delegate isFollowingUser:username]) { 
+            [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
+        }
+        [buttonAddFriend addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
+        
+        // reposition pixTableController frame
+        CGRect frame = pixTableController.view.frame;
+        frame.origin.y = frameAddFriend.origin.y + frameAddFriend.size.height + 20;
+        [pixTableController.view setFrame:frame];
+    }
+    else {
+        // reposition pixTableController frame
+        CGRect frame = pixTableController.view.frame;
+        frame.origin.y = frameAddFriend.origin.y + 20;
+        [pixTableController.view setFrame:frame];
+    }
+    [buttonFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
+    [buttonFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
+    
+    [buttonFollowers setFrame:CGRectMake(210, 103-44, 99, 45)];
+    [buttonFollowers setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
+}
+-(void)populateFollowCounts {
+    [myFollowingCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
+    [myFollowingCount setOutlineColor:[UIColor blackColor]];    
+    [myFollowingCount setTextAlignment:UITextAlignmentCenter];
+    [myFollowingCount setFontSize:25];
+    
+    [myFollowingLabel setTextColor:[UIColor whiteColor]];
+    [myFollowingLabel setOutlineColor:[UIColor blackColor]];  
+    [myFollowingLabel setText:@"FOLLOWING"];
+    [myFollowingLabel setTextAlignment:UITextAlignmentCenter];
+    [myFollowingLabel setFontSize:10];
+    
+    [myFollowersCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
+    [myFollowersCount setOutlineColor:[UIColor blackColor]];        
+    [myFollowersCount setTextAlignment:UITextAlignmentCenter];
+    [myFollowersCount setFontSize:25];
+    
+    [myFollowersLabel setTextColor:[UIColor whiteColor]];
+    [myFollowersLabel setOutlineColor:[UIColor blackColor]];    
+    [myFollowersLabel setText:@"FOLLOWERS"];
+    [myFollowersLabel setTextAlignment:UITextAlignmentCenter];
+    [myFollowersLabel setFontSize:10];
+    
+    [self updateFollowCounts];
+}
+
+-(void)updateFollowCounts {
+    [k getFollowersOfUserWithFollowsUser:username];
+    [k getFollowListWithUsername:username]; 
 }
 
 #pragma mark ColumnTableController delegate

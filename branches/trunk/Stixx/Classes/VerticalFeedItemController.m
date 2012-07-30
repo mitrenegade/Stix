@@ -347,6 +347,9 @@
     [myDoubleTapRecognizer setDelegate:self];
     
     [self.view addGestureRecognizer:myDoubleTapRecognizer];
+
+    UIImage * calloutImg = [UIImage imageNamed:@"graphic_FTUE_callout"];
+    frameFTUE = CGRectMake(160-calloutImg.size.width/2, 210, calloutImg.size.width, calloutImg.size.height);
 }
 
 - (void)viewDidUnload
@@ -462,6 +465,9 @@
         if (CGRectContainsPoint([buttonShare frame], location))
             [self didClickShareButton:buttonShare];
             //return;
+        else if ([delegate respondsToSelector:@selector(hasFirstTimeUserMessageStage2)] && [delegate hasFirstTimeUserMessageStage2] && CGRectContainsPoint(frameFTUE, location)) {
+            [delegate didClickFirstTimeUserMessage];
+        }
         else if (CGRectContainsPoint([buttonAddComment frame], location)) 
             [self didClickAddCommentButton:buttonAddComment];
         else if (CGRectContainsPoint([buttonRemix frame], location))

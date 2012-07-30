@@ -138,7 +138,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSData * theStixLayerData = UIImagePNGRepresentation([newTag stixLayer]); // must be PNG for transparency 
         [savedInfo setObject:newTag forKey:@"tag"];
         [savedInfo setObject:remixMode forKey:@"remixMode"];
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
         // debug mode
         Tag * tag = [savedInfo objectForKey:@"tag"];
         NSNumber * newRecordID = [NSNumber numberWithInt:9999];

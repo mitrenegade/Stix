@@ -290,15 +290,7 @@ static NSMutableSet * retainedDetailControllers;
     StixView * cview = [contentViews objectForKey:key];
     if (cview.isShowingPlaceholder) {
         UIView * placeholder = [placeholderViews objectForKey:key];
-        /*
-        if (placeholder == nil) {
-            // shouldn't go here!
-            NSLog(@"Placeholder is nil! contentID %d tag %d", [key intValue], [tagID intValue]);
-            [self createPlaceholderViewForStixView:cview andKey:key andTagID:tagID];
-        }
-         */
         return placeholder;
-        //return placeholderViewGlobal;
     }
     return [contentViews objectForKey:key];
 }
@@ -633,16 +625,6 @@ static NSMutableSet * retainedDetailControllers;
         detailController = nil;
     }
 }
-
-#pragma mark UserGalleryDelegate
-
-/*
- -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
- if (animationID == openDetailAnimation) {
- [DetailViewController unlockOpen];
- }
- }
- */
 
 -(void)shouldDisplayUserPage:(NSString *)username {
     // close detailView first - click came from here

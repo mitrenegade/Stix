@@ -151,6 +151,20 @@ static int animationID = 1;
      ];
 }
 
+-(void)doFadeOut:(UIView *)canvas forTime:(float)time withCompletion:(void (^)(BOOL))_completion {
+    // same as doFade but with no delegate calls
+    [canvas setAlpha:1];
+    animationID++;
+    [UIView animateWithDuration:time
+                          delay:0
+                        options: UIViewAnimationCurveEaseIn 
+                     animations: ^ { 
+                         [canvas setAlpha:0];
+                     } 
+                     completion:_completion
+     ];
+}
+
 -(void)doShake:(UIView *)canvas angleInDegrees:(float)deg forTime:(float)time withCompletion:(void (^)(BOOL))_completion {
     // same as doFade but with no delegate calls
     animationID++;

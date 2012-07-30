@@ -16,7 +16,6 @@
 #import "SMWebRequest.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
-#import "UserGalleryController.h"
 #import "DetailViewController.h"
 #import "StixAnimation.h"
 #import "ColumnTableController.h"
@@ -39,7 +38,7 @@
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, UserGalleryDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate>{
     
     Kumulos * k;
     IBOutlet UIButton * logo;
@@ -68,6 +67,8 @@
     NSMutableSet * allFollowing;
     
     int pendingContentCount;
+    IBOutlet UIScrollView * scrollView;
+
 }
 
 @property (nonatomic) UIImageView * photoButton;
@@ -84,14 +85,11 @@
 @property (nonatomic) OutlineLabel * myFollowingCount;
 @property (nonatomic) OutlineLabel * myFollowersLabel;
 @property (nonatomic) OutlineLabel * myFollowingLabel;
-@property (nonatomic) OutlineLabel * myPixCount;
-@property (nonatomic) OutlineLabel * myStixCount;
-@property (nonatomic) OutlineLabel * myPixLabel;
-@property (nonatomic) OutlineLabel * myStixLabel;
 @property (nonatomic) ColumnTableController * pixTableController;
 @property (nonatomic) UIView * headerView;
 @property (nonatomic) DetailViewController * detailController;
 @property (nonatomic) FriendSearchResultsController * searchResultsController;
+@property (nonatomic) IBOutlet UIScrollView * scrollView;
 
 -(void)populateUserInfo;
 -(void)populateFollowCounts;

@@ -59,6 +59,9 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    if (!agentArray) {
+        [self initializeNewsletter];
+    }
     [delegate didGetNews];
 }
 

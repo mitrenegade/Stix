@@ -222,8 +222,6 @@
 		9E940D0C159AEEF700F53687 /* btn_login_signup@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E940CFC159AEEF700F53687 /* btn_login_signup@2x.png */; };
 		9E940D0D159AEEF700F53687 /* btn_login_facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E940CFD159AEEF700F53687 /* btn_login_facebook@2x.png */; };
 		9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D21524DD8500BEA5D1 /* btn_mypix.png */; };
-		9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */; };
-		9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */; };
 		9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E98EBE915B7B2AC00D720C4 /* TwitterHelper.m */; };
 		9E9A877A158694510067957A /* PixPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9A8778158694510067957A /* PixPreviewController.m */; };
 		9E9A877B158694510067957A /* PixPreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E9A8779158694510067957A /* PixPreviewController.xib */; };
@@ -695,9 +693,6 @@
 		9E940CFC159AEEF700F53687 /* btn_login_signup@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_login_signup@2x.png"; sourceTree = "<group>"; };
 		9E940CFD159AEEF700F53687 /* btn_login_facebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_login_facebook@2x.png"; sourceTree = "<group>"; };
 		9E9649D21524DD8500BEA5D1 /* btn_mypix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_mypix.png; sourceTree = "<group>"; };
-		9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserGalleryController.h; sourceTree = "<group>"; };
-		9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserGalleryController.m; sourceTree = "<group>"; };
-		9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserGalleryController.xib; sourceTree = "<group>"; };
 		9E98EBE815B7B2AC00D720C4 /* TwitterHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwitterHelper.h; sourceTree = "<group>"; };
 		9E98EBE915B7B2AC00D720C4 /* TwitterHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TwitterHelper.m; sourceTree = "<group>"; };
 		9E9A8777158694510067957A /* PixPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixPreviewController.h; sourceTree = "<group>"; };
@@ -1108,9 +1103,6 @@
 		9E940CDF159AE9B900F53687 /* Profile and User Gallery */ = {
 			isa = PBXGroup;
 			children = (
-				9E9649D41524E3B600BEA5D1 /* UserGalleryController.h */,
-				9E9649D51524E3B700BEA5D1 /* UserGalleryController.m */,
-				9E9649D61524E3B800BEA5D1 /* UserGalleryController.xib */,
 				9ED2452A152A6D6B003886CD /* UserProfileViewController.h */,
 				9ED2452B152A6D6B003886CD /* UserProfileViewController.m */,
 				9ED2452C152A6D6C003886CD /* UserProfileViewController.xib */,
@@ -1914,7 +1906,6 @@
 				9E210C13152278E1002057F1 /* txt_discover.png in Resources */,
 				9E210C14152278E1002057F1 /* btn_follow.png in Resources */,
 				9E9649D31524DD8500BEA5D1 /* btn_mypix.png in Resources */,
-				9E9649D81524E3B900BEA5D1 /* UserGalleryController.xib in Resources */,
 				9ED2452E152A6D6C003886CD /* UserProfileViewController.xib in Resources */,
 				9ED24532152B7E47003886CD /* btn_following.png in Resources */,
 				9E6AFD93152C7F1100C61054 /* graphic_invite.png in Resources */,
@@ -2182,7 +2173,6 @@
 				9E6E1BCE151A48E40089F9B3 /* SMWebRequest.m in Sources */,
 				9EC91501151BC526005415E2 /* FacebookHelper.m in Sources */,
 				9E9C5E02151CCBF90048CDED /* FacebookLoginController.m in Sources */,
-				9E9649D71524E3B900BEA5D1 /* UserGalleryController.m in Sources */,
 				9E59908015256B8700CFFEB2 /* UserTagAggregator.m in Sources */,
 				9ED2452D152A6D6C003886CD /* UserProfileViewController.m in Sources */,
 				9EFDBDA11540AD31001236FA /* ASIAuthenticationDialog.m in Sources */,

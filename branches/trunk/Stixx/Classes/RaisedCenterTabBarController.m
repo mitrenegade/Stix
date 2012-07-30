@@ -11,7 +11,7 @@
 @implementation RaisedCenterTabBarController
 
 @synthesize myDelegate;
-@synthesize newsCount;
+@synthesize newsCount, newsCallout;
 
 -(void)initializeCustomButtons {
     // hide actual tabbar
@@ -42,12 +42,14 @@
     [self addButtonWithImage:[UIImage imageNamed:@"tab_camera"] highlightImage:nil atPosition:TABBAR_BUTTON_TAG];
      
     // news counter
+    /*
     CGRect newsFrame = CGRectMake(230, 420, 20, 20);
     newsCount = [[OutlineLabel alloc] initWithFrame:newsFrame];
     [newsCount setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
     [newsCount setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
     [newsCount setFontSize:20];
     [self.view addSubview:newsCount];
+     */
 }
 
 // Create a custom UIButton and add it to the center of our tab bar
@@ -101,51 +103,8 @@
     [profileButton setAdjustsImageWhenHighlighted:NO];
 }
 
--(IBAction)closeInstructions:(id)sender {
-    [self toggleFirstTimeInstructions:NO];
-    //[myDelegate didCloseFirstTimeMessage];
-//    [self toggleFirstTimePointer:NO atStage:0];
-//    pointerWasDismissed = YES;
-    instructionsDismissed = YES;
-}
-
--(void)flashFirstTimeInstructions {
-    // briefly show instructions again
-    /*
-    if (instructionsDismissed) {
-        [self toggleFirstTimeInstructions:YES];
-        [self performSelector:@selector(closeInstructions:) withObject:nil afterDelay:1.5];
-    }
-     */
-}
-
--(void)addFirstTimeInstructions {
-#if 0
-    UIImage * img1 = [UIImage imageNamed:@"message_firsttime_25.png"];
-    UIImage * img3 = [UIImage imageNamed:@"btn_close.png"];
-    firstTimeInstructions = [[UIImageView alloc] initWithImage:img1];
-    buttonClose = [[UIButton alloc] init];
-    [buttonClose setImage:img3 forState:UIControlStateNormal];
-    
-    [firstTimeInstructions setFrame:CGRectMake(5, 30, img1.size.width+25, img1.size.height+20)];
-    [buttonClose setFrame:CGRectMake(0, 22, img3.size.width, img3.size.height)];
-    
-    [buttonClose addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:firstTimeInstructions];
-    [self.view addSubview:buttonClose];
-    [self toggleFirstTimeInstructions:YES];
-#else
-    UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
-    //UIImage * img2 = [UIImage imageNamed:@"firsttime_message_02.png"];
-    //UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
-    firstTimeInstructions = [[UIButton alloc] initWithFrame:CGRectMake(5, 130, img1.size.width+25, img1.size.height+20)];
-    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:firstTimeInstructions];
-    [self toggleFirstTimeInstructions:NO];
-#endif
-}
-
 -(void)doPointerAnimation:(int)firstTimeUserStage {
+#if SHOW_ARROW
     UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
     CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 375, pointerImg.size.width, pointerImg.size.height);
     if (firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
@@ -168,43 +127,7 @@
     animation.delegate = self;
     if (firstTimeUserStage == FIRSTTIME_MESSAGE_01 || firstTimeUserStage == FIRSTTIME_MESSAGE_03)
         mallPointerAnimationID = [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
-}
-
--(void)doRewardAnimation:(NSString*)title withAmount:(int)amount {
-    return;
-    /*
-    int width = 100;
-    rewardValue = amount;
-    UIImage * coinImage = [UIImage imageNamed:@"bux_coin.png"];
-    //CGRect canvasFrame = CGRectMake(190, 275, width, 100);
-    CGRect canvasFrame = CGRectMake(5, 60, width, 100);
-    UIView * rewardCanvas = [[UIView alloc] initWithFrame:canvasFrame];
-    UIImageView * coinView = [[UIImageView alloc] initWithImage:coinImage];
-    CGRect rewardNameFrame = CGRectMake(0, 60, width, 15);
-    CGRect rewardAmountFrame = CGRectMake(0, 70, width, 35);
-    OutlineLabel * rewardName = [[OutlineLabel alloc] initWithFrame:rewardNameFrame];
-    [rewardName setTextColor:[UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1]];
-    [rewardName setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
-    [rewardName setFontSize:12];
-     OutlineLabel * rewardAmount = [[OutlineLabel alloc] initWithFrame:rewardAmountFrame];
-    [rewardAmount setTextColor:[UIColor colorWithRed:255/255.0 green:204/255.0 blue:102/255.0 alpha:1]];
-    [rewardAmount setOutlineColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:1]];
-    [rewardAmount setFontSize:20];
-    [rewardName setText:title];
-    [rewardAmount setText:[NSString stringWithFormat:@"+%d BUX", amount]];
-
-    [rewardCanvas addSubview:coinView];
-    [rewardCanvas addSubview:rewardName];
-    [rewardCanvas addSubview:rewardAmount];
-    [coinView setCenter:CGPointMake(canvasFrame.size.width/2, coinView.center.y)];
-    [rewardName setCenter:CGPointMake(canvasFrame.size.width/2, rewardName.center.y)];
-    [rewardAmount setCenter:CGPointMake(canvasFrame.size.width/2, rewardAmount.center.y)];
-    
-
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    allAnimationIDs[0] = [animation doJump:rewardCanvas inView:self.view forDistance:15 forTime:.25];
-     */
+#endif
 }
 
 -(void)doPurchaseAnimation:(NSString*)stixStringID {
@@ -302,6 +225,7 @@
     }
     
     /* first time mall pointer */
+#if SHOW_ARROW
     if (animationID == mallPointerAnimationID) // first jump animation finished
     {
         StixAnimation * animation = [[StixAnimation alloc] init];
@@ -318,6 +242,7 @@
 //            canvas = nil;
         }
     }
+#endif
     
     /* purchase stix */
     if (animationID == animationIDsPurchase[0]) { // fade in finished
@@ -366,31 +291,79 @@
     [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
 }
 
+
+-(void)addFirstTimeInstructions {
+#if 0
+    UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
+    firstTimeInstructions = [[UIButton alloc] initWithFrame:CGRectMake(5, 130, img1.size.width+25, img1.size.height+20)];
+    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:firstTimeInstructions];
+    [self toggleFirstTimeInstructions:NO];
+#else
+    firstTimeInstructions = [[UIButton alloc] init];
+    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
+    [firstTimeInstructions setAdjustsImageWhenHighlighted:NO];
+    [self.view addSubview:firstTimeInstructions];
+    firstTimeInstructionsLabel = [[UILabel alloc] init];
+    [firstTimeInstructionsLabel setTextColor:[UIColor whiteColor]];
+    [firstTimeInstructionsLabel setTextAlignment:UITextAlignmentCenter];
+    [firstTimeInstructionsLabel setBackgroundColor:[UIColor clearColor]];
+    //[firstTimeInstructionsLabel setOutlineColor:[UIColor blackColor]];
+    [firstTimeInstructionsLabel setFont:[UIFont boldSystemFontOfSize:15]];
+    [firstTimeInstructions addSubview:firstTimeInstructionsLabel];
+    
+    //[self toggleFirstTimeInstructions:NO];
+#endif
+}
+
+
+-(void)reshowFirstTimeInstructions:(NSNumber*)lastStage {
+    // for faded out instructions to be displayed after a delay
+    
+    NSLog(@"LastStage: %@ current Stage: %d", lastStage, [myDelegate getFirstTimeUserStage]);
+    // if stage has changed and is no longer equal to lastStage, do not show it
+    if ([lastStage intValue] != [myDelegate getFirstTimeUserStage])
+        return;
+    
+    if ([myDelegate tabBarIsVisible]) {
+        [self toggleFirstTimeInstructions:YES];        
+    }
+    else 
+        [self performSelector:@selector(reshowFirstTimeInstructions:) withObject:lastStage afterDelay:5];
+}
+
+-(IBAction)closeInstructions:(id)sender {
+    [self toggleFirstTimeInstructions:NO];
+    //instructionsDismissed = YES;
+}
+
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {
     StixAnimation * animation = [[StixAnimation alloc] init];
-    UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
-    CGRect frameOnscreen = CGRectMake(5, 130, img1.size.width+25, img1.size.height+20);
-    CGRect frameOffscreen = frameOnscreen;
-    frameOffscreen.origin.y += 480;
+    //CGRect frameOnscreen = firstTimeInstructionsFrame; //CGRectMake(5, 130, img1.size.width+25, img1.size.height+20);
+    //CGRect frameOffscreen = frameOnscreen;
+    //frameOffscreen.origin.y += 480;
     
     if (showInstructions) {
-        //[firstTimeInstructions setFrame:frameOffscreen];
-        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
-        }];
+//        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {}];
+        [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {}];
     }
     else {
-        //[firstTimeInstructions setFrame:frameOnscreen];
-        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+//        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {}];
+        // must set dismissedStage before the delay
+        NSNumber * dismissedStage = [NSNumber numberWithInt:[myDelegate getFirstTimeUserStage]];
+        NSLog(@"Hiding first time instructions at stage %d", [myDelegate getFirstTimeUserStage]);
+        [animation doFadeOut:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            [self performSelector:@selector(reshowFirstTimeInstructions:) withObject:dismissedStage afterDelay:FTUE_REDISPLAY_TIMER];
         }];
     }
-//    [firstTimeInstructions setHidden:!showInstructions];
-    [buttonClose setHidden:!showInstructions];
 }
 
 -(void)toggleFirstTimePointer:(BOOL)showPointer atStage:(int)firstTimeUserStage {
+#if SHOW_ARROW
     showMallPointer = showPointer;
     if (showPointer && !pointerWasDismissed)
         [self doPointerAnimation:firstTimeUserStage];
+#endif
 }
 
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage {
@@ -403,33 +376,39 @@
         {
             if (firstTimeInstructions == nil)
                 [self addFirstTimeInstructions];
-            UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
-            [firstTimeInstructions setImage:img1 forState:UIControlStateNormal];
-            pointerWasDismissed = NO;
+            //UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
+            UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
+            firstTimeInstructionsFrame = CGRectMake(60, 330, img.size.width+25, img.size.height+20);
+            [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
+            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
+            [firstTimeInstructionsLabel setText:@"Take your first Pix"];
+            //pointerWasDismissed = NO;
             // end old one
-            [self toggleFirstTimeInstructions:NO];
-            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
+            //[self toggleFirstTimeInstructions:NO];
+            //[self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
             // start new one
             [self toggleFirstTimeInstructions:YES];
-            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
-            instructionsDismissed = NO;
+            //[self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            //instructionsDismissed = NO;
         }
             break;
             
         case FIRSTTIME_MESSAGE_02:
         {
+            firstTimeInstructions = nil; // prevent it from popping back up
+            /*
             if (firstTimeInstructions == nil)
                 [self addFirstTimeInstructions];
-            UIImage * img2 = [UIImage imageNamed:@"firsttime_message_02.png"];
-            [firstTimeInstructions setImage:img2 forState:UIControlStateNormal];
-            pointerWasDismissed = NO;
-            // end old one
-            [self toggleFirstTimeInstructions:NO];
-            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
-            // start new one
-            [self toggleFirstTimeInstructions:YES];
-            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
-            instructionsDismissed = NO;
+            UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
+            firstTimeInstructionsFrame = CGRectMake(60, 330, img.size.width+25, img.size.height+20);
+            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
+            [firstTimeInstructionsLabel setText:@"Remix anyone's Pix!"];
+            [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
+            [self toggleFirstTimeInstructions:NO]; // don't show
+            //instructionsDismissed = NO;
+             */
         }
             break;
         
@@ -437,16 +416,21 @@
         {
             if (firstTimeInstructions == nil)
                 [self addFirstTimeInstructions];
-            UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
-            [firstTimeInstructions setImage:img3 forState:UIControlStateNormal];
-            pointerWasDismissed = NO;
+            //UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
+            UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout_side"];
+            firstTimeInstructionsFrame = CGRectMake(135, 330, img.size.width+25, img.size.height+20);
+            [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
+            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
+            [firstTimeInstructionsLabel setText:@"Find your Friends"];
+            //pointerWasDismissed = NO;
             // end old one
-            [self toggleFirstTimeInstructions:NO];
-            [self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
+            //[self toggleFirstTimeInstructions:NO];
+            //[self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
             // start new one
             [self toggleFirstTimeInstructions:YES];
-            [self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
-            instructionsDismissed = NO;
+            //[self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
+            //instructionsDismissed = NO;
         }
             break;
             
@@ -456,16 +440,52 @@
 }
 
 -(void)agitateFirstTimePointer {
+#if SHOW_ARROW
     agitatePointer = 3;
+#endif
 }
 
 #pragma mark news count
 -(void)setNewsCountValue:(int)newCount {
-    if (newCount == 0)
-        [newsCount setHidden:YES];
-    else {
-        [newsCount setHidden:NO];
-        [newsCount setText:[NSString stringWithFormat:@"%d", newCount]];
+    //if (newCount == 0)
+    //    [newsCount setHidden:YES];
+    //else {
+    //    [newsCount setHidden:NO];
+    //    [newsCount setText:[NSString stringWithFormat:@"%d", newCount]];
+    //}
+    // display news callout
+    if (!newsCallout) {
+        newsCallout = [[UIButton alloc] init];
+        UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
+        CGRect frame = CGRectMake(120, 330, img.size.width+25, img.size.height+20);
+        [newsCallout setFrame:frame];
+        [newsCallout setImage:img forState:UIControlStateNormal];
+        newsCountLabel = [[UILabel alloc] init];
+        [newsCountLabel setTextColor:[UIColor whiteColor]];
+        [newsCountLabel setTextAlignment:UITextAlignmentCenter];
+        [newsCountLabel setBackgroundColor:[UIColor clearColor]];
+        [newsCountLabel setFont:[UIFont boldSystemFontOfSize:15]];
+        [newsCountLabel setFrame:CGRectMake(0, 0, frame.size.width, frame.size.height-30)];
+        [newsCallout addSubview:newsCountLabel];
+    }
+    newsCount = newCount;
+    [newsCountLabel setText:[NSString stringWithFormat:@"%d New Items", newsCount]];
+}
+
+-(void)displayNewsCount {
+    if (newsCount > 0) {
+        [self.view addSubview:newsCallout];
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        [animation doFadeIn:newsCallout forTime:1.5 withCompletion:^(BOOL finished) {
+            [self performSelector:@selector(hideNewsCount) withObject:self afterDelay:NEWSCOUNT_DISPLAY_TIMER];
+        }];
+    }
+}
+-(void)hideNewsCount {
+    if (newsCallout) {
+        //[newsCallout removeFromSuperview];
+        StixAnimation * animation = [[StixAnimation alloc] init];
+        [animation doFadeOut:newsCallout forTime:1.5 withCompletion:^(BOOL finished) {}];
     }
 }
 @end

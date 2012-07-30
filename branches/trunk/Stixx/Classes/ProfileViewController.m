@@ -523,10 +523,12 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+#if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] == 3) {
         showPointer = NO;
         [delegate advanceFirstTimeUserMessage];
     }
+#endif
     if (isSearching)
         return;
     if (![delegate isLoggedIn])
@@ -545,14 +547,7 @@
         if (![delegate isLoggedIn])
             return;
         NSLog(@"Button show my pix!");
-#if 0
-        UserGalleryController * myGalleryController = [[UserGalleryController alloc] init];
-        [myGalleryController setDelegate:self];
-        [myGalleryController setUsername:[delegate getUsername]];
-        [self.view addSubview:myGalleryController.view];
-#else
         [self shouldDisplayUserPage:[delegate getUsername]];
-#endif
     }
     else if (indexPath.row == 0) {
         //[navController pushViewController:servicesController animated:YES];
@@ -570,6 +565,7 @@
 
 -(void)doPointerAnimation {
     //showPointer = YES;
+#if SHOW_ARROW
     UIImage * pointerImg = [UIImage imageNamed:@"orange_arrow.png"];
     CGRect canvasFrame = CGRectMake(160-pointerImg.size.width/2, 20, pointerImg.size.width, pointerImg.size.height);
     UIView * pointerCanvas = [[UIView alloc] initWithFrame:canvasFrame];
@@ -582,6 +578,7 @@
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     [animation doJump:pointerCanvas inView:self.view forDistance:20 forTime:1];
+#endif
 }
 
 -(IBAction)inviteButtonClicked:(id)sender {
@@ -734,6 +731,7 @@
 }
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
+#if SHOW_ARROW
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     if (showPointer)
@@ -741,6 +739,7 @@
     else {
         [canvas removeFromSuperview];
     }
+#endif
 }
 
 -(void)didLogin {

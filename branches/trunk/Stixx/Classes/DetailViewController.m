@@ -721,7 +721,4 @@ static BOOL openingDetailView;
 // checks whether first time user message will allow it
     return YES;
 }
--(void)hideFirstTimeArrowForShareController {
-    return;
-}
 @end

@@ -27,7 +27,6 @@
 -(void)shouldCloseShareController:(BOOL)didClickDone;
 -(NSString*)getUsername;
 -(void)uploadImageFinished;
--(void)hideFirstTimeArrowForShareController;
 -(int)getUserID;
 @optional
 -(void)sharePixDialogDidFinish;

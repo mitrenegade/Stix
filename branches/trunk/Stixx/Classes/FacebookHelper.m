@@ -294,17 +294,17 @@ static NSString * appID;
     }
      */
     if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
-        NSLog(@"Repeating getFacebookInfo request");
-        [self getFacebookInfo];
+        //NSLog(@"Repeating getFacebookInfo request");
+        //[self getFacebookInfo];
     }
     if ([error code] == -1001) {
         // the request timed out
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook login timed out. Try again when there is better connectivity!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Login Failed" message:@"Login timed out. Try again when there is better connectivity!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alertView show];
     }
     if ([error code] == -1009) {
         // the request timed out
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Facebook could not login. You must be connected to the internet." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Login Failed" message:@"You must be connected to the internet to access Facebook features." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alertView show];
     }
 }

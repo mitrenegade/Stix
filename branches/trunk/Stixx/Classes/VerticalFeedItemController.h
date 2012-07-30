@@ -34,6 +34,7 @@
 #import "FacebookHelper.h"
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
 #import "ShareController.h"
+#import "GlobalHeaders.h"
 
 #define CONTENT_HEIGHT 320
 #define HOSTNAME @"stix.herokuapp.com"
@@ -64,6 +65,9 @@
 -(void)didClickLikeButton:(int)type withTagID:(int)tagID;
 -(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem;
 -(BOOL)didClickNotesButton; // checks whether first time user message will allow it
+
+-(BOOL)hasFirstTimeUserMessageStage2;
+-(void)didClickFirstTimeUserMessage;
 @end
 
 
@@ -121,6 +125,9 @@
     UIButton * likeIconShocked;
     UIButton * likeIconComment;
     UIImageView * likeToolbarBg;
+    
+    // first time user experience
+    CGRect frameFTUE;
 }
 @property ( nonatomic) IBOutlet UILabel * labelName;
 @property ( nonatomic) IBOutlet UILabel * labelComment;

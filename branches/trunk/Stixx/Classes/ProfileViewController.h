@@ -13,8 +13,6 @@
 #import "LoadingAnimationView.h"
 #import "FriendSearchResultsController.h"
 #import "FacebookHelper.h"
-#import "UserGalleryController.h"
-//#import "SearchByNameController.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
 
@@ -48,7 +46,7 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
-@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UserGalleryDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
+@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
 {
     IBOutlet UIScrollView * scrollView;
     

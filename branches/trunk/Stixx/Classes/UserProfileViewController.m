@@ -14,7 +14,6 @@
 @synthesize username;
 @synthesize activityIndicator;
 @synthesize bgFollowers, bgFollowing;
-@synthesize myPixCount, myPixLabel, myStixCount, myStixLabel;
 @synthesize myFollowersCount, myFollowersLabel, myFollowingCount, myFollowingLabel;
 @synthesize photoButton, nameLabel, buttonAddFriend;
 @synthesize pixTableController;
@@ -22,6 +21,8 @@
 @synthesize detailController;
 @synthesize lastUsername;
 @synthesize searchResultsController;
+@synthesize scrollView;
+
 -(id)init
 {
 	self = [super initWithNibName:@"UserProfileViewController" bundle:nil];
@@ -69,12 +70,6 @@
     myFollowersCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(210, 100-44, 99, 40)];
     myFollowersLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(210, 133-44, 99, 15)];
 
-    /*
-    myPixCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(10, 160-44, 50, 35)];
-    myPixLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(60, 170-44, 20, 20)];
-    myStixCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(80, 160-44, 50, 35)];
-    myStixLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(130, 170-44, 25, 20)];
-     */
     searchResultsController = nil;
     allFollowers = [[NSMutableSet alloc] init];
     allFollowing = [[NSMutableSet alloc] init];
@@ -157,12 +152,10 @@
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (!pixTableController) {
-        CGRect frame = CGRectMake(0,44, 320, 460-44);
         pixTableController = [[ColumnTableController alloc] init];
-        [pixTableController.view setFrame:frame];
         [pixTableController.view setBackgroundColor:[UIColor clearColor]];
         pixTableController.delegate = self;
-        [pixTableController setHasHeaderRow:YES];
+//        [pixTableController setHasHeaderRow:YES];
         numColumns = 3;
         [pixTableController setNumberOfColumns:numColumns andBorder:4];
     }
@@ -179,7 +172,10 @@
     }
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
     [pixTableController.view removeFromSuperview];
-    [self.view addSubview:pixTableController.view];
+    //[self.view addSubview:pixTableController.view];
+    [self.scrollView addSubview:pixTableController.view];
+    [self.scrollView addSubview:headerView];
+    [scrollView setBackgroundColor:[UIColor clearColor]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -205,8 +201,6 @@
     [super viewDidUnload];
 }
 
-
-
 #pragma mark Init
 
 -(void)populateUserInfo {
@@ -217,17 +211,10 @@
     [nameLabel setText:username];
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
-    //[photoButton setBackgroundColor:[UIColor clearColor]];
-#if 1
-    //NSString * friendName = username;
-    UIImage * userPhoto = [delegate getUserPhotoForUsername:username];//[UIImage imageWithData:[[delegate getUserPhotos] objectForKey:username]];
+    UIImage * userPhoto = [delegate getUserPhotoForUsername:username];
     [photoButton setImage:userPhoto];
     if (!userPhoto)
         [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
-#else
-    [photoButton setImage:[delegate getUserPhotoForUsername:username]];// forState:UIControlStateNormal];
-#endif
-    //[photoButton addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
 
     if (![username isEqualToString:[delegate getUsername]]) {
         [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
@@ -240,7 +227,16 @@
             [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_follow"] forState:UIControlStateNormal];
         }
         [buttonAddFriend addTarget:self action:@selector(didClickAddFriendButton:) forControlEvents:UIControlEventTouchUpInside];
-    }    
+        
+        [headerView setFrame:CGRectMake(0, 0, 320, 160)];
+    }
+    else {
+        [headerView setFrame:CGRectMake(0, 0, 320, 160-44)];
+    }
+    float headerHeight = headerView.frame.size.height;
+    CGRect frame = CGRectMake(0,headerHeight, 320, 460-44);
+    [pixTableController.view setFrame:frame];
+
     [bgFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
     [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
 
@@ -278,68 +274,6 @@
     [k getFollowListWithUsername:username]; 
 }
 
--(void)updateStixCounts {
-    [myPixCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
-    [myPixCount setOutlineColor:[UIColor blackColor]];    
-    [myPixCount setTextAlignment:UITextAlignmentCenter];
-    [myPixCount setFontSize:20];
-    
-    [myPixLabel setTextColor:[UIColor whiteColor]];
-    [myPixLabel setOutlineColor:[UIColor blackColor]];  
-    [myPixLabel setText:@"PIX"];
-    [myPixLabel setTextAlignment:UITextAlignmentCenter];
-    [myPixLabel setFontSize:10];
-    
-    [myStixCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];
-    [myStixCount setOutlineColor:[UIColor blackColor]];        
-    [myStixCount setTextAlignment:UITextAlignmentCenter];
-    [myStixCount setFontSize:20];
-    
-    [myStixLabel setTextColor:[UIColor whiteColor]];
-    [myStixLabel setOutlineColor:[UIColor blackColor]];    
-    [myStixLabel setText:@"STIX"];
-    [myStixLabel setTextAlignment:UITextAlignmentCenter];
-    [myStixLabel setFontSize:10];
-    
-    userHistoryCount = -1;
-    userCommentCount = -1;
-    //[myPixCount setText:[NSString stringWithFormat:@"%d",0]];
-    //[myStixCount setText:[NSString stringWithFormat:@"%d",0]];
-    [k getCommentCountForUserWithUsername:username andStixStringID:@"COMMENT"];
-}
-
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getCommentCountForUserDidCompleteWithResult:(NSNumber *)aggregateResult {
-    userCommentCount = [aggregateResult intValue];
-    if (userCommentCount != -1) {
-        [myStixCount setText:[NSString stringWithFormat:@"%d", userCommentCount]];
-    }
-    [k getHistoryCountForUserWithUsername:username];    
-}
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getHistoryCountForUserDidCompleteWithResult:(NSNumber *)aggregateResult {
-    userHistoryCount = [aggregateResult intValue];
-    if (userCommentCount != -1) {
-        [myPixCount setText:[NSString stringWithFormat:@"%d", userHistoryCount - userCommentCount]];
-    }
-    /*
-    CGRect frame = [myPixCount frame];
-    frame.size.width = [myPixCount.text length] * 20;
-    [myPixCount setFrame:frame];
-    
-    frame = myPixLabel.frame;
-    frame.origin.x = myPixCount.frame.size.width + myPixCount.frame.origin.x + 3;
-    [myPixLabel setFrame:frame];
-    
-    frame = [myStixCount frame];
-    frame.size.width = [myStixCount.text length] * 20;
-    frame.origin.x = myPixLabel.frame.size.width + myPixLabel.frame.origin.x + 3;
-    [myStixCount setFrame:frame];
-    
-    frame = myStixLabel.frame;
-    frame.origin.x = myStixCount.frame.size.width + myStixCount.frame.origin.x + 3;
-    [myStixCount setFrame:frame];
-     */
-}
-
 -(IBAction)didClickAddFriendButton:(id)sender {
     NSLog(@"Add friend button clicked!");
     if ([[delegate getFollowingList] containsObject:username]) { 
@@ -360,13 +294,6 @@
         [delegate shouldDisplayUserPage:[delegate getUsername]];
     }
     else {
-#if 0
-        [searchResultsController.view removeFromSuperview];
-        isDisplayingFollowLists = NO;
-        [self toggleMyButtons:YES];
-        [self setUsername:new_username];
-        [self viewDidAppear:YES];
-#else
         CGRect frameOffscreen = self.view.frame;
         frameOffscreen.origin.x -= 330;
         StixAnimation * animation = [[StixAnimation alloc] init];
@@ -376,7 +303,6 @@
             [self toggleMyButtons:YES];
             [self shouldDisplayUserPage:new_username];
         }];
-#endif
     }
 }
 
@@ -431,22 +357,13 @@
     [[searchResultsController tableView] reloadData];
 }
 #pragma mark ColumnTableController delegate
-/*
--(UIView*)headerForSection:(NSInteger)section {
-    return headerView;  
-}
-
--(int)heightForHeader {
-    return 160;
-}
- */
 -(int)numberOfRows {
     double total = [allTagIDs count];
     //NSLog(@"allTagIDs has %d items", total);
     return ceil(total / numColumns) + 1;
 }
 
--(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key andTagID:(NSNumber*)tagID{
+-(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key {
     UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
     [placeholderView setCenter:cview.center];
     LoadingAnimationView * loadingAnimation = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
@@ -458,16 +375,25 @@
 
 -(UIView*)viewForItemAtIndex:(int)index
 {    
+    /*
     int actualIndex = index - numColumns;
     if (index >= [allTagIDs count] + numColumns)
         return nil;
-  
+  */
+    int actualIndex = index;
+    if (index >= [allTagIDs count])
+        return nil;
+    
     NSNumber * key = [NSNumber numberWithInt:actualIndex];
+    /*
     if (index < numColumns) {
         if (index == 0) return headerView;
         return nil;
     }
-    else if ([contentViews objectForKey:key] == nil) {
+     */
+    //else 
+#if 0
+    if ([contentViews objectForKey:key] == nil) {
         NSNumber * tagID = [allTagIDs objectAtIndex:actualIndex];
         Tag * tag = [allTags objectForKey:tagID];
         
@@ -480,6 +406,7 @@
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
+        
         [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
         
         // sometimes requests just fail and never show up
@@ -495,9 +422,50 @@
         }
         [contentViews setObject:cview forKey:key];
     }
+#else
+    if ([contentViews objectForKey:key] == nil) {
+        //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
+        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+            NSLog(@"Creating contentView for index %d with tagID %d", index, [[allTagIDs objectAtIndex:index] intValue]); 
+        }
+        else {
+            NSLog(@"Creating contentView for index %d with NULL", index); 
+        }
+        int contentWidth = [pixTableController getContentWidth];
+        int targetWidth = contentWidth;
+        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
+        CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
+        StixView * cview = [[StixView alloc] initWithFrame:frame];
+        [cview setInteractionAllowed:YES];
+        [cview setIsPeelable:NO];
+        [cview setDelegate:self];
+        
+        // populate with tags
+        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+            NSNumber * tagID = [allTagIDs objectAtIndex:index];
+            Tag * tag = [allTags objectForKey:tagID];
+            [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
+            
+            // sometimes requests just fail and never show up
+            [cview populateWithAuxStixFromTag:tag];
+        }
+        if (![isShowingPlaceholderView objectForKey:key]) {
+            cview.isShowingPlaceholder = YES;
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:key];//tagID];
+            
+            [self createPlaceholderViewForStixView:cview andKey:key];
+        }
+        else {
+            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:key/*tagID*/] boolValue];
+        }
+        [contentViews setObject:cview forKey:key];
+    }
+#endif
     StixView * cview = [contentViews objectForKey:key];
-    if (cview.isShowingPlaceholder)
-        return [placeholderViews objectForKey:key];
+    if (cview.isShowingPlaceholder) {
+        UIView * placeholder = [placeholderViews objectForKey:key];
+        return placeholder;
+    }
     return [contentViews objectForKey:key];
 }
 
@@ -509,7 +477,7 @@
     //NSLog(@"Loading row %d of total %d for gallery of user %@", row, [self numberOfRows], username);
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
-    if (row == -1 || row == 0) {
+    if (row == -1) {// || row == 0) {
         // load initial row(s)
         NSDate * now = [NSDate date]; // now
         [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:(numColumns*5)]];
@@ -647,7 +615,7 @@
 }
 
 #pragma mark stixview request delegates
-
+/*
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
     //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
     // send through to StixAppDelegate to save to defaults
@@ -666,7 +634,7 @@
         }
     }
 }
-
+*/
 #pragma mark followers and following lists
 
 -(void)buttonFollowingClicked {

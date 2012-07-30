@@ -22,6 +22,7 @@
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
 #import "StixEditorViewController.h"
+#import "GlobalHeaders.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -133,12 +134,6 @@
     int currentBuxPurchase;
     
     IBOutlet UIImageView * logo;
-    
-    //IBOutlet UITextField * statusMessage;
-    
-    //UserGalleryController * galleryController;
-    //UserProfileViewController * userPageController;
-    //NSString * galleryUsername;
     
     // stix purchase menu
     int buxAnimationOpen;

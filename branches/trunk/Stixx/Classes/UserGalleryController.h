@@ -25,9 +25,11 @@
 -(void)shouldDisplayUserPage:(NSString*)name;
 -(void)shouldCloseUserPage;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+-(NSString*)getUsername;
+-(BOOL)isFollowingUser:(NSString*)name;
 @end
 
-@interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate, StixAnimationDelegate, KumulosHelperDelegate>
+@interface UserGalleryController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, UIActionSheetDelegate, StixAnimationDelegate, KumulosHelperDelegate, UIScrollViewDelegate>
 {
     NSMutableArray * allTagIDs; // ordered in descending order
     NSMutableDictionary * allTags; // key: allTagID
@@ -45,6 +47,22 @@
     
     int pendingContentCount;
     int lastRowRequest;
+    
+    IBOutlet UIScrollView * scrollView;
+    ColumnTableController * pixTableController;
+    
+    // user info header
+    UIImageView * photoButton;
+    UIButton * buttonAddFriend;
+    UILabel * nameLabel;
+    NSString * lastUsername;
+    UIButton * buttonFollowers;
+    UIButton * buttonFollowing;
+    OutlineLabel * myFollowersCount;
+    OutlineLabel * myFollowingCount;
+    OutlineLabel * myFollowersLabel;
+    OutlineLabel * myFollowingLabel;
+    
 }
 @property (nonatomic) NSString * username;
 @property (nonatomic, unsafe_unretained) NSObject<UserGalleryDelegate> * delegate;
@@ -53,6 +71,16 @@
 @property (nonatomic) ColumnTableController * pixTableController;
 @property (nonatomic) UIView * headerView;
 @property (nonatomic) DetailViewController * detailController;
+@property (nonatomic) UIImageView * photoButton;
+@property (nonatomic) UIButton * buttonAddFriend;
+@property (nonatomic) UILabel * nameLabel;
+@property (nonatomic, copy) NSString * lastUsername;
+@property (nonatomic) UIButton * buttonFollowers;
+@property (nonatomic) UIButton * buttonFollowing;
+@property (nonatomic) OutlineLabel * myFollowersCount;
+@property (nonatomic) OutlineLabel * myFollowingCount;
+@property (nonatomic) OutlineLabel * myFollowersLabel;
+@property (nonatomic) OutlineLabel * myFollowingLabel;
 
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;

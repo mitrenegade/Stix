@@ -24,7 +24,7 @@
 
 #define HAS_PROFILE_BUTTON 0
 
-#define ADMIN_TESTING_MODE 0
+#define ADMIN_TESTING_MODE 1
 #define VERBOSE 0
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
 #define IS_ADMIN_USER(x) [ADMIN_USER_SET containsObject:x]
@@ -35,9 +35,15 @@
 #define TIME_LABEL_TAG 1003000
 #define PHOTO_TAG 1004000 // tag is going to be combined with comment index...hack: most comments possible: 999
 
+// First Time User Experience - arrow and button clicking restrictions
+#define SHOW_ARROW 0
+
 // hack to make camera fill screen for a custom (shorter) tab bar
 #define CAMERA_TRANSFORM_X 1.12412
 #define CAMERA_TRANSFORM_Y 1.12412
+
+#define FTUE_REDISPLAY_TIMER 10 // time before the message is redisplayed
+#define NEWSCOUNT_DISPLAY_TIMER 5
 
 enum {
     SUGGESTIONS_SECTION_FEATURED = 0,

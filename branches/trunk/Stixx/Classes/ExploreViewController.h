@@ -18,7 +18,6 @@
 #import "OutlineLabel.h"
 #import "ProfileViewController.h"
 #import "RaisedCenterTabBarController.h"
-#import "UserGalleryController.h"
 #import "KumulosHelper.h"
 #import "GlobalHeaders.h"
 #import "FlurryAnalytics.h"
@@ -55,7 +54,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, UserGalleryDelegate, KumulosHelperDelegate, StixEditorDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, KumulosHelperDelegate, StixEditorDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -90,7 +89,6 @@ enum {
     bool isZooming; // prevent hits when zooming
     
     DetailViewController * detailController;
-    UserGalleryController * galleryController;
     NSString * galleryUsername;
         
     //OutlineLabel * labelBuxCount;

@@ -295,8 +295,7 @@ static int animationID = 1;
 #endif
 }
 
--(void)doBounce:(UIView *)canvas inView:(UIView*)view forDistance:(int)pixels forTime:(float)time {
-    [view addSubview:canvas];
+-(void)doBounce:(UIView *)canvas forDistance:(int)pixels forTime:(float)time repeatCount:(int)repeat {
     int centerX = canvas.center.x;
     int centerY = canvas.center.y - pixels;
     CGPoint endPoint = CGPointMake(centerX, centerY); 
@@ -321,8 +320,10 @@ static int animationID = 1;
                                               [canvas setCenter:endPoint];
                                           } 
                                           completion:^(BOOL finished) { 
-                                              [canvas removeFromSuperview];
-                                              [self doBounce:canvas inView:view forDistance:pixels forTime:time];
+                                              if (repeat == -1)
+                                                  [self doBounce:canvas forDistance:pixels forTime:time repeatCount:repeat];
+                                              else if (repeat > 0) 
+                                                  [self doBounce:canvas forDistance:pixels forTime:time repeatCount:repeat-1];
                                           }
                           ];    
                      }

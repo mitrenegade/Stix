@@ -32,6 +32,8 @@
 @synthesize logo;
 @synthesize tagToRemix;
 
+static int tickID;
+
 -(id)init
 {
 	self = [super initWithNibName:@"VerticalFeedController" bundle:nil];
@@ -706,12 +708,27 @@
     }];
 }
 
+-(void)bounceInstructionsWithClock:(NSNumber *)lastTickID {
+    if ([lastTickID intValue] == tickID) {
+        NSLog(@"Bouncing on clock %@", lastTickID);
+        for (int i=0; i<2; i++) {
+            StixAnimation * animation = [[StixAnimation alloc] init];
+            [animation doBounce:firstTimeArrowCanvas[i] forDistance:FTUE_BOUNCE_DISTANCE forTime:.5 repeatCount:FTUE_BOUNCE_COUNT];
+        }
+        [self performSelector:@selector(bounceInstructionsWithClock:) withObject:lastTickID afterDelay:FTUE_REDISPLAY_TIMER];
+    }
+    else {
+        NSLog(@"Stopping bounce with clock %@", lastTickID);
+    }
+}
+
 -(void)showFirstTimeArrowCanvas:(int)i onFeedItem:(VerticalFeedItemController*)feedItem {
     // at this point this should already be offscreen
     [firstTimeArrowCanvas[i] removeFromSuperview];
     [feedItem.view addSubview:firstTimeArrowCanvas[i]];
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doFadeIn:firstTimeArrowCanvas[i] forTime:.5 withCompletion:^(BOOL finished) {
+        [self bounceInstructionsWithClock:[NSNumber numberWithInt:(++tickID)]];
     }];
 }
 
@@ -1199,6 +1216,8 @@
         //[firstTimeArrowCanvas[1] removeFromSuperview];
         firstTimeArrowCanvas[1] = nil;
     }
+    tickID++;
+    
     [self setTagToRemix:[feedItem.tag copy]];
     NSLog(@"Did click remix with feedItem by %@ with tagID %@, creating tagToRemix with ID %@", feedItem.tag.username, feedItem.tag.tagID, tagToRemix.tagID);
     if (tagToRemix.stixLayer) {

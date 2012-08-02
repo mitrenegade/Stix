@@ -10,6 +10,8 @@
 
 @implementation RaisedCenterTabBarController
 
+static int tickID = -1;
+
 @synthesize myDelegate;
 @synthesize newsCount, newsCallout;
 
@@ -300,9 +302,7 @@
     [self.view addSubview:firstTimeInstructions];
     [self toggleFirstTimeInstructions:NO];
 #else
-    firstTimeInstructions = [[UIButton alloc] init];
-    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    [firstTimeInstructions setAdjustsImageWhenHighlighted:NO];
+    firstTimeInstructions = [[UIImageView alloc] init];
     [self.view addSubview:firstTimeInstructions];
     firstTimeInstructionsLabel = [[UILabel alloc] init];
     [firstTimeInstructionsLabel setTextColor:[UIColor whiteColor]];
@@ -311,11 +311,16 @@
     //[firstTimeInstructionsLabel setOutlineColor:[UIColor blackColor]];
     [firstTimeInstructionsLabel setFont:[UIFont boldSystemFontOfSize:15]];
     [firstTimeInstructions addSubview:firstTimeInstructionsLabel];
+
+    firstTimeInstructionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [firstTimeInstructionsButton setBackgroundColor:[UIColor clearColor]];
+    [firstTimeInstructionsButton setAdjustsImageWhenHighlighted:NO];
+    [firstTimeInstructionsButton addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:firstTimeInstructionsButton];
     
     //[self toggleFirstTimeInstructions:NO];
 #endif
 }
-
 
 -(void)reshowFirstTimeInstructions:(NSNumber*)lastStage {
     // for faded out instructions to be displayed after a delay
@@ -336,6 +341,17 @@
     [self toggleFirstTimeInstructions:NO];
     //instructionsDismissed = YES;
 }
+-(void)bounceInstructionsWithClock:(NSNumber *)lastTickID {
+    if ([lastTickID intValue] == tickID) {
+        NSLog(@"Bouncing on clock %@", lastTickID);
+        StixAnimation * animation2 = [[StixAnimation alloc] init];
+        [animation2 doBounce:firstTimeInstructions forDistance:FTUE_BOUNCE_DISTANCE forTime:.5 repeatCount:FTUE_BOUNCE_COUNT];
+        [self performSelector:@selector(bounceInstructionsWithClock:) withObject:lastTickID afterDelay:FTUE_REDISPLAY_TIMER];
+    }
+    else {
+        NSLog(@"Stopping bounce with clock %@", lastTickID);
+    }
+}
 
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {
     StixAnimation * animation = [[StixAnimation alloc] init];
@@ -345,7 +361,11 @@
     
     if (showInstructions) {
 //        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {}];
-        [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {}];
+        [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            NSLog(@"Starting bounce with new clock %d", tickID + 1);
+            [self bounceInstructionsWithClock:[NSNumber numberWithInt:(++tickID)]];
+            [firstTimeInstructionsButton setHidden:NO];
+        }];
     }
     else {
 //        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {}];
@@ -353,6 +373,7 @@
         NSNumber * dismissedStage = [NSNumber numberWithInt:[myDelegate getFirstTimeUserStage]];
         NSLog(@"Hiding first time instructions at stage %d", [myDelegate getFirstTimeUserStage]);
         [animation doFadeOut:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            [firstTimeInstructionsButton setHidden:YES];
             [self performSelector:@selector(reshowFirstTimeInstructions:) withObject:dismissedStage afterDelay:FTUE_REDISPLAY_TIMER];
         }];
     }
@@ -367,6 +388,8 @@
 }
 
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage {
+    tickID++;
+    
     switch (firstTimeUserStage) {
         case FIRSTTIME_DONE:
             return;
@@ -380,9 +403,10 @@
             UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
             firstTimeInstructionsFrame = CGRectMake(60, 330, img.size.width+25, img.size.height+20);
             [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
-            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructions setImage:img];// forState:UIControlStateNormal];
             [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             [firstTimeInstructionsLabel setText:@"Take your first Pix"];
+            [firstTimeInstructionsButton setFrame:CGRectMake(firstTimeInstructionsFrame.origin.x, firstTimeInstructionsFrame.origin.y,firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             //pointerWasDismissed = NO;
             // end old one
             //[self toggleFirstTimeInstructions:NO];
@@ -397,6 +421,7 @@
         case FIRSTTIME_MESSAGE_02:
         {
             firstTimeInstructions = nil; // prevent it from popping back up
+            firstTimeInstructionsButton = nil;
             /*
             if (firstTimeInstructions == nil)
                 [self addFirstTimeInstructions];
@@ -420,9 +445,10 @@
             UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout_side"];
             firstTimeInstructionsFrame = CGRectMake(135, 330, img.size.width+25, img.size.height+20);
             [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
-            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructions setImage:img];// forState:UIControlStateNormal];
             [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             [firstTimeInstructionsLabel setText:@"Find your Friends"];
+            [firstTimeInstructionsButton setFrame:CGRectMake(firstTimeInstructionsFrame.origin.x, firstTimeInstructionsFrame.origin.y,firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             //pointerWasDismissed = NO;
             // end old one
             //[self toggleFirstTimeInstructions:NO];

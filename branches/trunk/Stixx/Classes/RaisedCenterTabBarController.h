@@ -50,11 +50,12 @@ enum first_time_user_stage {
     
     UIButton * profileButton;
     
-    UIButton * firstTimeInstructions;
+    UIImageView * firstTimeInstructions;
     bool showMallPointer;
     UIButton * buttonClose;
     CGRect firstTimeInstructionsFrame;
     UILabel * firstTimeInstructionsLabel;
+    UIButton * firstTimeInstructionsButton;
     
     int allAnimationIDs[4];
     int mallPointerAnimationID;

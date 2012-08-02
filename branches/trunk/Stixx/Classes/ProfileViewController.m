@@ -120,7 +120,7 @@
 }
 
 -(void)reloadSuggestions {
-    [self initializeSuggestions];
+    //[self initializeSuggestions];
 }
 
 -(void)initializeSuggestions {
@@ -277,7 +277,7 @@
         [allFacebookFriendStrings addObject:_facebookString];
         
         if ([alreadyFollowing containsObject:_facebookName]) {
-            NSLog(@"Already following %@", _facebookName);
+            //NSLog(@"Already following %@", _facebookName);
             continue; // skip those already following
         }
         if ([_facebookName isEqualToString:[delegate getUsername]])
@@ -829,10 +829,13 @@
         [suggestedFriends removeObjectAtIndex:row];
     }
     [self followUser:name];
-    
+
+#if 0
     if ([suggestedFeatured count] == 0 || [suggestedFriends count] == 0) {
         [self initializeHeaderViews];
     }
+#endif
+    [friendsTableView.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     if ([suggestedFriends count] + [suggestedFeatured count] == 0) {
         //[friendsTableView.tableView removeFromSuperview];
         [friendsTableView.view setHidden:YES];
@@ -879,6 +882,8 @@
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [buttonBack setHidden:YES];
+    [buttonAbout setHidden:NO];
+    [buttonFeedback setHidden:NO];
 }
 
 -(IBAction)closeTOS {

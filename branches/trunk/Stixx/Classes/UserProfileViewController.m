@@ -520,10 +520,13 @@
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
 
         // new system of auxiliary stix: request from auxiliaryStixes table
+#if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
-        
+#else
+        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+#endif
         pendingContentCount--;
         if (pendingContentCount <= 0)
             pendingContentCount = 0;            
@@ -533,6 +536,28 @@
     if ([theResults count]>0)
         [pixTableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
+}
+
+
+-(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
+    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
+    Tag * tag = [allTags objectForKey:tagID];
+    if (tag) {
+        //[tag populateWithAuxiliaryStix:theResults];
+        NSNumber * key = nil;
+        for (int i=0; i<[allTagIDs count]; i++) {
+            NSNumber * tID = [allTagIDs objectAtIndex:i];
+            if (tID == tagID) {
+                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
+                key = [NSNumber numberWithInt:i];
+                [contentViews removeObjectForKey:key];
+                break;
+            }
+        }
+        if (key)
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
+        [pixTableController.tableView reloadData];
+    }
 }
 
 -(void)khCallback_didGetAuxiliaryStixOfTag:(NSMutableArray *) returnParams {

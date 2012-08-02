@@ -43,6 +43,8 @@
 #define CAMERA_TRANSFORM_Y 1.12412
 
 #define FTUE_REDISPLAY_TIMER 10 // time before the message is redisplayed
+#define FTUE_BOUNCE_COUNT 2
+#define FTUE_BOUNCE_DISTANCE 10
 #define NEWSCOUNT_DISPLAY_TIMER 5
 
 enum {

@@ -81,7 +81,7 @@
     [tableView setHidden:NO];
     [noFriendsLabel setHidden:YES];
     [noFriendsButton setHidden:YES];
-    if ([delegate getNumOfUsers] < 0) {
+    if ([delegate getNumOfUsers] < 1) {
         // no results
         [noFriendsLabel setHidden:NO];
         [noFriendsButton setHidden:NO];

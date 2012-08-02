@@ -204,7 +204,8 @@ struct UserInfo {
     
     BOOL didGetFollowingLists;
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
-    BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown   
+    BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown
+    BOOL didDismissFriendSuggestions; // prevents friend suggestions from repopping up
     
     // sync flags for updating stix layers
     // when a new pic is created, createPix is called while the stix layer is being edited

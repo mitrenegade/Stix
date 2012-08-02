@@ -38,7 +38,7 @@
 -(NSMutableArray*)getAllTwitterFriendNames;
 -(NSMutableArray*)getAllTwitterFriendScreennames;
 -(BOOL)hasTwitterFriends;
--(void)reloadSuggestions;
+-(void)reloadSuggestionsForOutsideChange;
 
 -(void)shouldDisplayUserPage:(NSString*)name;
 @end

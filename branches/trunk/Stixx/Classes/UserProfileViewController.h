@@ -37,6 +37,7 @@
 -(NSMutableDictionary *) getUserPhotos;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 -(void)didChangeFriendsFromUserProfile;
+-(void)didClickChangePhoto;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate>{
@@ -72,7 +73,7 @@
 
 }
 
-@property (nonatomic) UIImageView * photoButton;
+@property (nonatomic) UIButton * photoButton;
 @property (nonatomic) UIButton * buttonAddFriend;
 @property (nonatomic) UILabel * nameLabel;
 @property (nonatomic, copy) NSString * lastUsername;
@@ -100,5 +101,6 @@
 -(void)populateFollowersList;
 -(void)populateFollowingList;
 -(void)toggleMyButtons:(BOOL)show;
+-(void)didChangeUserPhoto:(UIImage*)photo;
 
 @end

@@ -58,7 +58,8 @@
     placeholderViews = [[NSMutableDictionary alloc] init];
     
     nameLabel = [[UILabel alloc] init];
-    photoButton = [[UIImageView alloc] init];//[[UIButton alloc] init];
+    photoButton = [[UIButton alloc] init];
+    [photoButton addTarget:self action:@selector(didClickPhotoButton) forControlEvents:UIControlEventTouchUpInside];
     buttonAddFriend = [[UIButton alloc] init];//buttonWithType:UIButtonTypeCustom];
     bgFollowing = [UIButton buttonWithType:UIButtonTypeCustom];
     [bgFollowing addTarget:self action:@selector(buttonFollowingClicked) forControlEvents:UIControlEventTouchUpInside];
@@ -212,9 +213,10 @@
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
     UIImage * userPhoto = [delegate getUserPhotoForUsername:username];
-    [photoButton setImage:userPhoto];
+    [photoButton setImage:userPhoto forState:UIControlStateNormal];
     if (!userPhoto)
-        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
+        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"] forState:UIControlStateNormal];
+    [photoButton.layer setBorderWidth:2];
 
     if (![username isEqualToString:[delegate getUsername]]) {
         [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
@@ -831,4 +833,13 @@
     }];
 }
 
+#pragma mark changing profile photo
+-(void)didClickPhotoButton {
+    [delegate didClickChangePhoto];
+}
+
+-(void)didChangeUserPhoto:(UIImage *)photo {
+    [photoButton setImage:photo forState:UIControlStateNormal];
+    [photoButton.layer setBorderWidth:2];
+}
 @end

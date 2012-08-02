@@ -451,7 +451,7 @@
 #if USE_SORTED
                     int newIndex = [self insertNameSorted:_username];
                     [searchFriendScreenname insertObject:screenname atIndex:newIndex];
-                    [searchFriendIsStix insertObject:[NSNumber numberWithBool:YES] atIndex:newIndex];
+                    [searchFriendIsStix insertObject:[NSNumber numberWithBool:NO] atIndex:newIndex];
 #else
                     [searchFriendName addObject:_username];
                     [searchFriendScreenname addObject:screenname];
@@ -641,13 +641,13 @@
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate followUser:name];
     [stixUsersController.tableView reloadData];
-    [delegate reloadSuggestions];
+    [delegate reloadSuggestionsForOutsideChange]; // will already be done
 }
 -(void)unfollowUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate unfollowUser:name];
     [stixUsersController.tableView reloadData];
-    [delegate reloadSuggestions];
+    [delegate reloadSuggestionsForOutsideChange]; // will already be done
 }
 -(void)inviteUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
@@ -671,7 +671,7 @@
             [delegate followUser:name];
     }
     [stixUsersController.tableView reloadData];
-    [delegate reloadSuggestions];
+    [delegate reloadSuggestionsForOutsideChange];
 }
 -(void)inviteAllUsers {
     if (service == PROFILE_SERVICE_FACEBOOK) {

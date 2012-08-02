@@ -56,6 +56,8 @@
 -(void)setNumberOfColumns:(int)columns andBorder:(int)border;
 - (void)reloadTableViewDataSource;
 -(int)getContentWidth;
+-(float)getContentHeight;
+
 #if USE_PULL_TO_REFRESH
 - (void)dataSourceDidFinishLoadingNewData;
 #endif

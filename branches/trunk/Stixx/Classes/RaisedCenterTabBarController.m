@@ -15,6 +15,8 @@
 
 @implementation RaisedCenterTabBarController
 
+static int tickID = -1;
+
 @synthesize myDelegate;
 @synthesize newsCount, newsCallout;
 
@@ -351,7 +353,6 @@
 #endif
 }
 
-
 -(void)reshowFirstTimeInstructions:(NSNumber*)lastStage {
     // for faded out instructions to be displayed after a delay
     
@@ -401,6 +402,17 @@
      */
         [self toggleFirstTimeInstructions:NO];
 }
+-(void)bounceInstructionsWithClock:(NSNumber *)lastTickID {
+    if ([lastTickID intValue] == tickID) {
+        NSLog(@"Bouncing on clock %@", lastTickID);
+        StixAnimation * animation2 = [[StixAnimation alloc] init];
+        [animation2 doBounce:firstTimeInstructions forDistance:FTUE_BOUNCE_DISTANCE forTime:.5 repeatCount:FTUE_BOUNCE_COUNT];
+        [self performSelector:@selector(bounceInstructionsWithClock:) withObject:lastTickID afterDelay:FTUE_REDISPLAY_TIMER];
+    }
+    else {
+        NSLog(@"Stopping bounce with clock %@", lastTickID);
+    }
+}
 
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {
     StixAnimation * animation = [[StixAnimation alloc] init];
@@ -435,6 +447,8 @@
 }
 
 -(void)displayFirstTimeUserProgress:(int)firstTimeUserStage {
+    tickID++;
+    
     switch (firstTimeUserStage) {
         case FIRSTTIME_DONE:
             return;
@@ -466,6 +480,7 @@
         case FIRSTTIME_MESSAGE_02:
         {
             firstTimeInstructions = nil; // prevent it from popping back up
+            firstTimeInstructionsButton = nil;
             /*
             if (firstTimeInstructions == nil)
                 [self addFirstTimeInstructions];

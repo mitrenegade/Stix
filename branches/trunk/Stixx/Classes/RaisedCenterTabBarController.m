@@ -423,6 +423,8 @@ static int tickID = -1;
     if (showInstructions) {
 //        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {}];
         [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            NSLog(@"Starting bounce with new clock %d", tickID + 1);
+            [self bounceInstructionsWithClock:[NSNumber numberWithInt:(++tickID)]];
             [firstTimeInstructionsButton setHidden:NO];
         }];
     }

@@ -557,6 +557,27 @@
     [self stopActivityIndicator];
 }
 
+-(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
+    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
+    Tag * tag = [allTags objectForKey:tagID];
+    if (tag) {
+        //[tag populateWithAuxiliaryStix:theResults];
+        NSNumber * key = nil;
+        for (int i=0; i<[allTagIDs count]; i++) {
+            NSNumber * tID = [allTagIDs objectAtIndex:i];
+            if (tID == tagID) {
+                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
+                key = [NSNumber numberWithInt:i];
+                [contentViews removeObjectForKey:key];
+                break;
+            }
+        }
+        if (key)
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
+        [pixTableController.tableView reloadData];
+    }
+}
+
 -(void)khCallback_didGetAuxiliaryStixOfTag:(NSMutableArray *) returnParams {
     NSNumber * tagID = [returnParams objectAtIndex:0];
     NSMutableArray * theResults = [returnParams objectAtIndex:1];
@@ -577,27 +598,6 @@
         [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:tagID];
         [pixTableController.tableView reloadData];
         return;
-    }
-}
-
--(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
-    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
-    Tag * tag = [allTags objectForKey:tagID];
-    if (tag) {
-        //[tag populateWithAuxiliaryStix:theResults];
-        NSNumber * key = nil;
-        for (int i=0; i<[allTagIDs count]; i++) {
-            NSNumber * tID = [allTagIDs objectAtIndex:i];
-            if (tID == tagID) {
-                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
-                key = [NSNumber numberWithInt:i];
-                [contentViews removeObjectForKey:key];
-                break;
-            }
-        }
-        if (key)
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
-        [pixTableController.tableView reloadData];
     }
 }
 

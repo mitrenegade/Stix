@@ -191,6 +191,7 @@
         [agentArray addObject:agentName];
         [newsArray addObject:news];
         [thumbnailArray addObject:[NSNull null]];
+        [newsFeedIDs addObject:[NSNumber numberWithInt:-1]];
     }
     
     [self initializeHeaderViews];
@@ -246,7 +247,7 @@
     int index = [indexPath row];
     if (index < [agentArray count])
     {
-        NSLog(@"Displaying news at row %d", index);
+        NSLog(@"Displaying news at row %d: %d agents %d news %d thumbnails", index, [agentArray count], [newsArray count], [thumbnailArray count]);
         NSString * name = [agentArray objectAtIndex:index];
         NSString * news = [newsArray objectAtIndex:index];
         UIImage * photo = [delegate getUserPhotoForUsername:name];
@@ -292,7 +293,9 @@
             cell.accessoryView = nil;
         
         // count it as seen
-        [k hasSeenNewsWithNewsfeedID:[[newsFeedIDs objectAtIndex:index] intValue] andHasBeenSeen:YES];
+        if ([[newsFeedIDs objectAtIndex:index] intValue] != -1) {
+            [k hasSeenNewsWithNewsfeedID:[[newsFeedIDs objectAtIndex:index] intValue] andHasBeenSeen:YES];
+        }
         [delegate decrementNewsCount];
     }
     return cell;

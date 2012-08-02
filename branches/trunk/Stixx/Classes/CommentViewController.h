@@ -12,21 +12,22 @@
 #import "BadgeView.h"
 #import "LoadingAnimationView.h"
 #import "StixAnimation.h"
+#import "Tag.h"
 
 @protocol CommentViewDelegate <NSObject>
 
 -(void)didCloseComments;
--(void)didAddNewComment:(NSString*)newComment withTagID:(int)tagID;
+-(void)didAddNewComment:(NSString*)newComment withTag:(Tag*)tag;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 @end
 
 @interface CommentViewController : UIViewController <KumulosDelegate, CommentFeedTableDelegate, UITextFieldDelegate, StixAnimationDelegate>
 {
     CommentFeedTableController * commentsTable;
 
-    int tagID;
+    Tag * tag;
     NSString * nameString;
     
     NSMutableArray * names;
@@ -38,7 +39,6 @@
     Kumulos * k;
     
     IBOutlet UILabel * nameLabel;
-    IBOutlet UIButton * backButton;
     IBOutlet UIImageView * logo;
     
     IBOutlet UIButton * addButton;
@@ -50,17 +50,16 @@
     LoadingAnimationView * activityIndicator;
 }
 
-@property (nonatomic, assign) int tagID;
+@property (nonatomic) Tag* tag;
 @property (nonatomic) NSString * nameString;
 @property (nonatomic) IBOutlet UILabel * nameLabel;
-@property (nonatomic) IBOutlet UIButton * backButton;
 @property (nonatomic) IBOutlet UIButton * addButton;
 @property (nonatomic) IBOutlet UITextField * commentField;
 @property (nonatomic) IBOutlet UIToolbar * toolBar;
 @property (nonatomic, unsafe_unretained) NSObject<CommentViewDelegate> * delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 
--(IBAction) didClickBackButton:(id)sender;
+-(void) didClickBackButton:(id)sender;
 -(IBAction)didClickAddButton:(id)sender;
--(void)initCommentViewWithTagID:(int)tagID andNameString:(NSString*)nameString;
+-(void)initCommentViewWithTag:(Tag*)_tag andNameString:(NSString*)nameString;
 @end

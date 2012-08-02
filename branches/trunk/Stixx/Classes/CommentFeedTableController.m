@@ -283,38 +283,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     [detailViewController release];
-     */
 }
-/*
--(NSString*)commentStringFor:(NSString *)name andComment:(NSString *)comment andStixType:(NSString*)stixStringID {
-
-    NSString * str = @"";
-    if ([comment length] == 0) // add generic descriptor
-    {
-        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"%@ added a %@", name, desc];
-    }
-    else if ([comment isEqualToString:@"PEEL"]) {
-        NSString * desc = [BadgeView getStixDescriptorForStixStringID:stixStringID];
-        str = [NSString stringWithFormat:@"%@ peeled off a %@ to add to their collection", name, desc];
-    }
-    else if ([comment isEqualToString:@"SHARE"]) {
-        str = [NSString stringWithFormat:@"%@ shared this Pix at %@", name, comment];
-    }
-    else
-    {
-        //str = [NSString stringWithFormat:@"%@ said, \"%@\"", name, comment];
-        str = [NSString stringWithFormat:@"%@", comment];
-    }
-    return str;
-}
- */
 
 -(NSString*)simpleCommentString:(NSString *)comment andStixType:(NSString*)stixStringID {
     

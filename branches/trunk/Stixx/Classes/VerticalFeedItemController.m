@@ -81,13 +81,15 @@
     //imageData = image;
     locationString = location;
 }
-
+/*
 -(void)populateWithUserPhoto:(UIImage*)photo {
     if (photo){
+        NSLog(@"Frame: %f %f %f %f", userPhotoView.frame.origin.x, userPhotoView.frame.origin.y, userPhotoView.frame.size.width, userPhotoView.frame.size.height);
         [userPhotoView setImage:photo];
         [userPhotoView setBackgroundColor:[UIColor blackColor]];
     }
 }
+ */
 
 -(void)togglePlaceholderView:(BOOL)showPlaceholder {
     if (placeholderView == nil) {
@@ -472,7 +474,6 @@
             [self didClickAddCommentButton:buttonAddComment];
         else if (CGRectContainsPoint([buttonRemix frame], location))
             [self didClickRemixButton:buttonRemix];
-            //return;
         else if (CGRectContainsPoint([likeIconSmiles frame], location)) 
             [self didClickLikeIconSmiles];
         else if (CGRectContainsPoint([likeIconLove frame], location)) 
@@ -601,28 +602,28 @@
 -(void)didClickLikeIconSmiles {
     NSLog(@"Did click Smile!");
     [self likeToolbarHide:0];
-    [delegate didClickLikeButton:0 withTagID:tagID];
+    [delegate didClickLikeButton:0 withTag:tag];
 }
 -(void)didClickLikeIconLove {
     NSLog(@"Did click Love!");
     [self likeToolbarHide:1];
-    [delegate didClickLikeButton:1 withTagID:tagID];
+    [delegate didClickLikeButton:1 withTag:tag];
 }
 -(void)didClickLikeIconWink {
     NSLog(@"Did click Wink!");
     [self likeToolbarHide:2];
-    [delegate didClickLikeButton:2 withTagID:tagID];
+    [delegate didClickLikeButton:2 withTag:tag];
 }
 -(void)didClickLikeIconShocked {
     NSLog(@"Did click Shocked!");
     [self likeToolbarHide:3];
-    [delegate didClickLikeButton:3 withTagID:tagID];
+    [delegate didClickLikeButton:3 withTag:tag];
 }
 -(void)didClickLikeIconComment {
     NSLog(@"Did click Comment!");
     [self likeToolbarHide:-1];
     if ([delegate respondsToSelector:@selector(displayCommentsOfTag:andName:)])
-        [delegate displayCommentsOfTag:tagID andName:nameString];
+        [delegate displayCommentsOfTag:tag andName:nameString];
 }
 
 -(void)doubleTapGestureHandler:(UITapGestureRecognizer*) gesture {

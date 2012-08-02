@@ -22,6 +22,16 @@
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
+        
     }
     return self;
 }
@@ -179,7 +189,31 @@
     UIImage * userPhoto = [userPhotos objectForKey:username];
     //cell.imageView = userPhoto; //addSubview:userPhoto];
     [cell.imageView setImage:userPhoto];
-    
+#if 1
+    if ([self.userButtons objectForKey:username] == nil) {
+        UIButton * addFriendButton = [[UIButton alloc] init]; 
+        [addFriendButton setFrame:CGRectMake(-5, 0, 91, 30)];
+        [addFriendButton setImage:[UIImage imageNamed:@"btn_follow"] forState:UIControlStateNormal];             
+        [addFriendButton setTag:y];
+        [addFriendButton addTarget:self action:@selector(didAddFriend:) forControlEvents:UIControlEventTouchUpInside];
+        
+        UIButton * alreadyFriendedButton = [[UIButton alloc] init];
+        [alreadyFriendedButton setFrame:CGRectMake(-5, 0, 91, 30)];
+        [alreadyFriendedButton setImage:[UIImage imageNamed:@"btn_following"] forState:UIControlStateNormal];
+        [alreadyFriendedButton setTag:y];
+        [alreadyFriendedButton addTarget:self action:@selector(didRemoveFriend:) forControlEvents:UIControlEventTouchUpInside];
+        
+        UIButton * inviteButton = [[UIButton alloc] init]; 
+        [inviteButton setFrame:CGRectMake(-5, 0, 89, 28)];
+        [inviteButton setImage:[UIImage imageNamed:@"btn_invite"] forState:UIControlStateNormal];             
+        [inviteButton setTag:y];
+        [inviteButton addTarget:self action:@selector(didInviteFriend:) forControlEvents:UIControlEventTouchUpInside];
+        
+        NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, inviteButton, nil];
+        [self.userButtons setObject:buttonArray forKey:username];
+    }
+#else 
+    // check/x marks
     if ([userButtons objectForKey:username] == nil) {
         UIButton * addFriendButton = [[UIButton alloc] init]; 
         [addFriendButton setFrame:CGRectMake(0, 0, 70, 70)];
@@ -202,7 +236,7 @@
         NSMutableArray * buttonArray = [[NSMutableArray alloc] initWithObjects:addFriendButton,alreadyFriendedButton, inviteButton, nil];
         [userButtons setObject:buttonArray forKey:username];
     }
-    
+#endif
     NSMutableArray * buttonArray = [userButtons objectForKey:username];
     int userStatus = [delegate getFollowingUserStatus:y];
     if (userStatus == 0) {
@@ -255,6 +289,10 @@
     [delegate addFriendFromList:sender.tag];
 }
 
+-(void)didClickBackButton:(id)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 /*
  // Override to support conditional editing of the table view.
  - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
@@ -299,13 +337,6 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     [detailViewController release];
-     */
     [delegate didSelectUserProfile:[indexPath row]];
 }
 

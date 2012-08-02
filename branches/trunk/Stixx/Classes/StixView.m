@@ -779,8 +779,6 @@ static int currentStixViewID = 0;
                 }
             }
         }
-        //if (lastStixView == -1)
-        //    return -1;
         if (topStixIsPeelable == NO) 
             return -1;
         else {

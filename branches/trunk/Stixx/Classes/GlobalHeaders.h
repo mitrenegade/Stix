@@ -12,13 +12,18 @@
 #define STATUS_BAR_SHIFT 0 // the distance from the y coordinate of the visible camera and the actual y coordinate in screen - bug/hack!
 // status_bar_shift disappears if tabbarcontroller is manually sized
 #define STATUS_BAR_SHIFT_OVERLAY 20 // for views that become camera's overlay, we need this 20 px shift: pixPreview, stixEditor, tabbarcontroller
+
+// difference in default apple tabbar (49px) and our tabbar button height (40)
+#define TABBAR_BUTTON_DIFF_PX 9
+#define OFFSET_NAVBAR 44
+
 #define USING_FLURRY 1
 
 #define LAZY_LOAD_BOUNDARY 0
 #define USE_PULL_TO_REFRESH 1
 
 #define USE_HIGHRES_SHARE 0
-
+#define HIDE_STATUS_BAR YES
 #define PIX_WIDTH 314.0
 #define PIX_HEIGHT 282.0
 
@@ -78,6 +83,7 @@ enum actionsheet_tags {
     ACTIONSHEET_TAG_ADMIN = 1000,
     ACTIONSHEET_TAG_SHAREPIX,
     ACTIONSHEET_TAG_BUYBUX,
+    ACTIONSHEET_TAG_REMIX,
     ACTIONSHEET_TAG_MAX
 };
 

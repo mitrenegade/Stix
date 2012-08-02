@@ -19,6 +19,7 @@
 #import "CommentViewController.h"
 #import "ShareController.h"
 #import "KumulosHelper.h"
+//#import "UserProfileViewController.h"
 //#import "StixEditorViewController.h"
 
 @class DetailViewController;
@@ -28,9 +29,9 @@
 -(void)didDismissZoom;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(NSString*)getUsername;
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @optional
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;
@@ -38,6 +39,8 @@
 
 // stixEditorViewController stuff
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString;
 
 @end
 

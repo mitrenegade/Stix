@@ -53,7 +53,10 @@
 {
     // We need to do some setup once the view is visible. This will only be done once.
     // Position and size the scrollview. It will be centered in the view.    
-    CGRect frame = CGRectMake(0,44, 320, 380);
+    // 44 for nav bar header size
+    // 40 for tab bar
+    // add 20 because no status bar
+    CGRect frame = CGRectMake(0,OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR);
     tableController = [[FeedTableController alloc] init];
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
@@ -82,7 +85,11 @@
 }
 
 -(void) viewDidLoad {
+    // any frames set in viewDidLoad will happen before the nav controller appears.
+    // so we are able to place activityIndicator in the header.
+    // also, tables must be added with a Y offset of 44
     [super viewDidLoad];
+
     lastPageViewed = 0;
     tempTagID = -1;
 
@@ -95,21 +102,7 @@
 
     //[self startActivityIndicator];
     //[logo setHidden:YES];
-    /*
-    UIButton * buttonBux = [[UIButton alloc] initWithFrame:CGRectMake(6, 7, 84, 33)];
-    [buttonBux setImage:[UIImage imageNamed:@"bux_count.png"] forState:UIControlStateNormal];
-    [buttonBux addTarget:self action:@selector(didClickMoreBuxButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view insertSubview:buttonBux belowSubview:tableController.view];
-    
-    CGRect labelFrame = CGRectMake(28, 5, 58, 38);
-    labelBuxCount = [[OutlineLabel alloc] initWithFrame:labelFrame];
-    //[labelBuxCount setBackgroundColor:[UIColor redColor]];
-    [labelBuxCount setTextAlignment:UITextAlignmentCenter];
-    [labelBuxCount setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
-    [labelBuxCount drawTextInRect:CGRectMake(0,0, labelFrame.size.width, labelFrame.size.height)];
-    [labelBuxCount setText:[NSString stringWithFormat:@"%d", 0]];
-    [self.view insertSubview:labelBuxCount belowSubview:tableController.view];
-    */
+
     // array to retain each FeedItemViewController as it is created so its callback
     // for the button can be used
     feedItems = [[NSMutableDictionary alloc] init]; 
@@ -125,7 +118,7 @@
 
     [self startActivityIndicator];
     
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -138,7 +131,7 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     [super viewDidAppear:animated];
     //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
   
@@ -172,7 +165,7 @@
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     if ([descriptor length] > 0) {
         NSString * name = [self.delegate getUsername];
-        [delegate didAddCommentFromDetailViewController:nil withTagID:[t.tagID intValue] andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
+        [delegate didAddCommentFromDetailViewController:nil withTag:t andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
         //        [self didAddNewComment:descriptor withTagID:[t.tagID intValue]];
     }
 }
@@ -281,9 +274,9 @@
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    if (isOpeningProfile)
-        return;
-    isOpeningProfile = YES;
+//    if (isOpeningProfile)
+//        return;
+//    isOpeningProfile = YES;
 //    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
     int index = button.tag;
     Tag * tag;
@@ -323,9 +316,9 @@
 }
 
 -(void)didClickViaButton:(UIButton*)button {
-    if (isOpeningProfile)
-        return;
-    isOpeningProfile = YES;
+//    if (isOpeningProfile)
+//        return;
+//    isOpeningProfile = YES;
     //    Tag * tag = [allTagsDisplayed objectAtIndex:button.tag];
     int index = button.tag;
     Tag * tag;
@@ -420,15 +413,15 @@
         
         // the "Via..." label
         if ((tag.originalUsername != nil) && [tag.originalUsername length] != 0 && ![tag.originalUsername isEqualToString:tag.username]) {
-            UILabel * subLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 21, 260, 15)];
+            CGRect frame = CGRectMake(45, 21, 260, 15);
+            UILabel * subLabel = [[UILabel alloc] initWithFrame:frame];
             [subLabel setBackgroundColor:[UIColor clearColor]];
             [subLabel setTextColor:[UIColor colorWithRed:255.0/255.0 green:153.0/255.0 blue:0 alpha:1]];
             [subLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:11]];
-            //[locLabel setText:tag.locationString];
             [subLabel setText:tag.descriptor];
             [headerView addSubview:subLabel];    
         
-            UIButton * viaButton = [[UIButton alloc] initWithFrame:subLabel.frame];
+            UIButton * viaButton = [[UIButton alloc] initWithFrame:frame];
             [viaButton setTag:[tag.tagID intValue]];
             [viaButton setBackgroundColor:[UIColor clearColor]];
             [viaButton addTarget:self action:@selector(didClickViaButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -494,6 +487,7 @@
     [feedItem.view setBackgroundColor:[UIColor clearColor]];
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];// andWithImage:image];
     [feedItem setTagID:[tag.tagID intValue]];
+    /*
     UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
     {
@@ -501,6 +495,7 @@
         [feedItem populateWithUserPhoto:photo];
         //[photo autorelease]; // arc conversion
     }
+     */
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
     // add badge and counts
@@ -607,6 +602,7 @@
 #endif
         
         //[feedItem.view setFrame:CGRectMake(0, 0, FEED_ITEM_WIDTH, FEED_ITEM_HEIGHT)]; 
+        /*
         UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
         if (photo)
         {
@@ -614,6 +610,7 @@
             [feedItem populateWithUserPhoto:photo];
             //[photo autorelease]; // arc conversion
         }
+         */
         //NSLog(@"ViewForItem NEW: feedItem ID %d index %d size %f", [tag.tagID intValue], index, feedItem.view.frame.size.height);
         // add timestamp
         [feedItem populateWithTimestamp:tag.timestamp];
@@ -786,9 +783,11 @@
     NSString * locationString = tag.locationString;
     
     [feedItem populateWithName:name andWithDescriptor:descriptor andWithComment:comment andWithLocationString:locationString];
+    /*
     UIImage * photo = [delegate getUserPhotoForUsername:name];//[[UIImage alloc] initWithData:[[delegate getUserPhotos] objectForKey:name]];
     if (photo)
         [feedItem populateWithUserPhoto:photo];
+     */
     // add timestamp
     [feedItem populateWithTimestamp:tag.timestamp];
     int count = [self.delegate getCommentCount:feedItem.tagID];
@@ -1261,7 +1260,7 @@
     }
 }
 
--(void)displayCommentsOfTag:(int)tagID andName:(NSString *)nameString{
+-(void)displayCommentsOfTag:(Tag*)tag andName:(NSString *)nameString{
 #if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
         [delegate agitateFirstTimePointer];
@@ -1273,30 +1272,23 @@
     if ([delegate isShowingBuxInstructions])
         return;
     
+#if 0
     if (commentView == nil) {
         commentView = [[CommentViewController alloc] init];
         [commentView setDelegate:self];
     }
+    int tagID = [tag.tagID intValue];
     [commentView initCommentViewWithTagID:tagID andNameString:nameString];
     //[commentView setTagID:tagID];
     //[commentView setNameString:nameString];
     
     // hack a way to display feedback view over camera: formerly presentModalViewController
-#if 0
-    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
-    [self.view addSubview:commentView.view];
-    [commentView.view setFrame:frameOffscreen];
-    
-    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:commentView.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-#else
     [self summonSubview:commentView.view];
-#endif
-    
     // must force viewDidAppear because it doesn't happen when it's offscreen?
     [commentView viewDidAppear:YES];     
+#else
+    [delegate shouldDisplayCommentViewWithTag:tag andNameString:nameString];
+#endif
 }
 
 #pragma mark StixEditorDelegate 
@@ -1313,7 +1305,7 @@
         [stixEditorController.view removeFromSuperview];
     }];
 #else
-    [delegate didDismissSecondaryView];
+    [delegate didDismissSecondaryView]; 
     [stixEditorController.view removeFromSuperview];    
     [delegate didCloseEditorFromFeedController];
 #endif
@@ -1354,15 +1346,15 @@
 #endif
 }
 
--(void)didAddNewComment:(NSString *)newComment withTagID:(int)tagID{
+-(void)didAddNewComment:(NSString *)newComment withTag:(Tag*)tag{
     NSString * name = [self.delegate getUsername];
     //int tagID = [commentView tagID];
     if ([newComment length] > 0)
-        [delegate didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
+        [delegate didAddCommentFromDetailViewController:nil withTag:tag andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
     [self didCloseComments];
 }
 
--(void)didClickLikeButton:(int)type withTagID:(int)tagID {
+-(void)didClickLikeButton:(int)type withTag:(Tag*)_tag {
     NSString * newComment = @"";
     NSString * newType = @"LIKE";
     switch (type) {
@@ -1387,7 +1379,7 @@
     //[self didAddNewComment:newComment withTagID:tagID];
     NSString * name = [delegate getUsername];
 //    if ([newComment length] > 0)
-    [delegate didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:newComment andStixStringID:newType];
+    [delegate didAddCommentFromDetailViewController:nil withTag:_tag andUsername:name andComment:newComment andStixStringID:newType];
 }
 
 -(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem {
@@ -1460,9 +1452,9 @@
 #endif
 }
 
--(void)unlockProfile {
-    isOpeningProfile = NO;
-}
+//-(void)unlockProfile {
+//    isOpeningProfile = NO;
+//}
 
 /*
 -(void)shouldCloseUserPage {

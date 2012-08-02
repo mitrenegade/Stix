@@ -179,7 +179,6 @@
     camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     camera.delegate = self;
     /*
-     camera.navigationBarHidden = YES;
      camera.toolbarHidden = NO; // prevents bottom bar from being displayed
      camera.wantsFullScreenLayout = YES;
      camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto; 

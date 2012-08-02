@@ -11,10 +11,10 @@
 
 @implementation CommentViewController
 
-@synthesize tagID;
+@synthesize tag;
 @synthesize nameString;
 @synthesize nameLabel;
-@synthesize backButton, addButton;
+@synthesize addButton;
 @synthesize commentField;
 @synthesize delegate;
 @synthesize activityIndicator;
@@ -25,9 +25,18 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
+        
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
-        tagID = -1;
     }
     return self;
 }
@@ -91,8 +100,8 @@
     [commentField setPlaceholder:@"Enter a comment here"];
 }
 
--(void)initCommentViewWithTagID:(int)_tagID andNameString:(NSString*)_nameString {
-    [self setTagID:_tagID];
+-(void)initCommentViewWithTag:(Tag*)_tag andNameString:(NSString*)_nameString {
+    [self setTag:_tag];
     [self setNameString:_nameString];
     // Do any additional setup after loading the view from its nib.
     if (commentsTable)
@@ -116,9 +125,9 @@
     
     //[nameLabel setText:[NSString stringWithFormat:@"Viewing comments on %@'s Pix",nameString]];
     [nameLabel setText:[NSString stringWithFormat:@"%@'s Pix",nameString]];
-    NSLog(@"NameString: %@ tagID: %d", nameString, tagID);
+    NSLog(@"NameString: %@ tagID: %@", nameString, tag.tagID);
     
-    [k getAllHistoryWithTagID:tagID];
+    [k getAllHistoryWithTagID:[tag.tagID intValue]];
     [self startActivityIndicator];
 }
 
@@ -210,13 +219,13 @@
     [commentField resignFirstResponder];
     NSString * newComment = [commentField text];
     if ([newComment length] > 0)
-        [delegate didAddNewComment:newComment withTagID:self.tagID];
+        [delegate didAddNewComment:newComment withTag:self.tag];
 	NSLog(@"Comment entered: %@", [commentField text]); 
 }
 
--(IBAction)didClickBackButton:(id)sender {
+-(void)didClickBackButton:(id)sender {
     [commentField resignFirstResponder];
-    [delegate didCloseComments];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 /*** UITextFieldDelegate ***/
 
@@ -252,8 +261,8 @@
 -(void)shouldDisplayUserPage:(NSString *)username {
     [delegate shouldDisplayUserPage:username];
 }
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
-}
+//-(void)shouldCloseUserPage {
+//    [delegate shouldCloseUserPage];
+//}
 
 @end

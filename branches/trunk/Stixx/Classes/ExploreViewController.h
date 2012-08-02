@@ -11,7 +11,7 @@
 #import "ColumnTableController.h"
 #import "Kumulos.h"
 #import "Tag.h"
-#import "DetailViewController.h"
+//#import "DetailViewController.h"
 #import "LoadingAnimationView.h"
 #import "StixView.h"
 #import "StixAnimation.h"
@@ -27,8 +27,6 @@
 -(int)getStixCount:(NSString*)stixStringID;
 -(int)getStixOrder:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
-//-(void)sharePix:(int)tagID;
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
@@ -37,7 +35,7 @@
 -(NSString*)getUsername;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 -(void)didShowBuxInstructions;
 
 //-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
@@ -45,6 +43,7 @@
 -(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 -(void)didDismissSecondaryView;
 -(void)pauseAggregation;
+-(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
 @end
 
 enum {
@@ -54,7 +53,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, DetailViewDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, KumulosHelperDelegate, StixEditorDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, KumulosHelperDelegate, StixEditorDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -86,9 +85,9 @@ enum {
     //StixView * stixView; // the view that is clicked for zoom
     //CGRect zoomFrame;
     //UIImageView * DetailView;
-    bool isZooming; // prevent hits when zooming
+    //bool isZooming; // prevent hits when zooming
     
-    DetailViewController * detailController;
+    //DetailViewController * detailController;
     NSString * galleryUsername;
         
     //OutlineLabel * labelBuxCount;
@@ -125,7 +124,7 @@ enum {
 #endif
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
-@property (nonatomic) DetailViewController * detailController;
+//@property (nonatomic) DetailViewController * detailController;
 @property (nonatomic) StixEditorViewController * stixEditorController;
 @property (nonatomic) Tag * tagToRemix;
 //-(void)getTagWithID:(int)id;

@@ -48,11 +48,12 @@ enum first_time_user_stage {
     
     UIButton * profileButton;
     
-    UIButton * firstTimeInstructions;
+    UIImageView * firstTimeInstructions;
     bool showMallPointer;
     UIButton * buttonClose;
     CGRect firstTimeInstructionsFrame;
     UILabel * firstTimeInstructionsLabel;
+    UIButton * firstTimeInstructionsButton;
     
     int allAnimationIDs[4];
     int mallPointerAnimationID;
@@ -74,6 +75,7 @@ enum first_time_user_stage {
 @property (nonatomic, assign) int newsCount;
 
 -(void)initializeCustomButtons;
+-(void)setHeaderForTab:(int)pos;
 
 // Create a custom UIButton and add it to the center of our tab bar
 -(void) addButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage atPosition:(int)pos;
@@ -83,7 +85,7 @@ enum first_time_user_stage {
 -(void)setButtonStateNormal:(int)pos;
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions;
 -(void)toggleFirstTimePointer:(BOOL)showPointer atStage:(int)firstTimeUserStage;
--(IBAction)closeInstructions:(id)sender;
+-(void)closeInstructions:(id)sender;
 -(void)doRewardAnimation:(NSString *)title withAmount:(int)amount;
 -(void)doPointerAnimation:(int)firstTimeUserStage;
 -(void)doPurchaseAnimation:(NSString*)stixStringID;

@@ -18,14 +18,13 @@
 #endif
 @synthesize tabBarController;
 @synthesize galleryUsername;
-@synthesize detailController;
+//@synthesize detailController;
 @synthesize tagToRemix;
 @synthesize stixEditorController;
 
 #define EXPLORE_COL 3
 #define EXPLORE_ROW 2
 
-static NSMutableSet * retainedDetailControllers;
 
 -(void)needsRetainForDelegateCall {
     // comes from stixViews
@@ -38,20 +37,6 @@ static NSMutableSet * retainedDetailControllers;
 
 -(void)doneWithAsynchronousDelegateCall {
     //[retainedDetailControllers removeObject:detailController];
-}
-
--(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)_detailController {
-//-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController*)_detailController {
-    // comes from stixViews
-    if (!retainedDetailControllers) 
-        retainedDetailControllers = [[NSMutableSet alloc] init];
-    NSLog(@"ExploreView: retaining detail view with username %@", [_detailController tagUsername]);
-    [retainedDetailControllers addObject:_detailController];
-}
-
--(void)detailViewDoneWithAsynchronousDelegateCall {
-    NSLog(@"ExploreView: releasing detail view with username %@", [detailController tagUsername]);
-    [retainedDetailControllers removeObject:detailController];
 }
 
 -(id)init
@@ -86,16 +71,13 @@ static NSMutableSet * retainedDetailControllers;
     [self initializeTable];
     
     [self.view addSubview:activityIndicator];
-    //DetailViewController = [[DetailViewController alloc] init];
-    isZooming = NO;
-    //[self forceReloadAll];
 
     exploreModeButtons = [[NSMutableArray alloc] init];
     
     UIButton * buttonPopular = [[UIButton alloc] init];
     [buttonPopular setImage:[UIImage imageNamed:@"txt_popular"] forState:UIControlStateNormal];
     [buttonPopular setImage:[UIImage imageNamed:@"txt_popular_on"] forState:UIControlStateSelected];
-    [buttonPopular setFrame:CGRectMake(20, 50, 84, 26)];
+    [buttonPopular setFrame:CGRectMake(20, OFFSET_NAVBAR + 6, 84, 26)];
     [buttonPopular addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
     [buttonPopular setTag:EXPLORE_POPULAR];
     [self.view addSubview:buttonPopular];
@@ -103,7 +85,7 @@ static NSMutableSet * retainedDetailControllers;
     UIButton * buttonRecent = [[UIButton alloc] init];
     [buttonRecent setImage:[UIImage imageNamed:@"recent"] forState:UIControlStateNormal];
     [buttonRecent setImage:[UIImage imageNamed:@"recent_on"] forState:UIControlStateSelected];
-    [buttonRecent setFrame:CGRectMake(118, 50, 84, 26)];
+    [buttonRecent setFrame:CGRectMake(118, OFFSET_NAVBAR + 6, 84, 26)];
     [buttonRecent addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
     [buttonRecent setTag:EXPLORE_RECENT];
     [self.view addSubview:buttonRecent];
@@ -111,7 +93,7 @@ static NSMutableSet * retainedDetailControllers;
     UIButton * buttonRandom = [[UIButton alloc] init];
     [buttonRandom setImage:[UIImage imageNamed:@"random"] forState:UIControlStateNormal];
     [buttonRandom setImage:[UIImage imageNamed:@"random_on"] forState:UIControlStateSelected];
-    [buttonRandom setFrame:CGRectMake(216, 50, 84, 26)];
+    [buttonRandom setFrame:CGRectMake(216, OFFSET_NAVBAR + 6, 84, 26)];
     [buttonRandom addTarget:self action:@selector(setExploreMode:) forControlEvents:UIControlEventTouchUpInside];
     [buttonRandom setTag:EXPLORE_RANDOM];
     [self.view addSubview:buttonRandom];
@@ -179,7 +161,7 @@ static NSMutableSet * retainedDetailControllers;
 {
     // We need to do some setup once the view is visible. This will only be done once.
     // Position and size the scrollview. It will be centered in the view.    
-    CGRect frame = CGRectMake(0,85, 320, 340);
+    CGRect frame = CGRectMake(0,OFFSET_NAVBAR+40, 320, 480-(OFFSET_NAVBAR+40)-40);
     tableController = [[ColumnTableController alloc] init];
     [tableController.view setFrame:frame];
     [tableController.view setBackgroundColor:[UIColor clearColor]];
@@ -561,7 +543,7 @@ static NSMutableSet * retainedDetailControllers;
     indexPointer = 0;
     [self.tableController.tableView reloadData];
     [self loadContentPastRow:-1];
-    isZooming = NO;
+    //isZooming = NO;
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
 }
@@ -572,12 +554,13 @@ static NSMutableSet * retainedDetailControllers;
 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
-    if ([DetailViewController openingDetailView])
-        return;
-    [DetailViewController lockOpen];
+//    if ([DetailViewController openingDetailView])
+//        return;
+//    [DetailViewController lockOpen];
     
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
+#if 0
     detailController = [[DetailViewController alloc] init];
     [detailController setDelegate:self];    
     [detailController initDetailViewWithTag:tag];
@@ -592,6 +575,9 @@ static NSMutableSet * retainedDetailControllers;
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
         [DetailViewController unlockOpen];
     }];
+#else
+    [delegate shouldDisplayDetailViewWithTag:tag];
+#endif
     
 #if !USING_FLURRY
     NSString * metricName = @"ExplorePix";
@@ -604,20 +590,9 @@ static NSMutableSet * retainedDetailControllers;
 #endif
 }
 
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-    [delegate didAddCommentFromDetailViewController:detailViewController withTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
-}
-
--(void)didDismissZoom {
-    isZooming = NO;
-    if (detailController) {
-        [detailController.view removeFromSuperview];
-        detailController = nil;
-    }
-}
-
 -(void)shouldDisplayUserPage:(NSString *)username {
     // close detailView first - click came from here
+#if 0
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = detailController.view.frame;
@@ -627,10 +602,13 @@ static NSMutableSet * retainedDetailControllers;
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:username];
     }];
+#else
+    
+#endif
 }
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
-}
+//-(void)shouldCloseUserPage {
+//    [delegate shouldCloseUserPage];
+//}
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
     //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
@@ -737,81 +715,6 @@ static NSMutableSet * retainedDetailControllers;
     activityIndicator = nil;
 
     [super viewDidUnload];
-}
-
-#pragma mark stix editor
--(void)didClickRemixFromDetailViewWithTag:(Tag*)tag {
-    //[delegate didClickRemixFromDetailViewWithTag:tagToRemix];
-    [self setTagToRemix:[tag copy]];
-    NSLog(@"Did click remix with with tagID %@ by %@, creating tagToRemix with ID %@", tag.tagID, tag.username, tagToRemix.tagID);
-    if (tagToRemix.stixLayer) {
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
-        //    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
-        [actionSheet showFromTabBar:tabBarController.tabBar];
-    }
-    else {
-        // close detail view first
-        /*
-]        StixAnimation * animation = [[StixAnimation alloc] init];
-        animation.delegate = self;
-        CGRect frameOffscreen = detailController.view.frame;
-        frameOffscreen.origin.x -= 330;
-        
-        [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-            [detailController.view removeFromSuperview];
-            [DetailViewController unlockOpen];
-        }];
-         */
-        [detailController.view removeFromSuperview];
-        [DetailViewController unlockOpen];
-        
-        // no previous stix exist, automatically choose original mode
-        [delegate shouldDisplayStixEditor:[detailController.tag copy] withRemixMode:REMIX_MODE_USEORIGINAL];
-    }
-    [delegate didClickRemixButton]; // just to advance first time message, metrics, etc
-}
-
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    //    BOOL bUseOriginal = NO;
-    int remixMode;
-    if (buttonIndex == 0) {
-        // remixed photo
-        NSLog(@"Button 0");
-        remixMode = REMIX_MODE_ADDSTIX;
-    }
-    else if (buttonIndex == 1) {
-        // original photo
-        NSLog(@"Button 1");
-        remixMode = REMIX_MODE_USEORIGINAL;
-    }
-    else if (buttonIndex == 2) {
-        NSLog(@"Button 2");
-        tagToRemix = nil;
-        return;
-    }
-    
-    // close detailView first - click came from here
-    /*
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = detailController.view.frame;
-    frameOffscreen.origin.x -= 330;
-    
-    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [detailController.view removeFromSuperview];
-        [DetailViewController unlockOpen];
-    }];
-*/
-    [detailController.view removeFromSuperview];
-    [DetailViewController unlockOpen];
-    
-    [delegate shouldDisplayStixEditor:[detailController.tag copy] withRemixMode:remixMode];
-}
-
-// first time message function calls from VerticalFeedItemController that shouldn't be needed here
--(void)didCloseEditor {
-    [delegate didDismissSecondaryView];
-    //[stixEditorController.view removeFromSuperview];    
 }
 
 @end

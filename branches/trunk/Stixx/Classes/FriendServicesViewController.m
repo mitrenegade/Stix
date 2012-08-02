@@ -30,6 +30,15 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -39,18 +48,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    [tableView setFrame:CGRectMake(0, 45, 320, 200)];
+    [tableView setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 200)];
     [tableView.layer setCornerRadius:10];
     [tableView setDelegate:self];
     [tableView setBackgroundColor:[UIColor clearColor]];
 
     buttonNames = [[NSMutableArray alloc] initWithObjects:@"Facebook Friends", @"Twitter Friends", @"Contact List", nil];
     buttonIcons = [[NSMutableArray alloc] initWithObjects:[UIImage imageNamed:@"icon_share_facebook"], [UIImage imageNamed:@"icon_share_twitter"], [UIImage imageNamed:@"icon_contactlist"], nil];
-
-    stixUsersController = [[StixUsersViewController alloc] init];
-    [stixUsersController setDelegate:self];
-    [self.view addSubview:stixUsersController.view];
-    [stixUsersController.view setHidden:YES];
 }
 
 - (void)viewDidUnload
@@ -89,6 +93,7 @@
         [searchBar setDelegate:self];
         [searchBar becomeFirstResponder];
     }
+    [self.navigationItem setTitleView:logo];
 }
 
 #pragma mark activityindicator
@@ -163,12 +168,6 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
     service = indexPath.row;
     
     if (service == PROFILE_SERVICE_TWITTER) {
@@ -344,10 +343,6 @@
         }
         [self finishPopulateStixUsersView];
     } // end populate contact search results
-#if 0
-    [stixUsersController.tableView reloadData];
-#else
-#endif
 }
 
 -(void)didInitialLoginForTwitter {
@@ -481,16 +476,12 @@
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Invite" message:@"Contact list invite not implemented yet" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alertView show];
     }
-#if 0
-    [stixUsersController.tableView reloadData];
-#else
-#endif
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    //    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController popViewControllerAnimated:YES];
     //    [delegate shouldCloseFriendServices];
-    [self.view removeFromSuperview];
+    //[self.view removeFromSuperview];
 }
 
 -(void) initSearchResultLists {
@@ -509,17 +500,18 @@
     [searchFriendIsStix removeAllObjects];
     [searchFriendScreenname removeAllObjects];
     [searchFriendPhone removeAllObjects];
-    [self.view addSubview:stixUsersController.view];
-//    [stixUsersController.view setHidden:YES];
+//    [self.view addSubview:stixUsersController.view];
 }
 
 -(void)finishPopulateStixUsersView {
-    NSLog(@"FinishPopulatingStixUsersView: showing users results with mode %d and %d users: view %x", mode, [searchFriendName count], stixUsersController.view);
     [self stopActivityIndicatorLarge];
+    stixUsersController = [[StixUsersViewController alloc] init];
+    [stixUsersController setDelegate:self];
+    [stixUsersController setMode:mode];
+    [self.navigationController pushViewController:stixUsersController animated:YES];
     NSLog(@"Mode: %d", mode);
-    [stixUsersController setLogoWithMode:mode];
+    //[stixUsersController setLogoWithMode:mode];
     [stixUsersController.tableView reloadData];
-    [stixUsersController.view setHidden:NO];
 }
 
 -(void)switchToInviteMode {
@@ -555,7 +547,7 @@
         [searchFriendName addObject:[allUserNames objectAtIndex:index]];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
 #endif
-        [stixUsersController.tableView reloadData];
+//        [stixUsersController.tableView reloadData];
         return;
     }
     

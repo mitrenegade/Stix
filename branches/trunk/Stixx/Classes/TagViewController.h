@@ -39,6 +39,8 @@
 -(void)redisplayFirstTimeUserMessage01;
 //-(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 -(NSMutableSet*)getFollowingList;
+
+-(void)didCloseTagView;
 @end
 
 

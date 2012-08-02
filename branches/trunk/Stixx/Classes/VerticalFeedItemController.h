@@ -44,7 +44,7 @@
 
 @protocol VerticalFeedItemDelegate 
 
--(void)displayCommentsOfTag:(int)tagID andName:(NSString*)nameString;
+-(void)displayCommentsOfTag:(Tag*)tag andName:(NSString*)nameString;
 
 // forward from StixView
 -(NSString*)getUsername;
@@ -62,7 +62,7 @@
 -(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController*)feedItem;
 -(void)didClickReloadButtonForFeedItem:(VerticalFeedItemController *)feedItem;
 
--(void)didClickLikeButton:(int)type withTagID:(int)tagID;
+-(void)didClickLikeButton:(int)type withTag:(Tag*)tag;
 -(void)didDisplayLikeToolbar:(VerticalFeedItemController *)feedItem;
 -(BOOL)didClickNotesButton; // checks whether first time user message will allow it
 
@@ -157,7 +157,7 @@
 //@property (nonatomic, retain) IBOutlet UIButton * seeAllCommentsButton;
 
 -(void)populateWithName:(NSString *)name andWithDescriptor:(NSString*)descriptor andWithComment:(NSString*)comment andWithLocationString:(NSString*)location;
--(void)populateWithUserPhoto:(UIImage*)photo;
+//-(void)populateWithUserPhoto:(UIImage*)photo;
 -(void)populateWithTimestamp:(NSDate *)timestamp;
 -(void)populateWithCommentCount:(int)count;
 //-(void)populateCommentsWithNames:(NSMutableArray*)allNames andComments:(NSMutableArray*)allComments andStixStringIDs:(NSMutableArray*)allStixStringIDs;

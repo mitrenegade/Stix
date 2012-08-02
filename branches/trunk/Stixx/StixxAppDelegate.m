@@ -64,6 +64,7 @@
 @synthesize allCommentHistories;
 @synthesize editorController;
 @synthesize featuredUsers;
+@synthesize tagToRemix;
 
 #if USING_FACEBOOK
 @synthesize fbHelper;
@@ -174,10 +175,11 @@ static dispatch_queue_t backgroundQueue;
     /***** create first view controller: the TagViewController *****/
     [loadingMessage setText:@"Initializing camera..."];
     
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    //[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     camera = [[UIImagePickerController alloc] init];
-    camera.navigationBarHidden = YES;
+    camera.navigationBarHidden = NO;
+    camera.navigationBar.barStyle = UIBarStyleBlack;
     camera.toolbarHidden = YES; // prevents bottom bar from being displayed
     camera.allowsEditing = NO;
     camera.wantsFullScreenLayout = YES;
@@ -287,15 +289,14 @@ static dispatch_queue_t backgroundQueue;
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
     [profileController setCamera:camera];
-    userProfileController = [[UserProfileViewController alloc] init];
-    userProfileController.delegate = self;
+    //userProfileController = [[UserProfileViewController alloc] init];
+    //userProfileController.delegate = self;
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
 	NSArray * viewControllers = [NSArray arrayWithObjects: feedController,  exploreController, emptyViewController, newsController, profileController, nil];
     [tabBarController setViewControllers:viewControllers];
 	[tabBarController setDelegate:self];
-    [tabBarController initializeCustomButtons];
     [exploreController setTabBarController:tabBarController];
     
     friendSuggestionController = [[FriendSuggestionController alloc] init];
@@ -305,20 +306,44 @@ static dispatch_queue_t backgroundQueue;
     [editorController setDelegate:self];
 
     lastViewController = feedController;
+    [camera setCameraOverlayView:tagViewController.view];
     
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
+    UIViewController * tmpController = [[UIViewController alloc] init];
 #if !TARGET_IPHONE_SIMULATOR
 #if USE_CAMERA_AS_ROOT
-    [camera setCameraOverlayView:tabBarController.view];
     nav = [[UINavigationController alloc] initWithRootViewController:camera];
 #else
-    nav = [[UINavigationController alloc] initWithRootViewController:tabBarController];
+    //nav = camera; // camera is a nav controller!
+    //[camera.navigationController pushViewController:tagViewController animated:NO];
+    nav = [[UINavigationController alloc] initWithRootViewController:tmpController];
+    nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
 #endif
 #else
-    nav = [[UINavigationController alloc] initWithRootViewController:tabBarController];
+    nav = [[UINavigationController alloc] initWithRootViewController:tmpController];
+    nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
 #endif
     // [self addSubview:nav.view];
     [window addSubview:nav.view];
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
+    
+    CGRect frame = CGRectMake(0, 0, 72, 31);
+    UIButton * buttonFeedback = [[UIButton alloc] initWithFrame:frame];
+    [buttonFeedback setImage:[UIImage imageNamed:@"nav_feedback"] forState:UIControlStateNormal];
+    [buttonFeedback addTarget:self action:@selector(didClickFeedbackButton) forControlEvents:UIControlEventTouchDown];
+    CGRect frame2 = CGRectMake(0, 0, 52, 31);
+    UIButton * buttonAbout = [[UIButton alloc] initWithFrame:frame2];
+    [buttonAbout setImage:[UIImage imageNamed:@"btn_about"] forState:UIControlStateNormal];
+    [buttonAbout addTarget:self action:@selector(didClickAboutButton) forControlEvents:UIControlEventTouchDown];
+    UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:buttonFeedback];
+    UIBarButtonItem * rightButton = [[UIBarButtonItem alloc] initWithCustomView:buttonAbout];
+    [tabBarController.navigationItem setLeftBarButtonItem:leftButton];
+    [tabBarController.navigationItem setRightBarButtonItem:rightButton];
+    [tabBarController initializeCustomButtons];
+    //[nav pushViewController:camera animated:YES];
+    [nav pushViewController:tabBarController animated:YES];
 
     [self loadCachedTags];
 
@@ -349,7 +374,7 @@ static dispatch_queue_t backgroundQueue;
         NSLog(@"Could not log in: forcing new login screen!");
         isLoggingIn = YES;
         loggedIn = NO;
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 #if USE_CAMERA_AS_ROOT
         // present login as camera overlay
         [camera setCameraOverlayView:loginSplashController.view];
@@ -924,32 +949,17 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (isDisplayingBuxMenu)
         return;
     
-    [profileController closeTOS];
+//    [profileController closeTOS];
     
     // when center button is pressed, programmatically send the tab bar that command
+    [tabBarController setHeaderForTab:pos];
     [tabBarController setSelectedIndex:pos];
     [tabBarController setButtonStateSelected:pos]; // highlight button
     if (pos == TABBAR_BUTTON_TAG) {
-#if SHOW_ARROW
-        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
-            // force back to the feedview
-            [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
-            [tabBarController setButtonStateSelected:TABBAR_BUTTON_FEED];
-            [self agitateFirstTimePointer];
-            return;
-        }
-#endif
-#if USE_CAMERA_AS_ROOT
-        [self.camera setCameraOverlayView:tagViewController.view];
-#else
-        [nav pushViewController:tagViewController animated:NO];
-#endif
-        if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
-            [self hideFirstTimeUserMessage];
-        }
+        [self shouldOpenTagView];
     }
     else if (pos == TABBAR_BUTTON_FEED) {
-        [exploreController didDismissZoom];
+//        [exploreController didDismissZoom];
         lastViewController = feedController;
 
         // update feed with changes in friends
@@ -991,6 +1001,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #endif
     }
     else if (pos == TABBAR_BUTTON_PROFILE) {
+        lastViewController = profileController;
 #if SHOW_ARROW
         if ( (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 || myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02)) {
             [self agitateFirstTimePointer];
@@ -1005,9 +1016,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     else if (pos == TABBAR_BUTTON_NEWS) {
         lastViewController = newsController;
-    }
-    else if (pos == TABBAR_BUTTON_PROFILE) {
-        lastViewController = profileController;
     }
 }
 
@@ -1193,6 +1201,55 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 #pragma mark tagview delegate
+-(void)shouldOpenTagView {
+#if SHOW_ARROW
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_02) {
+        // force back to the feedview
+        [tabBarController setSelectedIndex:TABBAR_BUTTON_FEED];
+        [tabBarController setButtonStateSelected:TABBAR_BUTTON_FEED];
+        [self agitateFirstTimePointer];
+        return;
+    }
+#endif
+#if USE_CAMERA_AS_ROOT
+//    [self.camera setCameraOverlayView:tagViewController.view];
+    [nav popToRootViewControllerAnimated:NO];
+#else
+    AROverlayViewController * cameraController = [[AROverlayViewController alloc] init];
+    [nav pushViewController:cameraController animated:NO];
+    [cameraController.view addSubview:tagViewController.view];
+    //[nav popToRootViewControllerAnimated:NO];
+    //[nav pushViewController:camera animated:YES];
+    //[nav pushViewController:tagViewController animated:NO];
+    //[nav presentModalViewController:camera animated:NO];
+    //[tabBarController presentModalViewController:camera animated:NO];
+    //[nav popToViewController:camera animated:NO];
+#endif
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
+        [self hideFirstTimeUserMessage];
+    }
+}
+
+-(void)didCloseTagView {
+    [nav popViewControllerAnimated:NO];
+    //[nav pushViewController:tabBarController animated:YES];
+    //[tabBarController dismissModalViewControllerAnimated:NO];
+    //[nav dismissModalViewControllerAnimated:NO];
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
+    //[nav pushViewController:tabBarController animated:NO];
+    if (lastViewController == feedController)
+        [self didPressTabButton:TABBAR_BUTTON_FEED];
+    else if (lastViewController == exploreController)
+        [self didPressTabButton:TABBAR_BUTTON_EXPLORE];
+    else if (lastViewController == newsController)
+        [self didPressTabButton:TABBAR_BUTTON_NEWS];
+    else if (lastViewController == profileController)
+        [self didPressTabButton:TABBAR_BUTTON_PROFILE];
+    else {
+        [self didPressTabButton:TABBAR_BUTTON_FEED];
+    }
+}
+
 -(void)didConfirmNewPix:(Tag*)newTag {
     NSLog(@"Did confirm new pix ***********************************");
     // user took a new picture - read to add stix
@@ -1262,7 +1319,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(void)didCloseEditor {
     [feedController stopActivityIndicatorLarge];
-    [self didDismissSecondaryView];
+//    [self didDismissSecondaryView];
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
         [tabBarController toggleFirstTimeInstructions:YES];
         [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
@@ -1271,7 +1328,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [editorController.view removeFromSuperview];
     [camera setCameraOverlayView:tabBarController.view];
 #else
-    [nav popToRootViewControllerAnimated:YES];
+//    [nav popToRootViewControllerAnimated:YES];
+    [nav popViewControllerAnimated:YES];
 #endif
 }
 
@@ -1409,20 +1467,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self doParallelNewPixShare:cameraTag];
 }
 
--(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
-    // hack a way to do remix for all feedItem views, whether from the explore or profile
-    
-    // close profile or detail views
-    [self closeProfileView];
-    [self shouldCloseUserPage];
-    [self didDismissSecondaryView];
-    // jump to tab bar
-    [self didPressTabButton:TABBAR_BUTTON_FEED];
-    [self addTagWithCheck:tagToRemix withID:[tagToRemix.tagID intValue]];
-    
-    [feedController didClickRemixFromDetailView:tagToRemix];
-}
-
 -(void)doParallelNewPixShare:(Tag*)_tag {
     NSLog(@"NewPixShare: resetting toggles for new created pix");
     newPixDidClickShare = NO;
@@ -1547,16 +1591,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([remixMode intValue] != REMIX_MODE_NEWPIC) {
         // add comment: "Remixed this Pix via..." to original tag
         NSLog(@"NewTag: name %@ original %@ myname %@", newTag.username, newTag.originalUsername, [self getUsername]);
-        /*
-         // do not add Remixed comment
-        NSString * name = [self getUsername];
-        NSString * newType = @"REMIX";
-        NSString * comment;
-        if (newTag.originalUsername && [newTag.originalUsername length] > 0 && ![name isEqualToString:newTag.originalUsername]) {
-            comment = @"Remixed this Pix";
-            [self didAddCommentFromDetailViewController:nil withTagID:[newRecordID intValue] andUsername:name andComment:comment andStixStringID:newType];
-        }
-         */
         // send remix notification if not own pix
         if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
             NSString * message = [NSString stringWithFormat:@"%@ remixed your Pix.", myUserInfo_username];
@@ -1774,7 +1808,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // we get here from handleNotificationBookmarks
     if (isUpdatingNotifiedTag) {
         if (updatingNotifiedTagDoJump) {
-            [[UIApplication sharedApplication] setStatusBarHidden:NO];
+            [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
             [self.camera setCameraOverlayView:tabBarController.view];
 #else
@@ -2088,17 +2122,18 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+-(void)didAddCommentWithTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
     // simple version - no detailViewController
-    [self didAddCommentFromDetailViewController:nil withTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+    [self didAddCommentFromDetailViewController:nil withTag:tag andUsername:name andComment:comment andStixStringID:stixStringID];
 }
 
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)_tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     
     KumulosHelper * kh = [[KumulosHelper alloc] init];
+    int tagID = [_tag.tagID intValue];
     if (detailViewController == nil) {
         // regular comment
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:tagID], name, comment, stixStringID, nil];
@@ -2133,7 +2168,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if ([comment isEqualToString:@"LIKE_SHOCKED"])
             shortMsg = @"is shocked by your Pix.";
         actionMsg = [NSString stringWithFormat:@"%@ %@.", myUserInfo_username, shortMsg];
-        Tag * tag = [allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
+        Tag * tag = _tag; //[allTagIDs objectForKey:[NSNumber numberWithInt:tagID]]; //[self getTagWithID:tagID];
         if (tag != nil) // if tag is nil, it is not on feed yet, just ignore
         {
             if (![tag.username isEqualToString:[self getUsername]]) {
@@ -2397,7 +2432,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     frameOffscreen.origin.x -= 330;
     [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [profileController.view removeFromSuperview];
-        [feedController unlockProfile];
+        //[feedController unlockProfile];
     }];
 }
 
@@ -2412,7 +2447,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if 0
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
     picker.showsCameraControls = YES;
-    picker.navigationBarHidden = YES;
     picker.toolbarHidden = YES;
     picker.wantsFullScreenLayout = YES;
     picker.allowsEditing = YES;
@@ -2422,8 +2456,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     picker.delegate = self;
     
     // because a modal camera already exists, we must present a modal view over that camera
-    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
-    //[camera presentModalViewController:picker animated:YES];
     [profileController presentModalViewController:picker animated:YES];
 }
 
@@ -2434,9 +2466,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //    [[picker parentViewController] dismissModalViewControllerAnimated: YES];    
     //    [picker release];    
     
-    //[[UIApplication sharedApplication] setStatusBarHidden:YES];
     [profileController dismissModalViewControllerAnimated:TRUE];
-    //[[UIApplication sharedApplication] setStatusBarHidden:NO];
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
     [camera setCameraOverlayView:tabBarController.view];
 #else
@@ -2460,7 +2490,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         newPhoto = originalPhoto; 
     
     NSLog(@"Finished picking image: dimensions %f %f", newPhoto.size.width, newPhoto.size.height);
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     [profileController dismissModalViewControllerAnimated:TRUE];
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
     [camera setCameraOverlayView:tabBarController.view];
@@ -2488,11 +2518,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     // add to kumulos
     [k addPhotoWithUsername:myUserInfo_username andPhoto:img];
-    //if (lastViewController == feedController)
-    //    [self didPressTabButton:0];
-    //else if (lastViewController == exploreController)
-    //    [self didPressTabButton:2];
-    //[self closeProfileView];
 #if HAS_PROFILE_BUTTON
     [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
     [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
@@ -3275,30 +3300,52 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //[allCarouselViews addObject:newBadgeView];
 }
 
--(void)didClickFeedbackButton:(NSString *)fromView {
+-(void)didClickFeedbackButton {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    NSLog(@"Feedback button clicked from %@", fromView);
-    feedbackController = [[FeedbackViewController alloc] init];
-    [feedbackController setDelegate:self];
-    lastViewController = profileController;
+    if (!feedbackController) {
+        feedbackController = [[FeedbackViewController alloc] init];
+        [feedbackController setDelegate:self];
+    }
+//    lastViewController = profileController;
+#if 0
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
     [feedbackController.view setFrame:frameShifted];
-#if USE_CAMERA_AS_ROOT
     [self.camera setCameraOverlayView:feedbackController.view];
 #else
-    [nav pushViewController:feedController animated:YES];
+    [nav pushViewController:feedbackController animated:YES];
 #endif
 }
 
--(void)didCancelFeedback {
+-(void)didCloseFeedback {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
     // formerly dismissModalViewController
-    [self didDismissSecondaryView];
+    //[self didDismissSecondaryView];
+    [nav popViewControllerAnimated:YES];
+}
+
+-(void)didClickAboutButton {
+    UIWebView * webView = [[UIWebView alloc] init];
+    [webView setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.stixmobile.com/tos"]]];
+    [webView setDelegate:self];
+    UIViewController * webController = [[UIViewController alloc] init];
+    [webController.view addSubview:webView];
+    UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+    [webController.navigationItem setTitleView:logo];
+    [nav pushViewController:webController animated:YES];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSLog(@"Webview loaded");
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    NSLog(@"Webview error: %@", [error description]);
 }
 
 - (void) sendEmailTo:(NSString *)to withCC:(NSString*)cc withSubject:(NSString *) subject withBody:(NSString *)body {
@@ -3409,7 +3456,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //isShowingFriendSuggestions = YES;
 #if USE_CAMERA_AS_ROOT
         [self didDismissSecondaryView];
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
         [camera setCameraOverlayView:tabBarController.view];
         [self.tabBarController setSelectedIndex:0];    
 
@@ -3459,13 +3506,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         return;
     }
 #endif
-    /*
-    if ([name isEqualToString:[self getUsername]]) {
-        //[self didOpenProfileView];
-        [self didPressTabButton:TABBAR_BUTTON_PROFILE];
-        return;
-    }
-     */
+#if 0
     // hack a way to display feedback view over camera: formerly presentModalViewController
     CGRect frameOffscreen = CGRectMake(-330, STATUS_BAR_SHIFT, 320, 480);
     [self.tabBarController.view addSubview:userProfileController.view];
@@ -3478,12 +3519,20 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];    // does not need delegate function
     // must force viewDidAppear because it doesn't happen when it's offscreen?
     [userProfileController viewDidAppear:YES]; 
+#else
+    UserProfileViewController * userGallery = [[UserProfileViewController alloc] init];
+    [userGallery setUsername:name];
+    [userGallery setDelegate:self];
+    [nav pushViewController:userGallery animated:YES];
+#endif
 }
 
+/*
 -(void)shouldCloseUserPage {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+#if 0
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = userProfileController.view.frame;
@@ -3491,9 +3540,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     
     [animation doViewTransition:userProfileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [userProfileController.view removeFromSuperview];
-        [feedController unlockProfile];
+        //[feedController unlockProfile];
     }];
+#endif
 }
+ */
 
 -(void)shouldCloseShareController:(BOOL)didClickDone {
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
@@ -3560,7 +3611,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray *)addedFriends {
     isShowingFriendSuggestions = NO;
     
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
     [camera setCameraOverlayView:tabBarController.view];
 #else
@@ -3832,6 +3883,27 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
 */
+    else if (actionSheet.tag == ACTIONSHEET_TAG_REMIX) {
+        
+        //    BOOL bUseOriginal = NO;
+        int remixMode;
+        if (buttonIndex == 0) {
+            // remixed photo
+            NSLog(@"Button 0");
+            remixMode = REMIX_MODE_ADDSTIX;
+        }
+        else if (buttonIndex == 1) {
+            // original photo
+            NSLog(@"Button 1");
+            remixMode = REMIX_MODE_USEORIGINAL;
+        }
+        else if (buttonIndex == 2) {
+            NSLog(@"Button 2");
+            tagToRemix = nil;
+            return;
+        }
+        [self shouldDisplayStixEditor:tagToRemix withRemixMode:remixMode];
+    }
 }
 
 -(void)didGetFeaturedUsers:(NSArray *)featured {
@@ -4966,4 +5038,54 @@ static bool isShowingAlerts = NO;
 #endif
 }
 
+#pragma mark DetailViewController
+
+static NSMutableSet * retainedDetailControllers;
+
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tag {
+    // hack a way to do remix for all feedItem views, whether from the explore or profile
+    [self setTagToRemix:[tag copy]];
+    NSLog(@"Did click remix with with tagID %@ by %@, creating tagToRemix with ID %@", tag.tagID, tag.username, tagToRemix.tagID);
+    if (tagToRemix.stixLayer) {
+        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
+        [actionSheet showFromTabBar:tabBarController.tabBar];
+    }
+    else {
+        // no previous stix exist, automatically choose original mode
+        [self shouldDisplayStixEditor:[tag copy] withRemixMode:REMIX_MODE_USEORIGINAL];
+    }
+    [self didClickRemixButton]; // just to advance first time message, metrics, etc
+}
+
+-(void)shouldDisplayDetailViewWithTag:(Tag *)tag {
+    DetailViewController * detailController = [[DetailViewController alloc] init];
+    [detailController setDelegate:self];    
+    [detailController initDetailViewWithTag:tag];
+    [nav pushViewController:detailController animated:YES];
+}
+
+-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)_detailController {
+    //-(void)detailViewNeedsRetainForDelegateCall:(DetailViewController*)_detailController {
+    // comes from stixViews
+    if (!retainedDetailControllers) 
+        retainedDetailControllers = [[NSMutableSet alloc] init];
+    NSLog(@"ExploreView: retaining detail view with username %@", [_detailController tagUsername]);
+    [retainedDetailControllers addObject:_detailController];
+}
+
+-(void)detailViewDoneWithAsynchronousDelegateCall:(DetailViewController*)_detailViewController {
+    NSLog(@"ExploreView: releasing detail view with username %@", [_detailViewController tagUsername]);
+//    [retainedDetailControllers removeObject:_detailViewController]; // do not do this - will already be deallocated?
+}
+
+#pragma mark CommentView
+
+-(void)shouldDisplayCommentViewWithTag:(Tag *)tag andNameString:(NSString *)nameString {
+    CommentViewController * commentView = [[CommentViewController alloc] init];
+    [commentView setDelegate:self];
+    [commentView initCommentViewWithTag:tag andNameString:nameString];
+}
+
 @end
+
+

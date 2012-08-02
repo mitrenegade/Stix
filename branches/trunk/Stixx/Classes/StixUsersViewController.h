@@ -43,7 +43,6 @@
     NSObject<StixUsersViewDelegate> * __unsafe_unretained delegate;
     IBOutlet UIButton * buttonBack;
     IBOutlet UIButton * buttonAll;
-    IBOutlet UIImageView * logo;
     IBOutlet UITableView * tableView;
     
     IBOutlet UILabel * noFriendsLabel;
@@ -56,7 +55,6 @@
 }
 @property (nonatomic) IBOutlet UIButton * buttonBack;
 @property (nonatomic) IBOutlet UIButton * buttonAll;
-@property (nonatomic) IBOutlet UIImageView * logo;
 @property (nonatomic) IBOutlet UITableView * tableView;
 @property (nonatomic) IBOutlet UILabel * noFriendsLabel;
 @property (nonatomic) IBOutlet UIButton * noFriendsButton;

@@ -17,62 +17,59 @@
 @synthesize aperture;
 @synthesize cameraDeviceButton;
 @synthesize flashModeButton;
-@synthesize buttonClose;
+//@synthesize buttonClose;
 @synthesize buttonTakePicture;
 @synthesize buttonImport;
 @synthesize cameraTag;
 
 - (id)init {
 	
+    self = [super initWithNibName:@"TagViewController" bundle:nil];
+    {
 		// does not do anything - nib does not contain extra buttons etc
-		self = [super initWithNibName:@"TagViewController" bundle:nil];
-				
-		// create tab bar item to become a tab view
-		UITabBarItem *tbi = [self tabBarItem];
-		
-		// give it a label
-		[tbi setTitle:@"Stix"];
-		
-//-(void)viewDidLoad {
-//	[super viewDidLoad];
-    /****** init AR view ******/
-    /*
-    arViewController = [[ARViewController alloc] init];
-	CLLocation *newCenter = [[CLLocation alloc] initWithLatitude:42.369182 longitude:-71.080427];
-	arViewController.scaleViewsBasedOnDistance = YES;
-	arViewController.minimumScaleFactor = .5;
-	arViewController.rotateViewsBasedOnPerspective = NO;
-	arViewController.centerLocation = newCenter;
-	[newCenter release];
-     */
-    descriptorIsOpen = NO;
-    needToShowCamera = YES;
-    
-	/***** create camera controller *****/
-	NSLog(@"Initializing camera.");
-    camera = [[UIImagePickerController alloc] init];
-    camera.delegate = self;
-    camera.navigationBarHidden = YES;
-    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
-    camera.allowsEditing = NO;
-    camera.wantsFullScreenLayout = NO;
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickCloseButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+//        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+//        [self.navigationItem setTitleView:logo];
+        
+        //-(void)viewDidLoad {
+        //	[super viewDidLoad];
+        descriptorIsOpen = NO;
+        needToShowCamera = YES;
+        
+        /***** create camera controller *****/
+        /*
+        NSLog(@"Initializing camera.");
+        camera = [[UIImagePickerController alloc] init];
+        camera.delegate = self;
+        camera.navigationBarHidden = NO;
+        camera.toolbarHidden = YES; // prevents bottom bar from being displayed
+        camera.allowsEditing = NO;
+        camera.wantsFullScreenLayout = NO;
 #if !TARGET_IPHONE_SIMULATOR
-    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-    camera.showsCameraControls = NO;
-    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
+        camera.sourceType = UIImagePickerControllerSourceTypeCamera;
+        camera.showsCameraControls = NO;
+        camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
 #else
-    camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 #endif
-	// hierarchy of tagView overlays:
-	// 1. self.view = overlayView = blank;
-    // 1.5 overlayView.subView = apertureView - camera aperture (overlay.png)
-	// 2. overlayView.subView = badgeController.view
-	// 3. badgeController.subView = arViewController.view
-    // 4. arViewController.view
-	// 6. we don't want to set tabBar.subView because it goes to other views
-	
-    //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
-    //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
+         */
+        // hierarchy of tagView overlays:
+        // 1. self.view = overlayView = blank;
+        // 1.5 overlayView.subView = apertureView - camera aperture (overlay.png)
+        // 2. overlayView.subView = badgeController.view
+        // 3. badgeController.subView = arViewController.view
+        // 4. arViewController.view
+        // 6. we don't want to set tabBar.subView because it goes to other views
+        
+        //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
+        //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
+    }
     return self;
 }
 
@@ -80,10 +77,10 @@
     [super loadView];   
 }
 
--(void) viewDidLoad {
-    [super viewDidLoad];
+//-(void) viewDidLoad {
+//    [super viewDidLoad];
 
-}
+//}
 // called by main delegate to add tabBarView to camera overlay
 - (void)setCameraOverlayView:(UIView *)cameraOverlayView
 {
@@ -98,22 +95,10 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    //[buttonZoomIn setHidden:YES];
-    //[buttonZoomOut setHidden:YES];
-/*    
-    NSLog(@"RectView has frame: %f %f %f %f\n", rectView.frame.origin.x, rectView.frame.origin.y, rectView.frame.size.width, rectView.frame.size.height);
- */    
-//    [[UIApplication sharedApplication] setStatusBarHidden:NO];
-//    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
-
-    //CGRect viewFrame = rectView.frame;
-    //CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
-    // hack: because status bar is hidden, our "origin.y" is -20
-    //viewFrame.origin.y = viewFrame.origin.y + statusFrame.size.height;
 #if !TARGET_IPHONE_SIMULATOR
     if (descriptorIsOpen == NO) {
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
-        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
+        //[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
         needToShowCamera = NO;
     }
 #endif
@@ -159,9 +144,8 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     if (photoAlbumOpened) {
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
-        [self.camera dismissModalViewControllerAnimated:YES];
-        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
+        //[self.camera dismissModalViewControllerAnimated:YES];
     }
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
 	UIImage *baseImage = originalPhoto;
@@ -418,7 +402,7 @@
     [self.delegate didClickFeedbackButton:@"Tag view"];
 }
 
--(IBAction)didClickCloseButton:(id)sender {
+-(void)didClickCloseButton:(id)sender {
     if ([delegate getFirstTimeUserStage] == 0) {
         // advance to next
         // this is to make the users/developers not have to take a picture each time
@@ -428,7 +412,8 @@
         else 
             [delegate redisplayFirstTimeUserMessage01];
     }
-    [delegate didDismissSecondaryView];
+    //[delegate didDismissSecondaryView];
+    [delegate didCloseTagView];
 }
 
 -(IBAction)didClickTakePicture:(id)sender {
@@ -454,7 +439,7 @@
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
     [self.camera dismissModalViewControllerAnimated:YES];
     photoAlbumOpened = NO;
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 }
 
 @end

@@ -20,6 +20,22 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImage * doneImage = [UIImage imageNamed:@"btn_done"];
+        UIButton * doneButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, doneImage.size.width, doneImage.size.height)];
+        [doneButton setImage:doneImage forState:UIControlStateNormal];
+        [doneButton addTarget:self action:@selector(didClickSubmitButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * rightButton = [[UIBarButtonItem alloc] initWithCustomView:doneButton];
+        [self.navigationItem setRightBarButtonItem:rightButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -87,7 +103,7 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [self.delegate didCancelFeedback];
+    [self.delegate didCloseFeedback];
 }
 
 -(IBAction)didClickSubmitButton:(id)sender {

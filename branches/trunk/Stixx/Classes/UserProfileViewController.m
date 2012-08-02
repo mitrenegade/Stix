@@ -18,9 +18,9 @@
 @synthesize photoButton, nameLabel, buttonAddFriend;
 @synthesize pixTableController;
 @synthesize headerView;
-@synthesize detailController;
+//@synthesize detailController;
 @synthesize lastUsername;
-@synthesize searchResultsController;
+//@synthesize searchResultsController;
 @synthesize scrollView;
 
 -(id)init
@@ -30,19 +30,23 @@
     k = nil;
     k = [[Kumulos alloc]init];
     [k setDelegate:self];    
-    //isLoggedIn = NO;
+
+    UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+    UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+    [backButton setImage:backImage forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+    [self.navigationItem setLeftBarButtonItem:leftButton];
+    
+    UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+    [self.navigationItem setTitleView:logo];
+    
     return self;
     
 }
 
 -(void)viewDidLoad {
     [super viewDidLoad];
-    
-	if (k == nil)
-    {
-        k = [[Kumulos alloc]init];
-        [k setDelegate:self];    
-    }
     
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
@@ -61,16 +65,16 @@
     photoButton = [[UIImageView alloc] init];//[[UIButton alloc] init];
     buttonAddFriend = [[UIButton alloc] init];//buttonWithType:UIButtonTypeCustom];
     bgFollowing = [UIButton buttonWithType:UIButtonTypeCustom];
-    [bgFollowing addTarget:self action:@selector(buttonFollowingClicked) forControlEvents:UIControlEventTouchUpInside];
+    [bgFollowing addTarget:self action:@selector(didClickFollowingButton) forControlEvents:UIControlEventTouchUpInside];
     bgFollowers = [UIButton buttonWithType:UIButtonTypeCustom];
-    [bgFollowers addTarget:self action:@selector(buttonFollowersClicked) forControlEvents:UIControlEventTouchUpInside];
+    [bgFollowers addTarget:self action:@selector(didClickFollowersButton) forControlEvents:UIControlEventTouchUpInside];
 
     myFollowingCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(105, 100-44, 99, 40)];
     myFollowingLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(105, 133-44, 99, 15)];
     myFollowersCount = [[OutlineLabel alloc] initWithFrame:CGRectMake(210, 100-44, 99, 40)];
     myFollowersLabel = [[OutlineLabel alloc] initWithFrame:CGRectMake(210, 133-44, 99, 15)];
 
-    searchResultsController = nil;
+    //searchResultsController = nil;
     allFollowers = [[NSMutableSet alloc] init];
     allFollowing = [[NSMutableSet alloc] init];
 
@@ -86,9 +90,37 @@
     [self.headerView addSubview:myFollowingCount];
     [self.headerView addSubview:myFollowersCount];
 
-    [self toggleMyButtons:YES];
+    //[self toggleMyButtons:YES];
+
+    if (!pixTableController) {
+        pixTableController = [[ColumnTableController alloc] init];
+        [pixTableController.view setBackgroundColor:[UIColor clearColor]];
+        pixTableController.delegate = self;
+        //        [pixTableController setHasHeaderRow:YES];
+        numColumns = 3;
+        [pixTableController setNumberOfColumns:numColumns andBorder:4];
+    }
+    
+    [self populateUserInfo];
+    [self populateFollowCounts];
+    //[self updateStixCounts];
+    
+    NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
+    if (![lastUsername isEqualToString:username]) {
+        pendingContentCount = 0;
+        [self forceReloadAll];
+        [self setLastUsername:username];
+    }
+    [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
+    
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
+    [self.scrollView addSubview:pixTableController.view];
+    [self.scrollView addSubview:headerView];
+    [scrollView setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:scrollView];
 }
 
+/*
 -(void)toggleMyButtons:(BOOL)show {
     [nameLabel setHidden:!show];
     [photoButton setHidden:!show];
@@ -109,6 +141,7 @@
         [FlurryAnalytics logPageView];
 #endif
 }
+ */
 
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
@@ -126,18 +159,20 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    if (isDisplayingFollowLists) {
-        [searchResultsController.view removeFromSuperview];
-        [self toggleMyButtons:YES];
-        isDisplayingFollowLists = NO;
-    }
-    else
-        [delegate shouldCloseUserPage];
+//    if (isDisplayingFollowLists) {
+//        [searchResultsController.view removeFromSuperview];
+//        [self toggleMyButtons:YES];
+//        isDisplayingFollowLists = NO;
+//    }
+//    else {
+        [self.navigationController popViewControllerAnimated:YES];        
+//    }
+//        [delegate shouldCloseUserPage];
 }
 
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
-}
+//-(void)shouldCloseUserPage {
+//    [delegate shouldCloseUserPage];
+//}
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name
 {
@@ -151,31 +186,6 @@
 }
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    if (!pixTableController) {
-        pixTableController = [[ColumnTableController alloc] init];
-        [pixTableController.view setBackgroundColor:[UIColor clearColor]];
-        pixTableController.delegate = self;
-//        [pixTableController setHasHeaderRow:YES];
-        numColumns = 3;
-        [pixTableController setNumberOfColumns:numColumns andBorder:4];
-    }
-    
-    [self populateUserInfo];
-    [self populateFollowCounts];
-    //[self updateStixCounts];
-    
-    NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
-    if (![lastUsername isEqualToString:username]) {
-        pendingContentCount = 0;
-        [self forceReloadAll];
-        [self setLastUsername:username];
-    }
-    [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
-    [pixTableController.view removeFromSuperview];
-    //[self.view addSubview:pixTableController.view];
-    [self.scrollView addSubview:pixTableController.view];
-    [self.scrollView addSubview:headerView];
-    [scrollView setBackgroundColor:[UIColor clearColor]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -289,6 +299,7 @@
 
 -(void)didSelectUserProfile:(int)index {
     NSString * new_username = [self getUsernameForUser:index];
+    /*
     if ([new_username isEqualToString:[delegate getUsername]]) {
         [self didClickBackButton:nil];
         [delegate shouldDisplayUserPage:[delegate getUsername]];
@@ -303,6 +314,13 @@
             [self toggleMyButtons:YES];
             [self shouldDisplayUserPage:new_username];
         }];
+    }
+     */
+    if ([new_username isEqualToString:[delegate getUsername]]) {
+        [self didClickBackButton:nil];
+    }
+    else {
+        [delegate shouldDisplayUserPage:new_username];
     }
 }
 
@@ -337,10 +355,11 @@
 }
 
 #pragma UserGalleryDelegate
+/*
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
 //    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
 }
-
+*/
 -(void)addFriendFromList:(int)index{
     NSString * name = [self getUsernameForUser:index];
     //NSMutableSet * friendsList = [self.delegate getFriendsList];
@@ -354,7 +373,7 @@
     else {
         // cannot invite!
     }
-    [[searchResultsController tableView] reloadData];
+    //[[searchResultsController tableView] reloadData];
 }
 #pragma mark ColumnTableController delegate
 -(int)numberOfRows {
@@ -507,7 +526,7 @@
 -(void)didPullToRefresh {
     [self forceReloadAll];
     [self updateFollowCounts];
-    [self updateStixCounts];
+    //[self updateStixCounts];
 }
 
 #pragma mark KumulosDelegate functions
@@ -520,10 +539,13 @@
         [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
 
         // new system of auxiliary stix: request from auxiliaryStixes table
+#if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
-        
+#else
+        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+#endif
         pendingContentCount--;
         if (pendingContentCount <= 0)
             pendingContentCount = 0;            
@@ -558,6 +580,28 @@
     }
 }
 
+-(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
+    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
+    Tag * tag = [allTags objectForKey:tagID];
+    if (tag) {
+        //[tag populateWithAuxiliaryStix:theResults];
+        NSNumber * key = nil;
+        for (int i=0; i<[allTagIDs count]; i++) {
+            NSNumber * tID = [allTagIDs objectAtIndex:i];
+            if (tID == tagID) {
+                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
+                key = [NSNumber numberWithInt:i];
+                [contentViews removeObjectForKey:key];
+                break;
+            }
+        }
+        if (key)
+            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
+        [pixTableController.tableView reloadData];
+    }
+}
+
+
 #pragma kumulosHelper callback
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];
@@ -569,12 +613,13 @@
 #pragma mark DetailView 
 /************** DetailView ***********/
 -(void)didTouchInStixView:(StixView *)stixViewTouched {
-    if ([DetailViewController openingDetailView])
-        return;
-    [DetailViewController lockOpen];    
+//    if ([DetailViewController openingDetailView])
+//        return;
+//    [DetailViewController lockOpen];    
     
     NSNumber * tagID = stixViewTouched.tagID;
     Tag * tag = [allTags objectForKey:tagID];
+#if 0
     detailController = [[DetailViewController alloc] init];
     [detailController setDelegate:self];    
     [detailController initDetailViewWithTag:tag];
@@ -588,6 +633,9 @@
     //[animation doSlide:detailController.view inView:self.view toFrame:frameOnscreen forTime:.25];
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
     }];
+#else
+    [delegate shouldDisplayDetailViewWithTag:tag];
+#endif
 
 #if USING_FLURRY
     if (!IS_ADMIN_USER([self getUsername]))
@@ -597,7 +645,8 @@
 
 -(void)shouldDisplayUserPage:(NSString*)_username {
     NSLog(@"Multilayered display of profile view about to happen from UserProfileView!");
-    // close detailView first - click came from here
+    // close detailView first - click came from comments in detailview
+#if 0
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = detailController.view.frame;
@@ -607,11 +656,8 @@
         [detailController.view removeFromSuperview];
         [delegate shouldDisplayUserPage:_username];
     }];
-}
-
--(void)didDismissZoom {
-    [detailController.view removeFromSuperview];
-    detailController = nil;
+#endif
+    [delegate shouldDisplayUserPage:_username];
 }
 
 #pragma mark stixview request delegates
@@ -637,7 +683,7 @@
 */
 #pragma mark followers and following lists
 
--(void)buttonFollowingClicked {
+-(void)didClickFollowingButton {
     if (isSearching)
         return;
     
@@ -648,7 +694,7 @@
     [self populateFollowingList];
 }
 
--(void)buttonFollowersClicked {
+-(void)didClickFollowersButton {
     if (isSearching)
         return;
     
@@ -676,17 +722,19 @@
     [self initSearchResultLists];
     
     NSLog(@"Getting follows list from kumulos for username: %@", username);
-    if (searchResultsController) {
-        [searchResultsController.view removeFromSuperview];
-    }
-    searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    //if (searchResultsController) {
+    //    [searchResultsController.view removeFromSuperview];
+    //}
+    FriendSearchResultsController * searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
     [searchResultsController setDelegate:self];
+    [searchResultsController.view setBackgroundColor:[UIColor clearColor]];
     searchResultsController.tableView.showsVerticalScrollIndicator = NO;
     
-    [self toggleMyButtons:NO];
-    [self.view addSubview:searchResultsController.view];
-    isDisplayingFollowLists = YES;
+//    [self toggleMyButtons:NO];
+//    [self.view addSubview:searchResultsController.view];
+//    isDisplayingFollowLists = YES;
+    [self.navigationController pushViewController:searchResultsController animated:YES];
     
     for (NSString * following in allFollowing) {
         NSLog(@"ProfileViewController: followingSet contains %@", following);
@@ -703,17 +751,19 @@
     
     [self initSearchResultLists];
     
-    if (searchResultsController) {
-        [searchResultsController.view removeFromSuperview];
-    }
-    searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, 44, 320, 480-64)];
+    //if (searchResultsController) {
+    //    [searchResultsController.view removeFromSuperview];
+   // }
+    FriendSearchResultsController * searchResultsController = [[FriendSearchResultsController alloc] init];
+    [searchResultsController.view setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
     [searchResultsController setDelegate:self];
+    [searchResultsController.view setBackgroundColor:[UIColor clearColor]];
     searchResultsController.tableView.showsVerticalScrollIndicator = NO;
 
-    [self toggleMyButtons:NO];
-    [self.view addSubview:searchResultsController.view];
-    isDisplayingFollowLists = YES;
+//    [self toggleMyButtons:NO];
+//    [self.view addSubview:searchResultsController.view];
+//    isDisplayingFollowLists = YES;
+    [self.navigationController pushViewController:searchResultsController animated:YES];
 
     for (NSString * follower in allFollowers) {
         [searchFriendName addObject:follower];
@@ -757,6 +807,7 @@
 }
 
 #pragma mark remix hack
+/*
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix {
     // close detailView first - click came from here
     StixAnimation * animation = [[StixAnimation alloc] init];
@@ -769,5 +820,5 @@
         [delegate didClickRemixFromDetailViewWithTag:tagToRemix];
     }];
 }
-
+*/
 @end

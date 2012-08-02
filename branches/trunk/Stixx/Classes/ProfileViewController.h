@@ -15,6 +15,7 @@
 #import "FacebookHelper.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
+#import "UserProfileViewController.h"
 
 @protocol ProfileViewDelegate
 -(NSMutableSet*)getFollowingList;
@@ -42,13 +43,13 @@
 -(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookString:(NSString*)facebookString;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 @end
 
 @interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
 {
-    IBOutlet UIScrollView * scrollView;
+    UIScrollView * scrollView;
     
     UITableView * buttonsTableView;
     FriendSearchTableViewController * friendsTableView;
@@ -100,9 +101,8 @@
 
 @property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> * delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
-//@property (nonatomic) IBOutlet UITableView * buttonsTableView;
 @property (nonatomic) FriendServicesViewController * servicesController;
-@property (nonatomic) IBOutlet UIScrollView * scrollView;
+@property (nonatomic) UIScrollView * scrollView;
 @property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) IBOutlet UIButton * buttonAbout;

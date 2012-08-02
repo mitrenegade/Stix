@@ -28,17 +28,7 @@
             view.hidden = YES;
             break;
         }
-    } 
-     
-    [self.view setBackgroundColor:[UIColor redColor]];
-
-    // hack: the tabbar is always 49px at the bottom. we need a 40px space at the bottom for the custom buttons. so extend the whole frame of the tabBarController by 9 pixels
-    // but when frame height is manually changed it seems to ignore the status bar so we have to manually increase the y origin. in the end, the screen needs to be shrunk 10 pix (net increase 1 pix) and shifted down 20 pix, 
-    CGRect frame = self.view.frame;
-    frame.size.height += 1; // cannot be 0 because then status bar shift doesn't occur
-    frame.origin.y += STATUS_BAR_SHIFT_OVERLAY;
-    [self.view setFrame:frame];
-     
+    }      
     [self addButtonWithImage:[UIImage imageNamed:@"tab_feed"] highlightImage:[UIImage imageNamed:@"tab_feed_on"] atPosition:TABBAR_BUTTON_FEED];
     [self addButtonWithImage:[UIImage imageNamed:@"tab_popular"] highlightImage:[UIImage imageNamed:@"tab_popular_on"] atPosition:TABBAR_BUTTON_EXPLORE];
     [self addButtonWithImage:[UIImage imageNamed:@"tab_newsletter"] highlightImage:[UIImage imageNamed:@"tab_newsletter_on"] atPosition:TABBAR_BUTTON_NEWS];
@@ -65,9 +55,9 @@
     
     button[pos] = [UIButton buttonWithType:UIButtonTypeCustom];
     button[pos].autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-    button[pos].frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
-    NSLog(@"Button %d size: %f %f image %x %f %f", pos, buttonImage.size.width, buttonImage.size.height, buttonImage, buttonImage.size.width, buttonImage.size.height);
+    button[pos].frame = CGRectMake(0, 0, ceil(buttonImage.size.width), ceil(buttonImage.size.height));
     [button[pos] setBackgroundColor:[UIColor blackColor]];
+    //NSLog(@"Button %d: image size %f %f frame %f %f %f %f", pos, buttonImage.size.width, buttonImage.size.height, button[pos].frame.origin.x, button[pos].frame.origin.y, button[pos].frame.size.width, button[pos].frame.size.height);
     bgNormal[pos] = buttonImage;
     bgSelected[pos] = highlightImage;
     [button[pos] setBackgroundImage:bgNormal[pos] forState:UIControlStateNormal];
@@ -75,15 +65,25 @@
         [button[pos] setBackgroundImage:bgSelected[pos] forState:UIControlStateHighlighted];
 
     CGPoint center;
-    if (pos < TABBAR_BUTTON_TAG) {
-        center = CGPointMake(BUTTON_WIDTH * pos + BUTTON_WIDTH/2, 480-(BUTTON_HEIGHT/2));
-        NSLog(@"Center %d: %f %f", pos, center.x, center.y);
+    NSLog(@"Self.frame size: %f %f", self.view.frame.size.width, self.view.frame.size.height);
+    float height = self.view.frame.size.height;
+    if (pos == TABBAR_BUTTON_FEED) {
+        center = CGPointMake(BUTTON_WIDTH * pos + ceil(BUTTON_WIDTH/2.0), height-ceil(BUTTON_HEIGHT/2.0));
     }
-    if (pos > TABBAR_BUTTON_TAG) {
-        center = CGPointMake(320 - BUTTON_WIDTH * (TABBAR_BUTTON_MAX - pos) + BUTTON_WIDTH/2, 480 - (BUTTON_HEIGHT/2));
+    else if (pos == TABBAR_BUTTON_EXPLORE) {
+        center = CGPointMake(BUTTON_WIDTH * pos + ceil(BUTTON_WIDTH/2.0), height-ceil(BUTTON_HEIGHT/2.0));
+    }
+    else if (pos == TABBAR_BUTTON_NEWS) {
+        center = CGPointMake(320 - BUTTON_WIDTH * (TABBAR_BUTTON_MAX - pos) + ceil(BUTTON_WIDTH/2.0), height - ceil(BUTTON_HEIGHT/2.0));
+    }
+    else if (pos == TABBAR_BUTTON_PROFILE) {
+        center = CGPointMake(320 - BUTTON_WIDTH * (TABBAR_BUTTON_MAX - pos) + ceil(BUTTON_WIDTH/2.0), height - ceil(BUTTON_HEIGHT/2.0));
     }
     if (pos == TABBAR_BUTTON_TAG) 
-        center = CGPointMake(160, 480 - (BUTTON_HEIGHT/2));
+        center = CGPointMake(161, 480 - (BUTTON_HEIGHT/2));
+    
+    center.y -= TABBAR_BUTTON_DIFF_PX - 1;
+
     button[pos].center = center;
     [button[pos] setTag:pos];
     [button[pos] addTarget:self
@@ -94,8 +94,29 @@
     [self.view addSubview:button[pos]];
 }
 
+-(void)setHeaderForTab:(int)pos {
+    UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+    
+    if (pos == TABBAR_BUTTON_EXPLORE) {
+        UIImage * img = [UIImage imageNamed:@"txt_stixstergallery"];
+        [logo setImage:img];
+        [logo setFrame:CGRectMake(0, 0, img.size.width, img.size.height)];
+        [logo setCenter:self.navigationController.navigationBar.center];
+    }
+    else if (pos == TABBAR_BUTTON_NEWS) {
+        UIImage * img = [UIImage imageNamed:@"txt_newsletter"];
+        [logo setImage:img];
+        [logo setFrame:CGRectMake(0, 0, img.size.width, img.size.height)];
+        [logo setCenter:self.navigationController.navigationBar.center];
+    }
+    else if (pos == TABBAR_BUTTON_PROFILE) {
+        
+    }
+    [self.navigationItem setTitleView:logo];
+}
+
 -(void)didGetProfilePhoto:(UIImage *)photo {
-    CGPoint center = CGPointMake(320/2, 480-(BUTTON_HEIGHT/2)-20);
+    CGPoint center = CGPointMake(320/2, 480-(BUTTON_HEIGHT/2));
     CGRect buttonFrame = button[TABBAR_BUTTON_PROFILE].frame;
     int width = buttonFrame.size.width;
     buttonFrame.size.height -= 10;
@@ -285,7 +306,7 @@
 */
 -(IBAction)didPressTabButton:(id)sender {
     UIButton * pressedButton = sender;
-    [self.myDelegate didPressTabButton:pressedButton.tag];
+    [myDelegate didPressTabButton:pressedButton.tag];
 }
 
 // these functions are called by the app delegate - when the tabbar state changes
@@ -310,9 +331,8 @@
     [self.view addSubview:firstTimeInstructions];
     [self toggleFirstTimeInstructions:NO];
 #else
-    firstTimeInstructions = [[UIButton alloc] init];
-    [firstTimeInstructions addTarget:self action:@selector(closeInstructions:) forControlEvents:UIControlEventTouchUpInside];
-    [firstTimeInstructions setAdjustsImageWhenHighlighted:NO];
+    firstTimeInstructions = [[UIImageView alloc] init];
+    [firstTimeInstructions setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:firstTimeInstructions];
     firstTimeInstructionsLabel = [[UILabel alloc] init];
     [firstTimeInstructionsLabel setTextColor:[UIColor whiteColor]];
@@ -321,6 +341,11 @@
     //[firstTimeInstructionsLabel setOutlineColor:[UIColor blackColor]];
     [firstTimeInstructionsLabel setFont:[UIFont boldSystemFontOfSize:15]];
     [firstTimeInstructions addSubview:firstTimeInstructionsLabel];
+    firstTimeInstructionsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [firstTimeInstructionsButton setBackgroundColor:[UIColor clearColor]];
+    [firstTimeInstructionsButton setAdjustsImageWhenHighlighted:NO];
+    [firstTimeInstructionsButton addTarget:self action:@selector(closeInstructions:forEvent:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:firstTimeInstructionsButton];
     
     //[self toggleFirstTimeInstructions:NO];
 #endif
@@ -342,9 +367,39 @@
         [self performSelector:@selector(reshowFirstTimeInstructions:) withObject:lastStage afterDelay:5];
 }
 
--(IBAction)closeInstructions:(id)sender {
-    [self toggleFirstTimeInstructions:NO];
-    //instructionsDismissed = YES;
+-(void)closeInstructions:(id)sender forEvent:(UIEvent*)event{
+
+    // must make sure frame does not cover something else
+    /*
+     // only trigger if actually touched graphic
+    UIView *_button = (UIView *)sender;
+    UITouch *touch = [[event touchesForView:_button] anyObject];
+    CGPoint location = [touch locationInView:_button];
+
+    BOOL isForeground = NO;
+    int dx=0;
+    int dy=0;
+    unsigned char pixel[1] = {0};
+    CGContextRef context = CGBitmapContextCreate(pixel, 
+                                                 1, 1, 8, 1, NULL,
+                                                 kCGImageAlphaOnly);
+    UIGraphicsPushContext(context);
+    UIImage * im = firstTimeInstructions.imageView.image;
+    CGSize size = im.size;
+    float scale = size.width / _button.frame.size.width;
+    location.x *= scale; // convert to the UIImage size
+    location.y *= scale; 
+    [im drawAtPoint:CGPointMake(-location.x + dx, -location.y + dy)];
+    UIGraphicsPopContext();
+    CGContextRelease(context);
+    CGFloat alpha = pixel[0]/255.0;
+    BOOL thisTransparent = alpha < 0.1;
+    if (!thisTransparent) {
+        isForeground = YES;
+    }
+    if (isForeground)
+     */
+        [self toggleFirstTimeInstructions:NO];
 }
 
 -(void)toggleFirstTimeInstructions:(BOOL)showInstructions {
@@ -355,7 +410,9 @@
     
     if (showInstructions) {
 //        [animation doViewTransition:firstTimeInstructions toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {}];
-        [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {}];
+        [animation doFadeIn:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            [firstTimeInstructionsButton setHidden:NO];
+        }];
     }
     else {
 //        [animation doViewTransition:firstTimeInstructions toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {}];
@@ -363,6 +420,7 @@
         NSNumber * dismissedStage = [NSNumber numberWithInt:[myDelegate getFirstTimeUserStage]];
         NSLog(@"Hiding first time instructions at stage %d", [myDelegate getFirstTimeUserStage]);
         [animation doFadeOut:firstTimeInstructions forTime:.5 withCompletion:^(BOOL finished) {
+            [firstTimeInstructionsButton setHidden:YES];
             [self performSelector:@selector(reshowFirstTimeInstructions:) withObject:dismissedStage afterDelay:FTUE_REDISPLAY_TIMER];
         }];
     }
@@ -388,11 +446,12 @@
                 [self addFirstTimeInstructions];
             //UIImage * img1 = [UIImage imageNamed:@"firsttime_message_01.png"];
             UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
-            firstTimeInstructionsFrame = CGRectMake(60, 330, img.size.width+25, img.size.height+20);
+            firstTimeInstructionsFrame = CGRectMake(60, 370, img.size.width+25, img.size.height);
             [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
-            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructions setImage:img];// forState:UIControlStateNormal];
             [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             [firstTimeInstructionsLabel setText:@"Take your first Pix"];
+            [firstTimeInstructionsButton setFrame:CGRectMake(firstTimeInstructionsFrame.origin.x, firstTimeInstructionsFrame.origin.y,firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             //pointerWasDismissed = NO;
             // end old one
             //[self toggleFirstTimeInstructions:NO];
@@ -428,19 +487,13 @@
                 [self addFirstTimeInstructions];
             //UIImage * img3 = [UIImage imageNamed:@"firsttime_message_03.png"];
             UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout_side"];
-            firstTimeInstructionsFrame = CGRectMake(135, 330, img.size.width+25, img.size.height+20);
+            firstTimeInstructionsFrame = CGRectMake(135, 370, img.size.width+25, img.size.height);
             [firstTimeInstructions setFrame:firstTimeInstructionsFrame];
-            [firstTimeInstructions setImage:img forState:UIControlStateNormal];
+            [firstTimeInstructions setImage:img];// forState:UIControlStateNormal];
             [firstTimeInstructionsLabel setFrame:CGRectMake(0, 0, firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             [firstTimeInstructionsLabel setText:@"Find your Friends"];
-            //pointerWasDismissed = NO;
-            // end old one
-            //[self toggleFirstTimeInstructions:NO];
-            //[self toggleFirstTimePointer:NO atStage:firstTimeUserStage];
-            // start new one
+            [firstTimeInstructionsButton setFrame:CGRectMake(firstTimeInstructionsFrame.origin.x, firstTimeInstructionsFrame.origin.y,firstTimeInstructionsFrame.size.width, firstTimeInstructionsFrame.size.height-30)];
             [self toggleFirstTimeInstructions:YES];
-            //[self toggleFirstTimePointer:YES atStage:firstTimeUserStage];
-            //instructionsDismissed = NO;
         }
             break;
             

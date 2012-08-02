@@ -23,6 +23,7 @@
 #import "StixAnimation.h"
 #import "StixEditorViewController.h"
 #import "GlobalHeaders.h"
+#import "DetailViewController.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -36,7 +37,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 
 - (bool) isLoggedIn;
@@ -62,9 +63,10 @@
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 -(BOOL)isFollowing:(NSString*)name;
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString;
 
 -(void)shouldDisplayUserPage:(NSString*)name;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 
 -(void)checkAggregatorStatus; // debug
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
@@ -219,7 +221,7 @@
 -(void)stopActivityIndicatorLarge;
 
 -(void)didClickRemixFromDetailView:(Tag*)tag;
--(void)unlockProfile;
+//-(void)unlockProfile;
 -(void)agitatePointer;
 @end
 

@@ -16,7 +16,6 @@
 @implementation StixUsersViewController
 
 @synthesize buttonBack, buttonAll;
-@synthesize logo;
 @synthesize tableView;
 @synthesize delegate;
 @synthesize userButtons, userPhotos;
@@ -28,7 +27,15 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-    }
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];    }
     return self;
 }
 
@@ -52,27 +59,31 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-//-(void)viewWillAppear:(BOOL)animated {
-//    [super viewWillAppear:animated];
-//    [self setLogoWithMode:mode];
-//}
-
--(void)setLogoWithMode:(int)_mode {
-    // happens before viewWillAppear
-    mode = _mode;
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    UIImageView * logo;
     if (mode == PROFILE_SEARCHMODE_FIND) {
-        [logo setImage:[UIImage imageNamed:@"txt_findfriends"]];
-        [logo setFrame:CGRectMake(108, 12, 105, 25)];
+        logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_findfriends"]];
+    }
+    else if (mode == PROFILE_SEARCHMODE_INVITE) {
+        logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_invitefriends"]];
+    }
+    else if (mode == PROFILE_SEARCHMODE_SEARCHBAR) {
+        logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_findfriends"]];
+    }
+    [self.navigationItem setTitleView:logo];
+//    [self setLogoWithMode:mode];
+    UIImage * image;
+    if (mode == PROFILE_SEARCHMODE_FIND) {
+        image = [UIImage imageNamed:@"txt_findfriends"];
         [buttonAll setImage:[UIImage imageNamed:@"btn_followall"] forState:UIControlStateNormal];
     }
     else if (mode == PROFILE_SEARCHMODE_INVITE) {
-        [logo setImage:[UIImage imageNamed:@"txt_invitefriends"]];
-        [logo setFrame:CGRectMake(103, 12, 115, 25)];
+        image = [UIImage imageNamed:@"txt_invitefriends"];
         [buttonAll setImage:[UIImage imageNamed:@"btn_inviteall"] forState:UIControlStateNormal];
     }
     else if (mode == PROFILE_SEARCHMODE_SEARCHBAR) {
-        [logo setImage:[UIImage imageNamed:@"logo"]];
-        [logo setFrame:CGRectMake(131, 2, 59, 38)];
+        image = [UIImage imageNamed:@"logo"];
         [buttonAll setImage:[UIImage imageNamed:@"btn_followall"] forState:UIControlStateNormal];
     }
     
@@ -81,7 +92,7 @@
     [tableView setHidden:NO];
     [noFriendsLabel setHidden:YES];
     [noFriendsButton setHidden:YES];
-    if ([delegate getNumOfUsers] < 0) {
+    if ([delegate getNumOfUsers] < 1) {
         // no results
         [noFriendsLabel setHidden:NO];
         [noFriendsButton setHidden:NO];
@@ -89,6 +100,11 @@
         [buttonAll setEnabled:NO];
         [tableView setHidden:YES];
     }
+}
+
+-(void)setLogoWithMode:(int)_mode {
+    // happens before viewWillAppear
+    mode = _mode;
 }
 
 #pragma mark - Table view data source
@@ -170,30 +186,6 @@
     for (UIView * subview in cell.imageView.subviews) {
         [subview removeFromSuperview];
     }
-    /*
-    if ([userPhotos objectForKey:username] == nil) {
-        UIImage * photo = [delegate getUserPhotoForUserAtIndex:y];
-        if (!photo)
-            photo = [UIImage imageNamed:@"graphic_nopic.png"];
-        CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
-        UIGraphicsBeginImageContext(newSize);
-        [photo drawInRect:CGRectMake(3, 4, ROW_HEIGHT-6, ROW_HEIGHT-6)];	
-        
-        // add border
-        CGContextRef ctx = UIGraphicsGetCurrentContext();
-        CGContextSetLineWidth(ctx, 1);
-        CGContextSetRGBStrokeColor(ctx, 0,0,0, 1.000);
-        
-        CGRect borderRect = CGRectMake(3, 4, ROW_HEIGHT-6, ROW_HEIGHT-6);
-        CGContextStrokeRect(ctx, borderRect);
-        
-        UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();	
-        [userPhotos setObject:imageView forKey:username];
-    }
-     //UIImage * userPhoto = [userPhotos objectForKey:username];
-     //[cell.imageView setImage:userPhoto];
-     */
 
     UIImage * photo = [delegate getUserPhotoForUserAtIndex:y];
     UIButton * photoView = (UIButton*)[cell viewWithTag:PHOTO_TAG]; // + index];
@@ -263,7 +255,8 @@
 -(IBAction)didClickBackButton:(id)sender {
     NSLog(@"Clicked BACK Button!");
 //    [self.view removeFromSuperview];
-    [self.view setHidden:YES];
+//    [self.view setHidden:YES];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(IBAction)didClickAllButton:(id)sender {

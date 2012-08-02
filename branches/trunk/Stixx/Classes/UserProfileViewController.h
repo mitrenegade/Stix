@@ -16,12 +16,13 @@
 #import "SMWebRequest.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
-#import "DetailViewController.h"
+//#import "DetailViewController.h"
 #import "StixAnimation.h"
 #import "ColumnTableController.h"
 #import "KumulosHelper.h"
 #import "FlurryAnalytics.h"
 #import "GlobalHeaders.h"
+#import "StixView.h"
 
 @protocol UserProfileViewDelegate
 
@@ -29,19 +30,19 @@
 - (UIImage *)getUserPhotoForUsername:(NSString*)username;
 -(NSMutableSet*)getFollowingList;
 
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 -(void)shouldDisplayUserPage:(NSString*)username;
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(NSMutableDictionary *) getUserPhotos;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+-(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate, FriendSearchResultsDelegate>{
     
     Kumulos * k;
-    IBOutlet UIButton * logo;
         
     int userHistoryCount;
     int userCommentCount;
@@ -67,8 +68,7 @@
     NSMutableSet * allFollowing;
     
     int pendingContentCount;
-    IBOutlet UIScrollView * scrollView;
-
+    UIScrollView * scrollView;
 }
 
 @property (nonatomic) UIImageView * photoButton;
@@ -87,9 +87,9 @@
 @property (nonatomic) OutlineLabel * myFollowingLabel;
 @property (nonatomic) ColumnTableController * pixTableController;
 @property (nonatomic) UIView * headerView;
-@property (nonatomic) DetailViewController * detailController;
-@property (nonatomic) FriendSearchResultsController * searchResultsController;
-@property (nonatomic) IBOutlet UIScrollView * scrollView;
+//@property (nonatomic) DetailViewController * detailController;
+//@property (nonatomic) FriendSearchResultsController * searchResultsController;
+@property (nonatomic) UIScrollView * scrollView;
 
 -(void)populateUserInfo;
 -(void)populateFollowCounts;

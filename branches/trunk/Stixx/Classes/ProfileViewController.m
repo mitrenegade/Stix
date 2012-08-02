@@ -133,7 +133,7 @@
 }
 
 -(void)reloadSuggestions {
-    [self initializeSuggestions];
+    //[self initializeSuggestions];
 }
 
 -(void)initializeSuggestions {
@@ -828,10 +828,13 @@
         [suggestedFriends removeObjectAtIndex:row];
     }
     [self followUser:name];
-    
+
+#if 0
     if ([suggestedFeatured count] == 0 || [suggestedFriends count] == 0) {
         [self initializeHeaderViews];
     }
+#endif
+    [friendsTableView.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     if ([suggestedFriends count] + [suggestedFeatured count] == 0) {
         //[friendsTableView.tableView removeFromSuperview];
         [friendsTableView.view setHidden:YES];

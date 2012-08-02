@@ -43,7 +43,7 @@ static int tickID;
     }
     return self;
 }
-/*
+
 -(void)initializeTable
 {
     // We need to do some setup once the view is visible. This will only be done once.

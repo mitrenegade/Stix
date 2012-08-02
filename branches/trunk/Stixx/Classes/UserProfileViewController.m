@@ -162,7 +162,6 @@
     
     [self populateUserInfo];
     [self populateFollowCounts];
-    //[self updateStixCounts];
     
     NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
     if (![lastUsername isEqualToString:username]) {
@@ -173,6 +172,7 @@
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
     [pixTableController.view removeFromSuperview];
     //[self.view addSubview:pixTableController.view];
+    [self.scrollView setFrame:CGRectMake(0, 44, 320, 460-44)];
     [self.scrollView addSubview:pixTableController.view];
     [self.scrollView addSubview:headerView];
     [scrollView setBackgroundColor:[UIColor clearColor]];
@@ -236,6 +236,7 @@
     float headerHeight = headerView.frame.size.height;
     CGRect frame = CGRectMake(0,headerHeight, 320, 460-44);
     [pixTableController.view setFrame:frame];
+    [pixTableController.tableView setScrollEnabled:NO];
 
     [bgFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
     [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
@@ -285,6 +286,8 @@
         [delegate setFollowing:username toState:YES];
         [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
     }
+    // force profile update
+    [delegate didChangeFriendsFromUserProfile];
 }
 
 -(void)didSelectUserProfile:(int)index {
@@ -507,7 +510,6 @@
 -(void)didPullToRefresh {
     [self forceReloadAll];
     [self updateFollowCounts];
-    [self updateStixCounts];
 }
 
 #pragma mark KumulosDelegate functions
@@ -528,8 +530,10 @@
         [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
 #endif
         pendingContentCount--;
-        if (pendingContentCount <= 0)
-            pendingContentCount = 0;            
+        if (pendingContentCount <= 0) {
+            [self resizeContentView];
+            pendingContentCount = 0;   
+        }
         
         //NSLog(@"MyUserGallery recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
     }
@@ -580,6 +584,38 @@
         [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:tagID];
         [pixTableController.tableView reloadData];
         return;
+    }
+}
+
+-(void)resizeContentView {
+    int rows = [self numberOfRows];
+    float newHeight = [pixTableController getContentHeight] * rows;
+    [pixTableController.view setFrame:CGRectMake(pixTableController.view.frame.origin.x, pixTableController.view.frame.origin.y, pixTableController.view.frame.size.width, newHeight)];
+    CGSize newContentSize = CGSizeMake(scrollView.frame.size.width, pixTableController.view.frame.origin.y + pixTableController.view.frame.size.height);
+    [scrollView setContentSize:newContentSize];
+    if (rows > 3)
+        [scrollView setScrollEnabled:YES];
+    else {
+        [scrollView setScrollEnabled:NO];
+    }
+    NSLog(@"New user gallery scroll content size: %f %f number of rows %d table height %f", newContentSize.width, newContentSize.height, rows, newHeight);
+}
+
+-(void)didReachLastRow {
+    // do nothing - this will always be called because the ColumnTable view is resized
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    // check if scrollview didReachBottom / didViewLastRow
+    float viewOfBottom = [scrollView contentOffset].y + scrollView.frame.size.height;
+    NSLog(@"content offset: %f height: %f", [scrollView contentOffset].y, scrollView.frame.size.height);
+    float threshold = pixTableController.tableView.frame.origin.y + pixTableController.tableView.frame.size.height - 3 * [pixTableController getContentHeight];
+    NSLog(@"Currently viewing content at offset %f, with threshold %f origin %f height %f", viewOfBottom, threshold, pixTableController.tableView.frame.origin.y, pixTableController.tableView.frame.size.height);
+    // check to see if we are looking at the content of the last row
+    if (threshold < 0)
+        return;
+    if (viewOfBottom > threshold) {
+        [self loadContentPastRow:[self numberOfRows]];
     }
 }
 

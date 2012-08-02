@@ -36,6 +36,7 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(NSMutableDictionary *) getUserPhotos;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
+-(void)didChangeFriendsFromUserProfile;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, DetailViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate>{
@@ -94,7 +95,6 @@
 -(void)populateUserInfo;
 -(void)populateFollowCounts;
 -(void)updateFollowCounts;
--(void)updateStixCounts;
 -(IBAction)didClickAddFriendButton:(id)sender;
 -(void)forceReloadAll;
 -(void)populateFollowersList;

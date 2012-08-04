@@ -94,7 +94,7 @@
 #pragma mark activityindicator
 -(void)startActivityIndicatorLarge {
     if (!activityIndicatorLarge) {
-        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 220, 90, 90)];
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 250, 90, 90)];
         [self.view addSubview:activityIndicatorLarge];
     }
     [activityIndicatorLarge startCompleteAnimation];
@@ -366,6 +366,8 @@
         [twHelper setHelperDelegate:self];
         [twHelper getMyCredentials];
         waitingForTwitter = YES;
+        
+        [delegate didConnectToTwitter];
     }
     else 
         NSLog(@"After login still not working!");
@@ -704,11 +706,15 @@
 -(void)twitterHelperStartedInitialConnect {
     // nothing needs to be done here
 }
--(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params {
+-(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params andRequestType:(NSString *)requestType {
     // will be sent back by twitterHelper 
     NSNumber * _service = params;
-    NSLog(@"connecting to twitter from friendServices worked! params: %@", _service);
+    NSLog(@"connecting to twitter from friendServices worked! params: service %@ requestType %@", _service, requestType);
     [self performSelector:callback withObject:_service afterDelay:0];
+    
+    // called under didInitialLoginForTwitter insteadl
+    //if ([requestType isEqualToString:@"getTwitterCredentials"])   
+    //    [delegate didConnectToTwitter];
 }
 -(void)twitterHelperDidFailWithRequestType:(NSString *)requestType {
     if ([requestType isEqualToString:@"directMessage"]) {

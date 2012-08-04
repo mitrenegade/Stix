@@ -88,6 +88,9 @@
     [self.headerView addSubview:myFollowersCount];
 
     [self toggleMyButtons:YES];
+    
+    indexPointer = 0;
+    pendingContentCount = 0;
 }
 
 -(void)toggleMyButtons:(BOOL)show {
@@ -161,6 +164,9 @@
         [pixTableController setNumberOfColumns:numColumns andBorder:4];
     }
     
+    indexPointer = 0;
+    pendingContentCount = 0;
+
     [self populateUserInfo];
     [self populateFollowCounts];
     
@@ -221,6 +227,7 @@
     if (![username isEqualToString:[delegate getUsername]]) {
         [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
         [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
+        [buttonAddFriend setHidden:NO];
         if ([[delegate getFollowingList] containsObject:username]) { 
             [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
         }
@@ -233,6 +240,7 @@
         [headerView setFrame:CGRectMake(0, 0, 320, 160)];
     }
     else {
+        [buttonAddFriend setHidden:YES];
         [headerView setFrame:CGRectMake(0, 0, 320, 160-44)];
     }
     float headerHeight = headerView.frame.size.height;
@@ -364,8 +372,9 @@
 #pragma mark ColumnTableController delegate
 -(int)numberOfRows {
     double total = [allTagIDs count];
-    //NSLog(@"allTagIDs has %d items", total);
-    return ceil(total / numColumns) + 1;
+    double rows = ceil(total/numColumns);
+    NSLog(@"allTagIDs has %f items, returning %f rows", total, rows);
+    return (int)rows;
 }
 
 -(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key {
@@ -428,6 +437,10 @@
         [contentViews setObject:cview forKey:key];
     }
 #else
+    if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+        NSNumber * tagID = [allTagIDs objectAtIndex:index]; 
+        NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
+    }
     if ([contentViews objectForKey:key] == nil) {
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
         if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
@@ -483,18 +496,20 @@
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     if (row == -1) {// || row == 0) {
-        // load initial row(s)
-        NSDate * now = [NSDate date]; // now
-        [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:(numColumns*5)]];
-        pendingContentCount += numColumns * 5;
+        [k getUserPixCountWithUsername:username];
     }
     else {
-        NSNumber * tagID = [allTagIDs lastObject];
+        NSNumber * tagID = [allTagIDs objectAtIndex:indexPointer-1]; // start at previous index because the last allTagIDs in the array might still be null
         Tag * tag = [allTags objectForKey:tagID];
         NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
         //NSLog(@"lastUpdated: %@", lastUpdated);
-        [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:(numColumns*3)]];
-        pendingContentCount += numColumns * 3;
+        int numPix = MIN(numColumns*3, maxContentCount - indexPointer);
+        NSLog(@"Loading %d more pix, already loaded %d, total %d", numPix, indexPointer, maxContentCount);
+        [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:numPix]];
+        for (int i=0; i<numPix; i++)
+            [allTagIDs addObject:[NSNull null]];
+        pendingContentCount += numPix;
+        [pixTableController.tableView reloadData];
     }
 }
 
@@ -502,11 +517,14 @@
     [allTags removeAllObjects];
     [allTagIDs removeAllObjects];
     [contentViews removeAllObjects];
+    [placeholderViews removeAllObjects];
+    [isShowingPlaceholderView removeAllObjects];
+
+    pendingContentCount = 0;
+    indexPointer = 0;
     [pixTableController.tableView reloadData];
     [self loadContentPastRow:-1];
-    //isZooming = NO;
     [self startActivityIndicator];
-    //[activityIndicator startCompleteAnimation];
 }
 
 -(void)didPullToRefresh {
@@ -516,14 +534,26 @@
 
 #pragma mark KumulosDelegate functions
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+    NSLog(@"Received %d pix results", [theResults count]);
+    // todo: 
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
-        [allTagIDs addObject:newtag.tagID]; // save in order 
-        //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
-        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
-
+        //[allTagIDs addObject:newtag.tagID]; // save in order 
+        if ([allTags objectForKey:newtag.tagID] == nil) {
+            int newindex = indexPointer++;
+            if (newindex < [allTagIDs count]) {
+                [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+            }
+            else {
+                [allTagIDs addObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID];
+            }
+        }
+        
         // new system of auxiliary stix: request from auxiliaryStixes table
+        // even though we don't have aux stix, we need this to switch out of the placeholder
 #if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
         KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -531,19 +561,31 @@
 #else
         [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
 #endif
-        pendingContentCount--;
-        if (pendingContentCount <= 0) {
-            [self resizeContentView];
-            pendingContentCount = 0;   
-        }
         
-        //NSLog(@"MyUserGallery recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
+        // don't know why this happens but sometimes it does!
+        pendingContentCount--;
+        if (pendingContentCount < 0)
+            pendingContentCount = 0;
+        
+        //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
     }
     if ([theResults count]>0)
         [pixTableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
 }
 
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixCountDidCompleteWithResult:(NSNumber *)aggregateResult {
+    NSLog(@"User has %@ pix", aggregateResult);
+    maxContentCount = [aggregateResult intValue];
+    // load initial row(s)
+    NSDate * now = [NSDate date]; // now
+    int numPix = MIN(numColumns * 5, maxContentCount);
+    [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:numPix]];
+    for (int i=0; i<numPix; i++)
+        [allTagIDs addObject:[NSNull null]];
+    pendingContentCount += numPix;
+    [pixTableController.tableView reloadData];    
+}
 
 -(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
     NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
@@ -563,6 +605,7 @@
         if (key)
             [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
         [pixTableController.tableView reloadData];
+        [self resizeContentSize];
     }
 }
 
@@ -589,7 +632,7 @@
     }
 }
 
--(void)resizeContentView {
+-(void)resizeContentSize {
     int rows = [self numberOfRows];
     float newHeight = [pixTableController getContentHeight] * rows;
     [pixTableController.view setFrame:CGRectMake(pixTableController.view.frame.origin.x, pixTableController.view.frame.origin.y, pixTableController.view.frame.size.width, newHeight)];
@@ -835,6 +878,9 @@
 
 #pragma mark changing profile photo
 -(void)didClickPhotoButton {
+    // do not allow other profiles to be clickable
+    if (![[delegate getUsername] isEqualToString:[self username]])
+        return;
     [delegate didClickChangePhoto];
 }
 

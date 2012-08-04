@@ -69,7 +69,9 @@
     NSMutableSet * allFollowing;
     
     int pendingContentCount;
+    int indexPointer;
     IBOutlet UIScrollView * scrollView;
+    int maxContentCount;
 
 }
 

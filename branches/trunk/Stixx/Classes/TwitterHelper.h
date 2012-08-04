@@ -15,7 +15,7 @@
 @protocol TwitterHelperDelegate <NSObject>
 
 //-(void)twitterHelperDidConnect;
--(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params;
+-(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params andRequestType:(NSString*)requestType;
 -(int)getUserID;
 @optional
 -(void)twitterHelperStartedInitialConnect; 

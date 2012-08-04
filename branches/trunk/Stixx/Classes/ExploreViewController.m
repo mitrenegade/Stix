@@ -211,8 +211,8 @@ static NSMutableSet * retainedDetailControllers;
 }
 
 -(int)numberOfRows {
-    int total = [allTagIDs count];
-    //NSLog(@"allTagIDs has %d items, returning %d rows", total, total/numColumns);
+    float total = [allTagIDs count];
+    NSLog(@"allTagIDs has %f items, returning %f rows", total, total/numColumns);
     return total / numColumns;
 }
 

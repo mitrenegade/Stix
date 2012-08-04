@@ -244,8 +244,6 @@ struct UserInfo {
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_unsubscribeFromChannel:(NSString*)channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID;
-//-(void) Parse_unsubscribeFromAll;
--(void) Parse_sendNotificationToFollowers:(NSString*)message ofType:(int)type withTag:(NSNumber*)tagID;
 
 -(void) Parse_createSubscriptions;
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;

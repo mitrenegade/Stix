@@ -45,6 +45,7 @@
 -(void)shouldCloseUserPage;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didClickChangePhoto;
+-(void)didConnectToTwitter;
 @end
 
 @interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>

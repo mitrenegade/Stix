@@ -392,6 +392,9 @@
     didGetTwitterFriends = YES;
 }
 
+-(void)didConnectToTwitter {
+    [delegate didConnectToTwitter];
+}
 
 #pragma mark FriendSearchTableDelegate 
 -(int)friendsCount {

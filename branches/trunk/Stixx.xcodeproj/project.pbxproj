@@ -170,7 +170,6 @@
 		9E75E74114E721D90017DC3D /* check.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E75E74014E721D90017DC3D /* check.png */; };
 		9E75E74314E721F80017DC3D /* graphic_bux.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E75E74214E721F80017DC3D /* graphic_bux.png */; };
 		9E78A85E15B1E2E10000758E /* ProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E78A85C15B1E2E10000758E /* ProfileViewController.m */; };
-		9E78A85F15B1E2E10000758E /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E78A85D15B1E2E10000758E /* ProfileViewController.xib */; };
 		9E78A86815B1E8B30000758E /* FriendSearchTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E78A86615B1E8B30000758E /* FriendSearchTableViewController.m */; };
 		9E78A86915B1E8B30000758E /* FriendSearchTableViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E78A86715B1E8B30000758E /* FriendSearchTableViewController.xib */; };
 		9E78A86D15B1EF650000758E /* FriendSearchResultsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E78A86B15B1EF650000758E /* FriendSearchResultsController.m */; };
@@ -638,7 +637,6 @@
 		9E75E74214E721F80017DC3D /* graphic_bux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_bux.png; sourceTree = "<group>"; };
 		9E78A85B15B1E2E10000758E /* ProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileViewController.h; sourceTree = "<group>"; };
 		9E78A85C15B1E2E10000758E /* ProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileViewController.m; sourceTree = "<group>"; };
-		9E78A85D15B1E2E10000758E /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
 		9E78A86515B1E8B30000758E /* FriendSearchTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendSearchTableViewController.h; sourceTree = "<group>"; };
 		9E78A86615B1E8B30000758E /* FriendSearchTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendSearchTableViewController.m; sourceTree = "<group>"; };
 		9E78A86715B1E8B30000758E /* FriendSearchTableViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FriendSearchTableViewController.xib; sourceTree = "<group>"; };
@@ -1159,7 +1157,6 @@
 				9ED2452C152A6D6C003886CD /* UserProfileViewController.xib */,
 				9E78A85B15B1E2E10000758E /* ProfileViewController.h */,
 				9E78A85C15B1E2E10000758E /* ProfileViewController.m */,
-				9E78A85D15B1E2E10000758E /* ProfileViewController.xib */,
 				9E5D440915B4A830000C58F1 /* FriendServicesViewController.h */,
 				9E5D440A15B4A830000C58F1 /* FriendServicesViewController.m */,
 				9E5D440B15B4A830000C58F1 /* FriendServicesViewController.xib */,
@@ -2082,7 +2079,6 @@
 				9EDD0FA615B0C6C400EEBE0A /* txt_newsletter@2x.png in Resources */,
 				9EDD0FA715B0C6C400EEBE0A /* txt_stixstergallery.png in Resources */,
 				9EDD0FA815B0C6C400EEBE0A /* txt_stixstergallery@2x.png in Resources */,
-				9E78A85F15B1E2E10000758E /* ProfileViewController.xib in Resources */,
 				9E78A86915B1E8B30000758E /* FriendSearchTableViewController.xib in Resources */,
 				9E78A86E15B1EF650000758E /* FriendSearchResultsController.xib in Resources */,
 				9E78A87315B24B510000758E /* icon_profile_pix.png in Resources */,

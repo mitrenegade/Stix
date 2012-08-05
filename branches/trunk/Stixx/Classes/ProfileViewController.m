@@ -39,7 +39,12 @@
     [buttonsTableView.layer setCornerRadius:10];
     [buttonsTableView setBackgroundColor:[UIColor clearColor]];
     [buttonsTableView setScrollEnabled:NO];
-
+/*
+    buttonsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 480) style:UITableViewStyleGrouped];
+    [buttonsTableView setDelegate:self];
+    [buttonsTableView setDataSource:self];
+    [buttonAbout setHidden:YES];
+*/
     friendsTableView = [[FriendSearchTableViewController alloc] init];
     [friendsTableView setShowAccessoryButton:YES];
     [friendsTableView setDelegate:self];
@@ -115,10 +120,19 @@
     if ([headerViews objectAtIndex:1] == [NSNull null])
         NSLog(@"HeaderView 1 = null!");
     */
+    [self resizeContentSize];
+
+}
+
+-(void)resizeContentSize {
+    //[self initializeSuggestions];
+    
     int totalFriends = [suggestedFriends count] + [suggestedFeatured count];
     int newHeight = ROW_HEIGHT * (totalFriends) + HEADER_HEIGHT * [headerViews count];
     [friendsTableView.view setFrame:CGRectMake(friendsTableView.view.frame.origin.x, friendsTableView.view.frame.origin.y, friendsTableView.view.frame.size.width, newHeight)];
-    [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, friendsTableView.view.frame.origin.y + friendsTableView.view.frame.size.height)];
+    CGSize newContentSize = CGSizeMake(scrollView.frame.size.width, friendsTableView.view.frame.origin.y + friendsTableView.view.frame.size.height);
+    [scrollView setContentSize:newContentSize];
+    NSLog(@"New profile scroll content size: %f %f number of suggestions %d", newContentSize.width, newContentSize.height, totalFriends);
     if (totalFriends > 2)
         [scrollView setScrollEnabled:YES];
     else {
@@ -132,8 +146,9 @@
     [friendsTableView.tableView reloadData];
 }
 
--(void)reloadSuggestions {
-    //[self initializeSuggestions];
+-(void)reloadSuggestionsForOutsideChange {
+    [self initializeSuggestions];
+    //[friendsTableView.tableView reloadData];
 }
 
 -(void)initializeSuggestions {
@@ -268,9 +283,8 @@
     // first part is for the friend suggestion controller
     [suggestedFriends removeAllObjects];
     NSMutableSet * alreadyFollowing = [delegate getFollowingList];
-    NSLog(@"Already following: %d people", [alreadyFollowing count]);
     NSMutableArray * allFacebookStrings = [delegate getAllUserFacebookStrings];
-    NSLog(@"AllFacebookStrings %d", [allFacebookStrings count]);
+    NSLog(@"Already following: %d people: comparing with %d facebook Stix users", [alreadyFollowing count], [allFacebookStrings count]);
     for (NSMutableDictionary * d in facebookFriendArray) {
         NSString * _facebookString = [d valueForKey:@"id"];
         NSString * _facebookName = [d valueForKey:@"name"];
@@ -385,6 +399,9 @@
     didGetTwitterFriends = YES;
 }
 
+-(void)didConnectToTwitter {
+    [delegate didConnectToTwitter];
+}
 
 #pragma mark FriendSearchTableDelegate 
 -(int)friendsCount {
@@ -420,12 +437,49 @@
     return [headerViews objectAtIndex:section];
 }
 
+-(void)didSelectFriendSearchIndexPath:(NSIndexPath *)indexPath {
+    int section = indexPath.section;
+    int row = indexPath.row;
+    NSString * name;
+    if (section == 0) {
+        // featured
+        name = [suggestedFeatured objectAtIndex:row];
+        [suggestedFeatured removeObjectAtIndex:row];
+    }
+    else {
+        name = [suggestedFriends objectAtIndex:row];
+        [suggestedFriends removeObjectAtIndex:row];
+    }
+    NSLog(@"Profile now following user %@ at row %d - remaining friends %d featured %d", name, row, [suggestedFriends count], [suggestedFeatured count]);
+    [self followUser:name];
+    
+#if 0
+    if ([suggestedFeatured count] == 0 || [suggestedFriends count] == 0) {
+        [self initializeHeaderViews];
+    }
+#endif
+    [friendsTableView.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+
+    [self resizeContentSize];
+/*    
+    if ([suggestedFriends count] + [suggestedFeatured count] == 0) {
+        //[friendsTableView.tableView removeFromSuperview];
+        [friendsTableView.view setHidden:YES];
+    }
+    else {
+        [friendsTableView.tableView reloadData];
+    }
+ */
+}
+
+/*
 -(void)removeFriendAtRow:(int)row {
     // unlike FriendSuggestionController, friends here get removed from the list when they are added/followed
     [self followUser:[suggestedFriends objectAtIndex:row]];
 
-    if (row < [suggestedFriends count])
+    if (row < [suggestedFriends count]) {
         [suggestedFriends removeObjectAtIndex:row];
+    }
     if ([suggestedFriends count] == 0)
         [self initializeHeaderViews];
     
@@ -442,6 +496,8 @@
         [self initializeHeaderViews];
     
 }
+ */
+
 -(void)removeFriendsHeader {
     //[headerViews removeObjectAtIndex:SUGGESTIONS_SECTION_FRIENDS];
 }
@@ -814,37 +870,6 @@
 #endif
 }
 
--(void)didSelectFriendSearchIndexPath:(NSIndexPath *)indexPath {
-    int section = indexPath.section;
-    int row = indexPath.row;
-    NSString * name;
-    if (section == 0) {
-        // featured
-        name = [suggestedFeatured objectAtIndex:row];
-        [suggestedFeatured removeObjectAtIndex:row];
-    }
-    else {
-        name = [suggestedFriends objectAtIndex:row];
-        [suggestedFriends removeObjectAtIndex:row];
-    }
-    [self followUser:name];
-
-#if 0
-    if ([suggestedFeatured count] == 0 || [suggestedFriends count] == 0) {
-        [self initializeHeaderViews];
-    }
-#endif
-    [friendsTableView.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-    if ([suggestedFriends count] + [suggestedFeatured count] == 0) {
-        //[friendsTableView.tableView removeFromSuperview];
-        [friendsTableView.view setHidden:YES];
-    }
-    else {
-        [friendsTableView.tableView reloadData];
-    }
-}
-
-
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
 //    [buttonBack setHidden:YES];
@@ -868,6 +893,10 @@
             webView = nil;
         }];
     }
+}
+
+-(void)didClickChangePhoto {
+    [delegate didClickChangePhoto];
 }
 
 @end

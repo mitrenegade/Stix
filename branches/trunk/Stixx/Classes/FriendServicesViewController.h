@@ -38,9 +38,10 @@
 -(NSMutableArray*)getAllTwitterFriendNames;
 -(NSMutableArray*)getAllTwitterFriendScreennames;
 -(BOOL)hasTwitterFriends;
--(void)reloadSuggestions;
+-(void)reloadSuggestionsForOutsideChange;
 
 -(void)shouldDisplayUserPage:(NSString*)name;
+-(void)didConnectToTwitter;
 @end
 
 @interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate, TwitterHelperDelegate, UIAlertViewDelegate, FacebookHelperDelegate>

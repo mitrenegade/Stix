@@ -309,7 +309,8 @@ static ShareController *sharedShareController;
     NSData *png = UIImagePNGRepresentation(result);
     [self setImage:result];
     [self setPNG:png];
-    [self setTag:_tag];
+    if (_tag)
+        [self setTag:_tag];
     [self setDelegate:_delegate];
     [self uploadImage:png];
 

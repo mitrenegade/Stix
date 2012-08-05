@@ -11,6 +11,8 @@
 #import "GlobalHeaders.h"
 #import "FlurryAnalytics.h"
 #import "FriendSearchTableViewController.h"
+#import "LoadingAnimationView.h"
+#import "KumulosHelper.h"
 
 @protocol FriendSuggestionDelegate <NSObject>
 
@@ -25,7 +27,7 @@
 -(void)didGetFeaturedUsers:(NSArray*)featured;
 @end
 
-@interface FriendSuggestionController : UIViewController  <FriendSearchTableDelegate, KumulosDelegate>
+@interface FriendSuggestionController : UIViewController  <FriendSearchTableDelegate, KumulosDelegate, KumulosHelperDelegate>
 {    
     NSObject<FriendSuggestionDelegate>* __unsafe_unretained delegate;
     
@@ -44,6 +46,8 @@
     NSMutableDictionary * userPhotos;
     Kumulos * k;
     
+    LoadingAnimationView * activityIndicatorLarge;
+    
     NSMutableArray * headerViews;
     
     BOOL didGetFeaturedUsers;
@@ -55,6 +59,9 @@
 @property (nonatomic) IBOutlet UIButton * buttonEdit;
 @property (nonatomic) IBOutlet UIButton * buttonNext;
 @property (nonatomic) IBOutlet UIButton * refresh;
+
+-(void)startActivityIndicatorLarge;
+-(void)stopActivityIndicatorLarge;
 
 -(IBAction)didClickButtonEdit:(id)sender;
 -(IBAction)didClickButtonNext:(id)sender;

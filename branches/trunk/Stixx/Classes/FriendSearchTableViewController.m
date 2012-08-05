@@ -21,6 +21,7 @@
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
     }
     return self;
 }
@@ -240,11 +241,14 @@
     int row = [indexPath row];
     NSLog(@"Deleting row at section %d index %d", section, row);
     
+    // should only be for friendSuggestionsController
     if (section == SUGGESTIONS_SECTION_FRIENDS) {
-        [delegate removeFriendAtRow:row];
+        if ([delegate respondsToSelector:@selector(removeFriendAtRow:)])
+            [delegate removeFriendAtRow:row];
     }
     else if (section == SUGGESTIONS_SECTION_FEATURED) {
-        [delegate removeFeaturedAtRow:row];
+        if ([delegate respondsToSelector:@selector(removeFeaturedAtRow:)])
+            [delegate removeFeaturedAtRow:row];
     }
     [_tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     /*
@@ -259,11 +263,9 @@
             [delegate didDeleteAllEntries];
     }
 }
-
-#pragma mark - Table view delegate
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // only for ProfileController
     if (showAccessoryButton) {
         [delegate didSelectFriendSearchIndexPath:indexPath];
     }

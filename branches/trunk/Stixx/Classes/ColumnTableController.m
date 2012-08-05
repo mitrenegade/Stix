@@ -81,6 +81,10 @@
     return columnWidth;
 }
 
+-(float)getContentHeight {
+    return (columnHeight + columnPadding);
+}
+
 - (void)viewDidUnload
 {
     [super viewDidUnload];

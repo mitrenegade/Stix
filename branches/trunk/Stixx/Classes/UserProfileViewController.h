@@ -37,7 +37,8 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 -(NSMutableDictionary *) getUserPhotos;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
--(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
+-(void)didChangeFriendsFromUserProfile;
+-(void)didClickChangePhoto;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate, FriendSearchResultsDelegate>{
@@ -68,10 +69,13 @@
     NSMutableSet * allFollowing;
     
     int pendingContentCount;
-    UIScrollView * scrollView;
+    int indexPointer;
+    IBOutlet UIScrollView * scrollView;
+    int maxContentCount;
+
 }
 
-@property (nonatomic) UIImageView * photoButton;
+@property (nonatomic) UIButton * photoButton;
 @property (nonatomic) UIButton * buttonAddFriend;
 @property (nonatomic) UILabel * nameLabel;
 @property (nonatomic, copy) NSString * lastUsername;
@@ -94,11 +98,11 @@
 -(void)populateUserInfo;
 -(void)populateFollowCounts;
 -(void)updateFollowCounts;
--(void)updateStixCounts;
 -(IBAction)didClickAddFriendButton:(id)sender;
 -(void)forceReloadAll;
 -(void)populateFollowersList;
 -(void)populateFollowingList;
 -(void)toggleMyButtons:(BOOL)show;
+-(void)didChangeUserPhoto:(UIImage*)photo;
 
 @end

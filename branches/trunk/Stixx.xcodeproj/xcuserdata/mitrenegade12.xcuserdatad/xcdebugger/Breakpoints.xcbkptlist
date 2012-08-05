@@ -156,7 +156,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "578"
          endingLineNumber = "578"
-         landmarkName = "-khCallback_didGetAuxiliaryStixOfTag:"
+         landmarkName = "-didPullToRefresh"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -169,7 +169,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "572"
          endingLineNumber = "572"
-         landmarkName = "-khCallback_didGetAuxiliaryStixOfTag:"
+         landmarkName = "-forceReloadAll"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -824,7 +824,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "331"
          endingLineNumber = "331"
-         landmarkName = "-getUserPhotoForUserAtIndex:"
+         landmarkName = "-didClickAddFriendButton:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -837,7 +837,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "178"
          endingLineNumber = "178"
-         landmarkName = "-getUserPhotoForUsername:"
+         landmarkName = "-didClickBackButton:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1058,7 +1058,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "283"
          endingLineNumber = "283"
-         landmarkName = "-updateFollowCounts"
+         landmarkName = "-populateUserInfo"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1656,8 +1656,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "822"
          endingLineNumber = "822"
-         landmarkName = "@implementation UserProfileViewController"
-         landmarkType = "3">
+         landmarkName = "-initSearchResultLists"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
@@ -1929,8 +1929,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "71"
          endingLineNumber = "71"
-         landmarkName = "-initializeHeaderViews"
-         landmarkType = "5">
+         landmarkName = "@implementation FriendSuggestionController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1955,7 +1955,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "62"
          endingLineNumber = "62"
-         landmarkName = "-initializeHeaderViews"
+         landmarkName = "-startActivityIndicatorLarge"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2458,7 +2458,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "743"
          endingLineNumber = "743"
-         landmarkName = "-didLogin"
+         landmarkName = "-inviteUser:withService:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2471,7 +2471,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "553"
          endingLineNumber = "553"
-         landmarkName = "-tableView:didSelectRowAtIndexPath:"
+         landmarkName = "-tableView:cellForRowAtIndexPath:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2484,8 +2484,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "797"
          endingLineNumber = "797"
-         landmarkName = "-showSearchFriends"
-         landmarkType = "5">
+         landmarkName = "@implementation ProfileViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -2588,7 +2588,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "170"
          endingLineNumber = "170"
-         landmarkName = "-kumulosAPI:apiOperation:getFeaturedUsersDidCompleteWithResult:"
+         landmarkName = "-khCallback_didGetFeaturedUsers:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -3316,7 +3316,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "687"
          endingLineNumber = "687"
-         landmarkName = "-didClickFollowingButton"
+         landmarkName = "-resizeContentSize"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -3329,7 +3329,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "364"
          endingLineNumber = "364"
-         landmarkName = "-addFriendFromList:"
+         landmarkName = "-didSelectUserProfile:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -3485,7 +3485,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "87"
          endingLineNumber = "87"
-         landmarkName = "-initializeSuggestions"
+         landmarkName = "-initializeHeaderViews"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -3498,8 +3498,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "212"
          endingLineNumber = "212"
-         landmarkName = "-didClickButtonRefresh:"
-         landmarkType = "5">
+         landmarkName = "@implementation FriendSuggestionController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"

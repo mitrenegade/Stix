@@ -62,7 +62,8 @@
     placeholderViews = [[NSMutableDictionary alloc] init];
     
     nameLabel = [[UILabel alloc] init];
-    photoButton = [[UIImageView alloc] init];//[[UIButton alloc] init];
+    photoButton = [[UIButton alloc] init];
+    [photoButton addTarget:self action:@selector(didClickPhotoButton) forControlEvents:UIControlEventTouchUpInside];
     buttonAddFriend = [[UIButton alloc] init];//buttonWithType:UIButtonTypeCustom];
     bgFollowing = [UIButton buttonWithType:UIButtonTypeCustom];
     [bgFollowing addTarget:self action:@selector(didClickFollowingButton) forControlEvents:UIControlEventTouchUpInside];
@@ -90,6 +91,12 @@
     [self.headerView addSubview:myFollowingCount];
     [self.headerView addSubview:myFollowersCount];
 
+#if 1
+    [self toggleMyButtons:YES];
+    
+    indexPointer = 0;
+    pendingContentCount = 0;
+#else
     //[self toggleMyButtons:YES];
 
     if (!pixTableController) {
@@ -118,6 +125,7 @@
     [self.scrollView addSubview:headerView];
     [scrollView setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:scrollView];
+#endif
 }
 
 /*
@@ -186,6 +194,34 @@
 }
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    if (!pixTableController) {
+        pixTableController = [[ColumnTableController alloc] init];
+        [pixTableController.view setBackgroundColor:[UIColor clearColor]];
+        pixTableController.delegate = self;
+//        [pixTableController setHasHeaderRow:YES];
+        numColumns = 3;
+        [pixTableController setNumberOfColumns:numColumns andBorder:4];
+    }
+    
+    indexPointer = 0;
+    pendingContentCount = 0;
+
+    [self populateUserInfo];
+    [self populateFollowCounts];
+    
+    NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
+    if (![lastUsername isEqualToString:username]) {
+        pendingContentCount = 0;
+        [self forceReloadAll];
+        [self setLastUsername:username];
+    }
+    [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
+    [pixTableController.view removeFromSuperview];
+    //[self.view addSubview:pixTableController.view];
+    [self.scrollView setFrame:CGRectMake(0, 44, 320, 460-44)];
+    [self.scrollView addSubview:pixTableController.view];
+    [self.scrollView addSubview:headerView];
+    [scrollView setBackgroundColor:[UIColor clearColor]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -222,13 +258,15 @@
 
     [photoButton setFrame:CGRectMake(5, 58-44, 90, 90)];
     UIImage * userPhoto = [delegate getUserPhotoForUsername:username];
-    [photoButton setImage:userPhoto];
+    [photoButton setImage:userPhoto forState:UIControlStateNormal];
     if (!userPhoto)
-        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"]];
+        [photoButton setImage:[UIImage imageNamed:@"graphic_nopic.png"] forState:UIControlStateNormal];
+    [photoButton.layer setBorderWidth:2];
 
     if (![username isEqualToString:[delegate getUsername]]) {
         [buttonAddFriend setFrame:CGRectMake(85, 160-44, 153, 44)];
         [buttonAddFriend setBackgroundColor:[UIColor clearColor]];
+        [buttonAddFriend setHidden:NO];
         if ([[delegate getFollowingList] containsObject:username]) { 
             [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
         }
@@ -241,11 +279,13 @@
         [headerView setFrame:CGRectMake(0, 0, 320, 160)];
     }
     else {
+        [buttonAddFriend setHidden:YES];
         [headerView setFrame:CGRectMake(0, 0, 320, 160-44)];
     }
     float headerHeight = headerView.frame.size.height;
     CGRect frame = CGRectMake(0,headerHeight, 320, 460-44);
     [pixTableController.view setFrame:frame];
+    [pixTableController.tableView setScrollEnabled:NO];
 
     [bgFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
     [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
@@ -295,6 +335,8 @@
         [delegate setFollowing:username toState:YES];
         [buttonAddFriend setImage:[UIImage imageNamed:@"btn_profile_following"] forState:UIControlStateNormal];
     }
+    // force profile update
+    [delegate didChangeFriendsFromUserProfile];
 }
 
 -(void)didSelectUserProfile:(int)index {
@@ -373,13 +415,14 @@
     else {
         // cannot invite!
     }
-    //[[searchResultsController tableView] reloadData];
+    [[pixTableController tableView] reloadData];
 }
 #pragma mark ColumnTableController delegate
 -(int)numberOfRows {
     double total = [allTagIDs count];
-    //NSLog(@"allTagIDs has %d items", total);
-    return ceil(total / numColumns) + 1;
+    double rows = ceil(total/numColumns);
+    NSLog(@"allTagIDs has %f items, returning %f rows", total, rows);
+    return (int)rows;
 }
 
 -(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key {
@@ -442,6 +485,10 @@
         [contentViews setObject:cview forKey:key];
     }
 #else
+    if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
+        NSNumber * tagID = [allTagIDs objectAtIndex:index]; 
+        NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
+    }
     if ([contentViews objectForKey:key] == nil) {
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
         if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
@@ -497,18 +544,20 @@
     [self startActivityIndicator];
     //[activityIndicator startCompleteAnimation];
     if (row == -1) {// || row == 0) {
-        // load initial row(s)
-        NSDate * now = [NSDate date]; // now
-        [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:(numColumns*5)]];
-        pendingContentCount += numColumns * 5;
+        [k getUserPixCountWithUsername:username];
     }
     else {
-        NSNumber * tagID = [allTagIDs lastObject];
+        NSNumber * tagID = [allTagIDs objectAtIndex:indexPointer-1]; // start at previous index because the last allTagIDs in the array might still be null
         Tag * tag = [allTags objectForKey:tagID];
         NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
         //NSLog(@"lastUpdated: %@", lastUpdated);
-        [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:(numColumns*3)]];
-        pendingContentCount += numColumns * 3;
+        int numPix = MIN(numColumns*3, maxContentCount - indexPointer);
+        NSLog(@"Loading %d more pix, already loaded %d, total %d", numPix, indexPointer, maxContentCount);
+        [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:numPix]];
+        for (int i=0; i<numPix; i++)
+            [allTagIDs addObject:[NSNull null]];
+        pendingContentCount += numPix;
+        [pixTableController.tableView reloadData];
     }
 }
 
@@ -516,29 +565,43 @@
     [allTags removeAllObjects];
     [allTagIDs removeAllObjects];
     [contentViews removeAllObjects];
+    [placeholderViews removeAllObjects];
+    [isShowingPlaceholderView removeAllObjects];
+
+    pendingContentCount = 0;
+    indexPointer = 0;
     [pixTableController.tableView reloadData];
     [self loadContentPastRow:-1];
-    //isZooming = NO;
     [self startActivityIndicator];
-    //[activityIndicator startCompleteAnimation];
 }
 
 -(void)didPullToRefresh {
     [self forceReloadAll];
     [self updateFollowCounts];
-    //[self updateStixCounts];
 }
 
 #pragma mark KumulosDelegate functions
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+    NSLog(@"Received %d pix results", [theResults count]);
+    // todo: 
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
-        [allTagIDs addObject:newtag.tagID]; // save in order 
-        //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d", [newtag.tagID intValue], [allTagIDs count]);
-        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
-
+        //[allTagIDs addObject:newtag.tagID]; // save in order 
+        if ([allTags objectForKey:newtag.tagID] == nil) {
+            int newindex = indexPointer++;
+            if (newindex < [allTagIDs count]) {
+                [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+            }
+            else {
+                [allTagIDs addObject:newtag.tagID];
+                [allTags setObject:newtag forKey:newtag.tagID];
+            }
+        }
+        
         // new system of auxiliary stix: request from auxiliaryStixes table
+        // even though we don't have aux stix, we need this to switch out of the placeholder
 #if 0
         NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
         KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -546,15 +609,30 @@
 #else
         [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
 #endif
-        pendingContentCount--;
-        if (pendingContentCount <= 0)
-            pendingContentCount = 0;            
         
-        //NSLog(@"MyUserGallery recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
+        // don't know why this happens but sometimes it does!
+        pendingContentCount--;
+        if (pendingContentCount < 0)
+            pendingContentCount = 0;
+        
+        //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
     }
     if ([theResults count]>0)
         [pixTableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixCountDidCompleteWithResult:(NSNumber *)aggregateResult {
+    NSLog(@"User has %@ pix", aggregateResult);
+    maxContentCount = [aggregateResult intValue];
+    // load initial row(s)
+    NSDate * now = [NSDate date]; // now
+    int numPix = MIN(numColumns * 5, maxContentCount);
+    [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:numPix]];
+    for (int i=0; i<numPix; i++)
+        [allTagIDs addObject:[NSNull null]];
+    pendingContentCount += numPix;
+    [pixTableController.tableView reloadData];    
 }
 
 -(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
@@ -575,6 +653,7 @@
         if (key)
             [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
         [pixTableController.tableView reloadData];
+        [self resizeContentSize];
     }
 }
 
@@ -601,6 +680,37 @@
     }
 }
 
+-(void)resizeContentSize {
+    int rows = [self numberOfRows];
+    float newHeight = [pixTableController getContentHeight] * rows;
+    [pixTableController.view setFrame:CGRectMake(pixTableController.view.frame.origin.x, pixTableController.view.frame.origin.y, pixTableController.view.frame.size.width, newHeight)];
+    CGSize newContentSize = CGSizeMake(scrollView.frame.size.width, pixTableController.view.frame.origin.y + pixTableController.view.frame.size.height);
+    [scrollView setContentSize:newContentSize];
+    if (rows > 3)
+        [scrollView setScrollEnabled:YES];
+    else {
+        [scrollView setScrollEnabled:NO];
+    }
+    NSLog(@"New user gallery scroll content size: %f %f number of rows %d table height %f", newContentSize.width, newContentSize.height, rows, newHeight);
+}
+
+-(void)didReachLastRow {
+    // do nothing - this will always be called because the ColumnTable view is resized
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    // check if scrollview didReachBottom / didViewLastRow
+    float viewOfBottom = [scrollView contentOffset].y + scrollView.frame.size.height;
+    NSLog(@"content offset: %f height: %f", [scrollView contentOffset].y, scrollView.frame.size.height);
+    float threshold = pixTableController.tableView.frame.origin.y + pixTableController.tableView.frame.size.height - 3 * [pixTableController getContentHeight];
+    NSLog(@"Currently viewing content at offset %f, with threshold %f origin %f height %f", viewOfBottom, threshold, pixTableController.tableView.frame.origin.y, pixTableController.tableView.frame.size.height);
+    // check to see if we are looking at the content of the last row
+    if (threshold < 0)
+        return;
+    if (viewOfBottom > threshold) {
+        [self loadContentPastRow:[self numberOfRows]];
+    }
+}
 
 #pragma kumulosHelper callback
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
@@ -634,7 +744,7 @@
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
     }];
 #else
-    [delegate shouldDisplayDetailViewWithTag:tag];
+    //[delegate shouldDisplayDetailViewWithTag:tag];
 #endif
 
 #if USING_FLURRY
@@ -820,5 +930,18 @@
         [delegate didClickRemixFromDetailViewWithTag:tagToRemix];
     }];
 }
-*/
+ */
+
+#pragma mark changing profile photo
+-(void)didClickPhotoButton {
+    // do not allow other profiles to be clickable
+    if (![[delegate getUsername] isEqualToString:[self username]])
+        return;
+    [delegate didClickChangePhoto];
+}
+
+-(void)didChangeUserPhoto:(UIImage *)photo {
+    [photoButton setImage:photo forState:UIControlStateNormal];
+    [photoButton.layer setBorderWidth:2];
+}
 @end

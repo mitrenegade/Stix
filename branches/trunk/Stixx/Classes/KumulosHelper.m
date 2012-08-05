@@ -124,6 +124,9 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSLog(@"KumulosHelper trying to getAuxiliaryStixOfTag for tagID %d", [tagID intValue]);
         kOp = [k getAllAuxiliaryStixWithTagID:[tagID intValue]];
     }
+    else if ([function isEqualToString:@"getFeaturedUsers"]) {
+        kOp = [k getFeaturedUsers];
+    }
     else if ([function isEqualToString:@"removeAuxiliaryStix"]) {
         NSNumber * tagID = [inputParams objectAtIndex:0];
         NSString * stixStringID = [inputParams objectAtIndex:1];
@@ -371,6 +374,13 @@ static KumulosHelper *sharedKumulosHelper = nil;
     [self doCallback:returnParams];
 }
 
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFeaturedUsersDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects: theResults, nil];
+    [self doCallback:returnParams];
+}
+
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation incrementPopularityDidCompleteWithResult:(NSNumber *)affectedRows {
     [self cleanup];
 }
@@ -428,6 +438,11 @@ static KumulosHelper *sharedKumulosHelper = nil;
     }
     else if ([function isEqualToString:@"setOriginalUsername"]) {
         [self execute:function withParams:inputParams withCallback:callback withDelegate:delegate];
+    }
+    else if ([function isEqualToString:@"getFeaturedUsers"]) {
+        if (self.delegate && [delegate respondsToSelector:@selector(kumulosHelperGetFeaturedUsersDidFail)]) {
+            [delegate kumulosHelperGetFeaturedUsersDidFail];
+        }
     }
 }
 

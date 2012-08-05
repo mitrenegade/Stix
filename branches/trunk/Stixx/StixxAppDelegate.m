@@ -178,8 +178,7 @@ static dispatch_queue_t backgroundQueue;
     //[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     camera = [[UIImagePickerController alloc] init];
-    camera.navigationBarHidden = NO;
-    camera.navigationBar.barStyle = UIBarStyleBlack;
+    camera.navigationBarHidden = YES;
     camera.toolbarHidden = YES; // prevents bottom bar from being displayed
     camera.allowsEditing = NO;
     camera.wantsFullScreenLayout = YES;
@@ -192,6 +191,7 @@ static dispatch_queue_t backgroundQueue;
     camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 #endif    
     
+    camera.cameraViewTransform = CGAffineTransformScale(camera.cameraViewTransform, CAMERA_TRANSFORM_X, CAMERA_TRANSFORM_Y);
     // create an empty main controller in order to turn on camera
     //rootController = [[UIViewController alloc] init];
     //[window addSubview:rootController.view];
@@ -572,6 +572,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [profileController didConnectToFacebook];
 }
 
+-(void)didConnectToTwitter {
+    [shareController didConnect:@"Twitter"];
+}
+
 -(FacebookHelper*)getFacebookHelper {
     return fbHelper;
 }
@@ -857,7 +861,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if ([defaults objectForKey:connectedString]) {
         isConnected = [[defaults objectForKey:connectedString] boolValue];
     }
-    if (1) { //(!isConnected) {
+    if (!isConnected) {
         [defaults setObject:[NSNumber numberWithBool:NO] forKey:connectedString];        // hack to test twitter
         [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"FacebookIsConnected"];        // hack to test twitter
         [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"FacebookIsSharing"];        // hack to test twitter
@@ -1595,7 +1599,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         if (![newTag.originalUsername isEqualToString:[self getUsername]]) {
             NSString * message = [NSString stringWithFormat:@"%@ remixed your Pix.", myUserInfo_username];
             NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:newTag.originalUsername] intValue]];
-            [self Parse_sendBadgedNotification:message OfType:NB_NEWPIX toChannel:channel withTag:newTag.tagID];  
+            [self Parse_sendBadgedNotification:message OfType:NB_REMIX toChannel:channel withTag:newRecordID];  
         }
 
         // update popularity for REMIX
@@ -2388,6 +2392,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [feedController forceReloadWholeTableZOMG];
     [friendSuggestionController refreshUserPhotos];
     [newsController refreshUserPhotos];
+    [profileController reloadSuggestionsForOutsideChange];
 }
 
 -(void)didAddNewUserWithResult:(NSArray *)theResults {
@@ -2436,6 +2441,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 
+#pragma mark Changing user photo
+
 -(void)didClickChangePhoto {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -2444,15 +2451,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // we have to do it over the existing camera because touch controls don't work if
     // we add a modal view to profileViewController
     UIImagePickerController * picker = [[UIImagePickerController alloc] init];
-#if 0
-    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.showsCameraControls = YES;
-    picker.toolbarHidden = YES;
-    picker.wantsFullScreenLayout = YES;
-    picker.allowsEditing = YES;
-#else
-    picker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
-#endif
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary; ////SavedPhotosAlbum;
+    picker.allowsEditing = NO;
     picker.delegate = self;
     
     // because a modal camera already exists, we must present a modal view over that camera
@@ -2497,6 +2497,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #else
     [nav popToRootViewControllerAnimated:YES];
 #endif
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
     //[profileController viewWillAppear:YES];
     
     // scale down photo
@@ -2555,7 +2556,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 
 -(void)didReceiveFacebookFriends:(NSArray*)friendsArray {
     [profileController didGetFacebookFriends:friendsArray];
-    if (friendSuggestionController && isShowingFriendSuggestions)
+    if (friendSuggestionController) // && isShowingFriendSuggestions)
         [friendSuggestionController populateFacebookSearchResults:friendsArray];
 }
 
@@ -2642,7 +2643,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // may be called after cached user login
         [self getFollowListsWithoutAggregation:username];
         didGetFollowingLists = YES;
-        isShowingFriendSuggestions = YES; // following lists are used to initialize friend suggestion page so we want to lock other functions
+        // we WANT to display suggstion controller, and just wait a bit
+        //isShowingFriendSuggestions = YES;         // following lists are used to initialize friend suggestion page so we want to lock other functions
     }
 
     // check for user stage saved in UserDefaults
@@ -2651,14 +2653,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
     }
     // first time facebook connects, set defaults to YES automatically
-    [shareController connectService:@"Facebook"];
+    if (![facebookString isEqualToString:@"0"] && [facebookString length] > 0)      
+        [shareController connectService:@"Facebook"];
 
-#if 0
+#if 1
     if (firstTime) {
         myUserInfo_username = username; // needed by setFollowing to getUsername
         // flag set if someone is added to Kumulos for the first time
         //[k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
         //[k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
+        NSLog(@"Adding follower %@ to %@", username, @"Bobby Ren");
         [k addFollowerWithUsername:@"William Ho" andFollowsUser:username];
         [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:username];
         
@@ -2686,6 +2690,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
         // just wait
         NSLog(@"No device token yet!");
+    }
+    
+    if (firstTime) {
+        // do all the initial content stuff while waiting for friend controller
+        [self initialContent];
     }
 }
 
@@ -2876,6 +2885,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSData *userphoto = UIImagePNGRepresentation(myUserInfo_userphoto);
     [defaults setObject:userphoto forKey:@"userphoto"];
     [defaults synchronize];
+    
+    [allUserPhotos setObject:userphoto forKey:[self getUsername]];
+    [userProfileController didChangeUserPhoto:photo];
+    [tabBarController didGetProfilePhoto:photo];
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -2932,13 +2945,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:friendName] intValue]];//name];
         //NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
         //channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
+#if !ADMIN_TESTING_MODE
         [self Parse_sendBadgedNotification:message OfType:NB_NEWFOLLOWER toChannel:channel withTag:nil];
-        //[self Parse_sendNotificationToFollowers:message ofType:NB_NEWFOLLOWER withTag:nil];
+#endif
         
         // add to newsletter
         NSString * targetName = friendName;
-        NSString * agentName = [self getUsername];
+        NSString * agentName = myUserInfo_username;
         if (![targetName isEqualToString:agentName]) {
+            NSLog(@"TargetName: %@ AgentName: %@", targetName, agentName);
             [k addNewsWithUsername:targetName andAgentName:agentName andNews:@"is now following you" andThumbnail:nil andTagID:-1];
         }
         // subscribe to channel
@@ -2970,7 +2985,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //[self Parse_unsubscribeFromChannel:channel];
     }
     //[profileController updateFollowCounts];
-    [profileController reloadSuggestions];
+    // don't do this or adding friends from profile's suggestions will crash
+    //[profileController reloadSuggestionsForOutsideChange];
+}
+-(void)didChangeFriendsFromUserProfile {
+    [profileController reloadSuggestionsForOutsideChange];
 }
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
 {
@@ -3441,13 +3460,41 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // keeps the login screen up, and only dismisses when both have loaded
     // calls displayFriendSuggestionController then
     [friendSuggestionController initializeSuggestions];
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
     [self friendSuggestionControllerFinishedLoading:0];
 #endif
 }
 
+-(void)shouldDisplayFriendSuggestionController {
+    if (isShowingFriendSuggestions) {
+        NSLog(@"Trying to display friendSuggestionController but it is already showing!");
+        return;        
+    }
+    if (didDismissFriendSuggestions) {
+        NSLog(@"Trying to display friendSuggestionController but already dismissed");
+        return;
+    }
+    NSLog(@"Displaying friendSuggestionController!");
+    isShowingFriendSuggestions = YES;
+    [self didDismissSecondaryView];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [camera setCameraOverlayView:tabBarController.view];
+    [self.tabBarController setSelectedIndex:0];    
+    
+    // hack a way to display feedback view over camera: formerly presentModalViewController
+    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
+    [self.tabBarController.view addSubview:friendSuggestionController.view];
+    [friendSuggestionController.view setFrame:frameOffscreen];
+    
+    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
+    }];
+}
+
 -(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions { 
     // used to be displayFriendSuggestionController
+    NSLog(@"FriendSuggestionController finished loading with totalSuggestions: %d", totalSuggestions);
     if (totalSuggestions == 0) {
         [self didDismissSecondaryView]; // close login controller
         [self shouldCloseFriendSuggestionControllerWithNames:nil];
@@ -3594,22 +3641,26 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)sharePixDialogDidFail:(int)errorType {
-    [self didCloseShareSheet];
+//    [self didCloseShareSheet];
     if (errorType == 0) {
         // upload picture malfunction
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-        [alertView show];
+        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        //[alertView show];
+        [self showAlertWithTitle:@"Sharing Failed" andMessage:@"It seems that our Share pages are under maintenance. Please try again later." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
     }
     else if (errorType == 1) {
         // asihttp request timeout
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Low Connectivity" message:@"Could not complete your Share request. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-        [alertView show];
-        [self shouldCloseShareController:YES];
+        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Low Connectivity" message:@"Could not complete your Share request. Please try again later." delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"Try again", nil];
+        //[alertView setTag:ALERTVIEW_SHAREFAIL];
+        //[alertView show];
+        //[self shouldCloseShareController:YES];
+        [self showAlertWithTitle:@"Low Connectivity" andMessage:@"Could not complete your Share request. Please try again later." andButton:@"Cancel" andOtherButton:@"Try again" andAlertType:ALERTVIEW_SHAREFAIL];
     }
 }
 
 -(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray *)addedFriends {
     isShowingFriendSuggestions = NO;
+    didDismissFriendSuggestions = YES;
     
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
@@ -3635,7 +3686,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
 
-#if 1
+#if 0
+    // do this upon user creation, in case friendController has a problem
     [k addFollowerWithUsername:@"William Ho" andFollowsUser:[self getUsername]];
     [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:[self getUsername]];
     
@@ -3646,30 +3698,34 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [animation doViewTransition:friendSuggestionController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
         [friendSuggestionController.view removeFromSuperview];
 
-        isShowingFriendSuggestions = NO;
-        // check for first time user experience
+        [self initialContent];
+    }];
+    
+}
+
+-(void)initialContent {
+    // do all the stuff needed upon startup
+    
+    // check for first time user experience
+    if (!didStartFirstTimeMessage) {
+        if (notificationDeviceToken) {
+            [self Parse_createSubscriptions];  
+        }
+        else {
+            // try registering again
+            //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
+            // just wait
+            NSLog(@"No device token yet!");
+        }
+        myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
+        [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
+        didStartFirstTimeMessage = YES;
+        // start first time message if needed
         if (!didStartFirstTimeMessage) {
-            if (notificationDeviceToken) {
-                [self Parse_createSubscriptions];  
-            }
-            else {
-                // try registering again
-                //[[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
-                // just wait
-                NSLog(@"No device token yet!");
-            }
-            myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
             [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
             didStartFirstTimeMessage = YES;
         }
-    }];
-    
-    // start first time message if needed
-    if (!didStartFirstTimeMessage) {
-        [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
-        didStartFirstTimeMessage = YES;
     }
-    
     // at this time, friend list should have been updated
     // after adding users, then start aggregation
     //[self getFollowListsForAggregation:[self getUsername]];        
@@ -4100,62 +4156,25 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Parse: sending notification to channel <%@> with message: %@", channel_, message);
 
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX || type == NB_NEWFOLLOWER || type == NB_NEWPIX)
+    if (type == NB_NEWGIFT || type == NB_NEWCOMMENT || type == NB_NEWSTIX || type == NB_INCREMENTBUX || type == NB_NEWFOLLOWER || type == NB_NEWPIX || type == NB_REMIX)
         [data setObject:message forKey:@"alert"];
-    if (type == NB_NEWPIX || type == NB_NEWFOLLOWER || type == NB_NEWCOMMENT) {
+    if (type == NB_REMIX || type == NB_NEWFOLLOWER || type == NB_NEWCOMMENT) {
         [data setObject:[NSString stringWithFormat:@"%d", 1] forKey:@"badge"];
     }
     [data setObject:myUserInfo_username forKey:@"sender"];
-    //[data setObject:[NSNumber numberWithInt:0] forKey:@"badge"];
     [data setObject:[NSNumber numberWithInt:type] forKey:@"nbType"]; //notificationBookmarkType
     [data setObject:message forKey:@"message"];
     [data setObject:channel_ forKey:@"channel"];
     if (tagID != nil)
         [data setObject:tagID forKey:@"tagID"];
-//    if (giftStixStringID != nil)
-//        [data setObject:giftStixStringID forKey:@"giftStixStringID"];
     [PFPush sendPushDataToChannelInBackground:channel_ withData:data];
-}
-
--(void) Parse_sendNotificationToFollowers:(NSString*)message ofType:(int)type withTag:(NSNumber*)tagID {
-    NSMutableSet * followers = [self getFollowerList]; 
-    NSMutableArray * channels = [[NSMutableArray alloc] init];
-    
-    for (NSString * name in followers) {
-        NSString *channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:name] intValue]];//[[ name componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ]];
-        NSLog(@"Adding channel %@ for follower %@", channel, name); 
-        [channels addObject:channel];
-    }
-    NSLog(@"Parse: sending notification to %d channels with message: %@", [channels count], message);
-
-    NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    if (type == NB_NEWCOMMENT || type == NB_NEWFOLLOWER || type == NB_NEWPIX)
-        [data setObject:message forKey:@"alert"];
-    [data setObject:myUserInfo_username forKey:@"sender"];
-    [data setObject:[NSNumber numberWithInt:type] forKey:@"nbType"]; //notificationBookmarkType
-    [data setObject:message forKey:@"message"];
-    if (tagID != nil)
-        [data setObject:tagID forKey:@"tagID"];    
-
-    PFPush *push = [[PFPush alloc] init];
-    [push setChannels:channels];
-    [push setPushToAndroid:false];
-    [push expireAfterTimeInterval:86400];
-    [push setData:data];
-    NSError * err;
-    [push sendPush:&err];
-    if (err)
-        NSLog(@"Parse: send to followers with error: %@", [err description]);
 }
 
 - (void)application:(UIApplication *)application 
 didReceiveRemoteNotification:(NSDictionary *)userInfo {
-#if 1
+#if ADMIN_TESTING_MODE
     [PFPush handlePush:userInfo];
 #else
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
     // debug - display userInfo
     NSLog(@"%@", userInfo);
     //NSDictionary * aps = [userInfo objectForKey:@"aps"]; 
@@ -4169,10 +4188,16 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         NSLog(@"Key: %@", key);
     }
     bool doAlert = NO;
-#if 1
     notificationTagID = [userInfo objectForKey:@"tagID"];
-    if (notificationBookmarkType == NB_NEWSTIX || notificationBookmarkType == NB_NEWCOMMENT) 
+    if (notificationBookmarkType == NB_REMIX || notificationBookmarkType == NB_NEWCOMMENT) 
+    {
         doAlert = YES;
+        [self getNewsCount];
+    }
+    if (notificationBookmarkType == NB_NEWFOLLOWER) {
+        doAlert = NO;
+        [self getNewsCount];
+    }
     if (notificationBookmarkType == NB_NEWPIX && 
         (![[userInfo objectForKey:@"sender"] isEqualToString:myUserInfo_username])) 
     {
@@ -4183,78 +4208,6 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             doAlert = NO;
         }
     }
-#else
-    switch (notificationBookmarkType) {
-        case NB_NEWSTIX: 
-        {
-            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
-            notificationGiftStixStringID = nil;
-            doAlert = YES;
-            break;
-        }
-            
-        case NB_NEWCOMMENT:
-        {
-            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
-            notificationGiftStixStringID = nil;
-            [self updateCommentCount:notificationTagID]; // in case comment count was not updated
-            doAlert = YES;
-            break;
-        }
-        /*
-        case NB_NEWGIFT:
-        {
-            notificationTagID = -1;
-            notificationGiftStixStringID = [[userInfo objectForKey:@"giftStixStringID"] copy];
-            doAlert = YES;
-            break;
-        }
-         */
-            
-        case NB_PEELACTION:
-        {
-            // a general tag update - either a stix was peeled or attached, or a stix or comment was added to a tag but not the user's tag
-            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
-        }
-            
-        case NB_UPDATECAROUSEL:
-        {
-            notificationTagID = -1;
-        }
-            break;
-            
-        case NB_INCREMENTBUX: 
-        {
-            notificationTagID = -1;
-            doAlert = NO; // do not show general alert - go to bookmark jump
-        }
-            break;
-         
-        case NB_NEWPIX: 
-        {
-            notificationTagID = [[userInfo objectForKey:@"tagID"] intValue];
-            doAlert = YES;
-        }
-            break;
-        case NB_ONLINE: 
-        {
-            // broadcast that a person is online
-            notificationTagID = -1;
-            doAlert = NO;
-        }
-            break;
-        case NB_ONLINEREPLY: 
-        {
-            // broadcast that a person is online
-            notificationTagID = -1;
-            doAlert = NO;
-        }
-            break;
-        default:
-            break;
-    }
-#endif
-
     notificationTargetChannel = [[userInfo objectForKey:@"channel"] copy];
     NSString * message = [userInfo objectForKey:@"message"]; // get alert message
     NSLog(@"Message %@ for channel <%@>", message, notificationTargetChannel);
@@ -4273,6 +4226,7 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
         // the target channel in this case must have been broadcast or self
         [self handleNotificationBookmarks:YES withMessage:message];
     }
+    
 #endif
 }
 
@@ -4290,81 +4244,10 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo {
             [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
             [k getFollowersOfUserWithFollowsUser:[self getUsername]]; // update own follower list
         }
-        /*
-        if (notificationBookmarkType == NB_INCREMENTBUX) {
-            // only display message
-            [self showAlertWithTitle:@"Stix Notification" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-            //[self updateBuxCountFromKumulos];
-        }
-         */
-        if (notificationBookmarkType == NB_UPDATECAROUSEL) {
-            [k getUserStixWithUsername:myUserInfo_username];
-            //doJump = NO;
-        }
-        /*
-        if (notificationBookmarkType == NB_NEWGIFT) {
-            if (doJump) {
-                [tabBarController setSelectedIndex:3]; // go to mystixview
-                NSString * message;
-                if ([self getStixCount:notificationGiftStixStringID] == -1) {
-                    message = [NSString stringWithFormat:@"You have received a %@ but you already have it permanently!", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
-                }
-                else
-                {
-                    message = [NSString stringWithFormat:@"You have received a gift of %@.", [BadgeView getStixDescriptorForStixStringID:notificationGiftStixStringID]];
-                    [self reloadAllCarousels];
-               }
-                [self showAlertWithTitle:@"New Stix" andMessage:message andButton:@"Close" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-            }
-        }
-         */
-        if (notificationBookmarkType == NB_ONLINE && ![message isEqualToString:[self getUsername]]) {
-            NSString * onlineUser = message;                
-            NSLog(@"%@ just came online!", onlineUser);
-            if ([self isFollowing:onlineUser]) {
-                NSString * channel = [NSString stringWithFormat:@"From%@", onlineUser];
-                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
-                [self Parse_subscribeToChannel:channel];
-            }
-            
-            // send notification right back in case that person is a subscriber
-            NSString * channel = [NSString stringWithFormat:@"To%d", [[allUserIDs objectForKey:onlineUser] intValue]];//onlineUser] stringByReplacingOccurrencesOfString:@" " withString:@""];
-            NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-            channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
-            NSLog(@"Replying to online notice to channel %@", channel);
-            [self Parse_sendBadgedNotification:[self getUsername] OfType:NB_ONLINEREPLY toChannel:channel withTag:nil];
-        }
-        if (notificationBookmarkType == NB_ONLINEREPLY) {
-            NSString * onlineUser = message;
-            NSLog(@"%@ just replied that they are online!", onlineUser);
-            if ([self isFollowing:onlineUser]) {
-                NSString * channel = [NSString stringWithFormat:@"From%@", onlineUser];
-                NSCharacterSet *charactersToRemove = [[ NSCharacterSet alphanumericCharacterSet ] invertedSet ];
-                channel = [[ channel componentsSeparatedByCharactersInSet:charactersToRemove ]componentsJoinedByString:@"" ];
-                [self Parse_subscribeToChannel:channel];
-            }
-        }
     }
     else {
         BOOL doUpdateTag = YES;
-        if (notificationBookmarkType == NB_PEELACTION) {
-            // either sent globally, or a peel action - does not require jump
-            updatingNotifiedTagDoJump = NO;
-            
-            // if peel was on own stix, do not download it again
-            Tag * tag = [allTagIDs objectForKey:notificationTagID];
-            if (tag == nil) {
-                // if tag is not in feed, ignore notification
-                doUpdateTag = NO;
-            }
-            else { 
-                if ([tag.username isEqualToString:[[self getUsername] stringByReplacingOccurrencesOfString:@" " withString:@""]]) {
-                    // if tag belongs to self, do not update it
-                    doUpdateTag = NO;
-                }
-            }
-        } else if (notificationBookmarkType == NB_NEWPIX || notificationBookmarkType == NB_NEWCOMMENT) {
+        if (notificationBookmarkType == NB_NEWPIX || notificationBookmarkType == NB_REMIX || notificationBookmarkType == NB_NEWCOMMENT) {
             // user should be prompted to jump to new pix
             updatingNotifiedTagDoJump = YES;
             doUpdateTag = YES;
@@ -4493,6 +4376,16 @@ static bool isShowingAlerts = NO;
     else if (alertActionCurrent == ALERTVIEW_BUYBUX) {
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [self didPurchaseBux:buyBuxPurchaseAmount];
+        }
+    }
+    else if (alertActionCurrent == ALERTVIEW_SHAREFAIL) {
+        if (buttonIndex != [alertView cancelButtonIndex]) {
+            // let shareController continue and try uploading the same thing
+            [shareController startUploadImage:nil withDelegate:self];
+        }
+        else {
+            [self shouldCloseShareController:NO];
+            [self didCloseShareSheet];
         }
     }
     if ([alertQueue count] == 0)
@@ -4657,6 +4550,7 @@ static bool isShowingAlerts = NO;
     // friend list is needed by the suggestion controller, but
     // we don't want to start aggregating yet because we don't know
     // if the friend list will change after the controller closes
+    NSLog(@"GetFollowListsWithoutAggregation");
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:name, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"getFollowList" withParams:params withCallback:@selector(khCallback_didGetFollowList:) withDelegate:self];
@@ -4668,6 +4562,8 @@ static bool isShowingAlerts = NO;
 -(void)getFollowListsForAggregation:(NSString*)name {
     // called if we do not show the suggest friends page
     // get follows list, immediately start aggregation
+    
+    NSLog(@"GetFollowListsForAggregation");
     
     //[k getFollowListWithUsername:name];
     //[k getFollowersOfUserWithFollowsUser:name];

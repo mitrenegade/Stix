@@ -53,6 +53,22 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+-(void)startActivityIndicatorLarge {
+    if (!activityIndicatorLarge) {
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 220, 90, 90)];
+        [self.view addSubview:activityIndicatorLarge];
+    }
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)stopActivityIndicatorLarge {
+    if (activityIndicatorLarge) {
+        [activityIndicatorLarge setHidden:YES];
+        [activityIndicatorLarge stopCompleteAnimation];
+        [activityIndicatorLarge removeFromSuperview];
+    }
+}
+
 -(void)initializeHeaderViews {
     if (!headerViews) {
         headerViews = [[NSMutableArray alloc] init];
@@ -83,7 +99,9 @@
 
     didGetFeaturedUsers = NO;
     didGetFacebookFriends = NO;
-    [k getFeaturedUsers];
+    //[k getFeaturedUsers];
+    KumulosHelper * kh = [[KumulosHelper alloc] init];
+    [kh execute:@"getFeaturedUsers" withParams:nil withCallback:@selector(khCallback_didGetFeaturedUsers:) withDelegate:self];
     [delegate searchFriendsOnStix];
         
     [self initializeHeaderViews];
@@ -136,8 +154,9 @@
         NSLog(@"***FriendSuggestionController: facebook friends loaded first!");
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFeaturedUsersDidCompleteWithResult:(NSArray *)theResults {
-    
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFeaturedUsersDidCompleteWithResult:(NSArray *)theResults {
+-(void)khCallback_didGetFeaturedUsers:(NSArray*)returnParams {
+    NSArray * theResults = [returnParams objectAtIndex:0];
     if ([theResults count] == 0)
         return;
     
@@ -176,6 +195,19 @@
         [delegate friendSuggestionControllerFinishedLoading:total];
     else 
         NSLog(@"***FriendSuggestionController: featured users loaded first!");
+}
+
+#pragma mark KumulosHelperDelegate
+-(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
+    [self performSelector:callback withObject:params afterDelay:0];
+}
+
+-(void)kumulosHelperGetFeaturedUsersDidFail {
+    NSLog(@"getFeaturedUsers failed!");
+    // simulate no users
+    // create an empty featured user list
+    NSArray * theResults = [NSArray arrayWithObject:nil];
+    [self khCallback_didGetFeaturedUsers:[NSArray arrayWithObject:theResults]];
 }
 
 -(IBAction)didClickButtonEdit:(id)sender {

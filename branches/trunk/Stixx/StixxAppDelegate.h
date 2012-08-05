@@ -206,7 +206,8 @@ struct UserInfo {
     
     BOOL didGetFollowingLists;
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
-    BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown   
+    BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown
+    BOOL didDismissFriendSuggestions; // prevents friend suggestions from repopping up
     
     // sync flags for updating stix layers
     // when a new pic is created, createPix is called while the stix layer is being edited
@@ -245,8 +246,6 @@ struct UserInfo {
 -(void) Parse_subscribeToChannel:(NSString*) channel;
 -(void) Parse_unsubscribeFromChannel:(NSString*)channel;
 -(void) Parse_sendBadgedNotification:(NSString*)message OfType:(int)type toChannel:(NSString*) channel withTag:(NSNumber*)tagID;
-//-(void) Parse_unsubscribeFromAll;
--(void) Parse_sendNotificationToFollowers:(NSString*)message ofType:(int)type withTag:(NSNumber*)tagID;
 
 -(void) Parse_createSubscriptions;
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;

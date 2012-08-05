@@ -17,6 +17,7 @@
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray*)params;
 -(void)kumulosHelperGetFacebookUserDidFail;
 -(void)kumulosHelperCreateNewPixDidFail:(Tag*)failedTag;
+-(void)kumulosHelperGetFeaturedUsersDidFail;
 @end
 
 @interface KumulosHelper : NSObject <KumulosDelegate>

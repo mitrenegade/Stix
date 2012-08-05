@@ -97,7 +97,6 @@ enum {
 @property (nonatomic, weak) NSString * selectedStixStringID;
 
 -(void)resetBadgeLocations;
-//-(void)updateStixCounts;
 +(int)getOutlineOffsetX:(int) type;
 +(int)getOutlineOffsetY:(int) type;
 

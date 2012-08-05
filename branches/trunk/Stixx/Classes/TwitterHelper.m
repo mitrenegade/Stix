@@ -179,7 +179,7 @@
                 // return dictionary of user info
                 NSDictionary * returnDict = results;
                 if ([helperDelegate respondsToSelector:@selector(didGetTwitterCredentials:)])
-                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterCredentials:) andParams:returnDict];
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterCredentials:) andParams:returnDict andRequestType:requestType];
                 
                 // add credentials
                 NSString * twitterString = [results objectForKey:@"id_str"];
@@ -193,12 +193,12 @@
             else if ([requestType isEqualToString:@"getFriendsForUser"]) {
                 NSArray * friendsIDs = [self parseResponse:data forKey:@"ids"];
                 if ([helperDelegate respondsToSelector:@selector(didGetTwitterFriendsIDs:)])
-                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsIDs:) andParams:friendsIDs];
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsIDs:) andParams:friendsIDs andRequestType:requestType];
             }
             else if ([requestType isEqualToString:@"getNamesForIDs"]) {
                 NSArray * friendArray = results; // array of dictionaries
                 if ([helperDelegate respondsToSelector:@selector(didGetTwitterFriendsFromIDs:)])
-                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsFromIDs:) andParams:friendArray];
+                    [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterFriendsFromIDs:) andParams:friendArray andRequestType:requestType];
             }
             else if ([requestType isEqualToString:@"directMessage"]) {
                 NSLog(@"Direct message done!");
@@ -264,7 +264,7 @@
 -(void)sendInviteMessage:(NSString*)screen_name {
     requestType = @"directMessage";
     // hack: all messages sent to hackstarbobo for now
-    NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Come check out Stix! http://stixmobile.com", screen_name];
+    NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Tired of Instagram filters?  Try out Stix photo app for the iPhone.  It's free! http://bit.ly/JECBPU", screen_name];
     SHKItem *_item = [SHKItem text:shareText];
     [self setItem:_item];
     [self share];
@@ -273,7 +273,7 @@
     requestType = @"directMessage";
     // hack: all messages sent to hackstarbobo for now
     for (NSString * screen_name in screen_names) {
-        NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Come check out Stix! http://stixmobile.com", screen_name];
+        NSString * shareText = [NSString stringWithFormat:@"d stixapp %@, Tired of Instagram filters?  Try out Stix photo app for the iPhone.  It's free! http://bit.ly/JECBPU", screen_name];
         SHKItem *_item = [SHKItem text:shareText];
         [self setItem:_item];
         [self share];
@@ -290,6 +290,10 @@
         if ([helperDelegate respondsToSelector:@selector(didInitialLoginForTwitter)])
             [helperDelegate didInitialLoginForTwitter];
 
+    }
+    else if ([requestType isEqualToString:@"directMessage"]) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:nil message:@"Twitter invite sent" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
     }
 }
 -(void)sendDidCancel {

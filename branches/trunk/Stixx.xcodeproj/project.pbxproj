@@ -240,6 +240,7 @@
 		9E9E7026159C543E00EF996F /* splash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9E7024159C543D00EF996F /* splash@2x.png */; };
 		9E9E7028159C552E00EF996F /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9E7027159C552E00EF996F /* Default.png */; };
 		9E9E702A159C553700EF996F /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E9E7029159C553700EF996F /* Default@2x.png */; };
+		9EA0A01715CEDEE500E0931C /* ProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EA0A01615CEDEE500E0931C /* ProfileViewController.xib */; };
 		9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EA572D51523712800D79BE6 /* AddressBook.framework */; };
 		9EA6425214F5C02000EAB9A4 /* VerticalFeedItemController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA6425014F5C01E00EAB9A4 /* VerticalFeedItemController.m */; };
 		9EA6425314F5C02000EAB9A4 /* VerticalFeedItemController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9EA6425114F5C01F00EAB9A4 /* VerticalFeedItemController.xib */; };
@@ -722,6 +723,7 @@
 		9E9E7024159C543D00EF996F /* splash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "splash@2x.png"; sourceTree = "<group>"; };
 		9E9E7027159C552E00EF996F /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		9E9E7029159C553700EF996F /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		9EA0A01615CEDEE500E0931C /* ProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProfileViewController.xib; sourceTree = "<group>"; };
 		9EA572D51523712800D79BE6 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		9EA6424F14F5C01D00EAB9A4 /* VerticalFeedItemController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VerticalFeedItemController.h; sourceTree = "<group>"; };
 		9EA6425014F5C01E00EAB9A4 /* VerticalFeedItemController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VerticalFeedItemController.m; sourceTree = "<group>"; };
@@ -1157,6 +1159,7 @@
 				9ED2452C152A6D6C003886CD /* UserProfileViewController.xib */,
 				9E78A85B15B1E2E10000758E /* ProfileViewController.h */,
 				9E78A85C15B1E2E10000758E /* ProfileViewController.m */,
+				9EA0A01615CEDEE500E0931C /* ProfileViewController.xib */,
 				9E5D440915B4A830000C58F1 /* FriendServicesViewController.h */,
 				9E5D440A15B4A830000C58F1 /* FriendServicesViewController.m */,
 				9E5D440B15B4A830000C58F1 /* FriendServicesViewController.xib */,
@@ -2132,6 +2135,7 @@
 				9E06BED815C733CD00FD9659 /* tab_profile_on.png in Resources */,
 				9E06BED915C733CD00FD9659 /* tab_profile.png in Resources */,
 				9E06BEDA15C733CD00FD9659 /* tab_camera.png in Resources */,
+				9EA0A01715CEDEE500E0931C /* ProfileViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

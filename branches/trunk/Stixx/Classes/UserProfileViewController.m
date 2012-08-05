@@ -91,41 +91,8 @@
     [self.headerView addSubview:myFollowingCount];
     [self.headerView addSubview:myFollowersCount];
 
-#if 1
-    [self toggleMyButtons:YES];
-    
     indexPointer = 0;
     pendingContentCount = 0;
-#else
-    //[self toggleMyButtons:YES];
-
-    if (!pixTableController) {
-        pixTableController = [[ColumnTableController alloc] init];
-        [pixTableController.view setBackgroundColor:[UIColor clearColor]];
-        pixTableController.delegate = self;
-        //        [pixTableController setHasHeaderRow:YES];
-        numColumns = 3;
-        [pixTableController setNumberOfColumns:numColumns andBorder:4];
-    }
-    
-    [self populateUserInfo];
-    [self populateFollowCounts];
-    //[self updateStixCounts];
-    
-    NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
-    if (![lastUsername isEqualToString:username]) {
-        pendingContentCount = 0;
-        [self forceReloadAll];
-        [self setLastUsername:username];
-    }
-    [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
-    
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
-    [self.scrollView addSubview:pixTableController.view];
-    [self.scrollView addSubview:headerView];
-    [scrollView setBackgroundColor:[UIColor clearColor]];
-    [self.view addSubview:scrollView];
-#endif
 }
 
 /*
@@ -205,9 +172,10 @@
     
     indexPointer = 0;
     pendingContentCount = 0;
-
+    
     [self populateUserInfo];
     [self populateFollowCounts];
+    //[self updateStixCounts];
     
     NSLog(@"User Page appearing: name %@ last time name was: %@", username, lastUsername);
     if (![lastUsername isEqualToString:username]) {
@@ -216,12 +184,12 @@
         [self setLastUsername:username];
     }
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
-    [pixTableController.view removeFromSuperview];
-    //[self.view addSubview:pixTableController.view];
-    [self.scrollView setFrame:CGRectMake(0, 44, 320, 460-44)];
+    
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
     [self.scrollView addSubview:pixTableController.view];
     [self.scrollView addSubview:headerView];
     [scrollView setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:scrollView];
 }
 
 - (void)didReceiveMemoryWarning {

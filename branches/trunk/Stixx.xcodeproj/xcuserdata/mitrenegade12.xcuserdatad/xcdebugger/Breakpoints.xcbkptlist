@@ -138,11 +138,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365530200.137198"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "582"
-         endingLineNumber = "582"
+         startingLineNumber = "550"
+         endingLineNumber = "550"
          landmarkName = "@implementation UserProfileViewController"
          landmarkType = "3">
       </FileBreakpoint>
@@ -151,11 +151,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365530200.137198"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "578"
-         endingLineNumber = "578"
+         startingLineNumber = "546"
+         endingLineNumber = "546"
          landmarkName = "-didPullToRefresh"
          landmarkType = "5">
       </FileBreakpoint>
@@ -164,11 +164,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365530200.137198"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "572"
-         endingLineNumber = "572"
+         startingLineNumber = "540"
+         endingLineNumber = "540"
          landmarkName = "-forceReloadAll"
          landmarkType = "5">
       </FileBreakpoint>
@@ -772,7 +772,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3362"
          endingLineNumber = "3362"
-         landmarkName = "-sendEmailTo:withCC:withSubject:withBody:"
+         landmarkName = "-webViewDidFinishLoad:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -819,11 +819,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365416986.776818"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "331"
-         endingLineNumber = "331"
+         startingLineNumber = "299"
+         endingLineNumber = "299"
          landmarkName = "-didClickAddFriendButton:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -832,11 +832,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365416986.776818"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "178"
-         endingLineNumber = "178"
+         startingLineNumber = "145"
+         endingLineNumber = "145"
          landmarkName = "-didClickBackButton:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -876,7 +876,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4121"
          endingLineNumber = "4121"
-         landmarkName = "-Parse_sendNotificationToFollowers:ofType:withTag:"
+         landmarkName = "-Parse_subscribeToChannel:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -928,7 +928,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4282"
          endingLineNumber = "4282"
-         landmarkName = "-handleNotificationBookmarks:withMessage:"
+         landmarkName = "-showAlertWithTitle:andMessage:andButton:andOtherButton:andAlertType:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -941,7 +941,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4301"
          endingLineNumber = "4301"
-         landmarkName = "-handleNotificationBookmarks:withMessage:"
+         landmarkName = "-showAlertWithTitle:andMessage:andButton:andOtherButton:andAlertType:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -980,7 +980,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3491"
          endingLineNumber = "3491"
-         landmarkName = "-didClickInviteButtonByFacebook:withFacebookString:"
+         landmarkName = "-shouldDisplayFriendSuggestionController"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1053,11 +1053,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365416986.776818"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "283"
-         endingLineNumber = "283"
+         startingLineNumber = "251"
+         endingLineNumber = "251"
          landmarkName = "-populateUserInfo"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1357,7 +1357,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1861"
          endingLineNumber = "1861"
-         landmarkName = "-khCallback_didGetAuxiliaryStixOfTag:"
+         landmarkName = "-updateTagWithStix:forTagID:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1651,11 +1651,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365542442.9615"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "822"
-         endingLineNumber = "822"
+         startingLineNumber = "790"
+         endingLineNumber = "790"
          landmarkName = "-initSearchResultLists"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1669,7 +1669,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4943"
          endingLineNumber = "4943"
-         landmarkName = "-shouldPurchasePremiumPack:usingStixStringID:"
+         landmarkName = "-didClickRemixFromDetailViewWithTag:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1682,7 +1682,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4966"
          endingLineNumber = "4966"
-         landmarkName = "-shouldPurchasePremiumPack:usingStixStringID:"
+         landmarkName = "-detailViewNeedsRetainForDelegateCall:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1760,7 +1760,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4055"
          endingLineNumber = "4055"
-         landmarkName = "-Parse_subscribeToChannel:"
+         landmarkName = "-Parse_createSubscriptions"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1773,7 +1773,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4071"
          endingLineNumber = "4071"
-         landmarkName = "-Parse_subscribeToChannel:"
+         landmarkName = "-Parse_createSubscriptions"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1916,7 +1916,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4726"
          endingLineNumber = "4726"
-         landmarkName = "-khCallback_didGetFollowListWithAggregation:"
+         landmarkName = "-didDisplayShareSheet"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1942,8 +1942,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "4681"
          endingLineNumber = "4681"
-         landmarkName = "@implementation StixxAppDelegate"
-         landmarkType = "3">
+         landmarkName = "-agitateFirstTimePointer"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -1981,7 +1981,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3570"
          endingLineNumber = "3570"
-         landmarkName = "-shouldCloseShareController:"
+         landmarkName = "-shouldDisplayUserPage:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2150,8 +2150,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1519"
          endingLineNumber = "1519"
-         landmarkName = "-didReloadPendingPix:"
-         landmarkType = "5">
+         landmarkName = "@implementation StixxAppDelegate"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -2176,7 +2176,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1338"
          endingLineNumber = "1338"
-         landmarkName = "-didCloseEditorFromFeedController"
+         landmarkName = "-didCloseEditor"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -2215,7 +2215,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "577"
          endingLineNumber = "577"
-         landmarkName = "-getFacebookHelper"
+         landmarkName = "-didConnectToTwitter"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -3055,9 +3055,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "5007"
-         endingLineNumber = "5007"
-         landmarkName = "-kumulosAPI:apiOperation:countUnseenNewsDidCompleteWithResult:"
-         landmarkType = "5">
+         endingLineNumber = "5007">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3068,9 +3066,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "5002"
-         endingLineNumber = "5002"
-         landmarkName = "-kumulosAPI:apiOperation:countUnseenNewsDidCompleteWithResult:"
-         landmarkType = "5">
+         endingLineNumber = "5002">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3081,9 +3077,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "5025"
-         endingLineNumber = "5025"
-         landmarkName = "-didGetNews"
-         landmarkType = "5">
+         endingLineNumber = "5025">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3094,9 +3088,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "5013"
-         endingLineNumber = "5013"
-         landmarkName = "-kumulosAPI:apiOperation:countUnseenNewsDidCompleteWithResult:"
-         landmarkType = "5">
+         endingLineNumber = "5013">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3225,8 +3217,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "2421"
          endingLineNumber = "2421"
-         landmarkName = "-closeProfileView"
-         landmarkType = "5">
+         landmarkName = "@implementation StixxAppDelegate"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
@@ -3238,8 +3230,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "3535"
          endingLineNumber = "3535"
-         landmarkName = "@implementation StixxAppDelegate"
-         landmarkType = "3">
+         landmarkName = "-didClickInviteButton"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -3307,15 +3299,15 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
+         shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365541950.250356"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "687"
-         endingLineNumber = "687"
+         startingLineNumber = "655"
+         endingLineNumber = "655"
          landmarkName = "-resizeContentSize"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3324,11 +3316,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/UserProfileViewController.m"
-         timestampString = "365542048.382017"
+         timestampString = "365879323.489356"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "364"
-         endingLineNumber = "364"
+         startingLineNumber = "332"
+         endingLineNumber = "332"
          landmarkName = "-didSelectUserProfile:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3463,7 +3455,7 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
+         shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/StixxAppDelegate.m"

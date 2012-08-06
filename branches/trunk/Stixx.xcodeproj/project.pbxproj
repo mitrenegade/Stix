@@ -67,6 +67,7 @@
 		9E43DAA91538C0E000B39F4A /* bux_rewards.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E43DAA81538C0E000B39F4A /* bux_rewards.png */; };
 		9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E47ED1915068C8F00F4E250 /* ColumnTableController.m */; };
 		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
+		9E4DA24415CF7C02003B6BC0 /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */; };
 		9E5216E3155B210800CD0AD5 /* icon_lite_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E2155B210700CD0AD5 /* icon_lite_57.png */; };
 		9E5216E5155B210E00CD0AD5 /* icon_lite_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E4155B210E00CD0AD5 /* icon_lite_114.png */; };
 		9E5383761460C13D00C1D354 /* UIImage+Alpha.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5383711460C13D00C1D354 /* UIImage+Alpha.m */; };
@@ -111,7 +112,6 @@
 		9E59D09A1587C590000D13CC /* btn_feed_more@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E59D0861587C590000D13CC /* btn_feed_more@2x.png */; };
 		9E59D09E1587D28B000D13CC /* StixEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E59D09C1587D28A000D13CC /* StixEditorViewController.m */; };
 		9E59D09F1587D28B000D13CC /* StixEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E59D09D1587D28A000D13CC /* StixEditorViewController.xib */; };
-		9E59D0A51587D727000D13CC /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E59D0A41587D727000D13CC /* StixPanelView.m */; };
 		9E5ACD9014A94BB400B2E8DD /* KumulosData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E5D440C15B4A830000C58F1 /* FriendServicesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D440A15B4A830000C58F1 /* FriendServicesViewController.m */; };
 		9E5D440D15B4A830000C58F1 /* FriendServicesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D440B15B4A830000C58F1 /* FriendServicesViewController.xib */; };
@@ -512,6 +512,8 @@
 		9E47ED1815068C8F00F4E250 /* ColumnTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColumnTableController.h; sourceTree = "<group>"; };
 		9E47ED1915068C8F00F4E250 /* ColumnTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColumnTableController.m; sourceTree = "<group>"; };
 		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
+		9E4DA24215CF7BDE003B6BC0 /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixPanelView.h; sourceTree = "<group>"; };
+		9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixPanelView.m; sourceTree = "<group>"; };
 		9E5216E2155B210700CD0AD5 /* icon_lite_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_lite_57.png; sourceTree = "<group>"; };
 		9E5216E4155B210E00CD0AD5 /* icon_lite_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_lite_114.png; sourceTree = "<group>"; };
 		9E5383701460C13D00C1D354 /* UIImage+Alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Alpha.h"; sourceTree = "<group>"; };
@@ -562,8 +564,6 @@
 		9E59D09B1587D28A000D13CC /* StixEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixEditorViewController.h; sourceTree = "<group>"; };
 		9E59D09C1587D28A000D13CC /* StixEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixEditorViewController.m; sourceTree = "<group>"; };
 		9E59D09D1587D28A000D13CC /* StixEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StixEditorViewController.xib; sourceTree = "<group>"; };
-		9E59D0A31587D726000D13CC /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StixPanelView.h; path = ../../StixPanelView.h; sourceTree = "<group>"; };
-		9E59D0A41587D727000D13CC /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StixPanelView.m; path = ../../StixPanelView.m; sourceTree = "<group>"; };
 		9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosData.h; sourceTree = "<group>"; };
 		9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosData.m; sourceTree = "<group>"; };
 		9E5D440915B4A830000C58F1 /* FriendServicesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendServicesViewController.h; sourceTree = "<group>"; };
@@ -1024,8 +1024,8 @@
 				9E8A29C714AF76B400CDCE76 /* StixView.m */,
 				9EB031B8142C01260019F2BD /* BadgeView.h */,
 				9EB031B9142C01260019F2BD /* BadgeView.m */,
-				9E59D0A31587D726000D13CC /* StixPanelView.h */,
-				9E59D0A41587D727000D13CC /* StixPanelView.m */,
+				9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */,
+				9E4DA24215CF7BDE003B6BC0 /* StixPanelView.h */,
 			);
 			name = "Stix Panel";
 			sourceTree = "<group>";
@@ -2197,7 +2197,6 @@
 				9E57C12D15829CCD00FB1B91 /* FriendSuggestionController.m in Sources */,
 				9E9A877A158694510067957A /* PixPreviewController.m in Sources */,
 				9E59D09E1587D28B000D13CC /* StixEditorViewController.m in Sources */,
-				9E59D0A51587D727000D13CC /* StixPanelView.m in Sources */,
 				9E940CED159AEE5700F53687 /* LoginViewController.m in Sources */,
 				9E9E701F159C4C4900EF996F /* SignupViewController.m in Sources */,
 				9E5E55A3159D945200274C98 /* CreateFacebookUsernameController.m in Sources */,
@@ -2210,6 +2209,7 @@
 				9E5D446C15B517E8000C58F1 /* StixUsersViewController.m in Sources */,
 				9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */,
 				9ECBBA5315BE680300E6E48E /* AddressBookViewController.m in Sources */,
+				9E4DA24415CF7C02003B6BC0 /* StixPanelView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

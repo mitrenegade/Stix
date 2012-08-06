@@ -104,13 +104,13 @@ static int tickID;
     headerViews = [[NSMutableDictionary alloc] init];
     headerViewsDidLoadPhoto = [[NSMutableDictionary alloc] init];
     feedSectionHeights = [[NSMutableDictionary alloc] init];
-    
+    /*
     if (!stixEditorController)
     {
         stixEditorController = [[StixEditorViewController alloc] init];
-        [stixEditorController setDelegate:self];
+        [stixEditorController setMyDelegate:self];
     }
-
+     */
     [self startActivityIndicator];
     
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
@@ -1142,43 +1142,6 @@ static int tickID;
     }];    
 }
 
--(void)displayEditorWithRemixMode:(int)remixMode {
-    [delegate didClickRemixButton];
-    
-    if (!stixEditorController)
-    {
-        stixEditorController = [[StixEditorViewController alloc] init];
-        [stixEditorController setDelegate:self];
-    }
-
-    // display with an animation
-    NSLog(@"Displaying editor with remix mode %d", remixMode);
-    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
-    [self.view addSubview:stixEditorController.view];
-    //[stixEditorController.view setFrame:frameOffscreen];
-    
-    // temporarily add to feed; also correctly assigns a pending tagID
-    //int oldID = [tagToRemix.tagID intValue];
-    //int pendingID = [self addTagForDisplay:tagToRemix];
-    //NSLog(@"Remixing new tag with pending ID %d from original tagID %d", pendingID, oldID);
-    
-#if 0
-    [stixEditorController initializeWithTag:tagToRemix remixMode:remixMode];    
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:stixEditorController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-        // hack a way to display view over camera; formerly presentModalViewController
-        [stixEditorController.view setFrame:frameOnscreen];
-        [self.camera setCameraOverlayView:stixEditorController.view];        
-    }];
-#else
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
-    [stixEditorController.view setFrame:frameOnscreen];
-    [self.camera setCameraOverlayView:stixEditorController.view];        
-    [stixEditorController initializeWithTag:tagToRemix remixMode:remixMode];
-#endif
-}
-
 -(void)didClickRemixFromDetailView:(Tag*)tag {
     VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
     if (feedItem) {
@@ -1192,6 +1155,11 @@ static int tickID;
     return [delegate canClickNotesButton];
 }
 
+-(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
+    NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", feedItem.tag.tagID, tagToRemix.tagID);
+    [delegate didClickRemixFromDetailViewWithTag:feedItem.tag];
+}
+/*
 -(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
     BOOL okToAdvance = [delegate canClickRemixButton]; // just to advance first time message, metrics, etc
     if (!okToAdvance)
@@ -1243,35 +1211,15 @@ static int tickID;
     }
     [self displayEditorWithRemixMode:remixMode];
 }
-
 -(void)didRemixNewPix:(Tag *)cameraTag remixMode:(int)remixMode{
     [delegate didRemixNewPix:cameraTag remixMode:remixMode];
 }
 
--(void)didGetHighResImage:(UIImage *)highResImage forTagID:(NSNumber *)tagID {
-    // optimization - only request high res image once
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:tagID];
-    Tag * t = feedItem.tag;
-    [t setHighResImage:highResImage];
-    
-    for (int i=0; i<[allTags count]; i++) {
-        Tag * t = [allTags objectAtIndex:i];
-        if ([[t tagID] intValue] == [tagID intValue]) {
-            NSLog(@"DidGetHighResImage: updating allTags at index %d", i);
-            [t setHighResImage:highResImage];
-            return;
-        }
-    }
-    for (int i=0; i<[allTagsDisplayed count]; i++) {
-        Tag * t = [allTagsDisplayed objectAtIndex:i];
-        if ([[t tagID] intValue] == [tagID intValue]) {
-            NSLog(@"DidGetHighResImage: updating allTagsDisplayed at index %d", i);
-            [t setHighResImage:highResImage];
-            return;
-        }
-    }
+-(void)displayEditorWithRemixMode:(int)remixMode {
+    [delegate didClickRemixButton];
+    [delegate shouldDisplayStixEditor:tagToRemix withRemixMode:remixMode];
 }
-
+*/
 -(void)displayCommentsOfTag:(Tag*)tag andName:(NSString *)nameString{
 #if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
@@ -1304,7 +1252,7 @@ static int tickID;
 }
 
 #pragma mark StixEditorDelegate 
-
+/*
 -(void)didCloseEditor {
 #if 0
     [delegate didDismissSecondaryView];
@@ -1322,7 +1270,7 @@ static int tickID;
     [delegate didCloseEditorFromFeedController];
 #endif
 }
-
+*/
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];
 }

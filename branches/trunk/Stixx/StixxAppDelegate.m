@@ -78,7 +78,7 @@ static dispatch_queue_t backgroundQueue;
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    //versionStringStable = @"1.0"; // must change this on next release
+    versionStringStable = @"1.0"; // must change this on next release
     versionStringStable = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     versionStringBeta = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]; //@"0.7.7.4";
     
@@ -303,7 +303,7 @@ static dispatch_queue_t backgroundQueue;
     [friendSuggestionController setDelegate:self];
     
     editorController = [[StixEditorViewController alloc] init];
-    [editorController setDelegate:self];
+    [editorController setAppDelegate:self];
 
     lastViewController = feedController;
     [camera setCameraOverlayView:tagViewController.view];
@@ -543,6 +543,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         }
     }
     if (!gotTokenForShare) {
+        NSLog(@"Delegate didGetFacebookInfo for login! going back to loginSplashController");
         [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
         
         // update facebookString on kumulos
@@ -557,6 +558,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         // user is already logged in
 
         // update facebookString on kumulos
+        NSLog(@"Delegate didGetFacebookInfo for share token!");
         NSLog(@"Already logged in user: %@ %@ %@", myUserInfo_username, myUserInfo_email, facebookString);
         NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:myUserInfo_username, @"username", myUserInfo_email, @"email", facebookString, @"facebookID", nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -1504,6 +1506,29 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     [tag setHighResImage:highResImage];
     [shareController startUploadImage:tag withDelegate:self];
+}
+
+-(void)didGetHighResImage:(UIImage *)highResImage forTagID:(NSNumber *)tagID {
+    // optimization - only request high res image once
+    Tag * t = [allTagIDs objectForKey:tagID];
+    [t setHighResImage:highResImage];
+    
+    for (int i=0; i<[feedController.allTags count]; i++) {
+        Tag * t = [feedController.allTags objectAtIndex:i];
+        if ([[t tagID] intValue] == [tagID intValue]) {
+            NSLog(@"DidGetHighResImage: updating allTags at index %d", i);
+            [t setHighResImage:highResImage];
+            return;
+        }
+    }
+    for (int i=0; i<[feedController.allTagsDisplayed count]; i++) {
+        Tag * t = [feedController.allTagsDisplayed objectAtIndex:i];
+        if ([[t tagID] intValue] == [tagID intValue]) {
+            NSLog(@"DidGetHighResImage: updating allTagsDisplayed at index %d", i);
+            [t setHighResImage:highResImage];
+            return;
+        }
+    }
 }
 
 -(void)khCallback_didUpdateStixLayer:(NSArray *)returnParams {
@@ -3806,7 +3831,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if 0
     UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Buy more Bux" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"5 Bux for $0.99", @"15 Bux for $2.99", @"40 Bux for $4.99", @"80 Bux for $8.99", @"170 Bux for $19.99", @"475 Bux for $49.99", nil];
     actionSheet.tag = ACTIONSHEET_TAG_BUYBUX;
-    [actionSheet showFromTabBar:tabBarController.tabBar];
+    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
+    [actionSheet setActionSheetStyle:UIActionSheetStyleBlackOpaque];
     [actionSheet release];
 #endif
     
@@ -4944,6 +4970,7 @@ static NSMutableSet * retainedDetailControllers;
     NSLog(@"Did click remix with with tagID %@ by %@, creating tagToRemix with ID %@", tag.tagID, tag.username, tagToRemix.tagID);
     if (tagToRemix.stixLayer) {
         UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
+        [actionSheet setTag:ACTIONSHEET_TAG_REMIX];
         [actionSheet showFromTabBar:tabBarController.tabBar];
     }
     else {
@@ -4958,6 +4985,12 @@ static NSMutableSet * retainedDetailControllers;
     [detailController setDelegate:self];    
     [detailController initDetailViewWithTag:tag];
     [nav pushViewController:detailController animated:YES];
+    
+    // also add to feed if it doesn't exist
+    if ([allTagIDs objectForKey:tag.tagID] == nil) {
+        [self addTagWithCheck:tag withID:[tag.tagID intValue]];
+        [feedController forceReloadWholeTableZOMG];
+    }
 }
 
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)_detailController {

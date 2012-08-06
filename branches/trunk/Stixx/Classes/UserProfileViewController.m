@@ -422,37 +422,6 @@
     }
      */
     //else 
-#if 0
-    if ([contentViews objectForKey:key] == nil) {
-        NSNumber * tagID = [allTagIDs objectAtIndex:actualIndex];
-        Tag * tag = [allTags objectForKey:tagID];
-        
-        int contentWidth = [pixTableController getContentWidth];
-        int targetWidth = contentWidth;
-        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
-        CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
-        
-        StixView * cview = [[StixView alloc] initWithFrame:frame];
-        [cview setInteractionAllowed:YES];
-        [cview setIsPeelable:NO];
-        [cview setDelegate:self];
-        
-        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
-        
-        // sometimes requests just fail and never show up
-        [cview populateWithAuxStixFromTag:tag];
-        if (![isShowingPlaceholderView objectForKey:tagID]) {
-            cview.isShowingPlaceholder = YES;
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:tagID];
-            
-            [self createPlaceholderViewForStixView:cview andKey:key andTagID:tagID];
-        }
-        else {
-            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:tagID] boolValue];
-        }
-        [contentViews setObject:cview forKey:key];
-    }
-#else
     if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
         NSNumber * tagID = [allTagIDs objectAtIndex:index]; 
         NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
@@ -494,7 +463,6 @@
         }
         [contentViews setObject:cview forKey:key];
     }
-#endif
     StixView * cview = [contentViews objectForKey:key];
     if (cview.isShowingPlaceholder) {
         UIView * placeholder = [placeholderViews objectForKey:key];
@@ -712,7 +680,7 @@
     [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
     }];
 #else
-    //[delegate shouldDisplayDetailViewWithTag:tag];
+    [delegate shouldDisplayDetailViewWithTag:tag];
 #endif
 
 #if USING_FLURRY
@@ -800,9 +768,6 @@
     [self initSearchResultLists];
     
     NSLog(@"Getting follows list from kumulos for username: %@", username);
-    //if (searchResultsController) {
-    //    [searchResultsController.view removeFromSuperview];
-    //}
     FriendSearchResultsController * searchResultsController = [[FriendSearchResultsController alloc] init];
     [searchResultsController.view setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
     [searchResultsController setDelegate:self];

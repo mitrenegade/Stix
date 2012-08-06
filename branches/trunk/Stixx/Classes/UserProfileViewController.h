@@ -39,6 +39,7 @@
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 -(void)didChangeFriendsFromUserProfile;
 -(void)didClickChangePhoto;
+-(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
 @end
 
 @interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate, FriendSearchResultsDelegate>{
@@ -91,8 +92,6 @@
 @property (nonatomic) OutlineLabel * myFollowingLabel;
 @property (nonatomic) ColumnTableController * pixTableController;
 @property (nonatomic) UIView * headerView;
-//@property (nonatomic) DetailViewController * detailController;
-//@property (nonatomic) FriendSearchResultsController * searchResultsController;
 @property (nonatomic) UIScrollView * scrollView;
 
 -(void)populateUserInfo;

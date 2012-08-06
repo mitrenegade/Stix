@@ -19,8 +19,6 @@
 #import "CommentViewController.h"
 #import "ShareController.h"
 #import "KumulosHelper.h"
-//#import "UserProfileViewController.h"
-//#import "StixEditorViewController.h"
 
 @class DetailViewController;
 
@@ -85,7 +83,6 @@
     BOOL newPixDidClickShare;
     BOOL newPixDidFinishUpload;
 
-    //StixEditorViewController * stixEditorController;
     Tag * tagToRemix;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;

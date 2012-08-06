@@ -150,7 +150,7 @@
 -(void)loginUser {
     NSString* username = facebookName;    
     //[self checkForRitaPelosiBug:facebookString];
-
+    NSLog(@"LoginUser");
 #if 0
     //NSString* password = [NSString stringWithFormat:@"%d", 0];
         NSLog(@"FacebookLoginController: Logging in user %@ using password %@", username, password);
@@ -275,6 +275,7 @@
 #pragma mark KumulosDelegate functions
 
 -(void)khCallback_didGetFacebookUser:(NSMutableArray*)theResults {
+    NSLog(@"DidGetFacebookUser");
     if ([theResults count] == 0) {
         // new user - JOIN
         //NSLog(@"Facebook ID does not exist in user database - creating new user");
@@ -292,6 +293,7 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createFacebookUserDidCompleteWithResult:(NSArray *)theResults {
+    NSLog(@"CreateFacebookUser");
  
     NSString* username = facebookName;
     if (usersFacebookUsername)
@@ -328,7 +330,7 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginViaFacebookStringDidCompleteWithResult:(NSArray *)theResults {
-    
+    NSLog(@"LoginViaFacebookString");
     if ([theResults count]) {
         // successful login using given facebookString
         NSMutableDictionary * d = [theResults objectAtIndex:0];
@@ -355,7 +357,10 @@
         [self addUsernameForFacebookUser];
 #else
         // hack: if users were wrongly assigned the overflow facebookID 2147483647, look for username/email
-        [k loginWithNameOrEmailWithLoginName:facebookEmail];
+        //[k loginWithNameOrEmailWithLoginName:facebookEmail];
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:facebookEmail, nil];
+        [kh execute:@"loginWithNameOrEmail" withParams:params withCallback:@selector(khCallback_didLoginWithNameOrEmail:) withDelegate:self];
 #endif
     }
 }
@@ -364,7 +369,10 @@
     [self loginUser];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginWithNameOrEmailDidCompleteWithResult:(NSArray *)theResults {
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginWithNameOrEmailDidCompleteWithResult:(NSArray *)theResults {
+-(void)khCallback_didLoginWithNameOrEmail:(NSArray*)returnParams {
+    NSArray * theResults = [returnParams objectAtIndex:0];
+    // BOBBY: if never comes back here, never proceeds. needs a timeout
     [self stopActivityIndicator];
     if ([theResults count] == 0) {
         // this is a legitimate new user (facebookString and facebookEmail are not in our database)
@@ -415,7 +423,16 @@
     [self performSelector:callback withObject:params afterDelay:0];
 }
 
-// the only didFail function in kumulos helper delegate
+-(void)kumulosHelperDidFail:(NSString *)function {
+    NSLog(@"FacebookLogin: kumulosHelper failed on function %@", function);
+    if ([function isEqualToString:@"loginWithNameOrEmail"]) {
+        // also in requestFailed in FacebookHelper for error -1001
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Login Timeout" message:[NSString stringWithFormat:@"Time ran out while searching for user %@", facebookEmail] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+        [self shouldShowButtons];
+    }
+}
+
 -(void)kumulosHelperGetFacebookUserDidFail {
 #if 0
     NSLog(@"Facebook login failed! Kumulos had some error. trying to login again");

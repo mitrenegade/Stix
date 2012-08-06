@@ -13,7 +13,7 @@
 @synthesize imageView;
 @synthesize buttonSave, buttonClear, buttonClose, buttonDelete, buttonAddstix;
 @synthesize stixPanel;
-@synthesize delegate;
+@synthesize appDelegate;
 @synthesize stixView;
 @synthesize remixTag;
 
@@ -42,8 +42,8 @@
     
     [self setStixPanel:[StixPanelView sharedStixPanelView]];
     [stixPanel setDelegate:self];
-    [stixPanel setDismissedTabY:460-STATUS_BAR_SHIFT];
-    [stixPanel setExpandedTabY:50-STATUS_BAR_SHIFT+SHELF_LOWER_FROM_TOP];
+    [stixPanel setDismissedTabY:480-STATUS_BAR_SHIFT];
+    [stixPanel setExpandedTabY:70-STATUS_BAR_SHIFT+SHELF_LOWER_FROM_TOP];
     [stixPanel carouselTabDismiss:NO];
     [self.view addSubview:stixPanel];
 }
@@ -51,22 +51,14 @@
 -(void)viewWillAppear:(BOOL)animated {
     // because there are two instances of the stixEditor and only one shared stixPanel
     [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:NO];
     [self configureStixPanel];
 }
 
-/*
- // trying to find the delay...cannot find
--(void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    NSLog(@"***** VIEW WILL APPEAR *****");
-    NSLog(@"***** VIEW WILL APPEAR added stixpanel *****");
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
 }
-
--(void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    NSLog(@"***** view did appear ****");
-}
- */
 
 -(void)initializeWithTag:(Tag*)tag remixMode:(int)_remixMode {
     // remix mode:
@@ -236,7 +228,7 @@
     [self saveRemixedPix];
     
 #if USING_FLURRY
-    if (!IS_ADMIN_USER([delegate getUsername]))
+    if (!IS_ADMIN_USER([appDelegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Saved Edits", @"Method Of Quitting", nil]];
 #endif
 }
@@ -244,9 +236,9 @@
     NSLog(@"Did click close stix editor");
     if (isLoadingPixSource)
         return;
-    [delegate didCloseEditor];
+    [appDelegate didCloseEditor];
 #if USING_FLURRY
-    if (!IS_ADMIN_USER([delegate getUsername]))
+    if (!IS_ADMIN_USER([appDelegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Edits", @"Method Of Quitting", nil]];
 #endif
 }
@@ -311,8 +303,8 @@
     }
     
     // saves to tag if it doesnt already have it - for optimization
-    if ([delegate respondsToSelector:@selector(didGetHighResImage:forTagID:)])
-        [delegate didGetHighResImage:highResImage forTagID:tag.tagID];
+    if ([appDelegate respondsToSelector:@selector(didGetHighResImage:forTagID:)])
+        [appDelegate didGetHighResImage:highResImage forTagID:tag.tagID];
     
     [stixView initializeWithImage:newImage];
     [tag.auxStixStringIDs removeAllObjects]; // force no stix
@@ -328,7 +320,7 @@
     NSLog(@"Finishing editor with remix mode: %d", remixMode);
 
     // clear existing auxStixStringIDs
-    [delegate didCloseEditor]; // delegate is always app delegate
+    [appDelegate didCloseEditor]; // delegate is always app delegate
     
     [remixTag setAuxStixStringIDs:nil];
     
@@ -356,6 +348,6 @@
     //[auxStixStringIDs removeAllObjects];
     //[auxStixViews removeAllObjects];
     [remixTag.auxStixStringIDs removeAllObjects];
-    [delegate didRemixNewPix:remixTag remixMode:remixMode];
+    [appDelegate didRemixNewPix:remixTag remixMode:remixMode];
 }
 @end

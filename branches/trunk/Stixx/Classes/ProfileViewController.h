@@ -11,7 +11,6 @@
 #import "Kumulos.h"
 #import "StixAnimation.h"
 #import "LoadingAnimationView.h"
-#import "FriendSearchResultsController.h"
 #import "FacebookHelper.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
@@ -55,7 +54,6 @@
     
     UITableView * buttonsTableView;
     FriendSearchTableViewController * friendsTableView;
-    //FriendSearchResultsController * searchResultsController;
 
     // friend suggestion controller
     NSMutableArray * suggestedFriends;

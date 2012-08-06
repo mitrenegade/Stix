@@ -30,6 +30,7 @@
 		9E11515F15C70C0700D88D06 /* tab_feed_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E11515D15C70C0600D88D06 /* tab_feed_on@2x.png */; };
 		9E11516015C70C0700D88D06 /* tab_feed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E11515E15C70C0700D88D06 /* tab_feed@2x.png */; };
 		9E11B9D2154210890021A940 /* overlay.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E11B9D1154210880021A940 /* overlay.png */; };
+		9E158C8A15CF932800ADEF9D /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E158C8915CF932800ADEF9D /* StixPanelView.m */; };
 		9E17AE011543526D00F9E5F8 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E17AE001543526D00F9E5F8 /* Appirater.m */; };
 		9E17AE051543780100F9E5F8 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E17AE041543780100F9E5F8 /* Crashlytics.framework */; };
 		9E17AE0715437A3100F9E5F8 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E17AE0615437A3100F9E5F8 /* StoreKit.framework */; };
@@ -117,7 +118,6 @@
 		9E59D09A1587C590000D13CC /* btn_feed_more@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E59D0861587C590000D13CC /* btn_feed_more@2x.png */; };
 		9E59D09E1587D28B000D13CC /* StixEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E59D09C1587D28A000D13CC /* StixEditorViewController.m */; };
 		9E59D09F1587D28B000D13CC /* StixEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E59D09D1587D28A000D13CC /* StixEditorViewController.xib */; };
-		9E59D0A51587D727000D13CC /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E59D0A41587D727000D13CC /* StixPanelView.m */; };
 		9E5ACD9014A94BB400B2E8DD /* KumulosData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E5D440C15B4A830000C58F1 /* FriendServicesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D440A15B4A830000C58F1 /* FriendServicesViewController.m */; };
 		9E5D440D15B4A830000C58F1 /* FriendServicesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D440B15B4A830000C58F1 /* FriendServicesViewController.xib */; };
@@ -474,6 +474,8 @@
 		9E11515E15C70C0700D88D06 /* tab_feed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_feed@2x.png"; sourceTree = "<group>"; };
 		9E11B9D1154210880021A940 /* overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = overlay.png; sourceTree = "<group>"; };
 		9E1233D614DDDDF900D46DBD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		9E158C8815CF932800ADEF9D /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixPanelView.h; sourceTree = "<group>"; };
+		9E158C8915CF932800ADEF9D /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixPanelView.m; sourceTree = "<group>"; };
 		9E17ADFF1543526D00F9E5F8 /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
 		9E17AE001543526D00F9E5F8 /* Appirater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
 		9E17AE041543780100F9E5F8 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
@@ -576,8 +578,6 @@
 		9E59D09B1587D28A000D13CC /* StixEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixEditorViewController.h; sourceTree = "<group>"; };
 		9E59D09C1587D28A000D13CC /* StixEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixEditorViewController.m; sourceTree = "<group>"; };
 		9E59D09D1587D28A000D13CC /* StixEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StixEditorViewController.xib; sourceTree = "<group>"; };
-		9E59D0A31587D726000D13CC /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StixPanelView.h; path = ../../StixPanelView.h; sourceTree = "<group>"; };
-		9E59D0A41587D727000D13CC /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StixPanelView.m; path = ../../StixPanelView.m; sourceTree = "<group>"; };
 		9E5ACD8E14A94BB300B2E8DD /* KumulosData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumulosData.h; sourceTree = "<group>"; };
 		9E5ACD8F14A94BB400B2E8DD /* KumulosData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumulosData.m; sourceTree = "<group>"; };
 		9E5D440915B4A830000C58F1 /* FriendServicesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendServicesViewController.h; sourceTree = "<group>"; };
@@ -1064,17 +1064,17 @@
 			name = "Feed View";
 			sourceTree = "<group>";
 		};
-		9E940CD8159AE70F00F53687 /* Badge Tools */ = {
+		9E940CD8159AE70F00F53687 /* StixPanel */ = {
 			isa = PBXGroup;
 			children = (
 				9E8A29C614AF76B300CDCE76 /* StixView.h */,
 				9E8A29C714AF76B400CDCE76 /* StixView.m */,
 				9EB031B8142C01260019F2BD /* BadgeView.h */,
 				9EB031B9142C01260019F2BD /* BadgeView.m */,
-				9E59D0A31587D726000D13CC /* StixPanelView.h */,
-				9E59D0A41587D727000D13CC /* StixPanelView.m */,
+				9E158C8815CF932800ADEF9D /* StixPanelView.h */,
+				9E158C8915CF932800ADEF9D /* StixPanelView.m */,
 			);
-			name = "Badge Tools";
+			name = StixPanel;
 			sourceTree = "<group>";
 		};
 		9E940CD9159AE72F00F53687 /* Comments */ = {
@@ -1416,7 +1416,7 @@
 				9E940CDF159AE9B900F53687 /* Profile and User Gallery */,
 				9E940CDE159AE98900F53687 /* Stix Editor */,
 				9E940CDC159AE91E00F53687 /* Animation Utilities */,
-				9E940CD8159AE70F00F53687 /* Badge Tools */,
+				9E940CD8159AE70F00F53687 /* StixPanel */,
 				9E940CD7159AE6FE00F53687 /* Feed View */,
 				9E940CDB159AE7AF00F53687 /* Tag View */,
 				9E940CDA159AE74800F53687 /* Explore View */,
@@ -2239,7 +2239,6 @@
 				9E57C12D15829CCD00FB1B91 /* FriendSuggestionController.m in Sources */,
 				9E9A877A158694510067957A /* PixPreviewController.m in Sources */,
 				9E59D09E1587D28B000D13CC /* StixEditorViewController.m in Sources */,
-				9E59D0A51587D727000D13CC /* StixPanelView.m in Sources */,
 				9E940CED159AEE5700F53687 /* LoginViewController.m in Sources */,
 				9E9E701F159C4C4900EF996F /* SignupViewController.m in Sources */,
 				9E5E55A3159D945200274C98 /* CreateFacebookUsernameController.m in Sources */,
@@ -2254,6 +2253,7 @@
 				9ECBBA5315BE680300E6E48E /* AddressBookViewController.m in Sources */,
 				9EB6255F15CA60CB000CCCED /* AROverlayViewController.m in Sources */,
 				9EB6256015CA60CB000CCCED /* CaptureSessionManager.m in Sources */,
+				9E158C8A15CF932800ADEF9D /* StixPanelView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

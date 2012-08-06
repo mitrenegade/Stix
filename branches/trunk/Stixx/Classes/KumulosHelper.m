@@ -217,6 +217,12 @@ static KumulosHelper *sharedKumulosHelper = nil;
         NSLog(@"Setting twitterString %@ for user %@", twitterString, userID);
         kOp = [k setTwitterStringForUserWithAllUserID:[userID intValue] andTwitterString:twitterString];
     }
+    else if ([function isEqualToString:@"loginWithNameOrEmail"]) {
+        // initial login - checks for existence of either login name or email
+        NSString * loginString = [inputParams objectAtIndex:0];
+        NSLog(@"KumulosHelper: LoginWithNameOrEmail with login %@", loginString);
+        kOp = [k loginWithNameOrEmailWithLoginName:loginString];
+    }
     
     if (!kOp) 
         NSLog(@"KumulosHelper finished executing %@", _function);
@@ -374,12 +380,15 @@ static KumulosHelper *sharedKumulosHelper = nil;
     [self doCallback:returnParams];
 }
 
-
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFeaturedUsersDidCompleteWithResult:(NSArray *)theResults {
     NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects: theResults, nil];
     [self doCallback:returnParams];
 }
 
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginWithNameOrEmailDidCompleteWithResult:(NSArray *)theResults {
+    NSMutableArray * returnParams = [[NSMutableArray alloc] initWithObjects: theResults, nil];
+    [self doCallback:returnParams];
+}
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation incrementPopularityDidCompleteWithResult:(NSNumber *)affectedRows {
     [self cleanup];
@@ -442,6 +451,11 @@ static KumulosHelper *sharedKumulosHelper = nil;
     else if ([function isEqualToString:@"getFeaturedUsers"]) {
         if (self.delegate && [delegate respondsToSelector:@selector(kumulosHelperGetFeaturedUsersDidFail)]) {
             [delegate kumulosHelperGetFeaturedUsersDidFail];
+        }
+    }
+    else if ([function isEqualToString:@"loginWithNameOrEmail"]) {
+        if (self.delegate && [delegate respondsToSelector:@selector(kumulosHelperDidFail:)]) {
+            [delegate kumulosHelperDidFail:function];
         }
     }
 }

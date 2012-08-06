@@ -20,7 +20,7 @@
 @synthesize galleryUsername;
 //@synthesize detailController;
 @synthesize tagToRemix;
-@synthesize stixEditorController;
+//@synthesize stixEditorController;
 
 #define EXPLORE_COL 3
 #define EXPLORE_ROW 2

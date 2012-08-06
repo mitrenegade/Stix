@@ -229,13 +229,6 @@ static BOOL openingDetailView;
     [scrollView setContentSize:CGSizeMake(320, feedHeight + tableHeight + 5)];
     [scrollView addSubview:feedItem.view];
     [scrollView addSubview:commentsTable.view];
-/*
-    if (!stixEditorController)
-    {
-        stixEditorController = [[StixEditorViewController alloc] init];
-        [stixEditorController setDelegate:self];
-    }
- */
 }
 
 -(void)setScrollHeight:(int)height {

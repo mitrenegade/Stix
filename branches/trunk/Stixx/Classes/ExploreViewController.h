@@ -21,7 +21,6 @@
 #import "KumulosHelper.h"
 #import "GlobalHeaders.h"
 #import "FlurryAnalytics.h"
-#import "StixEditorViewController.h"
 
 @protocol ExploreViewDelegate
 -(int)getStixCount:(NSString*)stixStringID;
@@ -53,7 +52,7 @@ enum {
     EXPLORE_MODE_MAX
 };
 
-@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, KumulosHelperDelegate, StixEditorDelegate> 
+@interface ExploreViewController : UIViewController <ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, UIAlertViewDelegate, KumulosHelperDelegate> 
 {
     int exploreMode;
     int numColumns;
@@ -102,7 +101,6 @@ enum {
     
     Kumulos * k;
     
-    StixEditorViewController * stixEditorController;
     Tag * tagToRemix;
     
     BOOL bHasView;
@@ -124,8 +122,6 @@ enum {
 #endif
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 @property (nonatomic, copy) NSString * galleryUsername;
-//@property (nonatomic) DetailViewController * detailController;
-@property (nonatomic) StixEditorViewController * stixEditorController;
 @property (nonatomic) Tag * tagToRemix;
 //-(void)getTagWithID:(int)id;
 //-(IBAction)feedbackButtonClicked:(id)sender;

@@ -44,7 +44,7 @@
     StixView * stixView;
     Tag * remixTag;
     
-    NSObject<StixEditorDelegate> * __unsafe_unretained delegate;
+    NSObject<StixEditorDelegate> * __unsafe_unretained appDelegate;
     
     LoadingAnimationView * activityIndicator;
     
@@ -60,7 +60,7 @@
 @property (nonatomic) IBOutlet UIButton * buttonClose;
 @property (nonatomic) StixPanelView * stixPanel;
 @property (nonatomic) StixView * stixView;
-@property (nonatomic, unsafe_unretained) NSObject<StixEditorDelegate> * delegate;
+@property (nonatomic, unsafe_unretained) NSObject<StixEditorDelegate> * appDelegate;
 @property (nonatomic) Tag * remixTag;
 
 -(IBAction)didClickButtonDelete:(id)sender;

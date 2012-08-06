@@ -93,14 +93,16 @@
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
--(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
+//-(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
 -(void)requestTagWithTagID:(int)tagID;
 
 // check for first time user state
 -(BOOL)canClickRemixButton; // test user stage
 -(BOOL)canClickNotesButton;
 -(void)didClickRemixButton; // advance user stage
--(void)didCloseEditorFromFeedController; // advance user stage
+//-(void)didCloseEditorFromFeedController; // advance user stage
+//-(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate, StixAnimationDelegate> {

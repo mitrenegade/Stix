@@ -99,6 +99,11 @@
         [buttonAll setAlpha:.5];
         [buttonAll setEnabled:NO];
         [tableView setHidden:YES];
+        
+        if ([delegate didGetAllUsers] == NO) {
+            [noFriendsLabel setText:@"Stix users not loaded yet..."];
+            [noFriendsButton setHidden:YES];
+        }
     }
 }
 
@@ -273,22 +278,27 @@
     else if (mode == PROFILE_SEARCHMODE_SEARCHBAR) {
         [delegate followAllUsers];
     }
+    
+    [self.tableView reloadData];
 }
 
 -(void)didAddFriend:(UIButton*)sender {
     //NSString * name = [delegate getUsernameForUserAtIndex:sender.tag];
     //NSLog(@"Clicked add friend button %d: adding %@!", sender.tag, name);
     [delegate followUserAtIndex:sender.tag];
+    [self.tableView reloadData];
 }
 -(void)didRemoveFriend:(UIButton*)sender {
     //NSLog(@"Clicked remove friend button %d!", sender.tag);
     //NSString * name = [delegate getUsernameForUserAtIndex:sender.tag];
     [delegate unfollowUserAtIndex:sender.tag];
+    [self.tableView reloadData];
 }
 -(void)didInviteFriend:(UIButton*)sender {
     //NSLog(@"Clicked invite friend button %d!", sender.tag);
     //NSString * name = [delegate getUsernameForUserAtIndex:sender.tag];
     [delegate inviteUserAtIndex:sender.tag];
+    [self.tableView reloadData];
 }
 
 -(void)didClickUserPhoto:(UIButton*)button {

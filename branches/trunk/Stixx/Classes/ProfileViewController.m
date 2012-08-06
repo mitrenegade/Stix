@@ -661,6 +661,10 @@
     return userPhoto;
 }
 
+-(BOOL)didGetAllUsers {
+    return [delegate didGetAllUsers];
+}
+
 //-(int)getNumOfUsers {
 //    return [searchFriendName count];
 //}
@@ -709,26 +713,6 @@
     return didGetTwitterFriends;
 }
 
-/*
--(void)addFriendFromList:(int)index {
-    NSString * username = [self getUsernameForUser:index];
-    //NSMutableSet * friendsList = [self.delegate getFriendsList];
-    if ([self getFollowingUserStatus:index] == 1) { 
-        [delegate setFollowing:username toState:NO];
-    }
-    else if ([self getFollowingUserStatus:index] == 0)
-    {
-        [delegate setFollowing:username toState:YES];
-    }
-    else {
-        // invite
-        NSString * _facebookString = nil; //[self getIDForUser:index]; 
-        [delegate didClickInviteButtonByFacebook:username withFacebookString:_facebookString];
-    }
-    //[[searchResultsController tableView] reloadData];
-}
- */
-
 -(void)followUser:(NSString*)name {
     NSLog(@"Profile: starting to follow name: %@", name);
     if (![delegate isFollowing:name])
@@ -758,7 +742,7 @@
         NSLog(@"friend services view is taking care of it!");
     }
 }
-
+/*
 -(void)didSelectUserProfile:(int)index {
     NSString * username = [self getUsernameForUser:index];
     if ([username isEqualToString:[delegate getUsername]]) {
@@ -770,7 +754,7 @@
         //}   
     }
 }
-
+*/
 -(void)shouldDisplayUserPage:(NSString *)name {
     [delegate shouldDisplayUserPage:name];
 }

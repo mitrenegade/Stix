@@ -12,7 +12,7 @@
 #import "UIImage+Resize.h"
 #import "BadgeView.h"
 #import "KumulosData.h"
-#import "FriendSearchResultsController.h"
+//#import "FriendSearchResultsController.h"
 #import "SMWebRequest.h"
 #import "LoadingAnimationView.h"
 #import <AddressBook/AddressBook.h>
@@ -23,6 +23,7 @@
 #import "FlurryAnalytics.h"
 #import "GlobalHeaders.h"
 #import "StixView.h"
+#import "StixUsersViewController.h"
 
 @protocol UserProfileViewDelegate
 
@@ -40,9 +41,11 @@
 -(void)didChangeFriendsFromUserProfile;
 -(void)didClickChangePhoto;
 -(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
+-(void)reloadSuggestionsForOutsideChange;
+-(BOOL)didGetAllUsers;
 @end
 
-@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate, FriendSearchResultsDelegate>{
+@interface UserProfileViewController : UIViewController <UIAlertViewDelegate, UIImagePickerControllerDelegate, KumulosDelegate, UINavigationControllerDelegate, UITextFieldDelegate, UISearchBarDelegate, ColumnTableControllerDelegate, KumulosDelegate, StixViewDelegate, StixAnimationDelegate, UIActionSheetDelegate, KumulosHelperDelegate, UIScrollViewDelegate, StixUsersViewDelegate>{
     
     Kumulos * k;
         

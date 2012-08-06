@@ -36,6 +36,8 @@
 
 -(void)shouldDisplayUserPage:(NSString*)name;
 -(void)switchToInviteMode;
+
+-(BOOL)didGetAllUsers;
 @end
 
 @interface StixUsersViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>

@@ -95,29 +95,6 @@
     pendingContentCount = 0;
 }
 
-/*
--(void)toggleMyButtons:(BOOL)show {
-    [nameLabel setHidden:!show];
-    [photoButton setHidden:!show];
-    [buttonAddFriend setHidden:!show];
-
-    [bgFollowing setHidden:!show];
-    [bgFollowers setHidden:!show];
-
-    [myFollowersCount setHidden:!show];
-    [myFollowersLabel setHidden:!show];
-    [myFollowingCount setHidden:!show];
-    [myFollowingLabel setHidden:!show];
-    
-    [pixTableController.view setHidden:!show];
-    
-#if USING_FLURRY == 1
-    if (!IS_ADMIN_USER([self getUsername]))
-        [FlurryAnalytics logPageView];
-#endif
-}
- */
-
 -(void)startActivityIndicator {
     //[logo setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
@@ -134,24 +111,16 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-//    if (isDisplayingFollowLists) {
-//        [searchResultsController.view removeFromSuperview];
-//        [self toggleMyButtons:YES];
-//        isDisplayingFollowLists = NO;
-//    }
-//    else {
         [self.navigationController popViewControllerAnimated:YES];        
-//    }
-//        [delegate shouldCloseUserPage];
 }
-
-//-(void)shouldCloseUserPage {
-//    [delegate shouldCloseUserPage];
-//}
 
 -(UIImage*)getUserPhotoForUsername:(NSString*)name
 {
     return [self.delegate getUserPhotoForUsername:name];
+}
+
+-(BOOL)didGetAllUsers {
+    return [delegate didGetAllUsers];
 }
 
 /**** friendsViewControllerDelegate ****/
@@ -308,24 +277,7 @@
 }
 
 -(void)didSelectUserProfile:(int)index {
-    NSString * new_username = [self getUsernameForUser:index];
-    /*
-    if ([new_username isEqualToString:[delegate getUsername]]) {
-        [self didClickBackButton:nil];
-        [delegate shouldDisplayUserPage:[delegate getUsername]];
-    }
-    else {
-        CGRect frameOffscreen = self.view.frame;
-        frameOffscreen.origin.x -= 330;
-        StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doViewTransition:self.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-            [searchResultsController.view removeFromSuperview];
-            isDisplayingFollowLists = NO;
-            [self toggleMyButtons:YES];
-            [self shouldDisplayUserPage:new_username];
-        }];
-    }
-     */
+    NSString * new_username = [self getUsernameForUserAtIndex:index];
     if ([new_username isEqualToString:[delegate getUsername]]) {
         [self didClickBackButton:nil];
     }
@@ -334,21 +286,21 @@
     }
 }
 
-#pragma mark FriendSearchResultsDelegate
--(NSString*)getUsernameForUser:(int)index {
+#pragma mark StixUsersViewController
+-(int)getNumOfUsers {
+    return [searchFriendName count];
+}
+
+-(NSString*)getUsernameForUserAtIndex:(int)index {
     return [searchFriendName objectAtIndex:index];
+}
+-(NSString*)getUserEmailForUserAtIndex:(int)index {
+    return [searchFriendEmail objectAtIndex:index];
 }
 -(UIImage*)getUserPhotoForUserAtIndex:(int)index {
     NSString * friendName = [searchFriendName objectAtIndex:index];
     UIImage * userPhoto = [delegate getUserPhotoForUsername:friendName];
     return userPhoto;
-}
--(NSString*)getUserEmailForUser:(int)index {
-    //NSString * friendName = [searchFriendName objectAtIndex:index];
-    return @""; //[[[delegate getAllUsers] objectForKey:friendName] objectForKey:@"email"];
-}
--(NSString*)getFacebookStringForUser:(int)index {
-    return [searchFriendFacebookString objectAtIndex:index];
 }
 -(int)getFollowingUserStatus:(int)index {
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
@@ -359,32 +311,37 @@
         return -2;
     return [[delegate getFollowingList] containsObject:friendName];
 }
-
--(int)getNumOfUsers {
-    return [searchFriendName count];
+-(void)followUserAtIndex:(int)index {
+    NSString * name = [self getUsernameForUserAtIndex:index];
+    [delegate setFollowing:name toState:YES];
+}
+-(void)unfollowUserAtIndex:(int)index {
+    NSString * name = [self getUsernameForUserAtIndex:index];
+    [delegate setFollowing:name toState:NO];
+}
+-(void)followAllUsers {
+    for (int i=0; i<[searchFriendName count]; i++) {
+        NSString * name = [searchFriendName objectAtIndex:i];
+        if (![[delegate getFollowingList] containsObject:name])
+            [self followUserAtIndex:i];
+    }
+    // TODO: update profile page
+    [delegate reloadSuggestionsForOutsideChange];
+}
+-(void)inviteUserAtIndex:(int)index {
+    // no invite here
+}
+-(void)inviteAllUsers {
+    // no invite
+}
+-(void)switchToInviteMode {
+    // nothing
 }
 
-#pragma UserGalleryDelegate
-/*
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString *)stixStringID {
-//    [self.delegate didAddCommentWithTagID:tagID andUsername:name andComment:comment andStixStringID:stixStringID];
+-(NSString*)getFacebookStringForUser:(int)index {
+    return [searchFriendFacebookString objectAtIndex:index];
 }
-*/
--(void)addFriendFromList:(int)index{
-    NSString * name = [self getUsernameForUser:index];
-    //NSMutableSet * friendsList = [self.delegate getFriendsList];
-    if ([self getFollowingUserStatus:index] == 1) { 
-        [delegate setFollowing:name toState:NO];
-    }
-    else if ([self getFollowingUserStatus:index] == 0)
-    {
-        [delegate setFollowing:name toState:YES];
-    }
-    else {
-        // cannot invite!
-    }
-    [[pixTableController tableView] reloadData];
-}
+
 #pragma mark ColumnTableController delegate
 -(int)numberOfRows {
     double total = [allTagIDs count];
@@ -768,22 +725,15 @@
     [self initSearchResultLists];
     
     NSLog(@"Getting follows list from kumulos for username: %@", username);
-    FriendSearchResultsController * searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
-    [searchResultsController setDelegate:self];
-    [searchResultsController.view setBackgroundColor:[UIColor clearColor]];
-    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
-    
-//    [self toggleMyButtons:NO];
-//    [self.view addSubview:searchResultsController.view];
-//    isDisplayingFollowLists = YES;
-    [self.navigationController pushViewController:searchResultsController animated:YES];
-    
     for (NSString * following in allFollowing) {
-        NSLog(@"ProfileViewController: followingSet contains %@", following);
+        //NSLog(@"ProfileViewController: followingSet contains %@", following);
         [searchFriendName addObject:following];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
+    
+    StixUsersViewController * searchResultsController = [[StixUsersViewController alloc] init];
+    [searchResultsController setDelegate:self];    
+    [self.navigationController pushViewController:searchResultsController animated:YES];
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];
     isSearching = NO;
@@ -793,25 +743,14 @@
     NSLog(@"Getting follower list from kumulos for username: %@", username);
     
     [self initSearchResultLists];
-    
-    //if (searchResultsController) {
-    //    [searchResultsController.view removeFromSuperview];
-   // }
-    FriendSearchResultsController * searchResultsController = [[FriendSearchResultsController alloc] init];
-    [searchResultsController.view setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
-    [searchResultsController setDelegate:self];
-    [searchResultsController.view setBackgroundColor:[UIColor clearColor]];
-    searchResultsController.tableView.showsVerticalScrollIndicator = NO;
-
-//    [self toggleMyButtons:NO];
-//    [self.view addSubview:searchResultsController.view];
-//    isDisplayingFollowLists = YES;
-    [self.navigationController pushViewController:searchResultsController animated:YES];
 
     for (NSString * follower in allFollowers) {
         [searchFriendName addObject:follower];
         [searchFriendIsStix addObject:[NSNumber numberWithBool:YES]];
     }
+    StixUsersViewController * searchResultsController = [[StixUsersViewController alloc] init];
+    [searchResultsController setDelegate:self];
+    [self.navigationController pushViewController:searchResultsController animated:YES];
     [searchResultsController.tableView reloadData];
     [self stopActivityIndicator];
     isSearching = NO;

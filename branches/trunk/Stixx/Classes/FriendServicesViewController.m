@@ -611,6 +611,10 @@
     return @"";
 }
 
+-(BOOL)didGetAllUsers {
+    return [delegate didGetAllUsers];
+}
+
 -(int)getFollowingUserStatus:(int)index {
     if (![[searchFriendIsStix objectAtIndex:index] boolValue])
         return -1; // not stix: invite
@@ -634,13 +638,13 @@
 -(void)followUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate followUser:name];
-    [stixUsersController.tableView reloadData];
+//    [stixUsersController.tableView reloadData];
     [delegate reloadSuggestionsForOutsideChange]; // will already be done
 }
 -(void)unfollowUserAtIndex:(int)index {
     NSString * name = [searchFriendName objectAtIndex:index];
     [delegate unfollowUser:name];
-    [stixUsersController.tableView reloadData];
+//    [stixUsersController.tableView reloadData];
     [delegate reloadSuggestionsForOutsideChange]; // will already be done
 }
 -(void)inviteUserAtIndex:(int)index {
@@ -664,7 +668,7 @@
         if (![delegate isFollowing:name])
             [delegate followUser:name];
     }
-    [stixUsersController.tableView reloadData];
+//    [stixUsersController.tableView reloadData];
     [delegate reloadSuggestionsForOutsideChange];
 }
 -(void)inviteAllUsers {

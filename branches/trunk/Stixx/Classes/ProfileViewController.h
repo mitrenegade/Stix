@@ -46,9 +46,12 @@
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didClickChangePhoto;
 -(void)didConnectToTwitter;
+
+-(BOOL)didGetAllUsers;
+
 @end
 
-@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
+@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
 {
     UIScrollView * scrollView;
     

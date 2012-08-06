@@ -42,6 +42,7 @@
 
 -(void)shouldDisplayUserPage:(NSString*)name;
 -(void)didConnectToTwitter;
+-(BOOL)didGetAllUsers;
 @end
 
 @interface FriendServicesViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, StixUsersViewDelegate, TwitterHelperDelegate, UIAlertViewDelegate, FacebookHelperDelegate>

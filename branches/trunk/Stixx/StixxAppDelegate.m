@@ -1821,7 +1821,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
                 [feedController reloadPageForTagID:[tag.tagID intValue]];
 
             // new system of auxiliary stix: request from auxiliaryStixes table
-            if (1) {
+            if (0) {
                 NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil]; 
                 KumulosHelper * kh = [[KumulosHelper alloc] init];
                 [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
@@ -2384,6 +2384,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif  
     
     //[Admin adminUpdateAllUserFacebookStrings:theResults];
+    NSLog(@"DidGetAllUsers!");
+    didGetAllUsers = YES;
     
     NSLog(@"kumulosHelper getAllUsers did complete with %d users", [theResults count]);
     [allUsers removeAllObjects];
@@ -2414,6 +2416,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [allUserIDs setObject:userID forKey:name];
         //NSLog(@"AllUserIDS: %@ %d", name, [userID intValue]);
     }
+    NSLog(@"allUserFacebookStrings: %d", [allUserFacebookStrings count]);
     [feedController forceReloadWholeTableZOMG];
     [friendSuggestionController refreshUserPhotos];
     [newsController refreshUserPhotos];
@@ -2580,6 +2583,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didReceiveFacebookFriends:(NSArray*)friendsArray {
+    NSLog(@"DidReceiveFacebookFriends! updating profileController and friendSuggestionController!");
     [profileController didGetFacebookFriends:friendsArray];
     if (friendSuggestionController) // && isShowingFriendSuggestions)
         [friendSuggestionController populateFacebookSearchResults:friendsArray];
@@ -2590,6 +2594,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(NSMutableArray*)getAllUserFacebookStrings {
+    NSLog(@"Returning %d alluserfacebookstrings", [allUserFacebookStrings count]);
     return allUserFacebookStrings;
 }
 -(NSMutableArray*)getAllUserTwitterStrings {
@@ -3209,6 +3214,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return myUserInfo_userphoto;
 }
 
+-(BOOL)didGetAllUsers {
+    return didGetAllUsers;
+}
+
 -(UIImage *)getUserPhotoForProfile {
     // for profile view
     if ([self isLoggedIn]) {
@@ -3792,6 +3801,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }];
 }
 */
+
+-(void)reloadSuggestionsForOutsideChange {
+    [profileController reloadSuggestionsForOutsideChange];
+}
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
 #if DEBUGX==1

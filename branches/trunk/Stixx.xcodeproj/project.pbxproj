@@ -1017,7 +1017,7 @@
 			name = "Feed View";
 			sourceTree = "<group>";
 		};
-		9E940CD8159AE70F00F53687 /* Badge Tools */ = {
+		9E940CD8159AE70F00F53687 /* Stix Panel */ = {
 			isa = PBXGroup;
 			children = (
 				9E8A29C614AF76B300CDCE76 /* StixView.h */,
@@ -1027,7 +1027,7 @@
 				9E59D0A31587D726000D13CC /* StixPanelView.h */,
 				9E59D0A41587D727000D13CC /* StixPanelView.m */,
 			);
-			name = "Badge Tools";
+			name = "Stix Panel";
 			sourceTree = "<group>";
 		};
 		9E940CD9159AE72F00F53687 /* Comments */ = {
@@ -1361,7 +1361,7 @@
 				9E940CDF159AE9B900F53687 /* Profile and User Gallery */,
 				9E940CDE159AE98900F53687 /* Stix Editor */,
 				9E940CDC159AE91E00F53687 /* Animation Utilities */,
-				9E940CD8159AE70F00F53687 /* Badge Tools */,
+				9E940CD8159AE70F00F53687 /* Stix Panel */,
 				9E940CD7159AE6FE00F53687 /* Feed View */,
 				9E940CDB159AE7AF00F53687 /* Tag View */,
 				9E940CDA159AE74800F53687 /* Explore View */,
@@ -2404,8 +2404,8 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "73AA205A-D338-4405-9C87-4026C94E0A6D";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "73AA205A-D338-4405-9C87-4026C94E0A6D";
+				PROVISIONING_PROFILE = "1D18EC3C-305A-4008-9A3C-15ECCB2777C9";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1D18EC3C-305A-4008-9A3C-15ECCB2777C9";
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
 				VALID_ARCHS = "armv6 armv7";

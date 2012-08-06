@@ -130,8 +130,11 @@
     // if any of the followingSet is a featured user, separate that out
     NSLog(@"FollowingSetWithMe has %d elements initially", [followingSetWithMe count]);
     if (!featuredUsers)
-        featuredUsers = [[NSMutableSet alloc] init];
-    [featuredUsers unionSet:[delegate getFeaturedUserSet]];
+        featuredUsers = [[NSMutableSet alloc] initWithSet:[delegate getFeaturedUserSet]];
+    else {
+        [featuredUsers removeAllObjects];
+        [featuredUsers unionSet:[delegate getFeaturedUserSet]];
+    }
     [featuredUsers addObject:@"William Ho"];
     [featuredUsers addObject:[delegate getUsername]];     
     NSLog(@"FeaturedUsers has %d elements: %@", [featuredUsers count], featuredUsers);
@@ -147,17 +150,16 @@
 
 -(void)getUserPixForUsers { //:(NSMutableSet*)followingSetWithMe {
     if (!pauseAggregation) {
-        // hack: download for will ho or featured users first
-        
         NSString * name = nil;
         //NSLog(@"Featured users left: %@ remainderSet left: %d", featuredUsers, [remainderSet count]);
         if ([featuredUsers count] > 0) {
             NSEnumerator * enumerator = [featuredUsers objectEnumerator];
             name = [enumerator nextObject];
             if (name) {
-                [featuredUsers removeObject:name];
                 // next line causes crash but only in debug mode...???
                 NSLog(@"Aggregating new tags for featured user %@", name);
+                if ([featuredUsers containsObject:name])
+                    [featuredUsers removeObject:name];
             }
         }
         else {
@@ -165,7 +167,8 @@
             NSEnumerator * enumerator = [remainderSet objectEnumerator];
             name = [enumerator nextObject];
             if (name)
-                [remainderSet removeObject:name];
+                if ([remainderSet containsObject:name])
+                    [remainderSet removeObject:name];
         }
         
         if (!name)

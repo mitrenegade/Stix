@@ -239,7 +239,26 @@ static NSMutableArray * premiumCategoryNames;
     //[self reloadAllStix]; // done when clicking on shelf category
 }
 
+-(void)startActivityIndicatorLarge {
+    if (!activityIndicatorLarge) {
+        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 150, 90, 90)];
+    }
+    [carouselTab addSubview:activityIndicatorLarge];
+    [activityIndicatorLarge setHidden:NO];
+    [activityIndicatorLarge startCompleteAnimation];
+}
+
+-(void)stopActivityIndicatorLarge {
+    if (activityIndicatorLarge) {
+        [activityIndicatorLarge setHidden:YES];
+        [activityIndicatorLarge stopCompleteAnimation];
+        [activityIndicatorLarge removeFromSuperview];
+    }
+}
+
+
 -(void)didClickShelfCategory:(id)sender {
+    [self startActivityIndicatorLarge];
     UIButton * senderButton = (UIButton *)sender;
     if (senderButton.tag == shelfCategory)
         return;
@@ -381,6 +400,8 @@ static NSMutableArray * premiumCategoryNames;
         }
         [carouselTab addSubview:[premiumPurchaseButtons objectForKey:categoryName]];
     }
+    
+    [self stopActivityIndicatorLarge];
 }
 
 -(NSString *) getStixDescriptorForStixStringID:(NSString *)stixStringID {
@@ -452,8 +473,7 @@ static NSMutableArray * premiumCategoryNames;
     
     isPromptingPremiumPurchase = NO;
     if (activityIndicatorLarge) {
-        [activityIndicatorLarge stopCompleteAnimation];
-        [activityIndicatorLarge removeFromSuperview];
+        [self stopActivityIndicatorLarge];
     }
     
 #if ADMIN_TESTING_MODE
@@ -483,10 +503,7 @@ static NSMutableArray * premiumCategoryNames;
         return;
     
     isPromptingPremiumPurchase = YES;
-    if (!activityIndicatorLarge)
-        activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [self addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
+    [self startActivityIndicatorLarge];
     
     [delegatePurchase shouldPurchasePremiumPack:[self getCurrentCategory] usingStixStringID:stixStringID]; 
 }

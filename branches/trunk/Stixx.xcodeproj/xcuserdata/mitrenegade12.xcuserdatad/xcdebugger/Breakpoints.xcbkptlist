@@ -949,11 +949,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "254"
-         endingLineNumber = "254"
+         startingLineNumber = "257"
+         endingLineNumber = "257"
          landmarkName = "-kumulosAPI:apiOperation:getSomeNewPixBelongingToUserDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1066,11 +1066,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "502"
-         endingLineNumber = "502"
+         startingLineNumber = "505"
+         endingLineNumber = "505"
          landmarkName = "-getTagIDsLessThanTagID:totalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1079,11 +1079,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "305"
-         endingLineNumber = "305"
+         startingLineNumber = "308"
+         endingLineNumber = "308"
          landmarkName = "-insertNewTagID:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1209,11 +1209,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/KumulosHelper.m"
-         timestampString = "365633786.214477"
+         timestampString = "365881918.220041"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "397"
-         endingLineNumber = "397"
+         startingLineNumber = "406"
+         endingLineNumber = "406"
          landmarkName = "-kumulosAPI:apiOperation:didFailWithError:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1248,11 +1248,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "StixPanelView.m"
-         timestampString = "365027250.612345"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "631"
-         endingLineNumber = "631"
+         startingLineNumber = "648"
+         endingLineNumber = "648"
          landmarkName = "-hitTest:withEvent:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1287,11 +1287,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/KumulosHelper.m"
-         timestampString = "365633786.214477"
+         timestampString = "365881918.220041"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "247"
-         endingLineNumber = "247"
+         startingLineNumber = "253"
+         endingLineNumber = "253"
          landmarkName = "-kumulosAPI:apiOperation:savePixDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1391,11 +1391,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/KumulosHelper.m"
-         timestampString = "365633786.214477"
+         timestampString = "365881918.220041"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "422"
-         endingLineNumber = "422"
+         startingLineNumber = "431"
+         endingLineNumber = "431"
          landmarkName = "-kumulosAPI:apiOperation:didFailWithError:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1456,11 +1456,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/KumulosHelper.m"
-         timestampString = "365633786.214477"
+         timestampString = "365881918.220041"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "409"
-         endingLineNumber = "409"
+         startingLineNumber = "418"
+         endingLineNumber = "418"
          landmarkName = "-kumulosAPI:apiOperation:didFailWithError:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1610,11 +1610,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "StixPanelView.m"
-         timestampString = "365027250.612345"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "576"
-         endingLineNumber = "576"
+         startingLineNumber = "593"
+         endingLineNumber = "593"
          landmarkName = "-carouselTabExpand:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1727,11 +1727,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/FacebookLoginController.m"
-         timestampString = "363749650.51361"
+         timestampString = "365896640.209467"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "313"
-         endingLineNumber = "313"
+         startingLineNumber = "315"
+         endingLineNumber = "315"
          landmarkName = "-kumulosAPI:apiOperation:userLoginDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1740,11 +1740,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/FacebookLoginController.m"
-         timestampString = "363749650.51361"
+         timestampString = "365896640.209467"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "361"
-         endingLineNumber = "361"
+         startingLineNumber = "366"
+         endingLineNumber = "366"
          landmarkName = "-kumulosAPI:apiOperation:loginViaFacebookStringDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1779,11 +1779,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/FacebookLoginController.m"
-         timestampString = "363749650.51361"
+         timestampString = "365896640.209467"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "392"
-         endingLineNumber = "392"
+         startingLineNumber = "400"
+         endingLineNumber = "400"
          landmarkName = "@implementation FacebookLoginController"
          landmarkType = "3">
       </FileBreakpoint>
@@ -1792,11 +1792,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "246"
-         endingLineNumber = "246"
+         startingLineNumber = "249"
+         endingLineNumber = "249"
          landmarkName = "-kumulosAPI:apiOperation:getSomeNewPixBelongingToUserDidCompleteWithResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1805,11 +1805,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "380"
-         endingLineNumber = "380"
+         startingLineNumber = "383"
+         endingLineNumber = "383"
          landmarkName = "-processAggregationQueueInBackground"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1883,11 +1883,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "356"
-         endingLineNumber = "356"
+         startingLineNumber = "359"
+         endingLineNumber = "359"
          landmarkName = "-processAggregationQueueInBackground"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1909,11 +1909,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "488"
-         endingLineNumber = "488"
+         startingLineNumber = "491"
+         endingLineNumber = "491"
          landmarkName = "-getTagIDsLessThanTagID:totalTags:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1935,11 +1935,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363657143.709366"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "144"
-         endingLineNumber = "144"
+         startingLineNumber = "147"
+         endingLineNumber = "147"
          landmarkName = "-aggregateNewTagIDs"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1948,11 +1948,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "536"
-         endingLineNumber = "536"
+         startingLineNumber = "539"
+         endingLineNumber = "539"
          landmarkName = "@implementation UserTagAggregator"
          landmarkType = "3">
       </FileBreakpoint>
@@ -2076,11 +2076,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "165"
-         endingLineNumber = "165"
+         startingLineNumber = "167"
+         endingLineNumber = "167"
          landmarkName = "-getUserPixForUsers"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2102,11 +2102,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/UserTagAggregator.m"
-         timestampString = "363754035.720468"
+         timestampString = "365910917.862394"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "184"
-         endingLineNumber = "184"
+         startingLineNumber = "187"
+         endingLineNumber = "187"
          landmarkName = "-getUserPixForUsers"
          landmarkType = "5">
       </FileBreakpoint>
@@ -2412,11 +2412,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/FriendSuggestionController.m"
-         timestampString = "365633786.214477"
+         timestampString = "365897758.171304"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "173"
-         endingLineNumber = "173"
+         startingLineNumber = "175"
+         endingLineNumber = "175"
          landmarkName = "-khCallback_didGetFeaturedUsers:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -3145,19 +3145,6 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Stixx/StixxAppDelegate.m"
-         timestampString = "365681829.202891"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1244"
-         endingLineNumber = "1244"
-         landmarkName = "-didConfirmNewPix:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
@@ -3188,11 +3175,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Stixx/Classes/FriendSuggestionController.m"
-         timestampString = "365633786.214477"
+         timestampString = "365897758.171304"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "210"
-         endingLineNumber = "210"
+         startingLineNumber = "214"
+         endingLineNumber = "214"
          landmarkName = "-kumulosHelperGetFeaturedUsersDidFail"
          landmarkType = "5">
       </FileBreakpoint>

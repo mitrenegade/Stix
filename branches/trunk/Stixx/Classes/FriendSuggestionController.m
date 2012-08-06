@@ -148,8 +148,10 @@
 
     int total = [featured count] + [friends count];
     didGetFacebookFriends = YES;
-    if (didGetFeaturedUsers)
+    if (didGetFeaturedUsers) {
+        NSLog(@"***FriendSuggestionController: facebook friends loaded after featured; total suggestions %d", total);
         [delegate friendSuggestionControllerFinishedLoading:total];
+    }
     else 
         NSLog(@"***FriendSuggestionController: facebook friends loaded first!");
 }
@@ -191,8 +193,10 @@
     didGetFeaturedUsers = YES;
     [delegate didGetFeaturedUsers:theResults];
     int total = [featured count] + [friends count];
-    if (didGetFacebookFriends)
+    if (didGetFacebookFriends) {
+        NSLog(@"***FriendSuggestionController: featured users loaded after facebook; total suggestions %d", total);
         [delegate friendSuggestionControllerFinishedLoading:total];
+    }
     else 
         NSLog(@"***FriendSuggestionController: featured users loaded first!");
 }

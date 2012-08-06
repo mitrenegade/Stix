@@ -312,7 +312,7 @@ static NSString * appID;
 // response for requestWithGraphPath
 - (void)request:(FBRequest *)request didLoad:(id)result {
     NSDictionary * dictionary = result;
-    //NSLog(@"Result: %@", result);
+    NSLog(@"FacebookHelper FBRequest didLoad with Result: %@", result);
     if ([currentRequest isEqualToString:@"requestGraphPathMe"])
         [delegate didGetFacebookInfo:dictionary forShareOnly:getTokenForShare];
     else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])

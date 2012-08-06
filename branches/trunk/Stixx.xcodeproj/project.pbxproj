@@ -23,6 +23,7 @@
 		9E0C9C8214EEADE100FF4C8D /* bux_coin.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8114EEADE100FF4C8D /* bux_coin.png */; };
 		9E0C9C8D14EECECF00FF4C8D /* StixAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C9C8C14EECECB00FF4C8D /* StixAnimation.m */; };
 		9E0D042E15853896009767AD /* libFlurryAnalytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E0D042D15853896009767AD /* libFlurryAnalytics.a */; };
+		9E10844515CF819F005C7C4C /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E10844415CF819F005C7C4C /* StixPanelView.m */; };
 		9E11B9D2154210890021A940 /* overlay.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E11B9D1154210880021A940 /* overlay.png */; };
 		9E17AE011543526D00F9E5F8 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E17AE001543526D00F9E5F8 /* Appirater.m */; };
 		9E17AE051543780100F9E5F8 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E17AE041543780100F9E5F8 /* Crashlytics.framework */; };
@@ -67,7 +68,6 @@
 		9E43DAA91538C0E000B39F4A /* bux_rewards.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E43DAA81538C0E000B39F4A /* bux_rewards.png */; };
 		9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E47ED1915068C8F00F4E250 /* ColumnTableController.m */; };
 		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
-		9E4DA24415CF7C02003B6BC0 /* StixPanelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */; };
 		9E5216E3155B210800CD0AD5 /* icon_lite_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E2155B210700CD0AD5 /* icon_lite_57.png */; };
 		9E5216E5155B210E00CD0AD5 /* icon_lite_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E4155B210E00CD0AD5 /* icon_lite_114.png */; };
 		9E5383761460C13D00C1D354 /* UIImage+Alpha.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5383711460C13D00C1D354 /* UIImage+Alpha.m */; };
@@ -458,6 +458,8 @@
 		9E0C9C8C14EECECB00FF4C8D /* StixAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixAnimation.m; sourceTree = "<group>"; };
 		9E0D042C15853896009767AD /* FlurryAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FlurryAnalytics.h; path = FlurryAnalytics/FlurryAnalytics.h; sourceTree = "<group>"; };
 		9E0D042D15853896009767AD /* libFlurryAnalytics.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libFlurryAnalytics.a; path = FlurryAnalytics/libFlurryAnalytics.a; sourceTree = "<group>"; };
+		9E10844315CF819F005C7C4C /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixPanelView.h; sourceTree = "<group>"; };
+		9E10844415CF819F005C7C4C /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixPanelView.m; sourceTree = "<group>"; };
 		9E11B9D1154210880021A940 /* overlay.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = overlay.png; sourceTree = "<group>"; };
 		9E1233D614DDDDF900D46DBD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		9E17ADFF1543526D00F9E5F8 /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
@@ -512,8 +514,6 @@
 		9E47ED1815068C8F00F4E250 /* ColumnTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColumnTableController.h; sourceTree = "<group>"; };
 		9E47ED1915068C8F00F4E250 /* ColumnTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColumnTableController.m; sourceTree = "<group>"; };
 		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
-		9E4DA24215CF7BDE003B6BC0 /* StixPanelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixPanelView.h; sourceTree = "<group>"; };
-		9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixPanelView.m; sourceTree = "<group>"; };
 		9E5216E2155B210700CD0AD5 /* icon_lite_57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_lite_57.png; sourceTree = "<group>"; };
 		9E5216E4155B210E00CD0AD5 /* icon_lite_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_lite_114.png; sourceTree = "<group>"; };
 		9E5383701460C13D00C1D354 /* UIImage+Alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Alpha.h"; sourceTree = "<group>"; };
@@ -1024,8 +1024,8 @@
 				9E8A29C714AF76B400CDCE76 /* StixView.m */,
 				9EB031B8142C01260019F2BD /* BadgeView.h */,
 				9EB031B9142C01260019F2BD /* BadgeView.m */,
-				9E4DA24315CF7C02003B6BC0 /* StixPanelView.m */,
-				9E4DA24215CF7BDE003B6BC0 /* StixPanelView.h */,
+				9E10844315CF819F005C7C4C /* StixPanelView.h */,
+				9E10844415CF819F005C7C4C /* StixPanelView.m */,
 			);
 			name = "Stix Panel";
 			sourceTree = "<group>";
@@ -2209,7 +2209,7 @@
 				9E5D446C15B517E8000C58F1 /* StixUsersViewController.m in Sources */,
 				9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */,
 				9ECBBA5315BE680300E6E48E /* AddressBookViewController.m in Sources */,
-				9E4DA24415CF7C02003B6BC0 /* StixPanelView.m in Sources */,
+				9E10844515CF819F005C7C4C /* StixPanelView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

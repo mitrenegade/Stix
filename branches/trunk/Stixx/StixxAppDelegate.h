@@ -41,7 +41,6 @@
 #import "StixEditorViewController.h"
 #import "Admin.h"
 #import "NewsletterViewController.h"
-#import "AROverlayViewController.h"
 
 #import "SHK.h" // sharekit
 #import "SHKConfiguration.h"

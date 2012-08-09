@@ -96,7 +96,7 @@
     
     //UINavigationController * navController;
     FriendServicesViewController * servicesController;
-    UIImagePickerController * __unsafe_unretained camera;
+//    UIImagePickerController * __unsafe_unretained camera;
     UIWebView * webView;
     
     
@@ -106,10 +106,10 @@
 @property (nonatomic) LoadingAnimationView * activityIndicator;
 @property (nonatomic) FriendServicesViewController * servicesController;
 @property (nonatomic) UIScrollView * scrollView;
-@property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
+//@property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) IBOutlet UIButton * buttonAbout;
-@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
 
 -(IBAction)didClickFeedbackButton:(id)sender;
 -(IBAction)didClickAboutButton:(id)sender;

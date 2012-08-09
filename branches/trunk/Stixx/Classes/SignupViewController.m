@@ -28,15 +28,22 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        inputViews = [[NSMutableDictionary alloc] init];
-        inputFields = [[NSMutableArray alloc] initWithCapacity:5];
-        for (int i=0; i<5; i++) 
-            [inputFields addObject:[NSNull null]];
-        didChangePhoto = NO;
-        k = [[Kumulos alloc] init];
-        [k setDelegate:self];
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];    
     }
     return self;
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
 }
 
 - (void)viewDidLoad
@@ -44,9 +51,17 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [[self tableView] setDelegate:self];
-    [tableView setFrame:CGRectMake(10, 60, 300, 4*54-20)];
+    [tableView setFrame:CGRectMake(10, 60, 300, 4*54)];
     [tableView.layer setCornerRadius:10];
     [tableView setScrollEnabled:NO];
+
+    inputViews = [[NSMutableDictionary alloc] init];
+    inputFields = [[NSMutableArray alloc] initWithCapacity:5];
+    for (int i=0; i<5; i++) 
+        [inputFields addObject:[NSNull null]];
+    didChangePhoto = NO;
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
 
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 320, 80, 80)];
     [self.view addSubview:activityIndicator];
@@ -333,7 +348,7 @@
     
     NSLog(@"Added new user! email %@ name %@ recordID: %@ photo? %d", email.text, username.text, newRecordID, didChangePhoto);
 
-    [delegate shouldDismissSecondaryViewWithTransition:self.view];
+    [self.navigationController popViewControllerAnimated:YES];
     [delegate didLoginFromEmailSignup:[username text] andPhoto:didChangePhoto?[[photoButton imageView] image]:nil andEmail:[email text] andUserID:newRecordID];
 }
 
@@ -376,6 +391,7 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [delegate shouldDismissSecondaryViewWithTransition:self.view];
+    [self.navigationController popViewControllerAnimated:YES];
+    [delegate shouldShowButtons];
 }
 @end

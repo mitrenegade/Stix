@@ -29,7 +29,7 @@
 
 #define HAS_PROFILE_BUTTON 0
 
-#define ADMIN_TESTING_MODE 0
+#define ADMIN_TESTING_MODE 1
 #define VERBOSE 0
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
 #define IS_ADMIN_USER(x) [ADMIN_USER_SET containsObject:x]
@@ -44,14 +44,15 @@
 #define SHOW_ARROW 0
 
 // hack to make camera fill screen for a custom (shorter) tab bar
-#define CAMERA_TRANSFORM_X 1.12412
-#define CAMERA_TRANSFORM_Y 1.12412
+#define CAMERA_TRANSFORM_X 1 //.12412
+#define CAMERA_TRANSFORM_Y 1 //.12412
 
 #define FTUE_REDISPLAY_TIMER 10 // time before the message is redisplayed
 #define FTUE_BOUNCE_COUNT 2
 #define FTUE_BOUNCE_DISTANCE 10
 #define NEWSCOUNT_DISPLAY_TIMER 5
 
+#define USING_AVCAPTURE 1
 enum {
     SUGGESTIONS_SECTION_FEATURED = 0,
     SUGGESTIONS_SECTION_FRIENDS = 1,

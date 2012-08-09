@@ -58,7 +58,6 @@
 						<int key="NSvFlags">274</int>
 						<string key="NSFrame">{{9, 99}, {303, 224}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">10</int>
@@ -224,8 +223,8 @@ AAgACAAIAAEAAQABAAE</bytes>
 						<reference key="object" ref="191373211"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="1028177345"/>
-							<reference ref="232895902"/>
 							<reference ref="978656515"/>
+							<reference ref="232895902"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>

@@ -537,7 +537,7 @@ static int tickID = -1;
     if (!newsCallout) {
         newsCallout = [[UIButton alloc] init];
         UIImage * img = [UIImage imageNamed:@"graphic_FTUE_callout"];
-        CGRect frame = CGRectMake(120, 330, img.size.width+25, img.size.height+20);
+        CGRect frame = CGRectMake(120, 350, img.size.width+25, img.size.height+20);
         [newsCallout setFrame:frame];
         [newsCallout setImage:img forState:UIControlStateNormal];
         newsCountLabel = [[UILabel alloc] init];

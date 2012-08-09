@@ -55,7 +55,7 @@
 						<int key="NSvFlags">256</int>
 						<string key="NSFrame">{{0, -10}, {320, 480}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
-						<reference key="NSNextKeyView" ref="322399612"/>
+						<reference key="NSNextKeyView" ref="464882864"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">4</int>
@@ -79,8 +79,9 @@
 					<object class="IBUIImageView" id="464882864">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">256</int>
-						<string key="NSFrame">{{0, -2}, {320, 44}}</string>
+						<string key="NSFrameSize">{320, 44}</string>
 						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSNextKeyView" ref="586404208"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">4</int>
@@ -94,7 +95,7 @@
 					<object class="IBUIButton" id="284605270">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{94, -8}, {60, 60}}</string>
+						<string key="NSFrame">{{101, -8}, {60, 60}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSNextKeyView" ref="835948143"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
@@ -223,6 +224,30 @@
 						<reference key="IBUIFontDescription" ref="121135233"/>
 						<reference key="IBUIFont" ref="27303481"/>
 					</object>
+					<object class="IBUIButton" id="586404208">
+						<reference key="NSNextResponder" ref="191373211"/>
+						<int key="NSvFlags">292</int>
+						<string key="NSFrame">{{8, 7}, {45, 29}}</string>
+						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSNextKeyView" ref="322399612"/>
+						<string key="NSReuseIdentifierKey">_NS:9</string>
+						<bool key="IBUIOpaque">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<int key="IBUIContentHorizontalAlignment">0</int>
+						<int key="IBUIContentVerticalAlignment">0</int>
+						<reference key="IBUIHighlightedTitleColor" ref="545778398"/>
+						<object class="NSColor" key="IBUINormalTitleColor">
+							<int key="NSColorSpace">1</int>
+							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+						</object>
+						<reference key="IBUINormalTitleShadowColor" ref="282220130"/>
+						<object class="NSCustomResource" key="IBUINormalImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">nav_back.png</string>
+						</object>
+						<reference key="IBUIFontDescription" ref="121135233"/>
+						<reference key="IBUIFont" ref="27303481"/>
+					</object>
 				</object>
 				<string key="NSFrameSize">{320, 480}</string>
 				<reference key="NSSuperview"/>
@@ -292,6 +317,14 @@
 					<int key="connectionID">123</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">buttonClose</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="586404208"/>
+					</object>
+					<int key="connectionID">127</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">toggleFlashMode:</string>
 						<reference key="source" ref="284605270"/>
@@ -327,6 +360,15 @@
 					</object>
 					<int key="connectionID">121</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">didClickCloseButton:</string>
+						<reference key="source" ref="586404208"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">126</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -351,8 +393,9 @@
 							<reference ref="1023797282"/>
 							<reference ref="164538889"/>
 							<reference ref="464882864"/>
-							<reference ref="284605270"/>
 							<reference ref="835948143"/>
+							<reference ref="284605270"/>
+							<reference ref="586404208"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -412,6 +455,11 @@
 						<reference key="object" ref="464882864"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">125</int>
+						<reference key="object" ref="586404208"/>
+						<reference key="parent" ref="191373211"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -429,6 +477,7 @@
 					<string>115.IBPluginDependency</string>
 					<string>116.IBPluginDependency</string>
 					<string>12.IBPluginDependency</string>
+					<string>125.IBPluginDependency</string>
 					<string>21.IBPluginDependency</string>
 					<string>22.IBPluginDependency</string>
 					<string>92.IBPluginDependency</string>
@@ -438,6 +487,7 @@
 					<string>TagViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -463,7 +513,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">124</int>
+			<int key="maxID">127</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
@@ -486,6 +536,7 @@
 				<string>camerabutton.png</string>
 				<string>flash_auto.png</string>
 				<string>import.png</string>
+				<string>nav_back.png</string>
 				<string>nav_bar.png</string>
 				<string>overlay.png</string>
 				<string>switch_camera.png</string>
@@ -496,6 +547,7 @@
 				<string>{115, 38}</string>
 				<string>{35, 35}</string>
 				<string>{29, 29}</string>
+				<string>{45, 30}</string>
 				<string>{320, 44}</string>
 				<string>{320, 480}</string>
 				<string>{51, 29}</string>

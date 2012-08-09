@@ -283,7 +283,6 @@
 		9EB41B2C15617DE000204A10 /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9EB41B1D15617DDF00204A10 /* requestAccess.php */; };
 		9EB41B2D15617DE000204A10 /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9EB41B1E15617DDF00204A10 /* verifyProduct.php */; };
 		9EB5F680148AA7C000F403D1 /* graphic_nopic.png in Resources */ = {isa = PBXBuildFile; fileRef = 9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */; };
-		9EB6255F15CA60CB000CCCED /* AROverlayViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB6255C15CA60CB000CCCED /* AROverlayViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9EB6256015CA60CB000CCCED /* CaptureSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB6255E15CA60CB000CCCED /* CaptureSessionManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9EB6256215CA6266000CCCED /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB6256115CA6266000CCCED /* CoreMedia.framework */; };
 		9EB6256415CA6270000CCCED /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB6256315CA6270000CCCED /* AVFoundation.framework */; };
@@ -785,8 +784,6 @@
 		9EB41B1D15617DDF00204A10 /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
 		9EB41B1E15617DDF00204A10 /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
 		9EB5F67F148AA7C000F403D1 /* graphic_nopic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_nopic.png; sourceTree = "<group>"; };
-		9EB6255B15CA60CB000CCCED /* AROverlayViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AROverlayViewController.h; sourceTree = "<group>"; };
-		9EB6255C15CA60CB000CCCED /* AROverlayViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AROverlayViewController.m; sourceTree = "<group>"; };
 		9EB6255D15CA60CB000CCCED /* CaptureSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CaptureSessionManager.h; sourceTree = "<group>"; };
 		9EB6255E15CA60CB000CCCED /* CaptureSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CaptureSessionManager.m; sourceTree = "<group>"; };
 		9EB6256115CA6266000CCCED /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
@@ -1106,8 +1103,6 @@
 		9E940CDB159AE7AF00F53687 /* Tag View */ = {
 			isa = PBXGroup;
 			children = (
-				9EB6255B15CA60CB000CCCED /* AROverlayViewController.h */,
-				9EB6255C15CA60CB000CCCED /* AROverlayViewController.m */,
 				9EB6255D15CA60CB000CCCED /* CaptureSessionManager.h */,
 				9EB6255E15CA60CB000CCCED /* CaptureSessionManager.m */,
 				9E9A8777158694510067957A /* PixPreviewController.h */,
@@ -2251,7 +2246,6 @@
 				9E5D446C15B517E8000C58F1 /* StixUsersViewController.m in Sources */,
 				9E98EBEA15B7B2AC00D720C4 /* TwitterHelper.m in Sources */,
 				9ECBBA5315BE680300E6E48E /* AddressBookViewController.m in Sources */,
-				9EB6255F15CA60CB000CCCED /* AROverlayViewController.m in Sources */,
 				9EB6256015CA60CB000CCCED /* CaptureSessionManager.m in Sources */,
 				9E158C8A15CF932800ADEF9D /* StixPanelView.m in Sources */,
 			);
@@ -2403,8 +2397,8 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "5329A2D9-0543-45B3-AD8C-9EC4BEB69D5A";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "5329A2D9-0543-45B3-AD8C-9EC4BEB69D5A";
+				PROVISIONING_PROFILE = "A2273BA5-D6F8-4C93-9439-62211053181E";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A2273BA5-D6F8-4C93-9439-62211053181E";
 				SEPARATE_STRIP = YES;
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
@@ -2452,8 +2446,8 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = Stix;
-				PROVISIONING_PROFILE = "73AA205A-D338-4405-9C87-4026C94E0A6D";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "73AA205A-D338-4405-9C87-4026C94E0A6D";
+				PROVISIONING_PROFILE = "61582958-CEBB-4F4D-84F9-9C2CBF123744";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "61582958-CEBB-4F4D-84F9-9C2CBF123744";
 				TARGETED_DEVICE_FAMILY = 1;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
 				VALID_ARCHS = "armv6 armv7";

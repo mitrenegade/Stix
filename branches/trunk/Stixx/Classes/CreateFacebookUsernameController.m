@@ -28,11 +28,15 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        inputFields = [[NSMutableArray alloc] initWithCapacity:2];
-        for (int i=0; i<2; i++) 
-            [inputFields addObject:[NSNull null]];
-        k = [[Kumulos alloc] init];
-        [k setDelegate:self];
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -42,13 +46,20 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [[self tableView] setDelegate:self];
-    [tableView setFrame:CGRectMake(10, 60, 300, 2*54-20)];
+    [tableView setFrame:CGRectMake(10, 60, 300, 2*54)];
     [tableView.layer setCornerRadius:10];
     [tableView setScrollEnabled:NO];
 
+    inputFields = [[NSMutableArray alloc] initWithCapacity:2];
+    for (int i=0; i<2; i++) 
+        [inputFields addObject:[NSNull null]];
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+    
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(120, 320, 80, 80)];
     [self.view addSubview:activityIndicator];
     [activityIndicator setHidden:YES];
+    [buttonLogin setEnabled:NO];
 }
 
 - (void)viewDidUnload
@@ -56,6 +67,11 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -239,17 +255,12 @@
     [self startActivityIndicator];
     
     NSString * fbUsername = login.text;
-#if 0
-    [delegate didAddFacebookUsername:fbUsername andPhoto:photoData];
-    [delegate shouldDismissSecondaryViewWithTransition:self.view];
-#else
     // check for existence of username 
     [k getUserWithUsername:fbUsername];
-#endif
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [delegate shouldDismissSecondaryViewWithTransition:self.view];
+    [self.navigationController popViewControllerAnimated:YES];
     [delegate shouldShowButtons];
 }
 
@@ -259,6 +270,7 @@
         [self stopActivityIndicator];
     }
     else {
+        NSLog(@"CreateFacebookUsername complete! closing");
         UITextField * login = [inputFields objectAtIndex:0];
         UIButton * photoButton = [inputFields objectAtIndex:1];
         NSString * fbUsername = login.text;
@@ -271,7 +283,7 @@
         
         [self startActivityIndicator];
         [delegate didAddFacebookUsername:fbUsername andPhoto:photoData];
-        [delegate shouldDismissSecondaryViewWithTransition:self.view];
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 @end

@@ -1,4 +1,5 @@
-        //
+
+//
 //  StixxAppDelegate.m
 //  Stixx
 //
@@ -243,8 +244,10 @@ static dispatch_queue_t backgroundQueue;
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
     //[window addSubview:tagViewController.view];
+#if !USING_AVCAPTURE
     camera.delegate = tagViewController;
     tagViewController.camera = camera;
+#endif
     //timeStampOfMostRecentTag = [[NSDate alloc] init];
     idOfNewestTagOnServer = -1;
     idOfOldestTagOnServer = 99999;
@@ -266,8 +269,9 @@ static dispatch_queue_t backgroundQueue;
     [feedController setDelegate:self];
     feedController.allTags = allTags;
     feedController.tabBarController = tabBarController;
+#if !USING_AVCAPTURE
     feedController.camera = camera; // hack: in order to present modal controllers that respond 
-
+#endif
     // get newest tag on server regardless of who is logged in
     // when login completes, feed will filter 
     //[self getFirstTags];
@@ -288,7 +292,9 @@ static dispatch_queue_t backgroundQueue;
 	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
+#if !USING_AVCAPTURE
     [profileController setCamera:camera];
+#endif
     //userProfileController = [[UserProfileViewController alloc] init];
     //userProfileController.delegate = self;
     
@@ -306,28 +312,9 @@ static dispatch_queue_t backgroundQueue;
     [editorController setAppDelegate:self];
 
     lastViewController = feedController;
+#if !USING_AVCAPTURE
     [camera setCameraOverlayView:tagViewController.view];
-    
-    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-    UIViewController * tmpController = [[UIViewController alloc] init];
-#if !TARGET_IPHONE_SIMULATOR
-#if USE_CAMERA_AS_ROOT
-    nav = [[UINavigationController alloc] initWithRootViewController:camera];
-#else
-    //nav = camera; // camera is a nav controller!
-    //[camera.navigationController pushViewController:tagViewController animated:NO];
-    nav = [[UINavigationController alloc] initWithRootViewController:tmpController];
-    nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
-#endif
-#else
-    nav = [[UINavigationController alloc] initWithRootViewController:tmpController];
-    nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
-#endif
-    // [self addSubview:nav.view];
-    [window addSubview:nav.view];
-    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
+#endif    
     
     CGRect frame = CGRectMake(0, 0, 72, 31);
     UIButton * buttonFeedback = [[UIButton alloc] initWithFrame:frame];
@@ -342,13 +329,23 @@ static dispatch_queue_t backgroundQueue;
     [tabBarController.navigationItem setLeftBarButtonItem:leftButton];
     [tabBarController.navigationItem setRightBarButtonItem:rightButton];
     [tabBarController initializeCustomButtons];
-    //[nav pushViewController:camera animated:YES];
-    [nav pushViewController:tabBarController animated:YES];
+
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
+    UIViewController * tmpController = [[UIViewController alloc] init];
+    nav = [[UINavigationController alloc] initWithRootViewController:tabBarController];
+    nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
+    [window addSubview:nav.view];
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
 
     [self loadCachedTags];
 
     // Login process - first load cached user info from defaults
+#if ADMIN_TESTING_MODE
+    loggedIn = NO;
+#else
     loggedIn = [self loadUserInfoFromDefaults];
+#endif
     isLoggingIn = NO;
     if (loggedIn) {
         NSLog(@"Loggin in as %@", myUserInfo_username);
@@ -375,12 +372,7 @@ static dispatch_queue_t backgroundQueue;
         isLoggingIn = YES;
         loggedIn = NO;
         [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-#if USE_CAMERA_AS_ROOT
-        // present login as camera overlay
-        [camera setCameraOverlayView:loginSplashController.view];
-#else
         [nav pushViewController:loginSplashController animated:YES];
-#endif
         isLoggingIn = NO;
     }
     
@@ -962,6 +954,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [tabBarController setSelectedIndex:pos];
     [tabBarController setButtonStateSelected:pos]; // highlight button
     if (pos == TABBAR_BUTTON_TAG) {
+        if (lastViewController == tabBarController)
+            return;
+        lastViewController = tabBarController;
         [self shouldOpenTagView];
     }
     else if (pos == TABBAR_BUTTON_FEED) {
@@ -1044,7 +1039,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
     [self.camera setCameraOverlayView:tabBarController.view];
 #else
-    [nav popToRootViewControllerAnimated:NO];
+    //[nav popToRootViewControllerAnimated:NO];
+    [nav popToViewController:tabBarController animated:YES];
 #endif
 }
 
@@ -1217,19 +1213,17 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         return;
     }
 #endif
+    
+    [tagViewController startCamera];
+    
 #if USE_CAMERA_AS_ROOT
 //    [self.camera setCameraOverlayView:tagViewController.view];
     [nav popToRootViewControllerAnimated:NO];
 #else
-    AROverlayViewController * cameraController = [[AROverlayViewController alloc] init];
-    [nav pushViewController:cameraController animated:NO];
-    [cameraController.view addSubview:tagViewController.view];
-    //[nav popToRootViewControllerAnimated:NO];
-    //[nav pushViewController:camera animated:YES];
-    //[nav pushViewController:tagViewController animated:NO];
-    //[nav presentModalViewController:camera animated:NO];
-    //[tabBarController presentModalViewController:camera animated:NO];
-    //[nav popToViewController:camera animated:NO];
+    //AROverlayViewController * cameraController = [[AROverlayViewController alloc] init];
+    //[nav pushViewController:cameraController animated:NO];
+    //[cameraController.view addSubview:tagViewController.view];
+    [nav pushViewController:tagViewController animated:NO];
 #endif
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
         [self hideFirstTimeUserMessage];
@@ -1237,7 +1231,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didCloseTagView {
+    [nav setNavigationBarHidden:NO];
     [nav popViewControllerAnimated:NO];
+    
+    [tagViewController stopCamera];
+    
     //[nav pushViewController:tabBarController animated:YES];
     //[tabBarController dismissModalViewControllerAnimated:NO];
     //[nav dismissModalViewControllerAnimated:NO];
@@ -1259,8 +1257,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)didConfirmNewPix:(Tag*)newTag {
     NSLog(@"Did confirm new pix ***********************************");
     // user took a new picture - read to add stix
-    [self didDismissSecondaryView];
-    [tabBarController setSelectedIndex:0];
+    //[self didDismissSecondaryView];
+    //[tabBarController setSelectedIndex:0];
+    [self didCloseTagView];
     
     // display stix editor
     NSLog(@"Displaying editor ***********************************" );
@@ -2651,13 +2650,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+
+    // splash screen does the dismissing
     
-    // dismiss facebook login screen and create camera screen
-#if 0
-    [camera setCameraOverlayView:tabBarController.view];
-#else
-    [nav popToViewController:tabBarController animated:YES]; // should pop logincontroller
-#endif
     NSLog(@"DidLoginFromSplashScreen: username %@ userID %@ facebookString %@ email %@", username, userID, facebookString, email);
 
 #if USING_FLURRY
@@ -3372,15 +3367,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
 }
 
--(void)didCloseFeedback {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // formerly dismissModalViewController
-    //[self didDismissSecondaryView];
-    [nav popViewControllerAnimated:YES];
-}
-
 -(void)didClickAboutButton {
     UIWebView * webView = [[UIWebView alloc] init];
     [webView setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
@@ -3510,6 +3496,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     NSLog(@"Displaying friendSuggestionController!");
     isShowingFriendSuggestions = YES;
+#if 0
     [self didDismissSecondaryView];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
     [camera setCameraOverlayView:tabBarController.view];
@@ -3524,35 +3511,21 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     StixAnimation * animation = [[StixAnimation alloc] init];
     [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
     }];
+#else
+    [nav pushViewController:friendSuggestionController animated:YES];
+#endif
 }
 
 -(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions { 
-    // used to be displayFriendSuggestionController
+    // friendSuggestionController is initialized but not shown
+    // comes here when both friends and featured have been downloaded
     NSLog(@"FriendSuggestionController finished loading with totalSuggestions: %d", totalSuggestions);
     if (totalSuggestions == 0) {
-        [self didDismissSecondaryView]; // close login controller
-        [self shouldCloseFriendSuggestionControllerWithNames:nil];
+        [self didAddFriendsFromFriendSuggestionController:nil];
     }
     else {
-        //isShowingFriendSuggestions = YES;
-#if USE_CAMERA_AS_ROOT
-        [self didDismissSecondaryView];
-        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-        [camera setCameraOverlayView:tabBarController.view];
-        [self.tabBarController setSelectedIndex:0];    
-
-        // hack a way to display feedback view over camera: formerly presentModalViewController
-        CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-        [self.tabBarController.view addSubview:friendSuggestionController.view];
-        [friendSuggestionController.view setFrame:frameOffscreen];
-        
-        CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-        StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doViewTransition:friendSuggestionController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-        }];
-#else
+        NSLog(@"Showing friend suggestions view");
         [nav pushViewController:friendSuggestionController animated:YES];
-#endif
     }        
 }
 
@@ -3692,22 +3665,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray *)addedFriends {
+-(void)didAddFriendsFromFriendSuggestionController:(NSArray *)addedFriends {
     isShowingFriendSuggestions = NO;
     didDismissFriendSuggestions = YES;
-    
-    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-#if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
-    [camera setCameraOverlayView:tabBarController.view];
-#else
-    [nav popToRootViewControllerAnimated:YES];
-#endif
-    [self.tabBarController setSelectedIndex:0];    
-
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = friendSuggestionController.view.frame;
-    frameOffscreen.origin.x -= 330;
     
     NSLog(@"Current allFollowing: %d", [allFollowing count]);
     
@@ -3720,21 +3680,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         }
     }
 
-#if 0
-    // do this upon user creation, in case friendController has a problem
-    [k addFollowerWithUsername:@"William Ho" andFollowsUser:[self getUsername]];
-    [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:[self getUsername]];
-    
-    [self setFollowing:@"William Ho" toState:YES];
-    [self setFollowing:@"Bobby Ren" toState:YES];
-#endif
-    
-    [animation doViewTransition:friendSuggestionController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [friendSuggestionController.view removeFromSuperview];
-
-        [self initialContent];
-    }];
-    
+    [self.tabBarController setSelectedIndex:0];    
+    [self initialContent];
 }
 
 -(void)initialContent {
@@ -5026,6 +4973,8 @@ static NSMutableSet * retainedDetailControllers;
     CommentViewController * commentView = [[CommentViewController alloc] init];
     [commentView setDelegate:self];
     [commentView initCommentViewWithTag:tag andNameString:nameString];
+    
+    [nav pushViewController:commentView animated:YES];
 }
 
 @end

@@ -10,6 +10,7 @@
 
 static FacebookHelper *sharedFacebookHelper;
 static NSString * appID;
+static NSMutableDictionary * timeoutRequests;
 
 @implementation FacebookHelper
 
@@ -29,6 +30,7 @@ static NSString * appID;
 {
 	if (!sharedFacebookHelper){
 		sharedFacebookHelper = [[FacebookHelper alloc] init];
+        timeoutRequests = [[NSMutableDictionary alloc] init];
 	}
 	return sharedFacebookHelper;
 }
@@ -132,6 +134,9 @@ static NSString * appID;
     NSLog(@"FacebookHelper getFacebookInfo: requesting graph path: ME");
     [facebook requestWithGraphPath:@"me" andDelegate:self];  
     currentRequest = @"requestGraphPathMe";
+    [timeoutRequests setObject:[NSNumber numberWithBool:YES] forKey:currentRequest];
+    [self performSelector:@selector(timeoutForRequest:) withObject:currentRequest afterDelay:10];
+    // todo: cancel other actions and tell delegate? 
 }
 
 /*** Facebook delegate functions ***/
@@ -296,6 +301,7 @@ static NSString * appID;
     if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
         //NSLog(@"Repeating getFacebookInfo request");
         //[self getFacebookInfo];
+        [timeoutRequests removeObjectForKey:currentRequest];
     }
     if ([error code] == -1001) {
         // the request timed out
@@ -313,8 +319,10 @@ static NSString * appID;
 - (void)request:(FBRequest *)request didLoad:(id)result {
     NSDictionary * dictionary = result;
     NSLog(@"FacebookHelper FBRequest didLoad with Result: %@ for currentRequest %@", result, currentRequest);
-    if ([currentRequest isEqualToString:@"requestGraphPathMe"])
+    if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
+        [timeoutRequests removeObjectForKey:currentRequest];
         [delegate didGetFacebookInfo:dictionary forShareOnly:getTokenForShare];
+    }
     else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])
         [self requestFacebookFriendsFinished:result];
     else {
@@ -344,5 +352,13 @@ static NSString * appID;
     NSLog(@"Facebook dialog failed: %@", [error description]);
 }
 
+// manual timeout
+-(void)timeoutForRequest:(NSString*)request {
+    NSLog(@"Facebook Request timed out: %@", request);
+    if ([timeoutRequests objectForKey:request] != nil) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Timeout" message:[NSString stringWithFormat:@"Facebook seems unresponsive. Your request %@ timed out", request] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alertView show];
+    }
+}
 
 @end

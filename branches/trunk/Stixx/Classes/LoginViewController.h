@@ -17,7 +17,7 @@
 @protocol LoginViewDelegate
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
 -(void)showAlert:(NSString*)alertMessage;
--(void)shouldDismissSecondaryViewWithTransition:(UIView*)viewToDismiss;
+-(void)didDismissSecondaryView;
 @end
 
 @interface LoginViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate> {

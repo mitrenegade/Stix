@@ -17,6 +17,7 @@
 #import "ALAssetsLibrary+CustomPhotoAlbum.h"
 #import "PixPreviewController.h"
 #import "GlobalHeaders.h"
+#import "CaptureSessionManager.h"
 
 @protocol TagViewDelegate
 
@@ -44,10 +45,9 @@
 @end
 
 
-@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PixPreviewDelegate > {
+@interface TagViewController : UIViewController <BadgeViewDelegate, UIAlertViewDelegate, PixPreviewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
 	
 	// layers of UIViewControllers
-    UIImagePickerController * camera;
 	//ARViewController *arViewController; // for saving and displaying coordinates
     
 	NSObject<TagViewDelegate> *__unsafe_unretained delegate;
@@ -71,39 +71,44 @@
     
     Tag * cameraTag;
     
-    PixPreviewController *previewController;
-    bool descriptorIsOpen;
-    bool needToShowCamera;
     bool photoAlbumOpened;
     int drag;
+    
+    BOOL isCapturing;
 }
 @property (nonatomic) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic) BadgeView * badgeView;
 @property (nonatomic, unsafe_unretained) NSObject<TagViewDelegate> *delegate;
 @property (nonatomic) IBOutlet UIImageView * rectView;
-@property (nonatomic) UIImagePickerController * camera;
 @property (nonatomic, assign) bool descriptorIsOpen;
 @property (nonatomic, assign) bool needToShowCamera;
-@property (nonatomic) PixPreviewController * previewController;
 @property (nonatomic) IBOutlet UIImageView * aperture;
 @property (nonatomic) IBOutlet UIButton * flashModeButton;
 @property (nonatomic) IBOutlet UIButton * cameraDeviceButton;
 @property (nonatomic) IBOutlet UIButton * buttonClose;
 @property (nonatomic) IBOutlet UIButton * buttonTakePicture;
 @property (nonatomic) IBOutlet UIButton * buttonImport;
+
 @property (nonatomic) Tag * cameraTag;
+
+// CaptureSessionManager
+@property (retain) CaptureSessionManager *captureManager;
+@property (nonatomic, retain) UILabel *scanningLabel;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;
 - (void)clearTags;
 - (void)addCoordinateOfTag:(Tag *) tag;
-- (void)setCameraOverlayView:(UIView *)cameraOverlayView;
 -(IBAction)closeInstructions:(id)sender;
--(void)updateCameraControlButtons;
+-(void)updateCameraControlButtons:(int)flashMode;
 -(IBAction)toggleFlashMode:(id)sender;
 -(IBAction)toggleCameraDevice:(id)sender;
 -(IBAction)feedbackButtonClicked:(id)sender;
 -(IBAction)didClickCloseButton:(id)sender;
 -(IBAction)didClickTakePicture:(id)sender;
 -(IBAction)didClickImport:(id)sender;
+
+-(UIImage *)rotateImage:(UIImage *)image withCurrentOrientation:(int)orient;
+-(void)startCamera;
+-(void)stopCamera;
 @end

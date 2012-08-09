@@ -38,6 +38,7 @@
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES];
     if (activityIndicatorLarge)
 //        [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
@@ -64,7 +65,7 @@
     //[delegate didConfirmPix];
 }
 
--(IBAction)didClickCancel:(id)sender {
+-(IBAction)didClickBackButton:(id)sender {
     [delegate didCancelPix];
 }
 

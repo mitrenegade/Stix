@@ -3,17 +3,17 @@
 #define VIEWPORT_WIDTH_RADIANS .5
 #define VIEWPORT_HEIGHT_RADIANS .7392
 
+@interface TagViewController ()
+// private member variable
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo;
+@end
+
 @implementation TagViewController
 
 @synthesize delegate;
-//@synthesize arViewController;
 @synthesize rectView;
 @synthesize buttonInstructions;
 @synthesize badgeView;
-//@synthesize overlayView;
-@synthesize camera;
-@synthesize descriptorIsOpen;
-@synthesize needToShowCamera;
 @synthesize aperture;
 @synthesize cameraDeviceButton;
 @synthesize flashModeButton;
@@ -22,93 +22,61 @@
 @synthesize buttonImport;
 @synthesize cameraTag;
 
+@synthesize captureManager;
+@synthesize scanningLabel;
+
 - (id)init {
 	
     self = [super initWithNibName:@"TagViewController" bundle:nil];
     {
-		// does not do anything - nib does not contain extra buttons etc
-        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
-        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
-        [backButton setImage:backImage forState:UIControlStateNormal];
-        [backButton addTarget:self action:@selector(didClickCloseButton:) forControlEvents:UIControlEventTouchUpInside];
-        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
-        [self.navigationItem setLeftBarButtonItem:leftButton];
-        
-//        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
-//        [self.navigationItem setTitleView:logo];
-        
-        //-(void)viewDidLoad {
-        //	[super viewDidLoad];
-        descriptorIsOpen = NO;
-        needToShowCamera = YES;
-        
-        /***** create camera controller *****/
-        /*
-        NSLog(@"Initializing camera.");
-        camera = [[UIImagePickerController alloc] init];
-        camera.delegate = self;
-        camera.navigationBarHidden = NO;
-        camera.toolbarHidden = YES; // prevents bottom bar from being displayed
-        camera.allowsEditing = NO;
-        camera.wantsFullScreenLayout = NO;
-#if !TARGET_IPHONE_SIMULATOR
-        camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-        camera.showsCameraControls = NO;
-        camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;    
-#else
-        camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-#endif
-         */
-        // hierarchy of tagView overlays:
-        // 1. self.view = overlayView = blank;
-        // 1.5 overlayView.subView = apertureView - camera aperture (overlay.png)
-        // 2. overlayView.subView = badgeController.view
-        // 3. badgeController.subView = arViewController.view
-        // 4. arViewController.view
-        // 6. we don't want to set tabBar.subView because it goes to other views
-        
-        //overlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
-        //UIImageView * apertureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"overlay.png"]];
     }
     return self;
 }
-
--(void)loadView {
-    [super loadView];   
+-(void) viewDidLoad {
+    [super viewDidLoad];
+#if USING_AVCAPTURE
+    [self setCaptureManager:[[CaptureSessionManager alloc] init]];
+    int flashMode = [captureManager initializeCamera];
+    [self updateCameraControlButtons:flashMode];
+    
+	CGRect layerRect = [[[self view] layer] bounds];
+	[[[self captureManager] previewLayer] setBounds:layerRect];
+	[[[self captureManager] previewLayer] setPosition:CGPointMake(CGRectGetMidX(layerRect), CGRectGetMidY(layerRect))];
+    [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [self.aperture layer]];
+//    [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [buttonTakePicture layer]];
+    
+    UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(100, 50, 120, 30)];
+    [self setScanningLabel:tempLabel];
+	[scanningLabel setBackgroundColor:[UIColor clearColor]];
+	[scanningLabel setFont:[UIFont fontWithName:@"Courier" size: 18.0]];
+	[scanningLabel setTextColor:[UIColor redColor]]; 
+	[scanningLabel setText:@"Scanning..."];
+    [scanningLabel setHidden:YES];
+	[[self view] addSubview:scanningLabel];	
+    
+    // add a notification for completion of capture
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didCaptureImage) name:kImageCapturedSuccessfully object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(captureImageDidFail:) name:kImageCaptureFailed object:nil];
+    
+    [self startCamera];
+#endif
 }
 
-//-(void) viewDidLoad {
-//    [super viewDidLoad];
+-(void)startCamera {
+    [[captureManager captureSession] startRunning];
+}
 
-//}
-// called by main delegate to add tabBarView to camera overlay
-- (void)setCameraOverlayView:(UIView *)cameraOverlayView
-{
-//    [self setOverlayView:cameraOverlayView];
-    @try {
-#if !TARGET_IPHONE_SIMULATOR
-        [camera setCameraOverlayView:cameraOverlayView];
-#endif
-    }
-    @catch (NSException* exception) {
-    }
+-(void)stopCamera {
+    [[captureManager captureSession] stopRunning];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-#if !TARGET_IPHONE_SIMULATOR
-    if (descriptorIsOpen == NO) {
-        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-        //[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
-        needToShowCamera = NO;
-    }
-#endif
-    
-    [self updateCameraControlButtons];
 	[super viewDidAppear:animated];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -148,122 +116,10 @@
         //[self.camera dismissModalViewControllerAnimated:YES];
     }
 	UIImage * originalPhoto = [info objectForKey:UIImagePickerControllerOriginalImage];
-	UIImage *baseImage = originalPhoto;
-	if (baseImage == nil) return;
-    UIImageOrientation or = [baseImage imageOrientation];
-    // orientation 3 is normal camera use, orientation 0 is landscape mode
-	    
-    // raw images taken by this camera (with the status bar gone but the nav bar present are 1936x2592 (widthxheight) pix
-    // that means the actual image is 320x428.42 on the iphone
-    
-    int original_height = baseImage.size.height;
-    int original_width = baseImage.size.width;
-    CGSize screenContext = CGSizeMake(320, original_height*320/original_width);
-    if (or == 0 && !photoAlbumOpened)
-        screenContext = CGSizeMake(original_width*320/original_height, 320);
-	
-    // scale to convert base image from 1936x2592 to 320x428 - iphone size
-	float baseScale =  screenContext.width / baseImage.size.width;
-	CGRect scaledFrameImage = CGRectMake(0, 0, baseImage.size.width * baseScale, baseImage.size.height * baseScale);
-    
-	UIGraphicsBeginImageContext(screenContext);	
-	[baseImage drawInRect:scaledFrameImage];	
-	UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();	
-
-    // crop to camera view size - 314 x 282
-    // baseImage should be 320x428 - crop the middle 314x282
-    int target_width = self.rectView.frame.size.width;
-    int target_height = self.rectView.frame.size.height;
-    UIImage * cropped = nil;
-    int minHeight = self.rectView.frame.origin.y + self.rectView.frame.size.height;
-    int minWidth = self.rectView.frame.origin.x + self.rectView.frame.size.width;
-        
-    if ((or == 3 && result.size.height > minHeight) || (or == 0 && !photoAlbumOpened && result.size.width > minWidth)) {
-        // if resized image has height greater than the bottom of the crop frame
-        CGRect targetFrame = [self.rectView frame];
-        if (or == 0 && !photoAlbumOpened) { // hack: loaded images from photo album will be or=0 even if they were taken normally
-            int width = targetFrame.size.width;
-            int height = targetFrame.size.height;
-            int x = targetFrame.origin.y - (width - height)/2; // camera will take a picture that is taller than wide, but we display images that are wider than tall, so we offset the x by half that difference to keep the correct center and aspect ratio
-            int y = self.view.frame.size.width - (targetFrame.origin.x + targetFrame.size.width);
-            targetFrame = CGRectMake(x, y, width, height);
-        }
-        cropped = [result croppedImage:targetFrame];
-        CGSize resultSize = [cropped size];
-        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
-    }
-    else if (result.size.height >= target_height) {
-        // resized image has height greater than target height, crop evenly
-        int ydiff = result.size.height - target_height;
-        CGRect targetFrame = CGRectMake(0, ydiff/2, target_width, target_height);
-        cropped = [result croppedImage:targetFrame];
-        CGSize resultSize = [cropped size];
-        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
-    }
-    else { // (result.size.height < target_height) {
-        // if the picture is not tall enough (a wide image from library), crop from left and right evenly
-        int new_width = baseImage.size.width/baseImage.size.height*target_height;
-        CGRect scaledFrameImage = CGRectMake(0, 0, new_width, target_height);
-        
-        UIGraphicsBeginImageContext(screenContext);	
-        [baseImage drawInRect:scaledFrameImage];	
-        UIImage* result2 = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();	
-        int xdiff = new_width - target_width;
-        CGRect cropFrame = CGRectMake(xdiff/2, 0, target_width, target_height);
-        cropped = [result2 croppedImage:cropFrame];
-        CGSize resultSize = [cropped size];
-        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
-    }
-    
-    CGSize fullSize = CGSizeMake(PIX_WIDTH, PIX_HEIGHT);
-    if (cropped)
-        cropped = [cropped resizedImage:fullSize interpolationQuality:kCGInterpolationHigh];
-	if ([[ImageCache sharedImageCache] imageForKey:@"originalImage"])
-		[[ImageCache sharedImageCache] deleteImageForKey:@"originalImage"];
-	[[ImageCache sharedImageCache] setImage:originalPhoto forKey:@"originalImage"];
-
-	// set a title
-    descriptorIsOpen = YES; // prevent camera from reanimating on viewDidAppear
-    needToShowCamera = NO; // still not need to show camera
-    
-    // create temporary tag with:
-    // - username
-    // - cropped image
-    // 
-    // high res image will be added on confirmation
-    // stix will be added after that
-    cameraTag = [[Tag alloc] init]; 
-    [cameraTag addImage:cropped];
-    [cameraTag setUsername:[delegate getUsername]];
-    [cameraTag setTimestamp:[NSDate date]]; // hack: since we don't reload the tag after creating it, we need to put in a temporary timestamp. next time the tag is actually loaded from kumulos the real one will exist
-    
-    // prompt for image confirmation
-    if (!previewController) {
-        previewController = [[PixPreviewController alloc] init];
-        [previewController setDelegate:self];
-    }
-    
-#if !TARGET_IPHONE_SIMULATOR
-    // hack a way to display view over camera; formerly presentModalViewController
-    CGRect frameShifted = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
-    [previewController.view setFrame:frameShifted];
-    [self.camera setCameraOverlayView:previewController.view];
-#endif
-    
-    // populate after view has been created
-    [previewController initWithTag:cameraTag];
-    
-    photoAlbumOpened = NO;
-}
-
-- (void)image:(UIImage*)image didFinishSavingWithError:(NSError *)error contextInfo:(NSDictionary*)info {
-	NSLog(@"Did finish saving with error!");
+    [self didTakePhoto:originalPhoto];
 }
 
 #pragma mark PixPreview delegate
-
 -(void)didConfirmPix {
     UIImage * baseImage = [[ImageCache sharedImageCache] imageForKey:@"originalImage"];
     if (baseImage == nil) return;
@@ -323,18 +179,18 @@
         NSLog(@"Done saving high res picture *************");
     }
     
+//    [self.navigationController setNavigationBarHidden:NO];
+    [self.navigationController popViewControllerAnimated:YES];
+    [delegate didCloseTagView];
     [delegate didConfirmNewPix:cameraTag];
-    needToShowCamera = YES;
-    descriptorIsOpen = NO;
-    [self viewDidAppear:NO];
-    [previewController stopActivityIndicatorLarge];
+//    [self viewDidAppear:NO];
+//    [previewController stopActivityIndicatorLarge];
 }
 
 -(void)didCancelPix {
-    [self.camera setCameraOverlayView:self.view];
-    needToShowCamera = YES;
-    descriptorIsOpen = NO;
-    [self viewDidAppear:NO];    
+//    [self.camera setCameraOverlayView:self.view];
+    [self.navigationController popViewControllerAnimated:YES];
+//    [self viewDidAppear:NO];    
 }
 
 #pragma mark other tagView functions
@@ -349,18 +205,15 @@
 	[png writeToFile:[documentsDirectory stringByAppendingPathComponent:@"image.png"] options:NSAtomicWrite error:&error];
 }
 
--(void)updateCameraControlButtons {
-    switch (camera.cameraFlashMode) {
-        case UIImagePickerControllerCameraFlashModeAuto:
-            //[flashModeButton setTitle:@"Auto Flash" forState:UIControlStateNormal];
+-(void)updateCameraControlButtons:(int)cameraFlashMode {
+    switch (cameraFlashMode) {
+        case AVCaptureFlashModeAuto:
             [flashModeButton setImage:[UIImage imageNamed:@"flash_auto.png"] forState:UIControlStateNormal];
             break;
-        case UIImagePickerControllerCameraFlashModeOn:
-            //[flashModeButton setTitle:@"Flash On" forState:UIControlStateNormal];
+        case AVCaptureFlashModeOn:
             [flashModeButton setImage:[UIImage imageNamed:@"flash.png"] forState:UIControlStateNormal];
             break;
-        case UIImagePickerControllerCameraFlashModeOff:
-            //[flashModeButton setTitle:@"Flash Off" forState:UIControlStateNormal];
+        case AVCaptureFlashModeOff:
             [flashModeButton setImage:[UIImage imageNamed:@"flash_off.png"] forState:UIControlStateNormal];
             break;
             
@@ -384,18 +237,27 @@
 }
 
 -(IBAction)toggleFlashMode:(id)sender {
+#if USING_AVCAPTURE
+    int flashMode = [captureManager toggleFlash];
+    [self updateCameraControlButtons:flashMode];
+#else
     camera.cameraFlashMode++;
     if (camera.cameraFlashMode == 2)
         camera.cameraFlashMode = -1;
     [self updateCameraControlButtons];
+#endif
 }
 
 -(IBAction)toggleCameraDevice:(id)sender {
+#if USING_AVCAPTURE
+    [captureManager switchDevices];
+#else
     if (camera.cameraDevice == UIImagePickerControllerCameraDeviceFront)
         camera.cameraDevice = UIImagePickerControllerCameraDeviceRear;
     else
         camera.cameraDevice = UIImagePickerControllerCameraDeviceFront;
     [self updateCameraControlButtons];
+#endif
 }
 
 -(IBAction)feedbackButtonClicked:(id)sender {
@@ -413,33 +275,301 @@
             [delegate redisplayFirstTimeUserMessage01];
     }
     //[delegate didDismissSecondaryView];
+//    [self.navigationController setNavigationBarHidden:NO];
     [delegate didCloseTagView];
 }
 
 -(IBAction)didClickTakePicture:(id)sender {
     NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
-    if (descriptorIsOpen)
+#if USING_AVCAPTURE
+    if (isCapturing)
         return;
+    
+    [[self scanningLabel] setHidden:NO];
+    [[self captureManager] captureStillImage];
+    isCapturing = YES;
+#else
     [[self camera] takePicture];
+#endif
 }
 
 -(IBAction)didClickImport:(id)sender {
     NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
-    if (descriptorIsOpen)
-        return;
     
     UIImagePickerController * album = [[UIImagePickerController alloc] init];
     album.sourceType = UIImagePickerControllerSourceTypePhotoLibrary; ////SavedPhotosAlbum;
     album.allowsEditing = NO;
     album.delegate = self;
     photoAlbumOpened = YES;
+#if !USING_AVCAPTURE
     [self.camera presentModalViewController:album animated:YES];
+#else
+    //[self.navigationController pushViewController:album animated:YES];
+    [self presentModalViewController:album animated:YES];
+#endif
 }
 
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
+#if !USING_AVCAPTURE
     [self.camera dismissModalViewControllerAnimated:YES];
+#else
+    [self dismissModalViewControllerAnimated:YES];
+#endif
     photoAlbumOpened = NO;
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 }
+
+-(void)didTakePhoto:(UIImage*)originalPhoto{
+	UIImage *baseImage = originalPhoto;
+	if (baseImage == nil) return;
+    //UIImageOrientation or = [baseImage imageOrientation];
+    // orientation 3 is normal (vertical) camera use, orientation 0 is landscape mode
+    UIImageOrientation or = [UIDevice currentDevice].orientation;
+    // 1 = vertical/normal
+    // 2 = upside down
+    // 3 = landscape left
+    // 4 = landscape right
+    BOOL landscape = (or >= 3 && !photoAlbumOpened);
+    NSLog(@"or: %d photoAlbum: %d landscape %d", or, photoAlbumOpened, landscape);
+    UIImage * result2;
+    CGSize screenContext;
+    UIImage * scaled;
+    CGRect croppedFrame;
+    
+    float original_height = baseImage.size.height;
+    float original_width = baseImage.size.width;
+    
+    // for AVCapture, there is no automatic rotation for landscape.
+    // the raw image is 720x1280.
+    // we want an image at 320x(480+)
+    
+//    if (!landscape) {
+        float scaled_width = 320;
+        float scaled_height = original_height/original_width*320;
+        scaled = [originalPhoto resizedImage:CGSizeMake(scaled_width, scaled_height) interpolationQuality:kCGInterpolationHigh];
+        float offset = (scaled_height - 480)/2;
+        NSLog(@"scaledWidth %f scaledHeight %f offset %f", scaled_width, scaled_height, offset);
+        // target_height is smaller than scaled_height so we only take the middle
+        croppedFrame = CGRectMake(0, offset, 320, 480);
+    /*
+    }
+    else {
+        float scaled_height = 320;
+        float scaled_width = original_width/original_height*320;
+        scaled = [originalPhoto resizedImage:CGSizeMake(scaled_width, scaled_height) interpolationQuality:kCGInterpolationHigh];
+        float offset = (scaled_width - 480)/2;
+        NSLog(@"scaledWidth %f scaledHeight %f offset %f", scaled_width, scaled_height, offset);
+        // target_height is smaller than scaled_height so we only take the middle
+        croppedFrame = CGRectMake(offset, 0, 320, 480);
+    }
+     */
+        
+    result2 = [scaled croppedImage:croppedFrame];
+
+    // rotate
+    UIImage * result;
+    if (or == 0)
+        or = 1; // somehow invalid orientation. just treat as regular one
+    result = [self rotateImage:result2 withCurrentOrientation:or];
+    
+    UIImageWriteToSavedPhotosAlbum(result, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+    
+    // crop to camera view size - 314 x 282
+    // baseImage should be 320x428 - crop the middle 314x282
+    int target_width = self.rectView.frame.size.width;
+    int target_height = self.rectView.frame.size.height;
+    UIImage * cropped = nil;
+    int minHeight = self.rectView.frame.origin.y + self.rectView.frame.size.height;
+    int minWidth = self.rectView.frame.origin.x + self.rectView.frame.size.width;
+    NSLog(@"target_width target_height %d %d result width result height %f %F", target_width, target_height, result.size.width, result.size.height);
+    
+    if ((or == 1 && result.size.height > minHeight) || (landscape && result.size.width > minWidth)) {
+        // if resized image has height greater than the bottom of the crop frame
+        CGRect targetFrame = [self.rectView frame];
+        if (landscape) { // hack: loaded images from photo album will be or=0 even if they were taken normally
+            int width = targetFrame.size.width;
+            int height = targetFrame.size.height;
+            int x = targetFrame.origin.y - (width - height)/2; // camera will take a picture that is taller than wide, but we display images that are wider than tall, so we offset the x by half that difference to keep the correct center and aspect ratio
+            int y = self.view.frame.size.width - (targetFrame.origin.x + targetFrame.size.width);
+            targetFrame = CGRectMake(x, y, width, height);
+        }
+        cropped = [result croppedImage:targetFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
+    else if (result.size.height >= target_height) {
+        // resized image has height greater than target height, crop evenly
+        int ydiff = result.size.height - target_height;
+        CGRect targetFrame = CGRectMake(0, ydiff/2, target_width, target_height);
+        cropped = [result croppedImage:targetFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
+    else { // (result.size.height < target_height) {
+        // if the picture is not tall enough (a wide image from library), crop from left and right evenly
+        int new_width = baseImage.size.width/baseImage.size.height*target_height;
+        CGRect scaledFrameImage = CGRectMake(0, 0, new_width, target_height);
+        
+        UIGraphicsBeginImageContext(screenContext);	
+        [baseImage drawInRect:scaledFrameImage];	
+        UIImage* result2 = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();	
+        int xdiff = new_width - target_width;
+        CGRect cropFrame = CGRectMake(xdiff/2, 0, target_width, target_height);
+        cropped = [result2 croppedImage:cropFrame];
+        CGSize resultSize = [cropped size];
+        NSLog(@"Cropped image to size %f %f", resultSize.width, resultSize.height);
+    }
+    
+    CGSize fullSize = CGSizeMake(PIX_WIDTH, PIX_HEIGHT);
+    if (cropped)
+        cropped = [cropped resizedImage:fullSize interpolationQuality:kCGInterpolationHigh];
+	if ([[ImageCache sharedImageCache] imageForKey:@"originalImage"])
+		[[ImageCache sharedImageCache] deleteImageForKey:@"originalImage"];
+	[[ImageCache sharedImageCache] setImage:originalPhoto forKey:@"originalImage"];
+        
+    // create temporary tag with:
+    // - username
+    // - cropped image
+    // 
+    // high res image will be added on confirmation
+    // stix will be added after that
+    cameraTag = [[Tag alloc] init]; 
+    [cameraTag addImage:cropped];
+    [cameraTag setUsername:[delegate getUsername]];
+    [cameraTag setTimestamp:[NSDate date]]; // hack: since we don't reload the tag after creating it, we need to put in a temporary timestamp. next time the tag is actually loaded from kumulos the real one will exist
+    
+    // prompt for image confirmation
+#if !TARGET_IPHONE_SIMULATOR
+    PixPreviewController * previewController = [[PixPreviewController alloc] init];
+        [previewController setDelegate:self];
+    [self.navigationController pushViewController:previewController animated:YES];
+#endif
+    
+    // populate after view has been created
+    [previewController initWithTag:cameraTag];
+    isCapturing = NO;
+    photoAlbumOpened = NO;
+}
+
+-(UIImage *)rotateImage:(UIImage *)image withCurrentOrientation:(int)orient  
+{  
+    int kMaxResolution = 320; // Or whatever  
+    
+    CGImageRef imgRef = image.CGImage;  
+    
+    CGFloat width = CGImageGetWidth(imgRef);  
+    CGFloat height = CGImageGetHeight(imgRef);  
+    
+    CGAffineTransform transform = CGAffineTransformIdentity;  
+    CGRect bounds = CGRectMake(0, 0, width, height);  
+    
+    CGFloat scaleRatio = 1; //bounds.size.width / width;  
+    CGSize imageSize = CGSizeMake(CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));  
+    CGFloat boundHeight;  
+    switch(orient) {  
+            
+        case 1: // up
+            transform = CGAffineTransformIdentity;  
+            /*
+            if ([self.captureManager getMirrored]) {
+                transform = CGAffineTransformMakeTranslation(imageSize.width, 0.0);  
+                transform = CGAffineTransformScale(transform, -1.0, 1.0);  
+            }*/
+            break;  
+        case 2: // down  
+            transform = CGAffineTransformMakeTranslation(imageSize.width, imageSize.height);  
+            transform = CGAffineTransformRotate(transform, M_PI);  
+            if ([self.captureManager getMirrored]) {
+//                transform = CGAffineTransformMakeTranslation(0.0, imageSize.height);  
+//                transform = CGAffineTransformScale(transform, 1.0, -1.0);  
+            }
+            break;  
+            
+        case 3: // left 
+            boundHeight = bounds.size.height;  
+            bounds.size.height = bounds.size.width;  
+            bounds.size.width = boundHeight;  
+            transform = CGAffineTransformMakeTranslation(0.0, imageSize.width);  
+            if (![self.captureManager getMirrored]) {
+                transform = CGAffineTransformRotate(transform, 3.0 * M_PI / 2.0);  
+            } else {
+                transform = CGAffineTransformRotate(transform, M_PI / 2.0);  
+                transform = CGAffineTransformTranslate(transform, -imageSize.width, -imageSize.height);
+            }
+            break;  
+            
+        case 4: // right 
+            boundHeight = bounds.size.height;  
+            bounds.size.height = bounds.size.width;  
+            bounds.size.width = boundHeight;  
+            transform = CGAffineTransformMakeTranslation(imageSize.height, 0.0);  
+            if (![self.captureManager getMirrored]) {
+                transform = CGAffineTransformRotate(transform, M_PI / 2.0);  
+            } else {
+                transform = CGAffineTransformRotate(transform, 3.0 * M_PI / 2.0);  
+                transform = CGAffineTransformTranslate(transform, -imageSize.width, -imageSize.height);
+            }
+            break;  
+            
+        default:  
+//            [NSException raise:NSInternalInconsistencyException format:@"Invalid image orientation: %d", orient];  
+            transform = CGAffineTransformIdentity;  
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Camera Error!" message:[NSString stringWithFormat:@"Invalid orientation: %d", orient] delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+            [alert show];
+            break;            
+    }  
+    
+    UIGraphicsBeginImageContext(bounds.size);  
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();  
+    
+    if (orient == 3 || orient == 4) {   // landscape
+        CGContextScaleCTM(context, -scaleRatio, scaleRatio);  
+//        if (![captureManager getMirrored])
+            CGContextTranslateCTM(context, -height, 0);  
+    }  
+    else {  
+        CGContextScaleCTM(context, scaleRatio, -scaleRatio);  
+        CGContextTranslateCTM(context, 0, -height);  
+    }  
+    
+    CGContextConcatCTM(context, transform);  
+    
+    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, width, height), imgRef);  
+    UIImage *imageCopy = UIGraphicsGetImageFromCurrentImageContext();  
+    UIGraphicsEndImageContext();  
+    
+    return imageCopy;  
+}  
+
+#if USING_AVCAPTURE
+- (void)didCaptureImage 
+{
+    [[self scanningLabel] setHidden:YES];
+    UIImage * originalImage = [self.captureManager stillImage];
+
+    [self didTakePhoto:originalImage];
+}
+
+-(void)captureImageDidFail:(NSNotification*)notification {
+    if ([[notification.userInfo objectForKey:@"code"] intValue] == -11801) {
+        NSLog(@"Code=-11801 Cannot Complete Action UserInfo=0xe8b2480 {NSLocalizedRecoverySuggestion=Try again later., NSLocalizedDescription=Cannot Complete Action");
+    }
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Camera Error!" message:@"Image couldn't be captured" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+    [alert show];
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
+{
+    if (error != NULL) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error!" message:@"Image couldn't be saved" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+    }
+    else {
+        [[self scanningLabel] setHidden:YES];
+    }
+}
+#endif
 
 @end

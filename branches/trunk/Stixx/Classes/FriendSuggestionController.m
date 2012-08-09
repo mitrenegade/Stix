@@ -18,9 +18,15 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        k = [[Kumulos alloc] init];
-        [k setDelegate:self];
+        UIImage * leftImage = [UIImage imageNamed:@"btn_edit"];
+        UIButton * leftButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, leftImage.size.width, leftImage.size.height)];
+        [leftButton setImage:leftImage forState:UIControlStateNormal];
+        [leftButton addTarget:self action:@selector(didClickButtonEdit:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftBarButton = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
+        [self.navigationItem setLeftBarButtonItem:leftBarButton];
         
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"txt_suggested"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -29,6 +35,9 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+    
 #if USING_FLURRY
     if (!IS_ADMIN_USER([delegate getUsername]))
         [FlurryAnalytics logPageView];
@@ -39,6 +48,12 @@
     [tableViewController.view setFrame:CGRectMake(0, 44, 320, 480-44-80)];
     [tableViewController.view setBackgroundColor:[UIColor clearColor]];
     [self.view insertSubview:tableViewController.view belowSubview:tabGraphic];
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
+    
 }
 
 - (void)viewDidUnload
@@ -237,10 +252,9 @@
 
 -(IBAction)didClickButtonNext:(id)sender {
     [friends addObjectsFromArray:featured];
-    for (NSString * name in friends) {
-        NSLog(@"FriendSuggestionController: adding friend %@", name);
-    }
-    [delegate shouldCloseFriendSuggestionControllerWithNames:friends];
+    NSLog(@"FriendSuggestionController: friends and featured together: %d", [friends count]);
+    [self.navigationController popViewControllerAnimated:YES];
+    [delegate didAddFriendsFromFriendSuggestionController:friends];
 }
 
 -(void)refreshUserPhotos {
@@ -270,32 +284,8 @@
     return [featuredDesc objectAtIndex:index];
 }
 -(UIImage *)getUserPhotoForUsername:(NSString *)username {
-#if 0
-    if ([userPhotos objectForKey:username] == nil) {
-        UIImage * photo = [delegate getUserPhotoForUsername:username];
-        if (!photo)
-            photo = [UIImage imageNamed:@"graphic_nopic.png"];
-        CGSize newSize = CGSizeMake(ROW_HEIGHT, ROW_HEIGHT);
-        UIGraphicsBeginImageContext(newSize);
-        [photo drawInRect:CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT)];	
-        
-        // add border
-        CGContextRef ctx = UIGraphicsGetCurrentContext();
-        CGContextSetLineWidth(ctx, 1);
-        CGContextSetRGBStrokeColor(ctx, 0,0,0, 1.000);
-        
-        CGRect borderRect = CGRectMake(5, 6, PICTURE_HEIGHT, PICTURE_HEIGHT);
-        CGContextStrokeRect(ctx, borderRect);
-        
-        UIImage* imageView = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();	
-        [userPhotos setObject:imageView forKey:username];
-    }
-    return [userPhotos objectForKey:username];
-#else
     // FriendSearchTableViewController resizes the photos
     return [delegate getUserPhotoForUsername:username];
-#endif
 }
 -(int)numberOfSections {
     return [headerViews count];

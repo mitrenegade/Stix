@@ -34,7 +34,7 @@
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 
 -(IBAction)didClickOK:(id)sender;
--(IBAction)didClickCancel:(id)sender;
+-(IBAction)didClickBackButton:(id)sender;
 -(void)initWithTag:(Tag*)tag;
 -(void)startActivityIndicatorLarge;
 -(void)stopActivityIndicatorLarge;

@@ -22,7 +22,6 @@
 @synthesize tableController;
 @synthesize lastPageViewed;
 @synthesize commentView;
-@synthesize camera;
 @synthesize tabBarController;
 #if HAS_PROFILE_BUTTON
 @synthesize buttonProfile;

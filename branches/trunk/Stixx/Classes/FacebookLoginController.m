@@ -16,10 +16,9 @@
 @synthesize facebookName, facebookEmail, facebookString;
 @synthesize k;
 @synthesize activityIndicator;
-@synthesize navController;
 @synthesize camera;
 @synthesize usersFacebookUsername, usersFacebookPhotoData;
-@synthesize signupController, loginController, usernameController;
+//@synthesize signupController, loginController, usernameController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -29,6 +28,7 @@
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
         
+        [self.navigationController setNavigationBarHidden:YES];
     }
     return self;
 }
@@ -65,6 +65,7 @@
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES];
     [loginButton setAlpha:0];
     [signInButton setAlpha:0];
     [signUpButton setAlpha:0];
@@ -95,24 +96,23 @@
 
 #pragma mark login or join
 -(void)addUser {
+    NSLog(@"FacebookLoginController: adding user");
     NSString* username = facebookName;
     if (usersFacebookUsername)
         username = usersFacebookUsername;
     NSString * email = facebookEmail;
-#if 0
-    UIImage * img = [UIImage imageNamed:@"graphic_nopic.png"];
-#else
     NSData * photo;
     if (!usersFacebookPhotoData) {
+        NSLog(@"FacebookLoginController: getting picture (potentially blocking");
         NSURL * url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"http://graph.facebook.com/%@/picture", facebookString]];
         CGSize newSize = CGSizeMake(90, 90);
         UIImage * img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]];
         UIImage * resized = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
         photo = UIImageJPEGRepresentation(resized, .8);
+        NSLog(@"FacebookLoginController: got picture (potentially blocking");
     }
     else 
         photo = usersFacebookPhotoData;
-#endif
     
     NSMutableDictionary * stix = [BadgeView InitializeFirstTimeUserStix];   
     NSMutableData * stixData = [KumulosData dictionaryToData:stix];
@@ -131,16 +131,8 @@
     }
     [auxInfo setValue:stixOrder forKey:@"stixOrder"];
     
-    /*
-    NSMutableSet * friendsList = [[NSMutableSet alloc] init];
-    [friendsList addObject:@"bobo"];
-    [friendsList addObject:@"willh103"];
-    [auxInfo setValue:friendsList forKey:@"friendsList"];
-    */
     NSData * auxData = [KumulosData dictionaryToData:auxInfo];
     [k updateAuxiliaryDataWithUsername:username andAuxiliaryData:auxData];
-    int totalTags = 0;
-    int bux = NEW_USER_BUX;
     
     NSLog(@"FacebookLoginController: Adding user %@ with facebookString %@ and email %@", username, facebookString, email);
     
@@ -151,14 +143,8 @@
     NSString* username = facebookName;    
     //[self checkForRitaPelosiBug:facebookString];
     NSLog(@"LoginUser");
-#if 0
-    //NSString* password = [NSString stringWithFormat:@"%d", 0];
-        NSLog(@"FacebookLoginController: Logging in user %@ using password %@", username, password);
-        [k userLoginWithUsername:username andPassword:[k md5:password]];
-#else
     NSLog(@"FacebookLoginController: Logging in user %@ with facebookString %@", username, facebookString);
     [k loginViaFacebookStringWithFacebookString:facebookString];
-#endif
 }
 
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *)theResults {
@@ -173,8 +159,7 @@
         NSLog(@"No email! facebookString %@ facebookEmail %@", facebookString, facebookEmail);
         email = facebookEmail;
     }
-    if ([[newname lowercaseString] isEqualToString:[name lowercaseString]] == NO) 
-        return;
+    
     UIImage * newPhoto = nil;
     if ([d valueForKey:@"photo"])
         newPhoto = [[UIImage alloc] initWithData:[d valueForKey:@"photo"]];
@@ -183,17 +168,6 @@
     }
     // badge count array
     NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
-    // total badge count
-    //int totalTags;
-    //int bux;
-    //if (1) { // loginController.bJoinOrLogin == 1) { // login
-    //    bux = [[d valueForKey:@"bux"] intValue];
-    //    totalTags = [[d valueForKey:@"totalTags"] intValue];
-    //}
-    //else { // join
-    //    bux = NEW_USER_BUX; // should be set in kumulos but go ahead and set it here
-    //    totalTags = 0;
-    //}
     
     // set First time user flags
     /* auxiliary data */
@@ -210,21 +184,10 @@
     else if (ret == 0) {
         stixOrder = nil;
     }
-    /*
-    else if (ret == 2) {
-        //friendsList = nil;
-    }
-    else {
-        stixOrder = nil;
-        //friendsList = nil;
-    }
-     */
-//    [loginController.view removeFromSuperview];
     [self stopActivityIndicator];
-    // BOBBY here! we get here from userLogin...
-    // happens both when we have a facebook prompt (button) and when facebook
-    // automatically logs in. 
-    // need a method to determine whether it's the first time, and needs to display friendSuggestionController
+    [self.navigationController setNavigationBarHidden:NO];
+    NSLog(@"Closing facebookLoginController!");
+    [self.navigationController popViewControllerAnimated:YES];
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:0 andBuxCount:0 andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
 }
 
@@ -321,11 +284,7 @@
     }else {
         NSLog(@"Could not login with username %@ and facebookString %@, checking facebook", facebookName, facebookString);
         
-#if 0
-        [self addUser];
-#else
         [self addUsernameForFacebookUser];
-#endif
     }
 }
 
@@ -336,7 +295,11 @@
         NSMutableDictionary * d = [theResults objectAtIndex:0];
         NSString * username = [d objectForKey:@"username"];
         NSString * _facebookString = [d objectForKey:@"facebookString"];
+#if ADMIN_TESTING_MODE
+        [self addUsernameForFacebookUser]; // always show username page
+#else
         [self didSelectUsername:username withResults:theResults];
+#endif
         // debug
         if (1) {
             NSLog(@"Found %d users in database with facebookString %@", [theResults count], facebookString);
@@ -350,9 +313,10 @@
                     [FlurryAnalytics logEvent:@"Bug_MultipleUsernames" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:facebookString, @"facebookString", nil]];
             }
         }
-    } else {
+    } 
+    else {
         NSLog(@"Could not login with username %@ and facebookString %@, checking facebook", facebookName, facebookString);        
-#if 0
+#if 0 
         // show screen to prompt for a username
         [self addUsernameForFacebookUser];
 #else
@@ -450,48 +414,16 @@
     [loginButton setEnabled:NO];
     [signUpButton setEnabled:NO];
     [signInButton setEnabled:NO];
-    signupController = [[SignupViewController alloc] init];
+    SignupViewController * signupController = [[SignupViewController alloc] init];
     [signupController setDelegate:self];
 
-    /*
-    navController = [[UINavigationController alloc] initWithRootViewController:signupController]; 
-    navController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [navController.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar.png"] forBarMetrics:UIBarMetricsDefault];
-    [navController.navigationBar addSubview:nil];
-    
-    UIButton * buttonBack = [[UIButton alloc] init];
-    [buttonBack setImage:[UIImage imageNamed:@"nav_back.png"] forState:UIControlStateNormal];
-    [buttonBack setFrame:CGRectMake(8, 7, 50, 35)];
-    [buttonBack addTarget:self action:@selector(didCancelSignup:) forControlEvents:UIControlEventTouchUpInside]; //@selector(dismissModalViewControllerAnimated:)];
-    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithCustomView:buttonBack];  
-    [signupController.navigationItem setLeftBarButtonItem:button];
-    [signupController.navigationItem setTitleView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]]];
-     */
-    
-//    [self presentModalViewController:navController animated:NO ];
-    //[self displayNavControllerWithTransition:navController];
-    [self shouldDisplaySecondaryViewWithTransition:signupController];
+    [self.navigationController pushViewController:signupController animated:YES];
 }
 
-/*
- -(IBAction)didCancelSignup:(id)sender {
-    [self dismissModalViewControllerAnimated:YES];
-}
-
--(void)didCancelAddUsernameToFacebook {
-    [self dismissModalViewControllerAnimated:YES];
-    [self stopActivityIndicator];
-    [loginButton setHidden:NO];
-    [signInButton setHidden:NO];
-    [signUpButton setHidden:NO];
-}
-*/
 -(void)didLoginFromEmailSignup:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString *)email andUserID:(NSNumber *)userID {
     
     NSLog(@"Email signup: Username: %@ email %@ userid %@ photo %x", username, email, userID, photo);
     
-    //[self dismissModalViewControllerAnimated:NO];
-    //[self dismissNavControllerWithTransition];
     if (!IS_ADMIN_USER(username))
         [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:email, @"SignupByEmail", nil]];
     NSMutableDictionary * d = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
@@ -521,31 +453,13 @@
     [loginButton setEnabled:NO];
     [signUpButton setEnabled:NO];
     [signInButton setEnabled:NO];
-    loginController = [[LoginViewController alloc] init];
+    LoginViewController * loginController = [[LoginViewController alloc] init];
     [loginController setDelegate:self];
     
-    /*
-    navController = [[UINavigationController alloc] initWithRootViewController:loginController]; 
-    navController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [navController.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar.png"] forBarMetrics:UIBarMetricsDefault];
-    [navController.navigationBar addSubview:nil];
-    
-    UIButton * buttonBack = [[UIButton alloc] init];
-    [buttonBack setImage:[UIImage imageNamed:@"nav_back.png"] forState:UIControlStateNormal];
-    [buttonBack setFrame:CGRectMake(8, 7, 50, 35)];
-    [buttonBack addTarget:self action:@selector(didCancelSignup:) forControlEvents:UIControlEventTouchUpInside]; //@selector(dismissModalViewControllerAnimated:)];
-    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithCustomView:buttonBack];  
-    [loginController.navigationItem setLeftBarButtonItem:button];
-    [loginController.navigationItem setTitleView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]]];
-    */
-    
-    //[self displayNavControllerWithTransition:navController];
-    [self shouldDisplaySecondaryViewWithTransition:loginController];
+    [self.navigationController pushViewController:loginController animated:YES];
 }
 
 -(void)didLoginFromLoginScreen:(NSString*)username withResults:(NSMutableArray*)theResults {
-//    [self dismissModalViewControllerAnimated:NO];
-//    [self dismissNavControllerWithTransition];
     if (!IS_ADMIN_USER(username))
         [FlurryAnalytics logEvent:@"Login" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:username, @"LoginByUsername", nil]];
     if ([theResults count]) {
@@ -565,34 +479,16 @@
 }
 
 -(void)addUsernameForFacebookUser {
-    usernameController = [[CreateFacebookUsernameController alloc] init];
+    CreateFacebookUsernameController * usernameController = [[CreateFacebookUsernameController alloc] init];
     [usernameController setDelegate:self];
     [usernameController setFacebookString:facebookString];
     [usernameController setInitialFacebookName:facebookName];
     
-    /*
-    navController = [[UINavigationController alloc] initWithRootViewController:usernameController]; 
-    navController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [navController.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar.png"] forBarMetrics:UIBarMetricsDefault];
-    [navController.navigationBar addSubview:nil];
-    
-    UIButton * buttonBack = [[UIButton alloc] init];
-    [buttonBack setImage:[UIImage imageNamed:@"nav_back.png"] forState:UIControlStateNormal];
-    [buttonBack setFrame:CGRectMake(8, 7, 50, 35)];
-    [buttonBack addTarget:self action:@selector(didCancelAddUsernameToFacebook) forControlEvents:UIControlEventTouchUpInside]; //@selector(dismissModalViewControllerAnimated:)];
-    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithCustomView:buttonBack];  
-    [usernameController.navigationItem setLeftBarButtonItem:button];
-    [usernameController.navigationItem setTitleView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]]];
-    */
-//    [self presentModalViewController:navController animated:NO];    
-//    [self displayNavControllerWithTransition:navController];
-    [self shouldDisplaySecondaryViewWithTransition:usernameController];
+    [self.navigationController pushViewController:usernameController animated:YES];
 }
 
 -(void)didAddFacebookUsername:(NSString *)fbUsername andPhoto:(NSData *)photoData {
     // from CreateFacebookUsernameController
-//    [self dismissModalViewControllerAnimated:NO];
-    //[self dismissNavControllerWithTransition];
     if (!IS_ADMIN_USER(fbUsername))
         [FlurryAnalytics logEvent:@"AddUsernameToFacebook" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:fbUsername, @"NewUsername", facebookName, @"FacebookName", nil]];
     
@@ -600,35 +496,6 @@
     [self setUsersFacebookPhotoData:photoData];
     
     [self addUser];
-}
-
-//-(void)displayNavControllerWithTransition:(UINavigationController*)_navController {
--(void)shouldDisplaySecondaryViewWithTransition:(UIViewController*)controller {
-    // we want a side to side transition
-    // so we have to use the hack for navController.view in addition to presentmodalview
-    
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
-//    [self presentModalViewController:_navController animated:NO];
-    [self.view addSubview:controller.view];
-    [controller.view setFrame:frameOffscreen];
-    
-    // must initialize after imageView and stixView actually exist
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT_OVERLAY, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:controller.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-}
-
--(void)shouldDismissSecondaryViewWithTransition:(UIView *)viewToDismiss {
-    [loginButton setEnabled:YES];
-    [signUpButton setEnabled:YES];
-    [signInButton setEnabled:YES];
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-    // must initialize after imageView and stixView actually exist
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:viewToDismiss toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished){
-        [viewToDismiss removeFromSuperview];
-    }];
 }
 
 -(void)shouldShowButtons {

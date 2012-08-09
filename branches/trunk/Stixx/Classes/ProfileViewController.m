@@ -16,7 +16,7 @@
 @synthesize servicesController;
 @synthesize scrollView;
 //@synthesize buttonAbout, buttonFeedback, buttonBack;
-@synthesize camera;
+//@synthesize camera;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {

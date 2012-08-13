@@ -63,7 +63,7 @@
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 -(BOOL)isFollowing:(NSString*)name;
--(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString;
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString fromDetailView:(DetailViewController*)detailView;
 
 -(void)shouldDisplayUserPage:(NSString*)name;
 //-(void)shouldCloseUserPage;
@@ -99,9 +99,6 @@
 // check for first time user state
 -(BOOL)canClickRemixButton; // test user stage
 -(BOOL)canClickNotesButton;
--(void)didClickRemixButton; // advance user stage
-//-(void)didCloseEditorFromFeedController; // advance user stage
-//-(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
@@ -228,6 +225,7 @@
 -(void)didClickRemixFromDetailView:(Tag*)tag;
 //-(void)unlockProfile;
 -(void)agitatePointer;
+-(void)didAdvanceFirstTimeUserMessage;
 @end
 
 

@@ -17,10 +17,10 @@
 @protocol LoginViewDelegate
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
 -(void)showAlert:(NSString*)alertMessage;
--(void)didDismissSecondaryView;
+-(void)shouldShowButtons;
 @end
 
-@interface LoginViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate> {
+@interface LoginViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate, UINavigationControllerDelegate> {
     LoadingAnimationView * activityIndicator;
     IBOutlet UITableView * tableView;
     IBOutlet UIButton * buttonLogin;

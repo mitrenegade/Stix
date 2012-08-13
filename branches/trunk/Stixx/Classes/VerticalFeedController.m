@@ -125,6 +125,7 @@ static int tickID;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    NSLog(@"FeedView appeared!");
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     [super viewDidAppear:animated];
     //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
@@ -160,7 +161,6 @@ static int tickID;
     if ([descriptor length] > 0) {
         NSString * name = [self.delegate getUsername];
         [delegate didAddCommentFromDetailViewController:nil withTag:t andUsername:name andComment:descriptor andStixStringID:@"COMMENT"];
-        //        [self didAddNewComment:descriptor withTagID:[t.tagID intValue]];
     }
 }
 
@@ -171,22 +171,6 @@ static int tickID;
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
     //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
-}
-
--(void)didCancelAddStix {
-    // hack a way to remove view over camera; formerly dismissModalViewController
-    [delegate didDismissSecondaryView];
-    
-#if 0
-    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
-        //[tabBarController displayFirstTimeUserProgress:FIRSTTIME_MESSAGE_02];
-        [tabBarController toggleFirstTimePointer:YES atStage:FIRSTTIME_MESSAGE_02];
-    }
-#else
-    if ([delegate getFirstTimeUserStage] == FIRSTTIME_MESSAGE_02) {
-        [delegate advanceFirstTimeUserMessage];
-    }
-#endif
 }
 
 -(int)getStixCount:(NSString*)stixStringID {
@@ -728,6 +712,12 @@ static int tickID;
     [self hideFirstTimeArrowCanvas:1 showAfterDelay:FTUE_REDISPLAY_TIMER];
 }
 
+-(void)didAdvanceFirstTimeUserMessage {
+    // hide
+    [self hideFirstTimeArrowCanvas:0 showAfterDelay:0];
+    [self hideFirstTimeArrowCanvas:1 showAfterDelay:0];
+}
+
 #if SHOW_ARROW
 -(void)agitatePointer {
     agitatePointer[0] = 3;
@@ -1158,67 +1148,7 @@ static int tickID;
     NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", feedItem.tag.tagID, tagToRemix.tagID);
     [delegate didClickRemixFromDetailViewWithTag:feedItem.tag];
 }
-/*
--(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
-    BOOL okToAdvance = [delegate canClickRemixButton]; // just to advance first time message, metrics, etc
-    if (!okToAdvance)
-        return;
-    if (firstTimeArrowCanvas[0]) {
-        [self hideFirstTimeArrowCanvas:0 showAfterDelay:0];
-        //[firstTimeArrowCanvas[0] removeFromSuperview];
-        firstTimeArrowCanvas[0] = nil;
-    }
-    if (firstTimeArrowCanvas[1]) {
-        [self hideFirstTimeArrowCanvas:1 showAfterDelay:0];
-        //[firstTimeArrowCanvas[1] removeFromSuperview];
-        firstTimeArrowCanvas[1] = nil;
-    }
-    tickID++;
-    
-    [self setTagToRemix:[feedItem.tag copy]];
-    NSLog(@"Did click remix with feedItem by %@ with tagID %@, creating tagToRemix with ID %@", feedItem.tag.username, feedItem.tag.tagID, tagToRemix.tagID);
-    if (tagToRemix.stixLayer) {
-        UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"What do you want to remix?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Remixed Photo", @"Original Photo", nil];
-        [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
-        [actionSheet setActionSheetStyle:UIActionSheetStyleBlackOpaque];
-        //[actionSheet showFromTabBar:tabBarController.tabBar];
-    }
-    else {
-        // no previous stix exist, automatically choose original mode
-        [self displayEditorWithRemixMode:REMIX_MODE_USEORIGINAL];
-    }
-}
 
--(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-//    BOOL bUseOriginal = NO;
-    int remixMode;
-    if (buttonIndex == 0) {
-        // remixed photo
-        NSLog(@"Button 0");
-        remixMode = REMIX_MODE_ADDSTIX;
-    }
-    else if (buttonIndex == 1) {
-        // original photo
-        NSLog(@"Button 1");
-        remixMode = REMIX_MODE_USEORIGINAL;
-    }
-    else if (buttonIndex == 2) {
-        NSLog(@"Button 2");
-        tagToRemix = nil;
-        [self reloadCurrentPage];
-        return;
-    }
-    [self displayEditorWithRemixMode:remixMode];
-}
--(void)didRemixNewPix:(Tag *)cameraTag remixMode:(int)remixMode{
-    [delegate didRemixNewPix:cameraTag remixMode:remixMode];
-}
-
--(void)displayEditorWithRemixMode:(int)remixMode {
-    [delegate didClickRemixButton];
-    [delegate shouldDisplayStixEditor:tagToRemix withRemixMode:remixMode];
-}
-*/
 -(void)displayCommentsOfTag:(Tag*)tag andName:(NSString *)nameString{
 #if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
@@ -1230,24 +1160,8 @@ static int tickID;
         return;
     if ([delegate isShowingBuxInstructions])
         return;
-    
-#if 0
-    if (commentView == nil) {
-        commentView = [[CommentViewController alloc] init];
-        [commentView setDelegate:self];
-    }
-    int tagID = [tag.tagID intValue];
-    [commentView initCommentViewWithTagID:tagID andNameString:nameString];
-    //[commentView setTagID:tagID];
-    //[commentView setNameString:nameString];
-    
-    // hack a way to display feedback view over camera: formerly presentModalViewController
-    [self summonSubview:commentView.view];
-    // must force viewDidAppear because it doesn't happen when it's offscreen?
-    [commentView viewDidAppear:YES];     
-#else
-    [delegate shouldDisplayCommentViewWithTag:tag andNameString:nameString];
-#endif
+
+    [delegate shouldDisplayCommentViewWithTag:tag andNameString:nameString fromDetailView:nil];
 }
 
 #pragma mark StixEditorDelegate 
@@ -1289,30 +1203,7 @@ static int tickID;
     // todo: implement for offline pending pics?
 }
 
-/*** CommentViewDelegate ***/
--(void)didCloseComments {
-#if 1
-    // hack a way to remove view over camera; formerly dismissModalViewController
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    CGRect frameOffscreen = commentView.view.frame;
-    
-    frameOffscreen.origin.x -= 330;
-    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [commentView.view removeFromSuperview];
-    }];
-#else
-    [self unsummonSubview:commentView.view];
-#endif
-}
-
--(void)didAddNewComment:(NSString *)newComment withTag:(Tag*)tag{
-    NSString * name = [self.delegate getUsername];
-    //int tagID = [commentView tagID];
-    if ([newComment length] > 0)
-        [delegate didAddCommentFromDetailViewController:nil withTag:tag andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
-    [self didCloseComments];
-}
-
+// comment
 -(void)didClickLikeButton:(int)type withTag:(Tag*)_tag {
     NSString * newComment = @"";
     NSString * newType = @"LIKE";
@@ -1335,9 +1226,7 @@ static int tickID;
         default:
             break;
     }
-    //[self didAddNewComment:newComment withTagID:tagID];
     NSString * name = [delegate getUsername];
-//    if ([newComment length] > 0)
     [delegate didAddCommentFromDetailViewController:nil withTag:_tag andUsername:name andComment:newComment andStixStringID:newType];
 }
 
@@ -1443,6 +1332,7 @@ static int tickID;
     return [delegate isDisplayingShareSheet];
 }
 -(void)didCloseShareSheet {
+    /*
     CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
@@ -1460,13 +1350,9 @@ static int tickID;
             buttonShareFacebook = nil;
         }
     }];
-    
+    */
 }
 
--(void)didClickCloseShareSheet {
-    [self didCloseShareSheet];
-    [delegate didCloseShareSheet];
-}
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
 #if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] < FIRSTTIME_DONE) {
@@ -1478,50 +1364,7 @@ static int tickID;
         return;
     if ([delegate isDisplayingShareSheet])
         return;
-#if 0
-    shareFeedItem = feedItem;
-    
-    CGRect frameInside = CGRectMake(16, 22, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
-    [shareSheet setFrame:frameOutside];
-    
-    buttonShareFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
-    [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
-    [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
-    
-    buttonShareEmail = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
-    [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
-    [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
-    
-    buttonShareClose = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
-    [buttonShareClose setBackgroundColor:[UIColor clearColor]];
-    [buttonShareClose addTarget:self action:@selector(didClickCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self.view addSubview:shareSheet];
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-//    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
-    [animation doViewTransition:shareSheet toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished) {
-        [self.view addSubview:buttonShareEmail];
-        [self.view addSubview:buttonShareFacebook];
-        [self.view addSubview:buttonShareClose];
-    }];
-
-    [delegate didDisplayShareSheet];
-#else
-    //for (int i=0; i<[allTags count]; i++) {
-        //Tag * tag = [allTags objectAtIndex:i];
-        //if ([tag.tagID intValue] == feedItem.tagID) {
-        //    [delegate displayShareController:tag];
-        //    return;
-        //}
-    //}
     [delegate doParallelNewPixShare:feedItem.tag];
-#endif
 }
 
 -(void)startActivityIndicatorLarge {
@@ -1544,12 +1387,12 @@ static int tickID;
 }
 
 -(void)sharePixDialogDidFinish {
-    [self didCloseShareSheet];
+//    [self didCloseShareSheet];
     [self startActivityIndicatorLarge];
-    [delegate didCloseShareSheet];
+//    [delegate didCloseShareSheet];
 }
 -(void)sharePixDialogDidFail:(int)errorType {
-    [self didCloseShareSheet];
+//    [self didCloseShareSheet];
     if (activityIndicatorLarge) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
             [activityIndicatorLarge setHidden:YES];
@@ -1558,7 +1401,7 @@ static int tickID;
         });
         //activityIndicatorLarge = nil;
     }
-    [delegate didCloseShareSheet];
+//    [delegate didCloseShareSheet];
     if (errorType == 0) {
         // upload picture malfunction
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];

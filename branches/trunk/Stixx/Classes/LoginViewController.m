@@ -222,7 +222,7 @@ static bool usernameExists;
             
             if ([passwordMD5 isEqualToString:[k md5:[password text]]]) {
                 NSLog(@"Password matches! Logging in as username %@ email %@", username, email);
-                [delegate didDismissSecondaryView];
+                //[self.navigationController popViewControllerAnimated:YES]; // don't pop
                 [delegate didSelectUsername:username withResults:[NSMutableArray arrayWithObject:d]];
                 return;
             }
@@ -244,7 +244,8 @@ static bool usernameExists;
  */
 -(void)didClickBackButton:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
-    [delegate didDismissSecondaryView];
+    [self.navigationController setNavigationBarHidden:YES];		
+    [delegate shouldShowButtons];
 }
 
 @end

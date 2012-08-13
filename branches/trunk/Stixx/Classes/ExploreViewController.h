@@ -37,9 +37,6 @@
 //-(void)shouldCloseUserPage;
 -(void)didShowBuxInstructions;
 
-//-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
--(void)didClickRemixButton;
--(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 -(void)didDismissSecondaryView;
 -(void)pauseAggregation;
 -(void)shouldDisplayDetailViewWithTag:(Tag*)tag;

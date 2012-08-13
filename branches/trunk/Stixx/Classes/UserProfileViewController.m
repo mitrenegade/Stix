@@ -155,8 +155,9 @@
     [pixTableController.tableView setContentOffset:CGPointMake(0, 0)];
     
     scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
-    [self.scrollView addSubview:pixTableController.view];
-    [self.scrollView addSubview:headerView];
+    [scrollView addSubview:pixTableController.view];
+    [scrollView addSubview:headerView];
+    [scrollView setDelegate:self];
     [scrollView setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:scrollView];
 }
@@ -450,6 +451,7 @@
         for (int i=0; i<numPix; i++)
             [allTagIDs addObject:[NSNull null]];
         pendingContentCount += numPix;
+        [self resizeContentSize];
         [pixTableController.tableView reloadData];
     }
 }

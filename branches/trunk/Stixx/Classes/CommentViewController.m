@@ -19,6 +19,7 @@
 @synthesize delegate;
 @synthesize activityIndicator;
 @synthesize toolBar;
+@synthesize detailViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -219,7 +220,7 @@
     [commentField resignFirstResponder];
     NSString * newComment = [commentField text];
     if ([newComment length] > 0)
-        [delegate didAddNewComment:newComment withTag:self.tag];
+        [delegate didAddCommentFromDetailViewController:detailViewController withTag:tag andUsername:[delegate getUsername] andComment:newComment andStixStringID:@"COMMENT"];
 	NSLog(@"Comment entered: %@", [commentField text]); 
 }
 
@@ -232,30 +233,8 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 	[textField resignFirstResponder];
     NSString * newComment = [commentField text];
-    //if ([newComment length] > 0)
-    //    [delegate didAddNewComment:newComment withTagID:self.tagID];
-	//NSLog(@"Comment entered: %@", [textField text]); 
 	return YES;
 }
-
-/*
-- (void)textFieldDidBeginEditing:(UITextField *)textField {	
-    [UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDelegate:self];
-	[UIView setAnimationDuration:0.25];
-	[UIView setAnimationBeginsFromCurrentState:YES];
-	toolBar.frame = CGRectMake(toolBar.frame.origin.x, (toolBar.frame.origin.y - (216-48)), toolBar.frame.size.width, toolBar.frame.size.height);
-	[UIView commitAnimations];
-}
-- (void)textFieldDidEndEditing:(UITextField *)textField {	
-    [UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDelegate:self];
-	[UIView setAnimationDuration:0.25];
-	[UIView setAnimationBeginsFromCurrentState:YES];
-	toolBar.frame = CGRectMake(toolBar.frame.origin.x, (toolBar.frame.origin.y + (216-48)), toolBar.frame.size.width, toolBar.frame.size.height);
-	[UIView commitAnimations];
-}
- */
 
 /*** CommentFeedTableDelegate for user page ***/
 -(void)shouldDisplayUserPage:(NSString *)username {

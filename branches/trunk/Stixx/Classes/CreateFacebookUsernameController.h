@@ -13,7 +13,6 @@
 @protocol CreateFacebookUsernameDelegate
 -(void)didAddFacebookUsername:(NSString *)fbUsername andPhoto:(NSData*)photoData;
 -(void)showAlert:(NSString*)alertMessage;
--(void)didDismissSecondaryView;
 -(void)shouldShowButtons;
 @end
 

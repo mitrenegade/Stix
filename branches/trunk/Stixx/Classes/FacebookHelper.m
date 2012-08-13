@@ -356,8 +356,9 @@ static NSMutableDictionary * timeoutRequests;
 -(void)timeoutForRequest:(NSString*)request {
     NSLog(@"Facebook Request timed out: %@", request);
     if ([timeoutRequests objectForKey:request] != nil) {
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Timeout" message:[NSString stringWithFormat:@"Facebook seems unresponsive. Your request %@ timed out", request] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-        [alertView show];
+        if ([request isEqualToString:@"requestGraphPathMe"]) {
+            [delegate facebookRequestDidTimeOut];
+        }
     }
 }
 

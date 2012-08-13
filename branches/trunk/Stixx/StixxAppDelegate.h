@@ -271,7 +271,6 @@ struct UserInfo {
 -(void)uploadImage:(NSData *)dataPNG;
 -(void)initializeShareController;
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;    
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
@@ -282,9 +281,6 @@ struct UserInfo {
 
 -(void)getFollowListsWithoutAggregation:(NSString*)name;
 -(void)getFollowListsForAggregation:(NSString*)name;
-
-//-(void)showTwitterDialog;
--(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 
 @property (nonatomic) IBOutlet UIWindow *window;
 @property (nonatomic) UIViewController * emptyViewController;

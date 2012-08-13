@@ -91,7 +91,6 @@
 
 - (void)captureStillImage
 {  
-    //captureSession.sessionPreset = AVCaptureSessionPresetPhoto;
 	AVCaptureConnection *videoConnection = nil;
 	for (AVCaptureConnection *connection in [[self stillImageOutput] connections]) {
 		for (AVCaptureInputPort *port in [connection inputPorts]) {

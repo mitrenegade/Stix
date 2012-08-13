@@ -38,7 +38,7 @@
 // stixEditorViewController stuff
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 
--(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString;
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString fromDetailView:(DetailViewController*)detailView;
 
 @end
 
@@ -103,8 +103,6 @@
 -(void)initFeedItemWithTag:(Tag*)tag;
 -(void)setScrollHeight:(int)height;
 
--(void)didCloseShareSheet;
-
 +(BOOL)openingDetailView;
 +(void)lockOpen;
 +(void)unlockOpen;
@@ -114,4 +112,5 @@
 -(void)addCommentDidFinish;
 -(void)doParallelNewPixShare;
 
+-(void)reloadComments;
 @end

@@ -75,6 +75,11 @@
     [animation doFadeIn:signUpButton forTime:.5 withCompletion:^(BOOL finished) {}];
 }
 
+-(void)viewWillDisappear:(BOOL)animated {
+    NSLog(@"disappearing!");
+    [super viewWillDisappear:animated];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
@@ -171,7 +176,7 @@
     
     // set First time user flags
     /* auxiliary data */
-    //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
+     //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
     NSMutableDictionary * auxiliaryData;
     NSMutableDictionary * stixOrder = nil;
     //NSMutableSet * friendsList = nil;
@@ -184,10 +189,16 @@
     else if (ret == 0) {
         stixOrder = nil;
     }
+    
+#if 0
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Closing Login Splash!" message:nil delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alertView show];
+#endif
+
     [self stopActivityIndicator];
     [self.navigationController setNavigationBarHidden:NO];
     NSLog(@"Closing facebookLoginController!");
-    [self.navigationController popViewControllerAnimated:YES];
+    //[self.navigationController popViewControllerAnimated:YES];
     [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:0 andBuxCount:0 andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
 }
 
@@ -421,6 +432,8 @@
 }
 
 -(void)didLoginFromEmailSignup:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString *)email andUserID:(NSNumber *)userID {
+    
+    [self startActivityIndicator];
     
     NSLog(@"Email signup: Username: %@ email %@ userid %@ photo %x", username, email, userID, photo);
     

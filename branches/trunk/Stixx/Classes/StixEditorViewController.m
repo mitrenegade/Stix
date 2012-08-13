@@ -15,7 +15,7 @@
 @synthesize stixPanel;
 @synthesize appDelegate;
 @synthesize stixView;
-@synthesize remixTag;
+@synthesize remixTag, remixMode;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -30,10 +30,35 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-#if 1
     [self configureStixPanel];
     stixView = [[StixView alloc] initWithFrame:imageView.frame];
-#endif
+
+    // before displaying stixEditor, must do:
+    // [editorController setRemixMode:mode]
+    // [editorController setRemixTag:tag]
+    
+    // remix mode:
+    // REMIX_MODE_NEWPIC, // adding stix to the original pix
+    // REMIX_MODE_USEORIGINAL, // adding stix using a blank slate - remixing from blank
+    // REMIX_MODE_ADDSTIX // adding stix on top of existing stix - the real remix
+    
+    [self disableButtonDelete];
+    [self disableButtonClear];
+    
+    // tag is newTag
+    //    if (remixMode == REMIX_MODE_NEWPIC)
+    NSLog(@"Remixing tag by %@ originally %@", remixTag.username, remixTag.originalUsername);
+    //    else {
+    //        [self setRemixTag:tag.copy];  // create copy so original is not changed
+    //        NSLog(@"Remixing tag from original tag: %@", tag.tagID);
+    //    }
+    NSLog(@"Initializing editor for tagID %@, pendingID %d with remix mode: %d", remixTag.tagID, remixTag.pendingID, remixMode);
+    isLoadingPixSource = YES;
+    [imageView setImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
+    [stixView setAlpha:0];
+    [buttonClose setAlpha:0];
+    [stixPanel carouselTabDismiss:NO];
+    [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
 }
 
 -(void)configureStixPanel {
@@ -49,48 +74,15 @@
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-    // because there are two instances of the stixEditor and only one shared stixPanel
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:YES animated:NO];
-    [self configureStixPanel];
-}
-
--(void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-    [self.navigationController setNavigationBarHidden:NO];
-}
-
--(void)initializeWithTag:(Tag*)tag remixMode:(int)_remixMode {
-    // remix mode:
-    // REMIX_MODE_NEWPIC, // adding stix to the original pix
-    // REMIX_MODE_USEORIGINAL, // adding stix using a blank slate - remixing from blank
-    // REMIX_MODE_ADDSTIX // adding stix on top of existing stix - the real remix
-    
-    [self disableButtonDelete];
-    [self disableButtonClear];
-
-    remixMode = _remixMode;
-    // tag is newTag
-//    if (remixMode == REMIX_MODE_NEWPIC)
-        [self setRemixTag:tag];
-    NSLog(@"Remixing tag by %@ originally %@", tag.username, tag.originalUsername);
-//    else {
-//        [self setRemixTag:tag.copy];  // create copy so original is not changed
-//        NSLog(@"Remixing tag from original tag: %@", tag.tagID);
-//    }
-    NSLog(@"Initializing editor for tagID %@, pendingID %d with remix mode: %d", tag.tagID, tag.pendingID, remixMode);
-    isLoadingPixSource = YES;
-    [imageView setImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
-    [stixView setAlpha:0];
-    [buttonClose setAlpha:0];
-    [stixPanel carouselTabDismiss:NO];
-    [stixView setInteractionAllowed:NO]; // no dragging of stix already in stixView
+    //[self configureStixPanel];
 
     if (remixMode == REMIX_MODE_NEWPIC) {
         //[imageView setImage:tag.image];
         
-        [stixView initializeWithImage:tag.image];
-        [stixView multiStixInitializeWithTag:tag useStixLayer:NO];
+        [stixView initializeWithImage:remixTag.image];
+        [stixView multiStixInitializeWithTag:remixTag useStixLayer:NO];
         [self.view insertSubview:stixView aboveSubview:imageView];
         [stixView setAlpha:1];
         [buttonClose setAlpha:1];
@@ -98,8 +90,8 @@
     }
     else if (remixMode == REMIX_MODE_ADDSTIX) {
         // use original image and bake in stixLayer
-        [stixView initializeWithImage:tag.image];
-        [stixView multiStixInitializeWithTag:tag useStixLayer:YES];
+        [stixView initializeWithImage:remixTag.image];
+        [stixView multiStixInitializeWithTag:remixTag useStixLayer:YES];
         [self.view insertSubview:stixView aboveSubview:imageView];
         [stixView setAlpha:1];
         [buttonClose setAlpha:1];
@@ -110,8 +102,8 @@
         // use original image without baking in stixLayer
         if (stixView)
             [stixView removeFromSuperview];
-        [stixView initializeWithImage:tag.image];
-        [stixView multiStixInitializeWithTag:tag useStixLayer:NO];
+        [stixView initializeWithImage:remixTag.image];
+        [stixView multiStixInitializeWithTag:remixTag useStixLayer:NO];
         [self.view insertSubview:stixView aboveSubview:imageView];
         [stixView setAlpha:1];
         [buttonClose setAlpha:1];
@@ -148,6 +140,12 @@
     
     [stixPanel carouselTabExpand:YES];
 }
+
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
+}
+
 
 - (void)viewDidUnload
 {

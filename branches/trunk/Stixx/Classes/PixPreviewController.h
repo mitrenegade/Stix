@@ -23,6 +23,8 @@
 	IBOutlet UIButton * buttonOK;
 	IBOutlet UIButton * buttonCancel;
     LoadingAnimationView * activityIndicatorLarge;
+    
+    UIImage * image;
 
 	NSObject<PixPreviewDelegate> *__unsafe_unretained delegate;
 }
@@ -32,6 +34,7 @@
 @property (nonatomic) IBOutlet UIButton * buttonCancel;
 @property (nonatomic, unsafe_unretained) NSObject<PixPreviewDelegate> *delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
+@property (nonatomic) UIImage * image;
 
 -(IBAction)didClickOK:(id)sender;
 -(IBAction)didClickBackButton:(id)sender;

@@ -38,6 +38,22 @@ static ShareController *sharedShareController;
 
         // create buttons and arrays
         [self initializeServices];
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImage * doneImage = [UIImage imageNamed:@"btn_done"];
+        UIButton * doneButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, doneImage.size.width, doneImage.size.height)];
+        [doneButton setImage:doneImage forState:UIControlStateNormal];
+        [doneButton addTarget:self action:@selector(didClickDoneButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * rightButton = [[UIBarButtonItem alloc] initWithCustomView:doneButton];
+        [self.navigationItem setRightBarButtonItem:rightButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -199,7 +215,8 @@ static ShareController *sharedShareController;
     if (!IS_ADMIN_USER([delegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Share", @"Method Of Quitting", nil]];
 #endif
-    [delegate shouldCloseShareController:NO];
+    [self.navigationController popViewControllerAnimated:YES];
+    [delegate didCloseShareController:NO];
 }
 
 -(void)didClickDoneButton:(id)sender {
@@ -225,8 +242,8 @@ static ShareController *sharedShareController;
         [FlurryAnalytics logEvent:@"CloseSharePage" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Completed Share", @"Method Of Quitting", twitterShare, @"TwitterShare", facebookShare, @"FacebookShare", nil]];
     }
 #endif
-
-    [delegate shouldCloseShareController:YES];
+    [self.navigationController popViewControllerAnimated:YES];
+    [delegate didCloseShareController:YES];
 }
 
 -(void)didClickConnectButton:(id)sender {
@@ -382,7 +399,6 @@ static ShareController *sharedShareController;
         [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
     }
-    //[delegate shouldCloseShareController:YES];
 #endif
 }
 

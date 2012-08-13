@@ -46,6 +46,10 @@
     [self.navigationController setNavigationBarHidden:NO];
 }
 
+-(void)viewWillDisappear:(BOOL)animated {
+    [self.navigationController setNavigationBarHidden:YES];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -240,6 +244,7 @@
     NSLog(@"Email: %@ username: %@ password: %@ photo changed: %d", [email text], [username text], [password text], didChangePhoto);
     
 #if !ADMIN_TESTING_MODE
+    NSLog(@"Admin testing mode: skipping verification");
     if (![self NSStringIsValidEmail:[email text]]) {
         NSLog(@"Invalid email format!");
         [delegate showAlert:@"Invalid email format!"];
@@ -265,21 +270,9 @@
             [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", @"BlankPassword", nil]];
         return;
     }
-    
-//    Kumulos * k = [[Kumulos alloc] init];
-//    [k setDelegate:self];
+#endif    
     [self startActivityIndicator];
     [k checkValidNewUserWithUsername:[username text] andEmail:[email text]];
-#else
-    // test - just add the user for gods sake
-    UIButton * photoButton = [inputFields objectAtIndex:3];
-    NSData * photoData = nil;
-    if (didChangePhoto)
-        photoData = UIImagePNGRepresentation([[photoButton imageView] image]);
-    [k createEmailUserWithUsername:[username text] andPassword:[k md5:[password text]] andEmail:[email text] andPhoto:photoData];
-    
-#endif
-    
 }
 
 -(BOOL) NSStringIsValidEmail:(NSString *)checkString
@@ -293,6 +286,7 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation checkValidNewUserDidCompleteWithResult:(NSArray *)theResults {
+#if !ADMIN_TESTING_MODE
     if ([theResults count] > 0) {
         BOOL nameAlreadyExists = NO;
         BOOL emailAlreadyExists = NO;
@@ -315,6 +309,7 @@
         return;
     }
     else 
+#endif
     {
         UITextField * email = [inputFields objectAtIndex:0];
         UITextField * username = [inputFields objectAtIndex:1];
@@ -348,7 +343,7 @@
     
     NSLog(@"Added new user! email %@ name %@ recordID: %@ photo? %d", email.text, username.text, newRecordID, didChangePhoto);
 
-    [self.navigationController popViewControllerAnimated:YES];
+    //[self didClickBackButton:nil]; // don't pop
     [delegate didLoginFromEmailSignup:[username text] andPhoto:didChangePhoto?[[photoButton imageView] image]:nil andEmail:[email text] andUserID:newRecordID];
 }
 
@@ -391,7 +386,9 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
+    [self.navigationController setNavigationBarHidden:YES];
     [self.navigationController popViewControllerAnimated:YES];
-    [delegate shouldShowButtons];
+    if (sender != nil)
+        [delegate shouldShowButtons];
 }
 @end

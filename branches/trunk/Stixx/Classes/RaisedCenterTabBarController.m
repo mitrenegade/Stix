@@ -540,6 +540,7 @@ static int tickID = -1;
         CGRect frame = CGRectMake(120, 350, img.size.width+25, img.size.height+20);
         [newsCallout setFrame:frame];
         [newsCallout setImage:img forState:UIControlStateNormal];
+        [newsCallout addTarget:self action:@selector(didClickNewsCallout:) forControlEvents:UIControlEventTouchUpInside];
         newsCountLabel = [[UILabel alloc] init];
         [newsCountLabel setTextColor:[UIColor whiteColor]];
         [newsCountLabel setTextAlignment:UITextAlignmentCenter];
@@ -565,8 +566,13 @@ static int tickID = -1;
     if (newsCallout) {
         //[newsCallout removeFromSuperview];
         StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doFadeOut:newsCallout forTime:1.5 withCompletion:^(BOOL finished) {}];
+        [animation doFadeOut:newsCallout forTime:1.5 withCompletion:^(BOOL finished) { newsCallout = nil; }];
     }
+}
+
+-(void)didClickNewsCallout:(id)sender {
+    [self didPressTabButton:button[TABBAR_BUTTON_NEWS]];
+    [self hideNewsCount];
 }
 @end
 

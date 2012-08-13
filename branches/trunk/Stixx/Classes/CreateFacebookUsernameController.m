@@ -265,7 +265,7 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserDidCompleteWithResult:(NSArray *)theResults {
-    if ([theResults count] > 0) {
+    if (0) { //[theResults count] > 0) {
         [delegate showAlert:@"Username already exists! Please choose another."];
         [self stopActivityIndicator];
     }
@@ -283,7 +283,7 @@
         
         [self startActivityIndicator];
         [delegate didAddFacebookUsername:fbUsername andPhoto:photoData];
-        [self.navigationController popViewControllerAnimated:YES];
+        //[self.navigationController popViewControllerAnimated:YES]; // don't pop
     }
 }
 @end

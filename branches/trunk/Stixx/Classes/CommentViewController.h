@@ -16,11 +16,11 @@
 
 @protocol CommentViewDelegate <NSObject>
 
--(void)didCloseComments;
--(void)didAddNewComment:(NSString*)newComment withTag:(Tag*)tag;
+-(void)didAddCommentFromDetailViewController:(id)detailViewController withTag:(Tag*)tag andUsername:(NSString*)username andComment:(NSString*)newComment andStixStringID:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(void)shouldDisplayUserPage:(NSString*)username;
 //-(void)shouldCloseUserPage;
+-(NSString*)getUsername;
 @end
 
 @interface CommentViewController : UIViewController <KumulosDelegate, CommentFeedTableDelegate, UITextFieldDelegate, StixAnimationDelegate>
@@ -48,6 +48,8 @@
     NSObject<CommentViewDelegate> * __unsafe_unretained delegate;
     
     LoadingAnimationView * activityIndicator;
+    
+    id __unsafe_unretained detailViewController; // save reference
 }
 
 @property (nonatomic) Tag* tag;
@@ -58,6 +60,7 @@
 @property (nonatomic) IBOutlet UIToolbar * toolBar;
 @property (nonatomic, unsafe_unretained) NSObject<CommentViewDelegate> * delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
+@property (nonatomic, assign) __unsafe_unretained id detailViewController;
 
 -(void) didClickBackButton:(id)sender;
 -(IBAction)didClickAddButton:(id)sender;

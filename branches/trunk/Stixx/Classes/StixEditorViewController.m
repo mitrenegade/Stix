@@ -245,6 +245,7 @@
     if (isLoadingPixSource)
         return;
     [delegate didCloseEditor];
+    [delegate didRemixNewPix:remixTag remixMode:remixMode];
 #if USING_FLURRY
     if (!IS_ADMIN_USER([delegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Edits", @"Method Of Quitting", nil]];

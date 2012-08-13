@@ -447,7 +447,8 @@
         //NSLog(@"lastUpdated: %@", lastUpdated);
         int numPix = MIN(numColumns*3, maxContentCount - indexPointer);
         NSLog(@"Loading %d more pix, already loaded %d, total %d", numPix, indexPointer, maxContentCount);
-        [k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:numPix]];
+        //[k getUserPixByTimeWithUsername:username andLastUpdated:lastUpdated andNumRequested:[NSNumber numberWithInt:numPix]];
+        [k getUserPixByTimeCreatedWithUsername:username andTimeCreated:lastUpdated andNumPix:[NSNumber numberWithInt:numPix]];
         for (int i=0; i<numPix; i++)
             [allTagIDs addObject:[NSNull null]];
         pendingContentCount += numPix;
@@ -476,7 +477,8 @@
 }
 
 #pragma mark KumulosDelegate functions
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPixByTimeCreatedDidCompleteWithResult:(NSArray *)theResults {
     NSLog(@"Received %d pix results", [theResults count]);
     // todo: 
     for (int i=0; i<[theResults count]; i++) {
@@ -523,7 +525,8 @@
     // load initial row(s)
     NSDate * now = [NSDate date]; // now
     int numPix = MIN(numColumns * 5, maxContentCount);
-    [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:numPix]];
+//    [k getUserPixByTimeWithUsername:username andLastUpdated:now andNumRequested:[NSNumber numberWithInt:numPix]];
+    [k getUserPixByTimeCreatedWithUsername:username andTimeCreated:now andNumPix:[NSNumber numberWithInt:numPix]];
     for (int i=0; i<numPix; i++)
         [allTagIDs addObject:[NSNull null]];
     pendingContentCount += numPix;

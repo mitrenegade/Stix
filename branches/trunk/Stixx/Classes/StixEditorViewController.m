@@ -223,7 +223,9 @@
     NSLog(@"Did click save stix");
     if (isLoadingPixSource)
         return;
-    [self saveRemixedPix];
+    [self saveRemixedPix:YES];
+    
+    // do not pop; add sharecontroller over stixeditor
     
 #if USING_FLURRY
     if (!IS_ADMIN_USER([appDelegate getUsername]))
@@ -234,7 +236,11 @@
     NSLog(@"Did click close stix editor");
     if (isLoadingPixSource)
         return;
-    [appDelegate didCloseEditor];
+    [self saveRemixedPix:NO];
+    
+    // only pop if editing is cancelled
+    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController setNavigationBarHidden:NO];
 #if USING_FLURRY
     if (!IS_ADMIN_USER([appDelegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Edits", @"Method Of Quitting", nil]];
@@ -314,38 +320,41 @@
 #endif
 }
 
--(void)saveRemixedPix {
+-(void)saveRemixedPix:(BOOL)didAddStix {
     NSLog(@"Finishing editor with remix mode: %d", remixMode);
 
-    // clear existing auxStixStringIDs
-    [appDelegate didCloseEditor]; // delegate is always app delegate
+    // used to advance first time user message
+    [appDelegate didFinishEditing]; // delegate is always app delegate
     
     [remixTag setAuxStixStringIDs:nil];
     
-    NSMutableArray * auxStixStringIDs = [stixView auxStixStringIDs];
-    NSMutableArray * auxStixViews = [stixView auxStixViews];
-    for (int i=0; i<[auxStixStringIDs count]; i++) {
-        NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
-        UIImageView * auxStix = [auxStixViews objectAtIndex:i];
-        if (stixStringID != nil) {
-            [remixTag addStix:stixStringID withLocation:auxStix.center withTransform:auxStix.transform withPeelable:NO];
+    if (didAddStix) {
+    
+        NSMutableArray * auxStixStringIDs = [stixView auxStixStringIDs];
+        NSMutableArray * auxStixViews = [stixView auxStixViews];
+        for (int i=0; i<[auxStixStringIDs count]; i++) {
+            NSString * stixStringID = [auxStixStringIDs objectAtIndex:i];
+            UIImageView * auxStix = [auxStixViews objectAtIndex:i];
+            if (stixStringID != nil) {
+                [remixTag addStix:stixStringID withLocation:auxStix.center withTransform:auxStix.transform withPeelable:NO];
+            }
         }
-    }
-    
-    // bake stix into stixLayer
-    BOOL retainStixLayer = YES;
-    if (remixMode == REMIX_MODE_USEORIGINAL)
-        retainStixLayer = NO;
-    else if (remixMode == REMIX_MODE_ADDSTIX)
-        retainStixLayer = YES;
-
-    UIImage * stixLayer = [remixTag tagToUIImageUsingBase:NO retainStixLayer:retainStixLayer useHighRes:NO];
-    [remixTag setStixLayer:stixLayer];
-    
+        
+        // bake stix into stixLayer
+        BOOL retainStixLayer = YES;
+        if (remixMode == REMIX_MODE_USEORIGINAL)
+            retainStixLayer = NO;
+        else if (remixMode == REMIX_MODE_ADDSTIX)
+            retainStixLayer = YES;
+        
+        UIImage * stixLayer = [remixTag tagToUIImageUsingBase:NO retainStixLayer:retainStixLayer useHighRes:NO];
+        [remixTag setStixLayer:stixLayer];
+    }    
     // now remove all auxstix - no longer saved after baking into stixlayer
     //[auxStixStringIDs removeAllObjects];
     //[auxStixViews removeAllObjects];
     [remixTag.auxStixStringIDs removeAllObjects];
-    [appDelegate didRemixNewPix:remixTag remixMode:remixMode];
+    if (remixMode == REMIX_MODE_NEWPIC || didAddStix)
+        [appDelegate didRemixNewPix:remixTag remixMode:remixMode];
 }
 @end

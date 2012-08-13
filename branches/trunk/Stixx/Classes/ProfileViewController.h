@@ -43,12 +43,12 @@
 
 -(void)shouldDisplayUserPage:(NSString*)username;
 //-(void)shouldCloseUserPage;
--(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didClickChangePhoto;
 -(void)didConnectToTwitter;
 
 -(BOOL)didGetAllUsers;
-
+-(void)didClickFeedbackButton;
+-(void)didClickAboutButton;
 @end
 
 @interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>

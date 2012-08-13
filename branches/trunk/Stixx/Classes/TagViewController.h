@@ -93,7 +93,7 @@
 
 // CaptureSessionManager
 @property (retain) CaptureSessionManager *captureManager;
-@property (nonatomic, retain) UILabel *scanningLabel;
+//@property (nonatomic, retain) UILabel *scanningLabel;
 
 // sets a reference to a cameraController created outside in order to use modal view
 - (void)cameraDidTakePicture:(id)sender;

@@ -39,10 +39,11 @@
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 
 -(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString fromDetailView:(DetailViewController*)detailView;
+-(void)doParallelNewPixShare:(Tag*)_tag;
 
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate, KumulosHelperDelegate> //StixEditorDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, KumulosHelperDelegate> //StixEditorDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;

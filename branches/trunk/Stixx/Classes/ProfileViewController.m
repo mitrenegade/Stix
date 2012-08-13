@@ -859,28 +859,16 @@
 //    [buttonBack setHidden:YES];
 }
 
--(IBAction)closeTOS {
-    CGRect frameOnscreen = CGRectMake(0, 44, 320, 480-44-40);
-    CGRect frameOffscreen = CGRectMake(-320, 44, 320, 480-44-40);
-//    [buttonFeedback setHidden:NO];
-//    [buttonAbout setHidden:NO];
-//    [buttonBack setHidden:YES];
-    if (webView) {
-
-        [webView setFrame:frameOnscreen];
-        StixAnimation * animation = [[StixAnimation alloc] init];
-        
-        //CGRect frameOffscreen = webView.frame;
-        //frameOffscreen.origin.x -= 330;
-        [animation doViewTransition:webView toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-            [webView removeFromSuperview];
-            webView = nil;
-        }];
-    }
-}
-
 -(void)didClickChangePhoto {
     [delegate didClickChangePhoto];
+}
+
+-(IBAction)didClickFeedbackButton:(id)sender {
+    [delegate didClickFeedbackButton];
+}
+
+-(IBAction)didClickAboutButton:(id)sender {
+    [delegate didClickAboutButton];
 }
 
 @end

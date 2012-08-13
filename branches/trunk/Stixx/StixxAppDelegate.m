@@ -312,18 +312,6 @@ static dispatch_queue_t backgroundQueue;
     [camera setCameraOverlayView:tagViewController.view];
 #endif    
     
-    CGRect frame = CGRectMake(0, 0, 72, 31);
-    UIButton * buttonFeedback = [[UIButton alloc] initWithFrame:frame];
-    [buttonFeedback setImage:[UIImage imageNamed:@"nav_feedback"] forState:UIControlStateNormal];
-    [buttonFeedback addTarget:self action:@selector(didClickFeedbackButton) forControlEvents:UIControlEventTouchDown];
-    CGRect frame2 = CGRectMake(0, 0, 52, 31);
-    UIButton * buttonAbout = [[UIButton alloc] initWithFrame:frame2];
-    [buttonAbout setImage:[UIImage imageNamed:@"btn_about"] forState:UIControlStateNormal];
-    [buttonAbout addTarget:self action:@selector(didClickAboutButton) forControlEvents:UIControlEventTouchDown];
-    UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:buttonFeedback];
-    UIBarButtonItem * rightButton = [[UIBarButtonItem alloc] initWithCustomView:buttonAbout];
-    [tabBarController.navigationItem setLeftBarButtonItem:leftButton];
-    [tabBarController.navigationItem setRightBarButtonItem:rightButton];
     [tabBarController initializeCustomButtons];
 
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
@@ -350,7 +338,7 @@ static dispatch_queue_t backgroundQueue;
         [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookString:myUserInfo_facebookString andUserID:[NSNumber numberWithInt:myUserInfo->userID] andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil];
         
         // create shareController, share and connected lists for each service, and loads from default
-        [self initializeShareController];
+        //[self initializeShareController];
         
         [self getFollowListsForAggregation:[self getUsername]];
         didGetFollowingLists = YES;
@@ -385,16 +373,6 @@ static dispatch_queue_t backgroundQueue;
 //    [self showTwitterDialog];
     [twitterHelper requestTwitterPostPermission];
     */
-    
-    // sharekit test
-    /*
-    if (shareController == nil) {
-        shareController = [[ShareController alloc] init];
-        [shareController setDelegate:self];
-    }
-    [self.window addSubview:shareController.view];
-    [shareController doShareKit];
-     */
     
     return YES;
 }
@@ -731,6 +709,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setInteger:myUserInfo->firstTimeUserStage forKey:@"firstTimeUserStage"];
     
     // sharing
+    // todo: save as member variables, not sharecontroller variables
     if (shareController) {
         [defaults setBool:[shareController shareServiceIsConnected:@"Facebook"] forKey:@"FacebookIsConnected"];
         [defaults setBool:[shareController shareServiceIsSharing:@"Facebook"] forKey:@"FacebookIsSharing"];
@@ -969,7 +948,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     if (isDisplayingBuxMenu)
         return;
     
-//    [profileController closeTOS];
+    [tabBarController.navigationItem setLeftBarButtonItem:nil];
+    [tabBarController.navigationItem setRightBarButtonItem:nil];
     
     // when center button is pressed, programmatically send the tab bar that command
     [tabBarController setHeaderForTab:pos];
@@ -1035,6 +1015,19 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
             [self advanceFirstTimeUserMessage]; // must come after hide!
             //[profileController doPointerAnimation];
         }
+
+        CGRect frame = CGRectMake(0, 0, 72, 31);
+        UIButton * buttonFeedback = [[UIButton alloc] initWithFrame:frame];
+        [buttonFeedback setImage:[UIImage imageNamed:@"nav_feedback"] forState:UIControlStateNormal];
+        [buttonFeedback addTarget:self action:@selector(didClickFeedbackButton) forControlEvents:UIControlEventTouchDown];
+        CGRect frame2 = CGRectMake(0, 0, 52, 31);
+        UIButton * buttonAbout = [[UIButton alloc] initWithFrame:frame2];
+        [buttonAbout setImage:[UIImage imageNamed:@"btn_about"] forState:UIControlStateNormal];
+        [buttonAbout addTarget:self action:@selector(didClickAboutButton) forControlEvents:UIControlEventTouchDown];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:buttonFeedback];
+        UIBarButtonItem * rightButton = [[UIBarButtonItem alloc] initWithCustomView:buttonAbout];
+        [tabBarController.navigationItem setLeftBarButtonItem:leftButton];
+        [tabBarController.navigationItem setRightBarButtonItem:rightButton];
     }
     else if (pos == TABBAR_BUTTON_NEWS) {
         lastViewController = newsController;
@@ -1301,13 +1294,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #endif
 //    [editorController initializeWithTag:newTag remixMode:remixMode];
 }
--(void)didCloseEditor {
+-(void) didFinishEditing {//didCloseEditor {
     [feedController stopActivityIndicatorLarge];
     if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_03) {
         [tabBarController toggleFirstTimeInstructions:YES];
         [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
     }
-    [nav popViewControllerAnimated:YES];
 }
 
 -(BOOL)canClickRemixButton {
@@ -1425,29 +1417,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSLog(@"newTag: %@ from Tag: %@", newTag.tagID, cameraTag.tagID);
         [kh execute:@"createNewPix" withParams:params withCallback:@selector(khCallback_didCreateNewPix:) withDelegate:self];
+        
+        [self doParallelNewPixShare:cameraTag];
     }
     
-    // start share here: stix have been saved to tag
-    [self doParallelNewPixShare:cameraTag];
-}
-
--(void)doParallelNewPixShare:(Tag*)_tag {
-    NSLog(@"NewPixShare: resetting toggles for new created pix");
-    newPixDidClickShare = NO;
-    newPixDidFinishUpload = NO;
-    if (USE_HIGHRES_SHARE && (_tag.highResImage == nil)) {
-        // for now, skip high res share
-        KumulosHelper * kh = [[KumulosHelper alloc] init];
-        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:_tag, nil];
-        [kh execute:@"getHighResImage" withParams:params withCallback:@selector(khCallback_didGetHighResImage:) withDelegate:self];        
-    } else {
-        // always does this: uploads the new, unstix'd tag in case
-        // user wants to just share that
-        NSLog(@"ShareController: %@", shareController);
-        [shareController startUploadImage:_tag withDelegate:self];
-    }
-    [nav pushViewController:shareController animated:YES];
-    [shareController.view setFrame:CGRectMake(160, 0, 320, 480)];
 }
 
 -(void)khCallback_didGetHighResImage:(NSArray*)returnParams {
@@ -1558,7 +1531,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [kh execute:@"setOriginalUsername" withParams:params withCallback:@selector(khCallback_didSetOriginalUsername:) withDelegate:self];
 
     // If we have already finished editing/adding stix
-    if ( hasPendingStixLayerToUpload) {
+    if (hasPendingStixLayerToUpload) {
         // already finished modifying stix; ready to upload and share
         // stix layer editing was finished before upload completed
         
@@ -1687,18 +1660,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:highResID, tagID, nil];
     KumulosHelper * kh = [[KumulosHelper alloc] init];
     [kh execute:@"setHighResImageID" withParams:params withCallback:@selector(khCallback_didSetHighResImageID:) withDelegate:self];
-}
-
--(void)uploadImageFinished {
-    // share controller stuff
-    if (newPixDidClickShare) {
-        NSLog(@"NewPixShare: Upload finished: Now time to share!");
-        [shareController doSharePix];
-    }
-    else {
-        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
-        newPixDidFinishUpload = YES;
-    }    
 }
 
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID {
@@ -2670,7 +2631,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
     
     // create shareController, share and connected lists for each service, and loads from default
-    [self initializeShareController];
+//    [self initializeShareController];
     
     // login to parse only if facebook has correctly logged in. this ensures that the userID being saved to myUserInfo is the correct one
     if (notificationDeviceToken) {
@@ -3315,10 +3276,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [feedbackController setDelegate:self];
     }
 //    lastViewController = profileController;
-    [nav pushViewController:feedbackController animated:YES];
+    [nav pushViewController:feedbackController animated:NO];
 }
 
 -(void)didClickAboutButton {
+#if 0
     UIWebView * webView = [[UIWebView alloc] init];
     [webView setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.stixmobile.com/tos"]]];
@@ -3327,15 +3289,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [webController.view addSubview:webView];
     UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
     [webController.navigationItem setTitleView:logo];
-    [nav pushViewController:webController animated:YES];
-}
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
-    NSLog(@"Webview loaded");
-}
-
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    NSLog(@"Webview error: %@", [error description]);
+    [nav pushViewController:webController animated:NO];
+#else
+    AboutViewController * aboutController = [[AboutViewController alloc] init];
+    [nav pushViewController:aboutController animated:NO];
+#endif
 }
 
 - (void) sendEmailTo:(NSString *)to withCC:(NSString*)cc withSubject:(NSString *) subject withBody:(NSString *)body {
@@ -3364,14 +3322,16 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 #pragma mark shareController and share services
--(void)initializeShareController {
-    if (shareController == nil) {
+-(ShareController *)initializeShareController {
+    // this function must be called each time shareController is initialized
+    
+#if USE_SINGLETON_SHARE
+    if (shareController == nil) 
+#endif
+    {
         shareController = [ShareController sharedShareController];
         [shareController setDelegate:self];
     }
-    
-    //[[SHK currentHelper] setRootViewController:feedController];
-
     // check to see if each service is already sharing - load from user defaults
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSNumber * connected, * sharing;
@@ -3409,6 +3369,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             }
         }
     }
+    return shareController;
 }
 
 -(void)initializeFriendSuggestionController {
@@ -3476,69 +3437,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [userGallery setUsername:name];
     [userGallery setDelegate:self];
     [nav pushViewController:userGallery animated:YES];
-}
-
-/*
--(void)shouldCloseUserPage {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-#if 0
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = userProfileController.view.frame;
-    frameOffscreen.origin.x -= 330;
-    
-    [animation doViewTransition:userProfileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [userProfileController.view removeFromSuperview];
-        //[feedController unlockProfile];
-    }];
-#endif
-}
- */
-
--(void)didCloseShareController:(BOOL)didClickDone {
-    if (didClickDone) {
-        if (newPixDidFinishUpload) {
-            //NSLog(@"NewPixShare: Did click done: upload already finished");
-            [shareController doSharePix];
-        }
-        else {
-            // wait for shareController to finish the update
-            newPixDidClickShare = YES;
-            NSLog(@"NewPixShare: Clicked share; waiting for upload");
-        }
-        
-        // check for caption - used as comment
-        NSString * caption = [shareController.caption text];
-        NSLog(@"Did add caption: %@", caption);
-        if (caption && [caption length] > 0) {
-            int tagID = [[shareController.tag tagID] intValue];
-            NSLog(@"TagID: %d username %@", tagID, [self getUsername]);
-            [self didAddCommentFromDetailViewController:nil withTag:shareController.tag andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"]; 
-        }
-
-        // update popularity for SHARE
-        KumulosHelper * kh = [[KumulosHelper alloc] init];
-        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:shareController.tag.tagID, nil];
-        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
-    }    
-}
-
--(void)sharePixDialogDidFail:(int)errorType {
-    if (errorType == 0) {
-        // upload picture malfunction
-        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-        //[alertView show];
-        [self showAlertWithTitle:@"Sharing Failed" andMessage:@"It seems that our Share pages are under maintenance. Please try again later." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-    }
-    else if (errorType == 1) {
-        // asihttp request timeout
-        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Low Connectivity" message:@"Could not complete your Share request. Please try again later." delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"Try again", nil];
-        //[alertView setTag:ALERTVIEW_SHAREFAIL];
-        //[alertView show];
-        [self showAlertWithTitle:@"Low Connectivity" andMessage:@"Could not complete your Share request. Please try again later." andButton:@"Cancel" andOtherButton:@"Try again" andAlertType:ALERTVIEW_SHAREFAIL];
-    }
 }
 
 -(void)didAddFriendsFromFriendSuggestionController:(NSArray *)addedFriends {
@@ -4858,6 +4756,94 @@ static NSMutableSet * retainedDetailControllers;
     
     [nav pushViewController:commentView animated:YES];
 }
+
+#pragma mark shareControllerDelegate
+
+-(void)doParallelNewPixShare:(Tag*)_tag {
+    NSLog(@"NewPixShare: resetting toggles for new created pix");
+    newPixDidClickShare = NO;
+    newPixDidFinishUpload = NO;
+    if (USE_HIGHRES_SHARE && (_tag.highResImage == nil)) {
+        /*
+        // for now, skip high res share
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:_tag, nil];
+        [kh execute:@"getHighResImage" withParams:params withCallback:@selector(khCallback_didGetHighResImage:) withDelegate:self];    
+         */
+    } else {
+#if USE_SINGLETON_SHARE       
+        // always does this: uploads the new, unstix'd tag in case
+        // user wants to just share that
+        NSLog(@"ShareController: %@", shareController);
+        [shareController startUploadImage:_tag withDelegate:self];
+#else
+        shareController = [self initializeShareController];
+        [shareController startUploadImage:_tag withDelegate:self];
+#endif
+    }
+    [nav pushViewController:shareController animated:YES];
+    //[shareController.view setFrame:CGRectMake(160, 0, 320, 480)];
+}
+
+-(void)uploadImageFinished {
+    // share controller stuff
+    if (newPixDidClickShare) {
+        NSLog(@"NewPixShare: Upload finished: Now time to share!");
+        [shareController doSharePix];
+    }
+    else {
+        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
+        newPixDidFinishUpload = YES;
+    }    
+}
+
+-(void)didCloseShareController:(BOOL)didClickDone {
+    if (didClickDone) {
+        if (newPixDidFinishUpload) {
+            //NSLog(@"NewPixShare: Did click done: upload already finished");
+            [shareController doSharePix];
+        }
+        else {
+            // wait for shareController to finish the update
+            newPixDidClickShare = YES;
+            NSLog(@"NewPixShare: Clicked share; waiting for upload");
+        }
+        
+        // check for caption - used as comment
+        NSString * caption = [shareController.caption text];
+        NSLog(@"Did add caption: %@", caption);
+        if (caption && [caption length] > 0) {
+            int tagID = [[shareController.tag tagID] intValue];
+            NSLog(@"TagID: %d username %@", tagID, [self getUsername]);
+            [self didAddCommentFromDetailViewController:nil withTag:shareController.tag andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"]; 
+        }
+        
+        // update popularity for SHARE
+        KumulosHelper * kh = [[KumulosHelper alloc] init];
+        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:shareController.tag.tagID, nil];
+        [kh execute:@"incrementPopularity" withParams:params withCallback:nil withDelegate:self];
+    }
+    [nav popToViewController:tabBarController animated:YES];
+    [nav setNavigationBarHidden:NO];
+    //[nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; 
+}
+
+-(void)sharePixDialogDidFail:(int)errorType {
+    if (errorType == 0) {
+        // upload picture malfunction
+        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        //[alertView show];
+        [self showAlertWithTitle:@"Sharing Failed" andMessage:@"It seems that our Share pages are under maintenance. Please try again later." andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
+    }
+    else if (errorType == 1) {
+        // asihttp request timeout
+        //UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Low Connectivity" message:@"Could not complete your Share request. Please try again later." delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"Try again", nil];
+        //[alertView setTag:ALERTVIEW_SHAREFAIL];
+        //[alertView show];
+        [self showAlertWithTitle:@"Low Connectivity" andMessage:@"Could not complete your Share request. Please try again later." andButton:@"Cancel" andOtherButton:@"Try again" andAlertType:ALERTVIEW_SHAREFAIL];
+    }
+}
+
 
 @end
 

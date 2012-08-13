@@ -56,7 +56,6 @@
 -(void)didPerformPeelableAction:(int)action forAuxStix:(int)index;
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem;
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem;
--(void)sharePixDialogDidFinish;
 -(void)sharePixDialogDidFail:(int)errorType;
 
 -(void)didReceiveMemoryWarningForFeedItem:(VerticalFeedItemController*)feedItem;

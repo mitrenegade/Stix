@@ -495,75 +495,6 @@ static BOOL openingDetailView;
 #endif
 }
 
-//-(void)shouldCloseUserPage {
-//    [delegate shouldCloseUserPage];
-//}
-#pragma mark sharing from VerticalFeedItemDelegate
-
--(void)didCloseShareSheet {
-    /*
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
-     */
-}
-
--(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
-    [self doParallelNewPixShare];
-}
-
--(void)doParallelNewPixShare{
-    NSLog(@"NewPixShare: resetting toggles for new created pix");
-    newPixDidClickShare = NO;
-    newPixDidFinishUpload = NO;
-    shareController = [ShareController sharedShareController];
-    [shareController startUploadImage:tag withDelegate:self];
-    [self.navigationController pushViewController:shareController animated:YES];
-}
-
--(void)uploadImageFinished {
-    // share controller stuff
-    if (newPixDidClickShare) {
-        NSLog(@"NewPixShare: Upload finished: Now time to share!");
-        [shareController doSharePix];
-    }
-    else {
-        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
-        newPixDidFinishUpload = YES;
-    }    
-}
-
--(void)didCloseShareController:(BOOL)didClickDone {
-    if (didClickDone) {
-        if (newPixDidFinishUpload) {
-            NSLog(@"NewPixShare: Did click done: upload already finished");
-            [shareController doSharePix];
-        }
-        else {
-            newPixDidClickShare = YES;
-            NSLog(@"NewPixShare: Clicked share; waiting for upload");
-        }
-        // check for caption - used as comment
-        NSString * caption = [shareController.caption text];
-        NSLog(@"Did add caption: %@", caption);
-        if (caption && [caption length] > 0) {
-            [delegate didAddCommentFromDetailViewController:self withTag:tag andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
-            //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
-        }
-    }    
-}
-
--(void)sharePixDialogDidFinish {
-    //[self didCloseShareSheet];
-    if (activityIndicatorLarge) {
-        [activityIndicatorLarge setHidden:YES];
-        [activityIndicatorLarge stopCompleteAnimation];
-        [activityIndicatorLarge removeFromSuperview];
-        activityIndicatorLarge = nil;
-    }
-}
-
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
     /* DO NOT allow clicks - will lead to a delegate mess
     // location is the click location inside feeditem's frame
@@ -630,4 +561,10 @@ static BOOL openingDetailView;
 // checks whether first time user message will allow it
     return YES;
 }
+
+#pragma mark shareControllerDelegate called from verticalFeedItemDelegate
+-(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)_feedItem {
+    [delegate doParallelNewPixShare:_feedItem.tag];
+}
+
 @end

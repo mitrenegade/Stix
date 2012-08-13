@@ -46,6 +46,7 @@
 #import "SHKConfiguration.h"
 #import "MySHKConfigurator.h"
 #import "SHKSharer.h"
+#import "AboutViewController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -269,7 +270,7 @@ struct UserInfo {
 -(void)getFirstTags;
 -(void)displayShareController;
 -(void)uploadImage:(NSData *)dataPNG;
--(void)initializeShareController;
+-(ShareController*)initializeShareController;
 
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)doParallelNewPixShare:(Tag*)_tag;

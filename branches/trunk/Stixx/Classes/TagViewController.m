@@ -23,7 +23,7 @@
 @synthesize cameraTag;
 
 @synthesize captureManager;
-@synthesize scanningLabel;
+//@synthesize scanningLabel;
 
 - (id)init {
 	
@@ -44,7 +44,7 @@
 	[[[self captureManager] previewLayer] setPosition:CGPointMake(CGRectGetMidX(layerRect), CGRectGetMidY(layerRect))];
     [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [self.aperture layer]];
 //    [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [buttonTakePicture layer]];
-    
+/*    
     UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(100, 50, 120, 30)];
     [self setScanningLabel:tempLabel];
 	[scanningLabel setBackgroundColor:[UIColor clearColor]];
@@ -53,7 +53,7 @@
 	[scanningLabel setText:@"Scanning..."];
     [scanningLabel setHidden:YES];
 	[[self view] addSubview:scanningLabel];	
-    
+*/    
     // add a notification for completion of capture
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didCaptureImage) name:kImageCapturedSuccessfully object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(captureImageDidFail:) name:kImageCaptureFailed object:nil];
@@ -176,7 +176,7 @@
     if (isCapturing)
         return;
     
-    [[self scanningLabel] setHidden:NO];
+//    [[self scanningLabel] setHidden:NO];
     [[self captureManager] captureStillImage];
     isCapturing = YES;
 #else
@@ -203,7 +203,7 @@
 #if USING_AVCAPTURE
 - (void)didCaptureImage 
 {
-    [[self scanningLabel] setHidden:YES];
+//    [[self scanningLabel] setHidden:YES];
     UIImage * originalImage = [self.captureManager stillImage];
     
     [self didTakePhoto:originalImage];
@@ -224,7 +224,7 @@
         [alert show];
     }
     else {
-        [[self scanningLabel] setHidden:YES];
+//        [[self scanningLabel] setHidden:YES];
     }
 }
 #endif

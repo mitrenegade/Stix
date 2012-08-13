@@ -21,7 +21,8 @@
 
 @protocol StixEditorDelegate <NSObject>
 
--(void)didCloseEditor;
+//-(void)didCloseEditor;
+-(void)didFinishEditing;
 
 @optional
 
@@ -71,7 +72,7 @@
 -(IBAction)didClickButtonClose:(id)sender;
 
 //-(void)initializeWithTag:(Tag*)tag remixMode:(int)remixMode;
--(void)saveRemixedPix;
+-(void)saveRemixedPix:(BOOL)didAddStix;
 
 -(void)disableButtonDelete;
 -(void)disableButtonClear;

@@ -42,6 +42,7 @@
 
 // First Time User Experience - arrow and button clicking restrictions
 #define SHOW_ARROW 0
+#define USE_SINGLETON_SHARE 0
 
 // hack to make camera fill screen for a custom (shorter) tab bar
 #define CAMERA_TRANSFORM_X 1 //.12412

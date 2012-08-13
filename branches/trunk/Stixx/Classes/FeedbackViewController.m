@@ -103,7 +103,7 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController popViewControllerAnimated:NO];
 }
 
 -(IBAction)didClickSubmitButton:(id)sender {

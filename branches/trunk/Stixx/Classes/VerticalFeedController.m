@@ -1164,26 +1164,6 @@ static int tickID;
     [delegate shouldDisplayCommentViewWithTag:tag andNameString:nameString fromDetailView:nil];
 }
 
-#pragma mark StixEditorDelegate 
-/*
--(void)didCloseEditor {
-#if 0
-    [delegate didDismissSecondaryView];
-    
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    CGRect frameOffscreen = stixEditorController.view.frame;
-    
-    frameOffscreen.origin.x -= 330;
-    [animation doViewTransition:stixEditorController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [stixEditorController.view removeFromSuperview];
-    }];
-#else
-    [delegate didDismissSecondaryView]; 
-    [stixEditorController.view removeFromSuperview];    
-    [delegate didCloseEditorFromFeedController];
-#endif
-}
-*/
 -(void)kumulosHelperDidCompleteWithCallback:(SEL)callback andParams:(NSMutableArray *)params {
     [self performSelector:callback withObject:params afterDelay:0];
 }
@@ -1386,11 +1366,6 @@ static int tickID;
     }
 }
 
--(void)sharePixDialogDidFinish {
-//    [self didCloseShareSheet];
-    [self startActivityIndicatorLarge];
-//    [delegate didCloseShareSheet];
-}
 -(void)sharePixDialogDidFail:(int)errorType {
 //    [self didCloseShareSheet];
     if (activityIndicatorLarge) {

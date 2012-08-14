@@ -24,7 +24,7 @@
 
 @protocol ShareControllerDelegate <NSObject>
 
--(void)shouldCloseShareController:(BOOL)didClickDone;
+-(void)didCloseShareController:(BOOL)didClickDone;
 -(NSString*)getUsername;
 -(void)uploadImageFinished;
 -(int)getUserID;
@@ -34,7 +34,7 @@
 
 @end
 
-@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate, TwitterHelperDelegate, SHKSharerDelegate>
+@interface ShareController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, ASIHTTPRequestDelegate, TwitterHelperDelegate, SHKSharerDelegate, UINavigationControllerDelegate>
 {
     IBOutlet UIButton * backButton;
     IBOutlet UIButton * doneButton;

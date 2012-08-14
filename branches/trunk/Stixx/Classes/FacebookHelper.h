@@ -30,6 +30,7 @@
 -(NSString*)getUserFacebookString;
 -(void)didEarnFacebookReward:(int)bux;
 //-(void)facebookLoginIsOffline;
+-(void)facebookRequestDidTimeOut;
 @end
 
 @interface FacebookHelper : NSObject < FBSessionDelegate, FBRequestDelegate, FBDialogDelegate>

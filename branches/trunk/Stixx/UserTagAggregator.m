@@ -129,14 +129,19 @@
  */
     // if any of the followingSet is a featured user, separate that out
     NSLog(@"FollowingSetWithMe has %d elements initially", [followingSetWithMe count]);
-    if (!featuredUsers)
+    if (!featuredUsers) {
+        NSSet * featuredSetFromDelegate = [delegate getFeaturedUserSet];
+        NSLog(@"Delegate's featured User set: %@", featuredSetFromDelegate);
         featuredUsers = [[NSMutableSet alloc] initWithSet:[delegate getFeaturedUserSet]];
+    }
     else {
+        NSSet * featuredSetFromDelegate = [delegate getFeaturedUserSet];
+        NSLog(@"Delegate's featured User set: %@", featuredSetFromDelegate);
         [featuredUsers removeAllObjects];
         [featuredUsers unionSet:[delegate getFeaturedUserSet]];
     }
     [featuredUsers addObject:@"William Ho"];
-    [featuredUsers addObject:[delegate getUsername]];     
+    [featuredUsers addObject:[[delegate getUsername] copy]]; // this must be a copy or we get some weird memory error!
     NSLog(@"FeaturedUsers has %d elements: %@", [featuredUsers count], featuredUsers);
     [featuredUsers intersectSet:followingSetWithMe];
     NSLog(@"FeaturedUsers and FollowingSetWithMe has %d intersections, %@", [featuredUsers count], featuredUsers);
@@ -182,7 +187,7 @@
         
         //KSAPIOperation * kOp = [k getNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue]];
         KSAPIOperation * kOp = [k getSomeNewPixBelongingToUserWithUsername:name andTagID:[newestTagID intValue] andMaxPix:[NSNumber numberWithInt:50]];
-        [usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
+        //[usernameForOperations setObject:name forKey:[NSNumber numberWithInt:[kOp hash]]];
     } else {
         //NSLog(@"getUserPixForUsers paused!");
         [self performSelector:@selector(getUserPixForUsers) withObject:self afterDelay:1];
@@ -216,12 +221,13 @@
 
 //-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getSomeNewPixBelongingToUserDidCompleteWithResult:(NSArray *)theResults {
-    NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
+    // followName causes problems
+    //NSString * followName = [usernameForOperations objectForKey:[NSNumber numberWithInt:[operation hash]]];
     if ([theResults count] > 0)
     {
         //NSString * followName = [[theResults objectAtIndex:0] objectForKey:@"username"];
 #if VERBOSE
-        NSLog(@"getNewPixBelongingToUser %@ completed with %d results - %d users remaining, queue size %d", followName, [theResults count], followingCountLeftToAggregate-1, [aggregationQueue count]);
+        NSLog(@"getNewPixBelongingToUser completed with %d results - %d users remaining, queue size %d", [theResults count], followingCountLeftToAggregate-1, [aggregationQueue count]);
 #endif
         isLocked = YES;
         [aggregationQueue addObjectsFromArray:theResults];
@@ -241,7 +247,7 @@
     else {
 #if VERBOSE
         if (!isLocked) 
-            NSLog(@"getNewPixBelongingToUser %@ returned no results for followingCount %d - queue size %d", followName, followingCountLeftToAggregate-1, [aggregationQueue count]);
+            NSLog(@"getNewPixBelongingToUser returned no results for followingCount %d - queue size %d", followingCountLeftToAggregate-1, [aggregationQueue count]);
 #endif
     }
     

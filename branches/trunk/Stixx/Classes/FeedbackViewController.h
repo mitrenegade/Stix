@@ -11,7 +11,6 @@
 
 @protocol FeedbackViewDelegate
     
--(void)didCancelFeedback;
 -(void)didSubmitFeedbackOfType:(NSString*)type withMessage:(NSString*)message;
 
 @end

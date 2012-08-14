@@ -21,7 +21,8 @@
 
 @protocol StixEditorDelegate <NSObject>
 
--(void)didCloseEditor;
+//-(void)didCloseEditor;
+-(void)didFinishEditing;
 
 @optional
 
@@ -42,14 +43,14 @@
     
     StixPanelView * stixPanel;
     StixView * stixView;
-    Tag * remixTag;
     
-    NSObject<StixEditorDelegate> * __unsafe_unretained delegate;
+    NSObject<StixEditorDelegate> * __unsafe_unretained appDelegate;
     
     LoadingAnimationView * activityIndicator;
     
     BOOL isLoadingPixSource;
     int remixMode;
+    Tag * remixTag;
 }
 
 @property (nonatomic) IBOutlet UIImageView * imageView;
@@ -60,8 +61,9 @@
 @property (nonatomic) IBOutlet UIButton * buttonClose;
 @property (nonatomic) StixPanelView * stixPanel;
 @property (nonatomic) StixView * stixView;
-@property (nonatomic, unsafe_unretained) NSObject<StixEditorDelegate> * delegate;
+@property (nonatomic, unsafe_unretained) NSObject<StixEditorDelegate> * appDelegate;
 @property (nonatomic) Tag * remixTag;
+@property (nonatomic, assign) int remixMode;
 
 -(IBAction)didClickButtonDelete:(id)sender;
 -(IBAction)didClickButtonClear:(id)sender;
@@ -69,8 +71,8 @@
 -(IBAction)didClickButtonSave:(id)sender;
 -(IBAction)didClickButtonClose:(id)sender;
 
--(void)initializeWithTag:(Tag*)tag remixMode:(int)remixMode;
--(void)saveRemixedPix;
+//-(void)initializeWithTag:(Tag*)tag remixMode:(int)remixMode;
+-(void)saveRemixedPix:(BOOL)didAddStix;
 
 -(void)disableButtonDelete;
 -(void)disableButtonClear;

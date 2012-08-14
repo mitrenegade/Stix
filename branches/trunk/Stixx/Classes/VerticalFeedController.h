@@ -23,6 +23,7 @@
 #import "StixAnimation.h"
 #import "StixEditorViewController.h"
 #import "GlobalHeaders.h"
+#import "DetailViewController.h"
 
 #define FEED_ITEM_WIDTH 275
 #define FEED_ITEM_HEIGHT 300
@@ -36,7 +37,7 @@
 -(NSMutableDictionary *)getUserPhotos;
 -(void)getNewerTagsThanID:(int)tagID;
 -(void)getOlderTagsThanID:(int)tagID;
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 
 - (bool) isLoggedIn;
@@ -62,9 +63,10 @@
 
 -(NSMutableDictionary *)getCommentHistoriesForTag:(Tag*)tag;
 -(BOOL)isFollowing:(NSString*)name;
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString fromDetailView:(DetailViewController*)detailView;
 
 -(void)shouldDisplayUserPage:(NSString*)name;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 
 -(void)checkAggregatorStatus; // debug
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
@@ -91,14 +93,13 @@
 -(void)pendingTagDidHaveAuxiliaryStix:(Tag*)pendingTag withNewTagID:(int)tagID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
--(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
+//-(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
 -(void)requestTagWithTagID:(int)tagID;
 
 // check for first time user state
 -(BOOL)canClickRemixButton; // test user stage
 -(BOOL)canClickNotesButton;
--(void)didClickRemixButton; // advance user stage
--(void)didCloseEditorFromFeedController; // advance user stage
+-(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 @end
 
 @interface VerticalFeedController : UIViewController<VerticalFeedItemDelegate, BadgeViewDelegate, FeedTableControllerDelegate, CommentViewDelegate, KumulosHelperDelegate, KumulosHelperDelegate, UIActionSheetDelegate, UIAlertViewDelegate, StixAnimationDelegate, StixEditorDelegate, UIActionSheetDelegate, StixAnimationDelegate> {
@@ -111,9 +112,10 @@
     
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
-    
+
+#if !USING_AVCAPTURE
     UIImagePickerController * camera;
-    
+#endif    
     LoadingAnimationView * activityIndicator;
     LoadingAnimationView * activityIndicatorLarge;
     
@@ -175,7 +177,9 @@
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic) CommentViewController * commentView;
+#if !USING_AVCAPTURE
 @property (nonatomic) UIImagePickerController * camera;
+#endif
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 //@property (nonatomic, copy) NSString * galleryUsername;
@@ -219,8 +223,9 @@
 -(void)stopActivityIndicatorLarge;
 
 -(void)didClickRemixFromDetailView:(Tag*)tag;
--(void)unlockProfile;
+//-(void)unlockProfile;
 -(void)agitatePointer;
+-(void)didAdvanceFirstTimeUserMessage;
 @end
 
 

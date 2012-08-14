@@ -29,6 +29,16 @@ static BOOL openingDetailView;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
+        
         feedItem = nil;
     }
     return self;
@@ -122,17 +132,21 @@ static BOOL openingDetailView;
 }
 
 -(IBAction)didClickBackButton:(id)sender {    
+#if 0
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
     CGRect frameOffscreen = CGRectMake(-3-320, 0, 320, 480);
     animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.25];
     [DetailViewController unlockOpen];
+#else
+    [self.navigationController popViewControllerAnimated:YES];
+#endif
 }
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
     if (animID == animationID[1]) {
         //[stixView release];
-        [delegate didDismissZoom];
-        [DetailViewController unlockOpen];
+//        [delegate didDismissZoom];
+//        [DetailViewController unlockOpen];
     }
     // share menu
     else if (animID == shareMenuOpenAnimation) {
@@ -166,6 +180,7 @@ static BOOL openingDetailView;
 #pragma mark - View lifecycle
 
 +(BOOL)openingDetailView {
+    NSLog(@"Already opening detail view: %d", openingDetailView);
     return openingDetailView;
 }
 +(void)lockOpen {
@@ -180,7 +195,7 @@ static BOOL openingDetailView;
     [super viewDidLoad];
     
     // Do any additional setup after loading the view from its nib.
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,46 + headerView.frame.size.height,320,320)];
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,OFFSET_NAVBAR + headerView.frame.size.height,320,480-(OFFSET_NAVBAR+headerView.frame.size.height))];
     [self.view addSubview:scrollView];
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.scrollEnabled = YES;
@@ -188,7 +203,6 @@ static BOOL openingDetailView;
     //[scrollView setDelegate:self];
     
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 11, 25, 25)];
-    
     
     names = [[NSMutableArray alloc] init];
     comments = [[NSMutableArray alloc] init];
@@ -215,13 +229,6 @@ static BOOL openingDetailView;
     [scrollView setContentSize:CGSizeMake(320, feedHeight + tableHeight + 5)];
     [scrollView addSubview:feedItem.view];
     [scrollView addSubview:commentsTable.view];
-/*
-    if (!stixEditorController)
-    {
-        stixEditorController = [[StixEditorViewController alloc] init];
-        [stixEditorController setDelegate:self];
-    }
- */
 }
 
 -(void)setScrollHeight:(int)height {
@@ -430,53 +437,26 @@ static BOOL openingDetailView;
     return tagUsername;
 }
 
--(void)displayCommentsOfTag:(int)_tagID andName:(NSString *)nameString{
-    assert( _tagID == tagID );
-    if (commentView == nil) {
-        commentView = [[CommentViewController alloc] init];
-        [commentView setDelegate:self];
-    }
-    [commentView initCommentViewWithTagID:tagID andNameString:nameString];
-    //[commentView setTagID:tagID];
-    //[commentView setNameString:nameString];
-    
-    // hack a way to display view over camera; formerly presentModalViewController
-    [self.view addSubview:commentView.view];
+-(void)displayCommentsOfTag:(Tag*)_tag andName:(NSString *)nameString{
+    //assert( _tagID == tagID );
+    [delegate shouldDisplayCommentViewWithTag:_tag andNameString:nameString fromDetailView:self];
 }
 
--(void)didAddNewComment:(NSString *)newComment withTagID:(int)_tagID{
-    assert (_tagID == tagID);
-    NSString * name = [delegate getUsername];
-    //int tagID = [commentView tagID];
-    if ([newComment length] > 0) {
-        [delegate didAddCommentFromDetailViewController:self withTagID:_tagID andUsername:name andComment:newComment andStixStringID:@"COMMENT"];
-        // reload all comments - clear old ones
-        [names removeAllObjects];
-        [comments removeAllObjects];
-        [stixStringIDs removeAllObjects];
-        [timestamps removeAllObjects];
-        [rowHeights removeAllObjects];
-        //[k getAllHistoryWithTagID:feedItem.tagID];
-        
-        // force retention of delegate call
-        if ([delegate respondsToSelector:@selector(detailViewNeedsRetainForDelegateCall:)])
-            [delegate detailViewNeedsRetainForDelegateCall:self];
-        /*
-        if (!retainedViewsForDelegateCallGetAllHistory)
-            retainedViewsForDelegateCallGetAllHistory = [[NSMutableSet alloc] init];
-        [retainedViewsForDelegateCallGetAllHistory addObject:self.view]; // force retention of delegate
-        NSLog(@"DetailView: adding a comment and calling getAllHistory for tag %d: retained items %d", feedItem.tagID, [retainedViewsForDelegateCallGetAllHistory count]);
-         */
-    }
-    [self didCloseComments];
+-(void)reloadComments {
+    // reload all comments - clear old ones
+    [names removeAllObjects];
+    [comments removeAllObjects];
+    [stixStringIDs removeAllObjects];
+    [timestamps removeAllObjects];
+    [rowHeights removeAllObjects];
+    
+    // force retention of delegate call
+    if ([delegate respondsToSelector:@selector(detailViewNeedsRetainForDelegateCall:)])
+        [delegate detailViewNeedsRetainForDelegateCall:self];
 }
 
 -(void)addCommentDidFinish {
     [k getAllHistoryWithTagID:feedItem.tagID];
-}
-
--(void)didCloseComments {
-    [commentView.view removeFromSuperview];
 }
 
 //-(void)sharePix:(int)tag_id {
@@ -496,6 +476,7 @@ static BOOL openingDetailView;
 
 -(void)shouldDisplayUserPage:(NSString *)username {
     NSLog(@"Multilayered display of profile view about to happen from DetailViewController!");
+#if 0
     // close comments table first - click came from here
     StixAnimation * animation = [[StixAnimation alloc] init];
     animation.delegate = self;
@@ -509,148 +490,9 @@ static BOOL openingDetailView;
     
     // this is effectively a close action, so must unlock detailViewController open lock
     [DetailViewController unlockOpen];
-}
-
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
-}
-#pragma mark sharing from VerticalFeedItemDelegate
-
--(void)didCloseShareSheet {
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
-}
-/*
--(void)didClickShareViaFacebook {
-    [self startActivityIndicator];
-    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
-        [feedItem didClickShareViaFacebook];
-    });
-    [self didCloseShareSheet];
-    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [shareSheet addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
-}
-
--(void)didClickShareViaEmail {
-    [self startActivityIndicator];
-    dispatch_async( dispatch_queue_create("com.Neroh.Stix.FeedController.bgQueue", NULL), ^(void) {
-        [feedItem didClickShareViaEmail];
-    });
-    [self didCloseShareSheet];
-    activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 170, 90, 90)];
-    [shareSheet addSubview:activityIndicatorLarge];
-    [activityIndicatorLarge startCompleteAnimation];
-}
- */
-
--(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
-#if 0
-    CGRect frameInside = CGRectMake(16, 22, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    shareSheet = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"share_actions.png"]];
-    [shareSheet setFrame:frameOutside];
-    
-    buttonShareFacebook = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareFacebook setFrame:CGRectMake(68-16, 175-22, 210, 60)];
-    [buttonShareFacebook setBackgroundColor:[UIColor clearColor]];
-    [buttonShareFacebook addTarget:self action:@selector(didClickShareViaFacebook) forControlEvents:UIControlEventTouchUpInside];
-    
-    buttonShareEmail = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareEmail setFrame:CGRectMake(68-16, 250-22, 210, 60)];
-    [buttonShareEmail setBackgroundColor:[UIColor clearColor]];
-    [buttonShareEmail addTarget:self action:@selector(didClickShareViaEmail) forControlEvents:UIControlEventTouchUpInside];
-    
-    buttonShareClose = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonShareClose setFrame:CGRectMake(270-16, 60-22, 37, 39)];
-    [buttonShareClose setBackgroundColor:[UIColor clearColor]];
-    [buttonShareClose addTarget:self action:@selector(didCloseShareSheet) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self.view addSubview:shareSheet];
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    shareMenuOpenAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameInside forTime:.25];
 #else
-    [self doParallelNewPixShare];
+    [delegate shouldDisplayUserPage:username];
 #endif
-}
--(void)doParallelNewPixShare{
-    NSLog(@"NewPixShare: resetting toggles for new created pix");
-    newPixDidClickShare = NO;
-    newPixDidFinishUpload = NO;
-    shareController = [ShareController sharedShareController];
-    [shareController startUploadImage:tag withDelegate:self];
-    [self displayShareController];
-}
-
--(void)displayShareController {
-    // hack a way to display feedback view over camera: formerly presentModalViewController
-    CGRect frameOffscreen = CGRectMake(-320, 0, 320, 480);
-    [self.view addSubview:shareController.view];
-    [shareController.view setFrame:frameOffscreen];
-    
-    CGRect frameOnscreen = CGRectMake(0, 0, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:shareController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-    
-    // must force viewDidAppear because it doesn't happen when it's offscreen?
-    [shareController reloadConnections];
-    [shareController viewDidAppear:YES]; 
-}
-
--(void)uploadImageFinished {
-    // share controller stuff
-    if (newPixDidClickShare) {
-        NSLog(@"NewPixShare: Upload finished: Now time to share!");
-        [shareController doSharePix];
-    }
-    else {
-        NSLog(@"NewPixShare: Now time to wait for user to click on share!");
-        newPixDidFinishUpload = YES;
-    }    
-}
-
--(void)shouldCloseShareController:(BOOL)didClickDone {
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = shareController.view.frame;
-    frameOffscreen.origin.x -= 330;
-    
-    if (didClickDone) {
-        if (newPixDidFinishUpload) {
-            NSLog(@"NewPixShare: Did click done: upload already finished");
-            [shareController doSharePix];
-        }
-        else {
-            newPixDidClickShare = YES;
-            NSLog(@"NewPixShare: Clicked share; waiting for upload");
-        }
-        // check for caption - used as comment
-        NSString * caption = [shareController.caption text];
-        NSLog(@"Did add caption: %@", caption);
-        if (caption && [caption length] > 0) {
-            [delegate didAddCommentFromDetailViewController:self withTagID:tagID andUsername:[self getUsername] andComment:caption andStixStringID:@"COMMENT"];
-            //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
-        }
-    }    
-    
-    [animation doViewTransition:shareController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [shareController.view removeFromSuperview];
-    }];
-    
-}
-
--(void)sharePixDialogDidFinish {
-    [self didCloseShareSheet];
-    if (activityIndicatorLarge) {
-        [activityIndicatorLarge setHidden:YES];
-        [activityIndicatorLarge stopCompleteAnimation];
-        [activityIndicatorLarge removeFromSuperview];
-        activityIndicatorLarge = nil;
-    }
 }
 
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
@@ -674,7 +516,8 @@ static BOOL openingDetailView;
     // do nothing
 }
 
--(void)didClickLikeButton:(int)type withTagID:(int)_tagID {
+-(void)didClickLikeButton:(int)type withTag:(Tag*)_tag {
+    //int _tagID = [_tag.tagID intValue];
     NSString * newComment = @"";
     NSString * newType = @"LIKE";
     switch (type) {
@@ -700,25 +543,28 @@ static BOOL openingDetailView;
         default:
             break;
     }
-    //[self didAddNewComment:newComment withTagID:tagID];
     NSString * name = [delegate getUsername];
-    //    if ([newComment length] > 0)
-    [delegate didAddCommentFromDetailViewController:self withTagID:_tagID andUsername:name andComment:newComment andStixStringID:newType];
-    //[k getAllHistoryWithTagID:feedItem.tagID]; // hack: if timing is good, may force update of comment count
+    [delegate didAddCommentFromDetailViewController:self withTag:_tag andUsername:name andComment:newComment andStixStringID:newType];
 }
 
 #pragma mark remix delegate functions
 
--(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)feedItem {
-    NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", feedItem.tag.tagID, tagToRemix.tagID);
+-(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)_feedItem {
+    NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", _feedItem.tag.tagID, tagToRemix.tagID);
 
     // hack: instead of doing this in the detailView and duplicating all the code to make the functionality work, we just jump to the feedview
     [DetailViewController unlockOpen];
-    [delegate didClickRemixFromDetailViewWithTag:feedItem.tag];
+    [delegate didClickRemixFromDetailViewWithTag:_feedItem.tag];
 }
 
 -(BOOL)didClickNotesButton {
 // checks whether first time user message will allow it
     return YES;
 }
+
+#pragma mark shareControllerDelegate called from verticalFeedItemDelegate
+-(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)_feedItem {
+    [delegate doParallelNewPixShare:_feedItem.tag];
+}
+
 @end

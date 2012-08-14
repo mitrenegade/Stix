@@ -51,7 +51,7 @@
 // comes here after a successful SHKShareTypeUserInfo
 - (void)sharerFinishedSending:(SHKSharer *)sharer {
     // doesn't come here
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     if ([[sharer item] shareType] == SHKShareTypeUserInfo) {
         NSLog(@"Finished sending: userinfo");
         /*

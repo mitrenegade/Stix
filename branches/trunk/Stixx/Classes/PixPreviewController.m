@@ -12,6 +12,7 @@
 
 @synthesize buttonOK, buttonCancel, imageView;
 @synthesize delegate;
+@synthesize image;
 @synthesize activityIndicatorLarge;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -38,9 +39,11 @@
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES];
     if (activityIndicatorLarge)
 //        [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
+    [self.imageView setImage:image];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -51,6 +54,7 @@
 -(void)initWithTag:(Tag*)tag {
     UIImage * imageData = tag.image;
     [imageView setImage:imageData];
+    NSLog(@"Tag: %x image: %x %f %f", tag, imageData, imageData.size.width, imageData.size.height);
 }
 
 -(IBAction)didClickOK:(id)sender {
@@ -60,11 +64,12 @@
         [self.view addSubview:activityIndicatorLarge];
     }
     [activityIndicatorLarge startCompleteAnimation];
+    [self.navigationController popViewControllerAnimated:NO]; // close self
     [delegate performSelector:@selector(didConfirmPix) withObject:delegate afterDelay:0];
     //[delegate didConfirmPix];
 }
 
--(IBAction)didClickCancel:(id)sender {
+-(IBAction)didClickBackButton:(id)sender {
     [delegate didCancelPix];
 }
 

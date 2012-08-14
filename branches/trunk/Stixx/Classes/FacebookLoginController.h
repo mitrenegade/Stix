@@ -28,7 +28,7 @@
 -(void)didAddNewUserWithResult:(NSArray*)theResults;
 @end
 
-@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate, SignupViewDelegate, LoginViewDelegate, CreateFacebookUsernameDelegate>
+@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate, SignupViewDelegate, LoginViewDelegate, CreateFacebookUsernameDelegate, UINavigationControllerDelegate>
 {
     BOOL isFirstTimeUser;
 }
@@ -42,13 +42,14 @@
 @property (nonatomic, copy) NSString * facebookEmail;
 @property (nonatomic) NSString* facebookString;
 @property (nonatomic) Kumulos * k;
-@property (nonatomic) UINavigationController * navController;
 @property (nonatomic, assign) UIImagePickerController * camera;
 @property (nonatomic) NSString * usersFacebookUsername;
 @property (nonatomic) NSData * usersFacebookPhotoData;
+/*
 @property (nonatomic) SignupViewController * signupController;
 @property (nonatomic) LoginViewController * loginController;
 @property (nonatomic) CreateFacebookUsernameController * usernameController;
+*/
 
 -(IBAction)didClickFacebookLoginButton:(id)sender;
 -(void)didGetFacebookName:(NSString*)name andEmail:(NSString*)email andFacebookString:(NSString*)facebookString;

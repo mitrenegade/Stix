@@ -18,7 +18,7 @@
 
 -(void)searchFriendsOnStix;
 -(NSMutableArray*)getAllUserFacebookStrings;
--(void)shouldCloseFriendSuggestionControllerWithNames:(NSArray*)addedFriends;
+-(void)didAddFriendsFromFriendSuggestionController:(NSArray*)addedFriends;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 -(void)friendSuggestionControllerFinishedLoading:(int)totalSuggestions;
 -(NSMutableSet*)getFollowingList;

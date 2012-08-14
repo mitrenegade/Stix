@@ -11,10 +11,10 @@
 #import "Kumulos.h"
 #import "StixAnimation.h"
 #import "LoadingAnimationView.h"
-#import "FriendSearchResultsController.h"
 #import "FacebookHelper.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
+#import "UserProfileViewController.h"
 
 @protocol ProfileViewDelegate
 -(NSMutableSet*)getFollowingList;
@@ -42,19 +42,21 @@
 -(void)didClickInviteButtonByFacebook:(NSString*)username withFacebookString:(NSString*)facebookString;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
--(void)didClickFeedbackButton:(NSString*)fromView;
+//-(void)shouldCloseUserPage;
 -(void)didClickChangePhoto;
 -(void)didConnectToTwitter;
+
+-(BOOL)didGetAllUsers;
+-(void)didClickFeedbackButton;
+-(void)didClickAboutButton;
 @end
 
-@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, FriendSearchResultsDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
+@interface ProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, FriendSearchTableDelegate, KumulosDelegate, StixAnimationDelegate, UINavigationControllerDelegate, FriendServicesDelegate, UIScrollViewDelegate, TwitterHelperDelegate, UIWebViewDelegate>
 {
-    IBOutlet UIScrollView * scrollView;
+    UIScrollView * scrollView;
     
     UITableView * buttonsTableView;
     FriendSearchTableViewController * friendsTableView;
-    //FriendSearchResultsController * searchResultsController;
 
     // friend suggestion controller
     NSMutableArray * suggestedFriends;
@@ -94,7 +96,7 @@
     
     //UINavigationController * navController;
     FriendServicesViewController * servicesController;
-    UIImagePickerController * __unsafe_unretained camera;
+//    UIImagePickerController * __unsafe_unretained camera;
     UIWebView * webView;
     
     
@@ -102,13 +104,12 @@
 
 @property (nonatomic, unsafe_unretained) NSObject<ProfileViewDelegate> * delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
-//@property (nonatomic) IBOutlet UITableView * buttonsTableView;
 @property (nonatomic) FriendServicesViewController * servicesController;
-@property (nonatomic) IBOutlet UIScrollView * scrollView;
-@property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
+@property (nonatomic) UIScrollView * scrollView;
+//@property (nonatomic, unsafe_unretained) UIImagePickerController * camera;
 @property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic, retain) IBOutlet UIButton * buttonAbout;
-@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
+//@property (nonatomic, retain) IBOutlet UIButton * buttonBack;
 
 -(IBAction)didClickFeedbackButton:(id)sender;
 -(IBAction)didClickAboutButton:(id)sender;

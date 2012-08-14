@@ -29,16 +29,22 @@
         // Custom initialization
         k = [[Kumulos alloc] init];
         [k setDelegate:self];
-        activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X + 20, 9, 25, 25)];
     }
     return self;
 }
 
 - (void)viewDidLoad
 {
+    // any frames set in viewDidLoad will happen before the nav controller appears.
+    // so we are able to place activityIndicator in the header.
+    // also, tables must be added with a Y offset of 44
+
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X + 20, 9, 25, 25)];
     [self.view addSubview:activityIndicator];
+    [tableView setFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR)];
+    
 #if USE_PULL_TO_REFRESH
     if (refreshHeaderView == nil) {
         refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];

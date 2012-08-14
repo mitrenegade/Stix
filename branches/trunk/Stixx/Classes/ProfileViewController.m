@@ -15,8 +15,8 @@
 @synthesize activityIndicator;
 @synthesize servicesController;
 @synthesize scrollView;
-@synthesize buttonAbout, buttonFeedback, buttonBack;
-@synthesize camera;
+//@synthesize buttonAbout, buttonFeedback, buttonBack;
+//@synthesize camera;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -33,17 +33,35 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    friendsTableView = [[FriendSearchTableViewController alloc] init];
-    [friendsTableView setShowAccessoryButton:YES];
-    [friendsTableView setDelegate:self];
+    buttonsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 300) style:UITableViewStyleGrouped];
+    [buttonsTableView setDelegate:self];
+    [buttonsTableView setDataSource:self];    
+    [buttonsTableView.layer setCornerRadius:10];
+    [buttonsTableView setBackgroundColor:[UIColor clearColor]];
+    [buttonsTableView setScrollEnabled:NO];
+/*
     buttonsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 480) style:UITableViewStyleGrouped];
     [buttonsTableView setDelegate:self];
     [buttonsTableView setDataSource:self];
     [buttonAbout setHidden:YES];
+*/
+    friendsTableView = [[FriendSearchTableViewController alloc] init];
+    [friendsTableView setShowAccessoryButton:YES];
+    [friendsTableView setDelegate:self];
+    [friendsTableView.view setFrame:CGRectMake(0, 220, 320, 190)];
+    [friendsTableView.view setBackgroundColor:[UIColor clearColor]];
+    [friendsTableView.tableView setScrollEnabled:NO];
     
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, OFFSET_NAVBAR, 320, 480-OFFSET_NAVBAR-40)];
+    [scrollView addSubview:buttonsTableView];
+    [scrollView addSubview:friendsTableView.view];
+    [scrollView setDelegate:self];
+    [scrollView setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:scrollView];
+
     activityIndicator = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(LOADING_ANIMATION_X, 9, 25, 25)];
-    
     [self.view addSubview:activityIndicator];
+
     [self initializeButtons];
     [self initializeSuggestions];
     [self initializeContactList];
@@ -146,17 +164,6 @@
     
     [self initializeHeaderViews];
     //isEditing = NO;
-    [buttonsTableView setFrame:CGRectMake(0, -3, 320, 300)];
-    [buttonsTableView.layer setCornerRadius:10];
-    [buttonsTableView setBackgroundColor:[UIColor clearColor]];
-    [friendsTableView.view setFrame:CGRectMake(0, 220, 320, 190)];
-    [friendsTableView.view setBackgroundColor:[UIColor clearColor]];
-
-    [buttonsTableView setScrollEnabled:NO];
-    [friendsTableView.tableView setScrollEnabled:NO];
-    
-    [scrollView addSubview:buttonsTableView];
-    [scrollView addSubview:friendsTableView.view];
     [friendsTableView.view setHidden:YES];
     /*
     [buttonsTableView setBackgroundColor:[UIColor greenColor]];
@@ -569,12 +576,6 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
 #if SHOW_ARROW
     if ([delegate getFirstTimeUserStage] == 3) {
         showPointer = NO;
@@ -599,7 +600,8 @@
         if (![delegate isLoggedIn])
             return;
         NSLog(@"Button show my pix!");
-        [self shouldDisplayUserPage:[delegate getUsername]];
+        //[self shouldDisplayUserPage:[delegate getUsername]];
+        [self viewMyPix];
     }
     else if (indexPath.row == 0) {
         //[navController pushViewController:servicesController animated:YES];
@@ -659,6 +661,10 @@
     return userPhoto;
 }
 
+-(BOOL)didGetAllUsers {
+    return [delegate didGetAllUsers];
+}
+
 //-(int)getNumOfUsers {
 //    return [searchFriendName count];
 //}
@@ -707,26 +713,6 @@
     return didGetTwitterFriends;
 }
 
-/*
--(void)addFriendFromList:(int)index {
-    NSString * username = [self getUsernameForUser:index];
-    //NSMutableSet * friendsList = [self.delegate getFriendsList];
-    if ([self getFollowingUserStatus:index] == 1) { 
-        [delegate setFollowing:username toState:NO];
-    }
-    else if ([self getFollowingUserStatus:index] == 0)
-    {
-        [delegate setFollowing:username toState:YES];
-    }
-    else {
-        // invite
-        NSString * _facebookString = nil; //[self getIDForUser:index]; 
-        [delegate didClickInviteButtonByFacebook:username withFacebookString:_facebookString];
-    }
-    //[[searchResultsController tableView] reloadData];
-}
- */
-
 -(void)followUser:(NSString*)name {
     NSLog(@"Profile: starting to follow name: %@", name);
     if (![delegate isFollowing:name])
@@ -756,7 +742,7 @@
         NSLog(@"friend services view is taking care of it!");
     }
 }
-
+/*
 -(void)didSelectUserProfile:(int)index {
     NSString * username = [self getUsernameForUser:index];
     if ([username isEqualToString:[delegate getUsername]]) {
@@ -768,19 +754,18 @@
         //}   
     }
 }
-
+*/
 -(void)shouldDisplayUserPage:(NSString *)name {
-    if ([name isEqualToString:[delegate getUsername]]) {
-        [delegate shouldDisplayUserPage:name];
-    }
-    else {
-        [delegate shouldDisplayUserPage:name];
-    }
+    [delegate shouldDisplayUserPage:name];
 }
 
--(void)shouldCloseUserPage {
-    [delegate shouldCloseUserPage];
+-(void)viewMyPix {
+    [self shouldDisplayUserPage:[delegate getUsername]];
 }
+
+//-(void)shouldCloseUserPage {
+//    [delegate shouldCloseUserPage];
+//}
 
 -(void)didFinishAnimation:(int)animationID withCanvas:(UIView *)canvas {
 #if SHOW_ARROW
@@ -823,7 +808,7 @@
         [servicesController viewDidAppear:YES];
     }];
 #else
-    [self.view addSubview:servicesController.view];
+    [self.navigationController pushViewController:servicesController animated:YES];
 #endif
 }
 
@@ -843,7 +828,8 @@
         [servicesController viewDidAppear:YES];
     }];
 #else
-    [self.view addSubview:servicesController.view];
+//    [self.view addSubview:servicesController.view];
+    [self.navigationController pushViewController:servicesController animated:YES];
 #endif
 }
 
@@ -863,73 +849,26 @@
         [servicesController viewDidAppear:YES];
     }];
 #else
-    [self.view addSubview:servicesController.view];
+    [self.navigationController pushViewController:servicesController animated:YES];
+//    [self.view addSubview:servicesController.view];
 #endif
-}
-
--(IBAction)didClickFeedbackButton:(id)sender {
-    [delegate didClickFeedbackButton:@"Profile View"];
-}
--(IBAction)didClickAboutButton:(id)sender {
-    CGRect frameOnscreen = CGRectMake(0, 44, 320, 480-44);
-    CGRect frameOffscreen = CGRectMake(-320, 44, 320, 480-44);
-    if (!webView) {
-        webView = [[UIWebView alloc] initWithFrame:frameOnscreen];
-        [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.stixmobile.com/tos"]]];
-        [webView setDelegate:self];
-        [webView setBackgroundColor:[UIColor clearColor]];
-        [self.view addSubview:webView];
-        [webView setFrame:frameOffscreen];
-        [buttonFeedback setHidden:YES];
-        [buttonAbout setHidden:YES];
-        [buttonBack setHidden:NO];
-
-        StixAnimation * animation = [[StixAnimation alloc] init];
-        [animation doViewTransition:webView toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-        }];
-    }
-    else {
-        [self closeTOS];
-    }
-}
-
-- (void)webViewDidFinishLoad:(UIWebView *)webView {
-    NSLog(@"Webview loaded");
-}
-
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    NSLog(@"Webview error: %@", [error description]);
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [buttonBack setHidden:YES];
-    [buttonAbout setHidden:NO];
-    [buttonFeedback setHidden:NO];
-}
-
--(IBAction)closeTOS {
-    CGRect frameOnscreen = CGRectMake(0, 44, 320, 480-44-40);
-    CGRect frameOffscreen = CGRectMake(-320, 44, 320, 480-44-40);
-    [buttonFeedback setHidden:NO];
-    [buttonAbout setHidden:NO];
-    [buttonBack setHidden:YES];
-    if (webView) {
-
-        [webView setFrame:frameOnscreen];
-        StixAnimation * animation = [[StixAnimation alloc] init];
-        
-        //CGRect frameOffscreen = webView.frame;
-        //frameOffscreen.origin.x -= 330;
-        [animation doViewTransition:webView toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-            [webView removeFromSuperview];
-            webView = nil;
-        }];
-    }
+//    [buttonBack setHidden:YES];
 }
 
 -(void)didClickChangePhoto {
     [delegate didClickChangePhoto];
+}
+
+-(IBAction)didClickFeedbackButton:(id)sender {
+    [delegate didClickFeedbackButton];
+}
+
+-(IBAction)didClickAboutButton:(id)sender {
+    [delegate didClickAboutButton];
 }
 
 @end

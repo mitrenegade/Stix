@@ -24,7 +24,7 @@ enum tag_labels {
 @protocol SignupViewDelegate <NSObject>
 - (void)didLoginFromEmailSignup:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andUserID:(NSNumber*)userID;
 -(void)showAlert:(NSString*)alertMessage;
--(void)shouldDismissSecondaryViewWithTransition:(UIView*)viewToDismiss;
+-(void)shouldShowButtons;
 @end
     
 @interface SignupViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {

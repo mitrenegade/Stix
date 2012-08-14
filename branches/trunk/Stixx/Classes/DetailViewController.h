@@ -19,7 +19,6 @@
 #import "CommentViewController.h"
 #import "ShareController.h"
 #import "KumulosHelper.h"
-//#import "StixEditorViewController.h"
 
 @class DetailViewController;
 
@@ -28,9 +27,9 @@
 -(void)didDismissZoom;
 -(UIImage*)getUserPhotoForUsername:(NSString*)username;
 -(NSString*)getUsername;
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
--(void)shouldCloseUserPage;
+//-(void)shouldCloseUserPage;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @optional
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;
@@ -39,9 +38,12 @@
 // stixEditorViewController stuff
 -(void)didClickRemixFromDetailViewWithTag:(Tag*)tagToRemix;
 
+-(void)shouldDisplayCommentViewWithTag:(Tag*)tag andNameString:(NSString*)nameString fromDetailView:(DetailViewController*)detailView;
+-(void)doParallelNewPixShare:(Tag*)_tag;
+
 @end
 
-@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, ShareControllerDelegate, KumulosHelperDelegate> //StixEditorDelegate>
+@interface DetailViewController : UIViewController <StixViewDelegate, StixAnimationDelegate, CommentFeedTableDelegate, KumulosDelegate, VerticalFeedItemDelegate, CommentViewDelegate, KumulosHelperDelegate> //StixEditorDelegate>
 
 {
     //    IBOutlet UILabel * labelComment;
@@ -82,7 +84,6 @@
     BOOL newPixDidClickShare;
     BOOL newPixDidFinishUpload;
 
-    //StixEditorViewController * stixEditorController;
     Tag * tagToRemix;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
@@ -103,8 +104,6 @@
 -(void)initFeedItemWithTag:(Tag*)tag;
 -(void)setScrollHeight:(int)height;
 
--(void)didCloseShareSheet;
-
 +(BOOL)openingDetailView;
 +(void)lockOpen;
 +(void)unlockOpen;
@@ -114,4 +113,5 @@
 -(void)addCommentDidFinish;
 -(void)doParallelNewPixShare;
 
+-(void)reloadComments;
 @end

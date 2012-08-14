@@ -240,10 +240,11 @@ static NSMutableArray * premiumCategoryNames;
 }
 
 -(void)startActivityIndicatorLarge {
+    // doesn't show
     if (!activityIndicatorLarge) {
         activityIndicatorLarge = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(115, 150, 90, 90)];
     }
-    [carouselTab addSubview:activityIndicatorLarge];
+    [self addSubview:activityIndicatorLarge];
     [activityIndicatorLarge setHidden:NO];
     [activityIndicatorLarge startCompleteAnimation];
 }

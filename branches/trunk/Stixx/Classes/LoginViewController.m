@@ -24,11 +24,15 @@ static bool usernameExists;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        inputFields = [[NSMutableArray alloc] initWithCapacity:2];
-        for (int i=0; i<2; i++) 
-            [inputFields addObject:[NSNull null]];
-        k = [[Kumulos alloc] init];
-        [k setDelegate:self];
+        UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+        UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+        [backButton setImage:backImage forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(didClickBackButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+        [self.navigationItem setLeftBarButtonItem:leftButton];
+        
+        UIImageView * logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"logo"]];
+        [self.navigationItem setTitleView:logo];
     }
     return self;
 }
@@ -42,11 +46,21 @@ static bool usernameExists;
 }
 
 #pragma mark - View lifecycle
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:NO];
+}
 
 - (void)viewDidLoad
 {
+    inputFields = [[NSMutableArray alloc] initWithCapacity:2];
+    for (int i=0; i<2; i++) 
+        [inputFields addObject:[NSNull null]];
+    k = [[Kumulos alloc] init];
+    [k setDelegate:self];
+
     [[self tableView] setDelegate:self];
-    [tableView setFrame:CGRectMake(10, 60, 300, 2*54-20)];
+    [tableView setFrame:CGRectMake(10, 60, 300, 2*54)];
     [tableView.layer setCornerRadius:10];
     [tableView setScrollEnabled:NO];
 
@@ -208,7 +222,7 @@ static bool usernameExists;
             
             if ([passwordMD5 isEqualToString:[k md5:[password text]]]) {
                 NSLog(@"Password matches! Logging in as username %@ email %@", username, email);
-                [delegate shouldDismissSecondaryViewWithTransition:self.view];
+                //[self.navigationController popViewControllerAnimated:YES]; // don't pop
                 [delegate didSelectUsername:username withResults:[NSMutableArray arrayWithObject:d]];
                 return;
             }
@@ -228,8 +242,10 @@ static bool usernameExists;
     }
 }
  */
--(IBAction)didClickBackButton:(id)sender {
-    [delegate shouldDismissSecondaryViewWithTransition:self.view];
+-(void)didClickBackButton:(id)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController setNavigationBarHidden:YES];		
+    [delegate shouldShowButtons];
 }
 
 @end

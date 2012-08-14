@@ -46,6 +46,7 @@
 #import "SHKConfiguration.h"
 #import "MySHKConfigurator.h"
 #import "SHKSharer.h"
+#import "AboutViewController.h"
 
 #if USING_FACEBOOK
 //#import "FBConnect.h"
@@ -73,11 +74,12 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate> {
     
     UIWindow *window;
     
-    UIViewController * mainController;
+    UIViewController * rootController;
+    UINavigationController * nav;
     
 	RaisedCenterTabBarController * tabBarController; // tab bar for maintaining multiple views
 	//UITabBarController * tabBarController; 	
@@ -206,6 +208,7 @@ struct UserInfo {
     BOOL didStartFirstTimeMessage; // didLoginWithUsername can be called twice, and if firstTimeMessage is called twice it will cause a bug where the arrow doesn't go away
     BOOL isShowingFriendSuggestions; // prevents firstTimeMessage arrow from being shown if friendSuggestions shown
     BOOL didDismissFriendSuggestions; // prevents friend suggestions from repopping up
+    BOOL didGetAllUsers;
     
     // sync flags for updating stix layers
     // when a new pic is created, createPix is called while the stix layer is being edited
@@ -267,10 +270,9 @@ struct UserInfo {
 -(void)getFirstTags;
 -(void)displayShareController;
 -(void)uploadImage:(NSData *)dataPNG;
--(void)initializeShareController;
+-(ShareController*)initializeShareController;
 
--(void)didAddCommentWithTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;    
--(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTagID:(int)tagID andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
+-(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)doParallelNewPixShare:(Tag*)_tag;
 
 -(void)loadCachedTags;
@@ -280,9 +282,6 @@ struct UserInfo {
 
 -(void)getFollowListsWithoutAggregation:(NSString*)name;
 -(void)getFollowListsForAggregation:(NSString*)name;
-
-//-(void)showTwitterDialog;
--(void)shouldDisplayStixEditor:(Tag*)newTag withRemixMode:(int)remixMode;
 
 @property (nonatomic) IBOutlet UIWindow *window;
 @property (nonatomic) UIViewController * emptyViewController;
@@ -325,6 +324,7 @@ struct UserInfo {
 @property (nonatomic) NSDate * metricLogonTime;
 @property (nonatomic) NSDate * lastKumulosErrorTimestamp;
 @property (nonatomic) FacebookHelper * fbHelper;
+@property (nonatomic) Tag * tagToRemix; // saves tag for alertview response
 
 @end
 

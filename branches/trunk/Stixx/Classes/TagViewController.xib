@@ -167,7 +167,7 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">blackbar.png</string>
+							<string key="NSResourceName">bar_camera.png</string>
 						</object>
 					</object>
 					<object class="IBUIButton" id="164538889">
@@ -188,7 +188,7 @@
 						<reference key="IBUINormalTitleShadowColor" ref="282220130"/>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">camerabutton.png</string>
+							<string key="NSResourceName">btn_camera.png</string>
 						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription" id="121135233">
 							<int key="type">2</int>
@@ -203,7 +203,7 @@
 					<object class="IBUIButton" id="1023797282">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{19, 432}, {72, 46}}</string>
+						<string key="NSFrame">{{20, 432}, {72, 46}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSNextKeyView" ref="164538889"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
@@ -219,7 +219,7 @@
 						<reference key="IBUINormalTitleShadowColor" ref="282220130"/>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">import.png</string>
+							<string key="NSResourceName">btn_import.png</string>
 						</object>
 						<reference key="IBUIFontDescription" ref="121135233"/>
 						<reference key="IBUIFont" ref="27303481"/>
@@ -390,12 +390,12 @@
 							<reference ref="768906591"/>
 							<reference ref="554802109"/>
 							<reference ref="4036587"/>
-							<reference ref="1023797282"/>
 							<reference ref="164538889"/>
 							<reference ref="464882864"/>
 							<reference ref="835948143"/>
 							<reference ref="284605270"/>
 							<reference ref="586404208"/>
+							<reference ref="1023797282"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -532,10 +532,10 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>blackbar.png</string>
-				<string>camerabutton.png</string>
+				<string>bar_camera.png</string>
+				<string>btn_camera.png</string>
+				<string>btn_import.png</string>
 				<string>flash_auto.png</string>
-				<string>import.png</string>
 				<string>nav_back.png</string>
 				<string>nav_bar.png</string>
 				<string>overlay.png</string>
@@ -543,10 +543,10 @@
 			</object>
 			<object class="NSArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>{320, 48}</string>
-				<string>{115, 38}</string>
+				<string>{320, 47}</string>
+				<string>{103, 35}</string>
+				<string>{33, 34}</string>
 				<string>{35, 35}</string>
-				<string>{29, 29}</string>
 				<string>{45, 30}</string>
 				<string>{320, 44}</string>
 				<string>{320, 480}</string>

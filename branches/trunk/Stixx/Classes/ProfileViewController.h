@@ -14,7 +14,6 @@
 #import "FacebookHelper.h"
 #import <AddressBook/AddressBook.h>
 #import "FriendServicesViewController.h"
-#import "UserProfileViewController.h"
 
 @protocol ProfileViewDelegate
 -(NSMutableSet*)getFollowingList;

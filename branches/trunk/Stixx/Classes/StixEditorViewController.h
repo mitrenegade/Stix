@@ -30,6 +30,7 @@
 -(void)didGetHighResImage:(UIImage*)highResImage forTagID:(NSNumber*)tagID;
 -(void)didRemixNewPix:(Tag*)cameraTag remixMode:(int)remixMode;
 -(NSString*)getUsername;
+-(void)shouldCloseStixEditor;
 @end
 
 @interface StixEditorViewController : UIViewController <StixPanelDelegate, StixViewDelegate, KumulosHelperDelegate, UIAlertViewDelegate>

@@ -340,7 +340,7 @@
     PixPreviewController * previewController = [[PixPreviewController alloc] init];
     [previewController setDelegate:self];
     [previewController setImage:cropped];
-    [self.navigationController pushViewController:previewController animated:YES];
+    [self.navigationController pushViewController:previewController animated:NO];
 #endif
     
     isCapturing = NO;
@@ -414,11 +414,6 @@
     [delegate didConfirmNewPix:cameraTag];
 }
 
--(void)didCancelPix {
-    //    [self.camera setCameraOverlayView:self.view];
-    [self.navigationController popViewControllerAnimated:YES];
-    //    [self viewDidAppear:NO];    
-}
 -(UIImage *)rotateImage:(UIImage *)image withCurrentOrientation:(int)orient  
 {  
     int kMaxResolution = 320; // Or whatever  

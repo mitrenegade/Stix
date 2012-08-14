@@ -260,8 +260,6 @@ static dispatch_queue_t backgroundQueue;
 	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
-    //userProfileController = [[UserProfileViewController alloc] init];
-    //userProfileController.delegate = self;
     
     /***** add view controllers to tab controller, and add tab to window *****/
     emptyViewController = [[UIViewController alloc] init];
@@ -1254,6 +1252,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [tabBarController toggleFirstTimeInstructions:YES];
         [tabBarController toggleFirstTimePointer:YES atStage:myUserInfo->firstTimeUserStage];
     }
+}
+-(void) shouldCloseStixEditor {
+    [nav popToViewController:tabBarController animated:YES];
 }
 
 -(BOOL)canClickRemixButton {

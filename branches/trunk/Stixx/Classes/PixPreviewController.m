@@ -64,13 +64,13 @@
         [self.view addSubview:activityIndicatorLarge];
     }
     [activityIndicatorLarge startCompleteAnimation];
-    [self.navigationController popViewControllerAnimated:NO]; // close self
+//    [self.navigationController popViewControllerAnimated:NO]; // close self
     [delegate performSelector:@selector(didConfirmPix) withObject:delegate afterDelay:0];
     //[delegate didConfirmPix];
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [delegate didCancelPix];
+    [self.navigationController popViewControllerAnimated:NO];
 }
 
 -(void)startActivityIndicatorLarge {

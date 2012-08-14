@@ -239,8 +239,14 @@
     [self saveRemixedPix:NO];
     
     // only pop if editing is cancelled
+    /*
     [self.navigationController popViewControllerAnimated:YES];
     [self.navigationController setNavigationBarHidden:NO];
+     */
+    // use this to close stix editor by popping to the tabBar - 
+    // this way it closes either the stix editor itself, or the whole chain
+    // from tag to pixPreview to stixEditor
+    [appDelegate shouldCloseStixEditor];
 #if USING_FLURRY
     if (!IS_ADMIN_USER([appDelegate getUsername]))
         [FlurryAnalytics logEvent:@"CloseStixEditor" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Cancelled Edits", @"Method Of Quitting", nil]];

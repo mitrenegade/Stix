@@ -113,9 +113,6 @@
     NSMutableDictionary * feedSectionHeights;
     CommentViewController * commentView;
 
-#if !USING_AVCAPTURE
-    UIImagePickerController * camera;
-#endif    
     LoadingAnimationView * activityIndicator;
     LoadingAnimationView * activityIndicatorLarge;
     
@@ -177,9 +174,6 @@
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic, assign) int lastPageViewed;
 @property (nonatomic) CommentViewController * commentView;
-#if !USING_AVCAPTURE
-@property (nonatomic) UIImagePickerController * camera;
-#endif
 @property (nonatomic, weak) RaisedCenterTabBarController * tabBarController;
 //@property (nonatomic, retain) NSString * stixSelected;
 //@property (nonatomic, copy) NSString * galleryUsername;

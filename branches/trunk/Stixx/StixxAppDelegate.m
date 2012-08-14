@@ -29,7 +29,6 @@
 //#define HOSTNAME @"localhost:3000"
 
 #define DEBUGX 0
-#define USE_CAMERA_AS_ROOT 0
 
 @implementation StixxAppDelegate
 
@@ -58,7 +57,6 @@
 @synthesize allCommentCounts;
 @synthesize loadingMessage;
 @synthesize alertQueue;
-@synthesize camera;
 @synthesize metricLogonTime;
 @synthesize lastKumulosErrorTimestamp;
 @synthesize allCommentHistories;
@@ -177,21 +175,6 @@ static dispatch_queue_t backgroundQueue;
     
     //[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-    camera = [[UIImagePickerController alloc] init];
-    camera.navigationBarHidden = YES;
-    camera.toolbarHidden = YES; // prevents bottom bar from being displayed
-    camera.allowsEditing = NO;
-    camera.wantsFullScreenLayout = YES;
-#if !TARGET_IPHONE_SIMULATOR
-    camera.sourceType = UIImagePickerControllerSourceTypeCamera;
-    camera.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto; 
-    camera.showsCameraControls = NO;
-    camera.cameraViewTransform = CGAffineTransformScale(camera.cameraViewTransform, CAMERA_TRANSFORM_X, CAMERA_TRANSFORM_Y);
-#else
-    camera.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-#endif    
-    
-    camera.cameraViewTransform = CGAffineTransformScale(camera.cameraViewTransform, CAMERA_TRANSFORM_X, CAMERA_TRANSFORM_Y);
     // create an empty main controller in order to turn on camera
     //rootController = [[UIViewController alloc] init];
     //[window addSubview:rootController.view];
@@ -233,20 +216,9 @@ static dispatch_queue_t backgroundQueue;
     allCommentCounts = [[NSMutableDictionary alloc] init];
     allCommentHistories = [[NSMutableDictionary alloc] init];
     
-//#if !TARGET_IPHONE_SIMULATOR
-//    [rootController presentModalViewController:camera animated:NO];    
-//#else
-    //[rootController presentModalViewController:tabBarController animated:YES];
-//#endif
-    
-    // tagView subview is never added to the window but only used as an overlay for camera
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
     //[window addSubview:tagViewController.view];
-#if !USING_AVCAPTURE
-    camera.delegate = tagViewController;
-    tagViewController.camera = camera;
-#endif
     //timeStampOfMostRecentTag = [[NSDate alloc] init];
     idOfNewestTagOnServer = -1;
     idOfOldestTagOnServer = 99999;
@@ -268,9 +240,6 @@ static dispatch_queue_t backgroundQueue;
     [feedController setDelegate:self];
     feedController.allTags = allTags;
     feedController.tabBarController = tabBarController;
-#if !USING_AVCAPTURE
-    feedController.camera = camera; // hack: in order to present modal controllers that respond 
-#endif
     // get newest tag on server regardless of who is logged in
     // when login completes, feed will filter 
     //[self getFirstTags];
@@ -291,9 +260,6 @@ static dispatch_queue_t backgroundQueue;
 	/***** create profile view *****/
 	profileController = [[ProfileViewController alloc] init];
     profileController.delegate = self;
-#if !USING_AVCAPTURE
-    [profileController setCamera:camera];
-#endif
     //userProfileController = [[UserProfileViewController alloc] init];
     //userProfileController.delegate = self;
     
@@ -308,9 +274,6 @@ static dispatch_queue_t backgroundQueue;
     [friendSuggestionController setDelegate:self];
     
     lastViewController = feedController;
-#if !USING_AVCAPTURE
-    [camera setCameraOverlayView:tagViewController.view];
-#endif    
     
     [tabBarController initializeCustomButtons];
 
@@ -1050,12 +1013,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else if (lastViewController == profileController) {
         [self didPressTabButton:TABBAR_BUTTON_PROFILE];
     }
-#if !TARGET_IPHONE_SIMULATOR && USE_CAMERA_AS_ROOT
-    [self.camera setCameraOverlayView:tabBarController.view];
-#else
-    //[nav popToRootViewControllerAnimated:NO];
     [nav popToViewController:tabBarController animated:YES];
-#endif
 }
 
 -(void)logMetricTimeInApp {
@@ -1287,11 +1245,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [editorController setRemixMode:remixMode];
     
     // must initialize after imageView and stixView actually exist
-#if USE_CAMERA_AS_ROOT
-    [self.camera setCameraOverlayView:editorController.view];        
-#else
     [nav pushViewController:editorController animated:YES];
-#endif
 //    [editorController initializeWithTag:newTag remixMode:remixMode];
 }
 -(void) didFinishEditing {//didCloseEditor {
@@ -4687,11 +4641,7 @@ static bool isShowingAlerts = NO;
 }
 
 -(BOOL)tabBarIsVisible {
-#if USE_CAMERA_AS_ROOT
-    return (camera.cameraOverlayView == tabBarController.view);
-#else
     return [nav topViewController] == tabBarController;
-#endif
 }
 
 #pragma mark DetailViewController

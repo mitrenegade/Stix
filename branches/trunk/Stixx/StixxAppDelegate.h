@@ -74,7 +74,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate> {
     
     UIWindow *window;
     
@@ -170,8 +170,6 @@ struct UserInfo {
     bool isUpdatingNotifiedTag;
     NSString * notificationGiftStixStringID;
     
-    UIImagePickerController * camera;
-
     Kumulos* k;
     NSDate * lastKumulosErrorTimestamp;
         
@@ -320,7 +318,6 @@ struct UserInfo {
 @property (nonatomic) NSMutableDictionary * allCommentHistories;
 @property (nonatomic) IBOutlet UITextField * loadingMessage;
 @property (nonatomic) NSMutableArray * alertQueue;
-@property (nonatomic) UIImagePickerController * camera;
 @property (nonatomic) NSDate * metricLogonTime;
 @property (nonatomic) NSDate * lastKumulosErrorTimestamp;
 @property (nonatomic) FacebookHelper * fbHelper;

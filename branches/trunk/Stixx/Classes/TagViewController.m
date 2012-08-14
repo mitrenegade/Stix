@@ -34,7 +34,6 @@
 }
 -(void) viewDidLoad {
     [super viewDidLoad];
-#if USING_AVCAPTURE
     [self setCaptureManager:[[CaptureSessionManager alloc] init]];
     int flashMode = [captureManager initializeCamera];
     [self updateCameraControlButtons:flashMode];
@@ -59,7 +58,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(captureImageDidFail:) name:kImageCaptureFailed object:nil];
     
     [self startCamera];
-#endif
 }
 
 -(void)startCamera {
@@ -128,27 +126,12 @@
 }
 
 -(IBAction)toggleFlashMode:(id)sender {
-#if USING_AVCAPTURE
     int flashMode = [captureManager toggleFlash];
     [self updateCameraControlButtons:flashMode];
-#else
-    camera.cameraFlashMode++;
-    if (camera.cameraFlashMode == 2)
-        camera.cameraFlashMode = -1;
-    [self updateCameraControlButtons];
-#endif
 }
 
 -(IBAction)toggleCameraDevice:(id)sender {
-#if USING_AVCAPTURE
     [captureManager switchDevices];
-#else
-    if (camera.cameraDevice == UIImagePickerControllerCameraDeviceFront)
-        camera.cameraDevice = UIImagePickerControllerCameraDeviceRear;
-    else
-        camera.cameraDevice = UIImagePickerControllerCameraDeviceFront;
-    [self updateCameraControlButtons];
-#endif
 }
 
 -(IBAction)feedbackButtonClicked:(id)sender {
@@ -172,16 +155,12 @@
 
 -(IBAction)didClickTakePicture:(id)sender {
     NSLog(@"PhotoAlbumOpened: %d", photoAlbumOpened);
-#if USING_AVCAPTURE
     if (isCapturing)
         return;
     
 //    [[self scanningLabel] setHidden:NO];
     [[self captureManager] captureStillImage];
     isCapturing = YES;
-#else
-    [[self camera] takePicture];
-#endif
 }
 
 -(IBAction)didClickImport:(id)sender {
@@ -192,15 +171,9 @@
     album.allowsEditing = NO;
     album.delegate = self;
     photoAlbumOpened = YES;
-#if !USING_AVCAPTURE
-    [self.camera presentModalViewController:album animated:YES];
-#else
-    //[self.navigationController pushViewController:album animated:YES];
     [self presentModalViewController:album animated:YES];
-#endif
 }
 
-#if USING_AVCAPTURE
 - (void)didCaptureImage 
 {
 //    [[self scanningLabel] setHidden:YES];
@@ -227,9 +200,8 @@
 //        [[self scanningLabel] setHidden:YES];
     }
 }
-#endif
 
-#pragma mark camera - imagepickercontroller delegate
+#pragma mark camera - imagepickercontroller delegate - only for photo album
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     // only used for photoalbum
@@ -242,11 +214,7 @@
 }
 
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker {
-#if !USING_AVCAPTURE
-    [self.camera dismissModalViewControllerAnimated:YES];
-#else
     [self dismissModalViewControllerAnimated:YES];
-#endif
     photoAlbumOpened = NO;
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 }

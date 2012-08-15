@@ -347,7 +347,7 @@
 -(int)numberOfRows {
     double total = [allTagIDs count];
     double rows = ceil(total/numColumns);
-    NSLog(@"allTagIDs has %f items, returning %f rows", total, rows);
+    //NSLog(@"allTagIDs has %f items, returning %f rows", total, rows);
     return (int)rows;
 }
 

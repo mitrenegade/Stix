@@ -16,7 +16,7 @@
 
 @protocol LoginViewDelegate
 - (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
--(void)showAlert:(NSString*)alertMessage;
+@optional
 -(void)shouldShowButtons;
 @end
 

@@ -23,8 +23,9 @@ enum tag_labels {
 
 @protocol SignupViewDelegate <NSObject>
 - (void)didLoginFromEmailSignup:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andUserID:(NSNumber*)userID;
--(void)showAlert:(NSString*)alertMessage;
+@optional
 -(void)shouldShowButtons;
+-(void)doEmailLogin;
 @end
     
 @interface SignupViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, KumulosDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
@@ -53,4 +54,5 @@ enum tag_labels {
 -(void)startActivityIndicator;
 -(void)stopActivityIndicator;
 -(IBAction)didClickBackButton:(id)sender;
+-(IBAction)didClickLogin:(id)sender;
 @end

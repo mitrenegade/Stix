@@ -468,7 +468,6 @@
             NSLog(@"Should not come here! Twitter should get initialized!");
             [SHK setRootViewController:self];
             [twHelper setHelperDelegate:self];
-            //[twHelper doInitialConnectWithCallback:@selector(findFriendsForService:) withParams:[NSNumber numberWithInt:service]];
             waitingForTwitter = YES;
         }        
     }

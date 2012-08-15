@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Aug 13, 2012
+//  Created by Kumulos Bindings Compiler on Aug 15, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -144,6 +144,8 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation loginViaFacebookDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation loginViaFacebookStringDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation loginViaTwitterDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation loginWithNameOrEmailDidCompleteWithResult:(NSArray*)theResults;
  
@@ -435,6 +437,9 @@
     
    
 -(KSAPIOperation*) loginViaFacebookStringWithFacebookString:(NSString*)facebookString;
+    
+   
+-(KSAPIOperation*) loginViaTwitterWithUsername:(NSString*)username andScreenname:(NSString*)screenname andTwitterString:(NSString*)twitterString;
     
    
 -(KSAPIOperation*) loginWithNameOrEmailWithLoginName:(NSString*)loginName;

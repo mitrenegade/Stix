@@ -25,8 +25,6 @@
 -(void)didConfirmNewPix:(Tag*)cameraTag;
 - (bool) isLoggedIn;
 
--(int)getStixCount:(NSString*)stixStringID;
--(int)getStixOrder:(NSString*)stixStringID;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(void)didClickFeedbackButton:(NSString*)fromView;
 -(void)didDismissSecondaryView;

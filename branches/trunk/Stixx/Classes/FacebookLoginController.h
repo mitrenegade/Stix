@@ -14,7 +14,7 @@
 #import "BadgeView.h"
 #import "KumulosHelper.h"
 #import "SignupViewController.h"
-#import "CreateFacebookUsernameController.h"
+#import "CreateHandleController.h"
 #import "GlobalHeaders.h"
 #import "StixAnimation.h"
 #import "FacebookHelper.h"
@@ -28,7 +28,7 @@
 -(void)didAddNewUserWithResult:(NSArray*)theResults;
 @end
 
-@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate, SignupViewDelegate, LoginViewDelegate, CreateFacebookUsernameDelegate, UINavigationControllerDelegate>
+@interface FacebookLoginController : UIViewController <KumulosDelegate, KumulosHelperDelegate, SignupViewDelegate, LoginViewDelegate, CreateHandleControllerDelegate, UINavigationControllerDelegate>
 {
     BOOL isFirstTimeUser;
 }
@@ -48,7 +48,7 @@
 /*
 @property (nonatomic) SignupViewController * signupController;
 @property (nonatomic) LoginViewController * loginController;
-@property (nonatomic) CreateFacebookUsernameController * usernameController;
+@property (nonatomic) CreateHandleController * usernameController;
 */
 
 -(IBAction)didClickFacebookLoginButton:(id)sender;

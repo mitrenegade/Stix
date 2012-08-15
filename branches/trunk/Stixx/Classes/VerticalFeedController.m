@@ -170,15 +170,8 @@ static int tickID;
     
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
-    //    NSLog(@"Now tag id %d: %@ stix count is %d. User has %d left", [t.tagID intValue], badgeTypeStr, t.badgeCount, [delegate getStixCount:type]);
 }
 
--(int)getStixCount:(NSString*)stixStringID {
-    return [delegate getStixCount:stixStringID];
-}
--(int)getStixOrder:(NSString*)stixStringID {
-    return [delegate getStixOrder:stixStringID];
-}
 /*
 -(int)getBuxCount {
     return [delegate getBuxCount];
@@ -1302,9 +1295,6 @@ static int tickID;
 #pragma mark bux instructions
 -(BOOL)isShowingBuxInstructions {
     return [delegate isShowingBuxInstructions];
-}
--(void)didClickMoreBuxButton:(id)sender {
-    [delegate didShowBuxInstructions];
 }
 
 #pragma mark share

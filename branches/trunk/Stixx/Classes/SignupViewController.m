@@ -47,7 +47,8 @@
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
-    [self.navigationController setNavigationBarHidden:YES];
+    // no more facebookLoginController
+    //[self.navigationController setNavigationBarHidden:YES];
 }
 
 - (void)viewDidLoad
@@ -104,6 +105,15 @@
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
     [buttonSignup setHidden:NO];
+}
+
+-(void)showAlert:(NSString*)alertMessage {
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:nil
+                                                     message:alertMessage
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles: nil];  
+    [alert show];
 }
 
 #pragma mark - Table view data source
@@ -247,25 +257,25 @@
     NSLog(@"Admin testing mode: skipping verification");
     if (![self NSStringIsValidEmail:[email text]]) {
         NSLog(@"Invalid email format!");
-        [delegate showAlert:@"Invalid email format!"];
+        [self showAlert:@"Invalid email format!"];
         if (!IS_ADMIN_USER(username))
             [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[email text], @"InvalidEmail", nil]];
         return;
     }
     if ([[username text] length] == 0) {
         NSLog(@"Invalid username!");
-        [delegate showAlert:@"Please enter a username."];
+        [self showAlert:@"Please enter a username."];
         if (!IS_ADMIN_USER(username))
             [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[username text], @"InvalidName", nil]];
         return;
     }
     if ([[password text] length] == 0) {
-        [delegate showAlert:@"Please enter a password."];
+        [self showAlert:@"Please enter a password."];
         return;
     }
     if ([[password text] length] == 0) {
         NSLog(@"Password must not be blank!");
-        [delegate showAlert:@"Password must not be blank!"];
+        [self showAlert:@"Password must not be blank!"];
         if (!IS_ADMIN_USER(username))
             [FlurryAnalytics logEvent:@"SignupError" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:@"", @"BlankPassword", nil]];
         return;
@@ -302,9 +312,9 @@
         }
         NSLog(@"Invalid new user! User already exists!");
         if (nameAlreadyExists)
-            [delegate showAlert:@"Username is already taken!"];
+            [self showAlert:@"Username is already taken!"];
         else if (emailAlreadyExists)
-            [delegate showAlert:@"Email is already taken!"];
+            [self showAlert:@"Email is already taken!"];
         [self stopActivityIndicator];
         return;
     }
@@ -386,9 +396,18 @@
 }
 
 -(IBAction)didClickBackButton:(id)sender {
-    [self.navigationController setNavigationBarHidden:YES];
+    [self.navigationController setNavigationBarHidden:NO];
     [self.navigationController popViewControllerAnimated:YES];
-    if (sender != nil)
-        [delegate shouldShowButtons];
+    if (sender != nil) {
+        if ([delegate respondsToSelector:@selector(shouldShowButtons)])
+            [delegate shouldShowButtons];
+    }
+}
+
+-(IBAction)didClickLogin:(id)sender {
+//    [self.navigationController popViewControllerAnimated:YES];
+    if ([delegate respondsToSelector:@selector(doEmailLogin)]) {
+        [delegate doEmailLogin];
+    }
 }
 @end

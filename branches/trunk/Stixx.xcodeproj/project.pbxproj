@@ -32,6 +32,12 @@
 		9E04546F15DB079F00E95260 /* btn_signup_continue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E04546315DB079F00E95260 /* btn_signup_continue@2x.png */; };
 		9E04547015DB079F00E95260 /* bar_signup_continue.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E04546415DB079F00E95260 /* bar_signup_continue.png */; };
 		9E04547115DB079F00E95260 /* bar_signup_continue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E04546515DB079F00E95260 /* bar_signup_continue@2x.png */; };
+		9E04547A15DB179B00E95260 /* PreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E04547815DB179B00E95260 /* PreviewController.m */; };
+		9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E04547915DB179B00E95260 /* PreviewController.xib */; };
+		9E04547F15DB17BF00E95260 /* PreviewLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E04547D15DB17BE00E95260 /* PreviewLoginViewController.m */; };
+		9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E04547E15DB17BF00E95260 /* PreviewLoginViewController.xib */; };
+		9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E0454C615DC28DB00E95260 /* CreateHandleController.xib */; };
+		9E0454CA15DC28E600E95260 /* CreateHandleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E0454C915DC28E400E95260 /* CreateHandleController.m */; };
 		9E06BED215C733CD00FD9659 /* tab_feed_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E06BEC915C733CD00FD9659 /* tab_feed_on.png */; };
 		9E06BED315C733CD00FD9659 /* tab_feed.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E06BECA15C733CD00FD9659 /* tab_feed.png */; };
 		9E06BED415C733CD00FD9659 /* tab_newsletter_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E06BECB15C733CD00FD9659 /* tab_newsletter_on.png */; };
@@ -151,8 +157,6 @@
 		9E5D446515B4D9C4000C58F1 /* txt_findfriends@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D445915B4D9C4000C58F1 /* txt_findfriends@2x.png */; };
 		9E5D446C15B517E8000C58F1 /* StixUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D446A15B517E7000C58F1 /* StixUsersViewController.m */; };
 		9E5D446D15B517E8000C58F1 /* StixUsersViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D446B15B517E7000C58F1 /* StixUsersViewController.xib */; };
-		9E5E55A3159D945200274C98 /* CreateFacebookUsernameController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5E55A1159D945200274C98 /* CreateFacebookUsernameController.m */; };
-		9E5E55A4159D945200274C98 /* CreateFacebookUsernameController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E5E55A2159D945200274C98 /* CreateFacebookUsernameController.xib */; };
 		9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626414DC61D80008E806 /* feedback_cartoon.png */; };
 		9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626614DC61ED0008E806 /* radio_button_off.png */; };
 		9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626714DC61EE0008E806 /* radio_button_on.png */; };
@@ -488,6 +492,15 @@
 		9E04546315DB079F00E95260 /* btn_signup_continue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_signup_continue@2x.png"; sourceTree = "<group>"; };
 		9E04546415DB079F00E95260 /* bar_signup_continue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bar_signup_continue.png; sourceTree = "<group>"; };
 		9E04546515DB079F00E95260 /* bar_signup_continue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bar_signup_continue@2x.png"; sourceTree = "<group>"; };
+		9E04547715DB179A00E95260 /* PreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreviewController.h; sourceTree = "<group>"; };
+		9E04547815DB179B00E95260 /* PreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreviewController.m; sourceTree = "<group>"; };
+		9E04547915DB179B00E95260 /* PreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PreviewController.xib; sourceTree = "<group>"; };
+		9E04547C15DB17BE00E95260 /* PreviewLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreviewLoginViewController.h; sourceTree = "<group>"; };
+		9E04547D15DB17BE00E95260 /* PreviewLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreviewLoginViewController.m; sourceTree = "<group>"; };
+		9E04547E15DB17BF00E95260 /* PreviewLoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PreviewLoginViewController.xib; sourceTree = "<group>"; };
+		9E0454C615DC28DB00E95260 /* CreateHandleController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CreateHandleController.xib; sourceTree = "<group>"; };
+		9E0454C815DC28E200E95260 /* CreateHandleController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateHandleController.h; sourceTree = "<group>"; };
+		9E0454C915DC28E400E95260 /* CreateHandleController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateHandleController.m; sourceTree = "<group>"; };
 		9E06BEC915C733CD00FD9659 /* tab_feed_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_feed_on.png; sourceTree = "<group>"; };
 		9E06BECA15C733CD00FD9659 /* tab_feed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_feed.png; sourceTree = "<group>"; };
 		9E06BECB15C733CD00FD9659 /* tab_newsletter_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_newsletter_on.png; sourceTree = "<group>"; };
@@ -629,9 +642,6 @@
 		9E5D446915B517E7000C58F1 /* StixUsersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixUsersViewController.h; sourceTree = "<group>"; };
 		9E5D446A15B517E7000C58F1 /* StixUsersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixUsersViewController.m; sourceTree = "<group>"; };
 		9E5D446B15B517E7000C58F1 /* StixUsersViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StixUsersViewController.xib; sourceTree = "<group>"; };
-		9E5E55A0159D945100274C98 /* CreateFacebookUsernameController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateFacebookUsernameController.h; sourceTree = "<group>"; };
-		9E5E55A1159D945200274C98 /* CreateFacebookUsernameController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateFacebookUsernameController.m; sourceTree = "<group>"; };
-		9E5E55A2159D945200274C98 /* CreateFacebookUsernameController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CreateFacebookUsernameController.xib; sourceTree = "<group>"; };
 		9E63626414DC61D80008E806 /* feedback_cartoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = feedback_cartoon.png; sourceTree = "<group>"; };
 		9E63626614DC61ED0008E806 /* radio_button_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_off.png; sourceTree = "<group>"; };
 		9E63626714DC61EE0008E806 /* radio_button_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_on.png; sourceTree = "<group>"; };
@@ -1247,12 +1257,18 @@
 				9E940CE8159AEE5700F53687 /* LoginViewController.h */,
 				9E940CE9159AEE5700F53687 /* LoginViewController.m */,
 				9E940CEA159AEE5700F53687 /* LoginViewController.xib */,
-				9E5E55A0159D945100274C98 /* CreateFacebookUsernameController.h */,
-				9E5E55A1159D945200274C98 /* CreateFacebookUsernameController.m */,
-				9E5E55A2159D945200274C98 /* CreateFacebookUsernameController.xib */,
 				9E9E701C159C4C4900EF996F /* SignupViewController.h */,
 				9E9E701D159C4C4900EF996F /* SignupViewController.m */,
 				9E9E701E159C4C4900EF996F /* SignupViewController.xib */,
+				9E0454C815DC28E200E95260 /* CreateHandleController.h */,
+				9E0454C915DC28E400E95260 /* CreateHandleController.m */,
+				9E0454C615DC28DB00E95260 /* CreateHandleController.xib */,
+				9E04547715DB179A00E95260 /* PreviewController.h */,
+				9E04547815DB179B00E95260 /* PreviewController.m */,
+				9E04547915DB179B00E95260 /* PreviewController.xib */,
+				9E04547C15DB17BE00E95260 /* PreviewLoginViewController.h */,
+				9E04547D15DB17BE00E95260 /* PreviewLoginViewController.m */,
+				9E04547E15DB17BF00E95260 /* PreviewLoginViewController.xib */,
 			);
 			name = Login;
 			sourceTree = "<group>";
@@ -2116,7 +2132,6 @@
 				9E9E7026159C543E00EF996F /* splash@2x.png in Resources */,
 				9E9E7028159C552E00EF996F /* Default.png in Resources */,
 				9E9E702A159C553700EF996F /* Default@2x.png in Resources */,
-				9E5E55A4159D945200274C98 /* CreateFacebookUsernameController.xib in Resources */,
 				9E3915D615AE76480033AB2B /* txt_popular.png in Resources */,
 				9E8112E315AF89150080AAC3 /* txt_popular_on.png in Resources */,
 				9E8112E915AFACF30080AAC3 /* NewsletterViewController.xib in Resources */,
@@ -2204,6 +2219,9 @@
 				9E04546F15DB079F00E95260 /* btn_signup_continue@2x.png in Resources */,
 				9E04547015DB079F00E95260 /* bar_signup_continue.png in Resources */,
 				9E04547115DB079F00E95260 /* bar_signup_continue@2x.png in Resources */,
+				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
+				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
+				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2309,7 +2327,6 @@
 				9E59D09E1587D28B000D13CC /* StixEditorViewController.m in Sources */,
 				9E940CED159AEE5700F53687 /* LoginViewController.m in Sources */,
 				9E9E701F159C4C4900EF996F /* SignupViewController.m in Sources */,
-				9E5E55A3159D945200274C98 /* CreateFacebookUsernameController.m in Sources */,
 				9E73BCF415A7359D00B84C7C /* Admin.m in Sources */,
 				9E8112E815AFACF30080AAC3 /* NewsletterViewController.m in Sources */,
 				9E78A85E15B1E2E10000758E /* ProfileViewController.m in Sources */,
@@ -2322,6 +2339,9 @@
 				9EB6256015CA60CB000CCCED /* CaptureSessionManager.m in Sources */,
 				9E158C8A15CF932800ADEF9D /* StixPanelView.m in Sources */,
 				9E72653615D8F28A00BE2710 /* AboutViewController.m in Sources */,
+				9E04547A15DB179B00E95260 /* PreviewController.m in Sources */,
+				9E04547F15DB17BF00E95260 /* PreviewLoginViewController.m in Sources */,
+				9E0454CA15DC28E600E95260 /* CreateHandleController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

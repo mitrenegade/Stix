@@ -171,25 +171,6 @@
     else {
         NSLog(@"nil photo");
     }
-    // badge count array
-    NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; // returns a dictionary whose one element is a dictionary of stix
-    
-    // set First time user flags
-    /* auxiliary data */
-     //NSMutableData * data = [d valueForKey:@"auxiliaryData"];
-    NSMutableDictionary * auxiliaryData;
-    NSMutableDictionary * stixOrder = nil;
-    //NSMutableSet * friendsList = nil;
-    auxiliaryData = [[NSMutableDictionary alloc] init];
-    int ret = [KumulosData extractAuxiliaryDataFromUserData:d intoAuxiliaryData:auxiliaryData];
-    if (ret == 1) {
-        stixOrder = [auxiliaryData objectForKey:@"stixOrder"];
-        //friendsList = [auxiliaryData objectForKey:@"friendsList"];
-    }
-    else if (ret == 0) {
-        stixOrder = nil;
-    }
-    
 #if 0
     UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Closing Login Splash!" message:nil delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
     [alertView show];
@@ -199,7 +180,7 @@
     [self.navigationController setNavigationBarHidden:NO];
     NSLog(@"Closing facebookLoginController!");
     //[self.navigationController popViewControllerAnimated:YES];
-    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:0 andBuxCount:0 andStixOrder:stixOrder isFirstTimeUser:isFirstTimeUser];
+    [delegate didLoginFromSplashScreenWithUsername:name andPhoto:newPhoto andEmail:email andFacebookString:facebookString andUserID:userID andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil isFirstTimeUser:isFirstTimeUser];
 }
 
 #pragma mark IBOutlet button actions
@@ -306,7 +287,8 @@
         NSMutableDictionary * d = [theResults objectAtIndex:0];
         NSString * username = [d objectForKey:@"username"];
         NSString * _facebookString = [d objectForKey:@"facebookString"];
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
+        NSLog(@"**** ADMIN MODE **** FacebookLoginController:loginViaFacebookStringDidComplete");
         [self addUsernameForFacebookUser]; // always show username page
 #else
         [self didSelectUsername:username withResults:theResults];
@@ -492,16 +474,16 @@
 }
 
 -(void)addUsernameForFacebookUser {
-    CreateFacebookUsernameController * usernameController = [[CreateFacebookUsernameController alloc] init];
+    CreateHandleController * usernameController = [[CreateHandleController alloc] init];
     [usernameController setDelegate:self];
     [usernameController setFacebookString:facebookString];
-    [usernameController setInitialFacebookName:facebookName];
+    [usernameController setInitialName:facebookName];
     
     [self.navigationController pushViewController:usernameController animated:YES];
 }
 
 -(void)didAddFacebookUsername:(NSString *)fbUsername andPhoto:(NSData *)photoData {
-    // from CreateFacebookUsernameController
+    // from CreateHandleController
     if (!IS_ADMIN_USER(fbUsername))
         [FlurryAnalytics logEvent:@"AddUsernameToFacebook" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:fbUsername, @"NewUsername", facebookName, @"FacebookName", nil]];
     

@@ -98,6 +98,15 @@ static bool usernameExists;
     [buttonLogin setHidden:NO];
 }
 
+-(void)showAlert:(NSString*)alertMessage {
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:nil
+                                                     message:alertMessage
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles: nil];  
+    [alert show];
+}
+
 #pragma mark - Table view data source
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -179,11 +188,11 @@ static bool usernameExists;
 	[password resignFirstResponder];
 
     if ([[login text] length]==0) {
-        [delegate showAlert:@"Please enter a login name."];
+        [self showAlert:@"Please enter a login name."];
         return;
     }
     if ([[password text] length]==0) {
-        [delegate showAlert:@"Please enter a password."];
+        [self showAlert:@"Please enter a password."];
         return;
     }
     
@@ -201,7 +210,7 @@ static bool usernameExists;
     [self stopActivityIndicator];
     if ([theResults count] == 0) {
         NSLog(@"Invalid login! What you entered was neither a valid username or email!");
-        [delegate showAlert:@"Your entered username or email does not exist."];
+        [self showAlert:@"Your entered username or email does not exist."];
         return;
     }
     else {
@@ -228,7 +237,7 @@ static bool usernameExists;
             }
         }
         NSLog(@"none of the results matched your password!");
-        [delegate showAlert:@"Your password was incorrect."];
+        [self showAlert:@"Your password was incorrect."];
     }
 }
 /*
@@ -245,7 +254,8 @@ static bool usernameExists;
 -(void)didClickBackButton:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
     [self.navigationController setNavigationBarHidden:YES];		
-    [delegate shouldShowButtons];
+    if ([delegate respondsToSelector:@selector(shouldShowButtons)])
+        [delegate shouldShowButtons];
 }
 
 @end

@@ -47,8 +47,6 @@ enum {
 
 @protocol BadgeViewDelegate
 
--(int)getStixCount:(NSString*)stixStringID;
--(int)getStixOrder:(NSString*)stixStringID;
 -(BOOL)shouldPurchasePremiumPack:(NSString*)stixPackName;
 
 @optional

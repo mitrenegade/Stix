@@ -23,8 +23,6 @@
 #import "FlurryAnalytics.h"
 
 @protocol ExploreViewDelegate
--(int)getStixCount:(NSString*)stixStringID;
--(int)getStixOrder:(NSString*)stixStringID;
 -(UIImage*)getUserPhotoForUsername:(NSString *)username;
 
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
@@ -34,10 +32,7 @@
 -(NSString*)getUsername;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
-//-(void)shouldCloseUserPage;
--(void)didShowBuxInstructions;
 
--(void)didDismissSecondaryView;
 -(void)pauseAggregation;
 -(void)shouldDisplayDetailViewWithTag:(Tag*)tag;
 @end

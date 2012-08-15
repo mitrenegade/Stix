@@ -184,7 +184,7 @@
 
 -(int)numberOfRows {
     float total = [allTagIDs count];
-    NSLog(@"allTagIDs has %f items, returning %f rows", total, total/numColumns);
+    //NSLog(@"allTagIDs has %f items, returning %f rows", total, total/numColumns);
     return total / numColumns;
 }
 
@@ -290,7 +290,9 @@
                 [allTags removeAllObjects];
                 NSDate * twoWeeksAgo = [[NSDate date] dateByAddingTimeInterval:-3600*24*14];
                 lastDate = twoWeeksAgo;
+#if !ADMIN_TESTING_MODE
                 [k getPopularPixInTimeRangeWithTimeStart:twoWeeksAgo andTimeEnd:[NSDate date] andNumPix:[NSNumber numberWithInt:numPix]];
+#endif
                 for (int i=0; i<numPix; i++)
                     [allTagIDs addObject:[NSNull null]];
                 pendingContentCount += numPix;
@@ -689,20 +691,8 @@
     [alert show];
 }
 
--(int)getStixCount:(NSString*)stixStringID {
-    return [self.delegate getStixCount:stixStringID];
-}
--(int)getStixOrder:(NSString*)stixStringID;
-{
-    return [self.delegate getStixOrder:stixStringID];
-}
 -(UIImage*)getUserPhotoForUsername:(NSString *)username {
     return [self.delegate getUserPhotoForUsername:username];
-}
-
-#pragma mark bux instructions
--(void)didClickMoreBuxButton:(id)sender {
-    [delegate didShowBuxInstructions];
 }
 
 #pragma kumulosHelper callback

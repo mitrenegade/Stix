@@ -98,13 +98,7 @@ static dispatch_queue_t backgroundQueue;
         
     /*** MKStoreKit ***/
     [MKStoreManager sharedManager];
-#if 0
-    /*** doing store kit stuff manually ***/
-    NSSet * productIDs = [[NSSet alloc] initWithObjects:@"collection.Hipster", nil];
-    SKProductsRequest * productRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIDs];
-    [productRequest setDelegate:self];
-    [productRequest start];
-#endif
+
     notificationDeviceToken = nil;
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeSound];    
     
@@ -195,6 +189,62 @@ static dispatch_queue_t backgroundQueue;
         });
     }
      */
+    // Login process - first load cached user info from defaults
+#if ADMIN_TESTING_MODE
+    loggedIn = NO;
+#else
+    loggedIn = NO; //   [self loadUserInfoFromDefaults];
+#endif
+    isLoggingIn = NO;
+    if (loggedIn) {
+        NSLog(@"Loggin in as %@", myUserInfo_username);
+        
+        // preemptively do user login things
+        [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookString:myUserInfo_facebookString andUserID:[NSNumber numberWithInt:myUserInfo->userID] andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil];
+        
+        // create shareController, share and connected lists for each service, and loads from default
+        //[self initializeShareController];
+        
+        [self getFollowListsForAggregation:[self getUsername]];
+        didGetFollowingLists = YES;
+        if (myUserInfo_facebookString != 0) {
+            // logged in but still need facebook info
+            [self doFacebookLogin];
+        }
+    }
+    else if (![fbHelper facebookHasSession] || !loggedIn) // !myUserInfo_username || [myUserInfo_username length] == 0)
+    {
+        NSLog(@"Could not log in: forcing new login screen!");
+        isLoggingIn = YES;
+        loggedIn = NO;
+        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
+#if 0
+        loginSplashController = [[FacebookLoginController alloc] init];
+        [loginSplashController setDelegate:self];
+        nav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
+#else
+        previewController = [[PreviewController alloc] init];
+        [previewController setDelegate:self];
+        nav = [[UINavigationController alloc] initWithRootViewController:previewController];
+#endif
+        nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+        [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
+        [window addSubview:nav.view];
+/*
+        UINavigationController * loginNav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
+        loginNav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+        [loginNav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
+        [tabBarController presentModalViewController:loginNav animated:YES];
+ */
+    }
+}
+
+-(void) continueInit {
+    
+    if (nav) {
+        [nav.view removeFromSuperview];
+        nav = nil;
+    }
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
@@ -276,55 +326,13 @@ static dispatch_queue_t backgroundQueue;
     [tabBarController initializeCustomButtons];
 
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-    UIViewController * tmpController = [[UIViewController alloc] init];
     nav = [[UINavigationController alloc] initWithRootViewController:tabBarController];
     nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
     [window addSubview:nav.view];
     [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
 
-    [self loadCachedTags];
-
-    // Login process - first load cached user info from defaults
-#if ADMIN_TESTING_MODE
-    loggedIn = NO;
-#else
-    loggedIn = [self loadUserInfoFromDefaults];
-#endif
-    isLoggingIn = NO;
-    if (loggedIn) {
-        NSLog(@"Loggin in as %@", myUserInfo_username);
-        
-        // preemptively do user login things
-        [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookString:myUserInfo_facebookString andUserID:[NSNumber numberWithInt:myUserInfo->userID] andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil];
-        
-        // create shareController, share and connected lists for each service, and loads from default
-        //[self initializeShareController];
-        
-        [self getFollowListsForAggregation:[self getUsername]];
-        didGetFollowingLists = YES;
-        if (myUserInfo_facebookString != 0) {
-            // logged in but still need facebook info
-            [self doFacebookLogin];
-        }
-        
-    }
-    else if (![fbHelper facebookHasSession] || !loggedIn) // !myUserInfo_username || [myUserInfo_username length] == 0)
-    {
-        loginSplashController = [[FacebookLoginController alloc] init];
-        [loginSplashController setDelegate:self];
-        NSLog(@"Could not log in: forcing new login screen!");
-        isLoggingIn = YES;
-        loggedIn = NO;
-        [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-        //[nav pushViewController:loginSplashController animated:YES];
-        UINavigationController * loginNav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
-        loginNav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-        [loginNav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
-        [tabBarController presentModalViewController:loginNav animated:YES];
-//        isLoggingIn = NO;
-    }
-    
+    [self loadCachedTags];    
     [self didPressTabButton:TABBAR_BUTTON_FEED];
     
     /*** twitter ***/
@@ -443,7 +451,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     return [self.fbHelper handleOpenURL:url]; 
 }
 
--(void)didGetFacebookInfo:(NSDictionary *)results forShareOnly:(BOOL)gotTokenForShare {
+-(void)didLoginToFacebook:(NSDictionary *)results forShareOnly:(BOOL)gotTokenForShare {
+    // didGetFacebookInfo, didFacebookLogin, didLoginToFacebook
     // come here after logging in to facebook
     isLoggingIn = NO;
     NSLog(@"Did get facebook info!");
@@ -475,9 +484,16 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         }
     }
     if (!gotTokenForShare) {
-        NSLog(@"Delegate didGetFacebookInfo for login! going back to loginSplashController");
-        [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+        NSLog(@"Delegate didLoginToFacebook for login! going back to loginSplashController");
+        if (loginSplashController)
+            [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
         
+        if (previewController) {
+            // hack: use loginSplashController without showing it
+            //loginSplashController = [[FacebookLoginController alloc] init];
+            //[loginSplashController setDelegate:self];
+            [previewController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+        }
         // update facebookString on kumulos
         NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:name, @"username", email, @"email", facebookString, @"facebookID", nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -490,7 +506,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         // user is already logged in
 
         // update facebookString on kumulos
-        NSLog(@"Delegate didGetFacebookInfo for share token!");
+        NSLog(@"Delegate didLoginToFacebook for share token!");
         NSLog(@"Already logged in user: %@ %@ %@", myUserInfo_username, myUserInfo_email, facebookString);
         NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:myUserInfo_username, @"username", myUserInfo_email, @"email", facebookString, @"facebookID", nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
@@ -509,6 +525,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 -(void)didConnectToTwitter {
     [shareController didConnect:@"Twitter"];
 }
+
+-(void)didLoginToTwitter:(NSDictionary *)results forShareOnly:(BOOL)gotTokenForShare {
+    NSLog(@"Did get twitter login info!");
+    NSString * username = [results objectForKey:@"name"];
+    NSString * screenname = [results objectForKey:@"screen_name"];
+    NSString * twitterString = [results objectForKey:@"id_str"];
+ }
 
 -(FacebookHelper*)getFacebookHelper {
     return fbHelper;
@@ -533,6 +556,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [alertView show];
     
     // do login screen sequence again
+    /*
     if (isLoggingIn) {
         [tabBarController dismissModalViewControllerAnimated:YES];
     }
@@ -546,7 +570,19 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     loginNav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     [loginNav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
     [tabBarController presentModalViewController:loginNav animated:YES];
-
+     */
+    if (isLoggingIn) {
+        [loginSplashController shouldShowButtons];
+        [nav popToRootViewControllerAnimated:YES];
+    }
+    else {
+        [nav.view removeFromSuperview];
+        nav = nil;
+        nav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
+        nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+        [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
+        [window addSubview:nav.view];
+    }
 }
 
 -(void)didLogoutFromFacebook {
@@ -2317,6 +2353,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             photo = [UIImage imageNamed:@"graphic_nopic"];
         NSString * facebookString = [d valueForKey:@"facebookString"];
         NSString * twitterString = [d valueForKey:@"twitterString"];
+        
+        if ([allUsers objectForKey:name] != nil)
+            return;
+        
         [allUsers setObject:d forKey:name];
         [allUserPhotos setObject:photo forKey:name];
         [allUserFacebookStrings addObject:facebookString];
@@ -2610,6 +2650,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Function: %s", __func__);
 #endif  
 
+    [self continueInit];
+
 #if !USING_FLURRY
     NSString * metricName = @"LoginWithUsername";
     NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
@@ -2713,50 +2755,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [k getUserPremiumPacksWithUsername:myUserInfo_username];
 }
 
-/*
--(void)checkConsistency { 
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // if stix got messed up or stixOrders got messed up
-    for (int i=0; i<[BadgeView totalStixTypes]; i++) {
-        NSString * stixStringID = [BadgeView getStixStringIDAtIndex:i];
-        NSNumber * count = [allStix objectForKey:stixStringID];
-        NSNumber * order = [allStixOrder objectForKey:stixStringID];
-
-        if (count && !order) {
-            // create an order
-            if ([count intValue] != 0)
-            {
-                int orderInt = [allStixOrder count];
-                [allStixOrder setObject:[NSNumber numberWithInt:orderInt] forKey:stixStringID];
-                NSLog(@"Consistency: count for %@ = %d, new order %d", [BadgeView getStixDescriptorForStixStringID:stixStringID], [count intValue], orderInt);
-            }
-        }
-        if (order && !count) {
-            if ([order intValue] != -1)
-            {
-                [allStix setObject:[NSNumber numberWithInt:-1] forKey:stixStringID];
-                NSLog(@"Consistency: order for %@ = %d, new count %d", [BadgeView getStixDescriptorForStixStringID:stixStringID], [order intValue], -1);
-            }
-        }
-    }
-    if ([allStix count] == 0 && [allStixOrder count] == 0) {
-        // generate defaults
-        [allStix addEntriesFromDictionary:[BadgeView InitializeFirstTimeUserStix] ];
-        
-        NSLog(@"Generating stix order:");
-        NSEnumerator *e = [allStix keyEnumerator];
-        id key;
-        while (key = [e nextObject]) {
-                int ct = [self getStixCount:key];
-                if (ct != 0)
-                    [allStixOrder setObject:[NSNumber numberWithInt:[allStixOrder count]] forKey:key];
-        }    
-    }
-}
-*/
-
 -(void)didLogout {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -2792,29 +2790,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [allUserPhotos setObject:userphoto forKey:[self getUsername]];
     [userProfileController didChangeUserPhoto:photo];
     [tabBarController didGetProfilePhoto:photo];
-}
-
--(int)getStixCount:(NSString*)stixStringID {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    //if (loggedIn)
-    int ret = [[allStix objectForKey:stixStringID] intValue];
-    //NSLog(@"Stix count for %@: %d", stixStringID, ret);
-    return ret;
-}
-
--(int)getStixOrder:(NSString*)stixStringID {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    if ([allStixOrder objectForKey:stixStringID] == nil) {
-        //int pos = -1;
-        //[allStixOrder setValue:[NSNumber numberWithInt:ct] forKey:stixStringID];
-        return -1;
-    }
-    else
-        return [[allStixOrder objectForKey:stixStringID] intValue];
 }
 
 -(NSMutableSet*)getFollowerList {
@@ -4471,47 +4446,6 @@ static bool isShowingAlerts = NO;
         [buttonBuxInstructionsClose removeFromSuperview];
     }];
 #endif
-}
-
--(void)didShowBuxInstructions {
-#if SHOW_ARROW
-    if ([self getFirstTimeUserStage] < FIRSTTIME_DONE) {
-        [self agitateFirstTimePointer];
-        return;
-    }
-#endif
-    if ([self isDisplayingShareSheet])
-        return;
-    
-    if ([self isShowingBuxInstructions])
-        return;
-    
-    isShowingBuxInstructions = YES;
-    CGRect frameInside = CGRectMake(16, 22+20, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
-    buxInstructions = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bux_rewards.png"]];
-    [buxInstructions setFrame:frameOutside];
-    /*
-    buttonBuxStore = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonBuxStore setFrame:CGRectMake(68-10, 300, 200, 60)];
-    [buttonBuxStore setBackgroundColor:[UIColor clearColor]];
-    [buttonBuxStore addTarget:self action:@selector(didClickShowBuxPurchaseMenu) forControlEvents:UIControlEventTouchUpInside];
-     */
-    buttonBuxInstructionsClose = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonBuxInstructionsClose setFrame:CGRectMake(270-6, 60-12, 37, 39)];
-    [buttonBuxInstructionsClose setBackgroundColor:[UIColor clearColor]];
-    [buttonBuxInstructionsClose addTarget:self action:@selector(didCloseBuxInstructions) forControlEvents:UIControlEventTouchUpInside];
-    //    [buxInstructions addSubview:buttonBuxStore];
-    //    [buxInstructions addSubview:buttonBuxInstructionsClose];
-    [self.tabBarController.view addSubview:buxInstructions];
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    //int buxAnimationOpen = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameInside forTime:.25];
-    [animation doViewTransition:buxInstructions toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished) {
-        // bux purchase menu
-            //[self.tabBarController.view addSubview:buttonBuxStore];
-            [self.tabBarController.view addSubview:buttonBuxInstructionsClose];   
-    }];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPremiumPacksDidCompleteWithResult:(NSArray *)theResults {

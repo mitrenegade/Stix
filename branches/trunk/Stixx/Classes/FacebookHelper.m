@@ -321,7 +321,8 @@ static NSMutableDictionary * timeoutRequests;
     NSLog(@"FacebookHelper FBRequest didLoad with Result: %@ for currentRequest %@", result, currentRequest);
     if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
         [timeoutRequests removeObjectForKey:currentRequest];
-        [delegate didGetFacebookInfo:dictionary forShareOnly:getTokenForShare];
+        NSLog(@"Facebook FBRequest timeout for %@ removed", currentRequest);
+        [delegate didLoginToFacebook:dictionary forShareOnly:getTokenForShare];
     }
     else if ([currentRequest isEqualToString:@"requestGraphPathFriends"])
         [self requestFacebookFriendsFinished:result];

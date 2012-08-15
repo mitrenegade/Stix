@@ -41,7 +41,7 @@
 #import "StixEditorViewController.h"
 #import "Admin.h"
 #import "NewsletterViewController.h"
-
+#import "PreviewController.h"
 #import "SHK.h" // sharekit
 #import "SHKConfiguration.h"
 #import "MySHKConfigurator.h"
@@ -74,7 +74,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate, PreviewDelegate> {
     
     UIWindow *window;
     
@@ -215,6 +215,8 @@ struct UserInfo {
     BOOL hasPendingStixLayerToUpload;
     int readyToUploadPendingStixLayer_tagID;
     BOOL addAutomaticFollows; // friendSuggestionController causes the followList to be cleared, so set this to force the automatically followed users to stay in the list
+    
+    PreviewController * previewController;
 }
 
 -(void)initializeBadgesFromKumulos;

@@ -478,6 +478,7 @@
 		9E260BDA15DEED9A0061F325 /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
 		9E260BDB15DEED9A0061F325 /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
 		9E260BDC15DEED9A0061F325 /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
+		9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = ShareKit/ShareKit.xcodeproj; sourceTree = SOURCE_ROOT; };
 		9E28C1C81569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAssetsLibrary+CustomPhotoAlbum.h"; sourceTree = "<group>"; };
 		9E28C1C91569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAssetsLibrary+CustomPhotoAlbum.m"; sourceTree = "<group>"; };
 		9E28C1CB1569CC0300E56AB4 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
@@ -982,6 +983,7 @@
 		9E260B9715DEEC010061F325 /* MKStoreKit */ = {
 			isa = PBXGroup;
 			children = (
+				9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */,
 				9E260BCE15DEED9A0061F325 /* Externals */,
 				9E260BD315DEED9A0061F325 /* MKSKProduct.h */,
 				9E260BD415DEED9A0061F325 /* MKSKProduct.m */,
@@ -1006,6 +1008,11 @@
 				9E260BD215DEED9A0061F325 /* SFHFKeychainUtils.m */,
 			);
 			path = Externals;
+			sourceTree = "<group>";
+		};
+		9E260BFC15DEF0510061F325 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		9E32D36015DCE6100009077B /* Editor */ = {
@@ -1781,6 +1788,12 @@
 			mainGroup = 9EB03163142C002E0019F2BD;
 			productRefGroup = 9EB0316F142C002E0019F2BD /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 9E260BFC15DEF0510061F325 /* Products */;
+					ProjectRef = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				9EB0316D142C002E0019F2BD /* Stixx */,

@@ -4,3 +4,6 @@
 [submodule "mstorekit"]
 	path = mstorekit
 	url = git://github.com/MugunthKumar/MKStoreKit.git
+[submodule "Submodules/mstorekit"]
+	path = Submodules/mstorekit
+	url = git://github.com/MugunthKumar/MKStoreKit.git

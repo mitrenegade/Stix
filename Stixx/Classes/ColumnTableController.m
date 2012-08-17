@@ -177,83 +177,33 @@
 
     int row = [indexPath row];
     NSLog(@"Column table: populating row %d", row);
-    /*
-    if ([self hasHeaderRow]) {
-        if (row == 0) {
-            // row 0 is header
-            CGRect frame = CGRectMake(borderWidth, columnPadding, tableView.frame.size.width - 2*columnPadding, 160);
-            NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10)];// finds unique identifier for position in this cell
-            UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
-            if (cellOldView != nil) {
-                [cellOldView removeFromSuperview];
-            }
-            UIView * elementView = [self.delegate viewForItemAtIndex:row * numColumns]; 
-            if (elementView != nil) {
-                [elementView setFrame:frame];
-//                [elementView setBackgroundColor:[UIColor greenColor]];
-                [cell addSubview:elementView];
-                [cellDictionary setObject:elementView forKey:cellColumnKey];
-            }
-            for (int col=1; col<numColumns; col++) {
-                NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10 + col)];// finds unique identifier for position in this cell
-                UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
-                if (cellOldView != nil) {
-                    [cellOldView removeFromSuperview];
-                }
-            }
-        }
-        else
-        {   
-            // other rows are normal
-            for (int col=0; col<numColumns; col++) {
-                CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
-                NSNumber * cellColumnKey = [NSNumber numberWithInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
-                UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];         
-                if (cellOldView != nil) {
-                    [cellOldView removeFromSuperview];
-                }
-                UIView * elementView = [delegate viewForItemAtIndex:row * numColumns + col]; 
-                if (elementView != nil) {
-                    [elementView setFrame:frame];
-                    [cell addSubview:elementView];
-                    [cellDictionary setObject:elementView forKey:cellColumnKey];
-                }
-            }
-        }        
-    }
-    else
-     */
-    {
-        // all rows are normal
+    // all rows are normal
+    
+    for (int col=0; col<numColumns; col++) {
+        CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
+        NSNumber * cellColumnKey = [NSNumber numberWithUnsignedInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
+        UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];     
         
-        for (int col=0; col<numColumns; col++) {
-            CGRect frame = CGRectMake(borderWidth + (columnWidth + columnPadding) * col, columnPadding, columnWidth, columnHeight);
-            NSNumber * cellColumnKey = [NSNumber numberWithUnsignedInt:(cell.hash*10+col)];// finds unique identifier for position in this cell
-            UIView * cellOldView = [cellDictionary objectForKey:cellColumnKey];     
-            
-            // check row of cell
-            int lastRow = [[cellLastRow objectForKey:cellColumnKey] intValue];
-            if (cellOldView != nil) {
-                // fixme: sometimes cells are recycled that are still in the screen
-                /*
-                NSLog(@"Removing old cell from col %d row %d key %u lastRow %d", col, row, [cellColumnKey unsignedIntValue], lastRow);
-                if ( ( (lastRow < row && lastRow >= row - 3) || (lastRow > row && lastRow <= row + 3)) && lastRow != row)
-                    NSLog(@"***************** if you remove a row that is still being displayed, you're gonna have a bad time ****************");
-                 */
-                [cellOldView removeFromSuperview];
-            }
-            UIView * elementView = [delegate viewForItemAtIndex:row * numColumns + col]; 
-            if (elementView != nil) {
-                [elementView setFrame:frame];
-                [cell addSubview:elementView];
-                [cellDictionary setObject:elementView forKey:cellColumnKey];
-                //NSNumber * newRow = [NSNumber numberWithInt:row];
-                //[cellLastRow setObject:newRow forKey:cellColumnKey];
-                //NSLog(@"Set cell col %d row %d key %u newLastRow:%@", col, row, [cellColumnKey unsignedIntValue], newRow);
-            }
-            else {
-                //NSLog(@"failed to get cell col %d row %d key %u", col, row, [cellColumnKey unsignedIntValue]);
-            }
+        // check row of cell
+        int lastRow = [[cellLastRow objectForKey:cellColumnKey] intValue];
+        UIView * elementView = [delegate viewForItemAtIndex:row * numColumns + col]; 
+        if (cellOldView != nil) {
+            // fixme: sometimes cells are recycled that are still in the screen
+             NSLog(@"Removing old cell from col %d row %d key %u lastRow %d", col, row, [cellColumnKey unsignedIntValue], lastRow);
+             if ( ( (lastRow < row && lastRow >= row - 3) || (lastRow > row && lastRow <= row + 3)) && lastRow != row)
+             NSLog(@"***************** if you remove a row that is still being displayed, you're gonna have a bad time ****************");
+            [cellOldView removeFromSuperview];
+        }
+        if (elementView != nil) {
+            [elementView setFrame:frame];
+            [cell addSubview:elementView];
+            [cellDictionary setObject:elementView forKey:cellColumnKey];
+            NSNumber * newRow = [NSNumber numberWithInt:row];
+            [cellLastRow setObject:newRow forKey:cellColumnKey];
+            NSLog(@"Set cell col %d row %d key %u newLastRow:%@", col, row, [cellColumnKey unsignedIntValue], newRow);
+        }
+        else {
+            //NSLog(@"failed to get cell col %d row %d key %u", col, row, [cellColumnKey unsignedIntValue]);
         }
     }
     if (row == [self.delegate numberOfRows] - 3 || row == [self.delegate numberOfRows]-1) {

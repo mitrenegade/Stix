@@ -1,3 +1,6 @@
 [submodule "branches/trunk/Submodules/ShareKit"]
 	path = branches/trunk/Submodules/ShareKit
 	url = git://github.com/ShareKit/ShareKit.git
+[submodule "mstorekit"]
+	path = mstorekit
+	url = git://github.com/MugunthKumar/MKStoreKit.git

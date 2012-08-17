@@ -24,6 +24,8 @@
 #define EXPLORE_COL 3
 #define EXPLORE_ROW 2
 
+static int lastRequest;
+
 
 -(void)needsRetainForDelegateCall {
     // comes from stixViews
@@ -61,7 +63,7 @@
     allTagIDs = [[NSMutableArray alloc] init];
     allTags = [[NSMutableDictionary alloc] init];
     contentViews = [[NSMutableDictionary alloc] init];
-    placeholderViews = [[NSMutableDictionary alloc] init];
+    //placeholderViews = [[NSMutableDictionary alloc] init];
     isShowingPlaceholderView = [[NSMutableDictionary alloc] init];
     
     newRandomTags = [[NSMutableDictionary alloc] init];
@@ -187,26 +189,14 @@
     return total / numColumns;
 }
 
--(void)createPlaceholderViewForStixView:(StixView*)cview andKey:(NSNumber*)key {
-#if 1
+-(UIImageView *)createPlaceholderViewTemporaryAtPoint:(CGPoint)center {
     UIImageView * placeholderView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
-    [placeholderView setCenter:cview.center];
+    [placeholderView setCenter:center];
     LoadingAnimationView * loadingAnimation = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
-    [loadingAnimation setCenter:cview.center];
+    [loadingAnimation setCenter:center];
     [loadingAnimation startCompleteAnimation];
     [placeholderView addSubview:loadingAnimation];
-    [placeholderViews setObject:placeholderView forKey:key];
-#else
-    // doesn't work - frame is wrong
-    if (placeholderViewGlobal)
-        return;
-    placeholderViewGlobal = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"graphic_emptypic.png"]];
-    [placeholderViewGlobal setCenter:cview.center];
-    LoadingAnimationView * loadingAnimation = [[LoadingAnimationView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
-    [loadingAnimation setCenter:cview.center];
-    [loadingAnimation startCompleteAnimation];
-    [placeholderViewGlobal addSubview:loadingAnimation];
-#endif
+    return placeholderView;
 }
 
 -(UIView*)viewForItemAtIndex:(int)index
@@ -217,53 +207,41 @@
     if (index >= [allTagIDs count])
         return nil;
     
-    if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
-        NSNumber * tagID = [allTagIDs objectAtIndex:index]; 
-        NSLog(@"ViewItemAtIndex: %d tagid %d", index, [tagID intValue]);
-    }
-    if ([contentViews objectForKey:key] == nil) {
+    int contentWidth = [tableController getContentWidth];
+    int targetWidth = contentWidth;
+    int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
+    CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
+
+    id tagID = [allTagIDs objectAtIndex:index];
+    id tagItem = [allTags objectForKey:tagID];
+    UIView * contentView = [contentViews objectForKey:tagID];
+    if (contentView)
+        return contentView;
+    if (tagItem != nil && ([tagItem class] == [Tag class]) ) {
         //UIImageView * cview = [[UIImageView alloc] initWithImage:tag.image];
-        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
-            NSLog(@"Creating contentView for index %d with tagID %d", index, [[allTagIDs objectAtIndex:index] intValue]); 
-        }
-        else {
-            NSLog(@"Creating contentView for index %d with NULL", index); 
-        }
-        int contentWidth = [tableController getContentWidth];
-        int targetWidth = contentWidth;
-        int targetHeight = PIX_HEIGHT * targetWidth / PIX_WIDTH    ; //tagImageSize.height * scale;
-        CGRect frame = CGRectMake(0, 0, targetWidth, targetHeight);
         StixView * cview = [[StixView alloc] initWithFrame:frame];
         [cview setInteractionAllowed:YES];
         [cview setIsPeelable:NO];
         [cview setDelegate:self];
 
         // populate with tags
-        if ([allTagIDs objectAtIndex:index] != [NSNull null]) {
-            NSNumber * tagID = [allTagIDs objectAtIndex:index];
-            Tag * tag = [allTags objectForKey:tagID];
-            [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
-
-            // sometimes requests just fail and never show up
-            [cview populateWithAuxStixFromTag:tag];
-        }
-        if (![isShowingPlaceholderView objectForKey:key]) {
-            cview.isShowingPlaceholder = YES;
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:YES] forKey:key];//tagID];
-
-            [self createPlaceholderViewForStixView:cview andKey:key];
-        }
-        else {
-            cview.isShowingPlaceholder = [[isShowingPlaceholderView objectForKey:key/*tagID*/] boolValue];
-        }
-        [contentViews setObject:cview forKey:key];
+        NSNumber * tagID = [allTagIDs objectAtIndex:index];
+        Tag * tag = [allTags objectForKey:tagID];
+        [cview initializeWithImage:tag.image andStixLayer:tag.stixLayer];
+        
+        // sometimes requests just fail and never show up
+        [cview populateWithAuxStixFromTag:tag];
+        [contentViews setObject:cview forKey:tagID];
+        return cview;
     }
-    StixView * cview = [contentViews objectForKey:key];
-    if (cview.isShowingPlaceholder) {
-        UIView * placeholder = [placeholderViews objectForKey:key];
-        return placeholder;
+    else {
+        NSLog(@"Creating placeholder for key/index %@", key);
+        CGPoint center = frame.origin;
+        center.x += frame.size.width / 2;
+        center.y += frame.size.height / 2;
+        return [self createPlaceholderViewTemporaryAtPoint:center];
     }
-    return [contentViews objectForKey:key];
+    return nil;
 }
 
 -(void)didReachLastRow {
@@ -289,15 +267,20 @@
                 [allTags removeAllObjects];
                 NSDate * twoWeeksAgo = [[NSDate date] dateByAddingTimeInterval:-3600*24*14];
                 lastDate = twoWeeksAgo;
-#if 0 && ADMIN_TESTING_MODE
+                
+                // first make placeholder views
+                for (int i=0; i<numPix; i++)
+                    [allTagIDs addObject:[NSNull null]];
+                [tableController.tableView reloadData]; // needed to update number of rows
+                pendingContentCount += numPix;
+                NSLog(@"Pending content count: %d", pendingContentCount);
+                
+                // then make requests for content
+#if 1 && ADMIN_TESTING_MODE
                 NSLog(@"**** ADMIN MODE **** ExploreView:loadContentPastRow skipping actual call");
 #else
                 [k getPopularPixInTimeRangeWithTimeStart:twoWeeksAgo andTimeEnd:[NSDate date] andNumPix:[NSNumber numberWithInt:numPix]];
 #endif
-                for (int i=0; i<numPix; i++)
-                    [allTagIDs addObject:[NSNull null]];
-                pendingContentCount += numPix;
-                NSLog(@"Pending content count: %d", pendingContentCount);
             }
             else {
                 NSLog(@"No need!");
@@ -308,12 +291,29 @@
             if (row == -1) {
                 // load initial row(s)
                 NSDate * now = [NSDate date]; // now
-                //[k getUpdatedPixByTimeWithTimeUpdated:now andNumPix:[NSNumber numberWithInt:numColumns * 5]];
                 int numPix = numColumns * 5;
-                [k getPixByRecentWithTimeCreated:now andNumPix:[NSNumber numberWithInt:numPix]];
-                for (int i=0; i<numPix; i++)
-                    [allTagIDs addObject:[NSNull null]];
+                
+                // start index of request for the next batch
+                int requestIndex = [allTagIDs count];
+                
+                // first create placeholder views
+                for (int i=0; i<numPix; i++) {
+                    int indexTag = [allTagIDs count];
+                    [allTagIDs addObject:[NSNumber numberWithInt:indexTag]];//[NSNull null]];
+                }
+                [tableController.tableView reloadData];
                 pendingContentCount += numPix;
+                NSLog(@"Pending content count: %d", pendingContentCount);
+
+                // next make requests for content
+                lastRequest = requestIndex;
+#if 0 && ADMIN_TESTING_MODE
+                NSLog(@"**** ADMIN TESTING MODE **** fakeGetPixByRecent");
+//                [self fakeGetRecentPixAtRequestIndex:requestIndex];
+                [self performSelector:@selector(fakeGetRecentPixAtRequestIndex:) withObject:self afterDelay:5];
+#else
+                [k getPixByRecentWithTimeCreated:now andNumPix:[NSNumber numberWithInt:numPix]];
+#endif
             }
             else {
                 if (indexPointer > 0)
@@ -322,12 +322,29 @@
                     NSNumber * tagID = [allTagIDs objectAtIndex:indexPointer-1];
                     Tag * tag = [allTags objectForKey:tagID];
                     NSDate * lastUpdated = [tag.timestamp dateByAddingTimeInterval:-1];
-                    //[k getUpdatedPixByTimeWithTimeUpdated:lastUpdated andNumPix:[NSNumber numberWithInt:numColumns * 5]];
                     int numPix = numColumns * 5;
-                    [k getPixByRecentWithTimeCreated:lastUpdated andNumPix:[NSNumber numberWithInt:numPix]];
-                    for (int i=0; i<numColumns * 5; i++)
-                        [allTagIDs addObject:[NSNull null]];
+                    
+                    // start index of request for the next batch
+                    int requestIndex = [allTagIDs count];
+                    
+                    // first create placeholder views/update table
+                    for (int i=0; i<numColumns * 5; i++) {
+                        int indexTag = [allTagIDs count];
+                        [allTagIDs addObject:[NSNumber numberWithInt:indexTag]];
+                    }
+                    [tableController.tableView reloadData];
                     pendingContentCount += numColumns * 5;
+                    NSLog(@"Pending content count: %d", pendingContentCount);
+                    
+                    // then make request for content
+                    lastRequest = requestIndex;
+#if 0 && ADMIN_TESTING_MODE
+                    NSLog(@"**** ADMIN TESTING MODE **** fakeGetPixByRecent");
+                    //                [self fakeGetRecentPixAtRequestIndex:requestIndex];
+                    [self performSelector:@selector(fakeGetRecentPixAtRequestIndex:) withObject:self afterDelay:5];
+#else
+                    [k getPixByRecentWithTimeCreated:lastUpdated andNumPix:[NSNumber numberWithInt:numPix]];
+#endif
                 }
             }
             break;
@@ -337,17 +354,23 @@
             [newRandomTags removeAllObjects];
             int maxID = [delegate getNewestTagID];
             newRandomTagsTargetCount = numColumns * 5;
+            // first make placeholder views
+            for (int i=0; i<newRandomTagsTargetCount; i++) {
+                NSInteger num = arc4random() % maxID;
+                [allTagIDs addObject:[NSNull null]];
+            }
+            [tableController.tableView reloadData];
+            
+            // then make requests for content
             for (int i=0; i<newRandomTagsTargetCount; i++) {
                 NSInteger num = arc4random() % maxID;
                 // kick off kumulos requests
                 [k getAllTagsWithIDRangeWithId_min:num-1 andId_max:num+1];
-                [allTagIDs addObject:[NSNull null]];
             }
         }
         default:
             break;
     }
-    [tableController.tableView reloadData];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPopularPixInTimeRangeDidCompleteWithResult:(NSArray *)theResults {
@@ -358,7 +381,6 @@
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
         Tag * newtag = [Tag getTagFromDictionary:d];
-        //[allTagIDs addObject:newtag.tagID]; // save in order 
         if ([allTags objectForKey:newtag.tagID] == nil) {
             [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
             [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
@@ -390,36 +412,47 @@
     //[activityIndicator stopCompleteAnimation];
 }
 
-//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUpdatedPixByTimeDidCompleteWithResult:(NSArray *)theResults {
+-(void)fakeGetRecentPixAtRequestIndex:(int)startIndex {
+    startIndex = lastRequest;
+    int number = numColumns * 5;
+    for (int i=0; i<number; i++) {
+        int newindex = startIndex + i;
+        Tag * newtag = [[Tag alloc] init];
+        newtag.tagID = [NSNumber numberWithInt:newindex];
+        [newtag setImage:[UIImage imageNamed:@"nav_back"]];
+        
+        [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
+        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+        //[self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+        
+        indexPointer++;
+        
+        // don't know why this happens but sometimes it does!
+        pendingContentCount--;
+        if (pendingContentCount < 0)
+            pendingContentCount = 0;
+        
+    }
+    [tableController.tableView reloadData];
+    [tableController dataSourceDidFinishLoadingNewData];
+    [self stopActivityIndicator];
+}
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getPixByRecentDidCompleteWithResult:(NSArray *)theResults {
     if (exploreMode != EXPLORE_RECENT)
         return;
     
+    int startIndex = lastRequest;
     for (int i=0; i<[theResults count]; i++) {
         NSMutableDictionary * d = [theResults objectAtIndex:i];
+        int newindex = startIndex + i;
+
         Tag * newtag = [Tag getTagFromDictionary:d];
-        //[allTagIDs addObject:newtag.tagID]; // save in order 
-        if ([allTags objectForKey:newtag.tagID] == nil) {
-            int newindex = indexPointer++;
-            if (newindex < [allTagIDs count]) {
-                [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
-                [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
-            }
-            else {
-                [allTagIDs addObject:newtag.tagID];
-                [allTags setObject:newtag forKey:newtag.tagID];
-            }
-        }
-        
-        // new system of auxiliary stix: request from auxiliaryStixes table
-        // even though we don't have aux stix, we need this to switch out of the placeholder
-#if 0
-        NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:newtag.tagID, nil]; 
-        KumulosHelper * kh = [[KumulosHelper alloc] init];
-        [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
-#else
-        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
-#endif
+        [allTagIDs replaceObjectAtIndex:newindex withObject:newtag.tagID];
+        [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary        
+//        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+
+        indexPointer++;
 
         // don't know why this happens but sometimes it does!
         pendingContentCount--;
@@ -428,6 +461,7 @@
 
         //NSLog(@"Explore recent tags: Downloaded tag ID %d at position %d pending content: %d allTagIDs %d allTags %d", [newtag.tagID intValue], [allTagIDs count], pendingContentCount, [allTagIDs count], [allTags count]);
     }
+    [tableController.tableView reloadData];
     if ([theResults count]>0)
         [tableController dataSourceDidFinishLoadingNewData];
     [self stopActivityIndicator];
@@ -465,7 +499,6 @@
         id key;
         while (key = [e nextObject]) {
             Tag * newtag = [newRandomTags objectForKey:key];
-            //[allTagIDs addObject:newtag.tagID]; // save in order 
             if ([allTags objectForKey:newtag.tagID] == nil) {
                 [allTagIDs replaceObjectAtIndex:indexPointer++ withObject:newtag.tagID];
                 [allTags setObject:newtag forKey:newtag.tagID]; // save to dictionary
@@ -487,60 +520,11 @@
     }
 }
 
--(void)fakeDidGetAuxiliaryStixOfTagWithID:(NSNumber *) tagID {
-    NSLog(@"FakeDidGetAuxiliaryStix being called to update tag %@", tagID);
-    Tag * tag = [allTags objectForKey:tagID];
-    if (tag) {
-        //[tag populateWithAuxiliaryStix:theResults];
-        NSNumber * key = nil;
-        for (int i=0; i<[allTagIDs count]; i++) {
-            NSNumber * tID = [allTagIDs objectAtIndex:i];
-            if (tID == tagID) {
-                // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
-                key = [NSNumber numberWithInt:i];
-                [contentViews removeObjectForKey:key];
-                break;
-            }
-        }
-        if (key)
-            [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
-        [tableController.tableView reloadData];
-    }
-}
-
--(void)khCallback_didGetAuxiliaryStixOfTag:(NSMutableArray *) returnParams {
-    NSNumber * tagID = [returnParams objectAtIndex:0];
-    NSMutableArray * theResults = [returnParams objectAtIndex:1];
-    
-    //NSLog(@"Got auxiliary stix of tag %d with %d stix!", [tagID intValue], [theResults count]);
-//    if ([theResults count] > 0) {
-        Tag * tag = [allTags objectForKey:tagID];
-        if (tag) {
-            [tag populateWithAuxiliaryStix:theResults];
-            NSNumber * key = nil;
-            for (int i=0; i<[allTagIDs count]; i++) {
-                NSNumber * tID = [allTagIDs objectAtIndex:i];
-                if (tID == tagID) {
-                    // remove contentView for a given index. contentViews are indexed by cell number, not by tagID
-                    key = [NSNumber numberWithInt:i];
-                    [contentViews removeObjectForKey:key];
-                    break;
-                }
-            }
-            if (key)
-                [isShowingPlaceholderView setObject:[NSNumber numberWithBool:NO] forKey:key];
-            [tableController.tableView reloadData];
-            return;
-        }
-//    }
-}
-
-
 -(void)forceReloadAll {    
     [allTags removeAllObjects];
     [allTagIDs removeAllObjects];
     [contentViews removeAllObjects];
-    [placeholderViews removeAllObjects];
+    //[placeholderViews removeAllObjects];
     [isShowingPlaceholderView removeAllObjects];
     pendingContentCount = 0;
     indexPointer = 0;
@@ -612,25 +596,6 @@
 //-(void)shouldCloseUserPage {
 //    [delegate shouldCloseUserPage];
 //}
-
--(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID {
-    //NSLog(@"VerticalFeedItemController calling delegate didReceiveRequestedStixView");
-    // send through to StixAppDelegate to save to defaults
-    [delegate didReceiveRequestedStixViewFromKumulos:stixStringID];
-}
-
--(void)didReceiveAllRequestedMissingStix:(StixView *)stixView {
-    [stixView removeFromSuperview];
-    for (int i=0; i<[contentViews count]; i++) {
-        StixView * cview = [contentViews objectForKey:[NSNumber numberWithInt:i]];
-        if ([cview stixViewID] == [stixView stixViewID]) {
-            NSLog(@"ExploreView: didReceiveAllRequestedMissingStix for stixView %d at index %d", [stixView stixViewID], i);
-            [contentViews removeObjectForKey:[NSNumber numberWithInt:i]];
-            [self.tableController.tableView reloadData];
-            break;
-        }
-    }
-}
 
 - (void)didReceiveMemoryWarning
 {

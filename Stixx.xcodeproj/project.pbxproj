@@ -61,20 +61,6 @@
 		9E1EB79C14A4871100FC6E1A /* CommentFeedTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79A14A4871000FC6E1A /* CommentFeedTableController.xib */; };
 		9E1EB7A014A48D9200FC6E1A /* CommentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */; };
 		9E1EB7A114A48D9200FC6E1A /* CommentViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */; };
-		9E1FD6FC15DED63500D41FAC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6E315DED63500D41FAC /* .gitignore */; };
-		9E1FD6FE15DED63500D41FAC /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6E815DED63500D41FAC /* NSData+Base64.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9E1FD6FF15DED63500D41FAC /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6EA15DED63500D41FAC /* SFHFKeychainUtils.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9E1FD70015DED63500D41FAC /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6EC15DED63500D41FAC /* MKSKProduct.m */; };
-		9E1FD70115DED63500D41FAC /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6EE15DED63500D41FAC /* MKSKSubscriptionProduct.m */; };
-		9E1FD70215DED63500D41FAC /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F015DED63500D41FAC /* MKStoreKitConfigs.plist */; };
-		9E1FD70315DED63500D41FAC /* MKStoreManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F215DED63500D41FAC /* MKStoreManager.m */; };
-		9E1FD70415DED63500D41FAC /* MKStoreObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F415DED63500D41FAC /* MKStoreObserver.m */; };
-		9E1FD70515DED63500D41FAC /* README.mdown in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F515DED63500D41FAC /* README.mdown */; };
-		9E1FD70615DED63500D41FAC /* AddDevice.html in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F715DED63500D41FAC /* AddDevice.html */; };
-		9E1FD70715DED63500D41FAC /* DBSetup.sql in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F815DED63500D41FAC /* DBSetup.sql */; };
-		9E1FD70815DED63500D41FAC /* featureCheck.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6F915DED63500D41FAC /* featureCheck.php */; };
-		9E1FD70915DED63500D41FAC /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6FA15DED63500D41FAC /* requestAccess.php */; };
-		9E1FD70A15DED63500D41FAC /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6FB15DED63500D41FAC /* verifyProduct.php */; };
 		9E210C10152278E1002057F1 /* graphic_findbyname.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C09152278DD002057F1 /* graphic_findbyname.png */; };
 		9E210C11152278E1002057F1 /* graphic_facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0A152278DE002057F1 /* graphic_facebook.png */; };
 		9E210C12152278E1002057F1 /* graphic_contacts.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0B152278DE002057F1 /* graphic_contacts.png */; };
@@ -225,8 +211,21 @@
 		9E88A499148A8EB400E67864 /* libxml2.2.7.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E88A498148A8EB300E67864 /* libxml2.2.7.3.dylib */; };
 		9E8A29C814AF76B600CDCE76 /* StixView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A29C714AF76B400CDCE76 /* StixView.m */; };
 		9E8A29D014AFA80D00CDCE76 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E8A29CF14AFA80D00CDCE76 /* AudioToolbox.framework */; };
-		9E8CF230156EEC4900B27E1E /* libShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E8CF220156EEBBF00B27E1E /* libShareKit.a */; };
-		9E8CF231156EEC5400B27E1E /* ShareKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E8CF222156EEBBF00B27E1E /* ShareKit.bundle */; };
+		9E8FB90C15DEDE500063DCFE /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6BE15DEDE4E0063DCFE /* .gitignore */; };
+		9E8FB90D15DEDE500063DCFE /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6C115DEDE4E0063DCFE /* JSONKit.m */; };
+		9E8FB90E15DEDE500063DCFE /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6C315DEDE4E0063DCFE /* NSData+Base64.m */; };
+		9E8FB90F15DEDE500063DCFE /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6C515DEDE4E0063DCFE /* SFHFKeychainUtils.m */; };
+		9E8FB91015DEDE500063DCFE /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6C715DEDE4E0063DCFE /* MKSKProduct.m */; };
+		9E8FB91115DEDE500063DCFE /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6C915DEDE4E0063DCFE /* MKSKSubscriptionProduct.m */; };
+		9E8FB91215DEDE500063DCFE /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6CB15DEDE4E0063DCFE /* MKStoreKitConfigs.plist */; };
+		9E8FB91315DEDE500063DCFE /* MKStoreManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6CD15DEDE4E0063DCFE /* MKStoreManager.m */; };
+		9E8FB91415DEDE500063DCFE /* MKStoreObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FB6CF15DEDE4E0063DCFE /* MKStoreObserver.m */; };
+		9E8FB91515DEDE500063DCFE /* README.mdown in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D015DEDE4E0063DCFE /* README.mdown */; };
+		9E8FB91615DEDE500063DCFE /* AddDevice.html in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D215DEDE4E0063DCFE /* AddDevice.html */; };
+		9E8FB91715DEDE500063DCFE /* DBSetup.sql in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D315DEDE4E0063DCFE /* DBSetup.sql */; };
+		9E8FB91815DEDE500063DCFE /* featureCheck.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D415DEDE4E0063DCFE /* featureCheck.php */; };
+		9E8FB91915DEDE500063DCFE /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D515DEDE4E0063DCFE /* requestAccess.php */; };
+		9E8FB91A15DEDE500063DCFE /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E8FB6D615DEDE4E0063DCFE /* verifyProduct.php */; };
 		9E919A0C14F614AD00D03085 /* EGORefreshTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E919A0B14F614AD00D03085 /* EGORefreshTableHeaderView.m */; };
 		9E919A3D14F733A100D03085 /* blueArrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E919A3C14F733A100D03085 /* blueArrow.png */; };
 		9E919A4314FB0D1A00D03085 /* tab_close_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E919A4014FB0D1900D03085 /* tab_close_icon.png */; };
@@ -390,47 +389,33 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E8CF21D156EEBBF00B27E1E /* PBXContainerItemProxy */ = {
+		9E8FBA3C15DEDE5C0063DCFE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
+			containerPortal = 9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1D6058910D05DD3D006BFB54;
 			remoteInfo = "Demo App";
 		};
-		9E8CF21F156EEBBF00B27E1E /* PBXContainerItemProxy */ = {
+		9E8FBA3E15DEDE5C0063DCFE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
+			containerPortal = 9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5342E1552AADD00171BCE;
 			remoteInfo = "Static Library";
 		};
-		9E8CF221156EEBBF00B27E1E /* PBXContainerItemProxy */ = {
+		9E8FBA4015DEDE5C0063DCFE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
+			containerPortal = 9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5360F1552E26800171BCE;
 			remoteInfo = "Resource Bundle";
 		};
-		9E8CF223156EEBBF00B27E1E /* PBXContainerItemProxy */ = {
+		9E8FBA4215DEDE5C0063DCFE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
+			containerPortal = 9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7A0F9246156BA2A0009CB40A;
 			remoteInfo = "Static Library No Submodules";
-		};
-		9E8CF22C156EEC3B00B27E1E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 7AB5342D1552AADD00171BCE;
-			remoteInfo = "Static Library";
-		};
-		9E8CF22E156EEC3E00B27E1E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 7AB5360E1552E26800171BCE;
-			remoteInfo = "Resource Bundle";
 		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -509,27 +494,6 @@
 		9E1EB79D14A48D9000FC6E1A /* CommentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentViewController.h; sourceTree = "<group>"; };
 		9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentViewController.m; sourceTree = "<group>"; };
 		9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CommentViewController.xib; sourceTree = "<group>"; };
-		9E1FD6E315DED63500D41FAC /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		9E1FD6E715DED63500D41FAC /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
-		9E1FD6E815DED63500D41FAC /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
-		9E1FD6E915DED63500D41FAC /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHFKeychainUtils.h; sourceTree = "<group>"; };
-		9E1FD6EA15DED63500D41FAC /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHFKeychainUtils.m; sourceTree = "<group>"; };
-		9E1FD6EB15DED63500D41FAC /* MKSKProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKProduct.h; sourceTree = "<group>"; };
-		9E1FD6EC15DED63500D41FAC /* MKSKProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKProduct.m; sourceTree = "<group>"; };
-		9E1FD6ED15DED63500D41FAC /* MKSKSubscriptionProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKSubscriptionProduct.h; sourceTree = "<group>"; };
-		9E1FD6EE15DED63500D41FAC /* MKSKSubscriptionProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKSubscriptionProduct.m; sourceTree = "<group>"; };
-		9E1FD6EF15DED63500D41FAC /* MKStoreKitConfigs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreKitConfigs.h; sourceTree = "<group>"; };
-		9E1FD6F015DED63500D41FAC /* MKStoreKitConfigs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = MKStoreKitConfigs.plist; sourceTree = "<group>"; };
-		9E1FD6F115DED63500D41FAC /* MKStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreManager.h; sourceTree = "<group>"; };
-		9E1FD6F215DED63500D41FAC /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
-		9E1FD6F315DED63500D41FAC /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
-		9E1FD6F415DED63500D41FAC /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
-		9E1FD6F515DED63500D41FAC /* README.mdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.mdown; sourceTree = "<group>"; };
-		9E1FD6F715DED63500D41FAC /* AddDevice.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = AddDevice.html; sourceTree = "<group>"; };
-		9E1FD6F815DED63500D41FAC /* DBSetup.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DBSetup.sql; sourceTree = "<group>"; };
-		9E1FD6F915DED63500D41FAC /* featureCheck.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = featureCheck.php; sourceTree = "<group>"; };
-		9E1FD6FA15DED63500D41FAC /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
-		9E1FD6FB15DED63500D41FAC /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
 		9E210C09152278DD002057F1 /* graphic_findbyname.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_findbyname.png; sourceTree = "<group>"; };
 		9E210C0A152278DE002057F1 /* graphic_facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_facebook.png; sourceTree = "<group>"; };
 		9E210C0B152278DE002057F1 /* graphic_contacts.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_contacts.png; sourceTree = "<group>"; };
@@ -707,7 +671,30 @@
 		9E8A29C614AF76B300CDCE76 /* StixView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixView.h; sourceTree = "<group>"; };
 		9E8A29C714AF76B400CDCE76 /* StixView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixView.m; sourceTree = "<group>"; };
 		9E8A29CF14AFA80D00CDCE76 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = Submodules/ShareKit/ShareKit.xcodeproj; sourceTree = "<group>"; };
+		9E8FB6BE15DEDE4E0063DCFE /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		9E8FB6C015DEDE4E0063DCFE /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
+		9E8FB6C115DEDE4E0063DCFE /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
+		9E8FB6C215DEDE4E0063DCFE /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		9E8FB6C315DEDE4E0063DCFE /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		9E8FB6C415DEDE4E0063DCFE /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHFKeychainUtils.h; sourceTree = "<group>"; };
+		9E8FB6C515DEDE4E0063DCFE /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHFKeychainUtils.m; sourceTree = "<group>"; };
+		9E8FB6C615DEDE4E0063DCFE /* MKSKProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKProduct.h; sourceTree = "<group>"; };
+		9E8FB6C715DEDE4E0063DCFE /* MKSKProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKProduct.m; sourceTree = "<group>"; };
+		9E8FB6C815DEDE4E0063DCFE /* MKSKSubscriptionProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKSubscriptionProduct.h; sourceTree = "<group>"; };
+		9E8FB6C915DEDE4E0063DCFE /* MKSKSubscriptionProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKSubscriptionProduct.m; sourceTree = "<group>"; };
+		9E8FB6CA15DEDE4E0063DCFE /* MKStoreKitConfigs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreKitConfigs.h; sourceTree = "<group>"; };
+		9E8FB6CB15DEDE4E0063DCFE /* MKStoreKitConfigs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = MKStoreKitConfigs.plist; sourceTree = "<group>"; };
+		9E8FB6CC15DEDE4E0063DCFE /* MKStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreManager.h; sourceTree = "<group>"; };
+		9E8FB6CD15DEDE4E0063DCFE /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
+		9E8FB6CE15DEDE4E0063DCFE /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
+		9E8FB6CF15DEDE4E0063DCFE /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
+		9E8FB6D015DEDE4E0063DCFE /* README.mdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.mdown; sourceTree = "<group>"; };
+		9E8FB6D215DEDE4E0063DCFE /* AddDevice.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = AddDevice.html; sourceTree = "<group>"; };
+		9E8FB6D315DEDE4E0063DCFE /* DBSetup.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DBSetup.sql; sourceTree = "<group>"; };
+		9E8FB6D415DEDE4E0063DCFE /* featureCheck.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = featureCheck.php; sourceTree = "<group>"; };
+		9E8FB6D515DEDE4E0063DCFE /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
+		9E8FB6D615DEDE4E0063DCFE /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
+		9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = Submodules/ShareKit/ShareKit.xcodeproj; sourceTree = "<group>"; };
 		9E919A0A14F614AD00D03085 /* EGORefreshTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EGORefreshTableHeaderView.h; sourceTree = "<group>"; };
 		9E919A0B14F614AD00D03085 /* EGORefreshTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EGORefreshTableHeaderView.m; sourceTree = "<group>"; };
 		9E919A3C14F733A100D03085 /* blueArrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blueArrow.png; sourceTree = "<group>"; };
@@ -922,7 +909,6 @@
 				9EB6256215CA6266000CCCED /* CoreMedia.framework in Frameworks */,
 				9ECBBA5615BE68AF00E6E48E /* AddressBookUI.framework in Frameworks */,
 				9E6771821579F7AE00AD7A53 /* CoreLocation.framework in Frameworks */,
-				9E8CF230156EEC4900B27E1E /* libShareKit.a in Frameworks */,
 				9E186A7C156E38170014235C /* Twitter.framework in Frameworks */,
 				9E186A7A156E38120014235C /* Accounts.framework in Frameworks */,
 				9EF475D3156E2C7E00F0F352 /* MessageUI.framework in Frameworks */,
@@ -1039,51 +1025,6 @@
 			path = Appirator;
 			sourceTree = "<group>";
 		};
-		9E1FD6E215DED63500D41FAC /* mstorekit */ = {
-			isa = PBXGroup;
-			children = (
-				9E1FD6E315DED63500D41FAC /* .gitignore */,
-				9E1FD6E415DED63500D41FAC /* Externals */,
-				9E1FD6EB15DED63500D41FAC /* MKSKProduct.h */,
-				9E1FD6EC15DED63500D41FAC /* MKSKProduct.m */,
-				9E1FD6ED15DED63500D41FAC /* MKSKSubscriptionProduct.h */,
-				9E1FD6EE15DED63500D41FAC /* MKSKSubscriptionProduct.m */,
-				9E1FD6EF15DED63500D41FAC /* MKStoreKitConfigs.h */,
-				9E1FD6F015DED63500D41FAC /* MKStoreKitConfigs.plist */,
-				9E1FD6F115DED63500D41FAC /* MKStoreManager.h */,
-				9E1FD6F215DED63500D41FAC /* MKStoreManager.m */,
-				9E1FD6F315DED63500D41FAC /* MKStoreObserver.h */,
-				9E1FD6F415DED63500D41FAC /* MKStoreObserver.m */,
-				9E1FD6F515DED63500D41FAC /* README.mdown */,
-				9E1FD6F615DED63500D41FAC /* Server Code */,
-			);
-			name = mstorekit;
-			path = Submodules/mstorekit;
-			sourceTree = "<group>";
-		};
-		9E1FD6E415DED63500D41FAC /* Externals */ = {
-			isa = PBXGroup;
-			children = (
-				9E1FD6E715DED63500D41FAC /* NSData+Base64.h */,
-				9E1FD6E815DED63500D41FAC /* NSData+Base64.m */,
-				9E1FD6E915DED63500D41FAC /* SFHFKeychainUtils.h */,
-				9E1FD6EA15DED63500D41FAC /* SFHFKeychainUtils.m */,
-			);
-			path = Externals;
-			sourceTree = "<group>";
-		};
-		9E1FD6F615DED63500D41FAC /* Server Code */ = {
-			isa = PBXGroup;
-			children = (
-				9E1FD6F715DED63500D41FAC /* AddDevice.html */,
-				9E1FD6F815DED63500D41FAC /* DBSetup.sql */,
-				9E1FD6F915DED63500D41FAC /* featureCheck.php */,
-				9E1FD6FA15DED63500D41FAC /* requestAccess.php */,
-				9E1FD6FB15DED63500D41FAC /* verifyProduct.php */,
-			);
-			path = "Server Code";
-			sourceTree = "<group>";
-		};
 		9E32D36015DCE6100009077B /* Editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1198,23 +1139,70 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				9E1FD6E215DED63500D41FAC /* mstorekit */,
+				9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */,
+				9E8FB6BD15DEDE4E0063DCFE /* mstorekit */,
 				9E0D042C15853896009767AD /* FlurryAnalytics.h */,
 				9E0D042D15853896009767AD /* libFlurryAnalytics.a */,
-				9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */,
 				9E17ADFE1543526D00F9E5F8 /* Appirator */,
 				9EFDBD8C1540AD31001236FA /* ASIHTTPRequest */,
 			);
 			name = External;
 			sourceTree = "<group>";
 		};
-		9E8CF213156EEBBE00B27E1E /* Products */ = {
+		9E8FB6BD15DEDE4E0063DCFE /* mstorekit */ = {
 			isa = PBXGroup;
 			children = (
-				9E8CF21E156EEBBF00B27E1E /* ShareKitDemo.app */,
-				9E8CF220156EEBBF00B27E1E /* libShareKit.a */,
-				9E8CF222156EEBBF00B27E1E /* ShareKit.bundle */,
-				9E8CF224156EEBBF00B27E1E /* libShareKitNoSubmodules.a */,
+				9E8FB6BE15DEDE4E0063DCFE /* .gitignore */,
+				9E8FB6BF15DEDE4E0063DCFE /* Externals */,
+				9E8FB6C615DEDE4E0063DCFE /* MKSKProduct.h */,
+				9E8FB6C715DEDE4E0063DCFE /* MKSKProduct.m */,
+				9E8FB6C815DEDE4E0063DCFE /* MKSKSubscriptionProduct.h */,
+				9E8FB6C915DEDE4E0063DCFE /* MKSKSubscriptionProduct.m */,
+				9E8FB6CA15DEDE4E0063DCFE /* MKStoreKitConfigs.h */,
+				9E8FB6CB15DEDE4E0063DCFE /* MKStoreKitConfigs.plist */,
+				9E8FB6CC15DEDE4E0063DCFE /* MKStoreManager.h */,
+				9E8FB6CD15DEDE4E0063DCFE /* MKStoreManager.m */,
+				9E8FB6CE15DEDE4E0063DCFE /* MKStoreObserver.h */,
+				9E8FB6CF15DEDE4E0063DCFE /* MKStoreObserver.m */,
+				9E8FB6D015DEDE4E0063DCFE /* README.mdown */,
+				9E8FB6D115DEDE4E0063DCFE /* Server Code */,
+			);
+			name = mstorekit;
+			path = Submodules/mstorekit;
+			sourceTree = "<group>";
+		};
+		9E8FB6BF15DEDE4E0063DCFE /* Externals */ = {
+			isa = PBXGroup;
+			children = (
+				9E8FB6C015DEDE4E0063DCFE /* JSONKit.h */,
+				9E8FB6C115DEDE4E0063DCFE /* JSONKit.m */,
+				9E8FB6C215DEDE4E0063DCFE /* NSData+Base64.h */,
+				9E8FB6C315DEDE4E0063DCFE /* NSData+Base64.m */,
+				9E8FB6C415DEDE4E0063DCFE /* SFHFKeychainUtils.h */,
+				9E8FB6C515DEDE4E0063DCFE /* SFHFKeychainUtils.m */,
+			);
+			path = Externals;
+			sourceTree = "<group>";
+		};
+		9E8FB6D115DEDE4E0063DCFE /* Server Code */ = {
+			isa = PBXGroup;
+			children = (
+				9E8FB6D215DEDE4E0063DCFE /* AddDevice.html */,
+				9E8FB6D315DEDE4E0063DCFE /* DBSetup.sql */,
+				9E8FB6D415DEDE4E0063DCFE /* featureCheck.php */,
+				9E8FB6D515DEDE4E0063DCFE /* requestAccess.php */,
+				9E8FB6D615DEDE4E0063DCFE /* verifyProduct.php */,
+			);
+			path = "Server Code";
+			sourceTree = "<group>";
+		};
+		9E8FBA3215DEDE5B0063DCFE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9E8FBA3D15DEDE5C0063DCFE /* ShareKitDemo.app */,
+				9E8FBA3F15DEDE5C0063DCFE /* libShareKit.a */,
+				9E8FBA4115DEDE5C0063DCFE /* ShareKit.bundle */,
+				9E8FBA4315DEDE5C0063DCFE /* libShareKitNoSubmodules.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1824,8 +1812,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				9E8CF22F156EEC3E00B27E1E /* PBXTargetDependency */,
-				9E8CF22D156EEC3B00B27E1E /* PBXTargetDependency */,
 			);
 			name = Stixx;
 			productName = Stixx;
@@ -1873,8 +1859,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 9E8CF213156EEBBE00B27E1E /* Products */;
-					ProjectRef = 9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */;
+					ProductGroup = 9E8FBA3215DEDE5B0063DCFE /* Products */;
+					ProjectRef = 9E8FBA3115DEDE5B0063DCFE /* ShareKit.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1886,32 +1872,32 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		9E8CF21E156EEBBF00B27E1E /* ShareKitDemo.app */ = {
+		9E8FBA3D15DEDE5C0063DCFE /* ShareKitDemo.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = ShareKitDemo.app;
-			remoteRef = 9E8CF21D156EEBBF00B27E1E /* PBXContainerItemProxy */;
+			remoteRef = 9E8FBA3C15DEDE5C0063DCFE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E8CF220156EEBBF00B27E1E /* libShareKit.a */ = {
+		9E8FBA3F15DEDE5C0063DCFE /* libShareKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKit.a;
-			remoteRef = 9E8CF21F156EEBBF00B27E1E /* PBXContainerItemProxy */;
+			remoteRef = 9E8FBA3E15DEDE5C0063DCFE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E8CF222156EEBBF00B27E1E /* ShareKit.bundle */ = {
+		9E8FBA4115DEDE5C0063DCFE /* ShareKit.bundle */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = ShareKit.bundle;
-			remoteRef = 9E8CF221156EEBBF00B27E1E /* PBXContainerItemProxy */;
+			remoteRef = 9E8FBA4015DEDE5C0063DCFE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E8CF224156EEBBF00B27E1E /* libShareKitNoSubmodules.a */ = {
+		9E8FBA4315DEDE5C0063DCFE /* libShareKitNoSubmodules.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKitNoSubmodules.a;
-			remoteRef = 9E8CF223156EEBBF00B27E1E /* PBXContainerItemProxy */;
+			remoteRef = 9E8FBA4215DEDE5C0063DCFE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1921,7 +1907,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E8CF231156EEC5400B27E1E /* ShareKit.bundle in Resources */,
 				9EB0317D142C002E0019F2BD /* InfoPlist.strings in Resources */,
 				9EB03191142C002E0019F2BD /* MainWindow_iPad.xib in Resources */,
 				9EB031FC142C01260019F2BD /* TagViewController.xib in Resources */,
@@ -2187,14 +2172,14 @@
 				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
 				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
 				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
-				9E1FD6FC15DED63500D41FAC /* .gitignore in Resources */,
-				9E1FD70215DED63500D41FAC /* MKStoreKitConfigs.plist in Resources */,
-				9E1FD70515DED63500D41FAC /* README.mdown in Resources */,
-				9E1FD70615DED63500D41FAC /* AddDevice.html in Resources */,
-				9E1FD70715DED63500D41FAC /* DBSetup.sql in Resources */,
-				9E1FD70815DED63500D41FAC /* featureCheck.php in Resources */,
-				9E1FD70915DED63500D41FAC /* requestAccess.php in Resources */,
-				9E1FD70A15DED63500D41FAC /* verifyProduct.php in Resources */,
+				9E8FB90C15DEDE500063DCFE /* .gitignore in Resources */,
+				9E8FB91215DEDE500063DCFE /* MKStoreKitConfigs.plist in Resources */,
+				9E8FB91515DEDE500063DCFE /* README.mdown in Resources */,
+				9E8FB91615DEDE500063DCFE /* AddDevice.html in Resources */,
+				9E8FB91715DEDE500063DCFE /* DBSetup.sql in Resources */,
+				9E8FB91815DEDE500063DCFE /* featureCheck.php in Resources */,
+				9E8FB91915DEDE500063DCFE /* requestAccess.php in Resources */,
+				9E8FB91A15DEDE500063DCFE /* verifyProduct.php in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2307,12 +2292,13 @@
 				9E04547A15DB179B00E95260 /* PreviewController.m in Sources */,
 				9E04547F15DB17BF00E95260 /* PreviewLoginViewController.m in Sources */,
 				9E0454CA15DC28E600E95260 /* CreateHandleController.m in Sources */,
-				9E1FD6FE15DED63500D41FAC /* NSData+Base64.m in Sources */,
-				9E1FD6FF15DED63500D41FAC /* SFHFKeychainUtils.m in Sources */,
-				9E1FD70015DED63500D41FAC /* MKSKProduct.m in Sources */,
-				9E1FD70115DED63500D41FAC /* MKSKSubscriptionProduct.m in Sources */,
-				9E1FD70315DED63500D41FAC /* MKStoreManager.m in Sources */,
-				9E1FD70415DED63500D41FAC /* MKStoreObserver.m in Sources */,
+				9E8FB90D15DEDE500063DCFE /* JSONKit.m in Sources */,
+				9E8FB90E15DEDE500063DCFE /* NSData+Base64.m in Sources */,
+				9E8FB90F15DEDE500063DCFE /* SFHFKeychainUtils.m in Sources */,
+				9E8FB91015DEDE500063DCFE /* MKSKProduct.m in Sources */,
+				9E8FB91115DEDE500063DCFE /* MKSKSubscriptionProduct.m in Sources */,
+				9E8FB91315DEDE500063DCFE /* MKStoreManager.m in Sources */,
+				9E8FB91415DEDE500063DCFE /* MKStoreObserver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2326,16 +2312,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9E8CF22D156EEC3B00B27E1E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Static Library";
-			targetProxy = 9E8CF22C156EEC3B00B27E1E /* PBXContainerItemProxy */;
-		};
-		9E8CF22F156EEC3E00B27E1E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Resource Bundle";
-			targetProxy = 9E8CF22E156EEC3E00B27E1E /* PBXContainerItemProxy */;
-		};
 		9EB0319E142C002E0019F2BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9EB0316D142C002E0019F2BD /* Stixx */;

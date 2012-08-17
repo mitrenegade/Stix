@@ -4,3 +4,6 @@
 [submodule "Submodules/ShareKit"]
 	path = Submodules/ShareKit
 	url = git://github.com/ShareKit/ShareKit.git
+[submodule "Submodules/testSubmodule"]
+	path = Submodules/testSubmodule
+	url = git@github.com:mitrenegade/testSubmodule.git

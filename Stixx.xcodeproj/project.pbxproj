@@ -68,7 +68,7 @@
 		9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1114E1C08F0070ECB4 /* btn_addstix.png */; };
 		9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C4014E301EE0070ECB4 /* Parse.framework */; };
 		9E260BDD15DEED9A0061F325 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BD015DEED9A0061F325 /* NSData+Base64.m */; };
-		9E260BDE15DEED9A0061F325 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BD215DEED9A0061F325 /* SFHFKeychainUtils.m */; };
+		9E260BDE15DEED9A0061F325 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BD215DEED9A0061F325 /* SFHFKeychainUtils.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E260BDF15DEED9A0061F325 /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BD415DEED9A0061F325 /* MKSKProduct.m */; };
 		9E260BE015DEED9A0061F325 /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BD615DEED9A0061F325 /* MKSKSubscriptionProduct.m */; };
 		9E260BE115DEED9A0061F325 /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BD815DEED9A0061F325 /* MKStoreKitConfigs.plist */; };
@@ -97,6 +97,8 @@
 		9E3915D615AE76480033AB2B /* txt_popular.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E3915D515AE76480033AB2B /* txt_popular.png */; };
 		9E3BE07A1463673200F7B763 /* MainWindow_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3BE0761463673200F7B763 /* MainWindow_iPhone.xib */; };
 		9E3BE07B1463673200F7B763 /* StixxAppDelegate_iPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */; };
+		9E427EC715DEF1840059D580 /* libShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E427EBF15DEF0D50059D580 /* libShareKit.a */; };
+		9E427ECE15DEF5940059D580 /* ShareKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E427ECD15DEF5940059D580 /* ShareKit.bundle */; };
 		9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E47ED1915068C8F00F4E250 /* ColumnTableController.m */; };
 		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
 		9E5216E3155B210800CD0AD5 /* icon_lite_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E2155B210700CD0AD5 /* icon_lite_57.png */; };
@@ -409,6 +411,13 @@
 			remoteGlobalIDString = 7A0F9246156BA2A0009CB40A;
 			remoteInfo = "Static Library No Submodules";
 		};
+		9E427EC515DEF1710059D580 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 7AB5342D1552AADD00171BCE;
+			remoteInfo = "Static Library";
+		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9EB03165142C002E0019F2BD /* Project object */;
@@ -534,6 +543,7 @@
 		9E3BE0771463673200F7B763 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow_iPhone.xib; sourceTree = "<group>"; };
 		9E3BE0781463673200F7B763 /* StixxAppDelegate_iPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixxAppDelegate_iPhone.h; sourceTree = "<group>"; };
 		9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixxAppDelegate_iPhone.m; sourceTree = "<group>"; };
+		9E427ECD15DEF5940059D580 /* ShareKit.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = ShareKit.bundle; path = ShareKit/Classes/ShareKit/ShareKit.bundle; sourceTree = "<group>"; };
 		9E47ED1815068C8F00F4E250 /* ColumnTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColumnTableController.h; sourceTree = "<group>"; };
 		9E47ED1915068C8F00F4E250 /* ColumnTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColumnTableController.m; sourceTree = "<group>"; };
 		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
@@ -898,6 +908,7 @@
 				9E28C1CC1569CC0300E56AB4 /* AssetsLibrary.framework in Frameworks */,
 				9E17AE0715437A3100F9E5F8 /* StoreKit.framework in Frameworks */,
 				9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */,
+				9E427EC715DEF1840059D580 /* libShareKit.a in Frameworks */,
 				9EE8D95D14D1C5FE001F36D1 /* Security.framework in Frameworks */,
 				9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */,
 				9EE8D95914D1C5DA001F36D1 /* MobileCoreServices.framework in Frameworks */,
@@ -1480,6 +1491,7 @@
 		9EB03163142C002E0019F2BD = {
 			isa = PBXGroup;
 			children = (
+				9E427ECD15DEF5940059D580 /* ShareKit.bundle */,
 				9E9E7029159C553700EF996F /* Default@2x.png */,
 				9E9E7027159C552E00EF996F /* Default.png */,
 				9EF173BF146A10700073F83B /* icon_57.png */,
@@ -1777,6 +1789,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				9E427EC615DEF1710059D580 /* PBXTargetDependency */,
 			);
 			name = Stixx;
 			productName = Stixx;
@@ -2137,6 +2150,7 @@
 				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
 				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
 				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
+				9E427ECE15DEF5940059D580 /* ShareKit.bundle in Resources */,
 				9E260BE115DEED9A0061F325 /* MKStoreKitConfigs.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2269,6 +2283,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		9E427EC615DEF1710059D580 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Static Library";
+			targetProxy = 9E427EC515DEF1710059D580 /* PBXContainerItemProxy */;
+		};
 		9EB0319E142C002E0019F2BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9EB0316D142C002E0019F2BD /* Stixx */;
@@ -2399,7 +2418,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A2273BA5-D6F8-4C93-9439-62211053181E";
 				SEPARATE_STRIP = YES;
 				TARGETED_DEVICE_FAMILY = 1;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
+				USER_HEADER_SEARCH_PATHS = "ShareKit/** \"$(SDKROOT)/usr/include/libxml2\"/**";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};
@@ -2447,7 +2466,7 @@
 				PROVISIONING_PROFILE = "61582958-CEBB-4F4D-84F9-9C2CBF123744";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "61582958-CEBB-4F4D-84F9-9C2CBF123744";
 				TARGETED_DEVICE_FAMILY = 1;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/Foursquare2\" \"$(SRCROOT)/Foursquare2/HTTPRiot\"/** \"$(SRCROOT)/Foursquare2-iOS\" \"$(SDKROOT)/usr/include/libxml2\"/** Submodules/**";
+				USER_HEADER_SEARCH_PATHS = "ShareKit/** \"$(SDKROOT)/usr/include/libxml2\"/**";
 				VALID_ARCHS = "armv6 armv7";
 				WRAPPER_EXTENSION = app;
 			};

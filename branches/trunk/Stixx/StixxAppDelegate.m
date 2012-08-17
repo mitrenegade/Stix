@@ -40,13 +40,11 @@
 @synthesize feedController;
 @synthesize profileController, userProfileController;
 @synthesize newsController;
-@synthesize loginSplashController;
 @synthesize friendSuggestionController;
 @synthesize myUserInfo;
 @synthesize lastViewController;
 @synthesize allTags, allTagIDs;
 @synthesize timeStampOfMostRecentTag;
-@synthesize allUsers;
 @synthesize allUserPhotos;
 @synthesize allUserFacebookStrings, allUserEmails, allUserNames, allUserIDs;
 @synthesize allUserTwitterStrings;
@@ -141,8 +139,6 @@ static dispatch_queue_t backgroundQueue;
     myUserInfo = malloc(sizeof(struct UserInfo));
     myUserInfo_username = nil;
     myUserInfo_userphoto = nil;
-    //myUserInfo->bux = 0;
-    //myUserInfo->usertagtotal = 0;
     myUserInfo_email = nil;
     myUserInfo_facebookString = @"0";
     myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
@@ -192,15 +188,18 @@ static dispatch_queue_t backgroundQueue;
     // Login process - first load cached user info from defaults
 #if ADMIN_TESTING_MODE
     loggedIn = NO;
+    //[TwitterHelper logout];
+//    [k loginViaTwitterWithUsername:@"Bobby Ren" andScreenname:@"hackstarbobo" andTwitterString:@""];
+//    [k getAllUsers];
 #else
-    loggedIn = NO; //   [self loadUserInfoFromDefaults];
+    loggedIn = [self loadUserInfoFromDefaults];
 #endif
     isLoggingIn = NO;
     if (loggedIn) {
         NSLog(@"Loggin in as %@", myUserInfo_username);
         
         // preemptively do user login things
-        [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookString:myUserInfo_facebookString andUserID:[NSNumber numberWithInt:myUserInfo->userID] andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil];
+        [self didLoginWithUsername:myUserInfo_username andPhoto:myUserInfo_userphoto andEmail:myUserInfo_email andFacebookString:myUserInfo_facebookString andTwitterString:myUserInfo_twitterString andUserID:[NSNumber numberWithInt:myUserInfo->userID]];
         
         // create shareController, share and connected lists for each service, and loads from default
         //[self initializeShareController];
@@ -237,6 +236,7 @@ static dispatch_queue_t backgroundQueue;
         [tabBarController presentModalViewController:loginNav animated:YES];
  */
     }
+    return YES;
 }
 
 -(void) continueInit {
@@ -251,7 +251,6 @@ static dispatch_queue_t backgroundQueue;
     
     allTags = [[NSMutableArray alloc] init];
     allTagIDs = [[NSMutableDictionary alloc] init];
-    allUsers = [[NSMutableDictionary alloc] init];
     allUserPhotos = [[NSMutableDictionary alloc] init];
     allStix = [[NSMutableDictionary alloc] init];
     allStixOrder = [[NSMutableDictionary alloc] init];
@@ -344,6 +343,15 @@ static dispatch_queue_t backgroundQueue;
     */
     
     return YES;
+}
+
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginViaTwitterDidCompleteWithResult:(NSArray *)theResults
+{
+    NSLog(@"Finished");
+}
+
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAllUsersDidCompleteWithResult:(NSArray*)theResults {
+    NSLog(@"Finished");
 }
 /*
 -(void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response {
@@ -447,7 +455,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #pragma mark - facebook helper delegates
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
   sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    [loginSplashController startActivityIndicator];
+    [previewController startActivityIndicator];
     return [self.fbHelper handleOpenURL:url]; 
 }
 
@@ -485,21 +493,26 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     }
     if (!gotTokenForShare) {
         NSLog(@"Delegate didLoginToFacebook for login! going back to loginSplashController");
-        if (loginSplashController)
-            [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+//        if (loginSplashController)
+//            [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
         
         if (previewController) {
-            // hack: use loginSplashController without showing it
-            //loginSplashController = [[FacebookLoginController alloc] init];
-            //[loginSplashController setDelegate:self];
             [previewController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+            // hack
+//            loginSplashController = [[FacebookLoginController alloc] init];
+//            [loginSplashController setDelegate:self];
+//            [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
+
         }
         // update facebookString on kumulos
-        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:name, @"username", email, @"email", facebookString, @"facebookID", nil];
+        // only need to be done with shareController
+        /*
+        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:name, @"username", email, @"email", facebookString, @"facebookString", nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSMutableArray * params = [[NSMutableArray alloc] init];
         [params addObject:newUser];
         [kh execute:@"setFacebookString" withParams:params withCallback:nil withDelegate:nil];
+         */
     }
     else {
         // assume we only get here through facebook connecting in ShareController or FriendSearch
@@ -508,7 +521,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         // update facebookString on kumulos
         NSLog(@"Delegate didLoginToFacebook for share token!");
         NSLog(@"Already logged in user: %@ %@ %@", myUserInfo_username, myUserInfo_email, facebookString);
-        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:myUserInfo_username, @"username", myUserInfo_email, @"email", facebookString, @"facebookID", nil];
+        NSMutableDictionary * newUser = [NSMutableDictionary dictionaryWithObjectsAndKeys:myUserInfo_username, @"username", myUserInfo_email, @"email", facebookString, @"facebookString", nil];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         NSMutableArray * params = [[NSMutableArray alloc] init];
         [params addObject:newUser];
@@ -572,13 +585,13 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [tabBarController presentModalViewController:loginNav animated:YES];
      */
     if (isLoggingIn) {
-        [loginSplashController shouldShowButtons];
+        //[previewController shouldShowButtons];
         [nav popToRootViewControllerAnimated:YES];
     }
     else {
         [nav.view removeFromSuperview];
         nav = nil;
-        nav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
+        nav = [[UINavigationController alloc] initWithRootViewController:previewController];
         nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
         [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
         [window addSubview:nav.view];
@@ -596,14 +609,14 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 -(void)didCancelFacebookLogin {
     [fbHelper facebookLogout]; 
     // force permissions to be reset?
-    [loginSplashController shouldShowButtons];
+    [previewController shouldShowButtons];
     [shareController didCancelFacebookConnect];
     [profileController didCancelFacebookConnect];
 }
 
 -(void)initializeBadgesFromKumulos {
 #if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
+    NSLog(@"Function: %s", __func__);a
 #endif  
     //[BadgeView InitializeGenericStixTypes];
     //[self showAlertWithTitle:@"Initializing badges" andMessage:@"We are checking for new badges. Please be patient" andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
@@ -696,8 +709,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     [defaults setObject:myUserInfo_username forKey:@"username"];
     [defaults setObject:myUserInfo_email forKey:@"email"];
     [defaults setObject:myUserInfo_facebookString forKey:@"facebookString"];
-    //[defaults setInteger:myUserInfo->usertagtotal forKey:@"usertagtotal"];
-    //[defaults setInteger:myUserInfo->bux forKey:@"bux"];
     [defaults setInteger:myUserInfo->userID forKey:@"userID"];
     [defaults setInteger:myUserInfo->hasPhoto forKey:@"hasPhoto"];
     NSLog(@"SaveUserInfo: userID %d name %@ facebookString %@", myUserInfo->userID, myUserInfo_username, myUserInfo_facebookString);
@@ -831,8 +842,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         return 0;
     myUserInfo_email = [defaults objectForKey:@"email"];
     myUserInfo_facebookString = [defaults objectForKey:@"facebookString"];
-    //myUserInfo->usertagtotal = [defaults integerForKey:@"usertagtotal"];
-    //myUserInfo->bux = [defaults integerForKey:@"bux"];
     myUserInfo->userID = [defaults integerForKey:@"userID"];
     myUserInfo->hasPhoto = [defaults integerForKey:@"hasPhoto"];
     NSData * userphoto = [defaults objectForKey:@"userphoto"];
@@ -940,11 +949,6 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    if (isDisplayingShareSheet)
-        return;
-    if (isDisplayingBuxMenu)
-        return;
-    
     [tabBarController.navigationItem setLeftBarButtonItem:nil];
     [tabBarController.navigationItem setRightBarButtonItem:nil];
     
@@ -2285,7 +2289,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     NSLog(@"Checking for update photos");
     if (1)
     {
-        //[k getAllUsers];
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         [kh execute:@"getAllUsersForUpdatePhotos" withParams:nil withCallback:@selector(khCallback_getAllUsersDidComplete:) withDelegate:self];
     }
@@ -2308,7 +2311,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     didGetAllUsers = YES;
     
     NSLog(@"kumulosHelper getAllUsers did complete with %d users", [theResults count]);
-    [allUsers removeAllObjects];
     [allUserPhotos removeAllObjects];
     [allUserFacebookStrings removeAllObjects];
     [allUserTwitterStrings removeAllObjects];
@@ -2327,7 +2329,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSString * facebookString = [d valueForKey:@"facebookString"];
         NSString * twitterString = [d valueForKey:@"twitterString"];
         NSNumber * userID = [d valueForKey:@"allUserID"];
-        [allUsers setObject:d forKey:name];
         [allUserPhotos setObject:photo forKey:name];
         [allUserFacebookStrings addObject:facebookString];
         [allUserTwitterStrings addObject:twitterString];
@@ -2341,32 +2342,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [friendSuggestionController refreshUserPhotos];
     [newsController refreshUserPhotos];
     [profileController reloadSuggestionsForOutsideChange];
-}
-
--(void)didAddNewUserWithResult:(NSArray *)theResults {
-    for (NSMutableDictionary * d in theResults) {
-        NSString * name = [d valueForKey:@"username"];
-        UIImage * photo;
-        if ([d valueForKey:@"photo"])
-            photo = [UIImage imageWithData:[d valueForKey:@"photo"]];
-        else 
-            photo = [UIImage imageNamed:@"graphic_nopic"];
-        NSString * facebookString = [d valueForKey:@"facebookString"];
-        NSString * twitterString = [d valueForKey:@"twitterString"];
-        
-        if ([allUsers objectForKey:name] != nil)
-            return;
-        
-        [allUsers setObject:d forKey:name];
-        [allUserPhotos setObject:photo forKey:name];
-        [allUserFacebookStrings addObject:facebookString];
-        [allUserTwitterStrings addObject:twitterString];
-        [allUserEmails addObject:[d valueForKey:@"email"]];
-        [allUserNames addObject:name];
-        //[allUserIDs setObject:facebookString forKey:name];
-        
-        [TwitterHelper logout];
-    }    
 }
 
 /**** LoginSplashController delegate ****/
@@ -2441,7 +2416,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     [profileController dismissModalViewControllerAnimated:TRUE];
     [nav popToRootViewControllerAnimated:YES];
-    [[UIApplication sharedApplication] setStatusBarHidden:NO];
     //[profileController viewWillAppear:YES];
     
     // scale down photo
@@ -2505,10 +2479,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [friendSuggestionController populateFacebookSearchResults:friendsArray];
 }
 
--(NSMutableDictionary*)getAllUsers {
-    return allUsers;
-}
-
 -(NSMutableArray*)getAllUserFacebookStrings {
     NSLog(@"Returning %d alluserfacebookstrings", [allUserFacebookStrings count]);
     return allUserFacebookStrings;
@@ -2563,19 +2533,12 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
 }
 
--(void)didLoginFromSplashScreenWithUsername:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary*) stixOrder isFirstTimeUser:(BOOL)firstTime {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
+-(void)didLoginFromSplashScreenWithScreenname:(NSString *)username andPhoto:(NSData *)photo andEmail:(NSString *)email andFacebookString:(NSString *)facebookString andTwitterString:(NSString *)twitterString andUserID:(NSNumber *)userID isFirstTimeUser:(BOOL)isFirstTimeUser {
 
-#if 0
-    // splash screen does the dismissing
-#else
     // dismiss splash screen/s navcontroller
     [tabBarController dismissModalViewControllerAnimated:YES];
     [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
-#endif
-    NSLog(@"DidLoginFromSplashScreen: username %@ userID %@ facebookString %@ email %@", username, userID, facebookString, email);
+    NSLog(@"DidLoginFromSplashScreen: username %@ userID %@ email %@ facebookString %@ twitterString %@", username, userID, email,facebookString, twitterString);
 
 #if USING_FLURRY
     // only log to flurry here because every session eventually comes here; didLoginWithUsername can be called twice
@@ -2603,12 +2566,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (![facebookString isEqualToString:@"0"] && [facebookString length] > 0)      
         [shareController connectService:@"Facebook"];
 
-#if 1
-    if (firstTime) {
+    if (isFirstTimeUser) {
         myUserInfo_username = username; // needed by setFollowing to getUsername
         // flag set if someone is added to Kumulos for the first time
-        //[k addFollowerWithUsername:username andFollowsUser:@"William Ho"];
-        //[k addFollowerWithUsername:username andFollowsUser:@"Bobby Ren"];
         NSLog(@"Adding follower %@ to %@", username, @"Bobby Ren");
         [k addFollowerWithUsername:@"William Ho" andFollowsUser:username];
         [k addFollowerWithUsername:@"Bobby Ren" andFollowsUser:username];
@@ -2618,15 +2578,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         addAutomaticFollows = YES;
         
     }
-#endif
     if (photo != nil) {
         myUserInfo->hasPhoto = 1;
     }
     
-    [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookString:facebookString andUserID:userID andStix:stix andTotalTags:total andBuxCount:bux andStixOrder:stixOrder];
-    
-    // create shareController, share and connected lists for each service, and loads from default
-//    [self initializeShareController];
+    [self didLoginWithUsername:username andPhoto:photo andEmail:email andFacebookString:facebookString andTwitterString:twitterString andUserID:userID];
     
     // login to parse only if facebook has correctly logged in. this ensures that the userID being saved to myUserInfo is the correct one
     if (notificationDeviceToken) {
@@ -2639,13 +2595,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         NSLog(@"No device token yet!");
     }
     
-    if (firstTime) {
+    if (isFirstTimeUser) {
         // do all the initial content stuff while waiting for friend controller
         [self initialContent];
     }
+    
+    // from didAddNewUserWithResult
+    
+    if ([allUserNames containsObject:username]) {
+        [allUserPhotos setObject:photo forKey:username];
+        [allUserFacebookStrings addObject:facebookString];
+        [allUserTwitterStrings addObject:twitterString];
+        [allUserEmails addObject:email];
+        [allUserNames addObject:username];
+        [allUserIDs setObject:userID forKey:username];
+    }
 }
 
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder {
+- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andTwitterString:(NSString*)twitterString andUserID:(NSNumber*)userID {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -2658,36 +2625,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     //NSString * string = [NSString stringWithFormat:@"User login: %@", name];
     [k addMetricWithDescription:metricName andUsername:name andStringValue:metricData andIntegerValue:0];
 #endif
-    
-    if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = nil;
-        [allStix removeAllObjects];
-    }
-    else {
-        [allStix removeAllObjects];
-        [allStix addEntriesFromDictionary:stix];
-    }
-    if (![stixOrder isKindOfClass:[NSMutableDictionary class]]) {
-       
-        stixOrder = nil;
-        [stixOrder removeAllObjects];
-    }
-    else {
-        [allStixOrder removeAllObjects];
-        [allStixOrder addEntriesFromDictionary:stixOrder];
         
-        NSLog(@"DidLoginWithUsername: %@ allStix: %d stixOrder: %d", name, [allStix count], [stixOrder count]);
-    }  
-    
     [aggregator loadCachedUserTagListForUsers];
 
-    // done by whoever calls didLoginWithUsername now
-    // get friends/follow relationships
-    //if (!didGetFollowingLists) { 
-    //    [self getFollowLists];
-    //    didGetFollowingLists = YES;
-    //}
-    
     if (photo) {
         myUserInfo->hasPhoto = 1;
         [tabBarController didGetProfilePhoto:photo];
@@ -2699,31 +2639,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     loggedIn = YES;
     myUserInfo_username = name;
     myUserInfo_userphoto = photo;
-    //myUserInfo->usertagtotal = total;
-    //myUserInfo->bux = bux;
     myUserInfo_email = email;
     myUserInfo_facebookString = facebookString;
+    myUserInfo_twitterString = twitterString;
     myUserInfo->userID = [userID intValue];
-    //[profileController didLogin]; 
     
-#if HAS_PROFILE_BUTTON
-    if (!myUserInfo_userphoto) {
-        UIImage * photo = [self getUserPhotoForUsername:[self getUsername]];
-        [feedController.buttonProfile setImage:photo forState:UIControlStateNormal];
-    } else {
-        [feedController.buttonProfile setImage:myUserInfo_userphoto forState:UIControlStateNormal];
-    }
-    [feedController.buttonProfile.layer setBorderColor:[[UIColor blackColor] CGColor]];
-    [feedController.buttonProfile.layer setBorderWidth:1];
-#endif
     NSLog(@"UserID: %d Username %@ with email %@ and facebookString %@", myUserInfo->userID, myUserInfo_username, email, myUserInfo_facebookString);
             
-    // DO NOT do this: opening a camera probably means the badgeView belonging to LoginSplashViewer was
-    // deleted so now this is invalid. that badgeView does not need badgeLocations anyways
-    
-    //[myStixController forceLoadMyStix];
     [self reloadAllCarousels];
-
     [self getNewsCount];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
@@ -2738,14 +2661,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (!IS_ADMIN_USER(myUserInfo_username))
         [FlurryAnalytics logEvent:@"TimeInApp" timed:YES];
 #endif
-    // only download badges after login is over
-    /*
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 
-                                             (unsigned long)NULL), ^(void) {
-        NSLog(@"Login complete: starting initializeBadges");
-        //[self initializeBadgesFromKumulos];
-    });
-     */
     if (!didStartFirstTimeMessage && !isShowingFriendSuggestions && [self tabBarIsVisible]) {
         [tabBarController displayFirstTimeUserProgress:myUserInfo->firstTimeUserStage];    
         didStartFirstTimeMessage = YES;
@@ -2756,6 +2671,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)didLogout {
+    /*
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
@@ -2764,15 +2680,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if (myUserInfo_userphoto) {
         myUserInfo_userphoto = nil;
     }
-    //myUserInfo->usertagtotal = 0;
-    //myUserInfo->bux = 0;
     [allStix removeAllObjects];
     [allStixOrder removeAllObjects];
     [self logMetricTimeInApp];
     
     [fbHelper facebookLogout];
     [self didDismissSecondaryView];
-    [nav pushViewController:loginSplashController animated:YES];
+    [nav pushViewController:previewController animated:YES];
+     */
 }
 
 -(void)didChangeUserphoto:(UIImage *)photo {
@@ -3120,66 +3035,13 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     return nil;
 }
 
-//-(int)getUserTagTotal { return myUserInfo->usertagtotal; }
-//-(int)getBuxCount { return myUserInfo->bux; }
 -(NSString*)getUserFacebookString { return myUserInfo_facebookString; }
 
-/*
--(void)changeBuxCountByAmount:(int)change {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    myUserInfo->bux += change;
-    [k changeUserBuxByAmountWithUsername:[self getUsername] andBuxChange:change];
-    [self updateBuxCount];
-}
-
--(void)rewardBux {
-    NSString * title = @"Active Stix User";
-    int amount = 5;
-    [self.tabBarController doRewardAnimation:title withAmount:amount];
-}
-
--(void)didEarnFacebookReward:(int)bux {
-    if (bux == 10) {
-        NSString * title = @"Invite Complete";
-        [tabBarController doRewardAnimation:title withAmount:bux];
-    }
-    if (bux == 5) {
-        NSString * title = @"Shared Picture";
-        [tabBarController doRewardAnimation:title withAmount:bux];
-    }
-}
- */
 -(void)didFinishRewardAnimation:(int)amount {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-//    [self changeBuxCountByAmount:amount];
 }
--(void)rewardLocation {
-    /*
-    NSString * title = @"Location Added";
-    int amount = 1;
-    [self.tabBarController doRewardAnimation:title withAmount:amount];
-     */
-}
-/*
--(void)updateUserTagTotal {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // update usertagtotal
-    //myUserInfo->usertagtotal += 1;
-    //[k updateTotalTagsWithUsername:myUserInfo_username andTotalTags:myUserInfo->usertagtotal];
-    //if ((myUserInfo->usertagtotal % 5) == 0) {
-    //    [self rewardBux];
-    //}
-#if USING_KIIP
-    [[KPManager sharedManager] updateScore:usertagtotal onLeaderboard:@"topDailyStixter"];
-#endif
-}
-*/
 
 -(bool)isLoggedIn {
 #if DEBUGX==1
@@ -3321,6 +3183,9 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // friendSuggestionController is initialized but not shown
     // comes here when both friends and featured have been downloaded
     NSLog(@"FriendSuggestionController finished loading with totalSuggestions: %d", totalSuggestions);
+    if (isShowingFriendSuggestions || didDismissFriendSuggestions)
+        return;
+    
     if (totalSuggestions == 0) {
         [self didAddFriendsFromFriendSuggestionController:nil];
     }
@@ -3329,21 +3194,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         // hack: timing issue.
         //[self performSelector:@selector(showFriendSuggestionController) withObject:nil afterDelay:5];
         [nav pushViewController:friendSuggestionController animated:YES];
+        isShowingFriendSuggestions = YES;
     }        
 }
 
--(void)didClickInviteButton {
-    /*
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    NSLog(@"Invite button submitted by %@", [self getUsername]);
-    NSString * subject = [NSString stringWithFormat:@"Become a Stixster!"];
-    NSString * body = [NSString stringWithFormat:@"I'm playing Stix on my iPhone and I think you'd enjoy it too! Just click <a href=\"http://bit.ly/sjvbNE\">here</a> to get started!"];
-    [self sendEmailTo:@"" withCC:@"bobbyren@gmail.com, willh103@gmail.com" withSubject:subject withBody:body];
-    [self rewardBux];
-     */
-}
 -(void)didClickInviteButtonByFacebook:(NSString *)username withFacebookString:(NSString *)_facebookString {
     //NSString * metricString = [NSString stringWithFormat:@"%@ invited %@", [self getUsername], username];
 #if !USING_FLURRY
@@ -3418,68 +3272,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [aggregator aggregateNewTagIDs];
 }
 
-#pragma mark twitter helper
-/*
--(void)showTwitterDialog {
-#if 0
-    twitterDialog = [twitterHelper getTwitterDialog];
-    
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-    [self.tabBarController.view addSubview:twitterDialog.view];
-    [twitterDialog.view setFrame:frameOffscreen];
-    
-    CGRect frameOnscreen = CGRectMake(0, STATUS_BAR_SHIFT, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:twitterDialog.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished){
-    }];
-#else
-    // Create the item to share (in this example, a url)
-	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
-	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
-    
-	// Get the ShareKit action sheet
-	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
-    
-	// Display the action sheet
-	[actionSheet showFromTabBar:(UITabBar*)tabBarController];
-#endif
-}
--(void)twitterDialogDidFinish {
-    CGRect frameOffscreen = CGRectMake(-320, STATUS_BAR_SHIFT, 320, 480);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    [animation doViewTransition:profileController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [twitterDialog.view removeFromSuperview];
-        twitterDialog = nil;
-    }];
-}
-*/
-
 -(void)reloadSuggestionsForOutsideChange {
     [profileController reloadSuggestionsForOutsideChange];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserStixDidCompleteWithResult:(NSArray *)theResults {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    // called by NB_UPDATECAROUSEL notification
-    if ([theResults count] == 0)
-        return;
-    NSMutableDictionary * d = [theResults objectAtIndex:0];
-    NSMutableDictionary * stix = [KumulosData dataToDictionary:[d valueForKey:@"stix"]]; 
-    if (![stix isKindOfClass:[NSMutableDictionary class]]) {
-        stix = [BadgeView InitializeFirstTimeUserStix];
-        [allStix removeAllObjects];
-        [allStix addEntriesFromDictionary:stix];
-        //[stix autorelease];// arc conversion
-    }
-    else 
-    {
-        [allStix removeAllObjects];
-        [allStix addEntriesFromDictionary:stix];
-    }
-    [self reloadAllCarousels];
-}
 -(void)reloadAllCarousels {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
@@ -3487,151 +3283,11 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     [[StixPanelView sharedStixPanelView] reloadAllStix];
 }
 
--(void)didClickShowBuxPurchaseMenu {    
-    NSString * metricName = @"MoreBuxMenuPressed";
-    NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
-    [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:0];
-    
-    [self didCloseBuxInstructions];
-#if 0
-    UIActionSheet * actionSheet = [[UIActionSheet alloc] initWithTitle:@"Buy more Bux" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"5 Bux for $0.99", @"15 Bux for $2.99", @"40 Bux for $4.99", @"80 Bux for $8.99", @"170 Bux for $19.99", @"475 Bux for $49.99", nil];
-    actionSheet.tag = ACTIONSHEET_TAG_BUYBUX;
-    [actionSheet showFromRect:CGRectMake(0, 0, 320,480) inView:self.view animated:YES];
-    [actionSheet setActionSheetStyle:UIActionSheetStyleBlackOpaque];
-    [actionSheet release];
-#endif
-    
-    if (isShowingBuxPurchaseMenu)
-        return;
-    
-    isShowingBuxPurchaseMenu = YES;
-    
-    CGRect frameInside = CGRectMake(16, 22+20, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
-    buxPurchaseMenu = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"stixster_shop.png"]];
-    [buxPurchaseMenu setFrame:frameOutside];
-    [buxPurchaseMenu setBackgroundColor:[UIColor clearColor]];
-    
-    buxPurchaseButtons = [[NSMutableArray alloc] init];
-    
-    for (int i=0; i<3; i++) {
-        UIButton * buxButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [buxButton setTag:i];
-        [buxButton setFrame:CGRectMake(55, 120 + 80*i+20, 200, 60)];
-        [buxButton setBackgroundColor:[UIColor clearColor]];
-        [buxButton addTarget:self action:@selector(didClickPurchaseBuxButton:) forControlEvents:UIControlEventTouchUpInside];
-        [buxPurchaseButtons addObject:buxButton];
-    }
-    
-    buttonBuxPurchaseClose = [UIButton buttonWithType:UIButtonTypeCustom];
-    [buttonBuxPurchaseClose setFrame:CGRectMake(270-16, 60-22+20, 37, 39)];
-    [buttonBuxPurchaseClose setBackgroundColor:[UIColor clearColor]];
-    [buttonBuxPurchaseClose addTarget:self action:@selector(didCloseBuxPurchaseMenu) forControlEvents:UIControlEventTouchUpInside];
-
-    [self.tabBarController.view addSubview:buxPurchaseMenu];
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    [animation doViewTransition:buxPurchaseMenu toFrame:frameInside forTime:.25 withCompletion:^(BOOL finished){
-        [self.window addSubview:[buxPurchaseButtons objectAtIndex:0]];
-        [self.window addSubview:[buxPurchaseButtons objectAtIndex:1]];
-        [self.window addSubview:[buxPurchaseButtons objectAtIndex:2]];
-        [self.window addSubview:buttonBuxPurchaseClose];
-    }];
-}
-
--(void)didClickPurchaseBuxButton:(UIButton*)sender {
-    if ([self getFirstTimeUserStage] < FIRSTTIME_DONE) {
-        [tabBarController toggleFirstTimeInstructions:NO];
-    }
-    [self didCloseBuxPurchaseMenu];
-    
-    NSLog(@"Did click bux purchase button: %d", sender.tag);
-    int values[3] = {50, 125, 200};
-    buyBuxPurchaseAmount = values[sender.tag];
-    NSString * title = @"Bux Purchase";
-    NSString * message = [NSString stringWithFormat:@"Are you sure you want to purchase %d Bux?", buyBuxPurchaseAmount];
-    [self showAlertWithTitle:title andMessage:message andButton:@"Cancel" andOtherButton:@"Make Purchase" andAlertType:ALERTVIEW_BUYBUX];
-}
-
--(void)didCloseBuxPurchaseMenu {
-    NSLog(@"Did click close bux menu");
-    isShowingBuxPurchaseMenu = NO;
-    //CGRect frameInside = CGRectMake(16, 22+20, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    [animation doViewTransition:buxPurchaseMenu toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished){
-        [buxPurchaseMenu removeFromSuperview];
-        buxPurchaseMenu = nil;
-        for (int i=0; i<3; i++) {
-            UIButton * buxButton = [buxPurchaseButtons objectAtIndex:i];
-            [buxButton removeFromSuperview];
-        }
-        [buttonBuxPurchaseClose removeFromSuperview];
-    }];
-}
-
 -(void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
-    if (actionSheet.tag == ACTIONSHEET_TAG_ADMIN) {
-        // button index: 
-        // 0 = "Reset all Users' Stix"
-        // 1 = "Get me one of each"
-        // 2 = "Set my stix to unlimited"
-        // 3 = "Set all Users' bux"
-        // 4 = "Save stix feed"
-        // 5 = "Reset all Stix Orders"
-        // 6 = "Cancel"
-        switch (buttonIndex) {
-            case 0:
-                NSLog(@"button 0");
-                //[self adminUpdateAllStixCountsToOne];
-                break;
-            case 1:
-                NSLog(@"button 1");
-                //[self adminIncrementAllStixCounts];
-                break;
-            case 2:
-                NSLog(@"button 2 set my stix to unlimited");
-                //[self adminSetUnlimitedStix];
-                break;
-            case 3:
-                NSLog(@"button 3 increment all user bux by 5");
-                //[self adminSetAllUsersBuxCounts];
-                [self adminIncrementAllUsersBuxCounts];
-                break;
-            case 4:
-                NSLog(@"button 5: Reset all stix orders");
-                //[self adminResetAllStixOrders];
-                break;
-            default:
-                return;
-                break;
-        }        
-    }
-/*
-    else if (actionSheet.tag == ACTIONSHEET_TAG_BUYBUX) {
-        // button index: 
-        // 0 @"5 Bux for $0.99"
-        // 1 @"15 Bux for $2.99"
-        // 2 @"40 Bux for $4.99"
-        // 3 @"80 Bux for $8.99"
-        // 4 @"170 Bux for $19.99"
-        // 5 @"475 Bux for $49.99"
-        // 6 cancel
-        int values[6] = {5,15,40,80,170,475};
-        if (buttonIndex != [actionSheet cancelButtonIndex]) {
-            buyBuxPurchaseAmount = values[buttonIndex];
-            NSString * title = @"Bux Purchase";
-            NSString * message = [NSString stringWithFormat:@"Are you sure you want to purchase %d Bux?", buyBuxPurchaseAmount];
-            [self showAlertWithTitle:title andMessage:message andButton:@"Cancel" andOtherButton:@"Make Purchase" andAlertType:ALERTVIEW_BUYBUX];
-        }
-    }
-*/
-    else if (actionSheet.tag == ACTIONSHEET_TAG_REMIX) {
-        
+    if (actionSheet.tag == ACTIONSHEET_TAG_REMIX) {
         //    BOOL bUseOriginal = NO;
         int remixMode;
         if (buttonIndex == 0) {
@@ -4055,20 +3711,6 @@ static bool isShowingAlerts = NO;
         {
             NSString *entered = [(AlertPrompt *)alertView enteredText];
             NSLog(@"Alert prompt input value: %@", entered);
-            
-            [self adminEasterEggShowMenu:entered];
-        }
-    }
-    else if (alertActionCurrent == ALERTVIEW_GOTOSTORE) {
-        if (buttonIndex != [alertView cancelButtonIndex])
-        {
-            // for now just go to the store
-            [self.tabBarController setSelectedIndex:3];
-        }
-    }
-    else if (alertActionCurrent == ALERTVIEW_BUYBUX) {
-        if (buttonIndex != [alertView cancelButtonIndex]) {
-            [self didPurchaseBux:buyBuxPurchaseAmount];
         }
     }
     else if (alertActionCurrent == ALERTVIEW_SHAREFAIL) {
@@ -4078,7 +3720,6 @@ static bool isShowingAlerts = NO;
         }
         else {
             [self didCloseShareController:NO];
-            isDisplayingShareSheet = NO;
         }
     }
     if ([alertQueue count] == 0)
@@ -4088,27 +3729,6 @@ static bool isShowingAlerts = NO;
     [nextAlert show];
     isShowingAlerts = YES;
 }
-
-/*
--(void)updateBuxCountFromKumulos {
-    [k getBuxForUserWithUsername:[self getUsername]];
-}
-
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getBuxForUserDidCompleteWithResult:(NSArray *)theResults {
-    if ([theResults count] == 0)
-        return;
-    NSMutableDictionary * d = [theResults objectAtIndex:0];
-    //int bux = [[d valueForKey:@"bux"] intValue];
-    //myUserInfo->bux = bux;
-    //[self updateBuxCount];
-}
-
--(void)updateBuxCount {
-    // display bux on feed?
-    [[feedController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
-    [[exploreController labelBuxCount] setText:[NSString stringWithFormat:@"%d", myUserInfo->bux]];
-}
-*/
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
 #if DEBUGX==1
@@ -4151,8 +3771,6 @@ static bool isShowingAlerts = NO;
        // MRC  
     [k updateAuxiliaryDataWithUsername:[self getUsername] andAuxiliaryData:newAuxData];
     
-    //[self changeBuxCountByAmount:-5];
-    
     // metric
 #if !USING_FLURRY
     NSString * metricName = @"GetStixFromStore";
@@ -4164,78 +3782,6 @@ static bool isShowingAlerts = NO;
 #endif
 }
 
--(void)showNoMoreMoneyMessage {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    [self showAlertWithTitle:@"No More Bux" 
-                  andMessage:@"You can't get any more stickers without any Bux!" 
-                   andButton:@"OK"
-//               andOtherButton:@"View" 
-//                andAlertType:ALERTVIEW_GOTOSTORE];
-              andOtherButton:nil
-                andAlertType:ALERTVIEW_SIMPLE];
-}
-
--(void)displayPurchasedBuxMessage:(int)buxPurchased {
-    [self showAlertWithTitle:@"Thank you!" andMessage:[NSString stringWithFormat:@"You have received %d Bux. Have fun buying stickers!", buxPurchased] andButton:@"OK" andOtherButton:nil andAlertType:ALERTVIEW_SIMPLE];
-//    [self changeBuxCountByAmount:buxPurchased];
-    if  (buxPurchased == 25) {
-        NSString * metricName = @"ExpressBux";
-        NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
-        [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];
-    }
-    else { 
-        NSString * metricName = @"MoreBux";
-        NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
-        [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
-    }
-}
-
--(void)didPurchaseBux:(int)buxPurchased {
-#if DEBUGX==1
-    NSLog(@"Function: %s", __func__);
-#endif  
-    [self didCloseBuxPurchaseMenu];
-    
-#if 1
-    [self displayPurchasedBuxMessage:buxPurchased];
-#else
-    NSString * buxPurchaseObject = nil;
-    if (buxPurchased == 50) {
-        buxPurchaseObject = @"neroh.stix.bux.50";
-    }
-    else if (buxPurchased == 125) {
-        buxPurchaseObject = @"neroh.stix.bux.125";
-    }
-    else if (buxPurchased == 200) {
-        buxPurchaseObject = @"neroh.stix.bux.200";
-    }
-
-#if USING_MKSTOREKIT
-    [[MKStoreManager sharedManager] buyFeature:buxPurchaseObject
-                                    onComplete:^(NSString* purchasedFeature, NSData * data)
-     {
-         // provide your product to the user here.
-         // if it's a subscription, allow user to use now.
-         // remembering this purchase is taken care of by MKStoreKit.
-         [self displayPurchasedBuxMessage:buxPurchased];
-
-         // consume
-         //[[MKStoreManager sharedManager] consumeProduct:buxPurchaseObject quantity:buxPurchased];
-     }
-     onCancelled:^
-     {
-         // User cancels the transaction, you can log this using any analytics software like Flurry.
-         NSString * metricName = @"CancelledBux";
-         NSString * metricData = [NSString stringWithFormat:@"UID: %@", uniqueDeviceID];
-         [k addMetricWithDescription:metricName andUsername:[self getUsername] andStringValue:metricData andIntegerValue:buxPurchased];     
-     }];
-    
-#endif
-    
-#endif
-}
 
 -(void)getFollowListsWithoutAggregation:(NSString*)name {
     // called if we only want the friend list
@@ -4411,41 +3957,6 @@ static bool isShowingAlerts = NO;
 }
 -(BOOL)canDisplayNewsCount {
     return (myUserInfo->firstTimeUserStage == FIRSTTIME_DONE);
-}
-
-#pragma mark share pix sheet
-
--(void)didDisplayShareSheet {
-    isDisplayingShareSheet = YES;
-}
--(BOOL)isDisplayingShareSheet {
-    return isDisplayingShareSheet;
-}
-
-#pragma mark bux instructions
-
--(BOOL)isShowingBuxInstructions {
-    return isShowingBuxInstructions || isShowingBuxPurchaseMenu;
-}
-
--(void)didCloseBuxInstructions {
-    isShowingBuxInstructions = NO;
-#if 0
-    [buxInstructions removeFromSuperview];
-    [buttonBuxStore removeFromSuperview];
-    [buttonBuxInstructionsClose removeFromSuperview];
-#else
-    //CGRect frameInside = CGRectMake(16, 22+20, 289, 380);
-    CGRect frameOutside = CGRectMake(16-320, 22+20, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    //int buxAnimationClose = [animation doSlide:buxInstructions inView:self.tabBarController.view toFrame:frameOutside forTime:.25];
-    [animation doViewTransition:buxInstructions toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished) {
-        [buxInstructions removeFromSuperview];
-        [buttonBuxStore removeFromSuperview];
-        [buttonBuxInstructionsClose removeFromSuperview];
-    }];
-#endif
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserPremiumPacksDidCompleteWithResult:(NSArray *)theResults {

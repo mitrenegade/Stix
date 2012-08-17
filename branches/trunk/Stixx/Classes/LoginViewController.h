@@ -15,7 +15,8 @@
 #import "KumulosData.h"
 
 @protocol LoginViewDelegate
-- (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
+//- (void)didSelectUsername:(NSString *)name withResults:(NSArray *) theResults;
+- (void)didLoginFromEmailSignup:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andUserID:(NSNumber*)userID isFirstTime:(BOOL)isFirstTime;
 @optional
 -(void)shouldShowButtons;
 @end

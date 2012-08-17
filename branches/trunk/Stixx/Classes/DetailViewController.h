@@ -72,12 +72,6 @@
     int animationID[2];
     
     // share animation, graphics and actions
-    UIImageView * shareSheet;
-    UIButton * buttonShareFacebook;
-    UIButton * buttonShareEmail;
-    UIButton * buttonShareClose;
-    int shareMenuOpenAnimation;
-    int shareMenuCloseAnimation;
     
     Tag * tag;
     ShareController * shareController;

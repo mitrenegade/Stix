@@ -199,11 +199,7 @@ static bool usernameExists;
     [self startActivityIndicator];
     NSLog(@"Using login %@ and password %@", [login text], [password text]);
     
-#if 0
-    [k userLoginWithUsername:[login text] andPassword:[k md5:[password text]]];
-#else
     [k loginWithNameOrEmailWithLoginName:[login text]];
-#endif
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginWithNameOrEmailDidCompleteWithResult:(NSArray *)theResults {
@@ -220,19 +216,15 @@ static bool usernameExists;
             NSString * username = [d objectForKey:@"username"];
             NSString * email = [d objectForKey:@"email"];
             NSString * passwordMD5 = [d objectForKey:@"password"];
-            NSString * facebookString = [d objectForKey:@"facebookString"];
-            /*
-            if (facebookString && ![facebookString isEqualToString:@"0"] && ![facebookString isEqualToString:username]) {
-                NSLog(@"This username associated with a facebook account, please login via our facebook option! Name %@ email %@ facebook %@", username, email, facebookString);
-                [delegate showAlert:@"This username associated with a facebook account, please login via our facebook option!"];
-                return;
-            }
-             */
+            NSNumber * userID = [d objectForKey:@"allUserID"];
+            NSData * photoData = [d objectForKey:@"photo"];
+            UIImage * photo = nil;
+            if (photoData)
+                photo = [UIImage imageWithData:photoData];
             
             if ([passwordMD5 isEqualToString:[k md5:[password text]]]) {
                 NSLog(@"Password matches! Logging in as username %@ email %@", username, email);
-                //[self.navigationController popViewControllerAnimated:YES]; // don't pop
-                [delegate didSelectUsername:username withResults:[NSMutableArray arrayWithObject:d]];
+                [delegate didLoginFromEmailSignup:username andPhoto:photo andEmail:email andUserID:userID isFirstTime:NO];
                 return;
             }
         }
@@ -240,17 +232,7 @@ static bool usernameExists;
         [self showAlert:@"Your password was incorrect."];
     }
 }
-/*
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation userLoginDidCompleteWithResult:(NSArray *)theResults {
-    if ([theResults count] == 0) {
-        NSLog(@"Invalid login! Username and password combination not found!");
-    }
-    else {
-        NSMutableDictionary * d = [theResults objectAtIndex:0];
-        [delegate didSelectUsername:[d objectForKey:@"username"] withResults:theResults];
-    }
-}
- */
+
 -(void)didClickBackButton:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
     [self.navigationController setNavigationBarHidden:YES];		

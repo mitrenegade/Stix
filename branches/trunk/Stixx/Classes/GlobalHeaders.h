@@ -29,7 +29,7 @@
 
 #define HAS_PROFILE_BUTTON 0
 
-#define ADMIN_TESTING_MODE 0
+#define ADMIN_TESTING_MODE 1
 #define VERBOSE 0
 #define ADMIN_USER_SET [NSMutableSet setWithObjects:@"Bobby Ren", @"Will Ho", @"Original Stixster", @"Art Stixster", @"Cute Stixster", @"Mit Renegade", nil]
 #define IS_ADMIN_USER(x) [ADMIN_USER_SET containsObject:x]

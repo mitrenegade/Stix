@@ -12,7 +12,7 @@
 
 @protocol CreateHandleControllerDelegate
 -(void)didAddHandle:(NSString *)handle andPhoto:(NSData*)photoData;
--(void)showAlert:(NSString*)alertMessage;
+@optional
 -(void)shouldShowButtons;
 @end
 
@@ -31,6 +31,7 @@
     NSString * initialName;
     NSString * facebookString;
     NSString * twitterString;
+    NSString * twitterProfileURL;
 }
 
 @property (nonatomic) LoadingAnimationView * activityIndicator;
@@ -45,6 +46,7 @@
 @property (nonatomic) NSString * facebookString;
 @property (nonatomic) NSString * twitterString;
 @property (nonatomic) NSString * initialName;
+@property (nonatomic) NSString * twitterProfileURL;
 
 -(IBAction)didClickPhoto:(id)sender;
 -(IBAction)didClickLogin:(id)sender;

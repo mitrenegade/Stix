@@ -226,10 +226,10 @@
     [pixTableController.tableView setScrollEnabled:NO];
 
     [bgFollowing setFrame:CGRectMake(105, 103-44, 99, 45)];
-    [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
+    [bgFollowing setBackgroundImage:[UIImage imageNamed:@"dark_cell"] forState:UIControlStateNormal];
 
     [bgFollowers setFrame:CGRectMake(210, 103-44, 99, 45)];
-    [bgFollowers setBackgroundImage:[UIImage imageNamed:@"dark_cell.png"] forState:UIControlStateNormal];
+    [bgFollowers setBackgroundImage:[UIImage imageNamed:@"dark_cell"] forState:UIControlStateNormal];
 }
 -(void)populateFollowCounts {
     [myFollowingCount setTextColor:[UIColor colorWithRed:255/255 green:204/255.0 blue:102/255.0 alpha:1]];

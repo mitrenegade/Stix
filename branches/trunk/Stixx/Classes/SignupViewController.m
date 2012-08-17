@@ -22,6 +22,7 @@
 @synthesize activityIndicator;
 @synthesize delegate;
 @synthesize camera;
+@synthesize buttonSignin;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -99,12 +100,14 @@
 
 -(void)startActivityIndicator {
     [buttonSignup setHidden:YES];
+    [buttonSignin setHidden:YES];
     [self.activityIndicator startCompleteAnimation];
 }
 -(void)stopActivityIndicator {
     [self.activityIndicator stopCompleteAnimation];
     [self.activityIndicator setHidden:YES];
     [buttonSignup setHidden:NO];
+    [buttonSignin setHidden:NO];
 }
 
 -(void)showAlert:(NSString*)alertMessage {
@@ -296,7 +299,9 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation checkValidNewUserDidCompleteWithResult:(NSArray *)theResults {
-#if !ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
+    NSLog(@"**** ADMIN MODE **** SignUpViewController:checkValidNewUser is ignoring duplicates");
+#else
     if ([theResults count] > 0) {
         BOOL nameAlreadyExists = NO;
         BOOL emailAlreadyExists = NO;
@@ -319,8 +324,8 @@
         return;
     }
     else 
-#endif
     {
+#endif
         UITextField * email = [inputFields objectAtIndex:0];
         UITextField * username = [inputFields objectAtIndex:1];
         UITextField * password = [inputFields objectAtIndex:2];
@@ -354,7 +359,7 @@
     NSLog(@"Added new user! email %@ name %@ recordID: %@ photo? %d", email.text, username.text, newRecordID, didChangePhoto);
 
     //[self didClickBackButton:nil]; // don't pop
-    [delegate didLoginFromEmailSignup:[username text] andPhoto:didChangePhoto?[[photoButton imageView] image]:nil andEmail:[email text] andUserID:newRecordID];
+    [delegate didLoginFromEmailSignup:[username text] andPhoto:didChangePhoto?[[photoButton imageView] image]:nil andEmail:[email text] andUserID:newRecordID isFirstTime:YES];
 }
 
 #pragma mark imagepickercontrollerdelegate for changing user photo

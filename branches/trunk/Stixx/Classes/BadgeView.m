@@ -30,10 +30,6 @@ static int totalStixTypes = 0;
     if ([BadgeView totalStixTypes] == 0)
         NSLog(@"***** ERROR! BadgeView Stix Types not yet initialized! *****");
   
-    //shelf = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf.png"]];
-    //shelf.frame = CGRectMake(0, 390, 320, 30);
-    //[self addSubview:shelf];
-    
     showStixCounts = YES;
     
     // Populate all stix structures - used by BadgeView, CarouselView

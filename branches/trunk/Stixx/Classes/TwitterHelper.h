@@ -16,8 +16,8 @@
 
 //-(void)twitterHelperDidConnect;
 -(void)twitterHelperDidReturnWithCallback:(SEL)callback andParams:(id)params andRequestType:(NSString*)requestType;
--(int)getUserID;
 @optional
+-(int)getUserID;
 -(void)twitterHelperStartedInitialConnect; 
 -(void)didInitialLoginForTwitter;
 -(void)twitterHelperDidFailWithRequestType:(NSString*)requestType;

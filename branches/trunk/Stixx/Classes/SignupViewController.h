@@ -22,7 +22,7 @@ enum tag_labels {
 };
 
 @protocol SignupViewDelegate <NSObject>
-- (void)didLoginFromEmailSignup:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andUserID:(NSNumber*)userID;
+- (void)didLoginFromEmailSignup:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andUserID:(NSNumber*)userID isFirstTime:(BOOL)isFirstTime;
 @optional
 -(void)shouldShowButtons;
 -(void)doEmailLogin;
@@ -32,6 +32,7 @@ enum tag_labels {
     LoadingAnimationView * activityIndicator;
     IBOutlet UITableView * tableView;
     IBOutlet UIButton * buttonSignup;
+    IBOutlet UIButton * buttonSignin;
     NSMutableArray * inputFields;
     BOOL didChangePhoto;
     IBOutlet UIButton * buttonBack;
@@ -43,6 +44,7 @@ enum tag_labels {
 @property (nonatomic) IBOutlet UITableView * tableView;
 @property (nonatomic) NSMutableDictionary * inputViews;
 @property (nonatomic) IBOutlet UIButton * buttonSignup;
+@property (nonatomic) IBOutlet UIButton * buttonSignin;
 @property (nonatomic) NSMutableArray * inputFields;
 @property (nonatomic) Kumulos * k;
 @property (nonatomic, unsafe_unretained) NSObject<SignupViewDelegate> *delegate;

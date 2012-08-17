@@ -45,7 +45,7 @@
 
     tableViewController = [[FriendSearchTableViewController alloc] init];
     [tableViewController setDelegate:self];
-    [tableViewController.view setFrame:CGRectMake(0, 44, 320, 480-44-80)];
+    [tableViewController.view setFrame:CGRectMake(0, 44, 320, 480-44-40)];
     [tableViewController.view setBackgroundColor:[UIColor clearColor]];
     [self.view insertSubview:tableViewController.view belowSubview:tabGraphic];
 }

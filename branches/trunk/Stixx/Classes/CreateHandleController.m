@@ -22,6 +22,7 @@
 @synthesize buttonBack;
 @synthesize initialName;
 @synthesize facebookString, twitterString;
+@synthesize twitterProfileURL;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -86,6 +87,13 @@
     }
     else {
         // get twitter photo
+        if (twitterProfileURL && [twitterProfileURL length]>0) {
+            NSURL * url = [[NSURL alloc] initWithString:twitterProfileURL];
+            NSLog(@"TwitterString: %@ url: %@", twitterString, url);
+            CGSize newSize = CGSizeMake(90, 90);
+            UIImage * img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:url]];
+            userphoto = [img resizedImage:newSize interpolationQuality:kCGInterpolationDefault];
+        }
     }
     [[inputFields objectAtIndex:0] setText:initialName];
     [[inputFields objectAtIndex:1] setImage:userphoto forState:UIControlStateNormal];
@@ -250,7 +258,7 @@
     [login resignFirstResponder];
     
     if ([[login text] length]==0) {
-        [delegate showAlert:@"Please enter the name that will appear on your pictures"];
+        [self showAlert:@"Please enter the name that will appear on your pictures"];
         return;
     }
     NSData * photoData = nil;
@@ -266,12 +274,13 @@
 
 -(IBAction)didClickBackButton:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
-    [delegate shouldShowButtons];
+    if ([delegate respondsToSelector:@selector(shouldShowButtons)])
+        [delegate shouldShowButtons];
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getUserDidCompleteWithResult:(NSArray *)theResults {
-    if (0) { //[theResults count] > 0) {
-        [delegate showAlert:@"Username already exists! Please choose another."];
+    if ([theResults count] > 0) {
+        [self showAlert:@"Username already exists! Please choose another."];
         [self stopActivityIndicator];
     }
     else {
@@ -291,4 +300,14 @@
         //[self.navigationController popViewControllerAnimated:YES]; // don't pop
     }
 }
+
+-(void)showAlert:(NSString*)alertMessage {
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:nil
+                                                     message:alertMessage
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles: nil];  
+    [alert show];
+}
+
 @end

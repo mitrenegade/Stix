@@ -671,10 +671,6 @@
 
 // ALL users
 
--(NSMutableDictionary*)getAllUsers {
-    return [delegate getAllUsers];
-}
-
 -(NSMutableArray*)getAllUserNames {
     return [delegate getAllUserNames];
 }

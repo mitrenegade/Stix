@@ -41,7 +41,6 @@
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 
 - (bool) isLoggedIn;
-//-(int)getBuxCount;
 -(void)didAddStixToPix:(Tag *)tag withStixStringID:(NSString*)stixStringID withLocation:(CGPoint)location /*withScale:(float)scale withRotation:(float)rotation */withTransform:(CGAffineTransform)transform;
 -(void)didCreateBadgeView:(UIView*)newBadgeView;
 -(int)getCommentCount:(int)tagID;
@@ -74,15 +73,7 @@
 -(void)advanceFirstTimeUserMessage; // only called by cancel add stix - for convenience
 
 -(void)setFollowing:(NSString *)friendName toState:(BOOL)shouldFollow;
--(void)didDisplayShareSheet;
--(void)didCloseShareSheet;
--(void)didCloseBuxInstructions;
--(BOOL)isDisplayingShareSheet;
--(BOOL)isShowingBuxInstructions;
 -(UIImage*)getUserPhotoForUsername:(NSString*)name;
-
--(BOOL)isDisplayingShareSheet;
--(BOOL)isShowingBuxInstructions;
 
 -(void)getFirstTags; // called if no tags exist
 
@@ -127,22 +118,7 @@
     UIView * stixHeader;
     UIView * stixHeaderBody;
     
-    int currentBuxPurchase;
-    
     IBOutlet UIImageView * logo;
-    
-    // stix purchase menu
-    int buxAnimationOpen;
-    int buxAnimationClose;
-    
-    // share animation, graphics and actions
-    UIImageView * shareSheet;
-    UIButton * buttonShareFacebook;
-    UIButton * buttonShareEmail;
-    UIButton * buttonShareClose;
-    int shareMenuOpenAnimation;
-    int shareMenuCloseAnimation;
-    VerticalFeedItemController * shareFeedItem;
     
     RaisedCenterTabBarController * __weak tabBarController;
     
@@ -204,7 +180,6 @@
 -(void)followListsDidChange;
 -(void)shouldDisplayUserPage:(NSString*)galleryUsername;
 -(void)forceReloadWholeTableZOMG;
--(void)didCloseShareSheet;
 -(void)finishedCreateNewPix:(Tag*)tag withPendingID:(int)pendingID;
 -(void)checkForUpdatedStix;
 -(void)updateFeedTimestamps;

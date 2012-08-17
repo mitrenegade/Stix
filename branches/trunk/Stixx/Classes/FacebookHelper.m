@@ -355,8 +355,8 @@ static NSMutableDictionary * timeoutRequests;
 
 // manual timeout
 -(void)timeoutForRequest:(NSString*)request {
-    NSLog(@"Facebook Request timed out: %@", request);
     if ([timeoutRequests objectForKey:request] != nil) {
+        NSLog(@"Facebook Request timed out: %@", request);
         if ([request isEqualToString:@"requestGraphPathMe"]) {
             [delegate facebookRequestDidTimeOut];
         }

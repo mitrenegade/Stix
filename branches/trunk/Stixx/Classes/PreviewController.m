@@ -12,7 +12,8 @@
 
 @synthesize delegate;
 @synthesize barBase, buttonNext;
-@synthesize newHandle, newPhotoData;
+@synthesize handle, photoData;
+@synthesize k;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -36,6 +37,9 @@
     exploreController = [[ExploreViewController alloc] init];
     [exploreController setDelegate:self];
     hasExplore = NO;
+    
+    k = [[Kumulos alloc]init];
+    [k setDelegate:self];    
     //    [self.view addSubview:exploreController.view];
 }
 
@@ -143,10 +147,15 @@
     [animation doFadeOut:loginController.view forTime:.5 withCompletion:^(BOOL finished) {
         [loginController.view removeFromSuperview];
         loginController = nil;
-        [self startActivityIndicator];
+        //[self startActivityIndicator];
         // do twitter login here
+        [SHK setRootViewController:self];
         TwitterHelper * twHelper = [[TwitterHelper alloc] init];
         [twHelper setHelperDelegate:self];
+        if ([TwitterHelper isServiceAuthorized]) {
+            [self startActivityIndicator];
+        }
+        [twHelper doInitialConnect];
     }];
 }
 
@@ -158,11 +167,7 @@
     email = [_email copy];
     facebookString = [_facebookString copy];
 
-    // check for facebookString
-    Kumulos * k = [[Kumulos alloc] init];
-    [k setDelegate:self];
-    // todo: make general login function
-    // like [k loginWithUsername:username orFacebookString:facebookString orTwitterString:twitterString orEmail:email]
+    // check specifically for facebookString
     [k loginViaFacebookStringWithFacebookString:facebookString];
 }
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginViaFacebookStringDidCompleteWithResult:(NSArray *)theResults {
@@ -214,14 +219,19 @@
     username = [results objectForKey:@"name"];
     twitterHandle = [results objectForKey:@"screen_name"];
     twitterString = [results objectForKey:@"id_str"];
+    twitterProfileURL = [results objectForKey:@"profile_image_url_https"];
     
-    Kumulos * k = [[Kumulos alloc] init];
-    [k setDelegate:self];
-    // checks for either username, screenname, or twitterString
-    [k loginViaTwitterWithUsername:username andScreenname:twitterHandle andTwitterString:twitterString];
+    // checks specifically for twitterString
+    NSLog(@"Looking for twitterString %@", twitterString);
+    [k loginViaTwitterWithTwitterString:twitterString];
 }
+
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginViaTwitterDidCompleteWithResult:(NSArray *)theResults {
     [self didSelectUsernameWithResults:theResults];
+}
+
+-(void)kumulosAPI:(kumulosProxy *)kumulos apiOperation:(KSAPIOperation *)operation didFailWithError:(NSString *)theError {
+    NSLog(@"Operation failed! %@", theError);
 }
 
 #pragma mark Email login
@@ -243,7 +253,7 @@
     }];
 }
 
-#pragma mark SignupViewController
+#pragma mark SignupViewController/LoginViewController delegate
 -(void)doEmailLogin {
     // show LoginView
 
@@ -253,25 +263,18 @@
 }
 
 
--(void)didLoginFromEmailSignup:(NSString *)username andPhoto:(UIImage *)photo andEmail:(NSString *)email andUserID:(NSNumber *)userID {
+-(void)didLoginFromEmailSignup:(NSString *)newname andPhoto:(UIImage *)photo andEmail:(NSString *)newemail andUserID:(NSNumber *)userID isFirstTime:(BOOL)isFirstTime {
     
     [self startActivityIndicator];
+    isFirstTimeUser = isFirstTime;
     
-    NSLog(@"Email signup: Username: %@ email %@ userid %@ photo %x", username, email, userID, photo);
+    NSLog(@"Email signup: Username: %@ email %@ userid %@ photo %@", newname, newemail, userID, photo?@"YES": @"NO");
     
     if (!IS_ADMIN_USER(username))
         [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:email, @"SignupByEmail", nil]];
 
-    if (photo) {
-        [d setObject:UIImagePNGRepresentation(photo) forKey:@"photo"];
-    }
-    else {
-        NSLog(@"Nil photo");
-    }
-
     [self stopActivityIndicator];
-    [delegate didLoginFromSplashScreenWithUsername:newname andPhoto:photo andEmail:email andFacebookString:nil andUserID:userID andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil isFirstTimeUser:isFirstTimeUser];
-    [delegate didAddNewUserWithResult:[NSArray arrayWithObject:d]];
+    [delegate didLoginFromSplashScreenWithScreenname:newname andPhoto:photo andEmail:newemail andFacebookString:nil andTwitterString:nil andUserID:userID isFirstTimeUser:isFirstTimeUser];
     
     // since it's an email login, force invalidation of facebook and twitter tokens
     [[[FacebookHelper sharedFacebookHelper] facebook] logout];
@@ -279,18 +282,17 @@
 }
 
 #pragma mark CreateHandleDelegate
--(void)didAddHandle:(NSString *)handle andPhoto:(NSData *)photoData {
+-(void)didAddHandle:(NSString *)_handle andPhoto:(NSData *)_photoData {
     // from CreateHandleController
-    if (!IS_ADMIN_USER(fbUsername))
+    if (!IS_ADMIN_USER(handle))
         [FlurryAnalytics logEvent:@"AddHandle" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:handle, @"NewHandle", username, @"Username", nil]];
     
-    [self setNewHandle:handle];
-    [self setNewPhotoData:photoData];
+    [self setHandle:_handle];
+    [self setPhotoData:_photoData];
     
-//    [self addUser];
     NSLog(@"FacebookLoginController: adding user");
-    if (newHandle)
-        username = newHandle;
+    if (handle)
+        username = handle;
     
     [k createFacebookUserWithUsername:username andEmail:email andPhoto:photoData andFacebookString:facebookString];
     
@@ -303,14 +305,18 @@
     
     isFirstTimeUser = YES;
     
-    if (!IS_ADMIN_USER(facebookName))
-        [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:facebookName, @"SignupByFacebook", nil]];
-    
+    if ([theResults count] == 0)
+        [NSException raise:NSInternalInconsistencyException format:@"CreateFacebookUser completed but did not create user!"];  
+    NSMutableDictionary * d = [theResults objectAtIndex:0];
+
     NSString * newname = [d valueForKey:@"username"];
     NSNumber * userID = [d valueForKey:@"allUserID"];
     NSString * newemail = [d valueForKey:@"email"];
     NSString * newfacebookString = [d objectForKey:@"facebookString"];
     NSString * newtwitterString = [d objectForKey:@"twitterString"];
+    
+    if (!IS_ADMIN_USER(newname))
+        [FlurryAnalytics logEvent:@"Signup" withParameters:[[NSMutableDictionary alloc] initWithObjectsAndKeys:newname, @"SignupByFacebook", nil]];
     NSLog(@"DidSelectUsername: %@ Userid: %@ email: %@", newname, userID, newemail);
     
     UIImage * newPhoto = nil;
@@ -321,9 +327,7 @@
     }
     
     [self stopActivityIndicator];
-    [delegate didLoginFromSplashScreenWithUsername:newname andPhoto:newPhoto andEmail:newEmail andFacebookString:facebookString andUserID:userID andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil isFirstTimeUser:isFirstTimeUser];
-    
-    [delegate didAddNewUserWithResult:theResults];
+    [delegate didLoginFromSplashScreenWithScreenname:newname andPhoto:newPhoto andEmail:newemail andFacebookString:newfacebookString andTwitterString:newtwitterString andUserID:userID isFirstTimeUser:isFirstTimeUser];
 }
 
 #pragma mark DidSelectUsername
@@ -346,9 +350,13 @@
         // add email
         if (!newemail) {
             NSLog(@"No email! facebookString %@ facebookEmail %@", facebookString, email);
-            //email = facebookEmail;
+            newemail = email;
         }
-        // todo: add facebook, twitter string
+        // will this ever happen? 
+        if (!newfacebookString)
+            newfacebookString = facebookString;
+        if (!newtwitterString)
+            newtwitterString = twitterString;
         
         UIImage * newPhoto = nil;
         if ([d valueForKey:@"photo"])
@@ -358,11 +366,7 @@
         }
         
         [self stopActivityIndicator];
-        NSLog(@"Closing facebookLoginController!");
-        //[self.navigationController popViewControllerAnimated:YES];
-        [delegate didLoginFromSplashScreenWithUsername:newname andPhoto:nil andEmail:nil andFacebookString:facebookString andUserID:userID andStix:nil andTotalTags:0 andBuxCount:0 andStixOrder:nil isFirstTimeUser:isFirstTimeUser];
-        
-        [delegate didAddNewUserWithResult:theResults];
+        [delegate didLoginFromSplashScreenWithScreenname:newname andPhoto:newPhoto andEmail:newemail andFacebookString:newfacebookString andTwitterString:newtwitterString andUserID:userID isFirstTimeUser:isFirstTimeUser];
     } 
     else {
         NSLog(@"Could not login with twitter credentials! Creating new user");
@@ -370,6 +374,7 @@
         [usernameController setDelegate:self];
         [usernameController setFacebookString:facebookString];
         [usernameController setTwitterString:twitterString];
+        [usernameController setTwitterProfileURL:twitterProfileURL];
         if (twitterHandle && [twitterHandle length] > 0) 
             [usernameController setInitialName:twitterHandle]; 
         else

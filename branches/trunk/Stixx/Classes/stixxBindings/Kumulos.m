@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Aug 15, 2012
+//  Created by Kumulos Bindings Compiler on Aug 16, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -1038,116 +1038,6 @@
     
 }
 
--(KSAPIOperation*) adminAddStixToAllUsersWithStix:(NSData*)stix{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:stix forKey:@"stix"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminAddStixToAllUsers" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: adminAddStixToAllUsersDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) adminDeleteAllTestUsersWithEmail:(NSString*)email{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:email forKey:@"email"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminDeleteAllTestUsers" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: adminDeleteAllTestUsersDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) adminIncrementAllUserBuxWithBux:(NSInteger)bux{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:[NSNumber numberWithInt:bux] forKey:@"bux"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminIncrementAllUserBux" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: adminIncrementAllUserBuxDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) adminLoginWithUsername:(NSString*)username{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminLogin" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: adminLoginDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) adminSetAllUserBuxWithBux:(NSInteger)bux{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:[NSNumber numberWithInt:bux] forKey:@"bux"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"adminSetAllUserBux" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: adminSetAllUserBuxDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
 -(KSAPIOperation*) changeUserBuxByAmountWithUsername:(NSString*)username andBuxChange:(NSInteger)buxChange{
 
     
@@ -1506,13 +1396,11 @@
     
 }
 
--(KSAPIOperation*) loginViaTwitterWithUsername:(NSString*)username andScreenname:(NSString*)screenname andTwitterString:(NSString*)twitterString{
+-(KSAPIOperation*) loginViaTwitterWithTwitterString:(NSString*)twitterString{
 
     
      NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                    [theParams setValue:screenname forKey:@"screenname"];
-                    [theParams setValue:twitterString forKey:@"twitterString"];
+            [theParams setValue:twitterString forKey:@"twitterString"];
                         
     KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"loginViaTwitter" andParams:theParams];
     [newOp setDelegate:self];

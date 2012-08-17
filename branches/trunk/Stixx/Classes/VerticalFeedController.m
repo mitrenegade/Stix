@@ -128,11 +128,6 @@ static int tickID;
     NSLog(@"FeedView appeared!");
     [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
     [super viewDidAppear:animated];
-    //[labelBuxCount setText:[NSString stringWithFormat:@"%d", [delegate getBuxCount]]];
-  
-    // test spin
-//    StixAnimation * animation = [[StixAnimation alloc] init];
-//    [animation doSpin:logo forTime:10 withCompletion:^(BOOL finished){ }];
 }
 
 #pragma mark -
@@ -171,12 +166,6 @@ static int tickID;
     Tag * t = (Tag*) [allTagsDisplayed objectAtIndex:lastPageViewed];   
     [delegate didAddStixToPix:t withStixStringID:stixStringID withLocation:location withTransform:transform];
 }
-
-/*
--(int)getBuxCount {
-    return [delegate getBuxCount];
-}
- */
 
 -(void)didPurchaseStixFromCarousel:(NSString *)stixStringID {
     [self.delegate didPurchaseStixFromCarousel:stixStringID];
@@ -861,11 +850,6 @@ static int tickID;
 
 #if HAS_PROFILE_BUTTON
 -(IBAction)didClickProfileButton:(id)sender {
-    if ([delegate isShowingBuxInstructions])
-        return;
-    if ([delegate isDisplayingShareSheet])
-        return;
-    
     [delegate didOpenProfileView];
 }
 #endif
@@ -1149,11 +1133,6 @@ static int tickID;
         return;
     }
 #endif
-    if ([delegate isDisplayingShareSheet])
-        return;
-    if ([delegate isShowingBuxInstructions])
-        return;
-
     [delegate shouldDisplayCommentViewWithTag:tag andNameString:nameString fromDetailView:nil];
 }
 
@@ -1248,15 +1227,6 @@ static int tickID;
 #pragma mark UserGalleryDelegate
 
 -(void)shouldDisplayUserPage:(NSString *)username {
-    if ([delegate isShowingBuxInstructions]) {
-        isOpeningProfile = NO;
-        return;        
-    }
-    if ([delegate isDisplayingShareSheet]) {
-        isOpeningProfile = NO;
-        return;
-    }
-    
 #if 1    // custom callbacks needed here
     //    [self.delegate shouldDisplayUserPage:username];
     StixAnimation * animation = [[StixAnimation alloc] init];
@@ -1292,36 +1262,7 @@ static int tickID;
         [feedItemsWithLikeToolbar removeAllObjects];
 }
 
-#pragma mark bux instructions
--(BOOL)isShowingBuxInstructions {
-    return [delegate isShowingBuxInstructions];
-}
-
 #pragma mark share
--(BOOL)isDisplayingShareSheet {
-    return [delegate isDisplayingShareSheet];
-}
--(void)didCloseShareSheet {
-    /*
-    CGRect frameOutside = CGRectMake(16-320, 22, 289, 380);
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    //shareMenuCloseAnimation = [animation doSlide:shareSheet inView:self.view toFrame:frameOutside forTime:.25];
-    [animation doViewTransition:shareSheet toFrame:frameOutside forTime:.25 withCompletion:^(BOOL finished) {
-        [self stopActivityIndicator];
-        [self stopActivityIndicatorLarge];
-        if (shareSheet) {
-            shareSheet = nil;
-            [buttonShareEmail removeFromSuperview];
-            [buttonShareFacebook removeFromSuperview];
-            [buttonShareClose removeFromSuperview];
-            buttonShareClose = nil;
-            buttonShareEmail = nil;
-            buttonShareFacebook = nil;
-        }
-    }];
-    */
-}
 
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)feedItem {
 #if SHOW_ARROW
@@ -1330,10 +1271,6 @@ static int tickID;
         return;
     }
 #endif
-    if ([delegate isShowingBuxInstructions])
-        return;
-    if ([delegate isDisplayingShareSheet])
-        return;
     [delegate doParallelNewPixShare:feedItem.tag];
 }
 
@@ -1357,7 +1294,6 @@ static int tickID;
 }
 
 -(void)sharePixDialogDidFail:(int)errorType {
-//    [self didCloseShareSheet];
     if (activityIndicatorLarge) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, (unsigned long)NULL), ^(void) {
             [activityIndicatorLarge setHidden:YES];
@@ -1366,7 +1302,6 @@ static int tickID;
         });
         //activityIndicatorLarge = nil;
     }
-//    [delegate didCloseShareSheet];
     if (errorType == 0) {
         // upload picture malfunction
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Sharing Failed" message:@"It seems that our Share pages are under maintenance. Please try again later." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
@@ -1425,9 +1360,6 @@ static int tickID;
 
     NSLog(@"FeedController: finished create new pix: sharing ID %d", [tag.tagID intValue]);
     [self reloadPage:0];
-    VerticalFeedItemController * feedItem = [feedItems objectForKey:tag.tagID];
-    shareFeedItem = feedItem;
-    //[delegate displayShareController:tag];
 }
 
 -(void)checkForUpdatedStix {

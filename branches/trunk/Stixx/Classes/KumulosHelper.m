@@ -198,8 +198,7 @@ static KumulosHelper *sharedKumulosHelper = nil;
         for (NSMutableDictionary * d in params) {
             NSString * name = [d valueForKey:@"username"];
             NSString * email = [d valueForKey:@"email"];
-            NSNumber * facebookID = [d valueForKey:@"facebookID"];
-            NSString * facebookString = [NSString stringWithFormat:@"%@", facebookID];
+            NSString * facebookString = [d valueForKey:@"facebookString"];
             NSLog(@"Updating facebookString for email %@ to %@", email, facebookString);
             [savedInfo setObject:name forKey:@"username"];
             //kOp = [k setFacebookStringForUserWithEmail:email andFacebookString:facebookString];

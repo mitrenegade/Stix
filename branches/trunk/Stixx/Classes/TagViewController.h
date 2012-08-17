@@ -31,7 +31,6 @@
 -(void)pauseAggregation;
 
 -(void)didPurchaseStixFromCarousel:(NSString*)stixStringID;
-//-(int)getBuxCount;
 
 -(int)getFirstTimeUserStage;
 -(void)advanceFirstTimeUserMessage;

@@ -12,7 +12,6 @@
 @synthesize tableController;
 @synthesize delegate;
 @synthesize activityIndicator;
-//@synthesize labelBuxCount;
 #if HAS_PROFILE_BUTTON
 @synthesize buttonProfile;
 #endif
@@ -290,7 +289,9 @@
                 [allTags removeAllObjects];
                 NSDate * twoWeeksAgo = [[NSDate date] dateByAddingTimeInterval:-3600*24*14];
                 lastDate = twoWeeksAgo;
-#if !ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
+                NSLog(@"**** ADMIN MODE **** ExploreView:loadContentPastRow skipping actual call");
+#else
                 [k getPopularPixInTimeRangeWithTimeStart:twoWeeksAgo andTimeEnd:[NSDate date] andNumPix:[NSNumber numberWithInt:numPix]];
 #endif
                 for (int i=0; i<numPix; i++)

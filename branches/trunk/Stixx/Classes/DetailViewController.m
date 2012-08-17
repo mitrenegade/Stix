@@ -148,24 +148,6 @@ static BOOL openingDetailView;
 //        [delegate didDismissZoom];
 //        [DetailViewController unlockOpen];
     }
-    // share menu
-    else if (animID == shareMenuOpenAnimation) {
-        [self.view addSubview:buttonShareEmail];
-        [self.view addSubview:buttonShareFacebook];
-        [self.view addSubview:buttonShareClose];
-    }
-    else if (animID == shareMenuCloseAnimation) {
-        [self stopActivityIndicator];
-        if (shareSheet) {
-            shareSheet = nil;
-            [buttonShareEmail removeFromSuperview];
-            [buttonShareFacebook removeFromSuperview];
-            [buttonShareClose removeFromSuperview];
-            buttonShareClose = nil;
-            buttonShareEmail = nil;
-            buttonShareFacebook = nil;
-        }
-    }
 }
 
 

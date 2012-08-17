@@ -28,7 +28,6 @@
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 
 -(int)getNewestTagID;
-//-(int)getBuxCount;
 -(NSString*)getUsername;
 
 -(void)shouldDisplayUserPage:(NSString*)username;
@@ -81,7 +80,6 @@ enum {
     //DetailViewController * detailController;
     NSString * galleryUsername;
         
-    //OutlineLabel * labelBuxCount;
     IBOutlet UIImageView * logo;
     int openDetailAnimation;
     
@@ -105,10 +103,7 @@ enum {
 
 @property (nonatomic) ColumnTableController * tableController;
 @property (nonatomic, unsafe_unretained) NSObject<ExploreViewDelegate> * delegate;
-//@property (nonatomic, retain) IBOutlet UIButton * buttonFeedback;
 @property (nonatomic) LoadingAnimationView * activityIndicator;
-//@property (nonatomic, retain) UISegmentedControl * segmentedControl;
-//@property (nonatomic) OutlineLabel * labelBuxCount;
 #if HAS_PROFILE_BUTTON
 @property (nonatomic) IBOutlet UIButton * buttonProfile;
 #endif

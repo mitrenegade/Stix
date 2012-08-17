@@ -181,14 +181,14 @@
                 if ([helperDelegate respondsToSelector:@selector(didGetTwitterCredentials:)])
                     [helperDelegate twitterHelperDidReturnWithCallback:@selector(didGetTwitterCredentials:) andParams:returnDict andRequestType:requestType];
                 
-                // add credentials
-                NSString * twitterString = [results objectForKey:@"id_str"];
-                int userID = [helperDelegate getUserID];
                 // add credentials to kumulos
-                KumulosHelper * kh = [[KumulosHelper alloc] init];
-                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:userID], twitterString, nil];
-                [kh execute:@"setTwitterString" withParams:params withCallback:@selector(khCallback_didGetFacebookUser:) withDelegate:self];
-
+                if ([helperDelegate respondsToSelector:@selector(getUserID)]) {
+                    NSString * twitterString = [results objectForKey:@"id_str"];
+                    int userID = [helperDelegate getUserID];
+                    KumulosHelper * kh = [[KumulosHelper alloc] init];
+                    NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:[NSNumber numberWithInt:userID], twitterString, nil];
+                    [kh execute:@"setTwitterString" withParams:params withCallback:@selector(khCallback_didGetFacebookUser:) withDelegate:self];
+                }
             }
             else if ([requestType isEqualToString:@"getFriendsForUser"]) {
                 NSArray * friendsIDs = [self parseResponse:data forKey:@"ids"];

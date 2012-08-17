@@ -82,7 +82,7 @@
 						<string key="NSFrame">{{48, 284}, {224, 73}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="379923977"/>
+						<reference key="NSNextKeyView" ref="438879636"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -93,7 +93,7 @@
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
-						<object class="NSColor" key="IBUINormalTitleShadowColor" id="901759465">
+						<object class="NSColor" key="IBUINormalTitleShadowColor" id="39437029">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MC41AA</bytes>
 						</object>
@@ -101,22 +101,23 @@
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">btn_login_joinstix.png</string>
 						</object>
-						<object class="IBUIFontDescription" key="IBUIFontDescription" id="867678330">
+						<object class="IBUIFontDescription" key="IBUIFontDescription" id="185023982">
 							<int key="type">2</int>
 							<double key="pointSize">15</double>
 						</object>
-						<object class="NSFont" key="IBUIFont" id="981612764">
+						<object class="NSFont" key="IBUIFont" id="743466725">
 							<string key="NSName">Helvetica-Bold</string>
 							<double key="NSSize">15</double>
 							<int key="NSfFlags">16</int>
 						</object>
 					</object>
-					<object class="IBUIButton" id="379923977">
+					<object class="IBUIButton" id="438879636">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{48, 358}, {224, 51}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -127,13 +128,13 @@
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
-						<reference key="IBUINormalTitleShadowColor" ref="901759465"/>
+						<reference key="IBUINormalTitleShadowColor" ref="39437029"/>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">btn_signup_email.png</string>
 						</object>
-						<reference key="IBUIFontDescription" ref="867678330"/>
-						<reference key="IBUIFont" ref="981612764"/>
+						<reference key="IBUIFontDescription" ref="185023982"/>
+						<reference key="IBUIFont" ref="743466725"/>
 					</object>
 				</array>
 				<string key="NSFrameSize">{320, 480}</string>
@@ -178,6 +179,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">buttonSignin</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="438879636"/>
+					</object>
+					<int key="connectionID">25</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">dataSource</string>
 						<reference key="source" ref="669396860"/>
 						<reference key="destination" ref="372490531"/>
@@ -204,7 +213,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">didClickLogin:</string>
-						<reference key="source" ref="379923977"/>
+						<reference key="source" ref="438879636"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
@@ -226,7 +235,7 @@
 							<reference ref="191374358"/>
 							<reference ref="669396860"/>
 							<reference ref="35808535"/>
-							<reference ref="379923977"/>
+							<reference ref="438879636"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -258,7 +267,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">19</int>
-						<reference key="object" ref="379923977"/>
+						<reference key="object" ref="438879636"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
 				</array>
@@ -278,7 +287,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">24</int>
+			<int key="maxID">25</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -311,12 +320,17 @@
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="buttonBack">UIButton</string>
+						<string key="buttonSignin">UIButton</string>
 						<string key="buttonSignup">UIButton</string>
 						<string key="tableView">UITableView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="buttonBack">
 							<string key="name">buttonBack</string>
+							<string key="candidateClassName">UIButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="buttonSignin">
+							<string key="name">buttonSignin</string>
 							<string key="candidateClassName">UIButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="buttonSignup">

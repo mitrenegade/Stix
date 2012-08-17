@@ -289,7 +289,6 @@
     }
     else if (service == PROFILE_SERVICE_CONTACTS) {
         // populate contact search results
-        NSMutableDictionary * allUsers = [delegate getAllUsers];
         NSMutableArray * allUserEmails = [delegate getAllUserEmails];
         NSMutableArray * allUserNames = [delegate getAllUserNames];
         NSMutableArray * allContacts = [delegate getAllContacts];
@@ -302,8 +301,9 @@
                 continue;
             
             // search by full name
-            if ([allUsers objectForKey:cName] != nil) {
-                NSString * cEmail = [[allUsers objectForKey:cName] objectForKey:@"email"];
+            if ([allUserNames containsObject:cName]) {
+                int index = [allUserNames indexOfObject:cName];
+                NSString * cEmail = [allUserEmails objectAtIndex:index];
                 //NSLog(@"Friends from contact found by name: %@ withEmail %@", cName, cEmail);
 #if USE_SORTED
                 int newIndex = [self insertNameSorted:cName];

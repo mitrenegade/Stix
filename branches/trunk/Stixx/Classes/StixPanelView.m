@@ -259,7 +259,7 @@ static NSMutableArray * premiumCategoryNames;
 
 
 -(void)didClickShelfCategory:(id)sender {
-    [self startActivityIndicatorLarge];
+    //[self startActivityIndicatorLarge];
     UIButton * senderButton = (UIButton *)sender;
     if (senderButton.tag == shelfCategory)
         return;
@@ -607,12 +607,7 @@ static NSMutableArray * premiumCategoryNames;
     [self carouselTabDismiss:YES];
 }
 
--(void)toggleShowPanel {
-//    if ([delegate respondsToSelector:@selector(isDisplayingShareSheet)] && [delegate isDisplayingShareSheet])
-//        return;
-//    if ([delegate respondsToSelector:@selector(isShowingBuxInstructions)] && [delegate isShowingBuxInstructions])
-//        return;
-    
+-(void)toggleShowPanel {    
     if (isShowingCarousel) {
         [self carouselTabDismiss:YES];
         if ([delegate respondsToSelector:@selector(didDismissCarouselTab)])
@@ -623,7 +618,6 @@ static NSMutableArray * premiumCategoryNames;
         if ([delegate respondsToSelector:@selector(didExpandCarouselTab)])
             [delegate didExpandCarouselTab];
     }
-//#endif
 }
 
 #if 1

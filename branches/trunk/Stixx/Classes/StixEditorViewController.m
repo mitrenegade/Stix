@@ -219,11 +219,20 @@
         return;
     [stixPanel carouselTabExpand:YES];
 }
+
+-(void)saveHelper {
+    // hack
+    [self saveRemixedPix:YES];
+}
 -(IBAction)didClickButtonSave:(id)sender {
     NSLog(@"Did click save stix");
+    [self startActivityIndicator];
+    
     if (isLoadingPixSource)
         return;
-    [self saveRemixedPix:YES];
+    
+    [self performSelector:@selector(saveHelper) withObject:nil afterDelay:.5];
+    //[self saveRemixedPix:YES];
     
     // do not pop; add sharecontroller over stixeditor
     

@@ -27,7 +27,6 @@
 #import "SMWebRequest.h"
 #import "ASIHTTPRequest.h"
 #import "ASIFormDataRequest.h"
-#import "FacebookLoginController.h"
 #import "UserTagAggregator.h"
 #import "UserProfileViewController.h"
 #import "StixAnimation.h"
@@ -39,7 +38,6 @@
 #import "FlurryAnalytics.h"
 #import "StixPanelView.h"
 #import "StixEditorViewController.h"
-#import "Admin.h"
 #import "NewsletterViewController.h"
 #import "PreviewController.h"
 #import "SHK.h" // sharekit
@@ -63,8 +61,6 @@ struct UserInfo {
 //    UIImage * userphoto;
 //    NSString * email;
 //    NSString * facebookString;
-    //int usertagtotal;
-    //int bux;
     int firstTimeUserStage;
     int userID;
     int hasPhoto;
@@ -74,7 +70,7 @@ struct UserInfo {
 //    bool hasAccessedStore;
 };
 
-@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, FacebookLoginDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate, PreviewDelegate> {
+@interface StixxAppDelegate : NSObject <TagViewDelegate, UIImagePickerControllerDelegate, UITabBarControllerDelegate, ProfileViewDelegate, KumulosDelegate, ExploreViewDelegate, RaisedCenterTabBarControllerDelegate, FeedbackViewDelegate, UINavigationControllerDelegate, UIActionSheetDelegate, VerticalFeedDelegate, KumulosHelperDelegate, ASIHTTPRequestDelegate, UserTagAggregatorDelegate, UserProfileViewDelegate, StixAnimationDelegate, FacebookHelperDelegate, UIApplicationDelegate, ShareControllerDelegate, FriendSuggestionDelegate, StixEditorDelegate, StixPanelPurchaseDelegate, NewsletterViewDelegate, UIWebViewDelegate, DetailViewDelegate, CommentViewDelegate, PreviewDelegate> {
     
     UIWindow *window;
     
@@ -90,7 +86,6 @@ struct UserInfo {
 	ProfileViewController *profileController;
     UserProfileViewController * userProfileController;
     ExploreViewController * exploreController;
-    FacebookLoginController * loginSplashController;
     FriendSuggestionController * friendSuggestionController;
     NewsletterViewController * newsController;
     
@@ -103,6 +98,7 @@ struct UserInfo {
     UIImage * myUserInfo_userphoto;
     NSString * myUserInfo_email;
     NSString * myUserInfo_facebookString;
+    NSString * myUserInfo_twitterString;
 
     bool stixViewsLoadedFromDisk;
     bool fbLoginIsJoin;
@@ -147,15 +143,6 @@ struct UserInfo {
     int shareActionSheetTagID;
     //int shareMethod; // 0 = facebook, 1 = email
 
-    BOOL isDisplayingShareSheet;
-    BOOL isDisplayingBuxMenu;
-    
-    int buyBuxPurchaseAmount;
-    UIImageView * buxPurchaseMenu;
-    NSMutableArray * buxPurchaseButtons;
-    UIButton * buttonBuxPurchaseClose;
-    BOOL isShowingBuxPurchaseMenu;
-    
     NSMutableDictionary * allUsers;
     int idOfMostRecentUser;
     NSMutableSet * featuredUsers;
@@ -186,11 +173,6 @@ struct UserInfo {
     UserTagAggregator * aggregator;
     
     BOOL followListsDidChangeDuringProfileView;
-    
-    UIImageView * buxInstructions;
-    UIButton * buttonBuxInstructionsClose;
-    BOOL isShowingBuxInstructions;
-    UIButton * buttonBuxStore;
     
     BOOL mkStoreKitSuccess; // hack
     FeedbackViewController * feedbackController;
@@ -233,13 +215,6 @@ struct UserInfo {
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID;
 -(bool)addTagWithCheck:(Tag *) tag withID:(int)newID overwrite:(bool)bOverwrite;
 -(void)updateCommentCount:(int)tagID;
--(void)adminUpdateAllStixCountsToZero;
--(void)adminIncrementAllUsersBuxCounts;
--(void) adminSetAllUsersBuxCounts;
--(void)adminEasterEggShowMenu:(NSString*)password;
-//-(void)updateUserTagTotal;
-//-(void)changeBuxCountByAmount:(int)change;
-//-(void)adminSaveFeed;
 -(void)adminResetAllStixOrders;
 
 -(void) getTagWithID:(int)tagID;
@@ -252,21 +227,14 @@ struct UserInfo {
 -(void)handleNotificationBookmarks:(bool)doJump withMessage:(NSString*)message;
 -(void)showAllAlerts;
 -(void)reloadAllCarousels;
-//-(void)rewardBux;
-//-(void)rewardLocation;
 -(void)logMetricTimeInApp;
-//-(void)checkConsistency;
-//-(void)updateBuxCountFromKumulos;
 -(void)didDismissSecondaryView;
 // former store methods
-//-(void)updateBuxCount;
 -(void)didGetStixFromStore:(NSString*)stixStringID;
--(void)didPurchaseBux:(int)buxPurchased;
 
 -(void)hideFirstTimeUserMessage;
 -(void)advanceFirstTimeUserMessage;
 -(void)agitateFirstTimePointer;
-- (void)didLoginWithUsername:(NSString *)name andPhoto:(UIImage *)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andUserID:(NSNumber*)userID andStix:(NSMutableDictionary *)stix andTotalTags:(int)total andBuxCount:(int)bux andStixOrder:(NSMutableDictionary *)stixOrder;
 -(void)getFirstTags;
 -(void)displayShareController;
 -(void)uploadImage:(NSData *)dataPNG;
@@ -293,7 +261,6 @@ struct UserInfo {
 @property (nonatomic) UserProfileViewController *userProfileController;
 //@property (nonatomic, retain) FriendsViewController *friendController;
 @property (nonatomic) ExploreViewController *exploreController;
-@property (nonatomic) FacebookLoginController * loginSplashController;
 @property (nonatomic) FriendSuggestionController * friendSuggestionController;
 @property (nonatomic) NewsletterViewController * newsController;
 @property (nonatomic) StixEditorViewController * editorController;

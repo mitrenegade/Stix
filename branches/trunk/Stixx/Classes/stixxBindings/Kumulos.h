@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Aug 15, 2012
+//  Created by Kumulos Bindings Compiler on Aug 16, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -102,16 +102,6 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addStixToUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminAddStixToAllUsersDidCompleteWithResult:(NSNumber*)affectedRows;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminDeleteAllTestUsersDidCompleteWithResult:(NSNumber*)affectedRows;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminIncrementAllUserBuxDidCompleteWithResult:(NSNumber*)affectedRows;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminLoginDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation adminSetAllUserBuxDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation changeUserBuxByAmountDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -378,21 +368,6 @@
 -(KSAPIOperation*) addUserWithUsername:(NSString*)username andPassword:(NSString*)password andEmail:(NSString*)email andPhoto:(NSData*)photo andStix:(NSData*)stix andAuxiliaryData:(NSData*)auxiliaryData andTotalTags:(NSInteger)totalTags andBux:(NSInteger)bux andFacebookID:(NSInteger)facebookID;
     
    
--(KSAPIOperation*) adminAddStixToAllUsersWithStix:(NSData*)stix;
-    
-   
--(KSAPIOperation*) adminDeleteAllTestUsersWithEmail:(NSString*)email;
-    
-   
--(KSAPIOperation*) adminIncrementAllUserBuxWithBux:(NSInteger)bux;
-    
-   
--(KSAPIOperation*) adminLoginWithUsername:(NSString*)username;
-    
-   
--(KSAPIOperation*) adminSetAllUserBuxWithBux:(NSInteger)bux;
-    
-   
 -(KSAPIOperation*) changeUserBuxByAmountWithUsername:(NSString*)username andBuxChange:(NSInteger)buxChange;
     
    
@@ -439,7 +414,7 @@
 -(KSAPIOperation*) loginViaFacebookStringWithFacebookString:(NSString*)facebookString;
     
    
--(KSAPIOperation*) loginViaTwitterWithUsername:(NSString*)username andScreenname:(NSString*)screenname andTwitterString:(NSString*)twitterString;
+-(KSAPIOperation*) loginViaTwitterWithTwitterString:(NSString*)twitterString;
     
    
 -(KSAPIOperation*) loginWithNameOrEmailWithLoginName:(NSString*)loginName;

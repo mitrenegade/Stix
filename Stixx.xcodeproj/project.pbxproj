@@ -61,6 +61,20 @@
 		9E1EB79C14A4871100FC6E1A /* CommentFeedTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79A14A4871000FC6E1A /* CommentFeedTableController.xib */; };
 		9E1EB7A014A48D9200FC6E1A /* CommentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */; };
 		9E1EB7A114A48D9200FC6E1A /* CommentViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */; };
+		9E1FD6D315DED51B00D41FAC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6BA15DED51B00D41FAC /* .gitignore */; };
+		9E1FD6D515DED51B00D41FAC /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6BF15DED51B00D41FAC /* NSData+Base64.m */; };
+		9E1FD6D615DED51B00D41FAC /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6C115DED51B00D41FAC /* SFHFKeychainUtils.m */; };
+		9E1FD6D715DED51B00D41FAC /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6C315DED51B00D41FAC /* MKSKProduct.m */; };
+		9E1FD6D815DED51B00D41FAC /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6C515DED51B00D41FAC /* MKSKSubscriptionProduct.m */; };
+		9E1FD6D915DED51B00D41FAC /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6C715DED51B00D41FAC /* MKStoreKitConfigs.plist */; };
+		9E1FD6DA15DED51B00D41FAC /* MKStoreManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6C915DED51B00D41FAC /* MKStoreManager.m */; };
+		9E1FD6DB15DED51B00D41FAC /* MKStoreObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1FD6CB15DED51B00D41FAC /* MKStoreObserver.m */; };
+		9E1FD6DC15DED51B00D41FAC /* README.mdown in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6CC15DED51B00D41FAC /* README.mdown */; };
+		9E1FD6DD15DED51B00D41FAC /* AddDevice.html in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6CE15DED51B00D41FAC /* AddDevice.html */; };
+		9E1FD6DE15DED51B00D41FAC /* DBSetup.sql in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6CF15DED51B00D41FAC /* DBSetup.sql */; };
+		9E1FD6DF15DED51B00D41FAC /* featureCheck.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6D015DED51B00D41FAC /* featureCheck.php */; };
+		9E1FD6E015DED51B00D41FAC /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6D115DED51B00D41FAC /* requestAccess.php */; };
+		9E1FD6E115DED51B00D41FAC /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E1FD6D215DED51B00D41FAC /* verifyProduct.php */; };
 		9E210C10152278E1002057F1 /* graphic_findbyname.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C09152278DD002057F1 /* graphic_findbyname.png */; };
 		9E210C11152278E1002057F1 /* graphic_facebook.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0A152278DE002057F1 /* graphic_facebook.png */; };
 		9E210C12152278E1002057F1 /* graphic_contacts.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0B152278DE002057F1 /* graphic_contacts.png */; };
@@ -495,6 +509,27 @@
 		9E1EB79D14A48D9000FC6E1A /* CommentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentViewController.h; sourceTree = "<group>"; };
 		9E1EB79E14A48D9000FC6E1A /* CommentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentViewController.m; sourceTree = "<group>"; };
 		9E1EB79F14A48D9100FC6E1A /* CommentViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CommentViewController.xib; sourceTree = "<group>"; };
+		9E1FD6BA15DED51B00D41FAC /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		9E1FD6BE15DED51B00D41FAC /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		9E1FD6BF15DED51B00D41FAC /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		9E1FD6C015DED51B00D41FAC /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHFKeychainUtils.h; sourceTree = "<group>"; };
+		9E1FD6C115DED51B00D41FAC /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHFKeychainUtils.m; sourceTree = "<group>"; };
+		9E1FD6C215DED51B00D41FAC /* MKSKProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKProduct.h; sourceTree = "<group>"; };
+		9E1FD6C315DED51B00D41FAC /* MKSKProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKProduct.m; sourceTree = "<group>"; };
+		9E1FD6C415DED51B00D41FAC /* MKSKSubscriptionProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKSubscriptionProduct.h; sourceTree = "<group>"; };
+		9E1FD6C515DED51B00D41FAC /* MKSKSubscriptionProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKSubscriptionProduct.m; sourceTree = "<group>"; };
+		9E1FD6C615DED51B00D41FAC /* MKStoreKitConfigs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreKitConfigs.h; sourceTree = "<group>"; };
+		9E1FD6C715DED51B00D41FAC /* MKStoreKitConfigs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = MKStoreKitConfigs.plist; sourceTree = "<group>"; };
+		9E1FD6C815DED51B00D41FAC /* MKStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreManager.h; sourceTree = "<group>"; };
+		9E1FD6C915DED51B00D41FAC /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
+		9E1FD6CA15DED51B00D41FAC /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
+		9E1FD6CB15DED51B00D41FAC /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
+		9E1FD6CC15DED51B00D41FAC /* README.mdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.mdown; sourceTree = "<group>"; };
+		9E1FD6CE15DED51B00D41FAC /* AddDevice.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = AddDevice.html; sourceTree = "<group>"; };
+		9E1FD6CF15DED51B00D41FAC /* DBSetup.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DBSetup.sql; sourceTree = "<group>"; };
+		9E1FD6D015DED51B00D41FAC /* featureCheck.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = featureCheck.php; sourceTree = "<group>"; };
+		9E1FD6D115DED51B00D41FAC /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
+		9E1FD6D215DED51B00D41FAC /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
 		9E210C09152278DD002057F1 /* graphic_findbyname.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_findbyname.png; sourceTree = "<group>"; };
 		9E210C0A152278DE002057F1 /* graphic_facebook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_facebook.png; sourceTree = "<group>"; };
 		9E210C0B152278DE002057F1 /* graphic_contacts.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graphic_contacts.png; sourceTree = "<group>"; };
@@ -1004,6 +1039,50 @@
 			path = Appirator;
 			sourceTree = "<group>";
 		};
+		9E1FD6B915DED51B00D41FAC /* mstorekit */ = {
+			isa = PBXGroup;
+			children = (
+				9E1FD6BA15DED51B00D41FAC /* .gitignore */,
+				9E1FD6BB15DED51B00D41FAC /* Externals */,
+				9E1FD6C215DED51B00D41FAC /* MKSKProduct.h */,
+				9E1FD6C315DED51B00D41FAC /* MKSKProduct.m */,
+				9E1FD6C415DED51B00D41FAC /* MKSKSubscriptionProduct.h */,
+				9E1FD6C515DED51B00D41FAC /* MKSKSubscriptionProduct.m */,
+				9E1FD6C615DED51B00D41FAC /* MKStoreKitConfigs.h */,
+				9E1FD6C715DED51B00D41FAC /* MKStoreKitConfigs.plist */,
+				9E1FD6C815DED51B00D41FAC /* MKStoreManager.h */,
+				9E1FD6C915DED51B00D41FAC /* MKStoreManager.m */,
+				9E1FD6CA15DED51B00D41FAC /* MKStoreObserver.h */,
+				9E1FD6CB15DED51B00D41FAC /* MKStoreObserver.m */,
+				9E1FD6CC15DED51B00D41FAC /* README.mdown */,
+				9E1FD6CD15DED51B00D41FAC /* Server Code */,
+			);
+			path = mstorekit;
+			sourceTree = "<group>";
+		};
+		9E1FD6BB15DED51B00D41FAC /* Externals */ = {
+			isa = PBXGroup;
+			children = (
+				9E1FD6BE15DED51B00D41FAC /* NSData+Base64.h */,
+				9E1FD6BF15DED51B00D41FAC /* NSData+Base64.m */,
+				9E1FD6C015DED51B00D41FAC /* SFHFKeychainUtils.h */,
+				9E1FD6C115DED51B00D41FAC /* SFHFKeychainUtils.m */,
+			);
+			path = Externals;
+			sourceTree = "<group>";
+		};
+		9E1FD6CD15DED51B00D41FAC /* Server Code */ = {
+			isa = PBXGroup;
+			children = (
+				9E1FD6CE15DED51B00D41FAC /* AddDevice.html */,
+				9E1FD6CF15DED51B00D41FAC /* DBSetup.sql */,
+				9E1FD6D015DED51B00D41FAC /* featureCheck.php */,
+				9E1FD6D115DED51B00D41FAC /* requestAccess.php */,
+				9E1FD6D215DED51B00D41FAC /* verifyProduct.php */,
+			);
+			path = "Server Code";
+			sourceTree = "<group>";
+		};
 		9E32D36015DCE6100009077B /* Editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1118,6 +1197,7 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				9E1FD6B915DED51B00D41FAC /* mstorekit */,
 				9E0D042C15853896009767AD /* FlurryAnalytics.h */,
 				9E0D042D15853896009767AD /* libFlurryAnalytics.a */,
 				9E8CF212156EEBBE00B27E1E /* ShareKit.xcodeproj */,
@@ -2106,6 +2186,14 @@
 				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
 				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
 				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
+				9E1FD6D315DED51B00D41FAC /* .gitignore in Resources */,
+				9E1FD6D915DED51B00D41FAC /* MKStoreKitConfigs.plist in Resources */,
+				9E1FD6DC15DED51B00D41FAC /* README.mdown in Resources */,
+				9E1FD6DD15DED51B00D41FAC /* AddDevice.html in Resources */,
+				9E1FD6DE15DED51B00D41FAC /* DBSetup.sql in Resources */,
+				9E1FD6DF15DED51B00D41FAC /* featureCheck.php in Resources */,
+				9E1FD6E015DED51B00D41FAC /* requestAccess.php in Resources */,
+				9E1FD6E115DED51B00D41FAC /* verifyProduct.php in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2218,6 +2306,12 @@
 				9E04547A15DB179B00E95260 /* PreviewController.m in Sources */,
 				9E04547F15DB17BF00E95260 /* PreviewLoginViewController.m in Sources */,
 				9E0454CA15DC28E600E95260 /* CreateHandleController.m in Sources */,
+				9E1FD6D515DED51B00D41FAC /* NSData+Base64.m in Sources */,
+				9E1FD6D615DED51B00D41FAC /* SFHFKeychainUtils.m in Sources */,
+				9E1FD6D715DED51B00D41FAC /* MKSKProduct.m in Sources */,
+				9E1FD6D815DED51B00D41FAC /* MKSKSubscriptionProduct.m in Sources */,
+				9E1FD6DA15DED51B00D41FAC /* MKStoreManager.m in Sources */,
+				9E1FD6DB15DED51B00D41FAC /* MKStoreObserver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

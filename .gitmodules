@@ -1,9 +1,6 @@
-[submodule "branches/trunk/Submodules/ShareKit"]
-	path = branches/trunk/Submodules/ShareKit
+[submodule "Submodules/MKStoreKit"]
+	path = Submodules/MKStoreKit
+	url = git://github.com/MugunthKumar/MKStoreKit.git
+[submodule "Submodules/ShareKit"]
+	path = Submodules/ShareKit
 	url = git://github.com/ShareKit/ShareKit.git
-[submodule "mstorekit"]
-	path = mstorekit
-	url = git://github.com/MugunthKumar/MKStoreKit.git
-[submodule "Submodules/mstorekit"]
-	path = Submodules/mstorekit
-	url = git://github.com/MugunthKumar/MKStoreKit.git

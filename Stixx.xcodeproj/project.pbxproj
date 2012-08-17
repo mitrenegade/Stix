@@ -67,21 +67,21 @@
 		9E210C14152278E1002057F1 /* btn_follow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E210C0D152278DF002057F1 /* btn_follow.png */; };
 		9E252B1214E1C08F0070ECB4 /* btn_addstix.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E252B1114E1C08F0070ECB4 /* btn_addstix.png */; };
 		9E252C4114E301EE0070ECB4 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E252C4014E301EE0070ECB4 /* Parse.framework */; };
-		9E260A3F15DEE9030061F325 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 9E2607F115DEE9000061F325 /* .gitignore */; };
-		9E260A4015DEE9030061F325 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2607F415DEE9000061F325 /* JSONKit.m */; };
-		9E260A4115DEE9030061F325 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2607F615DEE9000061F325 /* NSData+Base64.m */; };
-		9E260A4215DEE9030061F325 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2607F815DEE9000061F325 /* SFHFKeychainUtils.m */; };
-		9E260A4315DEE9030061F325 /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2607FA15DEE9000061F325 /* MKSKProduct.m */; };
-		9E260A4415DEE9030061F325 /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2607FC15DEE9000061F325 /* MKSKSubscriptionProduct.m */; };
-		9E260A4515DEE9030061F325 /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E2607FE15DEE9000061F325 /* MKStoreKitConfigs.plist */; };
-		9E260A4615DEE9030061F325 /* MKStoreManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E26080015DEE9000061F325 /* MKStoreManager.m */; };
-		9E260A4715DEE9030061F325 /* MKStoreObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E26080215DEE9000061F325 /* MKStoreObserver.m */; };
-		9E260A4815DEE9030061F325 /* README.mdown in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080315DEE9000061F325 /* README.mdown */; };
-		9E260A4915DEE9030061F325 /* AddDevice.html in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080515DEE9000061F325 /* AddDevice.html */; };
-		9E260A4A15DEE9030061F325 /* DBSetup.sql in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080615DEE9000061F325 /* DBSetup.sql */; };
-		9E260A4B15DEE9030061F325 /* featureCheck.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080715DEE9000061F325 /* featureCheck.php */; };
-		9E260A4C15DEE9030061F325 /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080815DEE9000061F325 /* requestAccess.php */; };
-		9E260A4D15DEE9030061F325 /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E26080915DEE9000061F325 /* verifyProduct.php */; };
+		9E260BB115DEEC010061F325 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 9E260B9815DEEC010061F325 /* .gitignore */; };
+		9E260BB215DEEC010061F325 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260B9B15DEEC010061F325 /* JSONKit.m */; };
+		9E260BB315DEEC010061F325 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260B9D15DEEC010061F325 /* NSData+Base64.m */; };
+		9E260BB415DEEC010061F325 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260B9F15DEEC010061F325 /* SFHFKeychainUtils.m */; };
+		9E260BB515DEEC010061F325 /* MKSKProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BA115DEEC010061F325 /* MKSKProduct.m */; };
+		9E260BB615DEEC010061F325 /* MKSKSubscriptionProduct.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BA315DEEC010061F325 /* MKSKSubscriptionProduct.m */; };
+		9E260BB715DEEC010061F325 /* MKStoreKitConfigs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BA515DEEC010061F325 /* MKStoreKitConfigs.plist */; };
+		9E260BB815DEEC010061F325 /* MKStoreManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BA715DEEC010061F325 /* MKStoreManager.m */; };
+		9E260BB915DEEC010061F325 /* MKStoreObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E260BA915DEEC010061F325 /* MKStoreObserver.m */; };
+		9E260BBA15DEEC010061F325 /* README.mdown in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BAA15DEEC010061F325 /* README.mdown */; };
+		9E260BBB15DEEC010061F325 /* AddDevice.html in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BAC15DEEC010061F325 /* AddDevice.html */; };
+		9E260BBC15DEEC010061F325 /* DBSetup.sql in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BAD15DEEC010061F325 /* DBSetup.sql */; };
+		9E260BBD15DEEC010061F325 /* featureCheck.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BAE15DEEC010061F325 /* featureCheck.php */; };
+		9E260BBE15DEEC010061F325 /* requestAccess.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BAF15DEEC010061F325 /* requestAccess.php */; };
+		9E260BBF15DEEC010061F325 /* verifyProduct.php in Resources */ = {isa = PBXBuildFile; fileRef = 9E260BB015DEEC010061F325 /* verifyProduct.php */; };
 		9E28C1CA1569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28C1C91569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.m */; };
 		9E28C1CC1569CC0300E56AB4 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E28C1CB1569CC0300E56AB4 /* AssetsLibrary.framework */; };
 		9E28C1D31569DB5500E56AB4 /* ShareController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28C1D11569DB5400E56AB4 /* ShareController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -389,30 +389,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E260B6E15DEE9130061F325 /* PBXContainerItemProxy */ = {
+		9E260B8F15DEEBFB0061F325 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1D6058910D05DD3D006BFB54;
 			remoteInfo = "Demo App";
 		};
-		9E260B7015DEE9130061F325 /* PBXContainerItemProxy */ = {
+		9E260B9115DEEBFB0061F325 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5342E1552AADD00171BCE;
 			remoteInfo = "Static Library";
 		};
-		9E260B7215DEE9130061F325 /* PBXContainerItemProxy */ = {
+		9E260B9315DEEBFB0061F325 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5360F1552E26800171BCE;
 			remoteInfo = "Resource Bundle";
 		};
-		9E260B7415DEE9130061F325 /* PBXContainerItemProxy */ = {
+		9E260B9515DEEBFB0061F325 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7A0F9246156BA2A0009CB40A;
 			remoteInfo = "Static Library No Submodules";
@@ -500,30 +500,30 @@
 		9E210C0D152278DF002057F1 /* btn_follow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_follow.png; sourceTree = "<group>"; };
 		9E252B1114E1C08F0070ECB4 /* btn_addstix.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_addstix.png; sourceTree = "<group>"; };
 		9E252C4014E301EE0070ECB4 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Parse.framework; sourceTree = "<group>"; };
-		9E2607F115DEE9000061F325 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		9E2607F315DEE9000061F325 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
-		9E2607F415DEE9000061F325 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
-		9E2607F515DEE9000061F325 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
-		9E2607F615DEE9000061F325 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
-		9E2607F715DEE9000061F325 /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHFKeychainUtils.h; sourceTree = "<group>"; };
-		9E2607F815DEE9000061F325 /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHFKeychainUtils.m; sourceTree = "<group>"; };
-		9E2607F915DEE9000061F325 /* MKSKProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKProduct.h; sourceTree = "<group>"; };
-		9E2607FA15DEE9000061F325 /* MKSKProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKProduct.m; sourceTree = "<group>"; };
-		9E2607FB15DEE9000061F325 /* MKSKSubscriptionProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKSubscriptionProduct.h; sourceTree = "<group>"; };
-		9E2607FC15DEE9000061F325 /* MKSKSubscriptionProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKSubscriptionProduct.m; sourceTree = "<group>"; };
-		9E2607FD15DEE9000061F325 /* MKStoreKitConfigs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreKitConfigs.h; sourceTree = "<group>"; };
-		9E2607FE15DEE9000061F325 /* MKStoreKitConfigs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = MKStoreKitConfigs.plist; sourceTree = "<group>"; };
-		9E2607FF15DEE9000061F325 /* MKStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreManager.h; sourceTree = "<group>"; };
-		9E26080015DEE9000061F325 /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
-		9E26080115DEE9000061F325 /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
-		9E26080215DEE9000061F325 /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
-		9E26080315DEE9000061F325 /* README.mdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.mdown; sourceTree = "<group>"; };
-		9E26080515DEE9000061F325 /* AddDevice.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = AddDevice.html; sourceTree = "<group>"; };
-		9E26080615DEE9000061F325 /* DBSetup.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DBSetup.sql; sourceTree = "<group>"; };
-		9E26080715DEE9000061F325 /* featureCheck.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = featureCheck.php; sourceTree = "<group>"; };
-		9E26080815DEE9000061F325 /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
-		9E26080915DEE9000061F325 /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
-		9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = ShareKit/ShareKit.xcodeproj; sourceTree = "<group>"; };
+		9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = ShareKit/ShareKit.xcodeproj; sourceTree = "<group>"; };
+		9E260B9815DEEC010061F325 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		9E260B9A15DEEC010061F325 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
+		9E260B9B15DEEC010061F325 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
+		9E260B9C15DEEC010061F325 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		9E260B9D15DEEC010061F325 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		9E260B9E15DEEC010061F325 /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFHFKeychainUtils.h; sourceTree = "<group>"; };
+		9E260B9F15DEEC010061F325 /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFHFKeychainUtils.m; sourceTree = "<group>"; };
+		9E260BA015DEEC010061F325 /* MKSKProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKProduct.h; sourceTree = "<group>"; };
+		9E260BA115DEEC010061F325 /* MKSKProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKProduct.m; sourceTree = "<group>"; };
+		9E260BA215DEEC010061F325 /* MKSKSubscriptionProduct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKSKSubscriptionProduct.h; sourceTree = "<group>"; };
+		9E260BA315DEEC010061F325 /* MKSKSubscriptionProduct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKSKSubscriptionProduct.m; sourceTree = "<group>"; };
+		9E260BA415DEEC010061F325 /* MKStoreKitConfigs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreKitConfigs.h; sourceTree = "<group>"; };
+		9E260BA515DEEC010061F325 /* MKStoreKitConfigs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = MKStoreKitConfigs.plist; sourceTree = "<group>"; };
+		9E260BA615DEEC010061F325 /* MKStoreManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreManager.h; sourceTree = "<group>"; };
+		9E260BA715DEEC010061F325 /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
+		9E260BA815DEEC010061F325 /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
+		9E260BA915DEEC010061F325 /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
+		9E260BAA15DEEC010061F325 /* README.mdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.mdown; sourceTree = "<group>"; };
+		9E260BAC15DEEC010061F325 /* AddDevice.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = AddDevice.html; sourceTree = "<group>"; };
+		9E260BAD15DEEC010061F325 /* DBSetup.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DBSetup.sql; sourceTree = "<group>"; };
+		9E260BAE15DEEC010061F325 /* featureCheck.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = featureCheck.php; sourceTree = "<group>"; };
+		9E260BAF15DEEC010061F325 /* requestAccess.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = requestAccess.php; sourceTree = "<group>"; };
+		9E260BB015DEEC010061F325 /* verifyProduct.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = verifyProduct.php; sourceTree = "<group>"; };
 		9E28C1C81569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAssetsLibrary+CustomPhotoAlbum.h"; sourceTree = "<group>"; };
 		9E28C1C91569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAssetsLibrary+CustomPhotoAlbum.m"; sourceTree = "<group>"; };
 		9E28C1CB1569CC0300E56AB4 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
@@ -1025,61 +1025,61 @@
 			path = Appirator;
 			sourceTree = "<group>";
 		};
-		9E2607F015DEE9000061F325 /* MKStoreKit */ = {
+		9E260B8515DEEBFB0061F325 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9E2607F115DEE9000061F325 /* .gitignore */,
-				9E2607F215DEE9000061F325 /* Externals */,
-				9E2607F915DEE9000061F325 /* MKSKProduct.h */,
-				9E2607FA15DEE9000061F325 /* MKSKProduct.m */,
-				9E2607FB15DEE9000061F325 /* MKSKSubscriptionProduct.h */,
-				9E2607FC15DEE9000061F325 /* MKSKSubscriptionProduct.m */,
-				9E2607FD15DEE9000061F325 /* MKStoreKitConfigs.h */,
-				9E2607FE15DEE9000061F325 /* MKStoreKitConfigs.plist */,
-				9E2607FF15DEE9000061F325 /* MKStoreManager.h */,
-				9E26080015DEE9000061F325 /* MKStoreManager.m */,
-				9E26080115DEE9000061F325 /* MKStoreObserver.h */,
-				9E26080215DEE9000061F325 /* MKStoreObserver.m */,
-				9E26080315DEE9000061F325 /* README.mdown */,
-				9E26080415DEE9000061F325 /* Server Code */,
+				9E260B9015DEEBFB0061F325 /* ShareKitDemo.app */,
+				9E260B9215DEEBFB0061F325 /* libShareKit.a */,
+				9E260B9415DEEBFB0061F325 /* ShareKit.bundle */,
+				9E260B9615DEEBFB0061F325 /* libShareKitNoSubmodules.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9E260B9715DEEC010061F325 /* MKStoreKit */ = {
+			isa = PBXGroup;
+			children = (
+				9E260B9815DEEC010061F325 /* .gitignore */,
+				9E260B9915DEEC010061F325 /* Externals */,
+				9E260BA015DEEC010061F325 /* MKSKProduct.h */,
+				9E260BA115DEEC010061F325 /* MKSKProduct.m */,
+				9E260BA215DEEC010061F325 /* MKSKSubscriptionProduct.h */,
+				9E260BA315DEEC010061F325 /* MKSKSubscriptionProduct.m */,
+				9E260BA415DEEC010061F325 /* MKStoreKitConfigs.h */,
+				9E260BA515DEEC010061F325 /* MKStoreKitConfigs.plist */,
+				9E260BA615DEEC010061F325 /* MKStoreManager.h */,
+				9E260BA715DEEC010061F325 /* MKStoreManager.m */,
+				9E260BA815DEEC010061F325 /* MKStoreObserver.h */,
+				9E260BA915DEEC010061F325 /* MKStoreObserver.m */,
+				9E260BAA15DEEC010061F325 /* README.mdown */,
+				9E260BAB15DEEC010061F325 /* Server Code */,
 			);
 			path = MKStoreKit;
 			sourceTree = "<group>";
 		};
-		9E2607F215DEE9000061F325 /* Externals */ = {
+		9E260B9915DEEC010061F325 /* Externals */ = {
 			isa = PBXGroup;
 			children = (
-				9E2607F315DEE9000061F325 /* JSONKit.h */,
-				9E2607F415DEE9000061F325 /* JSONKit.m */,
-				9E2607F515DEE9000061F325 /* NSData+Base64.h */,
-				9E2607F615DEE9000061F325 /* NSData+Base64.m */,
-				9E2607F715DEE9000061F325 /* SFHFKeychainUtils.h */,
-				9E2607F815DEE9000061F325 /* SFHFKeychainUtils.m */,
+				9E260B9A15DEEC010061F325 /* JSONKit.h */,
+				9E260B9B15DEEC010061F325 /* JSONKit.m */,
+				9E260B9C15DEEC010061F325 /* NSData+Base64.h */,
+				9E260B9D15DEEC010061F325 /* NSData+Base64.m */,
+				9E260B9E15DEEC010061F325 /* SFHFKeychainUtils.h */,
+				9E260B9F15DEEC010061F325 /* SFHFKeychainUtils.m */,
 			);
 			path = Externals;
 			sourceTree = "<group>";
 		};
-		9E26080415DEE9000061F325 /* Server Code */ = {
+		9E260BAB15DEEC010061F325 /* Server Code */ = {
 			isa = PBXGroup;
 			children = (
-				9E26080515DEE9000061F325 /* AddDevice.html */,
-				9E26080615DEE9000061F325 /* DBSetup.sql */,
-				9E26080715DEE9000061F325 /* featureCheck.php */,
-				9E26080815DEE9000061F325 /* requestAccess.php */,
-				9E26080915DEE9000061F325 /* verifyProduct.php */,
+				9E260BAC15DEEC010061F325 /* AddDevice.html */,
+				9E260BAD15DEEC010061F325 /* DBSetup.sql */,
+				9E260BAE15DEEC010061F325 /* featureCheck.php */,
+				9E260BAF15DEEC010061F325 /* requestAccess.php */,
+				9E260BB015DEEC010061F325 /* verifyProduct.php */,
 			);
 			path = "Server Code";
-			sourceTree = "<group>";
-		};
-		9E260B6415DEE9130061F325 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9E260B6F15DEE9130061F325 /* ShareKitDemo.app */,
-				9E260B7115DEE9130061F325 /* libShareKit.a */,
-				9E260B7315DEE9130061F325 /* ShareKit.bundle */,
-				9E260B7515DEE9130061F325 /* libShareKitNoSubmodules.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		9E32D36015DCE6100009077B /* Editor */ = {
@@ -1196,8 +1196,8 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */,
-				9E2607F015DEE9000061F325 /* MKStoreKit */,
+				9E260B9715DEEC010061F325 /* MKStoreKit */,
+				9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */,
 				9E0D042C15853896009767AD /* FlurryAnalytics.h */,
 				9E0D042D15853896009767AD /* libFlurryAnalytics.a */,
 				9E17ADFE1543526D00F9E5F8 /* Appirator */,
@@ -1858,8 +1858,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 9E260B6415DEE9130061F325 /* Products */;
-					ProjectRef = 9E260B6315DEE9130061F325 /* ShareKit.xcodeproj */;
+					ProductGroup = 9E260B8515DEEBFB0061F325 /* Products */;
+					ProjectRef = 9E260B8415DEEBFB0061F325 /* ShareKit.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1871,32 +1871,32 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		9E260B6F15DEE9130061F325 /* ShareKitDemo.app */ = {
+		9E260B9015DEEBFB0061F325 /* ShareKitDemo.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = ShareKitDemo.app;
-			remoteRef = 9E260B6E15DEE9130061F325 /* PBXContainerItemProxy */;
+			remoteRef = 9E260B8F15DEEBFB0061F325 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E260B7115DEE9130061F325 /* libShareKit.a */ = {
+		9E260B9215DEEBFB0061F325 /* libShareKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKit.a;
-			remoteRef = 9E260B7015DEE9130061F325 /* PBXContainerItemProxy */;
+			remoteRef = 9E260B9115DEEBFB0061F325 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E260B7315DEE9130061F325 /* ShareKit.bundle */ = {
+		9E260B9415DEEBFB0061F325 /* ShareKit.bundle */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = ShareKit.bundle;
-			remoteRef = 9E260B7215DEE9130061F325 /* PBXContainerItemProxy */;
+			remoteRef = 9E260B9315DEEBFB0061F325 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E260B7515DEE9130061F325 /* libShareKitNoSubmodules.a */ = {
+		9E260B9615DEEBFB0061F325 /* libShareKitNoSubmodules.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKitNoSubmodules.a;
-			remoteRef = 9E260B7415DEE9130061F325 /* PBXContainerItemProxy */;
+			remoteRef = 9E260B9515DEEBFB0061F325 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2171,14 +2171,14 @@
 				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
 				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
 				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
-				9E260A3F15DEE9030061F325 /* .gitignore in Resources */,
-				9E260A4515DEE9030061F325 /* MKStoreKitConfigs.plist in Resources */,
-				9E260A4815DEE9030061F325 /* README.mdown in Resources */,
-				9E260A4915DEE9030061F325 /* AddDevice.html in Resources */,
-				9E260A4A15DEE9030061F325 /* DBSetup.sql in Resources */,
-				9E260A4B15DEE9030061F325 /* featureCheck.php in Resources */,
-				9E260A4C15DEE9030061F325 /* requestAccess.php in Resources */,
-				9E260A4D15DEE9030061F325 /* verifyProduct.php in Resources */,
+				9E260BB115DEEC010061F325 /* .gitignore in Resources */,
+				9E260BB715DEEC010061F325 /* MKStoreKitConfigs.plist in Resources */,
+				9E260BBA15DEEC010061F325 /* README.mdown in Resources */,
+				9E260BBB15DEEC010061F325 /* AddDevice.html in Resources */,
+				9E260BBC15DEEC010061F325 /* DBSetup.sql in Resources */,
+				9E260BBD15DEEC010061F325 /* featureCheck.php in Resources */,
+				9E260BBE15DEEC010061F325 /* requestAccess.php in Resources */,
+				9E260BBF15DEEC010061F325 /* verifyProduct.php in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2291,13 +2291,13 @@
 				9E04547A15DB179B00E95260 /* PreviewController.m in Sources */,
 				9E04547F15DB17BF00E95260 /* PreviewLoginViewController.m in Sources */,
 				9E0454CA15DC28E600E95260 /* CreateHandleController.m in Sources */,
-				9E260A4015DEE9030061F325 /* JSONKit.m in Sources */,
-				9E260A4115DEE9030061F325 /* NSData+Base64.m in Sources */,
-				9E260A4215DEE9030061F325 /* SFHFKeychainUtils.m in Sources */,
-				9E260A4315DEE9030061F325 /* MKSKProduct.m in Sources */,
-				9E260A4415DEE9030061F325 /* MKSKSubscriptionProduct.m in Sources */,
-				9E260A4615DEE9030061F325 /* MKStoreManager.m in Sources */,
-				9E260A4715DEE9030061F325 /* MKStoreObserver.m in Sources */,
+				9E260BB215DEEC010061F325 /* JSONKit.m in Sources */,
+				9E260BB315DEEC010061F325 /* NSData+Base64.m in Sources */,
+				9E260BB415DEEC010061F325 /* SFHFKeychainUtils.m in Sources */,
+				9E260BB515DEEC010061F325 /* MKSKProduct.m in Sources */,
+				9E260BB615DEEC010061F325 /* MKSKSubscriptionProduct.m in Sources */,
+				9E260BB815DEEC010061F325 /* MKStoreManager.m in Sources */,
+				9E260BB915DEEC010061F325 /* MKStoreObserver.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

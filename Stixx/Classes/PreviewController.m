@@ -103,10 +103,30 @@
 }
 
 -(void)shouldDisplayDetailViewWithTag:(Tag*)tag {
-    return; // do nothing - eventually can display information
+    detailController = [[DetailViewController alloc] init];
+    [detailController setDelegate:self];    
+    [detailController initDetailViewWithTag:tag];
+//    [self.navigationController pushViewController:detailController animated:YES];
+    [self.view insertSubview:detailController.view belowSubview:barBase];
+    [detailController setIsPreview]; 
+
+    UIImage * backImage = [UIImage imageNamed:@"nav_back"];
+    UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
+    [backButton setImage:backImage forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(didClickBackButton) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem * leftButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+    [self.navigationItem setLeftBarButtonItem:leftButton];
+    
+    return; 
 }
 
 #pragma mark button actions
+
+-(void)didClickBackButton {
+    // close detailView
+    [detailController.view removeFromSuperview];
+    [self.navigationItem setLeftBarButtonItem:nil];
+}
 
 -(IBAction)didClickNextButton:(id)sender {
     NSLog(@"You ready to log in?");
@@ -333,6 +353,7 @@
 #pragma mark DidSelectUsername
 
 -(void)didSelectUsernameWithResults:(NSArray *)theResults {
+    NSLog(@"PreviewController: didSelecUsernameWithResults: %d results", [theResults count]);
     if ([theResults count]) {
         // successful login using given facebookString
         NSMutableDictionary * d = [theResults objectAtIndex:0];

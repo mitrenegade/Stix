@@ -16,6 +16,7 @@
 #import "SignupViewController.h"
 #import "LoginViewController.h"
 #import "CreateHandleController.h"
+#import "DetailViewController.h"
 
 @protocol PreviewDelegate <NSObject>
 -(int)getNewestTagID;
@@ -53,6 +54,8 @@
     NSString * twitterProfileURL;
     
     BOOL isFirstTimeUser;
+    
+    DetailViewController * detailController;
 }
 
 @property (nonatomic, unsafe_unretained) NSObject<PreviewDelegate> * delegate;

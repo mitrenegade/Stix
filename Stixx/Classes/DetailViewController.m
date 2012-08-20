@@ -40,6 +40,7 @@ static BOOL openingDetailView;
         [self.navigationItem setTitleView:logo];
         
         feedItem = nil;
+        isPreview = YES;
     }
     return self;
 }
@@ -132,16 +133,11 @@ static BOOL openingDetailView;
 }
 
 -(IBAction)didClickBackButton:(id)sender {    
-#if 0
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = CGRectMake(-3-320, 0, 320, 480);
-    animationID[1] = [animation doSlide:self.view inView:self.view toFrame:frameOffscreen forTime:.25];
-    [DetailViewController unlockOpen];
-#else
+    if (isPreview)
+        [self.view removeFromSuperview];
     [self.navigationController popViewControllerAnimated:YES];
-#endif
 }
+
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
     if (animID == animationID[1]) {
         //[stixView release];
@@ -421,6 +417,8 @@ static BOOL openingDetailView;
 
 -(void)displayCommentsOfTag:(Tag*)_tag andName:(NSString *)nameString{
     //assert( _tagID == tagID );
+    if (!isPreview)
+        return;
     [delegate shouldDisplayCommentViewWithTag:_tag andNameString:nameString fromDetailView:self];
 }
 
@@ -446,35 +444,25 @@ static BOOL openingDetailView;
 //}
 
 -(void)didClickUserPhoto:(UIButton*)button {
+    if (!isPreview)
+        return;
     NSLog(@"DetailViewController: Clicked user photo for tag: user %@", tagUsername);
     [delegate shouldDisplayUserPage:tagUsername];
     [DetailViewController unlockOpen];
 }
 -(void)didClickViaButton:(UIButton*)button {
+    if (!isPreview)
+        return;
     NSLog(@"DetailViewController: Clicked via button for tag: original user %@", tag.originalUsername);
     [delegate shouldDisplayUserPage:tag.originalUsername];
     [DetailViewController unlockOpen];
 }
 
 -(void)shouldDisplayUserPage:(NSString *)username {
+    if (!isPreview)
+        return;
     NSLog(@"Multilayered display of profile view about to happen from DetailViewController!");
-#if 0
-    // close comments table first - click came from here
-    StixAnimation * animation = [[StixAnimation alloc] init];
-    animation.delegate = self;
-    CGRect frameOffscreen = commentView.view.frame;
-    frameOffscreen.origin.x -= 330;
-    
-    [animation doViewTransition:commentView.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
-        [commentView.view removeFromSuperview];
-        [delegate shouldDisplayUserPage:username];
-    }];
-    
-    // this is effectively a close action, so must unlock detailViewController open lock
-    [DetailViewController unlockOpen];
-#else
     [delegate shouldDisplayUserPage:username];
-#endif
 }
 
 -(void)didClickAtLocation:(CGPoint)location withFeedItem:(VerticalFeedItemController *)feedItem {
@@ -499,6 +487,8 @@ static BOOL openingDetailView;
 }
 
 -(void)didClickLikeButton:(int)type withTag:(Tag*)_tag {
+    if (!isPreview)
+        return;
     //int _tagID = [_tag.tagID intValue];
     NSString * newComment = @"";
     NSString * newType = @"LIKE";
@@ -532,6 +522,9 @@ static BOOL openingDetailView;
 #pragma mark remix delegate functions
 
 -(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)_feedItem {
+    if (!isPreview)
+        return;
+
     NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", _feedItem.tag.tagID, tagToRemix.tagID);
 
     // hack: instead of doing this in the detailView and duplicating all the code to make the functionality work, we just jump to the feedview
@@ -541,12 +534,26 @@ static BOOL openingDetailView;
 
 -(BOOL)didClickNotesButton {
 // checks whether first time user message will allow it
+    if (!isPreview)
+        return NO;
     return YES;
 }
 
 #pragma mark shareControllerDelegate called from verticalFeedItemDelegate
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)_feedItem {
+    if (!isPreview)
+        return;
     [delegate doParallelNewPixShare:_feedItem.tag];
 }
 
+-(void)setIsPreview {
+    // this view is not interactive because it comes from the preview controller
+    // so remove certain buttons
+    isPreview = NO;
+    [commentsTable.view setHidden:YES];
+    [feedItem.buttonRemix setAlpha:.5];
+    [feedItem.buttonAddComment setAlpha:.5];
+    [feedItem.buttonShare setAlpha:.5];
+    [feedItem.labelCommentCount setAlpha:.5];
+}
 @end

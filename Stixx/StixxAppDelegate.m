@@ -136,6 +136,22 @@ static dispatch_queue_t backgroundQueue;
     
     [window makeKeyAndVisible];
     
+    allTags = [[NSMutableArray alloc] init];
+    allTagIDs = [[NSMutableDictionary alloc] init];
+    allUserPhotos = [[NSMutableDictionary alloc] init];
+    allStix = [[NSMutableDictionary alloc] init];
+    allStixOrder = [[NSMutableDictionary alloc] init];
+    //allFriends = [[NSMutableSet alloc] init];
+    allFollowing = [[NSMutableSet alloc] init];
+    allFollowers = [[NSMutableSet alloc] init];
+    allUserFacebookStrings = [[NSMutableArray alloc] init];
+    allUserTwitterStrings = [[NSMutableArray alloc] init];
+    allUserIDs = [[NSMutableDictionary alloc] init];
+    allUserEmails = [[NSMutableArray alloc] init];
+    allUserNames = [[NSMutableArray alloc] init];
+    allCommentCounts = [[NSMutableDictionary alloc] init];
+    allCommentHistories = [[NSMutableDictionary alloc] init];
+    
     myUserInfo = malloc(sizeof(struct UserInfo));
     myUserInfo_username = nil;
     myUserInfo_userphoto = nil;
@@ -248,22 +264,6 @@ static dispatch_queue_t backgroundQueue;
     
 	tabBarController = [[RaisedCenterTabBarController alloc] init];
     tabBarController.myDelegate = self;
-    
-    allTags = [[NSMutableArray alloc] init];
-    allTagIDs = [[NSMutableDictionary alloc] init];
-    allUserPhotos = [[NSMutableDictionary alloc] init];
-    allStix = [[NSMutableDictionary alloc] init];
-    allStixOrder = [[NSMutableDictionary alloc] init];
-    //allFriends = [[NSMutableSet alloc] init];
-    allFollowing = [[NSMutableSet alloc] init];
-    allFollowers = [[NSMutableSet alloc] init];
-    allUserFacebookStrings = [[NSMutableArray alloc] init];
-    allUserTwitterStrings = [[NSMutableArray alloc] init];
-    allUserIDs = [[NSMutableDictionary alloc] init];
-    allUserEmails = [[NSMutableArray alloc] init];
-    allUserNames = [[NSMutableArray alloc] init];
-    allCommentCounts = [[NSMutableDictionary alloc] init];
-    allCommentHistories = [[NSMutableDictionary alloc] init];
     
   	tagViewController = [[TagViewController alloc] init];
 	tagViewController.delegate = self;
@@ -503,6 +503,9 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 //            [loginSplashController setDelegate:self];
 //            [loginSplashController didGetFacebookName:name andEmail:email andFacebookString:facebookString];
 
+        }
+        else {
+            NSLog(@"No previewController!");
         }
         // update facebookString on kumulos
         // only need to be done with shareController
@@ -2338,7 +2341,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         //NSLog(@"AllUserIDS: %@ %d", name, [userID intValue]);
     }
     NSLog(@"allUserFacebookStrings: %d", [allUserFacebookStrings count]);
-    [feedController forceReloadWholeTableZOMG];
+//    [feedController forceReloadWholeTableZOMG];
     [friendSuggestionController refreshUserPhotos];
     [newsController refreshUserPhotos];
     [profileController reloadSuggestionsForOutsideChange];
@@ -3817,6 +3820,7 @@ static bool isShowingAlerts = NO;
 //-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation getFollowListDidCompleteWithResult:(NSArray *)theResults {
 -(void)khCallback_didGetFollowList:(NSArray*)returnParams {
     NSArray * theResults = returnParams; // objectAtIndex:0];
+    NSLog(@"didGetFollowList returned %d", [theResults count]);
     // list of people this user is following
     // key: username value: friendName
     if (!addAutomaticFollows)
@@ -3845,7 +3849,7 @@ static bool isShowingAlerts = NO;
     NSArray * theResults = returnParams; // objectAtIndex:0];
     // list of people this user is following
     // key: username value: friendName
-    NSLog(@"You are following %d users", [theResults count]);
+    NSLog(@"didGetFollowListWithAggregation returned: You are following %d users", [theResults count]);
     if (!addAutomaticFollows)
         [allFollowing removeAllObjects];
     for (NSMutableDictionary * d in theResults) {

@@ -392,7 +392,7 @@ static int lastRequest;
         KumulosHelper * kh = [[KumulosHelper alloc] init];
         [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
 #else
-        [self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
+        //[self fakeDidGetAuxiliaryStixOfTagWithID:newtag.tagID];
 #endif
         pendingContentCount--;
         if (pendingContentCount <= 0) {

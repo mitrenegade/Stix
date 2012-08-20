@@ -97,8 +97,6 @@
 		9E3915D615AE76480033AB2B /* txt_popular.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E3915D515AE76480033AB2B /* txt_popular.png */; };
 		9E3BE07A1463673200F7B763 /* MainWindow_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E3BE0761463673200F7B763 /* MainWindow_iPhone.xib */; };
 		9E3BE07B1463673200F7B763 /* StixxAppDelegate_iPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */; };
-		9E427EC715DEF1840059D580 /* libShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E427EBF15DEF0D50059D580 /* libShareKit.a */; };
-		9E427ECE15DEF5940059D580 /* ShareKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E427ECD15DEF5940059D580 /* ShareKit.bundle */; };
 		9E47ED1B15068C8F00F4E250 /* ColumnTableController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E47ED1915068C8F00F4E250 /* ColumnTableController.m */; };
 		9E47ED1C15068C8F00F4E250 /* ColumnTableController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */; };
 		9E5216E3155B210800CD0AD5 /* icon_lite_57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E5216E2155B210700CD0AD5 /* icon_lite_57.png */; };
@@ -165,6 +163,8 @@
 		9E63626514DC61D80008E806 /* feedback_cartoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626414DC61D80008E806 /* feedback_cartoon.png */; };
 		9E63626814DC61EE0008E806 /* radio_button_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626614DC61ED0008E806 /* radio_button_off.png */; };
 		9E63626914DC61EE0008E806 /* radio_button_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E63626714DC61EE0008E806 /* radio_button_on.png */; };
+		9E66A18B15DF2C2C007285A5 /* libShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E66A18615DF29CF007285A5 /* libShareKit.a */; };
+		9E66A18C15DF2C34007285A5 /* ShareKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9E66A18815DF29CF007285A5 /* ShareKit.bundle */; };
 		9E6771821579F7AE00AD7A53 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E6771811579F7AE00AD7A53 /* CoreLocation.framework */; };
 		9E69E908158FF47900050488 /* btn_profile_following.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E69E902158FF47900050488 /* btn_profile_following.png */; };
 		9E69E909158FF47900050488 /* btn_profile_follow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9E69E903158FF47900050488 /* btn_profile_follow.png */; };
@@ -383,40 +383,33 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9E427EBC15DEF0D50059D580 /* PBXContainerItemProxy */ = {
+		9E66A18315DF29CF007285A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1D6058910D05DD3D006BFB54;
 			remoteInfo = "Demo App";
 		};
-		9E427EBE15DEF0D50059D580 /* PBXContainerItemProxy */ = {
+		9E66A18515DF29CF007285A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5342E1552AADD00171BCE;
 			remoteInfo = "Static Library";
 		};
-		9E427EC015DEF0D50059D580 /* PBXContainerItemProxy */ = {
+		9E66A18715DF29CF007285A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7AB5360F1552E26800171BCE;
 			remoteInfo = "Resource Bundle";
 		};
-		9E427EC215DEF0D50059D580 /* PBXContainerItemProxy */ = {
+		9E66A18915DF29CF007285A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7A0F9246156BA2A0009CB40A;
 			remoteInfo = "Static Library No Submodules";
-		};
-		9E427EC515DEF1710059D580 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 7AB5342D1552AADD00171BCE;
-			remoteInfo = "Static Library";
 		};
 		9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -424,6 +417,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9EB0316D142C002E0019F2BD;
 			remoteInfo = Stixx;
+		};
+		9EF8B89315E25F9C004E3405 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 7AB5342D1552AADD00171BCE;
+			remoteInfo = "Static Library";
+		};
+		9EF8B89515E25F9F004E3405 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 7AB5360E1552E26800171BCE;
+			remoteInfo = "Resource Bundle";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -515,7 +522,6 @@
 		9E260BDA15DEED9A0061F325 /* MKStoreManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreManager.m; sourceTree = "<group>"; };
 		9E260BDB15DEED9A0061F325 /* MKStoreObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKStoreObserver.h; sourceTree = "<group>"; };
 		9E260BDC15DEED9A0061F325 /* MKStoreObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKStoreObserver.m; sourceTree = "<group>"; };
-		9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = ShareKit/ShareKit.xcodeproj; sourceTree = SOURCE_ROOT; };
 		9E28C1C81569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAssetsLibrary+CustomPhotoAlbum.h"; sourceTree = "<group>"; };
 		9E28C1C91569C89100E56AB4 /* ALAssetsLibrary+CustomPhotoAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAssetsLibrary+CustomPhotoAlbum.m"; sourceTree = "<group>"; };
 		9E28C1CB1569CC0300E56AB4 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
@@ -543,7 +549,6 @@
 		9E3BE0771463673200F7B763 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow_iPhone.xib; sourceTree = "<group>"; };
 		9E3BE0781463673200F7B763 /* StixxAppDelegate_iPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StixxAppDelegate_iPhone.h; sourceTree = "<group>"; };
 		9E3BE0791463673200F7B763 /* StixxAppDelegate_iPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StixxAppDelegate_iPhone.m; sourceTree = "<group>"; };
-		9E427ECD15DEF5940059D580 /* ShareKit.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = ShareKit.bundle; path = ShareKit/Classes/ShareKit/ShareKit.bundle; sourceTree = "<group>"; };
 		9E47ED1815068C8F00F4E250 /* ColumnTableController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColumnTableController.h; sourceTree = "<group>"; };
 		9E47ED1915068C8F00F4E250 /* ColumnTableController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColumnTableController.m; sourceTree = "<group>"; };
 		9E47ED1A15068C8F00F4E250 /* ColumnTableController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColumnTableController.xib; sourceTree = "<group>"; };
@@ -620,6 +625,7 @@
 		9E63626414DC61D80008E806 /* feedback_cartoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = feedback_cartoon.png; sourceTree = "<group>"; };
 		9E63626614DC61ED0008E806 /* radio_button_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_off.png; sourceTree = "<group>"; };
 		9E63626714DC61EE0008E806 /* radio_button_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = radio_button_on.png; sourceTree = "<group>"; };
+		9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShareKit.xcodeproj; path = Submodules/ShareKit/ShareKit.xcodeproj; sourceTree = "<group>"; };
 		9E6771811579F7AE00AD7A53 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		9E69E902158FF47900050488 /* btn_profile_following.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_profile_following.png; sourceTree = "<group>"; };
 		9E69E903158FF47900050488 /* btn_profile_follow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_profile_follow.png; sourceTree = "<group>"; };
@@ -908,7 +914,6 @@
 				9E28C1CC1569CC0300E56AB4 /* AssetsLibrary.framework in Frameworks */,
 				9E17AE0715437A3100F9E5F8 /* StoreKit.framework in Frameworks */,
 				9EA572D61523712800D79BE6 /* AddressBook.framework in Frameworks */,
-				9E427EC715DEF1840059D580 /* libShareKit.a in Frameworks */,
 				9EE8D95D14D1C5FE001F36D1 /* Security.framework in Frameworks */,
 				9EE8D95B14D1C5F0001F36D1 /* libz.1.1.3.dylib in Frameworks */,
 				9EE8D95914D1C5DA001F36D1 /* MobileCoreServices.framework in Frameworks */,
@@ -926,6 +931,7 @@
 				9EB0D10415548F5B00EDB7BC /* libKumulos_iOS_.0.7.4.a in Frameworks */,
 				9ED08781157AA414009E63D3 /* Parse.framework in Frameworks */,
 				9E0D042E15853896009767AD /* libFlurryAnalytics.a in Frameworks */,
+				9E66A18B15DF2C2C007285A5 /* libShareKit.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1048,17 +1054,6 @@
 			path = Externals;
 			sourceTree = "<group>";
 		};
-		9E260BFC15DEF0510061F325 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9E427EBD15DEF0D50059D580 /* ShareKitDemo.app */,
-				9E427EBF15DEF0D50059D580 /* libShareKit.a */,
-				9E427EC115DEF0D50059D580 /* ShareKit.bundle */,
-				9E427EC315DEF0D50059D580 /* libShareKitNoSubmodules.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		9E32D36015DCE6100009077B /* Editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1160,6 +1155,17 @@
 			name = Friends;
 			sourceTree = "<group>";
 		};
+		9E66A17915DF29CE007285A5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9E66A18415DF29CF007285A5 /* ShareKitDemo.app */,
+				9E66A18615DF29CF007285A5 /* libShareKit.a */,
+				9E66A18815DF29CF007285A5 /* ShareKit.bundle */,
+				9E66A18A15DF29CF007285A5 /* libShareKitNoSubmodules.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		9E8112E415AFACB30080AAC3 /* Newsletter */ = {
 			isa = PBXGroup;
 			children = (
@@ -1173,7 +1179,7 @@
 		9E88A41E148A8D8000E67864 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */,
+				9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */,
 				9E260B9715DEEC010061F325 /* MKStoreKit */,
 				9E0D042C15853896009767AD /* FlurryAnalytics.h */,
 				9E0D042D15853896009767AD /* libFlurryAnalytics.a */,
@@ -1491,7 +1497,6 @@
 		9EB03163142C002E0019F2BD = {
 			isa = PBXGroup;
 			children = (
-				9E427ECD15DEF5940059D580 /* ShareKit.bundle */,
 				9E9E7029159C553700EF996F /* Default@2x.png */,
 				9E9E7027159C552E00EF996F /* Default.png */,
 				9EF173BF146A10700073F83B /* icon_57.png */,
@@ -1789,7 +1794,8 @@
 			buildRules = (
 			);
 			dependencies = (
-				9E427EC615DEF1710059D580 /* PBXTargetDependency */,
+				9EF8B89615E25F9F004E3405 /* PBXTargetDependency */,
+				9EF8B89415E25F9D004E3405 /* PBXTargetDependency */,
 			);
 			name = Stixx;
 			productName = Stixx;
@@ -1837,8 +1843,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 9E260BFC15DEF0510061F325 /* Products */;
-					ProjectRef = 9E260BFB15DEF0510061F325 /* ShareKit.xcodeproj */;
+					ProductGroup = 9E66A17915DF29CE007285A5 /* Products */;
+					ProjectRef = 9E66A17815DF29CE007285A5 /* ShareKit.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1850,32 +1856,32 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		9E427EBD15DEF0D50059D580 /* ShareKitDemo.app */ = {
+		9E66A18415DF29CF007285A5 /* ShareKitDemo.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = ShareKitDemo.app;
-			remoteRef = 9E427EBC15DEF0D50059D580 /* PBXContainerItemProxy */;
+			remoteRef = 9E66A18315DF29CF007285A5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E427EBF15DEF0D50059D580 /* libShareKit.a */ = {
+		9E66A18615DF29CF007285A5 /* libShareKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKit.a;
-			remoteRef = 9E427EBE15DEF0D50059D580 /* PBXContainerItemProxy */;
+			remoteRef = 9E66A18515DF29CF007285A5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E427EC115DEF0D50059D580 /* ShareKit.bundle */ = {
+		9E66A18815DF29CF007285A5 /* ShareKit.bundle */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = ShareKit.bundle;
-			remoteRef = 9E427EC015DEF0D50059D580 /* PBXContainerItemProxy */;
+			remoteRef = 9E66A18715DF29CF007285A5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9E427EC315DEF0D50059D580 /* libShareKitNoSubmodules.a */ = {
+		9E66A18A15DF29CF007285A5 /* libShareKitNoSubmodules.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libShareKitNoSubmodules.a;
-			remoteRef = 9E427EC215DEF0D50059D580 /* PBXContainerItemProxy */;
+			remoteRef = 9E66A18915DF29CF007285A5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2150,8 +2156,8 @@
 				9E04547B15DB179B00E95260 /* PreviewController.xib in Resources */,
 				9E04548015DB17BF00E95260 /* PreviewLoginViewController.xib in Resources */,
 				9E0454C715DC28DD00E95260 /* CreateHandleController.xib in Resources */,
-				9E427ECE15DEF5940059D580 /* ShareKit.bundle in Resources */,
 				9E260BE115DEED9A0061F325 /* MKStoreKitConfigs.plist in Resources */,
+				9E66A18C15DF2C34007285A5 /* ShareKit.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2283,15 +2289,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9E427EC615DEF1710059D580 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Static Library";
-			targetProxy = 9E427EC515DEF1710059D580 /* PBXContainerItemProxy */;
-		};
 		9EB0319E142C002E0019F2BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9EB0316D142C002E0019F2BD /* Stixx */;
 			targetProxy = 9EB0319D142C002E0019F2BD /* PBXContainerItemProxy */;
+		};
+		9EF8B89415E25F9D004E3405 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Static Library";
+			targetProxy = 9EF8B89315E25F9C004E3405 /* PBXContainerItemProxy */;
+		};
+		9EF8B89615E25F9F004E3405 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Resource Bundle";
+			targetProxy = 9EF8B89515E25F9F004E3405 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -93,9 +93,11 @@
 #pragma mark - Table view data source
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    //NSLog(@"Getting header for section: %d", section);
     return [self.delegate headerForSection:section];
 }
 - (float)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    //NSLog(@"Getting height for header for section: %d: %d", section, [delegate heightForHeaderInSection:section]);
     return [delegate heightForHeaderInSection:section]; //HEADER_HEIGHT;
 }
 

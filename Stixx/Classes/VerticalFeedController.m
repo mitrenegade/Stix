@@ -321,13 +321,11 @@ static int tickID;
     if (index < [allTagsPending count])
         tag = [allTagsPending objectAtIndex:index];
     else {
-        if ([allTagsDisplayed count] <= index - [allTagsPending count])
-            return nil;
+        if ([allTagsDisplayed count] <= index - [allTagsPending count]) {
+            NSLog(@"AllTagsDisplayed %d index %d allTagsPending %d", [allTagsDisplayed count], index, [allTagsPending count]);
+            return nil;            
+        }
         tag = [allTagsDisplayed objectAtIndex:(index-[allTagsPending count])];
-    }
-    if ([tag.tagID intValue] == 6019) {
-        NSLog(@"here");
-        NSLog(@"Tag username %@ comment %@ descriptor %@ original username %@", tag.username, tag.comment, tag.descriptor, tag.originalUsername);
     }
     UIView * headerView = [headerViews objectForKey:tag.tagID];
     if (!headerView) {
@@ -413,12 +411,16 @@ static int tickID;
                 [headerViewsDidLoadPhoto setObject:[NSNumber numberWithBool:YES] forKey:tag.tagID];
             }
         }
+        else {
+            //NSLog(@"Here!");
+        }
     }
     return [headerViews objectForKey:tag.tagID]; // MRC
 }
 
 -(UIView*)reloadViewForItemAtIndex:(int)index {
     // todo: reloadData only once for a batch of reloadViewForItem - maybe after requesting content from aggregator
+    NSLog(@"allTagsDisplayed %d allTagsPending %d", [allTagsDisplayed count], [allTagsPending count]);
     if (index > [allTagsDisplayed count]+[allTagsPending count]-1) {
         index = [allTagsDisplayed count]+[allTagsPending count]-1;
         NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
@@ -901,6 +903,7 @@ static int tickID;
 
 -(void)reloadPage:(int)page {
     // forces scrollview to clear view at lastPageViewed, forces self to recreate FeedItem at lastPageViewed
+    NSLog(@"ReloadPage");
     [self populateAllTagsDisplayed];
     [self startActivityIndicator];
     if (page>[allTagsDisplayed count])
@@ -999,6 +1002,7 @@ static int tickID;
     NSMutableSet * followingSetWithMe = [[NSMutableSet alloc] initWithSet:followingSet];
     if ([delegate isLoggedIn]) {
         [followingSetWithMe addObject:[self getUsername]];
+        NSLog(@"FollowingSetWithMe: %d", [followingSetWithMe count]);
         for (int i=0; i<[allTags count]; i++) {
             Tag * tag = [allTags objectAtIndex:i];
             NSString * name = tag.username;
@@ -1016,9 +1020,12 @@ static int tickID;
     else
     {
         // display all tags
-        [allTagsDisplayed addObjectsFromArray:allTags];
+        //[allTagsDisplayed addObjectsFromArray:allTags];
+        
+        // do not display all tags until user is logged in and followers are loaded
     }
     NSLog(@"After populateAllTagsDisplayed, allTagsDisplayed %d allTags %d", [allTagsDisplayed count], [allTags count]);
+    return;
 }
 
 -(int)addTagForDisplay:(Tag *)tag {
@@ -1054,6 +1061,7 @@ static int tickID;
 }
 
 -(int)numberOfSections {
+    NSLog(@"Number of sections: %d", [allTagsDisplayed count]);
     return [allTagsDisplayed count];
 }
 

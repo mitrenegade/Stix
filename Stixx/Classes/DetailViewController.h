@@ -79,6 +79,8 @@
     BOOL newPixDidFinishUpload;
 
     Tag * tagToRemix;
+    
+    BOOL isPreview;
 }
 //@property (nonatomic, retain) IBOutlet UILabel * labelComment;
 //@property (nonatomic, retain) IBOutlet UILabel * labelLocationString;
@@ -108,4 +110,5 @@
 -(void)doParallelNewPixShare;
 
 -(void)reloadComments;
+-(void)setIsPreview;
 @end

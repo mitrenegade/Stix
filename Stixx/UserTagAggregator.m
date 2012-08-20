@@ -271,6 +271,10 @@
          
         if ([aggregationQueue count] == 0) {
             NSLog(@"No new aggregation to do! trigger something here!");
+            
+            // hack: sometimes the following lists get downloaded slowly so no content
+            // appears
+            [delegate didFinishAggregation:YES];
         }
     }
     

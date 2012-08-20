@@ -131,6 +131,8 @@
     UIView * firstTimeArrowCanvas[2];
     int agitatePointer[2];
     int animationID[2];
+    
+    BOOL hasContent;
 }
 @property (nonatomic) NSMutableDictionary * feedItems;
 @property (nonatomic) NSMutableDictionary * headerViews;

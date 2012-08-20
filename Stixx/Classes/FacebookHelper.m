@@ -318,7 +318,7 @@ static NSMutableDictionary * timeoutRequests;
 // response for requestWithGraphPath
 - (void)request:(FBRequest *)request didLoad:(id)result {
     NSDictionary * dictionary = result;
-    NSLog(@"FacebookHelper FBRequest didLoad with Result: %@ for currentRequest %@", result, currentRequest);
+    NSLog(@"FacebookHelper FBRequest didLoad for currentRequest %@", currentRequest);
     if ([currentRequest isEqualToString:@"requestGraphPathMe"]) {
         [timeoutRequests removeObjectForKey:currentRequest];
         NSLog(@"Facebook FBRequest timeout for %@ removed", currentRequest);

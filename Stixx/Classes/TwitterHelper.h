@@ -21,6 +21,7 @@
 -(void)twitterHelperStartedInitialConnect; 
 -(void)didInitialLoginForTwitter;
 -(void)twitterHelperDidFailWithRequestType:(NSString*)requestType;
+-(void)twitterRequestDidTimeOut; // for code -1001, login request time out
 @end
 
 @interface TwitterHelper : SHKTwitter <SHKSharerDelegate, KumulosHelperDelegate>

@@ -110,6 +110,13 @@
     [self.view insertSubview:detailController.view belowSubview:barBase];
     [detailController setIsPreview]; 
 
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = CGRectMake(3+320, 0, 320, 480);
+    CGRect frameOnscreen = detailController.view.frame;
+    [detailController.view setFrame:frameOffscreen];
+    [animation doViewTransition:detailController.view toFrame:frameOnscreen forTime:.25 withCompletion:^(BOOL finished) {
+    }];
+
     UIImage * backImage = [UIImage imageNamed:@"nav_back"];
     UIButton * backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, backImage.size.width, backImage.size.height)];
     [backButton setImage:backImage forState:UIControlStateNormal];
@@ -124,7 +131,15 @@
 
 -(void)didClickBackButton {
     // close detailView
+#if 0
     [detailController.view removeFromSuperview];
+#else
+    StixAnimation * animation = [[StixAnimation alloc] init];
+    CGRect frameOffscreen = CGRectMake(3+320, 0, 320, 480);
+    [animation doViewTransition:detailController.view toFrame:frameOffscreen forTime:.25 withCompletion:^(BOOL finished) {
+        detailController = nil;
+    }];
+#endif
     [self.navigationItem setLeftBarButtonItem:nil];
 }
 
@@ -230,6 +245,13 @@
     }
 }
 
+-(void)twitterRequestDidTimeOut {
+    // comes from sharer did timeout - usually code -1001 in logout
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Twitter Timeout" message:@"Twitter is taking too long and can't connect...please try again later!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alertView show];
+    [self stopActivityIndicator];
+}
+
 -(void)didGetTwitterCredentials:(NSDictionary*)results {
     NSLog(@"Did get twitter credentials: %@", results);
     NSEnumerator * e = [results keyEnumerator];
@@ -247,6 +269,7 @@
 }
 
 -(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation loginViaTwitterDidCompleteWithResult:(NSArray *)theResults {
+    [self startActivityIndicator];
     [self didSelectUsernameWithResults:theResults];
 }
 
@@ -310,19 +333,19 @@
     [self setHandle:_handle];
     [self setPhotoData:_photoData];
     
-    NSLog(@"FacebookLoginController: adding user");
+    NSLog(@"PreviewController: didAddHandle for user %@ facebookString %@ twitterString %@ email %@", handle, facebookString, twitterString, email);
     if (handle)
         username = handle;
     
-    [k createFacebookUserWithUsername:username andEmail:email andPhoto:photoData andFacebookString:facebookString];
+    //[k createFacebookUserWithUsername:username andEmail:email andPhoto:photoData andFacebookString:facebookString];
     
-    // todo: 
-    // [k createNewUserWithUsername:username andEmail:email andPhoto:photoData andFacebookString:facebookString andTwitterString:twitterString]
+    [k createUserWithUsername:username andEmail:email andPhoto:photoData andFacebookString:facebookString andTwitterString:twitterString];
 }
 
--(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createFacebookUserDidCompleteWithResult:(NSArray *)theResults {
+//-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createFacebookUserDidCompleteWithResult:(NSArray *)theResults {
     // todo: should be createNewUserDidComplete
-    
+-(void)kumulosAPI:(Kumulos *)kumulos apiOperation:(KSAPIOperation *)operation createUserDidCompleteWithResult:(NSArray *)theResults
+{
     isFirstTimeUser = YES;
     
     if ([theResults count] == 0)

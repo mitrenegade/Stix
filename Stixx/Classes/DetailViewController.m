@@ -133,9 +133,12 @@ static BOOL openingDetailView;
 }
 
 -(IBAction)didClickBackButton:(id)sender {    
-    if (isPreview)
-        [self.view removeFromSuperview];
-    [self.navigationController popViewControllerAnimated:YES];
+    if (isPreview) {
+        // doesn't come here; preview version doesn't have a back button
+        [delegate shouldCloseDetailController];
+    }
+    else
+        [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)didFinishAnimation:(int)animID withCanvas:(UIView *)canvas {
@@ -171,7 +174,7 @@ static BOOL openingDetailView;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    isPreview = NO;
     // Do any additional setup after loading the view from its nib.
     scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,OFFSET_NAVBAR + headerView.frame.size.height,320,480-(OFFSET_NAVBAR+headerView.frame.size.height))];
     [self.view addSubview:scrollView];
@@ -417,7 +420,7 @@ static BOOL openingDetailView;
 
 -(void)displayCommentsOfTag:(Tag*)_tag andName:(NSString *)nameString{
     //assert( _tagID == tagID );
-    if (!isPreview)
+    if (isPreview)
         return;
     [delegate shouldDisplayCommentViewWithTag:_tag andNameString:nameString fromDetailView:self];
 }
@@ -444,14 +447,14 @@ static BOOL openingDetailView;
 //}
 
 -(void)didClickUserPhoto:(UIButton*)button {
-    if (!isPreview)
+    if (isPreview)
         return;
     NSLog(@"DetailViewController: Clicked user photo for tag: user %@", tagUsername);
     [delegate shouldDisplayUserPage:tagUsername];
     [DetailViewController unlockOpen];
 }
 -(void)didClickViaButton:(UIButton*)button {
-    if (!isPreview)
+    if (isPreview)
         return;
     NSLog(@"DetailViewController: Clicked via button for tag: original user %@", tag.originalUsername);
     [delegate shouldDisplayUserPage:tag.originalUsername];
@@ -459,7 +462,7 @@ static BOOL openingDetailView;
 }
 
 -(void)shouldDisplayUserPage:(NSString *)username {
-    if (!isPreview)
+    if (isPreview)
         return;
     NSLog(@"Multilayered display of profile view about to happen from DetailViewController!");
     [delegate shouldDisplayUserPage:username];
@@ -487,7 +490,7 @@ static BOOL openingDetailView;
 }
 
 -(void)didClickLikeButton:(int)type withTag:(Tag*)_tag {
-    if (!isPreview)
+    if (isPreview)
         return;
     //int _tagID = [_tag.tagID intValue];
     NSString * newComment = @"";
@@ -522,7 +525,7 @@ static BOOL openingDetailView;
 #pragma mark remix delegate functions
 
 -(void)didClickRemixWithFeedItem:(VerticalFeedItemController *)_feedItem {
-    if (!isPreview)
+    if (isPreview)
         return;
 
     NSLog(@"Did click remix with feedItem with tagID %@, creating tagToRemix with ID %@", _feedItem.tag.tagID, tagToRemix.tagID);
@@ -534,14 +537,14 @@ static BOOL openingDetailView;
 
 -(BOOL)didClickNotesButton {
 // checks whether first time user message will allow it
-    if (!isPreview)
+    if (isPreview)
         return NO;
     return YES;
 }
 
 #pragma mark shareControllerDelegate called from verticalFeedItemDelegate
 -(void)didClickShareButtonForFeedItem:(VerticalFeedItemController *)_feedItem {
-    if (!isPreview)
+    if (isPreview)
         return;
     [delegate doParallelNewPixShare:_feedItem.tag];
 }
@@ -549,7 +552,7 @@ static BOOL openingDetailView;
 -(void)setIsPreview {
     // this view is not interactive because it comes from the preview controller
     // so remove certain buttons
-    isPreview = NO;
+    isPreview = YES;
     [commentsTable.view setHidden:YES];
     [feedItem.buttonRemix setAlpha:.5];
     [feedItem.buttonAddComment setAlpha:.5];

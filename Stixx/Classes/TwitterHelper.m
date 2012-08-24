@@ -66,6 +66,15 @@
 
 -(void)sharer:(SHKSharer *)sharer failedWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin {
     NSLog(@"Sharer failed with error: %@ shouldRelogin: %d", [error description], shouldRelogin);
+    
+    if (error.code == -1001) {
+        // timeout
+        [helperDelegate twitterRequestDidTimeOut];
+    }
+    if (error.code == -1200) {
+        // ssl error, cannot make secure connection
+        [helperDelegate twitterRequestDidTimeOut];
+    }
 }
 
 - (void)followMe:(NSString*)name

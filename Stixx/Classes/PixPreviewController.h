@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Tag.h"
 #import "LoadingAnimationView.h"
+#import "GlobalHeaders.h"
 
 @protocol PixPreviewDelegate
 
@@ -22,6 +23,7 @@
     IBOutlet UIImageView * imageView;
 	IBOutlet UIButton * buttonOK;
 	IBOutlet UIButton * buttonCancel;
+    IBOutlet UIImageView * aperture;
     LoadingAnimationView * activityIndicatorLarge;
     
     UIImage * image;
@@ -35,6 +37,7 @@
 @property (nonatomic, unsafe_unretained) NSObject<PixPreviewDelegate> *delegate;
 @property (nonatomic) LoadingAnimationView * activityIndicatorLarge;
 @property (nonatomic) UIImage * image;
+@property (nonatomic) IBOutlet UIImageView * aperture;
 
 -(IBAction)didClickOK:(id)sender;
 -(IBAction)didClickBackButton:(id)sender;

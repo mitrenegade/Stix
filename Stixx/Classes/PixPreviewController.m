@@ -14,6 +14,7 @@
 @synthesize delegate;
 @synthesize image;
 @synthesize activityIndicatorLarge;
+@synthesize aperture;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -44,6 +45,10 @@
 //        [activityIndicatorLarge stopCompleteAnimation];
         [activityIndicatorLarge removeFromSuperview];
     [self.imageView setImage:image];
+    
+#if 0 && ADMIN_TESTING_MODE 
+    [aperture setHidden:YES];
+#endif
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

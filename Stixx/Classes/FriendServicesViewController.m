@@ -194,7 +194,7 @@
             waitingForTwitter = YES;
         }
     }
-    else {
+    else if (service == PROFILE_SERVICE_FACEBOOK) {
         if ([[FacebookHelper sharedFacebookHelper] facebookHasSession]) {
             if (mode == PROFILE_SEARCHMODE_FIND)
                 [self findFriendsForService:[NSNumber numberWithInt:service]];
@@ -210,6 +210,9 @@
                 [[FacebookHelper sharedFacebookHelper] getFacebookInfo];
             }   
         }
+    }
+    else {
+        [self findFriendsForService:[NSNumber numberWithInt:service]];
     }
     [tableView reloadData];
 }
@@ -513,6 +516,18 @@
     NSLog(@"Mode: %d", mode);
     //[stixUsersController setLogoWithMode:mode];
     [stixUsersController.tableView reloadData];
+    
+    // disable invite all for facebook
+    if (service == PROFILE_SERVICE_FACEBOOK && mode == PROFILE_SEARCHMODE_INVITE) {
+        [stixUsersController.graphicBar setHidden:YES];
+        [stixUsersController.buttonAll setHidden:YES];
+        [stixUsersController.tableView setFrame:CGRectMake(0, 44, 320, 480-44)];
+    }
+    else {
+//        [stixUsersController.graphicBar setHidden:NO];
+//        [stixUsersController.buttonAll setHidden:NO];
+//        [stixUsersController.tableView setFrame:CGRectMake(0, 0, 320, 398)];
+    }
 }
 
 -(void)switchToInviteMode {

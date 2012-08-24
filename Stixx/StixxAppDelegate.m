@@ -202,7 +202,7 @@ static dispatch_queue_t backgroundQueue;
     }
      */
     // Login process - first load cached user info from defaults
-#if ADMIN_TESTING_MODE
+#if 0 && ADMIN_TESTING_MODE
     loggedIn = NO;
     //[TwitterHelper logout];
 //    [k loginViaTwitterWithUsername:@"Bobby Ren" andScreenname:@"hackstarbobo" andTwitterString:@""];
@@ -568,25 +568,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 }
 
 -(void)facebookRequestDidTimeOut {
-    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Timeout" message:[NSString stringWithFormat:@"Facebook seems unresponsive. Please try login again!"] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Timeout" message:[NSString stringWithFormat:@"Facebook Login is unresponsive. Please try login again!"] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
     [alertView show];
-    
-    // do login screen sequence again
-    /*
-    if (isLoggingIn) {
-        [tabBarController dismissModalViewControllerAnimated:YES];
-    }
-    loginSplashController = [[FacebookLoginController alloc] init];
-    [loginSplashController setDelegate:self];
-    NSLog(@"Could not log in: forcing new login screen!");
-    isLoggingIn = YES;
-    loggedIn = NO;
-    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
-    UINavigationController * loginNav = [[UINavigationController alloc] initWithRootViewController:loginSplashController];
-    loginNav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    [loginNav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
-    [tabBarController presentModalViewController:loginNav animated:YES];
-     */
     if (isLoggingIn) {
         //[previewController shouldShowButtons];
         [nav popToRootViewControllerAnimated:YES];
@@ -594,6 +577,10 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     else {
         [nav.view removeFromSuperview];
         nav = nil;
+        if (!previewController) {
+            previewController = [[PreviewController alloc] init];
+            [previewController setDelegate:self];
+        }
         nav = [[UINavigationController alloc] initWithRootViewController:previewController];
         nav.navigationBar.barStyle = UIBarStyleBlackTranslucent;
         [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"nav_bar"] forBarMetrics:UIBarMetricsDefault];
@@ -612,7 +599,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 -(void)didCancelFacebookLogin {
     [fbHelper facebookLogout]; 
     // force permissions to be reset?
-    [previewController shouldShowButtons];
+    //[previewController shouldShowButtons];
     [shareController didCancelFacebookConnect];
     [profileController didCancelFacebookConnect];
 }
@@ -1055,6 +1042,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
         [self didPressTabButton:TABBAR_BUTTON_PROFILE];
     }
     [nav popToViewController:tabBarController animated:YES];
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
 }
 
 -(void)logMetricTimeInApp {
@@ -1114,6 +1102,8 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
     
     [Appirater appEnteredForeground:YES];
     [feedController updateFeedTimestamps];
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:HIDE_STATUS_BAR];
 }
 
 - (void)application:(UIApplication *)application 
@@ -1189,7 +1179,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allTagIDs setObject:tag forKey:tag.tagID];
             [self getCommentCount:newID]; // store comment count for this tag
             // force update to feedController.allTags
-            [feedController reloadPage:i];
+            //[feedController reloadPage:i]; // will already be done because added=YES
             added = YES;
             break;
         }
@@ -1205,7 +1195,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
             [allTagIDs setObject:tag forKey:tag.tagID];
             [self getCommentCount:newID]; // store comment count for this tag
             // force update to feedController.allTags
-            [feedController reloadPage:i];
+            //[feedController reloadPage:i]; // will already be done since added = YES
             added = YES;
         }
         else {
@@ -1298,6 +1288,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 -(void) shouldCloseStixEditor {
     [nav popToViewController:tabBarController animated:YES];
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
 }
 
 -(BOOL)canClickRemixButton {
@@ -1506,14 +1497,15 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 -(void)khCallback_didCreateNewPix:(NSArray*)returnParams {
     // created a new entry in allTags in Kumulos
     
-    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01) {
+    NSNumber * remixMode = [returnParams objectAtIndex:2];
+    
+    if (myUserInfo->firstTimeUserStage == FIRSTTIME_MESSAGE_01 && [remixMode intValue] == REMIX_MODE_NEWPIC) {
         [self advanceFirstTimeUserMessage];
     }
     
     // get that record and add to feed
     NSNumber * newRecordID = [returnParams objectAtIndex:0];
     Tag * newTag = [returnParams objectAtIndex:1]; // newTag should be a newly created tag
-    NSNumber * remixMode = [returnParams objectAtIndex:2];
     NSNumber * oldID = newTag.tagID; // if it was a new pix, then the tagID is pendingID. 
     
     // we must create a new tag, because old tag is a pointer to the previous tag so if we are remixing
@@ -1721,37 +1713,31 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 }
 
 -(void)processTagsWithIDRange:(NSArray*)theResults {
-    [feedController stopActivityIndicatorLarge];
     
     // first, update from kumulos in case other people have added stix
     // to the same pix we are modifying
-    {
-        // this is called from simply wanting to populate our allTags structure
-        bool didAddTag = NO;
-        // assume result is ordered by allTagID
-        for (NSMutableDictionary * d in theResults) {
-            Tag * tag = [Tag getTagFromDictionary:d]; // MRC
-            if ([tag.tagID intValue] == 5138)
-                NSLog(@"Tag %@: user %@ desc %@", tag.tagID, tag.username, tag.descriptor);
-            int new_id = [tag.tagID intValue];
-            didAddTag = [self addTagWithCheck:tag withID:new_id];
-            if (didAddTag)
-                [feedController reloadPageForTagID:[tag.tagID intValue]];
-
-            // new system of auxiliary stix: request from auxiliaryStixes table
-            if (0) {
-                NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil]; 
-                KumulosHelper * kh = [[KumulosHelper alloc] init];
-                [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
-            }
+    // this is called from simply wanting to populate our allTags structure
+    bool didAddTag = NO;
+    // assume result is ordered by allTagID
+    for (NSMutableDictionary * d in theResults) {
+        Tag * tag = [Tag getTagFromDictionary:d]; // MRC
+        int new_id = [tag.tagID intValue];
+        didAddTag = [self addTagWithCheck:tag withID:new_id];
+        if (didAddTag) {
+            [feedController reloadPageForTagID:[tag.tagID intValue]];
+        }        
+        // new system of auxiliary stix: request from auxiliaryStixes table
+        if (0) {
+            NSMutableArray * params = [[NSMutableArray alloc] initWithObjects:tag.tagID, nil]; 
+            KumulosHelper * kh = [[KumulosHelper alloc] init];
+            [kh execute:@"getAuxiliaryStixOfTag" withParams:params withCallback:@selector(khCallback_didGetAuxiliaryStixOfTag:) withDelegate:self];
         }
-        //if (didAddTag) {
-            //[feedController reloadCurrentPage]; // should reload page that it is displayed on
-        //}
+    }
+
+    if ([[feedController allTagsDisplayed] count] > 0) {
         [feedController stopActivityIndicator];
+        [feedController stopActivityIndicatorLarge];
     }    
-    
-    
     // we get here from handleNotificationBookmarks
     if (isUpdatingNotifiedTag) {
         if (updatingNotifiedTagDoJump) {
@@ -2565,9 +2551,14 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     if ([defaults objectForKey:@"firstTimeUserStage"] == nil) {
         myUserInfo->firstTimeUserStage = FIRSTTIME_MESSAGE_01;
     }
-    // first time facebook connects, set defaults to YES automatically
+    // first time logging in via a service, set defaults to YES automatically
+    // shareController doesn't exist
+    /*
     if (![facebookString isEqualToString:@"0"] && [facebookString length] > 0)      
         [shareController connectService:@"Facebook"];
+    if (![twitterString isEqualToString:@"0"] && [twitterString length] > 0)
+        [shareController connectService:@"Twitter"];
+     */
 
     if (isFirstTimeUser) {
         myUserInfo_username = username; // needed by setFollowing to getUsername
@@ -2579,7 +2570,6 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
         [self setFollowing:@"William Ho" toState:YES];
         [self setFollowing:@"Bobby Ren" toState:YES];
         addAutomaticFollows = YES;
-        
     }
     if (photo != nil) {
         myUserInfo->hasPhoto = 1;
@@ -2619,6 +2609,8 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 #if DEBUGX==1
     NSLog(@"Function: %s", __func__);
 #endif  
+    
+    NSLog(@"DidLoginWithUsername: %@ email %@ facebookString %@ twitterString %@ userid %@", name, email, facebookString, twitterString, userID);
 
     [self continueInit];
 
@@ -3134,9 +3126,7 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     // set whether facebook is connected based on session
     //if ([fbHelper facebookHasSession]) {
     BOOL bConnected = [fbHelper facebookHasSession];
-    NSLog(@"Facebook bConnected: %d", bConnected);
-    // bobby
-    bConnected = NO;
+    NSLog(@"Facebook bConnected (hasSession): %d", bConnected);
     [shareController shareServiceShouldConnect:bConnected forService:@"Facebook"];
     if (bConnected) {
         // set whether facebook is sharing based on defaults
@@ -3148,10 +3138,10 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
     }
     
     // set whether twitter is connect based on defaults
-    connected = [defaults objectForKey:@"TwitterIsConnected"]; 
-    if (connected) 
+    bConnected = [TwitterHelper isServiceAuthorized];
+    //connected =  //[defaults objectForKey:@"TwitterIsConnected"]; 
+    if (bConnected) 
     {
-        BOOL bConnected = [connected boolValue];
         NSLog(@"Twitter bConnected: %d", bConnected);
         [shareController shareServiceShouldConnect:bConnected forService:@"Twitter"];
         if (bConnected) {
@@ -4225,7 +4215,7 @@ static NSMutableSet * retainedDetailControllers;
     }
     [nav popToViewController:tabBarController animated:YES];
     [nav setNavigationBarHidden:NO];
-    //[nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; 
+    [nav.view setFrame:CGRectMake(0, 0, 320, 480+TABBAR_BUTTON_DIFF_PX)]; // forces bottom of tabbar to be 40 px
 }
 
 -(void)sharePixDialogDidFail:(int)errorType {

@@ -132,10 +132,15 @@ static NSMutableDictionary * timeoutRequests;
 -(void)getFacebookInfo {
     // request all information about me
     NSLog(@"FacebookHelper getFacebookInfo: requesting graph path: ME");
-    [facebook requestWithGraphPath:@"me" andDelegate:self];  
     currentRequest = @"requestGraphPathMe";
     [timeoutRequests setObject:[NSNumber numberWithBool:YES] forKey:currentRequest];
+#if 0 && ADMIN_TESTING_MODE
+    NSLog(@"**** ADMIN DEBUG **** forcing facebook timeout and not logging in");
+    [self performSelector:@selector(timeoutForRequest:) withObject:currentRequest afterDelay:0.5];
+#else    
+    [facebook requestWithGraphPath:@"me" andDelegate:self];  
     [self performSelector:@selector(timeoutForRequest:) withObject:currentRequest afterDelay:10];
+#endif
     // todo: cancel other actions and tell delegate? 
 }
 
@@ -351,6 +356,11 @@ static NSMutableDictionary * timeoutRequests;
 }
 - (void)dialog:(FBDialog*)dialog didFailWithError:(NSError *)error {
     NSLog(@"Facebook dialog failed: %@", [error description]);
+}
+
+-(BOOL)dialog:(FBDialog *)dialog shouldOpenURLInExternalBrowser:(NSURL *)url {
+    NSLog(@"URL: %@", url);
+    return YES;
 }
 
 // manual timeout

@@ -65,6 +65,7 @@
     
     IBOutlet UIButton * buttonTakePicture;
     IBOutlet UIButton * buttonImport;
+    IBOutlet UIImageView * graphicBar;
     
     Tag * cameraTag;
     
@@ -72,6 +73,10 @@
     int drag;
     
     BOOL isCapturing;
+#if ADMIN_TESTING_MODE
+    UIImageView * preview;
+#endif
+    
 }
 @property (nonatomic) IBOutlet UIButton * buttonInstructions;
 @property (nonatomic) BadgeView * badgeView;
@@ -85,6 +90,7 @@
 @property (nonatomic) IBOutlet UIButton * buttonClose;
 @property (nonatomic) IBOutlet UIButton * buttonTakePicture;
 @property (nonatomic) IBOutlet UIButton * buttonImport;
+@property (nonatomic) IBOutlet UIImageView * graphicBar;
 
 @property (nonatomic) Tag * cameraTag;
 

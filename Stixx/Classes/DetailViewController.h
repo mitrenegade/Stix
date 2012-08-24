@@ -30,6 +30,7 @@
 -(void)didAddCommentFromDetailViewController:(DetailViewController*)detailViewController withTag:(Tag*)tag andUsername:(NSString *)name andComment:(NSString *)comment andStixStringID:(NSString*)stixStringID;
 -(void)shouldDisplayUserPage:(NSString*)username;
 //-(void)shouldCloseUserPage;
+-(void)shouldCloseDetailController;
 -(void)didReceiveRequestedStixViewFromKumulos:(NSString*)stixStringID;
 @optional
 -(void)detailViewNeedsRetainForDelegateCall:(DetailViewController *)detailController;

@@ -225,8 +225,9 @@
     NSLog(@"getFeaturedUsers failed!");
     // simulate no users
     // create an empty featured user list
-    NSArray * theResults = [NSArray arrayWithObject:nil];
-    [self khCallback_didGetFeaturedUsers:[NSArray arrayWithObject:theResults]];
+    //NSArray * theResults = [NSArray arrayWithObject:nil];
+    //[self khCallback_didGetFeaturedUsers:[NSArray arrayWithObject:theResults]];
+    [delegate didGetFeaturedUsers:nil];
 }
 
 -(IBAction)didClickButtonEdit:(id)sender {

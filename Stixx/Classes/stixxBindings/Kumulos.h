@@ -2,7 +2,7 @@
 //  Kumulos.h
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Aug 16, 2012
+//  Created by Kumulos Bindings Compiler on Aug 20, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -14,6 +14,10 @@
 @protocol KumulosDelegate <kumulosProxyDelegate>
 @optional
 
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixForUsersDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserPixKScriptTestDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addHighResPixDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -103,13 +107,13 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation addUserDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation changeUserBuxByAmountDidCompleteWithResult:(NSNumber*)affectedRows;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation checkValidNewUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createEmailUserDidCompleteWithResult:(NSNumber*)newRecordID;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createFacebookUserDidCompleteWithResult:(NSArray*)theResults;
+ 
+- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation deleteUserDidCompleteWithResult:(NSNumber*)affectedRows;
  
@@ -117,19 +121,9 @@
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getAuxiliaryDataDidCompleteWithResult:(NSArray*)theResults;
  
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getBuxForUserDidCompleteWithResult:(NSArray*)theResults;
- 
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getFacebookUserDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByEmailDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByFacebookLongDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserByIDDidCompleteWithResult:(NSArray*)theResults;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation getUserStixDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation loginViaFacebookDidCompleteWithResult:(NSArray*)theResults;
  
@@ -150,8 +144,6 @@
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateUserByEmailDidCompleteWithResult:(NSNumber*)affectedRows;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation updateUserInfoByEmailDidCompleteWithResult:(NSNumber*)affectedRows;
- 
-- (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation userLoginDidCompleteWithResult:(NSArray*)theResults;
  
 - (void) kumulosAPI:(Kumulos*)kumulos apiOperation:(KSAPIOperation*)operation createAppInfoDidCompleteWithResult:(NSNumber*)newRecordID;
  
@@ -239,6 +231,11 @@
 -(Kumulos*)init;
 -(Kumulos*)initWithAPIKey:(NSString*)APIKey andSecretKey:(NSString*)secretKey;
 
+   
+-(KSAPIOperation*) getUserPixForUsersWithCsvUsers:(NSString*)csvUsers andMaxTagId:(NSInteger)maxTagId andMaxPix:(NSInteger)maxPix;
+    
+   
+ -(KSAPIOperation*) getUserPixKScriptTest;
    
 -(KSAPIOperation*) addHighResPixWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID;
     
@@ -368,9 +365,6 @@
 -(KSAPIOperation*) addUserWithUsername:(NSString*)username andPassword:(NSString*)password andEmail:(NSString*)email andPhoto:(NSData*)photo andStix:(NSData*)stix andAuxiliaryData:(NSData*)auxiliaryData andTotalTags:(NSInteger)totalTags andBux:(NSInteger)bux andFacebookID:(NSInteger)facebookID;
     
    
--(KSAPIOperation*) changeUserBuxByAmountWithUsername:(NSString*)username andBuxChange:(NSInteger)buxChange;
-    
-   
 -(KSAPIOperation*) checkValidNewUserWithUsername:(NSString*)username andEmail:(NSString*)email;
     
    
@@ -378,6 +372,9 @@
     
    
 -(KSAPIOperation*) createFacebookUserWithUsername:(NSString*)username andEmail:(NSString*)email andPhoto:(NSData*)photo andFacebookString:(NSString*)facebookString;
+    
+   
+-(KSAPIOperation*) createUserWithUsername:(NSString*)username andEmail:(NSString*)email andPhoto:(NSData*)photo andFacebookString:(NSString*)facebookString andTwitterString:(NSString*)twitterString;
     
    
 -(KSAPIOperation*) deleteUserWithUsername:(NSString*)username;
@@ -388,24 +385,10 @@
 -(KSAPIOperation*) getAuxiliaryDataWithUsername:(NSString*)username;
     
    
--(KSAPIOperation*) getBuxForUserWithUsername:(NSString*)username;
-    
-   
 -(KSAPIOperation*) getFacebookUserWithFacebookID:(NSInteger)facebookID;
     
    
 -(KSAPIOperation*) getUserWithUsername:(NSString*)username;
-    
-   
--(KSAPIOperation*) getUserByEmailWithEmail:(NSString*)email;
-    
-   
- -(KSAPIOperation*) getUserByFacebookLong;
-   
--(KSAPIOperation*) getUserByIDWithAllUserID:(NSUInteger)allUserID;
-    
-   
--(KSAPIOperation*) getUserStixWithUsername:(NSString*)username;
     
    
 -(KSAPIOperation*) loginViaFacebookWithFacebookID:(NSInteger)facebookID;
@@ -436,9 +419,6 @@
     
    
 -(KSAPIOperation*) updateUserInfoByEmailWithEmail:(NSString*)email andUsername:(NSString*)username andPassword:(NSString*)password andPhoto:(NSData*)photo;
-    
-   
--(KSAPIOperation*) userLoginWithUsername:(NSString*)username andPassword:(NSString*)password;
     
    
 -(KSAPIOperation*) createAppInfoWithInfoType:(NSString*)infoType andStringInfo:(NSString*)stringInfo andIntegerInfo:(NSInteger)integerInfo;

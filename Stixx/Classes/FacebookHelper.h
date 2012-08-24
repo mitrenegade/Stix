@@ -11,6 +11,7 @@
 #import "JSON.h"
 #import "FBConnect.h"
 #import "SMWebRequest.h"
+#import "GlobalHeaders.h"
 //#import "SMXMLDocument.h"
 
 // NOW defined in Stixx-info.plist

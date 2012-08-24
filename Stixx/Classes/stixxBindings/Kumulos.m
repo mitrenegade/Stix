@@ -2,7 +2,7 @@
 //  Kumulos.m
 //  Kumulos
 //
-//  Created by Kumulos Bindings Compiler on Aug 16, 2012
+//  Created by Kumulos Bindings Compiler on Aug 20, 2012
 //  Copyright Neroh All rights reserved.
 //
 
@@ -29,6 +29,51 @@
     return self;
  }
 
+
+-(KSAPIOperation*) getUserPixForUsersWithCsvUsers:(NSString*)csvUsers andMaxTagId:(NSInteger)maxTagId andMaxPix:(NSInteger)maxPix{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:csvUsers forKey:@"csvUsers"];
+                    [theParams setValue:maxTagId forKey:@"maxTagId"];
+                    [theParams setValue:maxPix forKey:@"maxPix"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserPixForUsers" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserPixForUsersDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) getUserPixKScriptTest{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+                
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserPixKScriptTest" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserPixKScriptTestDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
 
 -(KSAPIOperation*) addHighResPixWithDataPNG:(NSData*)dataPNG andTagID:(NSInteger)tagID{
 
@@ -1038,29 +1083,6 @@
     
 }
 
--(KSAPIOperation*) changeUserBuxByAmountWithUsername:(NSString*)username andBuxChange:(NSInteger)buxChange{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                    [theParams setValue:[NSNumber numberWithInt:buxChange] forKey:@"buxChange"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"changeUserBuxByAmount" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: changeUserBuxByAmountDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
 -(KSAPIOperation*) checkValidNewUserWithUsername:(NSString*)username andEmail:(NSString*)email{
 
     
@@ -1125,6 +1147,32 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: createFacebookUserDidCompleteWithResult:)];
+    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
+    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
+    [opQueue addOperation:newOp];
+    [newOp release];
+    [theParams release];
+    return newOp;
+    
+}
+
+-(KSAPIOperation*) createUserWithUsername:(NSString*)username andEmail:(NSString*)email andPhoto:(NSData*)photo andFacebookString:(NSString*)facebookString andTwitterString:(NSString*)twitterString{
+
+    
+     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
+            [theParams setValue:username forKey:@"username"];
+                    [theParams setValue:email forKey:@"email"];
+                    [theParams setValue:photo forKey:@"photo"];
+                    [theParams setValue:facebookString forKey:@"facebookString"];
+                    [theParams setValue:twitterString forKey:@"twitterString"];
+                        
+    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"createUser" andParams:theParams];
+    [newOp setDelegate:self];
+    [newOp setUseSSL:useSSL];
+            
+    //we pass the method signature for the kumulosProxy callback on this thread
+ 
+    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: createUserDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];
@@ -1199,28 +1247,6 @@
     
 }
 
--(KSAPIOperation*) getBuxForUserWithUsername:(NSString*)username{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getBuxForUser" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getBuxForUserDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
 -(KSAPIOperation*) getFacebookUserWithFacebookID:(NSInteger)facebookID{
 
     
@@ -1256,93 +1282,6 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) getUserByEmailWithEmail:(NSString*)email{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:email forKey:@"email"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserByEmail" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserByEmailDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) getUserByFacebookLong{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-                
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserByFacebookLong" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserByFacebookLongDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) getUserByIDWithAllUserID:(NSUInteger)allUserID{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:[NSNumber numberWithInt:allUserID] forKey:@"allUserID"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserByID" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserByIDDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) getUserStixWithUsername:(NSString*)username{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"getUserStix" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: getUserStixDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];
@@ -1574,29 +1513,6 @@
     //we pass the method signature for the kumulosProxy callback on this thread
  
     [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: updateUserInfoByEmailDidCompleteWithResult:)];
-    [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
-    [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
-    [opQueue addOperation:newOp];
-    [newOp release];
-    [theParams release];
-    return newOp;
-    
-}
-
--(KSAPIOperation*) userLoginWithUsername:(NSString*)username andPassword:(NSString*)password{
-
-    
-     NSMutableDictionary* theParams = [[NSMutableDictionary alloc]init];
-            [theParams setValue:username forKey:@"username"];
-                    [theParams setValue:password forKey:@"password"];
-                        
-    KSAPIOperation* newOp = [[KSAPIOperation alloc]initWithAPIKey:theAPIKey andSecretKey:theSecretKey andMethodName:@"userLogin" andParams:theParams];
-    [newOp setDelegate:self];
-    [newOp setUseSSL:useSSL];
-            
-    //we pass the method signature for the kumulosProxy callback on this thread
- 
-    [newOp setCallbackSelector:@selector( kumulosAPI: apiOperation: userLoginDidCompleteWithResult:)];
     [newOp setSuccessCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didCompleteWithResult:)]];
     [newOp setErrorCallbackMethodSignature:[self methodSignatureForSelector:@selector(apiOperation: didFailWithError:)]];
     [opQueue addOperation:newOp];

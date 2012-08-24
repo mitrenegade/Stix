@@ -423,7 +423,8 @@ static int tickID;
     NSLog(@"allTagsDisplayed %d allTagsPending %d", [allTagsDisplayed count], [allTagsPending count]);
     if (index > [allTagsDisplayed count]+[allTagsPending count]-1) {
         index = [allTagsDisplayed count]+[allTagsPending count]-1;
-        NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);    
+        NSLog(@"Here! Trying to reload index beyond allTagsDisplayed. Changing index to %d", index);  
+        return nil;
     }
     Tag * tag;
     if (index < [allTagsPending count])

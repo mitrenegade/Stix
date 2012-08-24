@@ -49,7 +49,7 @@
     
     IBOutlet UILabel * noFriendsLabel;
     IBOutlet UIButton * noFriendsButton;
-    
+    IBOutlet UIImageView * graphicBar;
     NSMutableDictionary * userButtons;
     NSMutableDictionary * userPhotos;
 
@@ -64,6 +64,7 @@
 @property (nonatomic) NSMutableDictionary * userButtons;
 @property (nonatomic) NSMutableDictionary * userPhotos;
 @property (nonatomic, assign) int mode;
+@property (nonatomic) IBOutlet UIImageView * graphicBar;
 
 -(IBAction)didClickBackButton:(id)sender;
 -(IBAction)didClickAllButton:(id)sender;

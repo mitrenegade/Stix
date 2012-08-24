@@ -21,6 +21,7 @@
 @synthesize userButtons, userPhotos;
 @synthesize mode;
 @synthesize noFriendsLabel, noFriendsButton;
+@synthesize graphicBar;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {

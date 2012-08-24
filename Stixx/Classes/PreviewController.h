@@ -27,7 +27,7 @@
 -(void)didLoginFromSplashScreenWithScreenname:(NSString*)username andPhoto:(UIImage*)photo andEmail:(NSString*)email andFacebookString:(NSString*)facebookString andTwitterString:(NSString*)twitterString andUserID:(NSNumber*)userID isFirstTimeUser:(BOOL)isFirstTimeUser;
 @end
 
-@interface PreviewController : UIViewController <ExploreViewDelegate, PreviewLoginDelegate, TwitterHelperDelegate, KumulosDelegate, SignupViewDelegate, LoginViewDelegate, CreateHandleControllerDelegate>
+@interface PreviewController : UIViewController <ExploreViewDelegate, PreviewLoginDelegate, TwitterHelperDelegate, KumulosDelegate, SignupViewDelegate, LoginViewDelegate, CreateHandleControllerDelegate, DetailViewDelegate>
 {
     NSObject<PreviewDelegate> * __unsafe_unretained delegate;
     IBOutlet UIImageView * barBase;

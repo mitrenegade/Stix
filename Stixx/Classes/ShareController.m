@@ -139,6 +139,8 @@ static ShareController *sharedShareController;
         [connect.titleLabel setHidden:YES];
         [connect addTarget:self action:@selector(didClickConnectButton:) forControlEvents:UIControlEventTouchUpInside];
         [connect setImage:[UIImage imageNamed:@"btn_share_connect@2x.png"] forState:UIControlStateNormal];
+        NSLog(@"Highlights: %d", [connect adjustsImageWhenHighlighted]);
+//        [connect setAdjustsImageWhenHighlighted:YES];
         [connectButtons setObject:connect forKey:name];
         
         UIButton * toggle = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 79, 29)];

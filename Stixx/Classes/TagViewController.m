@@ -21,6 +21,7 @@
 @synthesize buttonTakePicture;
 @synthesize buttonImport;
 @synthesize cameraTag;
+@synthesize graphicBar;
 
 @synthesize captureManager;
 //@synthesize scanningLabel;
@@ -42,6 +43,11 @@
 	[[[self captureManager] previewLayer] setBounds:layerRect];
 	[[[self captureManager] previewLayer] setPosition:CGPointMake(CGRectGetMidX(layerRect), CGRectGetMidY(layerRect))];
     [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [self.aperture layer]];
+#if 0 && ADMIN_TESTING_MODE 
+    NSLog(@"**** ADMIN TEST MODE **** hiding aperture");
+    [aperture setHidden:YES];
+    [graphicBar setHidden:YES];
+#endif
 //    [[self.view layer] insertSublayer:[self.captureManager previewLayer] below: [buttonTakePicture layer]];
 /*    
     UILabel *tempLabel = [[UILabel alloc] initWithFrame:CGRectMake(100, 50, 120, 30)];
@@ -179,6 +185,9 @@
 //    [[self scanningLabel] setHidden:YES];
     UIImage * originalImage = [self.captureManager stillImage];
     
+    // for AVCapture, it seems that the original image is 1936x2592 == 3:4. the iphone at 320x480 == 1728x2592
+    // so there is content to the sides that isn't captured
+    
     [self didTakePhoto:originalImage];
 }
 
@@ -239,31 +248,23 @@
     float original_width = baseImage.size.width;
     
     // for AVCapture, there is no automatic rotation for landscape.
-    // the raw image is 720x1280.
-    // we want an image at 320x(480+)
+    // the raw image is 1936x2592 for high res photo setting == 358x480  //720x1280.
+    // we want an image at 320x480, so we have to crop the SIDES
     
-//    if (!landscape) {
-        float scaled_width = 320;
-        float scaled_height = original_height/original_width*320;
-        scaled = [originalPhoto resizedImage:CGSizeMake(scaled_width, scaled_height) interpolationQuality:kCGInterpolationHigh];
-        float offset = (scaled_height - 480)/2;
-        NSLog(@"scaledWidth %f scaledHeight %f offset %f", scaled_width, scaled_height, offset);
-        // target_height is smaller than scaled_height so we only take the middle
-        croppedFrame = CGRectMake(0, offset, 320, 480);
-    /*
-    }
-    else {
-        float scaled_height = 320;
-        float scaled_width = original_width/original_height*320;
-        scaled = [originalPhoto resizedImage:CGSizeMake(scaled_width, scaled_height) interpolationQuality:kCGInterpolationHigh];
-        float offset = (scaled_width - 480)/2;
-        NSLog(@"scaledWidth %f scaledHeight %f offset %f", scaled_width, scaled_height, offset);
-        // target_height is smaller than scaled_height so we only take the middle
-        croppedFrame = CGRectMake(offset, 0, 320, 480);
-    }
-     */
-        
+    float scaled_width = original_width / original_height * 480; //320;
+    float scaled_height = 480; ////original_height/original_width*320;
+    scaled = [originalPhoto resizedImage:CGSizeMake(scaled_width, scaled_height) interpolationQuality:kCGInterpolationHigh];
+    //float offsetY = (scaled_height - 480)/2;
+    float offsetX = (scaled_width - 320) / 2;
+    NSLog(@"originalWidth %f originalHeight %f", original_width, original_height);
+    NSLog(@"scaledWidth %f scaledHeight %f offset %f", scaled_width, scaled_height, offsetX);
+    // target_height is smaller than scaled_height so we only take the middle
+    //croppedFrame = CGRectMake(0, offset, 320, 480);
+    croppedFrame = CGRectMake(offsetX, 0, 320, 480);        
     result2 = [scaled croppedImage:croppedFrame];
+    
+    // result2 should be the exact same image as what the user sees in the camera view,
+    // scaled down to the actual 320x480 size
 
     // rotate
     UIImage * result;
@@ -337,15 +338,29 @@
     
     // prompt for image confirmation
 #if !TARGET_IPHONE_SIMULATOR
+#if 0 && ADMIN_TESTING_MODE
+    preview = [[UIImageView alloc] initWithImage:result2];
+    [self.view addSubview:preview];
+    NSLog(@"Preview frame: %f %f %f %f", preview.frame.origin.x, preview.frame.origin.y, preview.frame.size.width, preview.frame.size.height);
+    [self performSelector:@selector(closePreview) withObject:nil afterDelay:1];
+#else
     PixPreviewController * previewController = [[PixPreviewController alloc] init];
     [previewController setDelegate:self];
     [previewController setImage:cropped];
     [self.navigationController pushViewController:previewController animated:NO];
 #endif
+#endif
     
     isCapturing = NO;
     photoAlbumOpened = NO;
 }
+
+#if ADMIN_TESTING_MODE
+-(void)closePreview {
+    [preview removeFromSuperview];
+    preview = nil;
+}
+#endif
 
 #pragma mark PixPreview delegate
 -(void)didConfirmPix {
